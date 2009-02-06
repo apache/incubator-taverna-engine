@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <parent>
+    <groupId>net.sf.taverna.t2</groupId>
+    <artifactId>activities</artifactId>
+    <version>0.5-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>net.sf.taverna.t2.activities</groupId>
+  <artifactId>archetypes</artifactId>
+  <name>Archetypes</name>
+  <packaging>pom</packaging>
+  <modules>
+    <module>activity-archetype</module>
+    <module>activity-translator-archetype</module>
+  </modules>
+</project>

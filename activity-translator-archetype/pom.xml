@@ -1,0 +1,12 @@
+<?xml version="1.0"?><project>
+  <parent>
+    <groupId>net.sf.taverna.t2.activities</groupId>
+    <artifactId>archetypes</artifactId>
+    <version>0.5-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>net.sf.taverna.t2.activities.archetypes</groupId>
+  <artifactId>activity-translator-archetype</artifactId>
+  <name>Archetype - activity translator</name>
+  <packaging>maven-plugin</packaging>
+</project>

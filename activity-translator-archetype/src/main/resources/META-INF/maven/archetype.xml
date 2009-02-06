@@ -1,0 +1,7 @@
+<archetype>
+  <id>activity-translator-archetype</id>
+  <sources>
+    <!--<source>src/main/java/ExampleActivityTranslator.java</source>-->
+    <source destinationFile="${artifactId}ActivityTranslator.java">src/main/java/ExampleActivityTranslator.java</source>
+  </sources>
+</archetype>

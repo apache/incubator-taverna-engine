@@ -1,0 +1,12 @@
+<archetype>
+  <id>activity-archetype</id>
+  <sources>
+    <source>src/main/java/ExampleActivity.java</source>
+    <source>src/main/java/ExampleActivityConfigurationBean.java</source>
+    <source>src/main/java/ExampleActivityHealthChecker.java</source>
+  </sources>
+  <testSources>
+    <source>src/test/java/ExampleActivityTest.java</source>
+    <source>src/test/java/ExampleActivityHealthCheckerTest.java</source>
+  </testSources>
+</archetype>
