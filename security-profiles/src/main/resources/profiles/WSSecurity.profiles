@@ -1,0 +1,209 @@
+
+-----BEGIN PROFILE-----
+Name=Timestamp
+Description=This profile uses adds a timestamp header to the message.
+Profile=<deployment xmlns="http://xml.apache.org/axis/wsdd/" 
+		xmlns:java="http://xml.apache.org/axis/wsdd/providers/java"> 
+		<globalConfiguration>
+		<requestFlow>
+		<handler type="java:net.sf.taverna.t2.activities.wsdl.wss4j.T2WSDoAllSender"> 
+		<parameter name="action" value="Timestamp"/>
+		</handler> 
+		</requestFlow> 
+		</globalConfiguration> 
+		<transport name="http" pivot="java:org.apache.axis.transport.http.HTTPSender"/> 
+		</deployment>		
+-----END PROFILE-----
+
+-----BEGIN PROFILE-----
+Name=Username and plaintext password
+Description=This profile uses username and plaintext password authentication.
+Profile=<deployment xmlns="http://xml.apache.org/axis/wsdd/" 
+		xmlns:java="http://xml.apache.org/axis/wsdd/providers/java"> 
+		<globalConfiguration>
+		<requestFlow>
+		<handler type="java:net.sf.taverna.t2.activities.wsdl.wss4j.T2WSDoAllSender"> 
+		<parameter name="action" value="UsernameToken"/>
+		<parameter name="passwordType" value="PasswordText"/> 
+		</handler> 
+		</requestFlow> 
+		</globalConfiguration> 
+		<transport name="http" pivot="java:org.apache.axis.transport.http.HTTPSender"/> 
+		</deployment>		
+-----END PROFILE-----
+
+-----BEGIN PROFILE-----
+Name=Username and plaintext password + Timestamp
+Description=This profile uses username and plaintext password authentication and adds a timestamp header to the message.
+Profile=<deployment xmlns="http://xml.apache.org/axis/wsdd/" 
+		xmlns:java="http://xml.apache.org/axis/wsdd/providers/java"> 
+		<globalConfiguration>
+		<requestFlow>
+		<handler type="java:net.sf.taverna.t2.activities.wsdl.wss4jnet.sf.taverna.t2.activities.wsdl.wss4j.T2WSDoAllSender"> 
+		<parameter name="action" value="UsernameToken Timestamp"/>
+		<parameter name="passwordType" value="PasswordText"/> 
+		</handler> 
+		</requestFlow> 
+		</globalConfiguration> 
+		<transport name="http" pivot="java:org.apache.axis.transport.http.HTTPSender"/> 
+		</deployment>		
+-----END PROFILE-----
+
+-----BEGIN PROFILE-----
+Name=Username and digest password
+Description=This profile uses uses username and digest password authentication.
+Profile=<deployment xmlns="http://xml.apache.org/axis/wsdd/" 
+		xmlns:java="http://xml.apache.org/axis/wsdd/providers/java"> 
+		<globalConfiguration>
+		<requestFlow>
+		<handler type="java:net.sf.taverna.t2.activities.wsdl.wss4j.T2WSDoAllSender"> 
+		<parameter name="action" value="UsernameToken"/>
+		<parameter name="passwordType" value="PasswordDigest"/> 
+		</handler> 
+		</requestFlow> 
+		</globalConfiguration> 
+		<transport name="http" pivot="java:org.apache.axis.transport.http.HTTPSender"/> 
+		</deployment>		
+-----END PROFILE-----
+
+-----BEGIN PROFILE-----
+Name=Username and digest password + Timestamp
+Description=This profile uses username and digets password authentication and adds a timestamp header to the message.
+Profile=<deployment xmlns="http://xml.apache.org/axis/wsdd/" 
+		xmlns:java="http://xml.apache.org/axis/wsdd/providers/java"> 
+		<globalConfiguration>
+		<requestFlow>
+		<handler type="java:net.sf.taverna.t2.activities.wsdl.wss4j.T2WSDoAllSender"> 
+		<parameter name="action" value="UsernameToken Timestamp"/>
+		<parameter name="passwordType" value="PasswordDigest"/> 
+		</handler> 
+		</requestFlow> 
+		</globalConfiguration> 
+		<transport name="http" pivot="java:org.apache.axis.transport.http.HTTPSender"/> 
+		</deployment>		
+-----END PROFILE-----
+
+-----BEGIN PROFILE-----
+Name=Signed outgoing message
+Description=The body of the REQUEST message will be signed. The RESPONSE message is not expected to be signed.
+Profile=<deployment xmlns="http://xml.apache.org/axis/wsdd/" 
+		xmlns:java="http://xml.apache.org/axis/wsdd/providers/java"> 
+		<globalConfiguration>
+		<requestFlow>
+		<handler type="java:net.sf.taverna.t2.activities.wsdl.wss4j.T2WSDoAllSender"> 
+		<parameter name="action" value="Signature"/>
+		<parameter name="signatureKeyIdentifier" value="DirectReference" />
+		</handler> 
+		</requestFlow> 
+		</globalConfiguration> 
+		<transport name="http" pivot="java:org.apache.axis.transport.http.HTTPSender"/> 
+		</deployment>		
+-----END PROFILE-----
+
+-----BEGIN PROFILE-----
+Name=Signed outgoing message + Timestamp
+Description=The body of the REQUEST message will be signed and a timestamp header added to it. The RESPONSE message is not expected to be signed.
+Profile=<deployment xmlns="http://xml.apache.org/axis/wsdd/" 
+		xmlns:java="http://xml.apache.org/axis/wsdd/providers/java"> 
+		<globalConfiguration>
+		<requestFlow>
+		<handler type="java:net.sf.taverna.t2.activities.wsdl.wss4j.T2WSDoAllSender"> 
+		<parameter name="action" value="Timestamp Signature"/>
+		<parameter name="signatureKeyIdentifier" value="DirectReference" />
+		</handler> 
+		</requestFlow> 
+		</globalConfiguration> 
+		<transport name="http" pivot="java:org.apache.axis.transport.http.HTTPSender"/> 
+		</deployment>		
+-----END PROFILE-----
+
+-----BEGIN PROFILE-----
+Name=Signed outgoing and incoming messages
+Description=Both the bodies of the REQUEST and RESPONSE message will be signed.
+Profile=<deployment xmlns="http://xml.apache.org/axis/wsdd/" 
+		xmlns:java="http://xml.apache.org/axis/wsdd/providers/java"> 
+		<globalConfiguration>
+		<requestFlow>
+		<handler type="java:net.sf.taverna.t2.activities.wsdl.wss4j.T2WSDoAllSender"> 
+		<parameter name="action" value="Signature"/>
+		<parameter name="signatureKeyIdentifier" value="DirectReference" />
+		</handler> 
+		</requestFlow> 
+		<responseFlow>
+		<handler type="java:net.sf.taverna.t2.activities.wsdl.wss4j.T2WSDoAllSender"> 
+		<parameter name="action" value="Signature"/>
+		<parameter name="signatureKeyIdentifier" value="DirectReference" />
+		</handler> 
+		</responseFlow> 
+		</globalConfiguration> 
+		<transport name="http" pivot="java:org.apache.axis.transport.http.HTTPSender"/> 
+		</deployment>		
+-----END PROFILE-----
+
+-----BEGIN PROFILE-----
+Name=Signed outgoing and incoming message + Timestamps
+Description=Both the bodies of the REQUEST and RESPONSE message will be signed and will have a timestamp header added to them.
+Profile=<deployment xmlns="http://xml.apache.org/axis/wsdd/" 
+		xmlns:java="http://xml.apache.org/axis/wsdd/providers/java"> 
+		<globalConfiguration>
+		<requestFlow>
+		<handler type="java:net.sf.taverna.t2.activities.wsdl.wss4j.T2WSDoAllSender"> 
+		<parameter name="action" value="Signature Timestamp"/>
+		<parameter name="signatureKeyIdentifier" value="DirectReference" />
+		</handler> 
+		</requestFlow> 
+		<responseFlow>
+		<handler type="java:net.sf.taverna.t2.activities.wsdl.wss4j.T2WSDoAllSender"> 
+		<parameter name="action" value="Signature Timestamp"/>
+		<parameter name="signatureKeyIdentifier" value="DirectReference" />
+		</handler> 
+		</responseFlow> 
+		</globalConfiguration> 
+		<transport name="http" pivot="java:org.apache.axis.transport.http.HTTPSender"/> 
+		</deployment>		
+-----END PROFILE-----
+
+-----BEGIN PROFILE-----
+Name=Encrypted outgoing and incoming message
+Description=The bodies of the REQUEST and RESPONSE message will be encrypted.
+Profile=<deployment xmlns="http://xml.apache.org/axis/wsdd/" 
+		xmlns:java="http://xml.apache.org/axis/wsdd/providers/java"> 
+		<globalConfiguration>
+		<requestFlow>
+		<handler type="java:net.sf.taverna.t2.activities.wsdl.wss4j.T2WSDoAllSender"> 
+		<parameter name="action" value="Encrypt"/>
+		<parameter name="encryptKeyIdentifier" value="DirectReference" />
+		</handler> 
+		</requestFlow> 
+		<responseFlow>
+		<handler type="java:net.sf.taverna.t2.activities.wsdl.wss4j.T2WSDoAllSender"> 
+		<parameter name="action" value="Encrypt"/>
+		<parameter name="signatureKeyIdentifier" value="DirectReference" />
+		</handler> 
+		</responseFlow> 
+		</globalConfiguration> 
+		<transport name="http" pivot="java:org.apache.axis.transport.http.HTTPSender"/> 
+		</deployment>		
+-----END PROFILE-----
+
+-----BEGIN PROFILE-----
+Name=Encrypted outgoing and incoming message + Timestamps
+Description=The bodies of the REQUEST and RESPONSE message will be encrypted and both will have a timestamp header added to them.
+Profile=<deployment xmlns="http://xml.apache.org/axis/wsdd/" 
+		xmlns:java="http://xml.apache.org/axis/wsdd/providers/java"> 
+		<globalConfiguration>
+		<requestFlow>
+		<handler type="java:net.sf.taverna.t2.activities.wsdl.wss4j.T2WSDoAllSender"> 
+		<parameter name="action" value="Encrypt Timestamp"/>
+		<parameter name="encryptionKeyIdentifier" value="DirectReference" />
+		</handler> 
+		</requestFlow> 
+		<responseFlow>
+		<handler type="java:net.sf.taverna.t2.activities.wsdl.wss4j.T2WSDoAllSender"> 
+		<parameter name="action" value="Encrypt Timestamp"/>
+		<parameter name="signatureKeyIdentifier" value="DirectReference" />
+		</handler> 
+		</globalConfiguration> 
+		<transport name="http" pivot="java:org.apache.axis.transport.http.HTTPSender"/> 
+		</deployment>		
+-----END PROFILE-----

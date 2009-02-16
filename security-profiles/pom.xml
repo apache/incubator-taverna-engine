@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.sf.taverna</groupId>
+		<artifactId>parent</artifactId>
+		<version>0.1.2008-10-27</version>
+	</parent>
+	<groupId>net.sf.taverna.t2.security</groupId>
+	<artifactId>security-profiles</artifactId>
+	<version>0.3-SNAPSHOT</version>
+	<name>Security profiles</name>
+	<repositories>
+		<repository>
+			<releases />
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<!--  required for the 1.4.0 version of xml-security/xmlsec -->
+			<id>eviware</id>
+			<name>Eviware Repository</name>
+			<url>http://www.eviware.com/repository/maven2/</url>
+		</repository>
+	</repositories>
+	<dependencies>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.9</version>
+		</dependency>
+		<dependency>
+			<groupId>xml-security</groupId>
+			<artifactId>xmlsec</artifactId>
+			<version>1.4.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.ws.security</groupId>
+			<artifactId>wss4j</artifactId>
+			<version>1.5.4</version>
+		</dependency>
+		<dependency>
+			<groupId>uk.org.mygrid.taverna.raven</groupId>
+			<artifactId>appconfig</artifactId>
+			<version>1.10-SNAPSHOT</version>
+		</dependency>
+	</dependencies>
+</project>
