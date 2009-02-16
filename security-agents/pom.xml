@@ -3,40 +3,33 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>net.sf.taverna</groupId>
-		<artifactId>parent</artifactId>
-		<version>0.1.2008-10-27</version>
+		<groupId>net.sf.taverna.t2</groupId>
+		<artifactId>security</artifactId>
+		<version>0.4-SNAPSHOT</version>
 	</parent>
 	<groupId>net.sf.taverna.t2.security</groupId>
-	<artifactId>t2security-agents</artifactId>
-	<version>0.3-SNAPSHOT</version>
+	<artifactId>security-agents</artifactId>
 	<name>Taverna 2 security agents</name>
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.ws.security</groupId>
 			<artifactId>wss4j</artifactId>
-			<version>1.5.4</version>
+			<version>${wss4j.version}</version>
 		</dependency>
-		<dependency>
+		<!--<dependency>
 			<groupId>axis</groupId>
 			<artifactId>axis</artifactId>
-			<version>1.4</version>
-		</dependency>
+			<version>${axis.version}</version>
+		</dependency>-->
 		<dependency>
 			<groupId>net.sf.taverna.t2.security</groupId>
 			<artifactId>security-profiles</artifactId>
-			<version>0.3-SNAPSHOT</version>
+			<version>${t2.security.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>xml-apis</groupId>
+			<artifactId>xml-apis</artifactId>
+			<version>${xmlapis.version}</version>
 		</dependency>
 	</dependencies>
-	<repositories>
-		<repository>
-			<releases />
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<id>mygrid-repository</id>
-			<name>myGrid Repository</name>
-			<url>http://www.mygrid.org.uk/maven/repository</url>
-		</repository>
-	</repositories>
 </project>

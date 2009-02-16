@@ -3,13 +3,12 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>net.sf.taverna</groupId>
-		<artifactId>parent</artifactId>
-		<version>0.1.2008-10-27</version>
+		<groupId>net.sf.taverna.t2</groupId>
+		<artifactId>security</artifactId>
+		<version>0.4-SNAPSHOT</version>
 	</parent>
 	<groupId>net.sf.taverna.t2.security</groupId>
 	<artifactId>security-profiles</artifactId>
-	<version>0.3-SNAPSHOT</version>
 	<name>Security profiles</name>
 	<repositories>
 		<repository>
@@ -27,22 +26,21 @@
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
-			<version>1.2.9</version>
 		</dependency>
 		<dependency>
 			<groupId>xml-security</groupId>
 			<artifactId>xmlsec</artifactId>
-			<version>1.4.0</version>
+			<version>${xmlsec.version}</version>
 		</dependency>
-		<dependency>
+		<!--<dependency>
 			<groupId>org.apache.ws.security</groupId>
 			<artifactId>wss4j</artifactId>
-			<version>1.5.4</version>
-		</dependency>
+			<version>${wss4j.version}</version>
+		</dependency>-->
 		<dependency>
-			<groupId>uk.org.mygrid.taverna.raven</groupId>
+			<groupId>net.sf.taverna.t2.infrastructure</groupId>
 			<artifactId>appconfig</artifactId>
-			<version>1.10-SNAPSHOT</version>
+			<version>${t2.infrastructure.version}</version>
 		</dependency>
 	</dependencies>
 </project>
