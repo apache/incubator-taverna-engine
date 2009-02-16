@@ -66,6 +66,7 @@ import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.DERBitString;
+import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.misc.NetscapeCertType;
 
 
@@ -576,27 +577,22 @@ public class ViewCertDetailsDialog
         INTENDED_USES_STRINGS.put("1", "Object Signing CA");
         
         
-        try{
-            // Get octet string from extension value
-            byte[] octets = ((ASN1OctetString) ASN1Object.fromByteArray(value)).getOctets();
-            
-        	int val = new NetscapeCertType((DERBitString) ASN1Object.fromByteArray(octets)).intValue();
-            StringBuffer strBuff = new StringBuffer();
-            for (int i = 0, len = INTENDED_USES.length; i < len; i++) {
-                int use = INTENDED_USES[i];
-                if ((val & use) == use) {
-                    strBuff.append(INTENDED_USES_STRINGS.get(String.valueOf(use))+", \n");
-                }
+        // Get octet string from extension value
+        ASN1OctetString fromByteArray = new DEROctetString(value);
+		byte[] octets = fromByteArray.getOctets();            
+    	DERBitString fromByteArray2 = new DERBitString(octets);
+		int val = new NetscapeCertType(fromByteArray2).intValue();
+        StringBuffer strBuff = new StringBuffer();
+        for (int i = 0, len = INTENDED_USES.length; i < len; i++) {
+            int use = INTENDED_USES[i];
+            if ((val & use) == use) {
+                strBuff.append(INTENDED_USES_STRINGS.get(String.valueOf(use))+", \n");
             }
-            // remove the last ", \n" from the end of the buffer
-            String str = strBuff.toString();
-            str = str.substring(0, str.length()-3);
-            return str;
         }
-        catch(IOException ex){
-        	logger.error("Credential Manager Error: could not get Netscape Certificate Type extension.", ex);
-        	return "";
-        }
+        // remove the last ", \n" from the end of the buffer
+        String str = strBuff.toString();
+        str = str.substring(0, str.length()-3);
+        return str;
     }
     
     /**
