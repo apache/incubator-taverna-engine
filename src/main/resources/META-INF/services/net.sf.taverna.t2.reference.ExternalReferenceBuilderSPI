@@ -1,0 +1,3 @@
+# Implementation classes of ExternalReferenceBuilderSPI go here, one per line
+net.sf.taverna.t2.reference.impl.external.object.InlineStringReferenceBuilder
+net.sf.taverna.t2.reference.impl.external.object.InlineByteArrayReferenceBuilder

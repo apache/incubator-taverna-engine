@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.sf.taverna</groupId>
+		<artifactId>parent</artifactId>
+		<version>0.1.2009-02-12</version>
+	</parent>
+	<groupId>net.sf.taverna.t2.core</groupId>
+	<artifactId>reference-core-extensions</artifactId>
+	<version>0.4-SNAPSHOT</version>
+	<name>Implementation of core extension points</name>
+	<description>
+		Implementations of certain SPIs to provide a core set of
+		functionality for the reference management framework. This
+		includes
+		ExternalReference implementations to reference data
+		held in local files
+		and URLs along with the appropriate
+		translate / publish logic.
+		Implementations in this package are
+		tied only to the API, although
+		certain metadata files such as
+		hibernate mappings are also included
+		where appropriate (these
+		will be silently ignored if using a backing
+		store that is not hibernate based)
+	</description>
+	<properties>
+		<t2.core.version>0.6-SNAPSHOT</t2.core.version>
+	</properties>
+	<repositories>
+		<repository>
+			<releases />
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>mygrid-repository</id>
+			<name>myGrid Repository</name>
+			<url>http://www.mygrid.org.uk/maven/repository</url>
+		</repository>
+	</repositories>
+	<scm>
+		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/engine/net.sf.taverna.t2.core.reference-core-extensions/trunk/</connection>
+		<developerConnection>scm:svn:https://taverna.googlecode.com/svn/taverna/engine/net.sf.taverna.t2.core.reference-core-extensions/trunk/</developerConnection>
+		<url>http://code.google.com/p/taverna/source/browse/#svn/taverna/engine/net.sf.taverna.t2.core.reference-core-extensions/trunk</url>
+	</scm>
+	<dependencies>
+		<dependency>
+			<groupId>net.sf.taverna.t2.core</groupId>
+			<artifactId>reference-api</artifactId>
+			<version>${t2.core.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-httpclient</groupId>
+			<artifactId>commons-httpclient</artifactId>
+			<version>3.1</version>
+		</dependency>
+	</dependencies>
+</project>
