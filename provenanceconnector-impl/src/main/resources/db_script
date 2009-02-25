@@ -1,0 +1,93 @@
+CREATE DATABASE IF NOT EXISTS T2Provenance;
+script:
+USE T2Provenance;
+script:
+DROP TABLE IF EXISTS `T2Provenance`.`Arc`;
+script:
+CREATE TABLE  `T2Provenance`.`Arc` (
+ `sourceVarNameRef` varchar(100) NOT NULL COMMENT 'ref. to var name for source of arc',
+ `sinkVarNameRef` varchar(100) NOT NULL COMMENT 'ref. to var name for sink of arc',
+ `sourcePNameRef` varchar(100) NOT NULL,
+ `sinkPNameRef` varchar(100) NOT NULL,
+ `wfInstanceRef` varchar(100) NOT NULL,
+ PRIMARY KEY  USING BTREE (`sourceVarNameRef`,`sinkVarNameRef`,`sourcePNameRef`,`sinkPNameRef`,`wfInstanceRef`)
+);
+script:
+DROP TABLE IF EXISTS `T2Provenance`.`Collection`;
+script:
+CREATE TABLE  `T2Provenance`.`Collection` (
+ `collID` varchar(100) NOT NULL COMMENT 'ID of a list (collection). not sure yet what this looks like... ',
+ `parentCollIDRef` varchar(100) NOT NULL default 'TOP' COMMENT 'used for list nesting.\ndefault is dummy list TOP since this attr. is key',
+ `wfInstanceRef` varchar(100) NOT NULL,
+ `PNameRef` varchar(100) NOT NULL,
+ `varNameRef` varchar(100) NOT NULL,
+ `iteration` char(10) NOT NULL default '',
+ PRIMARY KEY  USING BTREE (`collID`,`wfInstanceRef`,`PNameRef`,`varNameRef`,`parentCollIDRef`,`iteration`)
+);
+script:
+DROP TABLE IF EXISTS `T2Provenance`.`ProcBinding`;
+script:
+CREATE TABLE  `T2Provenance`.`ProcBinding` (
+ `pnameRef` varchar(100) NOT NULL COMMENT 'ref to static processor name',
+ `execIDRef` varchar(100) NOT NULL COMMENT 'ref. to ID of wf execution',
+ `actName` varchar(100) NOT NULL COMMENT 'name of activity bound to this processor',
+ `iteration` char(10) NOT NULL default '',
+ PRIMARY KEY  USING BTREE (`pnameRef`,`execIDRef`,`iteration`)
+);
+script:
+DROP TABLE IF EXISTS `T2Provenance`.`Processor`;
+script:
+CREATE TABLE  `T2Provenance`.`Processor` (
+ `pname` varchar(100) NOT NULL,
+ `wfInstanceRef` varchar(100) NOT NULL COMMENT 'ref to WfInstance.wfInstanceID',
+ `type` varchar(100) default NULL COMMENT 'processor type',
+ PRIMARY KEY  (`pname`,`wfInstanceRef`)
+);
+script:
+DROP TABLE IF EXISTS `T2Provenance`.`Var`;
+script:
+CREATE TABLE  `T2Provenance`.`Var` (
+ `varName` varchar(100) NOT NULL,
+ `type` varchar(20) default NULL COMMENT 'variable type',
+ `inputOrOutput` tinyint(1) NOT NULL COMMENT '1 = input, 0 = output',
+ `pnameRef` varchar(100) NOT NULL COMMENT 'reference to the processor',
+ `wfInstanceRef` varchar(100) NOT NULL,
+ `nestingLevel` int(10) unsigned default '0',
+ `actualNestingLevel` int(10) unsigned default '0',
+ `anlSet` tinyint(1) default NULL,
+ PRIMARY KEY  USING BTREE (`varName`,`inputOrOutput`,`pnameRef`,`wfInstanceRef`)
+);
+script:
+DROP TABLE IF EXISTS `T2Provenance`.`VarBinding`;
+script:
+CREATE TABLE  `T2Provenance`.`VarBinding` (
+ `varNameRef` varchar(100) NOT NULL COMMENT 'ref to var name',
+ `wfInstanceRef` varchar(100) NOT NULL COMMENT 'ref to execution ID',
+ `value` varchar(100) default NULL COMMENT 'ref to value. Either a string value or a string ref (URI) to a value',
+ `collIDRef` varchar(100) NOT NULL default 'TOP',
+ `positionInColl` int(10) unsigned NOT NULL default '1' COMMENT 'position within collection. default is 1',
+ `PNameRef` varchar(100) NOT NULL,
+ `valueType` varchar(50) default NULL,
+ `ref` varchar(100) default NULL,
+ `iteration` char(10) NOT NULL default '',
+ PRIMARY KEY  USING BTREE (`varNameRef`,`wfInstanceRef`,`PNameRef`,`positionInColl`,`iteration`,`collIDRef`),
+ KEY `collectionFK` (`wfInstanceRef`,`PNameRef`,`varNameRef`,`collIDRef`)
+);
+script:
+DROP TABLE IF EXISTS `T2Provenance`.`WfInstance`;
+script:
+CREATE TABLE  `T2Provenance`.`WfInstance` (
+ `instanceID` varchar(100) NOT NULL COMMENT 'T2-generated ID for one execution',
+ `wfnameRef` varchar(100) NOT NULL COMMENT 'ref to name of the workflow being executed',
+ `timestamp` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'when execution has occurred',
+ PRIMARY KEY  (`instanceID`)
+);
+script:
+DROP TABLE IF EXISTS `T2Provenance`.`Workflow`;
+script:
+CREATE TABLE  `T2Provenance`.`Workflow` (
+ `wfname` varchar(100) NOT NULL,
+ PRIMARY KEY  (`wfname`)
+);
+
+

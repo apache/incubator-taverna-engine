@@ -1,0 +1,84 @@
+<dataflow role="top" xmlns="http://taverna.sf.net/2008/xml/t2flow">
+	<inputPorts/>
+	<outputPorts>
+		<port>
+			<name>df_output</name>
+		</port>
+	</outputPorts>
+	<processors>
+		<processor>
+			<name>a_processor</name>
+			<inputPorts />
+			<outputPorts>
+				<port>
+					<name>a_output</name>
+					<depth>0</depth>
+					<granularDepth>0</granularDepth>
+				</port>
+			</outputPorts>
+			<annotations />
+			<activities />
+			<dispatchStack />
+			<iterationStrategyStack>
+				<iteration>
+					<strategy>
+						<cross>
+							<port name="input" depth="0" />
+						</cross>
+					</strategy>
+				</iteration>
+			</iterationStrategyStack>
+		</processor>
+		<processor>
+			<name>b_processor</name>
+			<inputPorts>
+				<port>
+					<name>b_input</name>
+					<depth>0</depth>
+				</port>
+			</inputPorts>
+			<outputPorts>
+				<port>
+					<name>b_output</name>
+					<depth>0</depth>
+					<granularDepth>0</granularDepth>
+				</port>
+			</outputPorts>
+			<annotations />
+			<activities />
+			<dispatchStack />
+			<iterationStrategyStack>
+				<iteration>
+					<strategy>
+						<cross>
+							<port name="input" depth="0" />
+						</cross>
+					</strategy>
+				</iteration>
+			</iterationStrategyStack>
+		</processor>
+	</processors>
+	<conditions />
+	<datalinks xmlns="http://taverna.sf.net/2008/xml/t2flow">
+		<datalink>
+			<sink type="processor">
+				<processor>b_processor</processor>
+				<port>b_input</port>
+			</sink>
+			<source type="processor">
+				<processor>a_processor</processor>
+				<port>a_output</port>
+			</source>
+		</datalink>
+		<datalink>
+			<sink type="dataflow">
+				<port>df_output</port>
+			</sink>
+			<source type="processor">
+				<processor>b_processor</processor>
+				<port>b_output</port>
+			</source>
+		</datalink>
+	</datalinks>
+</dataflow>
+

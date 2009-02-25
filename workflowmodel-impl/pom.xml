@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.sf.taverna.t2</groupId>
+		<artifactId>core</artifactId>
+		<version>0.6-SNAPSHOT</version>
+	</parent>
+	<groupId>net.sf.taverna.t2.core</groupId>
+	<artifactId>workflowmodel-impl</artifactId>
+	<name>Workflow Model implementation</name>
+	<description> Implementation of the core workflow object model for
+		Taverna 2 workflows including concrete instances of the workflow
+		definition objects and enactment behaviours.</description>
+	<dependencies>
+		<dependency>
+			<groupId>jdom</groupId>
+			<artifactId>jdom</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.taverna.t2.core</groupId>
+			<artifactId>workflowmodel-api</artifactId>
+			<version>${t2.core.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.taverna.t2.core</groupId>
+			<artifactId>provenanceconnector-api</artifactId>
+			<version>${t2.core.version}</version>
+		</dependency>
+        
+		<dependency>
+			<groupId>net.sf.taverna.t2.core</groupId>
+			<artifactId>provenanceconnector-impl</artifactId>
+			<version>${t2.core.version}</version>
+		</dependency>
+		<!--<dependency>
+			<groupId>net.sf.taverna.t2.infrastructure</groupId>
+			<artifactId>platform</artifactId>
+			<version>${t2.infrastructure.version}</version>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.hibernate</groupId>
+					<artifactId>hibernate</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-jdbc</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-orm</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>geronimo-spec</groupId>
+					<artifactId>geronimo-spec-jta</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>net.sf.taverna.t2.infrastructure.raven</groupId>
+					<artifactId>raven</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>-->
+		<!--<dependency>
+			<groupId>net.sf.taverna.t2</groupId>
+			<artifactId>security-api</artifactId>
+			<version>${t2.security.version}</version>
+		</dependency>-->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.thoughtworks.xstream</groupId>
+			<artifactId>xstream</artifactId>
+			<version>1.2.1</version>
+		</dependency>
+	</dependencies>
+</project>

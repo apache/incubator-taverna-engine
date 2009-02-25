@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- A test context with no raven aware components used by the DatabaseSetupTest -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:raven="http://taverna.sf.net/schema/artifact-support"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-2.5.xsd
+        http://www.springframework.org/schema/tx 
+        http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
+
+	<!-- Transaction manager, commented out to use the regular dao implementations -->
+	<!-- 
+		<tx:annotation-driven transaction-manager="txManager" />
+		<bean id="txManager"
+		class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactoryBean" />
+		</bean>
+	-->
+
+
+	<!-- Apache Derby rooted at a temporary directory -->
+	<bean id="t2reference.jdbc.temporaryjdbc"
+		class="net.sf.taverna.platform.spring.jdbc.TemporaryJDBC">
+	</bean>
+	<bean id="t2reference.jdbc.url" class="java.lang.String"
+		factory-bean="t2reference.jdbc.temporaryjdbc"
+		factory-method="getTemporaryDerbyJDBC" />
+
+	<!-- At least for testing purposes we use Apache Derby -->
+	<bean id="exampleDataSource"
+		class="net.sf.taverna.platform.spring.jdbc.InterpolatingDriverManagerDataSource">
+		<property name="driverClassName">
+			<value>org.apache.derby.jdbc.EmbeddedDriver</value>
+		</property>
+		<property name="url">
+			<ref bean="t2reference.jdbc.url" />
+		</property>
+	</bean>
+
+	<!-- Configure hibernate to use dynamic schema update -->
+	<bean id="exampleHibernateProperties"
+		class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+		<property name="properties">
+			<props>
+				<prop key="hibernate.hbm2ddl.auto">create</prop>
+				<prop key="hibernate.dialect">
+					org.hibernate.dialect.DerbyDialect
+				</prop>
+				<prop key="hibernate.query.substitutions">
+					true 'T', false 'F'
+				</prop>
+				<prop key="hibernate.show_sql">false</prop>
+				<prop key="hibernate.c3p0.minPoolSize">5</prop>
+				<prop key="hibernate.c3p0.maxPoolSize">20</prop>
+				<prop key="hibernate.c3p0.timeout">600</prop>
+				<prop key="hibernate.c3p0.max_statement">50</prop>
+				<prop key="hibernate.c3p0.testConnectionOnCheckout">
+					false
+				</prop>
+				<prop key="show_sql">true</prop>
+				<prop key="format_sql">true</prop>
+			</props>
+		</property>
+	</bean>
+
+	<!-- A regular hibernate session factory -->
+	<bean id="sessionFactoryBean"
+		class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+		<property name="dataSource">
+			<ref local="exampleDataSource" />
+		</property>
+		<property name="hibernateProperties">
+			<ref bean="exampleHibernateProperties" />
+		</property>
+		<property name="mappingResources">
+			<list>
+				<value>
+					net/sf/taverna/t2/reference/AbstractExternalReference.hbm.xml
+				</value>
+				<value>
+					net/sf/taverna/t2/reference/impl/ReferenceSetImpl.hbm.xml
+				</value>
+				<value>
+					net/sf/taverna/t2/reference/impl/T2ReferenceListImpl.hbm.xml
+				</value>
+				<value>
+					net/sf/taverna/t2/reference/impl/ErrorDocumentImpl.hbm.xml
+				</value>
+			</list>
+		</property>
+	</bean>
+
+	<!-- Test data access object -->
+	<bean id="testDao"
+		class="net.sf.taverna.t2.reference.impl.HibernateReferenceSetDao">
+		<property name="sessionFactory">
+			<ref local="sessionFactoryBean" />
+		</property>
+	</bean>
+
+	<!-- Test list data access object -->
+	<bean id="testListDao"
+		class="net.sf.taverna.t2.reference.impl.HibernateListDao">
+		<property name="sessionFactory">
+			<ref local="sessionFactoryBean" />
+		</property>
+	</bean>
+
+</beans>
