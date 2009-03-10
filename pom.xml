@@ -84,6 +84,11 @@
             <url>http://download.java.net/maven/2/</url>
         </repository>
 	</repositories>
+	<scm>
+		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/engine/net.sf.taverna.t2.security/trunk/</connection>
+		<developerConnection>scm:svn:https://taverna.googlecode.com/svn/taverna/engine/net.sf.taverna.t2.security/trunk/</developerConnection>
+		<url>http://code.google.com/p/taverna/source/browse/#svn/taverna/engine/net.sf.taverna.t2.security/trunk/</url>
+	</scm>
 	<dependencyManagement>
 		<dependencies>			
 			<dependency>
