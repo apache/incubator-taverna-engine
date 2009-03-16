@@ -37,13 +37,15 @@ public class AddActivityOutputPortMappingEdit extends AbstractActivityEdit {
 	@Override
 	protected void doEditAction(AbstractActivity<?> activity)
 			throws EditException {
-		if (activity.getOutputPortMapping().containsKey(processorPortName)) throw new EditException("The mapping starting with:"+processorPortName+" already exists");
-		activity.getOutputPortMapping().put(processorPortName, activityPortName);
+		if (activity.getOutputPortMapping().containsKey(activityPortName)) throw new EditException("The mapping starting with:"+activityPortName+" already exists");
+		// Note javadoc of getOutputPortMapping - the mapping is activityPort -> processorPort
+		// -- opposite of the outputPortMapping
+		activity.getOutputPortMapping().put(activityPortName, processorPortName);
 	}
 
 	@Override
 	protected void undoEditAction(AbstractActivity<?> activity) {
-		activity.getOutputPortMapping().remove(processorPortName);
+		activity.getOutputPortMapping().remove(activityPortName);
 	}
 
 }

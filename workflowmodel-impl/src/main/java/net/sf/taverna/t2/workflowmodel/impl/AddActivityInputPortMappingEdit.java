@@ -38,6 +38,8 @@ public class AddActivityInputPortMappingEdit extends AbstractActivityEdit {
 	protected void doEditAction(AbstractActivity<?> activity)
 			throws EditException {
 		if (activity.getInputPortMapping().containsKey(processorPortName)) throw new EditException("The output mapping for processor name:"+processorPortName+" already exists");
+		// Note javadoc of getOutputPortMapping - the mapping is processorPort -> activityPort
+		// -- opposite of the outputPortMapping
 		activity.getInputPortMapping().put(processorPortName, activityPortName);
 	}
 
