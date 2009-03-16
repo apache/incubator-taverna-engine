@@ -25,6 +25,7 @@ import java.util.Set;
 import net.sf.taverna.t2.annotation.AnnotationChain;
 import net.sf.taverna.t2.workflowmodel.AbstractOutputPort;
 import net.sf.taverna.t2.workflowmodel.EditException;
+import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityOutputPort;
 
 /**
  * An output port on an Activity instance, used as a bean to hold port name,
@@ -33,7 +34,7 @@ import net.sf.taverna.t2.workflowmodel.EditException;
  * @author Tom Oinn
  * 
  */
-public class ActivityOutputPortImpl extends AbstractOutputPort {
+public class ActivityOutputPortImpl extends AbstractOutputPort implements ActivityOutputPort {
 
 	/**
 	 * Constructs an Activity output port instance with the provided name,depth
