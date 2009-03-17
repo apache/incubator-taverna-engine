@@ -63,7 +63,7 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 	List<ProcessorImpl> processors;
 	List<MergeImpl> merges;
 	private String name;
-	private static int nameIndex = 0;
+	private static int nameIndex = 1;
 	private List<DataflowInputPortImpl> inputs;
 	private List<DataflowOutputPortImpl> outputs;
 	protected String internalIdentifier;
@@ -74,7 +74,7 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 	 * interface
 	 */
 	protected DataflowImpl() {
-		this.name = "dataflow" + (nameIndex++);
+		this.name = "Workflow" + (nameIndex++);
 		this.processors = new ArrayList<ProcessorImpl>();
 		this.merges = new ArrayList<MergeImpl>();
 		this.inputs = new ArrayList<DataflowInputPortImpl>();
