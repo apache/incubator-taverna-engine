@@ -29,6 +29,8 @@ import java.util.Map.Entry;
 
 import net.sf.taverna.t2.workflowmodel.CompoundEdit;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
+import net.sf.taverna.t2.workflowmodel.DataflowInputPort;
+import net.sf.taverna.t2.workflowmodel.DataflowOutputPort;
 import net.sf.taverna.t2.workflowmodel.Datalink;
 import net.sf.taverna.t2.workflowmodel.Edit;
 import net.sf.taverna.t2.workflowmodel.Edits;
@@ -44,6 +46,7 @@ import net.sf.taverna.t2.workflowmodel.Port;
 import net.sf.taverna.t2.workflowmodel.Processor;
 import net.sf.taverna.t2.workflowmodel.ProcessorInputPort;
 import net.sf.taverna.t2.workflowmodel.ProcessorOutputPort;
+import net.sf.taverna.t2.workflowmodel.TokenProcessingEntity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityInputPort;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityOutputPort;
@@ -510,6 +513,107 @@ public class Tools {
 		return processors;
 	}
 
+	/**
+	 * Get the TokenProcessingEntity (Processor, Merge or Dataflow) 
+	 * from the workflow that contains the given EventForwardingOutputPort. 
+	 * This can be an output port of a Processor or a Merge or an input port of a Dataflow 
+	 * that has an internal EventForwardingOutputPort attached to it. 
+	 * @param port
+	 * @param workflow 
+	 * @return
+	 */
+	public static TokenProcessingEntity getTokenProcessingEntityWithEventForwardingOutputPort(
+			EventForwardingOutputPort port, Dataflow workflow) {
+
+		// First check the workflow's inputs
+		for (DataflowInputPort input : workflow.getInputPorts()){
+			if (input.getInternalOutputPort().equals(port)){
+				return workflow;
+			}
+		}
+		
+		// Check workflow's merges
+		List<? extends Merge> merges = workflow.getMerges();
+		for (Merge merge : merges){
+			if (merge.getOutputPort().equals(port)){
+				return merge;
+			}
+		}
+		
+		// Check workflow's processors
+		List<? extends Processor> processors = workflow.getProcessors();
+		for (Processor processor : processors){
+			for (OutputPort output : processor.getOutputPorts()){
+				if (output.equals(port)) {
+					return processor;
+				}
+			}
+
+			// If processor contains a nested workflow - descend into it
+			if (containsNestedWorkflow(processor)){
+				Dataflow nestedWorkflow = ((NestedDataflow) processor.getActivityList().get(0)).getNestedDataflow();
+				TokenProcessingEntity entity = getTokenProcessingEntityWithEventForwardingOutputPort(port, nestedWorkflow);
+				if (entity != null){
+					return entity;
+				}
+			}
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * Get the TokenProcessingEntity (Processor, Merge or Dataflow) from 
+	 * the workflow that contains the given target EventHandlingInputPort. 
+	 * This can be an input port of a Processor or a Merge or an output port of a Dataflow 
+	 * that has an internal EventHandlingInputPort attached to it. 
+	 * @param port
+	 * @param workflow 
+	 * @return
+	 */
+	public static TokenProcessingEntity getTokenProcessingEntityWithEventHandlingInputPort(
+			EventHandlingInputPort port, Dataflow workflow) {
+
+		// First check the workflow's outputs
+		for (DataflowOutputPort output : workflow.getOutputPorts()){
+			if (output.getInternalInputPort().equals(port)){
+				return workflow;
+			}
+		}
+		
+		// Check workflow's merges
+		List<? extends Merge> merges = workflow.getMerges();
+		for (Merge merge : merges){
+			for (EventHandlingInputPort input : merge.getInputPorts()){
+				if (input.equals(port)){
+					return merge;
+				}
+			}
+		}
+		
+		// Check workflow's processors
+		List<? extends Processor> processors = workflow.getProcessors();
+		for (Processor processor : processors){
+			for (EventHandlingInputPort output : processor.getInputPorts()){
+				if (output.equals(port)) {
+					return processor;
+				}
+			}
+
+			// If processor contains a nested workflow - descend into it
+			if (containsNestedWorkflow(processor)){
+				Dataflow nestedWorkflow = ((NestedDataflow) processor.getActivityList().get(0)).getNestedDataflow();
+				TokenProcessingEntity entity = getTokenProcessingEntityWithEventHandlingInputPort(port, nestedWorkflow);
+				if (entity != null){
+					return entity;
+				}
+			}
+		}
+		
+		return null;
+	}
+
+	
 	/**
 	 * Returns true if processor contains a nested workflow.
 	 */
