@@ -472,4 +472,9 @@ public class EditsImpl implements Edits {
 				Configurable.class, configurable, configBean);
 	}
 
+	public Edit<Merge> getReorderMergeInputPortsEdit(Merge merge,
+			List<MergeInputPort> reorderedMergeInputPortList) {
+		return new ReorderMergeInputPortsEdit(merge, reorderedMergeInputPortList);
+	}
+
 }

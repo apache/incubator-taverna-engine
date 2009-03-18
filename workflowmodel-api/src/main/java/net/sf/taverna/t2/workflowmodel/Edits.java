@@ -333,7 +333,7 @@ public interface Edits {
 			DispatchLayer<?> layer, int position);
 
 	public Edit<Dataflow> getAddMergeEdit(Dataflow dataflow, Merge processor);
-
+	
 	/**
 	 * Returns an edit to add a MergeInputPort to a Merge.
 	 * 
@@ -345,6 +345,18 @@ public interface Edits {
 	 */
 	public Edit<Merge> getAddMergeInputPortEdit(Merge merge,
 			MergeInputPort mergeInputPort);
+	
+	/**
+	 * Returns an edit to reorder the list of MergeInputPortS in a Merge.
+	 * 
+	 * @param merge
+	 *            merge to reorder the list of input ports to
+	 * @param reorderedMergeInputPortList
+	 *            a list of reordered input ports
+	 * @return an edit to reorder the list of MergeInputPortS to a Merge
+	 */
+	public Edit<Merge> getReorderMergeInputPortsEdit(Merge merge,
+			List<MergeInputPort> reorderedMergeInputPortList);
 
 	/**
 	 * Provides an edit object responsible for adding a Processor to a Dataflow

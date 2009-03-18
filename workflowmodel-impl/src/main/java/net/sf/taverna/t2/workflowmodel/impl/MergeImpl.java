@@ -216,4 +216,11 @@ public class MergeImpl implements Merge {
 		}
 		return true;
 	}
+
+	@SuppressWarnings("unchecked")
+	public void reorderInputPorts(
+			List<? extends MergeInputPort> reorderedInputPortList) {
+		// Just set the inputs to the already reordered list of ports
+		inputs = (List<MergeInputPortImpl>) reorderedInputPortList;	
+	}
 }
