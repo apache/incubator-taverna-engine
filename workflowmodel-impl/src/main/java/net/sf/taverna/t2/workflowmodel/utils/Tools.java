@@ -296,7 +296,7 @@ public class Tools {
 	public static String uniquePortName(String portName,
 			Collection<? extends Port> existingPorts) {
 		// Make sure we have a unique port name
-		List<String> existingNames = new ArrayList<String>();
+		Set<String> existingNames = new HashSet<String>();
 		for (Port existingPort : existingPorts) {
 			existingNames.add(existingPort.getName());
 		}
