@@ -58,6 +58,9 @@ import org.jdom.output.XMLOutputter;
  * Contains static methods concerned with legacy Processor construction and XML
  * handling for the various configurable types such as Activity and
  * DispatchLayer.
+ * <p>
+ * Not to be confused with the probably more helpful 
+ * {@link net.sf.taverna.t2.workflowmodel.utils.Tools}.
  * 
  * @author Tom Oinn
  * @author Stuart Owen
@@ -168,6 +171,7 @@ public class Tools {
 	 *            {@link MutableAnnotated} to be annotated
 	 */
 	@SuppressWarnings("unchecked")
+	@Deprecated
 	public static void annotateObject(Element annotations, Annotated annotated) {
 		// TODO - implement for new annotation chain framework
 		/**
@@ -443,6 +447,7 @@ public class Tools {
 	 *            the workflow entity to serialise annotations for
 	 * @return a JDOM {@link Element} object containing the annotations
 	 */
+	@Deprecated
 	public static Element getAnnotationsElement(Annotated<?> annotated) {
 		Element result = new Element(ANNOTATIONS);
 		// TODO - implement for new annotation chain framework
@@ -516,37 +521,11 @@ public class Tools {
 	 * @param annotated
 	 *            {@link Annotated} from where to find annotations
 	 */
+	@Deprecated
 	public static void injectAnnotations(Element element, Annotated<?> annotated) {
 		if (!annotated.getAnnotations().isEmpty()) {
 			element.addContent(getAnnotationsElement(annotated));
 		}
-	}
-	
-	/**
-	 * Returns a unique processor name for the supplied Dataflow, based upon the preferred name.
-	 * A numeric prefix is added to the preferred name, and incremented until it is unique.
-	 * 
-	 * @param preferredName - the preferred name for the Processor
-	 * @param dataflow - the dataflow for which the Processor name needs to be unique
-	 * @return
-	 */
-	public static String uniqueProcessorName(String preferredName, Dataflow dataflow) {
-		String uniqueName=preferredName;
-		boolean found=true;
-		int prefix=0;
-		while(found) {
-			found=false;
-			for (Processor p : dataflow.getProcessors()) 
-			{
-				if (p.getLocalName().equals(uniqueName)) {
-					uniqueName=preferredName+String.valueOf(prefix);
-					prefix++;
-					found=true;
-					break;
-				}
-			}
-		}
-		return uniqueName;
 	}
 
 	/**
@@ -560,6 +539,7 @@ public class Tools {
 	 * @param annotated
 	 *            {@link MutableAnnotated} to be annotated
 	 */
+	@Deprecated
 	public static void populateAnnotationsFromParent(Element parent,
 			Annotated<?> annotated) {
 		Element annotationsElement = parent.getChild(ANNOTATIONS);

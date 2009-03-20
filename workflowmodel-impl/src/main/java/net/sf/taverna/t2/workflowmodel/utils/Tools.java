@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.Map.Entry;
 
 import net.sf.taverna.t2.workflowmodel.CompoundEdit;
+import net.sf.taverna.t2.workflowmodel.Condition;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
 import net.sf.taverna.t2.workflowmodel.DataflowInputPort;
 import net.sf.taverna.t2.workflowmodel.DataflowOutputPort;
@@ -41,6 +42,7 @@ import net.sf.taverna.t2.workflowmodel.InputPort;
 import net.sf.taverna.t2.workflowmodel.Merge;
 import net.sf.taverna.t2.workflowmodel.MergeInputPort;
 import net.sf.taverna.t2.workflowmodel.MergeOutputPort;
+import net.sf.taverna.t2.workflowmodel.NamedWorkflowEntity;
 import net.sf.taverna.t2.workflowmodel.OutputPort;
 import net.sf.taverna.t2.workflowmodel.Port;
 import net.sf.taverna.t2.workflowmodel.Processor;
@@ -52,6 +54,17 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityInputPort;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityOutputPort;
 import net.sf.taverna.t2.workflowmodel.processor.activity.NestedDataflow;
 
+/**
+ * Various workflow model tools that can be helpful when constructing a
+ * dataflow.
+ * <p>
+ * Not to be confused with the @deprecated
+ * {@link net.sf.taverna.t2.workflowmodel.impl.Tools}
+ * 
+ * @author David Withers
+ * @author Stian Soiland-Reyes
+ * 
+ */
 public class Tools {
 
 	private static Edits edits = EditsRegistry.getEdits();
@@ -293,17 +306,34 @@ public class Tools {
 		return new CompoundEdit(editList);
 	}
 
-	public static String uniquePortName(String portName,
+	/**
+	 * Find a unique port name given a list of existing ports.
+	 * <p>
+	 * If needed, the returned port name will have a numeric postfix, starting
+	 * from 2.
+	 * <p>
+	 * Although not strictly needed by Taverna, for added user friendliness the
+	 * case of the existing port names are ignored when checking for uniqueness.
+	 * 
+	 * @see #uniqueProcessorName(String, Dataflow)
+	 * 
+	 * @param suggestedPortName
+	 *            Port name suggested for new port
+	 * @param existingPorts
+	 *            Collection of existing {@link Port}s
+	 * @return A port name unique for the given collection of port
+	 */
+	public static String uniquePortName(String suggestedPortName,
 			Collection<? extends Port> existingPorts) {
 		// Make sure we have a unique port name
 		Set<String> existingNames = new HashSet<String>();
 		for (Port existingPort : existingPorts) {
-			existingNames.add(existingPort.getName());
+			existingNames.add(existingPort.getName().toLowerCase());
 		}
-		String candidateName = portName;
-		int counter = 2;
-		while (existingNames.contains(candidateName)) {
-			candidateName = portName + counter++;
+		String candidateName = suggestedPortName;
+		long counter = 2;
+		while (existingNames.contains(candidateName.toLowerCase())) {
+			candidateName = suggestedPortName + counter++;
 		}
 		return candidateName;
 	}
@@ -514,112 +544,411 @@ public class Tools {
 	}
 
 	/**
-	 * Get the TokenProcessingEntity (Processor, Merge or Dataflow) 
-	 * from the workflow that contains the given EventForwardingOutputPort. 
-	 * This can be an output port of a Processor or a Merge or an input port of a Dataflow 
-	 * that has an internal EventForwardingOutputPort attached to it. 
+	 * Get the TokenProcessingEntity (Processor, Merge or Dataflow) from the
+	 * workflow that contains the given EventForwardingOutputPort. This can be
+	 * an output port of a Processor or a Merge or an input port of a Dataflow
+	 * that has an internal EventForwardingOutputPort attached to it.
+	 * 
 	 * @param port
-	 * @param workflow 
+	 * @param workflow
 	 * @return
 	 */
 	public static TokenProcessingEntity getTokenProcessingEntityWithEventForwardingOutputPort(
 			EventForwardingOutputPort port, Dataflow workflow) {
 
 		// First check the workflow's inputs
-		for (DataflowInputPort input : workflow.getInputPorts()){
-			if (input.getInternalOutputPort().equals(port)){
+		for (DataflowInputPort input : workflow.getInputPorts()) {
+			if (input.getInternalOutputPort().equals(port)) {
 				return workflow;
 			}
 		}
-		
+
 		// Check workflow's merges
 		List<? extends Merge> merges = workflow.getMerges();
-		for (Merge merge : merges){
-			if (merge.getOutputPort().equals(port)){
+		for (Merge merge : merges) {
+			if (merge.getOutputPort().equals(port)) {
 				return merge;
 			}
 		}
-		
+
 		// Check workflow's processors
 		List<? extends Processor> processors = workflow.getProcessors();
-		for (Processor processor : processors){
-			for (OutputPort output : processor.getOutputPorts()){
+		for (Processor processor : processors) {
+			for (OutputPort output : processor.getOutputPorts()) {
 				if (output.equals(port)) {
 					return processor;
 				}
 			}
 
 			// If processor contains a nested workflow - descend into it
-			if (containsNestedWorkflow(processor)){
-				Dataflow nestedWorkflow = ((NestedDataflow) processor.getActivityList().get(0)).getNestedDataflow();
-				TokenProcessingEntity entity = getTokenProcessingEntityWithEventForwardingOutputPort(port, nestedWorkflow);
-				if (entity != null){
+			if (containsNestedWorkflow(processor)) {
+				Dataflow nestedWorkflow = ((NestedDataflow) processor
+						.getActivityList().get(0)).getNestedDataflow();
+				TokenProcessingEntity entity = getTokenProcessingEntityWithEventForwardingOutputPort(
+						port, nestedWorkflow);
+				if (entity != null) {
 					return entity;
 				}
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 	/**
-	 * Get the TokenProcessingEntity (Processor, Merge or Dataflow) from 
-	 * the workflow that contains the given target EventHandlingInputPort. 
-	 * This can be an input port of a Processor or a Merge or an output port of a Dataflow 
-	 * that has an internal EventHandlingInputPort attached to it. 
+	 * Get the TokenProcessingEntity (Processor, Merge or Dataflow) from the
+	 * workflow that contains the given target EventHandlingInputPort. This can
+	 * be an input port of a Processor or a Merge or an output port of a
+	 * Dataflow that has an internal EventHandlingInputPort attached to it.
+	 * 
 	 * @param port
-	 * @param workflow 
+	 * @param workflow
 	 * @return
 	 */
 	public static TokenProcessingEntity getTokenProcessingEntityWithEventHandlingInputPort(
 			EventHandlingInputPort port, Dataflow workflow) {
 
 		// First check the workflow's outputs
-		for (DataflowOutputPort output : workflow.getOutputPorts()){
-			if (output.getInternalInputPort().equals(port)){
+		for (DataflowOutputPort output : workflow.getOutputPorts()) {
+			if (output.getInternalInputPort().equals(port)) {
 				return workflow;
 			}
 		}
-		
+
 		// Check workflow's merges
 		List<? extends Merge> merges = workflow.getMerges();
-		for (Merge merge : merges){
-			for (EventHandlingInputPort input : merge.getInputPorts()){
-				if (input.equals(port)){
+		for (Merge merge : merges) {
+			for (EventHandlingInputPort input : merge.getInputPorts()) {
+				if (input.equals(port)) {
 					return merge;
 				}
 			}
 		}
-		
+
 		// Check workflow's processors
 		List<? extends Processor> processors = workflow.getProcessors();
-		for (Processor processor : processors){
-			for (EventHandlingInputPort output : processor.getInputPorts()){
+		for (Processor processor : processors) {
+			for (EventHandlingInputPort output : processor.getInputPorts()) {
 				if (output.equals(port)) {
 					return processor;
 				}
 			}
 
 			// If processor contains a nested workflow - descend into it
-			if (containsNestedWorkflow(processor)){
-				Dataflow nestedWorkflow = ((NestedDataflow) processor.getActivityList().get(0)).getNestedDataflow();
-				TokenProcessingEntity entity = getTokenProcessingEntityWithEventHandlingInputPort(port, nestedWorkflow);
-				if (entity != null){
+			if (containsNestedWorkflow(processor)) {
+				Dataflow nestedWorkflow = ((NestedDataflow) processor
+						.getActivityList().get(0)).getNestedDataflow();
+				TokenProcessingEntity entity = getTokenProcessingEntityWithEventHandlingInputPort(
+						port, nestedWorkflow);
+				if (entity != null) {
 					return entity;
 				}
 			}
 		}
-		
+
 		return null;
 	}
 
-	
 	/**
 	 * Returns true if processor contains a nested workflow.
 	 */
 	public static boolean containsNestedWorkflow(Processor processor) {
 		return ((!processor.getActivityList().isEmpty()) && processor
 				.getActivityList().get(0) instanceof NestedDataflow);
+	}
+
+	/**
+	 * Find processors that a given processor can connect to downstream.
+	 * <p>
+	 * This is calculated as all processors in the dataflow, except the
+	 * processor itself, and any processor <em>upstream</em>, following both
+	 * data links and conditional links.
+	 * 
+	 * @see #possibleUpStreamProcessors(Dataflow, Processor)
+	 * @see #splitProcessors(Collection, Processor)
+	 * 
+	 * @param dataflow
+	 *            Dataflow from where to find processors
+	 * @param processor
+	 *            Processor which is to be connected
+	 * @return A set of possible downstream processors
+	 */
+	public static Set<Processor> possibleDownStreamProcessors(
+			Dataflow dataflow, Processor processor) {
+		ProcessorSplit splitProcessors = splitProcessors(dataflow
+				.getProcessors(), processor);
+		Set<Processor> possibles = new HashSet<Processor>(splitProcessors
+				.getUnconnected());
+		possibles.addAll(splitProcessors.getDownStream());
+		return possibles;
+	}
+
+	/**
+	 * Find processors that a given processor can connect to upstream.
+	 * <p>
+	 * This is calculated as all processors in the dataflow, except the
+	 * processor itself, and any processor <em>downstream</em>, following both
+	 * data links and conditional links.
+	 * 
+	 * @see #possibleDownStreamProcessors(Dataflow, Processor)
+	 * @see #splitProcessors(Collection, Processor)
+	 * 
+	 * @param dataflow
+	 *            Dataflow from where to find processors
+	 * @param processor
+	 *            Processor which is to be connected
+	 * @return A set of possible downstream processors
+	 */
+	public static Set<Processor> possibleUpStreamProcessors(Dataflow dataflow,
+			Processor firstProcessor) {
+		ProcessorSplit splitProcessors = splitProcessors(dataflow
+				.getProcessors(), firstProcessor);
+		Set<Processor> possibles = new HashSet<Processor>(splitProcessors
+				.getUnconnected());
+		possibles.addAll(splitProcessors.getUpStream());
+		return possibles;
+	}
+
+	/**
+	 * 
+	 * @param processors
+	 * @param splitPoint
+	 * @return
+	 */
+	public static ProcessorSplit splitProcessors(
+			Collection<? extends Processor> processors, Processor splitPoint) {
+		Set<Processor> upStream = new HashSet<Processor>();
+		Set<Processor> downStream = new HashSet<Processor>();
+		Set<TokenProcessingEntity> queue = new HashSet<TokenProcessingEntity>();
+
+		queue.add(splitPoint);
+
+		// First let's go upstream
+		while (!queue.isEmpty()) {
+			TokenProcessingEntity investigate = queue.iterator().next();
+			queue.remove(investigate);
+			if (investigate instanceof Processor) {
+				Processor processor = (Processor) investigate;
+				List<? extends Condition> preConditions = processor
+						.getPreconditionList();
+				for (Condition condition : preConditions) {
+					Processor upstreamProc = condition.getControl();
+					if (!upStream.contains(upstreamProc)) {
+						upStream.add(upstreamProc);
+						queue.add(upstreamProc);
+					}
+				}
+			}
+			for (EventHandlingInputPort inputPort : investigate.getInputPorts()) {
+				Datalink incomingLink = inputPort.getIncomingLink();
+				if (incomingLink == null) {
+					continue;
+				}
+				EventForwardingOutputPort source = incomingLink.getSource();
+				if (source instanceof ProcessorOutputPort) {
+					Processor upstreamProc = ((ProcessorOutputPort) source)
+							.getProcessor();
+					if (!upStream.contains(upstreamProc)) {
+						upStream.add(upstreamProc);
+						queue.add(upstreamProc);
+					}
+				} else if (source instanceof MergeOutputPort) {
+					Merge merge = ((MergeOutputPort) source).getMerge();
+					queue.add(merge);
+					// The merge it self doesn't count as a processor
+				} else {
+					// Ignore
+				}
+			}
+		}
+		// Then downstream
+		queue.add(splitPoint);
+		while (!queue.isEmpty()) {
+			TokenProcessingEntity investigate = queue.iterator().next();
+			queue.remove(investigate);
+			if (investigate instanceof Processor) {
+				Processor processor = (Processor) investigate;
+				List<? extends Condition> controlledConditions = processor
+						.getControlledPreconditionList();
+				for (Condition condition : controlledConditions) {
+					Processor downstreamProc = condition.getTarget();
+					if (!downStream.contains(downstreamProc)) {
+						downStream.add(downstreamProc);
+						queue.add(downstreamProc);
+					}
+				}
+			}
+
+			for (EventForwardingOutputPort outputPort : investigate
+					.getOutputPorts()) {
+				for (Datalink datalink : outputPort.getOutgoingLinks()) {
+					EventHandlingInputPort sink = datalink.getSink();
+					if (sink instanceof ProcessorInputPort) {
+						Processor downstreamProcc = ((ProcessorInputPort) sink)
+								.getProcessor();
+						if (!downStream.contains(downstreamProcc)) {
+							downStream.add(downstreamProcc);
+							queue.add(downstreamProcc);
+						}
+					} else if (sink instanceof MergeInputPort) {
+						Merge merge = ((MergeOutputPort) sink).getMerge();
+						queue.add(merge);
+						// The merge it self doesn't count as a processor
+					} else {
+						// Ignore dataflow ports
+					}
+				}
+			}
+		}
+		Set<Processor> undecided = new HashSet<Processor>(processors);
+		undecided.remove(splitPoint);
+		undecided.removeAll(upStream);
+		undecided.removeAll(downStream);
+		return new ProcessorSplit(splitPoint, upStream, downStream, undecided);
+	}
+
+	/**
+	 * Find the first processor that contains an activity that has the given
+	 * activity input port. See #get
+	 * 
+	 * @param dataflow
+	 * @param targetPort
+	 * @return
+	 */
+	public static Processor getFirstProcessorWithActivityInputPort(
+			Dataflow dataflow, ActivityInputPort targetPort) {
+		Collection<Processor> processorsWithActivityPort = getProcessorsWithActivityInputPort(
+				dataflow, targetPort);
+		for (Processor processor : processorsWithActivityPort) {
+			return processor;
+		}
+		return null;
+	}
+
+	public static Processor getFirstProcessorWithActivityOutputPort(
+			Dataflow dataflow, ActivityOutputPort targetPort) {
+		Collection<Processor> processorsWithActivityPort = getProcessorsWithActivityOutputPort(
+				dataflow, targetPort);
+		for (Processor processor : processorsWithActivityPort) {
+			return processor;
+		}
+		return null;
+	}
+
+	/**
+	 * Find a unique processor name for the supplied Dataflow, based upon the
+	 * preferred name. If needed, a numeric suffix is added to the preferred
+	 * name, and incremented until it is unique, starting from 2.
+	 * <p>
+	 * Note that this method checks the uniqueness against the names of all
+	 * {@link NamedWorkflowEntity}s, including {@link Merge}s.
+	 * <p>
+	 * Although not strictly needed by Taverna, for added user friendliness the
+	 * case of the existing port names are ignored when checking for uniqueness.
+	 * 
+	 * @param preferredName
+	 *            the preferred name for the Processor
+	 * @param dataflow
+	 *            the dataflow for which the Processor name needs to be unique
+	 * @return A unique processor name
+	 */
+	public static String uniqueProcessorName(String preferredName,
+			Dataflow dataflow) {
+
+		Set<String> existingNames = new HashSet<String>();
+
+		for (NamedWorkflowEntity entity : dataflow
+				.getEntities(NamedWorkflowEntity.class)) {
+			existingNames.add(entity.getLocalName().toLowerCase());
+		}
+		String uniqueName = preferredName;
+		long suffix = 2;
+		while (existingNames.contains(uniqueName.toLowerCase())) {
+			uniqueName = preferredName + suffix++;
+		}
+		return uniqueName;
+	}
+
+	/**
+	 * Result bean returned from
+	 * {@link Tools#splitProcessors(Collection, Processor)}.
+	 * 
+	 * @author Stian Soiland-Reyes
+	 * 
+	 */
+	public static class ProcessorSplit {
+
+		private final Processor splitPoint;
+		private final Set<Processor> upStream;
+		private final Set<Processor> downStream;
+		private final Set<Processor> unconnected;
+
+		/**
+		 * Processor that was used as a split point.
+		 * 
+		 * @return Split point processor
+		 */
+		public Processor getSplitPoint() {
+			return splitPoint;
+		}
+
+		/**
+		 * Processors that are upstream from the split point.
+		 * 
+		 * @return Upstream processors
+		 */
+		public Set<Processor> getUpStream() {
+			return upStream;
+		}
+
+		/**
+		 * Processors that are downstream from the split point.
+		 * 
+		 * @return Downstream processors
+		 */
+		public Set<Processor> getDownStream() {
+			return downStream;
+		}
+
+		/**
+		 * Processors that are unconnected to the split point.
+		 * <p>
+		 * These are processors in the dataflow that are neither upstream,
+		 * downstream or the split point itself.
+		 * <p>
+		 * Note that this does not imply a total graph separation, for instance
+		 * processors in {@link #getUpStream()} might have some of these
+		 * unconnected processors downstream, but not along the path to the
+		 * {@link #getSplitPoint()}, or they could be upstream from any
+		 * processor in {@link #getDownStream()}.
+		 * 
+		 * @return Processors unconnected from the split point
+		 */
+		public Set<Processor> getUnconnected() {
+			return unconnected;
+		}
+
+		/**
+		 * Construct a new processor split result.
+		 * 
+		 * @param splitPoint
+		 *            Processor used as split point
+		 * @param upStream
+		 *            Processors that are upstream from split point
+		 * @param downStream
+		 *            Processors that are downstream from split point
+		 * @param unconnected
+		 *            The rest of the processors, that are by definition
+		 *            unconnected to split point
+		 */
+		public ProcessorSplit(Processor splitPoint, Set<Processor> upStream,
+				Set<Processor> downStream, Set<Processor> unconnected) {
+			this.splitPoint = splitPoint;
+			this.upStream = upStream;
+			this.downStream = downStream;
+			this.unconnected = unconnected;
+		}
+
 	}
 
 }
