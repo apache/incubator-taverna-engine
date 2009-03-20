@@ -66,7 +66,7 @@ public class DatalinksXMLSerializer extends AbstractXMLSerializer {
 			portElement.setText(link.getSink().getName());
 			sink.addContent(portElement);
 		} else if (dataLinkSinkType == DATALINK_TYPES.MERGE) {
-			Merge m = ((MergeInputPortImpl) link.getSink()).getMergeInstance();
+			Merge m = ((MergeInputPortImpl) link.getSink()).getMerge();
 			ProcessorPort processorPort = (ProcessorPort) ((Datalink) m
 					.getOutputPort().getOutgoingLinks().toArray()[0]).getSink();
 			Element proc = new Element(PROCESSOR, T2_WORKFLOW_NAMESPACE);

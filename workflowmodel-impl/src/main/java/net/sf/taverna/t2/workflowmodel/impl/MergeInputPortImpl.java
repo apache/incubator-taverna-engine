@@ -37,8 +37,21 @@ public class MergeInputPortImpl extends AbstractEventHandlingInputPort implement
 		parent.receiveEvent(t, this.name);
 	}
 
+	/**
+	 * Deprecated - use {@link #getMerge()}
+	 * 
+	 * @see #getMerge()
+	 * @return
+	 */
+	@Deprecated
 	public Merge getMergeInstance() {
 		return parent;
 	}
+	
+
+	public Merge getMerge() {
+		return parent;
+	}
+
 
 }

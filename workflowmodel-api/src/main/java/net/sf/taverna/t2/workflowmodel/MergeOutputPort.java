@@ -25,15 +25,13 @@ package net.sf.taverna.t2.workflowmodel;
  * In particular it provides access to the Merge instance it is associated with.
  * 
  * @see Merge
+ * @see MergePort
  * @see EventForwardingOutputPort
  * 
  * @author Stuart Owen
+ * @author Stian Soiland-Reyes
  *
  */
-public interface MergeOutputPort extends EventForwardingOutputPort {
-
-	/**
-	 * @return the Merge instance the port is associated with. 
-	 */
-	Merge getMerge();
+public interface MergeOutputPort extends EventForwardingOutputPort, MergePort {
+	
 }

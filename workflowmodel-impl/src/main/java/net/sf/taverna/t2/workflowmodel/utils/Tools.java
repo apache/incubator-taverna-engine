@@ -791,7 +791,7 @@ public class Tools {
 							queue.add(downstreamProcc);
 						}
 					} else if (sink instanceof MergeInputPort) {
-						Merge merge = ((MergeOutputPort) sink).getMerge();
+						Merge merge = ((MergeInputPort) sink).getMerge();
 						queue.add(merge);
 						// The merge it self doesn't count as a processor
 					} else {

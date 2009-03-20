@@ -28,7 +28,7 @@ import net.sf.taverna.t2.invocation.WorkflowDataToken;
  * @author Tom Oinn
  * 
  */
-public interface MergeInputPort extends EventHandlingInputPort {
+public interface MergeInputPort extends EventHandlingInputPort, MergePort {
 
 	/**
 	 * Receive an arbitrary workflow event. The index of this port relative to
