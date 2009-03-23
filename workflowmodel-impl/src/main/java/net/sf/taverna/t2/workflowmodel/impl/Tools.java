@@ -575,6 +575,18 @@ public class Tools {
 	}
 
 	/**
+	 * 
+	 * @see net.sf.taverna.t2.workflowmodel.utils.Tools#uniqueProcessorName(String, Dataflow)
+	 */
+	@Deprecated
+	public static String uniqueProcessorName(String preferredName,
+			Dataflow dataflow) {
+		return net.sf.taverna.t2.workflowmodel.utils.Tools.uniqueProcessorName(preferredName, dataflow);
+	}
+		
+	
+	
+	/**
 	 * Protected constructor, use static methods only.
 	 */
 	protected Tools() {
