@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2007 The University of Manchester   
+ * Copyright (C) 2007-2009 The University of Manchester   
  * 
  *  Modifications to the initial code base are copyright of their
  *  respective authors, or their employers as appropriate.
@@ -24,9 +24,10 @@ package net.sf.taverna.t2.workflowmodel;
  * Defines that the implementing port belongs to a Dataflow
  * 
  * @author Tom Oinn
+ * @author Stian Soiland-Reyes
  * 
  */
-public interface DataflowPort {
+public interface DataflowPort extends Port {
 
 	/**
 	 * Get the parent DataFlow to which this port belongs
