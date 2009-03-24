@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2007 The University of Manchester   
+ * Copyright (C) 2007-2009 The University of Manchester   
  * 
  *  Modifications to the initial code base are copyright of their
  *  respective authors, or their employers as appropriate.
@@ -24,11 +24,14 @@ import java.util.List;
 
 import net.sf.taverna.t2.spi.SPIRegistry;
 
-@SuppressWarnings("unchecked")
+/**
+ * Registry for finding the {@link Edits} implementation.
+ * 
+ */
 public class EditsRegistry extends SPIRegistry<Edits> {
 
 	private static EditsRegistry instance;
-	
+
 	protected EditsRegistry() {
 		super(Edits.class);
 	}
@@ -49,7 +52,7 @@ public class EditsRegistry extends SPIRegistry<Edits> {
 			if (instances.size() > 1)
 				System.out
 						.println("More that 1 Edits implementation defined, using the first");
-			result=instances.get(0);
+			result = instances.get(0);
 		}
 		return result;
 	}
