@@ -20,11 +20,16 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel;
 
-public interface ProcessorPort {
+/**
+ * An {@link ProcessorInputPort} or {@link ProcessorOutputPort} belonging to a
+ * {@link Processor}.
+ * 
+ */
+public interface ProcessorPort extends Port {
 
 	/**
 	 * Get the Processor to which this port belongs
 	 */
 	public Processor getProcessor();
-		
+
 }
