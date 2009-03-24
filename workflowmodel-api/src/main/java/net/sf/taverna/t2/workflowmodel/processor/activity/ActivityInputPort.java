@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2007 The University of Manchester   
+ * Copyright (C) 2007-2009 The University of Manchester   
  * 
  *  Modifications to the initial code base are copyright of their
  *  respective authors, or their employers as appropriate.
@@ -26,13 +26,13 @@ import net.sf.taverna.t2.reference.ExternalReferenceSPI;
 import net.sf.taverna.t2.workflowmodel.InputPort;
 
 /**
- * Specialization of InputPort to capture the extra information required by
+ * Specialisation of InputPort to capture the extra information required by
  * Activity instances.
  * 
  * @author Tom Oinn
  * 
  */
-public interface ActivityInputPort extends InputPort {
+public interface ActivityInputPort extends InputPort, ActivityPort {
 
 	/**
 	 * Declares that the DataDocument instances fed as input data (either
