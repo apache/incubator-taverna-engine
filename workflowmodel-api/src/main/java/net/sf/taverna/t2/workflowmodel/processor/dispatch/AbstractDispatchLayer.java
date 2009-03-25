@@ -56,7 +56,6 @@ public abstract class AbstractDispatchLayer<ConfigurationType> implements
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public void receiveJob(DispatchJobEvent jobEvent) {
 		DispatchLayer<?> below = dispatchStack.layerBelow(this);
 		if (below != null) {

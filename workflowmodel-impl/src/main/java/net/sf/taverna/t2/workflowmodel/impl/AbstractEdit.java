@@ -53,6 +53,7 @@ public abstract class AbstractEdit<SubjectInterface, SubjectType extends Subject
 	 * @param subject
 	 *            The subject of this edit
 	 */
+	@SuppressWarnings("unchecked")
 	public AbstractEdit(Class<?> subjectType, SubjectInterface subject) {
 		if (subject == null && !isNullSubjectAllowed()) {
 			throw new RuntimeException(
@@ -69,6 +70,7 @@ public abstract class AbstractEdit<SubjectInterface, SubjectType extends Subject
 	/**
 	 * {@inheritDoc}
 	 */
+	@SuppressWarnings("unchecked")
 	public final SubjectInterface doEdit() throws EditException {
 		if (applied) {
 			throw new EditException("Edit has already been applied!");
@@ -112,6 +114,7 @@ public abstract class AbstractEdit<SubjectInterface, SubjectType extends Subject
 	/**
 	 * {@inheritDoc}
 	 */
+	@SuppressWarnings("unchecked")
 	public final SubjectType getSubject() {
 		return (SubjectType) subject;
 	}
@@ -126,6 +129,7 @@ public abstract class AbstractEdit<SubjectInterface, SubjectType extends Subject
 	/**
 	 * {@inheritDoc}
 	 */
+	@SuppressWarnings("unchecked")
 	public final void undo() {
 		if (!applied) {
 			throw new RuntimeException(

@@ -35,7 +35,7 @@ package net.sf.taverna.t2.workflowmodel;
  * 
  */
 public class InvalidDataflowException extends Exception {
-
+	private static final long serialVersionUID = -8470683930687738369L;
 	private final DataflowValidationReport report;
 	private final Dataflow dataflow;
 

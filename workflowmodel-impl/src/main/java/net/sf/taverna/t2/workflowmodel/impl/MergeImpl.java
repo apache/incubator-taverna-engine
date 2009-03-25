@@ -23,12 +23,8 @@ package net.sf.taverna.t2.workflowmodel.impl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
-import org.apache.log4j.Logger;
 
 import net.sf.taverna.t2.invocation.InvocationContext;
 import net.sf.taverna.t2.invocation.WorkflowDataToken;
@@ -42,6 +38,8 @@ import net.sf.taverna.t2.workflowmodel.MergeInputPort;
 import net.sf.taverna.t2.workflowmodel.WorkflowStructureException;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationTypeMismatchException;
 
+import org.apache.log4j.Logger;
+
 /**
  * Implementation of {@link Merge}
  * 
@@ -51,6 +49,7 @@ import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationTypeMismatch
  */
 public class MergeImpl implements Merge {
 
+	@SuppressWarnings("unused")
 	private static Logger logger = Logger.getLogger(MergeImpl.class);
 	
 	private List<MergeInputPortImpl> inputs = new ArrayList<MergeInputPortImpl>();

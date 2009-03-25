@@ -434,6 +434,7 @@ public class EditsImpl implements Edits {
 		return new AddMergeInputPortEdit(merge, mergeInputPort);
 	}
 
+	@SuppressWarnings("unchecked")
 	public <ConfigurationBean> Edit<Activity<?>> getConfigureActivityEdit(
 			Activity<ConfigurationBean> activity,
 			ConfigurationBean configurationBean) {

@@ -22,7 +22,6 @@ package net.sf.taverna.t2.workflowmodel.serialization.xml;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.List;
 
 import net.sf.taverna.raven.repository.Artifact;
 import net.sf.taverna.raven.repository.impl.LocalArtifactClassLoader;
@@ -46,6 +45,7 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
  */
 public abstract class AbstractXMLSerializer implements XMLSerializationConstants {
 
+	@SuppressWarnings("unused")
 	private static Logger logger = Logger.getLogger(AbstractXMLSerializer.class);
 
 	/**

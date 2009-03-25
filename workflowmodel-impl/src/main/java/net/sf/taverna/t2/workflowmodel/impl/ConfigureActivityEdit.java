@@ -32,8 +32,10 @@ import org.apache.log4j.Logger;
  * @author Stian Soiland-Reyes
  * 
  */
+@SuppressWarnings("unchecked")
 public class ConfigureActivityEdit extends ConfigureEdit {
 
+	@SuppressWarnings("unused")
 	private static Logger logger = Logger
 			.getLogger(ConfigureActivityEdit.class);
 

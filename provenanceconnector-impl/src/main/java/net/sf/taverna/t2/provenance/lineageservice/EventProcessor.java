@@ -24,7 +24,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -93,8 +92,6 @@ public class EventProcessor {
 
 	ProvenanceWriter pw = null;
 	ProvenanceQuery pq = null;
-
-	private Connection openConnection;
 
 	/**
 	 * @param pw
@@ -210,6 +207,7 @@ public class EventProcessor {
 	 * @param localName the external name of the dataflow. Null if this is top level, not null if a sub-dataflow
 	 *  @return the wfInstanceRef for this workflow structure
 	 */
+	@SuppressWarnings("unchecked")
 	public String processDataflowStructure(Dataflow df, String dataflowID, String externalName) {
 
 		dataflowDepth++;
@@ -676,15 +674,9 @@ public class EventProcessor {
 	}
 
 
+	@SuppressWarnings("unchecked")
 	private void processOutput(Element outputDataEl, ProcBinding procBinding) {
 		List<Element> outputPorts = outputDataEl.getChildren("port");
-		String iterationVector = outputDataEl.getAttributeValue("id");
-		String iteration = outputDataEl.getAttributeValue("parent");
-		String activityId = parentChildMap.get(iteration);
-		String processor = parentChildMap.get(activityId);
-		String process = parentChildMap.get(processor);
-		String dataflow = parentChildMap.get(process);
-
 		for (Element outputport : outputPorts) {
 
 			String portName = outputport.getAttributeValue("name");
@@ -704,18 +696,10 @@ public class EventProcessor {
 
 	}
 
+	@SuppressWarnings("unchecked")
 	private void processInput(Element inputDataEl, ProcBinding procBinding) {
 
 		List<Element> inputPorts = inputDataEl.getChildren("port");
-		String iterationVector = inputDataEl.getAttributeValue("id");
-
-		// not sure any of this is needed
-		String iteration = inputDataEl.getAttributeValue("parent");
-		String activityId = parentChildMap.get(iteration); // activity
-		String processor = parentChildMap.get(activityId);
-		String process = parentChildMap.get(processor);
-		String dataflow = parentChildMap.get(process);
-
 		for (Element inputport : inputPorts) {
 
 			String portName = inputport.getAttributeValue("name");
@@ -758,6 +742,7 @@ public class EventProcessor {
 				iterationId, wfInstanceRef);
 	}
 
+	@SuppressWarnings("unchecked")
 	private void processVarBinding(Element valueEl, String processorId,
 			String portName, String collIdRef, int positionInCollection,
 			String parentCollectionRef, String iterationId, String wfInstanceRef) {
@@ -792,9 +777,6 @@ public class EventProcessor {
 			}
 
 		} else if (valueType.equals("referenceSet")) {
-
-			String refValue = null;
-			String ref = null; // used for non-literal values that need
 			// de-referencing
 
 //			logger.info("processing dataDocument value");
@@ -1028,7 +1010,7 @@ public class EventProcessor {
 
 		// propagate through 1 level of processors, ignore nesting. A subworkflow here is
 		// simply a processor
-		Map<String, Integer> processors = propagateANLWithinSubflow(wfInstanceRef);
+		propagateANLWithinSubflow(wfInstanceRef);
 
 		// now fetch all children workflows and recurse
 		List<String> children = pq.getChildrenOfWorkflow(wfInstanceRef);

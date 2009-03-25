@@ -29,12 +29,10 @@ import net.sf.taverna.t2.workflowmodel.EditException;
 @SuppressWarnings("unchecked")
 public class AddAnnotationBeanEdit implements Edit<AnnotationAssertion> {
 
-	@SuppressWarnings("unchecked")
 	private AnnotationAssertion annotationAssertion;
 	private AnnotationBeanSPI annotationBean;
 	private boolean applied;
 
-	@SuppressWarnings("unchecked")
 	public AddAnnotationBeanEdit(AnnotationAssertion annotationAssertion,
 			AnnotationBeanSPI annotationBean) {
 				this.annotationAssertion = annotationAssertion;

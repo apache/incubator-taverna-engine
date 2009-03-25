@@ -57,7 +57,7 @@ public class RemoveProcessorOutputPortEditTest {
 	@Test
 	public void testUndo() throws Exception {
 		assertFalse(removeProcessorOutputPortEdit.isApplied());
-		Processor p = removeProcessorOutputPortEdit.doEdit();
+		removeProcessorOutputPortEdit.doEdit();
 		assertTrue(removeProcessorOutputPortEdit.isApplied());
 		removeProcessorOutputPortEdit.undo();
 		assertFalse(removeProcessorOutputPortEdit.isApplied());

@@ -120,7 +120,6 @@ public abstract class AbstractErrorHandlerLayer<ConfigurationType> extends
 	 * Receive a job from the layer above, store it for later retries and pass
 	 * it down to the next layer
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public void receiveJob(DispatchJobEvent jobEvent) {
 		addJobToStateList(jobEvent);

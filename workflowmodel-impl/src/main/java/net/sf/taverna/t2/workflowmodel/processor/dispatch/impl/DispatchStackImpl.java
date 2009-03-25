@@ -176,7 +176,6 @@ public abstract class DispatchStackImpl extends
 	 * 
 	 * @param owningProcess
 	 */
-	@SuppressWarnings("unchecked")
 	public void satisfyConditions(String enclosingProcess) {
 		if (conditionsSatisfied(enclosingProcess)) {
 			String owningProcess = enclosingProcess + ":" + getProcessName();

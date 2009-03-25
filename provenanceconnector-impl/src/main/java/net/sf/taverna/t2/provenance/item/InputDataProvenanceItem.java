@@ -40,7 +40,6 @@ public class InputDataProvenanceItem extends DataProvenanceItem {
 	private String processId;
 	private String identifier;
 	private String parentId;
-	private ReferenceService referenceService;
 
 	/**
 	 * Used when generating the xml version by the {@link DataProvenanceItem}.
@@ -53,7 +52,6 @@ public class InputDataProvenanceItem extends DataProvenanceItem {
 	public InputDataProvenanceItem(Map<String, T2Reference> dataMap,
 			ReferenceService referenceService) {
 		super(dataMap, referenceService);
-		this.referenceService = referenceService;
 	}
 
 	public String getEventType() {

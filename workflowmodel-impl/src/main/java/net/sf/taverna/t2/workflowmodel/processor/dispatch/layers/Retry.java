@@ -96,7 +96,6 @@ public class Retry extends AbstractErrorHandlerLayer<RetryConfig> {
 				delay = config.getMaxDelay();
 			}
 			TimerTask task = new TimerTask() {
-				@SuppressWarnings("unchecked")
 				@Override
 				public void run() {
 					currentRetryCount++;

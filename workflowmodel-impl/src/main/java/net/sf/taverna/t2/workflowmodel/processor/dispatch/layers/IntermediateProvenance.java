@@ -24,11 +24,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.Map.Entry;
-
-import org.apache.log4j.Logger;
 
 import net.sf.taverna.t2.invocation.Event;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector;
@@ -51,6 +48,8 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchErrorEv
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchJobEvent;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchJobQueueEvent;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchResultEvent;
+
+import org.apache.log4j.Logger;
 
 /**
  * Sits above the {@link Invoke} layer and collects information about the
@@ -253,6 +252,7 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 	 * @param index
 	 * @return
 	 */
+	@SuppressWarnings("unused")
 	private String[] stripLastIndex(int[] index) {
 		String indexStr = "";
 		for (int ind : index) {

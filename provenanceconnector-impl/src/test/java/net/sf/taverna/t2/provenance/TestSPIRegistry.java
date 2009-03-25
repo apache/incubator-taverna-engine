@@ -1,7 +1,5 @@
 package net.sf.taverna.t2.provenance;
 
-import static org.junit.Assert.*;
-
 import java.util.List;
 
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector;

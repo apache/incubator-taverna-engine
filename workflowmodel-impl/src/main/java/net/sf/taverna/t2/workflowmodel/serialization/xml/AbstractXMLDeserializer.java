@@ -138,6 +138,7 @@ public abstract class AbstractXMLDeserializer implements
 		return new XMLOutputter().outputString(element);
 	}
 	
+	@SuppressWarnings("unchecked")
 	protected void annotationsFromXml(Annotated<?> annotated, Element parent,
 			ClassLoader cl) {
 		Element annotationsElement = parent.getChild(ANNOTATIONS,

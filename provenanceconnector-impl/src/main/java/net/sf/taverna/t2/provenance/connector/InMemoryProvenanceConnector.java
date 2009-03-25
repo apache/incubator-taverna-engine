@@ -49,17 +49,9 @@ public class InMemoryProvenanceConnector implements ProvenanceConnector {
 
 	private ArrayList<ProvenanceItem> provenanceCollection;
 
-	private boolean runStarted = false;
-
 	private String provenance;
 
-	private int storedNumber = 0;
-
-	private UUID randomUUID;
-
 	private ReferenceService referenceService;
-
-	private List<String> idList;
 
 	private String identifier;
 
@@ -84,7 +76,6 @@ public class InMemoryProvenanceConnector implements ProvenanceConnector {
 		return provenanceCollection;
 	}
 
-	@SuppressWarnings("unchecked")
 	public synchronized void store(ProvenanceItem provenanceItem) {
 
 	}
@@ -179,7 +170,6 @@ public class InMemoryProvenanceConnector implements ProvenanceConnector {
 
 	public void init() {
 		eventCnt = 0;
-		idList = new ArrayList<String>();
 		provenanceCollection = new ArrayList<ProvenanceItem>();
 		setSessionId(UUID.randomUUID().toString());
 		file = new File("/tmp/" + identifier);

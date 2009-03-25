@@ -40,7 +40,6 @@ import org.jdom.Element;
 public class ProcessorProvenanceItem implements ProvenanceItem {
 
 	private ActivityProvenanceItem activityProvenanceItem;
-	private String processorID;
 	private String processId;
 	private String parentId;
 	private String identifier;
@@ -57,8 +56,7 @@ public class ProcessorProvenanceItem implements ProvenanceItem {
 		result.setAttribute("processID", this.processId);
 		result.setAttribute("parent", this.parentId);
 		if (activityProvenanceItem != null) {
-			result
-					.addContent(activityProvenanceItem
+			result.addContent(activityProvenanceItem
 							.getAsXML(referenceService));
 		}
 
@@ -87,7 +85,7 @@ public class ProcessorProvenanceItem implements ProvenanceItem {
 	}
 
 	public void setProcessorID(String processorID) {
-		this.processorID = processorID;
+		//this.processorID = processorID;
 	}
 
 	public String getIdentifier() {

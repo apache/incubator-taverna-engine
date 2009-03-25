@@ -61,7 +61,6 @@ public class Failover extends AbstractErrorHandlerLayer<Object> {
 	 * it to the layer below with a modified activity list containing only the
 	 * activity at index 0
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public void receiveJob(DispatchJobEvent jobEvent) {
 		addJobToStateList(jobEvent);
@@ -82,7 +81,6 @@ public class Failover extends AbstractErrorHandlerLayer<Object> {
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
 		public boolean handleError() {
 			currentActivityIndex++;
 			if (currentActivityIndex == jobEvent.getActivities().size()) {

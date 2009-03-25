@@ -21,12 +21,7 @@
 package net.sf.taverna.t2.annotation.annotationbeans;
 
 import net.sf.taverna.t2.annotation.AppliesTo;
-import net.sf.taverna.t2.workflowmodel.Condition;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
-import net.sf.taverna.t2.workflowmodel.Datalink;
-import net.sf.taverna.t2.workflowmodel.Port;
-import net.sf.taverna.t2.workflowmodel.Processor;
-import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 
 /**
  * The descriptive title of a dataflow held as a String

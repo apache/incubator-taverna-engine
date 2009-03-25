@@ -38,10 +38,6 @@ import org.jdom.input.SAXBuilder;
  */
 public class AnnotationsLoader {
 
-	private static final String TOP_ELEMENT = "annotations";
-	private static final String PROCESSOR = "processor";
-	private static final String ANNOTATIONS = "annotations";
-
 
 	/**
 	 * 
@@ -49,6 +45,7 @@ public class AnnotationsLoader {
 	 * @return a map pname -> annotation so that the lineage query alg can use the annotation
 	 * when processing pname
 	 */
+	@SuppressWarnings("unchecked")
 	public Map<String,List<String>>  getAnnotations(String annotationFile)  {
 
 

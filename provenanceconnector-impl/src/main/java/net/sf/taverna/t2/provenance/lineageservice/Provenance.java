@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector;
-import net.sf.taverna.t2.provenance.lineageservice.types.ProvenanceEventType;
 
 /**
  * Implemented by the database class that a {@link ProvenanceConnector}
