@@ -47,7 +47,7 @@ public class ActivityProvenanceItem implements ProvenanceItem {
 	private String parentId;
 
 	public ActivityProvenanceItem(Activity<?> activity) {
-		super();
+	super();
 		this.activity = activity;
 	}
 
@@ -57,8 +57,9 @@ public class ActivityProvenanceItem implements ProvenanceItem {
 		result.setAttribute("identifier", this.identifier);
 		result.setAttribute("processID", this.processId);
 		result.setAttribute("parent", this.parentId);
-		// if (iterationProvenanceItem!=null)
-		// result.addContent(iterationProvenanceItem.getAsXML(referenceService));
+		
+//		 if (iterationProvenanceItem!=null)
+//		 result.addContent(iterationProvenanceItem.getAsXML(referenceService));
 		return result;
 	}
 

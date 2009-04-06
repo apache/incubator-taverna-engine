@@ -32,6 +32,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.jdom.output.XMLOutputter;
 
+import net.sf.taverna.t2.invocation.InvocationContext;
 import net.sf.taverna.t2.provenance.item.ProvenanceItem;
 import net.sf.taverna.t2.reference.ReferenceService;
 
@@ -104,7 +105,8 @@ public class InMemoryProvenanceConnector implements ProvenanceConnector {
 		return "In Memory Connector - use for testing only";
 	}
 
-	public void addProvenanceItem(ProvenanceItem provenanceItem) {
+	public void addProvenanceItem(ProvenanceItem provenanceItem,
+			Object invocationContext) {
 		String asString = provenanceItem.getAsString();
 		String eventType = provenanceItem.getEventType();
 		if (asString != null) {
@@ -246,5 +248,7 @@ public class InMemoryProvenanceConnector implements ProvenanceConnector {
 		this.saveEvents = saveEvents;
 		
 	}
+
+	
 
 }

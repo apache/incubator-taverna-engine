@@ -38,6 +38,18 @@ public interface Provenance {
 	public void acceptRawProvenanceEvent(String eventType, String content)
 			throws SQLException, IOException;
 
+	/**
+	 * pass context explicitly -- so we can get a referenceService and use it to deref data
+	 * @param eventType
+	 * @param content
+	 * @param context
+	 * @throws SQLException
+	 * @throws IOException
+	 */
+	public void acceptRawProvenanceEvent(String eventType, String content, Object context)
+	throws SQLException, IOException;
+	
+
 	public void clearDB() throws SQLException;
 
 	public void setLocation(String location);

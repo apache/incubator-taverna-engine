@@ -89,7 +89,7 @@ public interface ProvenanceWriter {
 			String parentCollectionId, String iteration, String portName,
 			String dataflowId) throws SQLException;
 
-	public abstract void addVarBinding(VarBinding vb) throws SQLException;
+	public abstract void addVarBinding(VarBinding vb, Object context) throws SQLException;
 
 	/**
 	 * deletes DB contents for the static structures -- called prior to each run 

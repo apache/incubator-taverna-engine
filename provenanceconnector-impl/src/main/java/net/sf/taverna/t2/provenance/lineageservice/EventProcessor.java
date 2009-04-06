@@ -84,7 +84,6 @@ public class EventProcessor {
 
 	static String wfInstanceID = null; // unique run ID. set when we see the first event of type "process"
 
-	
 	String topLevelDataflowName = null;
 	String topLevelDataflowID   = null;
 
@@ -516,8 +515,9 @@ public class EventProcessor {
 	 * the correct proc binding is used
 	 * 
 	 * @param d
+	 * @param context 
 	 */
-	public void processProcessEvent(Document d) {
+	public void processProcessEvent(Document d, Object context) {
 
 		Element root = d.getRootElement();
 
@@ -568,8 +568,8 @@ public class EventProcessor {
 			procBinding.setIterationVector(itVector);
 			Element inputDataEl = root.getChild("inputdata");
 			Element outputDataEl = root.getChild("outputdata");
-			processInput(inputDataEl, procBinding);
-			processOutput(outputDataEl, procBinding);
+			processInput(inputDataEl, procBinding, context);
+			processOutput(outputDataEl, procBinding, context);
 
 			try {
 				pw.addProcessorBinding(procBinding);
@@ -589,7 +589,7 @@ public class EventProcessor {
 			
 			dataflowDepth--;
 			if (dataflowDepth == 0) {
-				patchTopLevelnputs();
+				patchTopLevelnputs(context);
 				workflowStructureDone = false; // CHECK reset for next run... 
 			}
 
@@ -609,7 +609,7 @@ public class EventProcessor {
 	 * fills in the VBs for the global inputs -- for some reason there is no explicit event
 	 * that accounts for these value bindings...
 	 */
-	public void patchTopLevelnputs() {
+	public void patchTopLevelnputs(Object context) {
 
 		// only do the patching on the top level
 	//	if (dataflowDepth > 0) {
@@ -660,7 +660,7 @@ public class EventProcessor {
 					// insert VarBinding back into VB with the global input varname
 					vb.setPNameRef(input.getPName());
 					vb.setVarNameRef(input.getVName());
-					pw.addVarBinding(vb);
+					pw.addVarBinding(vb, context);
 					
 //					logger.info("added");
 					
@@ -675,7 +675,8 @@ public class EventProcessor {
 
 
 	@SuppressWarnings("unchecked")
-	private void processOutput(Element outputDataEl, ProcBinding procBinding) {
+	private void processOutput(Element outputDataEl, ProcBinding procBinding, Object context) {
+
 		List<Element> outputPorts = outputDataEl.getChildren("port");
 		for (Element outputport : outputPorts) {
 
@@ -690,14 +691,14 @@ public class EventProcessor {
 //				dataflow);
 
 				processVarBinding(valueEl,  procBinding.getPNameRef(), portName, procBinding.getIterationVector(),
-						wfInstanceID);
+						wfInstanceID, context);
 			}
 		}
 
 	}
 
 	@SuppressWarnings("unchecked")
-	private void processInput(Element inputDataEl, ProcBinding procBinding) {
+	private void processInput(Element inputDataEl, ProcBinding procBinding, Object context) {
 
 		List<Element> inputPorts = inputDataEl.getChildren("port");
 		for (Element inputport : inputPorts) {
@@ -716,7 +717,7 @@ public class EventProcessor {
 //				dataflow);
 
 				processVarBinding(valueEl, procBinding.getPNameRef(), portName, procBinding.getIterationVector(),
-						wfInstanceID);
+						wfInstanceID, context);
 			}
 		}
 
@@ -732,20 +733,31 @@ public class EventProcessor {
 	 * @param wfInstanceRef
 	 */
 	private void processVarBinding(Element valueEl, String processorId,
-			String portName, String iterationId, String wfInstanceRef) {
+			String portName, String iterationId, String wfInstanceRef, Object context) {
 
 		// uses the defaults:
 		// collIdRef = null
 		// parentcollectionRef = null
 		// positionInCollection = 1
 		processVarBinding(valueEl, processorId, portName, null, 1, null,
-				iterationId, wfInstanceRef);
+				iterationId, wfInstanceRef, context);
 	}
 
+	/**
+	 * general case where value can be a list
+	 * @param valueEl
+	 * @param processorId
+	 * @param portName
+	 * @param collIdRef
+	 * @param positionInCollection
+	 * @param parentCollectionRef
+	 * @param iterationId
+	 * @param wfInstanceRef
+	 */
 	@SuppressWarnings("unchecked")
 	private void processVarBinding(Element valueEl, String processorId,
 			String portName, String collIdRef, int positionInCollection,
-			String parentCollectionRef, String iterationId, String wfInstanceRef) {
+			String parentCollectionRef, String iterationId, String wfInstanceRef, Object context) {
 
 		String valueType = valueEl.getName();
 //		logger.info("value element for " + processorId + ": "
@@ -770,10 +782,10 @@ public class EventProcessor {
 
 				vb.setValue(valueEl.getAttributeValue("id"));
 
-				pw.addVarBinding(vb);
+				pw.addVarBinding(vb, context);
 
 			} catch (SQLException e) {
-//				logger.info("Process Var Binding problem with provenance" + e.getMessage());
+				logger.info("Process Var Binding problem with provenance" + e.getMessage());
 			}
 
 		} else if (valueType.equals("referenceSet")) {
@@ -784,9 +796,9 @@ public class EventProcessor {
 			vb.setRef(valueEl.getChildText("reference"));
 
 			try {
-				pw.addVarBinding(vb);
+				pw.addVarBinding(vb, context);
 			} catch (SQLException e) {
-//				logger.warn("Problem processing var binding: " + e);
+				logger.warn("Problem processing var binding: " + e);
 			}
 
 		} else if (valueType.equals("list")) {
@@ -811,7 +823,7 @@ public class EventProcessor {
 				for (Element el : listElements) {
 					processVarBinding(el, processorId, portName, collId,
 							positionInCollection, parentCollectionRef,
-							iterationId, wfInstanceRef);
+							iterationId, wfInstanceRef, context);
 					positionInCollection++;
 				}
 
@@ -865,7 +877,7 @@ public class EventProcessor {
 	}
 
 	/**
-	 * assume content is XML but this is really immaterial
+	 * log raw event to file system
 	 * 
 	 * @param content
 	 * @param eventType
@@ -902,7 +914,7 @@ public class EventProcessor {
 	 * 
 	 * @throws SQLException
 	 */
-	public void fillInputVarBindings() throws SQLException {
+	public void fillInputVarBindings(Object context) throws SQLException {
 
 		// System.out.println("*** fillInputVarBindings: ***");
 
@@ -936,7 +948,7 @@ public class EventProcessor {
 				vb.setVarNameRef(aArc.getSourceVarNameRef());
 				// all other attributes are the same --> CHECK!!
 
-				pw.addVarBinding(vb);
+				pw.addVarBinding(vb, context);
 			}
 		}
 	}
@@ -947,7 +959,7 @@ public class EventProcessor {
 	 * 
 	 * @throws SQLException
 	 */
-	public void fillOutputVarBindings() throws SQLException {
+	public void fillOutputVarBindings(Object context) throws SQLException {
 
 		//System.out.println("*** fillOutputVarBindings: ***");
 
@@ -991,7 +1003,7 @@ public class EventProcessor {
 
 				//		System.out.println(vb.toString());
 
-				pw.addVarBinding(vb); // DB UPDATE
+				pw.addVarBinding(vb, context); // DB UPDATE
 			}
 
 		}
