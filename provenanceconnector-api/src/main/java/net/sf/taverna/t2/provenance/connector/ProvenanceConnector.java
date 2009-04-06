@@ -80,8 +80,10 @@ public interface ProvenanceConnector {
 	 * Add a {@link ProvenanceItem} to the connector
 	 * 
 	 * @param provenanceItem
+	 * @param invocationContext 
 	 */
-	public void addProvenanceItem(ProvenanceItem provenanceItem);
+	// FIXME: Have to use Object for invocationContext to avoid Maven loop with workflowmodel-api
+	public void addProvenanceItem(ProvenanceItem provenanceItem, Object invocationContext);
 
 	/**
 	 * Tell the connector what {@link ReferenceService} it should use when
