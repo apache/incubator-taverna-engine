@@ -73,7 +73,7 @@ public class ErrorDocumentServiceImpl extends AbstractErrorDocumentServiceImpl
 				edi.setMessage("");
 			}
 			if (t != null) {
-				edi.setExceptionMessage(t.getMessage());
+				edi.setExceptionMessage(t.toString());
 				for (StackTraceElement ste : t.getStackTrace()) {
 					StackTraceElementBeanImpl stebi = new StackTraceElementBeanImpl();
 					stebi.setClassName(ste.getClassName());
