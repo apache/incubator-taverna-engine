@@ -120,7 +120,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 			workflowItem.setParentId(dataflow.getInternalIdentier());
 
 			addProvenanceLayerToProcessors(dataflow, workflowItem);
-			context.getProvenanceConnector().addProvenanceItem(workflowItem);
+			context.getProvenanceConnector().addProvenanceItem(workflowItem, context);
 		}
 		facadeResultListener = new FacadeResultListener(dataflow, workflowItem);
 	}
@@ -240,7 +240,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 				workflowDataProvenanceItem.setParentId(instanceOwningProcessId);
 				workflowDataProvenanceItem.setProcessId(instanceOwningProcessId);
 				context.getProvenanceConnector().addProvenanceItem(
-						workflowDataProvenanceItem);
+						workflowDataProvenanceItem, context);
 			}
 			synchronized (this) {
 				if (token.getIndex().length == 0) {
@@ -258,7 +258,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 								.setProcessId(instanceOwningProcessId);
 						dataflowRunComplete.setIdentifier(UUID.randomUUID().toString());
 						context.getProvenanceConnector().addProvenanceItem(
-								dataflowRunComplete);
+								dataflowRunComplete, context);
 					}
 				}
 			}

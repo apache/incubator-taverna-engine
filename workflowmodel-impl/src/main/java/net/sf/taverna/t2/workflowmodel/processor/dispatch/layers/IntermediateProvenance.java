@@ -20,6 +20,12 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.processor.dispatch.layers;
 
+import java.beans.XMLDecoder;
+import java.beans.XMLEncoder;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +45,8 @@ import net.sf.taverna.t2.provenance.item.ProcessorProvenanceItem;
 import net.sf.taverna.t2.provenance.item.ProvenanceItem;
 import net.sf.taverna.t2.provenance.item.WorkflowProvenanceItem;
 import net.sf.taverna.t2.reference.ReferenceService;
+import net.sf.taverna.t2.reference.T2Reference;
+import net.sf.taverna.t2.reference.T2ReferenceType;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.AsynchronousActivity;
@@ -297,7 +305,7 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 		errorItem.setParentId(iterationProvItem.getIdentifier());
 		// iterationProvItem.setErrorItem(errorItem);
 		// FIXME don't need to add to the processor item earlier
-		getConnector().addProvenanceItem(errorItem);
+		getConnector().addProvenanceItem(errorItem, errorEvent.getContext());
 		super.receiveError(errorEvent);
 	}
 
@@ -322,8 +330,8 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 		processorProvItem.setIdentifier(UUID.randomUUID().toString());
 		processorProvItem.setParentId(provenanceItem.getIdentifier());
 		provenanceItem.setProcessId(jobEvent.getOwningProcess());
-		getConnector().addProvenanceItem(provenanceItem);
-		getConnector().addProvenanceItem(processorProvItem);
+		getConnector().addProvenanceItem(provenanceItem, jobEvent.getContext());
+		getConnector().addProvenanceItem(processorProvItem, jobEvent.getContext());
 
 		IterationProvenanceItem iterationProvItem = null;
 		iterationProvItem = new IterationProvenanceItem(jobEvent.getIndex());
@@ -364,7 +372,7 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 						inputIndexOwnerList);
 				// activityProvenanceItemList.add(activityProvItem);
 				// activityProvItem.setIterationProvenanceItem(iterationProvItem);
-				getConnector().addProvenanceItem(activityProvItem);
+				getConnector().addProvenanceItem(activityProvItem, jobEvent.getContext());
 				break;
 			}
 		}
@@ -391,6 +399,7 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 		IterationProvenanceItem iterationProvItem = getIterationProvItem(resultEvent);
 		ReferenceService referenceService = resultEvent.getContext()
 				.getReferenceService();
+		
 
 		OutputDataProvenanceItem outputDataItem = new OutputDataProvenanceItem(
 				resultEvent.getData(), referenceService);
@@ -399,11 +408,36 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 		outputDataItem.setParentId(iterationProvItem.getIdentifier());
 		iterationProvItem.setOutputDataItem(outputDataItem);
 
-		getConnector().addProvenanceItem(iterationProvItem);
+		getConnector().addProvenanceItem(iterationProvItem, resultEvent.getContext());
 		// getConnector().addProvenanceItem(outputDataItem);
+
+		// PM -- testing
+		// add xencoding of data value here??
+//		Map<String, T2Reference> inputDataMap = iterationProvItem.getInputDataItem().getDataMap();
+//		for(Map.Entry<String, T2Reference> entry:inputDataMap.entrySet()) {
+//			
+//			// create a simpler bean that we can serialize?
+//			
+//			T2Reference ref = entry.getValue();
+//			
+//			SimplerT2Reference t2RefBean = new SimplerT2Reference();
+//			t2RefBean.setReferenceType(ref.getReferenceType());
+//			t2RefBean.setDepth(ref.getDepth());
+//			t2RefBean.setLocalPart(ref.getLocalPart());
+//			t2RefBean.setNamespacePart(ref.getNamespacePart());
+//						
+//			System.out.println("data ref: "+ref);
+//			String serializedInput = SerializeParam(t2RefBean);
+//			System.out.println("serialized reference:" + serializedInput);
+//			
+//			System.out.println(referenceService.renderIdentifier(entry.getValue(), String.class, resultEvent.getContext()));
+//		}
+		
 		super.receiveResult(resultEvent);
 	}
 
+
+	
 	@Override
 	public void receiveResultCompletion(DispatchCompletionEvent completionEvent) {
 		// TODO Auto-generated method stub
@@ -436,4 +470,21 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 		this.workflowItem = workflowItem;
 	}
 
+	
+	  public static String SerializeParam(Object ParamValue) {
+		    ByteArrayOutputStream BStream = new ByteArrayOutputStream();
+		    XMLEncoder encoder = new XMLEncoder(BStream);
+		    encoder.writeObject(ParamValue);
+		    encoder.close();
+		    return BStream.toString();
+		  }
+	  
+	  public static Object DeserializeParam (String SerializedParam) {
+		    InputStream IStream = new ByteArrayInputStream(SerializedParam.getBytes()); 
+		    XMLDecoder decoder = new XMLDecoder(IStream);
+		    Object output = decoder.readObject();
+		    decoder.close(); 
+		    return output;
+		  }
+	  
 }
