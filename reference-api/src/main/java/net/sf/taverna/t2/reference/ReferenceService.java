@@ -225,7 +225,15 @@ public interface ReferenceService {
 	public T2Reference register(Object o, int targetDepth,
 			boolean useConverterSPI, ReferenceContext context)
 			throws ReferenceServiceException;
-
+	
+	/**
+	 * Given a string representation of a T2Reference create a new T2Reference with
+	 * the correct depth etc.
+	 * @param reference
+	 * @return a new T2Reference parsed from the original
+	 */
+	public T2Reference referenceFromString(String reference);
+	
 	/**
 	 * Returns the {@link ErrorDocumentService} this ReferenceService uses, use
 	 * this when you need functionality from that service explicitly.
