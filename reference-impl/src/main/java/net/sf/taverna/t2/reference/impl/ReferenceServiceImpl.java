@@ -21,9 +21,11 @@
 package net.sf.taverna.t2.reference.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -43,6 +45,7 @@ import net.sf.taverna.t2.reference.ReferenceSet;
 import net.sf.taverna.t2.reference.ReferenceSetServiceException;
 import net.sf.taverna.t2.reference.StreamToValueConverterSPI;
 import net.sf.taverna.t2.reference.T2Reference;
+import net.sf.taverna.t2.reference.T2ReferenceType;
 import net.sf.taverna.t2.reference.ValueCarryingExternalReference;
 import net.sf.taverna.t2.reference.ValueToReferenceConversionException;
 import net.sf.taverna.t2.reference.ValueToReferenceConverterSPI;
@@ -81,8 +84,8 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 	 * is itself registered as an IdentifiedList of T2Reference and its
 	 * reference returned.</li>
 	 * </ol>
-	 * The exception to this is if the useConvertorSPI parameter is set to true -
-	 * in this case any objects which do not match the above allowed list will
+	 * The exception to this is if the useConvertorSPI parameter is set to true
+	 * - in this case any objects which do not match the above allowed list will
 	 * be run through any available ValueToReferenceConvertorSPI instances in
 	 * turn until one succeeds or all fail, which may result in the creation of
 	 * ExternalReferenceSPI instances. As these can be registered such objects
@@ -152,7 +155,7 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 		// just return it (useful for when registering lists of existing
 		// references)
 		if (o instanceof T2Reference) {
-			return (T2Reference)o;
+			return (T2Reference) o;
 		}
 		// Next check lists.
 		else if (o instanceof List) {
@@ -508,6 +511,68 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 		System.arraycopy(current, 0, result, 0, current.length);
 		result[current.length] = head;
 		return result;
+	}
+
+	/**
+	 * Parse the reference contained in the string and return a
+	 * {@link T2Reference} with the correct properties
+	 */
+	public T2Reference referenceFromString(String reference) {
+		T2ReferenceImpl newRef = new T2ReferenceImpl();
+		Map<String, String> parseRef = parseRef(reference);
+		newRef.setNamespacePart(parseRef.get("namespace"));
+		newRef.setLocalPart(parseRef.get("localPart"));
+		String type = parseRef.get("type");
+		if (type.equals("ref")) {
+			newRef.setReferenceType(T2ReferenceType.ReferenceSet);
+		} else if (type.equals("list")) {
+			newRef.setReferenceType(T2ReferenceType.IdentifiedList);
+			newRef.setContainsErrors(Boolean
+					.parseBoolean(parseRef.get("error")));
+			newRef.setDepth(Integer.parseInt(parseRef.get("depth")));
+		} else if (type.equals("error")) {
+			newRef.setReferenceType(T2ReferenceType.ErrorDocument);
+			newRef.setDepth(Integer.parseInt(parseRef.get("depth")));
+		} else {
+			return null;
+			// should throw an error
+		}
+
+		return newRef;
+	}
+
+	/**
+	 * Parse the reference and return a map with localPart, namespace, depth,
+	 * contains errors and the type
+	 * 
+	 * @param ref
+	 * @return
+	 */
+	private Map<String, String> parseRef(String ref) {
+		String[] split = ref.split("\\?");
+		// get the bit before and after the final '/' ie. the local part and the
+		// depth, there might not be a split1[1] since it might not be a list
+		String[] split2 = split[1].split("/");
+		// get the t2:abc:// and the namespace
+		String[] split3 = split[0].split("//");
+		// get the t2 bit and the reference type bit
+		String[] split4 = split3[0].split(":");
+
+		Map<String, String> refPartsMap = new HashMap<String, String>();
+		refPartsMap.put("type", split4[1]);
+		refPartsMap.put("namespace", split3[1]);
+		refPartsMap.put("localPart", split2[0]);
+
+		if (refPartsMap.get("type").equals("list")) {
+			refPartsMap.put("error", split2[1]);
+			refPartsMap.put("depth", split2[2]);
+		}
+		if (refPartsMap.get("type").equals("error")) {
+			refPartsMap.put("depth", split2[1]);
+		}
+
+		return refPartsMap;
+
 	}
 
 }
