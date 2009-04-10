@@ -412,26 +412,15 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 		// getConnector().addProvenanceItem(outputDataItem);
 
 		// PM -- testing
-		// add xencoding of data value here??
-//		Map<String, T2Reference> inputDataMap = iterationProvItem.getInputDataItem().getDataMap();
-//		for(Map.Entry<String, T2Reference> entry:inputDataMap.entrySet()) {
-//			
-//			// create a simpler bean that we can serialize?
-//			
-//			T2Reference ref = entry.getValue();
-//			
-//			SimplerT2Reference t2RefBean = new SimplerT2Reference();
-//			t2RefBean.setReferenceType(ref.getReferenceType());
-//			t2RefBean.setDepth(ref.getDepth());
-//			t2RefBean.setLocalPart(ref.getLocalPart());
-//			t2RefBean.setNamespacePart(ref.getNamespacePart());
-//						
-//			System.out.println("data ref: "+ref);
-//			String serializedInput = SerializeParam(t2RefBean);
-//			System.out.println("serialized reference:" + serializedInput);
-//			
-//			System.out.println(referenceService.renderIdentifier(entry.getValue(), String.class, resultEvent.getContext()));
-//		}
+		Map<String, T2Reference> inputDataMap = iterationProvItem.getInputDataItem().getDataMap();
+		for(Map.Entry<String, T2Reference> entry:inputDataMap.entrySet()) {
+			
+			T2Reference ref = entry.getValue();
+			
+	
+			System.out.println("output data in IntermediateProvenance: "+
+					referenceService.resolveIdentifier(entry.getValue(), null, resultEvent.getContext()));
+		}
 		
 		super.receiveResult(resultEvent);
 	}
