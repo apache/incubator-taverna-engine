@@ -35,6 +35,7 @@ public class VarBinding {
 	String valueType;
 	String ref;
 	String    iterationVector;
+	String resolvedValue;
 	
 	
 	public String toString() {
@@ -49,7 +50,9 @@ public class VarBinding {
 			append("collIdef  " +collIDRef+"\n").
 			append("positionInColl = "+positionInColl+"\n").
 			append("value = "+value+"\n").
-			append("ref = "+ref+"\n");
+			append("ref = "+ref+"\n").
+			append("resolvedValue = "+resolvedValue+"\n");
+			
 
 		return sb.toString();
 	}
@@ -162,6 +165,22 @@ public class VarBinding {
 	 */
 	public void setRef(String ref) {
 		this.ref = ref;
+	}
+
+
+	/**
+	 * @return the resolvedValue
+	 */
+	public String getResolvedValue() {
+		return resolvedValue;
+	}
+
+
+	/**
+	 * @param resolvedValue the resolvedValue to set
+	 */
+	public void setResolvedValue(String resolvedValue) {
+		this.resolvedValue = resolvedValue;
 	}
 	
 	

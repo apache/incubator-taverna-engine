@@ -51,8 +51,21 @@ public interface Provenance {
 	
 
 	public void clearDB() throws SQLException;
+	
 
 	public void setLocation(String location);
+
+	public void setPw(ProvenanceWriter pw);
+
+	public ProvenanceWriter getPw();
+
+	public void setPq(ProvenanceQuery pq);
+
+	public ProvenanceQuery getPq();
+
+	public void setEp(EventProcessor ep);
+
+	public EventProcessor getEp();
 
 	/**
 	 * @return the saveEvents
@@ -62,4 +75,7 @@ public interface Provenance {
 	 * @param saveEvents the saveEvents to set
 	 */
 	public void setSaveEvents(String saveEvents);	
+	
+	public String getCurrentWFInstanceID();
+	
 }

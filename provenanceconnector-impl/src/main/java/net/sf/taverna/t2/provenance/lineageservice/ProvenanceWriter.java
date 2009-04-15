@@ -52,6 +52,8 @@ public interface ProvenanceWriter {
 	 */
 	public abstract void addArc(Var sourceVar, Var sinkVar, String wfId) throws SQLException;
 
+	public abstract void addData(String dataRef, String wfInstanceId, String renderedData) throws SQLException;
+	
 	
 	public abstract void addArc(String sourceVarName, String sourceProcName,
 			String sinkVarName, String sinkProcName, String wfId)

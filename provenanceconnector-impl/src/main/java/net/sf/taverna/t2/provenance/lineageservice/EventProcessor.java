@@ -489,7 +489,7 @@ public class EventProcessor {
 			// get identifier from <workflowItem> element
 			Element root = d.getRootElement();
 
-			wfInstanceID = root.getAttributeValue("identifier");
+			setWfInstanceID(root.getAttributeValue("identifier"));
 
 			Namespace ns = Namespace.getNamespace("http://taverna.sf.net/2008/xml/t2flow");
 
@@ -1152,6 +1152,22 @@ public class EventProcessor {
 			}
 		}
 		return processorsLinks;
+	}
+
+
+	/**
+	 * @return the wfInstanceID
+	 */
+	public  String getWfInstanceID() {
+		return wfInstanceID;
+	}
+
+
+	/**
+	 * @param wfInstanceID the wfInstanceID to set
+	 */
+	public void setWfInstanceID(String wfInstanceID) {
+		EventProcessor.wfInstanceID = wfInstanceID;
 	}
 
 }

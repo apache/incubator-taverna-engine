@@ -43,6 +43,7 @@ public class LineageQueryResult {
 			String wfInstance,
 			String iteration,
 			String value,
+			String resolvedValue,
 			String type) {
 
 		LineageQueryResultRecord record = new LineageQueryResultRecord();
@@ -52,6 +53,7 @@ public class LineageQueryResult {
 		record.setValue(value);
 		record.setVname(vname);
 		record.setIteration(iteration);
+		record.setResolvedValue(resolvedValue);
 
 		getRecords().add(record);
 	}
