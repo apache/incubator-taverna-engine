@@ -30,6 +30,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import java.util.UUID;
 import java.util.Map.Entry;
 
@@ -44,7 +46,10 @@ import net.sf.taverna.t2.provenance.item.ProcessProvenanceItem;
 import net.sf.taverna.t2.provenance.item.ProcessorProvenanceItem;
 import net.sf.taverna.t2.provenance.item.ProvenanceItem;
 import net.sf.taverna.t2.provenance.item.WorkflowProvenanceItem;
+import net.sf.taverna.t2.reference.ExternalReferenceSPI;
+import net.sf.taverna.t2.reference.Identified;
 import net.sf.taverna.t2.reference.ReferenceService;
+import net.sf.taverna.t2.reference.ReferenceSet;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.reference.T2ReferenceType;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
@@ -108,7 +113,7 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 			String owningProcess) {
 		synchronized (processToIndexes) {
 			Map<String, IterationProvenanceItem> indexes = processToIndexes
-					.get(owningProcess);
+			.get(owningProcess);
 			if (indexes == null) {
 				indexes = new HashMap<String, IterationProvenanceItem>();
 				processToIndexes.put(owningProcess, indexes);
@@ -156,7 +161,7 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 
 							if (owningProcess.equalsIgnoreCase(owner)
 									&& indexString
-											.equalsIgnoreCase(indexString2)) {
+									.equalsIgnoreCase(indexString2)) {
 								iterationProvenanceItem1.setParentId(entrySet
 										.getKey().getIdentifier());
 							}
@@ -171,9 +176,9 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 							String indexString2 = indexStr(index);
 							if (owningProcess.equalsIgnoreCase(owner)
 									&& indexString
-											.equalsIgnoreCase(indexString2)) {
+									.equalsIgnoreCase(indexString2)) {
 								iterationProvenanceItem1
-										.setInputDataItem(entrySet.getKey());
+								.setInputDataItem(entrySet.getKey());
 							}
 
 						}
@@ -211,9 +216,9 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 					// through the while
 				} catch (IllegalStateException e) {
 					logger
-							.warn("Cannot find a parent iteration with index [] for owning process: "
-									+ owningProcess
-									+ "Workflow invocation is in an illegal state");
+					.warn("Cannot find a parent iteration with index [] for owning process: "
+							+ owningProcess
+							+ "Workflow invocation is in an illegal state");
 					throw e;
 				}
 			}
@@ -281,7 +286,7 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 	private int[] removeLastIndex(int[] index) {
 		if (index.length == 0) {
 			throw new IllegalStateException(
-					"There is no parent iteration of index [] for this result");
+			"There is no parent iteration of index [] for this result");
 		}
 		int[] newIntArray = new int[index.length - 1];
 		for (int i = 0; i < index.length - 1; i++) {
@@ -337,7 +342,7 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 		iterationProvItem = new IterationProvenanceItem(jobEvent.getIndex());
 		iterationProvItem.setIdentifier(UUID.randomUUID().toString());
 		ReferenceService referenceService = jobEvent.getContext()
-				.getReferenceService();
+		.getReferenceService();
 
 		InputDataProvenanceItem inputDataItem = new InputDataProvenanceItem(
 				jobEvent.getData(), referenceService);
@@ -398,8 +403,8 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 
 		IterationProvenanceItem iterationProvItem = getIterationProvItem(resultEvent);
 		ReferenceService referenceService = resultEvent.getContext()
-				.getReferenceService();
-		
+		.getReferenceService();
+
 
 		OutputDataProvenanceItem outputDataItem = new OutputDataProvenanceItem(
 				resultEvent.getData(), referenceService);
@@ -411,26 +416,15 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 		getConnector().addProvenanceItem(iterationProvItem, resultEvent.getContext());
 		// getConnector().addProvenanceItem(outputDataItem);
 
-		// PM -- testing
-		Map<String, T2Reference> inputDataMap = iterationProvItem.getInputDataItem().getDataMap();
-		for(Map.Entry<String, T2Reference> entry:inputDataMap.entrySet()) {
-			
-			T2Reference ref = entry.getValue();
-			
-	
-			System.out.println("output data in IntermediateProvenance: "+
-					referenceService.resolveIdentifier(entry.getValue(), null, resultEvent.getContext()));
-		}
-		
 		super.receiveResult(resultEvent);
 	}
 
 
-	
+
 	@Override
 	public void receiveResultCompletion(DispatchCompletionEvent completionEvent) {
 		// TODO Auto-generated method stub
-		
+
 		super.receiveResultCompletion(completionEvent);
 	}
 
@@ -459,21 +453,21 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 		this.workflowItem = workflowItem;
 	}
 
-	
-	  public static String SerializeParam(Object ParamValue) {
-		    ByteArrayOutputStream BStream = new ByteArrayOutputStream();
-		    XMLEncoder encoder = new XMLEncoder(BStream);
-		    encoder.writeObject(ParamValue);
-		    encoder.close();
-		    return BStream.toString();
-		  }
-	  
-	  public static Object DeserializeParam (String SerializedParam) {
-		    InputStream IStream = new ByteArrayInputStream(SerializedParam.getBytes()); 
-		    XMLDecoder decoder = new XMLDecoder(IStream);
-		    Object output = decoder.readObject();
-		    decoder.close(); 
-		    return output;
-		  }
-	  
+
+	public static String SerializeParam(Object ParamValue) {
+		ByteArrayOutputStream BStream = new ByteArrayOutputStream();
+		XMLEncoder encoder = new XMLEncoder(BStream);
+		encoder.writeObject(ParamValue);
+		encoder.close();
+		return BStream.toString();
+	}
+
+	public static Object DeserializeParam (String SerializedParam) {
+		InputStream IStream = new ByteArrayInputStream(SerializedParam.getBytes()); 
+		XMLDecoder decoder = new XMLDecoder(IStream);
+		Object output = decoder.readObject();
+		decoder.close(); 
+		return output;
+	}
+
 }
