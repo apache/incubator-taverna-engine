@@ -56,6 +56,7 @@
 		<module>observer</module>
 		<module>partition</module>
 		<module>ui</module>
+		<module>uibuilder</module>
 	</modules>
 	<scm>
 		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/utils/net.sf.taverna.t2.lang/trunk/</connection>
