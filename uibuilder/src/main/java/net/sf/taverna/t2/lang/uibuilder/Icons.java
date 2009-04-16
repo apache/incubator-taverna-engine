@@ -21,17 +21,16 @@ public abstract class Icons {
 	}
 
 	static synchronized ImageIcon getIcon(String iconName) {
-		if (!icons.containsKey(iconName.toLowerCase())) {
+		String iconNameLC = iconName.toLowerCase();
+		if (!icons.containsKey(iconNameLC)) {
 			try {
-				URL iconURL = Icons.class.getClassLoader().getResource(
-						"net/sf/taverna/t2/platform/ui/" + iconName
-								+ ".png");
-				icons.put(iconName.toLowerCase(), new ImageIcon(iconURL));
+				URL iconURL = Icons.class.getResource(iconName + ".png");
+				icons.put(iconNameLC, new ImageIcon(iconURL));
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
 		}
-		return icons.get(iconName.toLowerCase());
+		return icons.get(iconNameLC);
 	}
 
 }
