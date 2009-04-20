@@ -22,6 +22,8 @@ package net.sf.taverna.t2.workflowmodel;
 
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import net.sf.taverna.t2.spi.SPIRegistry;
 
 /**
@@ -31,6 +33,8 @@ import net.sf.taverna.t2.spi.SPIRegistry;
 public class EditsRegistry extends SPIRegistry<Edits> {
 
 	private static EditsRegistry instance;
+	
+	private static Logger logger = Logger.getLogger(EditsRegistry.class);
 
 	protected EditsRegistry() {
 		super(Edits.class);
@@ -50,8 +54,7 @@ public class EditsRegistry extends SPIRegistry<Edits> {
 			System.out.println("No Edits implementation defined");
 		} else {
 			if (instances.size() > 1)
-				System.out
-						.println("More that 1 Edits implementation defined, using the first");
+				logger.info("More than 1 Edits implementation defined, using the first");
 			result = instances.get(0);
 		}
 		return result;
