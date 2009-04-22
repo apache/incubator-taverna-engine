@@ -239,6 +239,8 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 				workflowDataProvenanceItem.setIdentifier(UUID.randomUUID().toString());
 				workflowDataProvenanceItem.setParentId(instanceOwningProcessId);
 				workflowDataProvenanceItem.setProcessId(instanceOwningProcessId);
+				workflowDataProvenanceItem.setIndex(token.getIndex());
+				workflowDataProvenanceItem.setFinal(token.isFinal());
 				context.getProvenanceConnector().addProvenanceItem(
 						workflowDataProvenanceItem, context);
 			}
