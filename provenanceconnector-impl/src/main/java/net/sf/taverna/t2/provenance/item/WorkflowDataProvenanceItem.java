@@ -53,6 +53,8 @@ public class WorkflowDataProvenanceItem implements ProvenanceItem {
 	private final String portName;
 	/** A reference to the data token received in the facade */
 	private final T2Reference data;
+	private int[] index;
+	private boolean isFinal;
 
 	public WorkflowDataProvenanceItem(String portName, T2Reference data,
 			ReferenceService referenceService) {
@@ -75,8 +77,22 @@ public class WorkflowDataProvenanceItem implements ProvenanceItem {
 		portElement.setAttribute("name", portName);
 		portElement.setAttribute("data", data.toString());
 		result.addContent(portElement);
+		
+		result.setAttribute("index", iterationToString(getIndex()));
+		result.setAttribute("isFinal", Boolean.toString(isFinal()));
 		//don't know the depth for these type of results
 //		portElement.addContent(resolveToElement(data));
+		return result;
+	}
+
+	private String iterationToString(int[] index) {
+		String result = "[";
+		for (int i = 0; i < index.length; i++) {
+			result += index[i];
+			if (i < (index.length - 1))
+				result += ",";
+		}
+		result += "]";
 		return result;
 	}
 
@@ -164,6 +180,34 @@ public class WorkflowDataProvenanceItem implements ProvenanceItem {
 			// throw something (maybe a tantrum)
 		}
 		return element;
+	}
+
+	/**
+	 * @return the index
+	 */
+	public int[] getIndex() {
+		return index;
+	}
+
+	/**
+	 * @param index the index to set
+	 */
+	public void setIndex(int[] index) {
+		this.index = index;
+	}
+
+	/**
+	 * @return the isFinal
+	 */
+	public boolean isFinal() {
+		return isFinal;
+	}
+
+	/**
+	 * @param isFinal the isFinal to set
+	 */
+	public void setFinal(boolean isFinal) {
+		this.isFinal = isFinal;
 	}
 
 }

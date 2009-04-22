@@ -96,6 +96,9 @@ public interface ProvenanceQuery {
 	 */
 	public abstract String getWFInstanceID(String dataflowID) throws SQLException;
 	
+	
+	public abstract String getWFNameFromInstanceID(String dataflowID) throws SQLException;
+	
 	/**
 	 * all ProCBinding records that satisfy the input constraints
 	 * @param constraints

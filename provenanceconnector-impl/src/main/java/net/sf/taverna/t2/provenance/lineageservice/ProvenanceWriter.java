@@ -93,6 +93,8 @@ public interface ProvenanceWriter {
 
 	public abstract void addVarBinding(VarBinding vb, Object context) throws SQLException;
 
+	public abstract void updateVarBinding(VarBinding vb);
+
 	/**
 	 * deletes DB contents for the static structures -- called prior to each run 
 	 * @throws SQLException 

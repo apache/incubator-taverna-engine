@@ -89,6 +89,10 @@ public class EventProcessor {
 
 	Map<String, String> wfNestingMap = new HashMap<String, String>(); 
 
+	// dedicated class for processing WorkflowData events which carry workflow output info 
+	WorkflowDataProcessor  wfdp = new WorkflowDataProcessor();
+
+
 	ProvenanceWriter pw = null;
 	ProvenanceQuery pq = null;
 
@@ -525,7 +529,7 @@ public class EventProcessor {
 
 		if (root.getName().equalsIgnoreCase("process")) {
 
-			String parentId = root.getAttributeValue("parent");  // this is a the workflowID
+			String parentId = root.getAttributeValue("parent");  // this is the workflowID
 			String identifier = root.getAttributeValue("identifier");  // use this as wfInstanceID if this is the top-level process
 
 			parentChildMap.put(identifier, parentId);
@@ -589,15 +593,22 @@ public class EventProcessor {
 			
 			dataflowDepth--;
 			if (dataflowDepth == 0) {
-				patchTopLevelnputs(context);
+				patchTopLevelInputs(context);
+				patchTopLevelOutputs(context);			
 				workflowStructureDone = false; // CHECK reset for next run... 
 			}
 
 		} else if (root.getName().equalsIgnoreCase("workflowdata")) {
 
-//			logger.info("Received workflow data - not processing");
-			//FIXME not sure  - needs to be stored somehow
+			// assume these outputs are associated to the top level dataflow
+			
+			wfdp.addWorkflowDataItem(root);
 
+			// create new VarBinding for <topLevelDataflowName, wfInstanceID> and the name of this port
+			
+			
+						
+			
 		} else {
 			// TODO broken, should we throw something here?
 			return;
@@ -606,16 +617,11 @@ public class EventProcessor {
 	}
 
 	/**
-	 * fills in the VBs for the global inputs -- for some reason there is no explicit event
-	 * that accounts for these value bindings...
+	 * fills in the VBs for the global inputs -- this removes the need for explicit events
+	 * that account for these value bindings...
 	 */
-	public void patchTopLevelnputs(Object context) {
+	public void patchTopLevelInputs(Object context) {
 
-		// only do the patching on the top level
-	//	if (dataflowDepth > 0) {
-	//		System.out.println("patchTopLevelnputs called on a subflow -- nothing to do");
-	//		return;
-	//	}
 		// for each input I to topLevelDataflow:
 		// pick first outgoing arc with sink P:X
 		// copy value X to I -- this can be a collection, so copy everything
@@ -673,8 +679,74 @@ public class EventProcessor {
 
 	}
 
+	
+	/**
+	 * fills in the VBs for the global outputs-- this removes the need for explicit events
+	 * that account for these value bindings...
+	 */
+	public void patchTopLevelOutputs(Object context) {
+
+		// for each output O to topLevelDataflow:
+		// pick the only incoming arc with source P:Y
+		// copy value Y to O -- if this is a collection, do a deep copy
+
+		// get all global input vars
+		
+		List<Var> outputs=null;
+		try {
+			outputs = pq.getOutputVars(topLevelDataflowName, topLevelDataflowID);
+
+			for (Var output:outputs)  {
+				
+				Map<String,String> queryConstraints = new HashMap<String,String>();
+
+				queryConstraints.put("sinkVarNameRef", output.getVName());
+				queryConstraints.put("sinkPNameRef", output.getPName());
+
+				List<Arc> incomingArcs = pq.getArcs(queryConstraints);
+
+				// there can be only one -- but check that there is one!
+				if (incomingArcs.size()==0)  continue;
+				
+				String sourcePname = incomingArcs.get(0).getSourcePnameRef();
+				String sourceVname = incomingArcs.get(0).getSourceVarNameRef();
+
+//				logger.info("copying values from ["+targetPname+":"+targetVname+"] for instance ID: ["+wfInstanceID+"]");
+				
+				queryConstraints.clear();
+				queryConstraints.put("varNameRef", sourceVname);
+				queryConstraints.put("V.pNameRef", sourcePname);
+				queryConstraints.put("VB.wfInstanceRef", wfInstanceID);
+				queryConstraints.put("V.wfInstanceRef", topLevelDataflowID);
+
+				List<VarBinding> VBs = pq.getVarBindings(queryConstraints);
+				
+//				logger.info("found the following VBs:");
+				for (VarBinding vb:VBs) {
+//					logger.info(vb.getValue());
+	
+					// insert VarBinding back into VB with the global output varname
+					vb.setPNameRef(output.getPName());
+					vb.setVarNameRef(output.getVName());
+					pw.addVarBinding(vb, context);
+					
+//					logger.info("added");
+					
+				}
+				
+			}
+		} catch (SQLException e) {
+			logger.warn("Patch top level output problem for provenance: " + e);
+		}
+
+	}
+
+	
 
 	@SuppressWarnings("unchecked")
+	/**
+	 * creates one new VarBinding record for each output port binding
+	 */
 	private void processOutput(Element outputDataEl, ProcBinding procBinding, Object context) {
 
 		List<Element> outputPorts = outputDataEl.getChildren("port");
@@ -690,13 +762,67 @@ public class EventProcessor {
 //				processVarBinding(valueEl, processor, portName, iterationVector,
 //				dataflow);
 
-				processVarBinding(valueEl,  procBinding.getPNameRef(), portName, procBinding.getIterationVector(),
+				processVarBinding(
+						valueEl,  procBinding.getPNameRef(), 
+						portName, procBinding.getIterationVector(),
 						wfInstanceID, context);
+				
 			}
 		}
 
 	}
 
+
+	/**
+	 * if b involves a value within a collection , _and_ it is copied from a value generated during a previous iteration,
+	 * then this method propagates the list reference to that iteration value, which wouldn't have it 
+	 * @param vb
+	 * @throws SQLException 
+	 */
+	private void backpatchIterationResults(List<VarBinding> newBindings, Object context) throws SQLException {
+
+		for (VarBinding vb:newBindings) {
+
+			if (vb.getCollIDRef()!= null)  {  // this is a member of a collection
+
+				// look for its antecedent
+				Map<String,String> queryConstraints = new HashMap<String,String>();
+
+				queryConstraints.put("sinkVarNameRef", vb.getVarNameRef());
+				queryConstraints.put("sinkPNameRef", vb.getPNameRef());				
+				queryConstraints.put("wfInstanceRef", pq.getWFNameFromInstanceID(vb.getWfInstanceRef()));  // CHECK wfInstanceID
+
+				List<Arc> incomingArcs = pq.getArcs(queryConstraints);
+
+				// there can be only one -- but check that there is one!
+				if (incomingArcs.size()==0)  return;
+
+				String sourcePname = incomingArcs.get(0).getSourcePnameRef();
+				String sourceVname = incomingArcs.get(0).getSourceVarNameRef();
+
+				// get the varbindings for this port and select the one with the same value as b
+				queryConstraints.clear();
+				queryConstraints.put("varNameRef", sourceVname);
+				queryConstraints.put("V.pNameRef", sourcePname);
+				queryConstraints.put("VB.value", vb.getValue());
+				queryConstraints.put("VB.wfInstanceRef", vb.getWfInstanceRef());
+
+				List<VarBinding> VBs = pq.getVarBindings(queryConstraints);
+
+				for (VarBinding b:VBs) {
+					b.setCollIDRef(vb.getCollIDRef());
+					b.setPositionInColl(vb.getPositionInColl());
+					pw.updateVarBinding(b);
+				}
+			}
+		}
+
+	}
+
+
+	/**
+	 * create one new VarBinding record for each input port binding
+	 */
 	@SuppressWarnings("unchecked")
 	private void processInput(Element inputDataEl, ProcBinding procBinding, Object context) {
 
@@ -716,8 +842,20 @@ public class EventProcessor {
 //				processVarBinding(valueEl, processor, portName, iterationVector,
 //				dataflow);
 
-				processVarBinding(valueEl, procBinding.getPNameRef(), portName, procBinding.getIterationVector(),
+				List<VarBinding> newBindings = processVarBinding(valueEl, procBinding.getPNameRef(), portName, procBinding.getIterationVector(),
 						wfInstanceID, context);
+				// this is a list whenever valueEl is of type list: in this case processVarBinding recursively
+				// processes all values within the collection, and generates one VarBinding record for each of them
+				
+				// if the new binding involves list values, then check to see if they need to be propagated back to 
+				// results of iterations
+				try {
+					backpatchIterationResults(newBindings, context);
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
 			}
 		}
 
@@ -732,14 +870,14 @@ public class EventProcessor {
 	 * @param iterationId
 	 * @param wfInstanceRef
 	 */
-	private void processVarBinding(Element valueEl, String processorId,
+	private List<VarBinding> processVarBinding(Element valueEl, String processorId,
 			String portName, String iterationId, String wfInstanceRef, Object context) {
 
 		// uses the defaults:
 		// collIdRef = null
 		// parentcollectionRef = null
 		// positionInCollection = 1
-		processVarBinding(valueEl, processorId, portName, null, 1, null,
+		return processVarBinding(valueEl, processorId, portName, null, 1, null,
 				iterationId, wfInstanceRef, context);
 	}
 
@@ -755,10 +893,12 @@ public class EventProcessor {
 	 * @param wfInstanceRef
 	 */
 	@SuppressWarnings("unchecked")
-	private void processVarBinding(Element valueEl, String processorId,
+	private List<VarBinding> processVarBinding(Element valueEl, String processorId,
 			String portName, String collIdRef, int positionInCollection,
 			String parentCollectionRef, String iterationId, String wfInstanceRef, Object context) {
 
+		List<VarBinding> newBindings = new ArrayList<VarBinding>();
+		
 		String valueType = valueEl.getName();
 //		logger.info("value element for " + processorId + ": "
 //				+ valueType);
@@ -783,6 +923,8 @@ public class EventProcessor {
 				vb.setValue(valueEl.getAttributeValue("id"));
 
 				pw.addVarBinding(vb, context);
+				
+				newBindings.add(vb);
 
 			} catch (SQLException e) {
 				logger.info("Process Var Binding problem with provenance" + e.getMessage());
@@ -797,6 +939,8 @@ public class EventProcessor {
 
 			try {
 				pw.addVarBinding(vb, context);
+				newBindings.add(vb);
+				
 			} catch (SQLException e) {
 				logger.warn("Problem processing var binding: " + e);
 			}
@@ -821,9 +965,12 @@ public class EventProcessor {
 				// children can be any base type, including list itself -- so
 				// use recursion
 				for (Element el : listElements) {
-					processVarBinding(el, processorId, portName, collId,
+					List<VarBinding> bindings = processVarBinding(el, processorId, portName, collId,
 							positionInCollection, parentCollectionRef,
 							iterationId, wfInstanceRef, context);
+					
+					newBindings.addAll(bindings);
+					
 					positionInCollection++;
 				}
 
@@ -834,27 +981,10 @@ public class EventProcessor {
 			logger.info("unrecognized value type element for "
 					+ processorId + ": " + valueType);
 		}
-
+		
+		return newBindings;
 	}
 
-	/**
-	 * dummy impl -- waiting for T2 to provide the real ID as part of the event
-	 * message
-	 * 
-	 * @param root
-	 * @return
-	 */
-	public String getWorkflowID(Element root) {
-
-		Element nameEl = root.getChild("name");
-
-		if (nameEl != null)
-			return nameEl.getText();
-
-		else
-			return "N/A";
-
-	}
 
 	/**
 	 * OBSOLETE: returns the iteration vector x,y,z,... from [x,y,z,...]
