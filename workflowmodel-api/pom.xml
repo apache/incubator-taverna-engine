@@ -32,12 +32,12 @@
 			<artifactId>security-api</artifactId>
 			<version>${t2.security.version}</version>
 		</dependency>-->
-		<dependency>
+		<!--<dependency>
 			<groupId>net.sf.taverna.t2.core</groupId>
 			<artifactId>provenanceconnector-api</artifactId>
 			<version>${t2.core.version}</version>
 		</dependency>
-		<dependency>
+		--><dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
