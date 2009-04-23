@@ -108,9 +108,10 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 		} else {
 			this.instanceOwningProcessId = parentProcess + ":" + localName;
 		}
-
+		
 		WorkflowProvenanceItem workflowItem = null;
-		if (context.getProvenanceConnector() != null) {
+		
+		if (context.getProvenanceReporter() != null) {
 
 			provEnabled = true;
 			workflowItem = new WorkflowProvenanceItem();
@@ -120,7 +121,8 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 			workflowItem.setParentId(dataflow.getInternalIdentier());
 
 			addProvenanceLayerToProcessors(dataflow, workflowItem);
-			context.getProvenanceConnector().addProvenanceItem(workflowItem, context);
+			context.getProvenanceReporter().addProvenanceItem(workflowItem);
+			context.getProvenanceReporter().setSessionID(workflowItem.getIdentifier());
 		}
 		facadeResultListener = new FacadeResultListener(dataflow, workflowItem);
 	}
@@ -145,8 +147,8 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 				DispatchLayer<?> provenance = new IntermediateProvenance();
 				IntermediateProvenance intermediateProvenance = (IntermediateProvenance) provenance;
 				intermediateProvenance.setWorkflow(workflowItem);
-				intermediateProvenance.setConnector(context
-						.getProvenanceConnector());
+				intermediateProvenance.setReporter(context
+						.getProvenanceReporter());
 
 				Edits edits = EditsRegistry.getEdits();
 				try {
@@ -233,16 +235,18 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 				return;
 			}
 			if (provEnabled) {
-			WorkflowDataProvenanceItem workflowDataProvenanceItem = new WorkflowDataProvenanceItem(
-					portName, token.getData(), context.getReferenceService());
+				WorkflowDataProvenanceItem workflowDataProvenanceItem = new WorkflowDataProvenanceItem();
+				workflowDataProvenanceItem.setPortName(portName);
+				workflowDataProvenanceItem.setData(token.getData());
+				workflowDataProvenanceItem.setReferenceService(context.getReferenceService());
 				workflowDataProvenanceItem.setParentId(workflowItem.getIdentifier());
 				workflowDataProvenanceItem.setIdentifier(UUID.randomUUID().toString());
 				workflowDataProvenanceItem.setParentId(instanceOwningProcessId);
 				workflowDataProvenanceItem.setProcessId(instanceOwningProcessId);
 				workflowDataProvenanceItem.setIndex(token.getIndex());
 				workflowDataProvenanceItem.setFinal(token.isFinal());
-				context.getProvenanceConnector().addProvenanceItem(
-						workflowDataProvenanceItem, context);
+				context.getProvenanceReporter().addProvenanceItem(
+						workflowDataProvenanceItem);
 			}
 			synchronized (this) {
 				if (token.getIndex().length == 0) {
@@ -259,8 +263,8 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 						dataflowRunComplete
 								.setProcessId(instanceOwningProcessId);
 						dataflowRunComplete.setIdentifier(UUID.randomUUID().toString());
-						context.getProvenanceConnector().addProvenanceItem(
-								dataflowRunComplete, context);
+						context.getProvenanceReporter().addProvenanceItem(
+								dataflowRunComplete);
 					}
 				}
 			}

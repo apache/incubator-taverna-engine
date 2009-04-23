@@ -25,18 +25,14 @@ import java.beans.XMLEncoder;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
 import java.util.UUID;
 import java.util.Map.Entry;
 
 import net.sf.taverna.t2.invocation.Event;
-import net.sf.taverna.t2.provenance.connector.ProvenanceConnector;
 import net.sf.taverna.t2.provenance.item.ActivityProvenanceItem;
 import net.sf.taverna.t2.provenance.item.ErrorProvenanceItem;
 import net.sf.taverna.t2.provenance.item.InputDataProvenanceItem;
@@ -46,12 +42,8 @@ import net.sf.taverna.t2.provenance.item.ProcessProvenanceItem;
 import net.sf.taverna.t2.provenance.item.ProcessorProvenanceItem;
 import net.sf.taverna.t2.provenance.item.ProvenanceItem;
 import net.sf.taverna.t2.provenance.item.WorkflowProvenanceItem;
-import net.sf.taverna.t2.reference.ExternalReferenceSPI;
-import net.sf.taverna.t2.reference.Identified;
+import net.sf.taverna.t2.provenance.reporter.ProvenanceReporter;
 import net.sf.taverna.t2.reference.ReferenceService;
-import net.sf.taverna.t2.reference.ReferenceSet;
-import net.sf.taverna.t2.reference.T2Reference;
-import net.sf.taverna.t2.reference.T2ReferenceType;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.AsynchronousActivity;
@@ -76,7 +68,7 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 
 	Logger logger = Logger.getLogger(IntermediateProvenance.class);
 
-	private ProvenanceConnector connector;
+	private ProvenanceReporter reporter;
 
 	Map<String, Map<String, IterationProvenanceItem>> processToIndexes = new HashMap<String, Map<String, IterationProvenanceItem>>();
 
@@ -113,7 +105,7 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 			String owningProcess) {
 		synchronized (processToIndexes) {
 			Map<String, IterationProvenanceItem> indexes = processToIndexes
-			.get(owningProcess);
+					.get(owningProcess);
 			if (indexes == null) {
 				indexes = new HashMap<String, IterationProvenanceItem>();
 				processToIndexes.put(owningProcess, indexes);
@@ -145,8 +137,8 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 					// instead?
 					if (iterationProvenanceItem != null) {
 						// set the index to the one from the event
-						IterationProvenanceItem iterationProvenanceItem1 = new IterationProvenanceItem(
-								originalIndex);
+						IterationProvenanceItem iterationProvenanceItem1 = new IterationProvenanceItem();
+						iterationProvenanceItem1.setIteration(originalIndex);
 						iterationProvenanceItem1.setProcessId(owningProcess);
 						iterationProvenanceItem1.setIdentifier(UUID
 								.randomUUID().toString());
@@ -161,7 +153,7 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 
 							if (owningProcess.equalsIgnoreCase(owner)
 									&& indexString
-									.equalsIgnoreCase(indexString2)) {
+											.equalsIgnoreCase(indexString2)) {
 								iterationProvenanceItem1.setParentId(entrySet
 										.getKey().getIdentifier());
 							}
@@ -176,9 +168,9 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 							String indexString2 = indexStr(index);
 							if (owningProcess.equalsIgnoreCase(owner)
 									&& indexString
-									.equalsIgnoreCase(indexString2)) {
+											.equalsIgnoreCase(indexString2)) {
 								iterationProvenanceItem1
-								.setInputDataItem(entrySet.getKey());
+										.setInputDataItem(entrySet.getKey());
 							}
 
 						}
@@ -216,9 +208,9 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 					// through the while
 				} catch (IllegalStateException e) {
 					logger
-					.warn("Cannot find a parent iteration with index [] for owning process: "
-							+ owningProcess
-							+ "Workflow invocation is in an illegal state");
+							.warn("Cannot find a parent iteration with index [] for owning process: "
+									+ owningProcess
+									+ "Workflow invocation is in an illegal state");
 					throw e;
 				}
 			}
@@ -286,7 +278,7 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 	private int[] removeLastIndex(int[] index) {
 		if (index.length == 0) {
 			throw new IllegalStateException(
-			"There is no parent iteration of index [] for this result");
+					"There is no parent iteration of index [] for this result");
 		}
 		int[] newIntArray = new int[index.length - 1];
 		for (int i = 0; i < index.length - 1; i++) {
@@ -303,14 +295,20 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 	public void receiveError(DispatchErrorEvent errorEvent) {
 		IterationProvenanceItem iterationProvItem = getIterationProvItem(errorEvent);
 		// get using errorEvent.getOwningProcess();
-		ErrorProvenanceItem errorItem = new ErrorProvenanceItem(errorEvent
-				.getCause(), errorEvent.getMessage(), errorEvent
-				.getFailureType(), errorEvent.getOwningProcess());
+		
+		ErrorProvenanceItem errorItem = new ErrorProvenanceItem();
+		errorItem.setCause(errorEvent
+				.getCause());
+		errorItem.setErrorType(errorEvent
+				.getFailureType().toString());
+		errorItem.setMessage(errorEvent.getMessage());
+		
+		errorItem.setProcessId(errorEvent.getOwningProcess());
 		errorItem.setIdentifier(UUID.randomUUID().toString());
 		errorItem.setParentId(iterationProvItem.getIdentifier());
 		// iterationProvItem.setErrorItem(errorItem);
 		// FIXME don't need to add to the processor item earlier
-		getConnector().addProvenanceItem(errorItem, errorEvent.getContext());
+		getReporter().addProvenanceItem(errorItem);
 		super.receiveError(errorEvent);
 	}
 
@@ -326,26 +324,34 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 
 		// FIXME do we need this ProcessProvenanceItem?
 		ProcessProvenanceItem provenanceItem;
-		provenanceItem = new ProcessProvenanceItem(jobEvent.getOwningProcess());
+		String[] split = jobEvent.getOwningProcess().split(":");
+		provenanceItem = new ProcessProvenanceItem();
+		//FIXME are the facade id and dataflow name really needed? 
+		provenanceItem.setFacadeID(split[0]);
+		provenanceItem.setDataflowID(split[1]);
+		provenanceItem.setProcessId(jobEvent.getOwningProcess());
 		provenanceItem.setIdentifier(UUID.randomUUID().toString());
 		provenanceItem.setParentId(workflowItem.getIdentifier());
 		ProcessorProvenanceItem processorProvItem;
-		processorProvItem = new ProcessorProvenanceItem(jobEvent
+		processorProvItem = new ProcessorProvenanceItem();
+		processorProvItem.setProcessId(jobEvent
 				.getOwningProcess());
 		processorProvItem.setIdentifier(UUID.randomUUID().toString());
 		processorProvItem.setParentId(provenanceItem.getIdentifier());
 		provenanceItem.setProcessId(jobEvent.getOwningProcess());
-		getConnector().addProvenanceItem(provenanceItem, jobEvent.getContext());
-		getConnector().addProvenanceItem(processorProvItem, jobEvent.getContext());
+		getReporter().addProvenanceItem(provenanceItem);
+		getReporter().addProvenanceItem(processorProvItem);
 
 		IterationProvenanceItem iterationProvItem = null;
-		iterationProvItem = new IterationProvenanceItem(jobEvent.getIndex());
+		iterationProvItem = new IterationProvenanceItem();
+		iterationProvItem.setIteration(jobEvent.getIndex());
 		iterationProvItem.setIdentifier(UUID.randomUUID().toString());
 		ReferenceService referenceService = jobEvent.getContext()
-		.getReferenceService();
+				.getReferenceService();
 
-		InputDataProvenanceItem inputDataItem = new InputDataProvenanceItem(
-				jobEvent.getData(), referenceService);
+		InputDataProvenanceItem inputDataItem = new InputDataProvenanceItem();
+		inputDataItem.setDataMap(jobEvent.getData());
+		inputDataItem.setReferenceService(referenceService);
 		inputDataItem.setIdentifier(UUID.randomUUID().toString());
 		inputDataItem.setParentId(iterationProvItem.getIdentifier());
 		inputDataItem.setProcessId(jobEvent.getOwningProcess());
@@ -362,8 +368,7 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 
 		for (Activity<?> activity : jobEvent.getActivities()) {
 			if (activity instanceof AsynchronousActivity) {
-				ActivityProvenanceItem activityProvItem = new ActivityProvenanceItem(
-						activity);
+				ActivityProvenanceItem activityProvItem = new ActivityProvenanceItem();
 				activityProvItem.setIdentifier(UUID.randomUUID().toString());
 				iterationProvItem.setParentId(activityProvItem.getIdentifier());
 				// getConnector().addProvenanceItem(iterationProvItem);
@@ -377,7 +382,7 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 						inputIndexOwnerList);
 				// activityProvenanceItemList.add(activityProvItem);
 				// activityProvItem.setIterationProvenanceItem(iterationProvItem);
-				getConnector().addProvenanceItem(activityProvItem, jobEvent.getContext());
+				getReporter().addProvenanceItem(activityProvItem);
 				break;
 			}
 		}
@@ -403,28 +408,51 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 
 		IterationProvenanceItem iterationProvItem = getIterationProvItem(resultEvent);
 		ReferenceService referenceService = resultEvent.getContext()
-		.getReferenceService();
+				.getReferenceService();
+		
 
-
-		OutputDataProvenanceItem outputDataItem = new OutputDataProvenanceItem(
-				resultEvent.getData(), referenceService);
+		OutputDataProvenanceItem outputDataItem = new OutputDataProvenanceItem();
+		outputDataItem.setDataMap(resultEvent.getData());
+		outputDataItem.setReferenceService(referenceService);
 		outputDataItem.setIdentifier(UUID.randomUUID().toString());
 		outputDataItem.setProcessId(resultEvent.getOwningProcess());
 		outputDataItem.setParentId(iterationProvItem.getIdentifier());
 		iterationProvItem.setOutputDataItem(outputDataItem);
 
-		getConnector().addProvenanceItem(iterationProvItem, resultEvent.getContext());
+		getReporter().addProvenanceItem(iterationProvItem);
 		// getConnector().addProvenanceItem(outputDataItem);
 
+		// PM -- testing
+		// add xencoding of data value here??
+//		Map<String, T2Reference> inputDataMap = iterationProvItem.getInputDataItem().getDataMap();
+//		for(Map.Entry<String, T2Reference> entry:inputDataMap.entrySet()) {
+//			
+//			// create a simpler bean that we can serialize?
+//			
+//			T2Reference ref = entry.getValue();
+//			
+//			SimplerT2Reference t2RefBean = new SimplerT2Reference();
+//			t2RefBean.setReferenceType(ref.getReferenceType());
+//			t2RefBean.setDepth(ref.getDepth());
+//			t2RefBean.setLocalPart(ref.getLocalPart());
+//			t2RefBean.setNamespacePart(ref.getNamespacePart());
+//						
+//			System.out.println("data ref: "+ref);
+//			String serializedInput = SerializeParam(t2RefBean);
+//			System.out.println("serialized reference:" + serializedInput);
+//			
+//			System.out.println(referenceService.renderIdentifier(entry.getValue(), String.class, resultEvent.getContext()));
+//		}
+		
 		super.receiveResult(resultEvent);
 	}
 
 
-
+	
 	@Override
 	public void receiveResultCompletion(DispatchCompletionEvent completionEvent) {
 		// TODO Auto-generated method stub
-
+		
 		super.receiveResultCompletion(completionEvent);
 	}
 
@@ -435,12 +463,12 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 	 * 
 	 * @param connector
 	 */
-	public void setConnector(ProvenanceConnector connector) {
-		this.connector = connector;
+	public void setReporter(ProvenanceReporter connector) {
+		this.reporter = connector;
 	}
 
-	public ProvenanceConnector getConnector() {
-		return connector;
+	public ProvenanceReporter getReporter() {
+		return reporter;
 	}
 
 	/**
@@ -453,21 +481,21 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 		this.workflowItem = workflowItem;
 	}
 
-
-	public static String SerializeParam(Object ParamValue) {
-		ByteArrayOutputStream BStream = new ByteArrayOutputStream();
-		XMLEncoder encoder = new XMLEncoder(BStream);
-		encoder.writeObject(ParamValue);
-		encoder.close();
-		return BStream.toString();
-	}
-
-	public static Object DeserializeParam (String SerializedParam) {
-		InputStream IStream = new ByteArrayInputStream(SerializedParam.getBytes()); 
-		XMLDecoder decoder = new XMLDecoder(IStream);
-		Object output = decoder.readObject();
-		decoder.close(); 
-		return output;
-	}
-
+	
+	  public static String SerializeParam(Object ParamValue) {
+		    ByteArrayOutputStream BStream = new ByteArrayOutputStream();
+		    XMLEncoder encoder = new XMLEncoder(BStream);
+		    encoder.writeObject(ParamValue);
+		    encoder.close();
+		    return BStream.toString();
+		  }
+	  
+	  public static Object DeserializeParam (String SerializedParam) {
+		    InputStream IStream = new ByteArrayInputStream(SerializedParam.getBytes()); 
+		    XMLDecoder decoder = new XMLDecoder(IStream);
+		    Object output = decoder.readObject();
+		    decoder.close(); 
+		    return output;
+		  }
+	  
 }

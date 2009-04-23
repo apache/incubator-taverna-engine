@@ -63,21 +63,7 @@ public abstract class AbstractXMLDeserializer implements
 	
 	protected Edits edits = new EditsImpl();
 
-	protected Object createBean(Element element, ClassLoader cl) {
-		Element configElement;
-		if (element.getName().equals(CONFIG_BEAN)
-				&& element.getNamespace().equals(T2_WORKFLOW_NAMESPACE)) {
-			configElement = element;
-		} else {
-			// Find it one element below
-			configElement = element
-					.getChild(CONFIG_BEAN, T2_WORKFLOW_NAMESPACE);
-			if (configElement == null) {
-				// Not found
-				return null;
-			}
-		}
-		
+	protected Object createBean(Element configElement, ClassLoader cl) {
 		String encoding = configElement.getAttributeValue(BEAN_ENCODING);
 		Object result = null;
 		if (encoding.equals(XSTREAM_ENCODING)) {
@@ -105,29 +91,17 @@ public abstract class AbstractXMLDeserializer implements
 
 	}
 
-	protected ClassLoader getRavenLoader(Element element)
+	protected ClassLoader getRavenLoader(Element ravenElement)
 			throws ArtifactNotFoundException, ArtifactStateException {
 		// Try to get the current Repository object, if there isn't one we can't
 		// do this here
 		Repository repository = ApplicationRuntime.getInstance().getRavenRepository();
 		if (repository instanceof DummyRepository) { 
-			return myClassLoader();
+			return Tools.class.getClassLoader();
 			// TODO - should probably warn that this is happening as it's likely
 			// to be because of an error in API usage. There are times it won't
 			// be though so leave it for now.
 		}
-		
-		Element ravenElement;
-		if (element.getName().equals(RAVEN) && element.getNamespace().equals(T2_WORKFLOW_NAMESPACE)) {
-			ravenElement = element;			
-		} else {
-			ravenElement = element.getChild(RAVEN, T2_WORKFLOW_NAMESPACE);
-			if (ravenElement == null) {
-				// Not found in XML
-				return myClassLoader();
-			}
-		}
-		
 		String groupId = ravenElement.getChildTextTrim(GROUP,
 				T2_WORKFLOW_NAMESPACE);
 		String artifactId = ravenElement.getChildTextTrim(ARTIFACT,
@@ -160,14 +134,6 @@ public abstract class AbstractXMLDeserializer implements
 		return repository.getLoader(artifact, null);
 	}
 	
-	private ClassLoader myClassLoader() {
-		ClassLoader classLoader = getClass().getClassLoader();
-		if (classLoader != null) {
-			return classLoader;
-		}
-		return ClassLoader.getSystemClassLoader();
-	}
-
 	protected String elementToString(Element element) {
 		return new XMLOutputter().outputString(element);
 	}
