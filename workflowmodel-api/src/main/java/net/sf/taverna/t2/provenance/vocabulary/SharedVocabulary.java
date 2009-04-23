@@ -18,30 +18,20 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package net.sf.taverna.t2.invocation;
+package net.sf.taverna.t2.provenance.vocabulary;
 
-import net.sf.taverna.t2.provenance.reporter.ProvenanceReporter;
-import net.sf.taverna.t2.reference.ReferenceContext;
-import net.sf.taverna.t2.reference.ReferenceService;
+import net.sf.taverna.t2.provenance.item.ProvenanceItem;
 
 /**
- * Carries the context of a workflow invocation, the necessary data manager,
- * security agents and any other resource shared across the invocation such as
- * provenance injectors.
+ * Static strings which identify all the {@link ProvenanceItem}s and
+ * {@link ProvenanceEventType}s
  * 
- * @author Tom Oinn
+ * @author Paolo Missier
+ * @author Ian Dunlop
  * 
  */
-public interface InvocationContext extends ReferenceContext {
+public enum SharedVocabulary {
 
-	/**
-	 * Return the reference service to be used within this invocation context
-	 * 
-	 * @return a configured instance of ReferenceService to be used to resolve
-	 *         and register references to data in the workflow
-	 */
-	public ReferenceService getReferenceService();
-	
-	public ProvenanceReporter getProvenanceReporter();
+	DATAFLOW_EVENT_TYPE, PROCESS_EVENT_TYPE, PROVENANCE_EVENT_TYPE, ACTIVITY_EVENT_TYPE, DATA_EVENT_TYPE, ERROR_EVENT_TYPE, INMEMORY_EVENT_TYPE, INPUTDATA_EVENT_TYPE, ITERATION_EVENT_TYPE, OUTPUTDATA_EVENT_TYPE, PROCESSOR_EVENT_TYPE, WEBSERVICE_EVENT_TYPE, WORKFLOW_DATA_EVENT_TYPE, WORKFLOW_EVENT_TYPE, END_WORKFLOW_EVENT_TYPE;
 
 }

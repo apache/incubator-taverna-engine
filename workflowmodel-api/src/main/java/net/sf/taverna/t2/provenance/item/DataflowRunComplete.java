@@ -18,30 +18,52 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package net.sf.taverna.t2.invocation;
+package net.sf.taverna.t2.provenance.item;
 
-import net.sf.taverna.t2.provenance.reporter.ProvenanceReporter;
-import net.sf.taverna.t2.reference.ReferenceContext;
-import net.sf.taverna.t2.reference.ReferenceService;
+import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
 
 /**
- * Carries the context of a workflow invocation, the necessary data manager,
- * security agents and any other resource shared across the invocation such as
- * provenance injectors.
+ * Informs the {@link ProvenanceConnector} that a workflow has been run to
+ * completion. If a {@link ProvenanceConnector} receives this event then it
+ * means that there are no further events to come and that the workflow has been
+ * enacted to completion
  * 
- * @author Tom Oinn
+ * @author Ian Dunlop
  * 
  */
-public interface InvocationContext extends ReferenceContext {
+public class DataflowRunComplete implements ProvenanceItem {
 
-	/**
-	 * Return the reference service to be used within this invocation context
-	 * 
-	 * @return a configured instance of ReferenceService to be used to resolve
-	 *         and register references to data in the workflow
-	 */
-	public ReferenceService getReferenceService();
-	
-	public ProvenanceReporter getProvenanceReporter();
+	private String processId;
+	private String parentId;
+	private String identifier;
+	private SharedVocabulary eventType = SharedVocabulary.END_WORKFLOW_EVENT_TYPE;
+
+	public SharedVocabulary getEventType() {
+		return eventType;
+	}
+
+	public String getIdentifier() {
+		return identifier;
+	}
+
+	public void setProcessId(String processId) {
+		this.processId = processId;
+	}
+
+	public String getParentId() {
+		return parentId;
+	}
+
+	public void setIdentifier(String identifier) {
+		this.identifier = identifier;
+	}
+
+	public void setParentId(String parentId) {
+		processId = parentId;
+	}
+
+	public String getProcessId() {
+		return processId;
+	}
 
 }
