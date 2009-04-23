@@ -48,8 +48,8 @@
 	   	<module>reference-testhelpers</module>
 		<module>workflowmodel-api</module>
 		<module>workflowmodel-impl</module>   
-		<module>provenanceconnector-api</module>
-		<module>provenanceconnector-impl</module>
+		<module>provenanceconnector</module>
+		<!--<module>provenanceconnector-impl</module>-->
 	</modules>
 	<repositories>
 		<repository>
