@@ -95,7 +95,7 @@ public class DataflowXMLSerializer extends AbstractXMLSerializer {
 	}
 
 	protected Element dataflowInputPorts(
-			List<? extends DataflowInputPort> inputPorts) {
+			List<? extends DataflowInputPort> inputPorts) throws JDOMException, IOException {
 		Element result = new Element(DATAFLOW_INPUT_PORTS,
 				T2_WORKFLOW_NAMESPACE);
 		for (DataflowInputPort port : inputPorts) {
@@ -113,6 +113,8 @@ public class DataflowXMLSerializer extends AbstractXMLSerializer {
 			portElement.addContent(name);
 			portElement.addContent(depth);
 			portElement.addContent(granularDepth);
+			// do annotations
+			portElement.addContent(annotationsToXML(port));
 			result.addContent(portElement);
 		}
 		return result;

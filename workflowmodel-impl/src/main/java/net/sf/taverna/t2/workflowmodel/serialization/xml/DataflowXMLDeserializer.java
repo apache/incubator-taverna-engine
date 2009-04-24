@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.sf.taverna.t2.workflowmodel.Dataflow;
+import net.sf.taverna.t2.workflowmodel.DataflowInputPort;
 import net.sf.taverna.t2.workflowmodel.EditException;
 import net.sf.taverna.t2.workflowmodel.Processor;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityConfigurationException;
@@ -86,7 +87,11 @@ public class DataflowXMLDeserializer extends AbstractXMLDeserializer {
 			String name=port.getChildText(NAME,T2_WORKFLOW_NAMESPACE);
 			int portDepth = Integer.valueOf(port.getChildText(DEPTH,T2_WORKFLOW_NAMESPACE));
 			int granularDepth = Integer.valueOf(port.getChildText(GRANULAR_DEPTH,T2_WORKFLOW_NAMESPACE));
-			edits.getCreateDataflowInputPortEdit(df, name, portDepth, granularDepth).doEdit();
+			DataflowInputPort dataflowInputPort = edits.createDataflowInputPort(name, portDepth, granularDepth, df);
+			// add annotations
+			annotationsFromXml(dataflowInputPort, port, df.getClass().getClassLoader());
+			edits.getAddDataflowInputPortEdit(df, dataflowInputPort).doEdit();
+//			edits.getCreateDataflowInputPortEdit(df, name, portDepth, granularDepth).doEdit();
 		}
 		
 		for (Element port : (List<Element>)outputPortsElement.getChildren(DATAFLOW_PORT,T2_WORKFLOW_NAMESPACE)) {
