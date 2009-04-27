@@ -347,6 +347,12 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 		this.provenanceAnalysis = provenanceAnalysis;
 	}
 
+	/**
+	 * Use this {@link ProvenanceAnalysis} to carry out lineage queries on the
+	 * provenance
+	 * 
+	 * @return
+	 */
 	public ProvenanceAnalysis getProvenanceAnalysis() {
 		return provenanceAnalysis;
 	}
