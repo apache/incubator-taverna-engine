@@ -24,6 +24,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -41,6 +42,7 @@ import net.sf.taverna.t2.provenance.lineageservice.LineageSQLQuery;
 import net.sf.taverna.t2.provenance.lineageservice.Provenance;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceQuery;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceWriter;
+import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceAnalysis;
 import net.sf.taverna.t2.provenance.reporter.ProvenanceReporter;
 
 /**
@@ -58,7 +60,10 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 
 	protected Connection connection;
 	
-	private ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(10);
+	private ProvenanceAnalysis provenanceAnalysis;
+
+	private ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(
+			10);
 
 	private boolean isClearDB = false;
 
@@ -74,9 +79,10 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 
 	}
 
-	public ProvenanceConnector(Provenance provenance, String dbURL,
+	public ProvenanceConnector(Provenance provenance, ProvenanceAnalysis provenanceAnalysis, String dbURL,
 			boolean isClearDB, String saveEvents) {
 		this.provenance = provenance;
+		this.provenanceAnalysis = provenanceAnalysis;
 		this.dbURL = dbURL;
 		this.isClearDB = isClearDB;
 		this.saveEvents = saveEvents;
@@ -230,31 +236,31 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 	public abstract void init();
 
 	public List<LineageQueryResultRecord> getIntermediateValues(
-			final String wfInstance, final String pname, final String vname, final String iteration)
-			throws Exception {
+			final String wfInstance, final String pname, final String vname,
+			final String iteration) throws Exception {
 
 		LineageQueryResult result = null;
-		FutureTask<LineageQueryResult> future = new FutureTask<LineageQueryResult>(new Callable<LineageQueryResult>() {
+		FutureTask<LineageQueryResult> future = new FutureTask<LineageQueryResult>(
+				new Callable<LineageQueryResult>() {
 
-			public LineageQueryResult call() throws Exception {
-					try {
-						LineageSQLQuery simpleLineageQuery = provenance.getPq()
-						.simpleLineageQuery(wfInstance, pname, vname, iteration);
-						LineageQueryResult runLineageQuery = null;
-						runLineageQuery = provenance.getPq().runLineageQuery(
-								simpleLineageQuery);
-						return runLineageQuery;
-					} catch (SQLException e) {
-						throw e;
+					public LineageQueryResult call() throws Exception {
+						try {
+							LineageSQLQuery simpleLineageQuery = provenance
+									.getPq().simpleLineageQuery(wfInstance,
+											pname, vname, iteration);
+							LineageQueryResult runLineageQuery = null;
+							runLineageQuery = provenance.getPq()
+									.runLineageQuery(simpleLineageQuery);
+							return runLineageQuery;
+						} catch (SQLException e) {
+							throw e;
+						}
 					}
-			}
 
-			
-			
-		});
-		
+				});
+
 		getExecutor().submit(future);
-		
+
 		try {
 			return future.get().getRecords();
 		} catch (InterruptedException e1) {
@@ -262,7 +268,12 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 		} catch (ExecutionException e1) {
 			throw e1;
 		}
-		
+
+	}
+
+	public List<LineageQueryResultRecord> computeLineage(String wfInstance,
+			String var, String proc, String path, Set<String> selectedProcessors) {
+		return null;
 	}
 
 	public String getDataflowInstance(String dataflowId) {
