@@ -59,7 +59,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 	private String saveEvents;
 
 	protected Connection connection;
-	
+
 	private ProvenanceAnalysis provenanceAnalysis;
 
 	private ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(
@@ -79,10 +79,11 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 
 	}
 
-	public ProvenanceConnector(Provenance provenance, ProvenanceAnalysis provenanceAnalysis, String dbURL,
+	public ProvenanceConnector(Provenance provenance,
+			ProvenanceAnalysis provenanceAnalysis, String dbURL,
 			boolean isClearDB, String saveEvents) {
 		this.provenance = provenance;
-		this.provenanceAnalysis = provenanceAnalysis;
+		this.setProvenanceAnalysis(provenanceAnalysis);
 		this.dbURL = dbURL;
 		this.isClearDB = isClearDB;
 		this.saveEvents = saveEvents;
@@ -238,6 +239,8 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 	public List<LineageQueryResultRecord> getIntermediateValues(
 			final String wfInstance, final String pname, final String vname,
 			final String iteration) throws Exception {
+		LineageQueryResult fetchIntermediateResult = getProvenanceAnalysis()
+				.fetchIntermediateResult(wfInstance, pname, vname, iteration);
 
 		LineageQueryResult result = null;
 		FutureTask<LineageQueryResult> future = new FutureTask<LineageQueryResult>(
@@ -248,9 +251,12 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 							LineageSQLQuery simpleLineageQuery = provenance
 									.getPq().simpleLineageQuery(wfInstance,
 											pname, vname, iteration);
-							LineageQueryResult runLineageQuery = null;
-							runLineageQuery = provenance.getPq()
-									.runLineageQuery(simpleLineageQuery);
+							LineageQueryResult runLineageQuery = getProvenanceAnalysis()
+									.fetchIntermediateResult(wfInstance, pname,
+											vname, iteration);
+
+							// runLineageQuery = provenance.getPq()
+							// .runLineageQuery(simpleLineageQuery);
 							return runLineageQuery;
 						} catch (SQLException e) {
 							throw e;
@@ -335,6 +341,14 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 
 	public synchronized ScheduledThreadPoolExecutor getExecutor() {
 		return executor;
+	}
+
+	public void setProvenanceAnalysis(ProvenanceAnalysis provenanceAnalysis) {
+		this.provenanceAnalysis = provenanceAnalysis;
+	}
+
+	public ProvenanceAnalysis getProvenanceAnalysis() {
+		return provenanceAnalysis;
 	}
 
 }
