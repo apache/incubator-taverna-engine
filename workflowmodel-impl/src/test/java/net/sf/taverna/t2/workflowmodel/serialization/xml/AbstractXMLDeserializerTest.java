@@ -38,7 +38,7 @@ public class AbstractXMLDeserializerTest {
 	
 	@Test
 	public void testCreateBeanSimple() throws Exception {
-		Element el = new Element("configBean");
+		Element el = new Element(XMLSerializationConstants.CONFIG_BEAN, XMLSerializationConstants.T2_WORKFLOW_NAMESPACE);
 		el.setAttribute("encoding","xstream");
 		Element elString = new Element("string");
 		elString.setText("12345");
@@ -51,7 +51,7 @@ public class AbstractXMLDeserializerTest {
 	
 	@Test
 	public void testCreateBeanComplex() throws Exception {
-		String xml="<configBean encoding=\"xstream\"><net.sf.taverna.t2.workflowmodel.serialization.DummyBean><id>1</id><name>bob</name><innerBean><stuff>xyz</stuff></innerBean></net.sf.taverna.t2.workflowmodel.serialization.DummyBean></configBean>";
+		String xml="<configBean xmlns='http://taverna.sf.net/2008/xml/t2flow' encoding=\"xstream\"><net.sf.taverna.t2.workflowmodel.serialization.DummyBean><id>1</id><name>bob</name><innerBean><stuff>xyz</stuff></innerBean></net.sf.taverna.t2.workflowmodel.serialization.DummyBean></configBean>";
 		Element el = new SAXBuilder().build(new StringReader(xml)).detachRootElement();
 		
 		Object bean = deserializer.createBean(el, XMLDeserializerImpl.class.getClassLoader());
@@ -65,7 +65,7 @@ public class AbstractXMLDeserializerTest {
 	
 	@Test
 	public void testCreateBeanJDomXML() throws Exception {
-		String xml="<configBean encoding=\"jdomxml\"><fred><child1/><child2/></fred></configBean>";
+		String xml="<configBean xmlns='http://taverna.sf.net/2008/xml/t2flow'  encoding=\"jdomxml\"><fred><child1/><child2/></fred></configBean>";
 		Element el = new SAXBuilder().build(new StringReader(xml)).detachRootElement();
 		
 		Object bean = deserializer.createBean(el, XMLDeserializerImpl.class.getClassLoader());
