@@ -28,6 +28,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import net.sf.taverna.t2.provenance.lineageservice.utils.NestedListNode;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProcBinding;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Var;
 import net.sf.taverna.t2.provenance.lineageservice.utils.VarBinding;
@@ -43,7 +44,7 @@ import net.sf.taverna.t2.provenance.lineageservice.utils.VarBinding;
  */
 public abstract class ProvenanceWriter {
 	
-	Logger logger = Logger.getLogger(ProvenanceWriter.class);
+	private static Logger logger = Logger.getLogger(ProvenanceWriter.class);
 
 	protected Connection connection;
 
@@ -460,6 +461,51 @@ public abstract class ProvenanceWriter {
 
 		return newParentCollectionId;
 	}
+	
+
+	/**
+	 * adds (dataRef, data) pairs to the Data table (only for string data)
+	 */
+	// FIXME needs the db statement corrected
+	public void addData(String dataRef, String wfInstanceId, byte[] data)
+			throws SQLException {
+	
+		Statement stmt;
+		try {
+			// stmt = getConnection().createStatement();
+			PreparedStatement ps = null;
+			ps = getConnection()
+					.prepareStatement(
+							"INSERT INTO Data (dataReference,wfInstanceID,data) VALUES (?,?,?)");
+			ps.setString(1, dataRef);
+			ps.setString(2, wfInstanceId);
+			ps.setBytes(3, data);
+			// String q =
+			// "INSERT INTO Data (dataReference,wfInstanceID,data) VALUES (?1,?2,?3)";
+			// +
+			// "\'" +dataRef+"\', \'" + wfInstanceId+ "\'," + data + ")";
+	
+			int result = ps.executeUpdate();
+	
+			cnt++;
+	
+		} catch (SQLException e) {
+			System.out.println(e);
+			// the same ID will come in several times -- duplications are
+			// expected, don't panic
+			// System.out.println("****  insert failed due to ["+e.getMessage()+"]");
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	
+	}
 
 	public void addVarBinding(VarBinding vb) throws SQLException {
 		Statement stmt = null;
@@ -529,6 +575,55 @@ public abstract class ProvenanceWriter {
 		}
 	}
 	
+	/**
+	 * persists var v back to DB
+	 * 
+	 * @param v
+	 * @throws SQLException
+	 */
+	public void updateVar(Var v) throws SQLException {
+		// Statement stmt;
+		PreparedStatement ps = null;
+		// String u = "UPDATE Var " + "SET type = \'" + v.getType() + "\'"
+		// + ", inputOrOutput = \'" + (v.isInput() ? 1 : 0) + "\' "
+		// + ", nestingLevel = \'" + v.getTypeNestingLevel() + "\' "
+		// + ", actualNestingLevel = \'" + v.getActualNestingLevel()
+		// + "\' " + ", anlSet = \'" + (v.isANLset() ? 1 : 0) + "\' "
+		// + "WHERE varName = \'" + v.getVName() + "\' "
+		// + "AND pnameRef = \'" + v.getPName() + "\' "
+		// + "AND wfInstanceRef = \'" + v.getWfInstanceRef() + "\'";
+		try {
+			ps = getConnection()
+					.prepareStatement(
+							"UPDATE Var SET type = ?, inputOrOutput=?, nestingLevel = ?,"
+									+ "actualNestingLevel = ?, anlSet = ? WHERE varName = ? AND pnameRef = ? AND wfInstanceRef = ?");
+			ps.setString(1, v.getType());
+			int i = v.isInput() ? 1 : 0;
+			ps.setInt(2, i);
+			ps.setInt(3, v.getTypeNestingLevel());
+			ps.setInt(4, v.getActualNestingLevel());
+			int j = v.isANLset() ? 1 : 0;
+			ps.setInt(5, j);
+			ps.setString(6, v.getVName());
+			ps.setString(7, v.getPName());
+			ps.setString(8, v.getWfInstanceRef());
+	
+			// stmt = getConnection().createStatement();
+			//			
+			// System.out.println("executing: "+u);
+	
+			boolean success = ps.execute();
+		} catch (InstantiationException e) {
+			logger.warn("Could not execute query: " + e);
+		} catch (IllegalAccessException e) {
+			logger.warn("Could not execute query: " + e);
+		} catch (ClassNotFoundException e) {
+			logger.warn("Could not execute query: " + e);
+		}
+	
+		// System.out.println("update executed");
+	}
+
 	public void updateVarBinding(VarBinding vb) {
 
 		Statement stmt;
@@ -578,6 +673,48 @@ public abstract class ProvenanceWriter {
 		} catch (ClassNotFoundException e) {
 			logger.info("****  insert failed due to ["+e.getMessage()+"]");
 		}
+	}
+	
+	public void replaceCollectionRecord(NestedListNode nln, String prevPName, String prevVarName) {
+
+		Statement stmt;
+		try {
+			stmt = getConnection().createStatement();
+
+			String q = "DELETE FROM Collection WHERE "+
+			"collId = \""+nln.getCollId()+"\" and "+
+			"wfInstanceRef = \""+nln.getWfInstanceRef()+"\" and "+
+			"varNameRef = \""+prevVarName+"\" and "+
+			"pnameRef = \""+prevPName+"\" and "+
+			"iteration = \""+nln.getIteration()+"\" ";
+
+			int result = stmt.executeUpdate(q);
+
+		} catch (SQLException e) {
+			System.out.println("****  delete failed due to ["+e.getMessage()+"]");
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 	
+		
+		try {
+			
+			addCollection(prevPName, 
+					      nln.getCollId(), 
+					      nln.getParentCollIdRef(), 
+					      nln.getIteration(), 
+					      prevVarName, 
+					      nln.getWfInstanceRef());
+
+		} catch (SQLException e) {
+			System.out.println("****  insert failed due to ["+e.getMessage()+"]");
+		} 
 	}
 
 	/**
@@ -776,50 +913,6 @@ public abstract class ProvenanceWriter {
 	}
 
 	/**
-	 * adds (dataRef, data) pairs to the Data table (only for string data)
-	 */
-	// FIXME needs the db statement corrected
-	public void addData(String dataRef, String wfInstanceId, byte[] data)
-			throws SQLException {
-
-		Statement stmt;
-		try {
-			// stmt = getConnection().createStatement();
-			PreparedStatement ps = null;
-			ps = getConnection()
-					.prepareStatement(
-							"INSERT INTO Data (dataReference,wfInstanceID,data) VALUES (?,?,?)");
-			ps.setString(1, dataRef);
-			ps.setString(2, wfInstanceId);
-			ps.setBytes(3, data);
-			// String q =
-			// "INSERT INTO Data (dataReference,wfInstanceID,data) VALUES (?1,?2,?3)";
-			// +
-			// "\'" +dataRef+"\', \'" + wfInstanceId+ "\'," + data + ")";
-
-			int result = ps.executeUpdate();
-
-			cnt++;
-
-		} catch (SQLException e) {
-			System.out.println(e);
-			// the same ID will come in several times -- duplications are
-			// expected, don't panic
-			// System.out.println("****  insert failed due to ["+e.getMessage()+"]");
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	}
-
-	/**
 	 * used to support the implementation of
 	 * 
 	 * @param pname
@@ -879,7 +972,7 @@ public abstract class ProvenanceWriter {
 			e.printStackTrace();
 		}
 	}
-
+	
 	public void setDbURL(String dbURL) {
 		this.dbURL = dbURL;
 	}

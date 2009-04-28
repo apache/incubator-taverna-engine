@@ -26,9 +26,27 @@ public class LineageQueryResultRecord {
 	String vname;
 	String wfInstance;
 	String iteration;
-	String value;     // atomic or XML-formatted collection
+	String value;     // atomic or XML-formatted collection -- this is actually a reference to the value...
+	String resolvedValue;
 	String type;  // one of referenceSet, referenceSetCollection
-	private String resolvedValue;
+	private boolean printResolvedValue;
+
+	public String toString() {
+
+		if (printResolvedValue)
+			return "proc "+getPname()+
+			" var "+getVname()+" " +
+			"iteration: "+getIteration()+
+			" value: "+getValue()+
+			" resolvedValue: "+getResolvedValue();
+		else  
+			return "proc "+getPname()+
+			" var "+getVname()+" " +
+			"iteration: "+getIteration()+
+			" value: "+getValue();
+	}
+
+
 	/**
 	 * @return the pname
 	 */
@@ -101,7 +119,6 @@ public class LineageQueryResultRecord {
 	public void setIteration(String iteration) {
 		this.iteration = iteration;
 	}
-	
 	/**
 	 * @return the resolvedValue
 	 */
@@ -114,5 +131,10 @@ public class LineageQueryResultRecord {
 	public void setResolvedValue(String resolvedValue) {
 		this.resolvedValue = resolvedValue;
 	}
+
+
+	public void setPrintResolvedValue(boolean b) {
+		this.printResolvedValue = b
+		;	}
 
 }

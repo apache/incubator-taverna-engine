@@ -20,19 +20,12 @@
  ******************************************************************************/
 package net.sf.taverna.t2.provenance.lineageservice.utils;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-
 /**
  * @author Paolo Missier
  *
  */
-@Entity
 public class VarBinding {
 
-	@Id @GeneratedValue
-	String identifier;
 	String varNameRef;
 	String wfInstanceRef;
 	String value;
@@ -41,8 +34,8 @@ public class VarBinding {
 	String PNameRef;
 	String valueType;
 	String ref;
-	String iterationVector;
-	private byte[] resolvedValue;
+	String    iterationVector;
+	String resolvedValue;
 	
 	
 	public String toString() {
@@ -57,7 +50,9 @@ public class VarBinding {
 			append("collIdef  " +collIDRef+"\n").
 			append("positionInColl = "+positionInColl+"\n").
 			append("value = "+value+"\n").
-			append("ref = "+ref+"\n");
+			append("ref = "+ref+"\n").
+			append("resolvedValue = "+resolvedValue+"\n");
+			
 
 		return sb.toString();
 	}
@@ -171,20 +166,22 @@ public class VarBinding {
 	public void setRef(String ref) {
 		this.ref = ref;
 	}
-	
+
+
 	/**
 	 * @return the resolvedValue
 	 */
-	public byte[] getResolvedValue() {
+	public String getResolvedValue() {
 		return resolvedValue;
 	}
 
 
 	/**
-	 * @param bs the resolvedValue to set
+	 * @param resolvedValue the resolvedValue to set
 	 */
-	public void setResolvedValue(byte[] bs) {
-		this.resolvedValue = bs;
+	public void setResolvedValue(String resolvedValue) {
+		this.resolvedValue = resolvedValue;
 	}
+	
 	
 }

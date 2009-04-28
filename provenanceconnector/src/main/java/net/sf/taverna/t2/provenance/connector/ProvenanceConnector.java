@@ -248,9 +248,9 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 
 					public LineageQueryResult call() throws Exception {
 						try {
-							LineageSQLQuery simpleLineageQuery = provenance
-									.getPq().simpleLineageQuery(wfInstance,
-											pname, vname, iteration);
+//							LineageSQLQuery simpleLineageQuery = provenance
+//									.getPq().simpleLineageQuery(wfInstance,
+//											pname, vname, iteration);
 							LineageQueryResult runLineageQuery = getProvenanceAnalysis()
 									.fetchIntermediateResult(wfInstance, pname,
 											vname, iteration);
