@@ -506,8 +506,8 @@ public abstract class ProvenanceWriter {
 		}
 	
 	}
-
 	public void addVarBinding(VarBinding vb) throws SQLException {
+
 		Statement stmt = null;
 		PreparedStatement ps = null;
 
