@@ -34,7 +34,6 @@ import net.sf.taverna.t2.provenance.lineageservice.LineageSQLQuery;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceQuery;
 
 import org.tupeloproject.kernel.Context;
-import org.tupeloproject.kernel.UnionContext;
 import org.tupeloproject.provenance.ProvenanceAccount;
 import org.tupeloproject.provenance.ProvenanceArtifact;
 import org.tupeloproject.provenance.ProvenanceRole;
@@ -52,37 +51,37 @@ public class ProvenanceAnalysis {
 	private static final String INPUT_CONTAINER_PROCESSOR = "_INPUT_";
 	private static final Object ALL_PATHS_KEYWORD = "ALL";
 
-	private ProvenanceQuery provenanceQuery = null;
-	private AnnotationsLoader al = new AnnotationsLoader();
+	private ProvenanceQuery pq = null;
+	private AnnotationsLoader al = new AnnotationsLoader();  // singleton
 
 	// paths collected by lineageQuery and to be used by naive provenance query
 	private Map<String, List<List<String>>> validPaths = new HashMap<String, List<List<String>>>();
 
 	private List<String> currentPath;
-
 	private Map<String,List<String>> annotations = null;  // user-made annotations to processors
 
-	//
 	// Tupelo for OPM -- 4/09
-	// init the provenance graph
-	//
-	private Context context = new UnionContext();
+	private Context context = null;
 	private ProvenanceContextFacade graph = null;
 	private ProvenanceAccount account = null;
+
 	private OPMManager aOPMManager = new OPMManager();
-
-	public ProvenanceAnalysis() {
-	}
+	private String location;
 	
-	public ProvenanceAnalysis(ProvenanceQuery provenanceQuery) {
-		this.provenanceQuery = provenanceQuery;
+	public ProvenanceAnalysis() {
+		
 	}
 
-/**
- * init Tupelo RDF provenance graph
- */
-	public void initGraph() {		
-
+	public ProvenanceAnalysis(String location, ProvenanceQuery pq) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
+		this.setLocation(location);
+		this.pq = pq;
+		initGraph();
+	}
+	/**
+	 * Call to create the opm graph and annotation loader
+	 */
+	public void initGraph() {
+		
 		// OPM management
 		aOPMManager = new OPMManager();
 		graph = aOPMManager.getGraph();		
@@ -117,8 +116,7 @@ public class ProvenanceAnalysis {
 	}
 
 
-	public List<String> getWFInstanceIDs() throws SQLException { return getProvenanceQuery().getWFInstanceIDs(); }
-
+	public List<String> getWFInstanceIDs() throws SQLException { return getPq().getWFInstanceIDs(); }
 
 	/**
 	 * @param wfInstance lineage scope -- a specific instance
@@ -134,10 +132,9 @@ public class ProvenanceAnalysis {
 			String vname,
 			String iteration) throws SQLException  {
 
-		LineageSQLQuery lq = getProvenanceQuery().simpleLineageQuery(wfInstance, pname, vname, iteration);
+		LineageSQLQuery lq = getPq().simpleLineageQuery(wfInstance, pname, vname, iteration);
 
-		return getProvenanceQuery().runLineageQuery(lq);
-
+		return getPq().runLineageQuery(lq);
 	}
 
 
@@ -171,7 +168,7 @@ public class ProvenanceAnalysis {
 			vbConstraints.put("VB.varNameRef", var);
 			vbConstraints.put("VB.wfInstanceRef", wfInstance);
 
-			List<VarBinding> vbList = getProvenanceQuery().getVarBindings(vbConstraints); // DB
+			List<VarBinding> vbList = getPq().getVarBindings(vbConstraints); // DB
 
 			for (VarBinding vb:vbList) {
 
@@ -222,7 +219,7 @@ public class ProvenanceAnalysis {
 		// System.out.println("\n****************  executing lineage queries:  **************\n");
 		start = System.currentTimeMillis();
 
-		List<LineageQueryResult> results =  getProvenanceQuery().runLineageQueries(lqList);
+		List<LineageQueryResult> results =  getPq().runLineageQueries(lqList);
 		stop = System.currentTimeMillis();
 
 		long qrt = stop-start;
@@ -267,7 +264,7 @@ public class ProvenanceAnalysis {
 		varQueryConstraints.put("V.pnameRef", proc);  
 		varQueryConstraints.put("V.varName", var);  
 
-		List<Var> vars = getProvenanceQuery().getVars(varQueryConstraints);
+		List<Var> vars = getPq().getVars(varQueryConstraints);
 
 		if (vars.isEmpty())  {
 			System.out.println("variable ("+var+","+proc+") not found, lineage query terminated");
@@ -293,10 +290,10 @@ public class ProvenanceAnalysis {
 				vbConstraints.put("VB.iteration", "["+path+"]");
 		}
 
-		List<VarBinding> vbList = getProvenanceQuery().getVarBindings(vbConstraints); // DB
+		List<VarBinding> vbList = getPq().getVarBindings(vbConstraints); // DB
 
+		// use only the first result (expect only one) -- in this method we assume path is not null
 
-		// use only the first result (expect only one)
 		// map the resulting varBinding to an Artifact
 		if (vbList == null) {
 			System.out.println("no entry corresponding to conditions: proc="+
@@ -319,7 +316,7 @@ public class ProvenanceAnalysis {
 		aOPMManager.addArtifact(vb.getValue());
 		aOPMManager.createRole(role);
 
-		if (v.isInput() || getProvenanceQuery().isDataflow(proc)) { // if vName is input, then do a xfer() step
+		if (v.isInput() || getPq().isDataflow(proc)) { // if vName is input, then do a xfer() step
 
 			// rec. accumulates SQL queries into lqList
 			xferStep(wfInstance, var, proc, path, 
@@ -372,7 +369,7 @@ public class ProvenanceAnalysis {
 		// in this way we can seamlessly traverse the graph over intermediate I/O that are part 
 		// of nested dataflows
 
-		if (getProvenanceQuery().isDataflow(proc)) { // if we are looking at the output of an entire dataflow
+		if (getPq().isDataflow(proc)) { // if we are looking at the output of an entire dataflow
 
 			// force the "input vars" for this step to be the output var itself
 			// this causes the following xfer step to trace back to the next processor _within_ proc 
@@ -390,7 +387,7 @@ public class ProvenanceAnalysis {
 			varsQueryConstraints.put("pnameRef", proc);  
 			varsQueryConstraints.put("inputOrOutput", "1");  
 
-			inputVars = getProvenanceQuery().getVars(varsQueryConstraints);
+			inputVars = getPq().getVars(varsQueryConstraints);
 		}
 
 		///////////
@@ -464,7 +461,7 @@ public class ProvenanceAnalysis {
 			// also remove spurious dataflow processors are this point
 			List<String> pathCopy = new ArrayList<String>();
 			for (String s:currentPath) {
-				if (!getProvenanceQuery().isDataflow(s)) pathCopy.add(s);
+				if (!getPq().isDataflow(s)) pathCopy.add(s);
 			}			
 
 			paths.add(pathCopy);			
@@ -492,15 +489,15 @@ public class ProvenanceAnalysis {
 			// using the current path, which becomes the element in collection		
 			if (var2Path.isEmpty()) {
 
-				lq = getProvenanceQuery().generateSQL(wfInstance, proc, path, false);  // false -> fetch output vars
+				lq = getPq().generateSQL(wfInstance, proc, path, false);  // false -> fetch output vars
 
 			} else {
 				// dnl of output var defines length of suffix to path that we are going to use for query
 				// if var2Path is null this generates a trivial query for the current output var and current path CHECK
-				lq = getProvenanceQuery().lineageQueryGen(wfInstance, proc, var2Path, outputVar, path);
+				lq = getPq().lineageQueryGen(wfInstance, proc, var2Path, outputVar, path);
 
 				// if OPM is on, execute the query so we get the value we need for the Artifact node 
-				LineageQueryResult inputs = getProvenanceQuery().runLineageQuery(lq);
+				LineageQueryResult inputs = getPq().runLineageQuery(lq);
 
 				//
 				// update OPM graph
@@ -590,7 +587,7 @@ public class ProvenanceAnalysis {
 		arcsQueryConstraints.put("sinkVarNameRef", var);  
 		arcsQueryConstraints.put("sinkPNameRef", proc);  
 
-		List<Arc> arcs = getProvenanceQuery().getArcs(arcsQueryConstraints);
+		List<Arc> arcs = getPq().getArcs(arcsQueryConstraints);
 
 		if (arcs.size() == 0) {
 //			System.out.println("no arcs going up from ["+proc+","+var+"] ... returning");
@@ -615,7 +612,7 @@ public class ProvenanceAnalysis {
 		varsQueryConstraints.put("W.instanceID", wfInstanceID);
 		varsQueryConstraints.put("pnameRef", sourceProcName);  
 		varsQueryConstraints.put("varName", sourceVarName);  
-		List<Var>  varList  = getProvenanceQuery().getVars(varsQueryConstraints);
+		List<Var>  varList  = getPq().getVars(varsQueryConstraints);
 
 		Var outputVar = varList.get(0);
 
@@ -923,13 +920,21 @@ public class ProvenanceAnalysis {
 	}
 
 
-	public void setProvenanceQuery(ProvenanceQuery provenanceQuery) {
-		this.provenanceQuery = provenanceQuery;
+	public void setPq(ProvenanceQuery pq) {
+		this.pq = pq;
 	}
 
 
-	public ProvenanceQuery getProvenanceQuery() {
-		return provenanceQuery;
+	public ProvenanceQuery getPq() {
+		return pq;
+	}
+
+	public void setLocation(String location) {
+		this.location = location;
+	}
+
+	public String getLocation() {
+		return location;
 	}
 
 

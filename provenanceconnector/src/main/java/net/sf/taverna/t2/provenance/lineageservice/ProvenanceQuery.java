@@ -63,7 +63,7 @@ public abstract class ProvenanceQuery {
 
 	private String dbURL;
 
-	private static String DATAFLOW_TYPE = "net.sf.taverna.t2.activities.dataflow.DataflowActivity";
+	public static String DATAFLOW_TYPE = "net.sf.taverna.t2.activities.dataflow.DataflowActivity";
 
 	public Connection getConnection() throws InstantiationException,
 			IllegalAccessException, ClassNotFoundException {
