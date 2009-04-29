@@ -66,14 +66,12 @@ public class ProvenanceAnalysis {
 	private ProvenanceAccount account = null;
 
 	private OPMManager aOPMManager = new OPMManager();
-	private String location;
 	
 	public ProvenanceAnalysis() {
 		
 	}
 
-	public ProvenanceAnalysis(String location, ProvenanceQuery pq) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
-		this.setLocation(location);
+	public ProvenanceAnalysis(ProvenanceQuery pq) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 		this.pq = pq;
 		initGraph();
 	}
@@ -927,14 +925,6 @@ public class ProvenanceAnalysis {
 
 	public ProvenanceQuery getPq() {
 		return pq;
-	}
-
-	public void setLocation(String location) {
-		this.location = location;
-	}
-
-	public String getLocation() {
-		return location;
 	}
 
 
