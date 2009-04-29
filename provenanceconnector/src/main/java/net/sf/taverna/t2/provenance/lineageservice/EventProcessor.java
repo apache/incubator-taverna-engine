@@ -49,10 +49,14 @@ import net.sf.taverna.t2.workflowmodel.Dataflow;
 import net.sf.taverna.t2.workflowmodel.DataflowInputPort;
 import net.sf.taverna.t2.workflowmodel.DataflowOutputPort;
 import net.sf.taverna.t2.workflowmodel.Datalink;
+import net.sf.taverna.t2.workflowmodel.EditException;
 import net.sf.taverna.t2.workflowmodel.Processor;
 import net.sf.taverna.t2.workflowmodel.ProcessorInputPort;
 import net.sf.taverna.t2.workflowmodel.ProcessorOutputPort;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
+import net.sf.taverna.t2.workflowmodel.serialization.DeserializationException;
+import net.sf.taverna.t2.workflowmodel.serialization.xml.XMLDeserializer;
+import net.sf.taverna.t2.workflowmodel.serialization.xml.XMLDeserializerRegistry;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -70,13 +74,13 @@ public class EventProcessor {
 	 * A map of UUIDs of the originating processor to the ProcBinding object
 	 * that contains its parameters
 	 */
-	private Map<String, ProcBinding> procBindingMap = new HashMap<String, ProcBinding>();
+	private Map<String, ProcBinding> procBindingMap = new HashMap<String, ProcBinding>();;
 
 	/** A map of child ids to their parents in the hierarchy of events:
 	 *  workflow -> process -> processor -> activity -> iteration
 	 */
-	private Map<String, String> parentChildMap = new HashMap<String, String>();
-	
+	private Map<String, String> parentChildMap= new HashMap<String, String>();
+
 	private static Logger logger = Logger.getLogger(EventProcessor.class);
 
 	private static final String OUTPUT_CONTAINER_PROCESSOR = "_OUTPUT_";
@@ -89,24 +93,24 @@ public class EventProcessor {
 	static boolean workflowStructureDone = false; // used to inhibit processing of multiple workflow events -- we only need the first
 	static int dataflowDepth = 0; // incremented when we recurse on a subflow, decremented on exit
 
-	private String wfInstanceID; // unique run ID. set when we see the first event of type "process"
+	private String wfInstanceID = null; // unique run ID. set when we see the first event of type "process"
 
 	String topLevelDataflowName = null;
 	String topLevelDataflowID   = null;
 
 	Map<String, String> wfNestingMap = new HashMap<String, String>(); 
-	
-	private WorkflowDataProcessor  wfdp = new WorkflowDataProcessor();
+
+	// dedicated class for processing WorkflowData events which carry workflow output info 
+	private WorkflowDataProcessor  wfdp;
+
 
 	private ProvenanceWriter pw = null;
 	private ProvenanceQuery pq = null;
-	
-	// dedicated class for processing WorkflowData events which carry workflow output info 
-	
-	public EventProcessor () {
-		
-	}
 
+	public EventProcessor(){
+	
+	}
+	
 	/**
 	 * @param pw
 	 * @throws SQLException
@@ -115,19 +119,12 @@ public class EventProcessor {
 	 * @throws InstantiationException
 	 * 
 	 */
-	public EventProcessor(ProvenanceWriter pw, ProvenanceQuery pq)
+	public EventProcessor(ProvenanceWriter pw, ProvenanceQuery pq, WorkflowDataProcessor wfdp)
 	throws InstantiationException, IllegalAccessException,
 	ClassNotFoundException, SQLException {
 		this.pw = pw;
 		this.pq = pq;
-
-		// set the reader and writer in the workflowDataProcessor
-		wfdp.setPq(pq);
-		wfdp.setPw(pw);
-
-		//procBindingMap = new HashMap<String, ProcBinding>();
-		//parentChildMap = new HashMap<String, String>();
-
+		this.wfdp = wfdp;
 	}
 
 
@@ -155,12 +152,12 @@ public class EventProcessor {
 
 		// strip the new <workflowItem identifier="57a70081-3d8b-462c-aa35-3b63d7326002">
 		// before passing the rest to the deser.
-		setWfInstanceID(provenanceItem.getIdentifier());
 //		Element wfStructureRootEl = stripWfInstanceHeader(content); // sets wfInstanceID (the id of this run)
-//
+
 //		XMLDeserializerRegistry instance = XMLDeserializerRegistry.getInstance();
 //		XMLDeserializer deserializer = instance.getDeserializer();
 
+		setWfInstanceID(((WorkflowProvenanceItem)provenanceItem).getIdentifier());
 		Dataflow df = null;
 
 //		System.out.println("starting deserialiser");
@@ -184,7 +181,7 @@ public class EventProcessor {
 		// check whether we already have this WF in the DB
 		List<String> wfNames = null;
 		try {
-			wfNames = getPq().getAllWFnames();
+			wfNames = pq.getAllWFnames();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -197,7 +194,7 @@ public class EventProcessor {
 			// it is going to be rewritten right away in the rest of this method
 			// this is simpler to implement than selectively avoiding duplicate writes to the DB
 			try {
-				getPw().clearDBStatic(topLevelDataflowID);
+				pw.clearDBStatic(topLevelDataflowID);
 			} catch (SQLException e) {
 				logger.warn(e);
 			}
@@ -205,17 +202,17 @@ public class EventProcessor {
 		} else {
 //			logger.info("new workflow structure with ID "+topLevelDataflowID);
 		}
-		
+
 		// record the top level dataflow as a processor in the DB
 		try {
-			getPw().addProcessor(topLevelDataflowName, DATAFLOW_PROCESSOR_TYPE, topLevelDataflowID);
+			pw.addProcessor(topLevelDataflowName, DATAFLOW_PROCESSOR_TYPE, topLevelDataflowID);
 		} catch (SQLException e) {
 			logger.warn(e);
 		}
 
 //		logger.info("top level wf name: "+topLevelDataflowName);
 
-		
+
 		return processDataflowStructure(df, topLevelDataflowID, df.getLocalName());  // null: no external name given to top level dataflow
 	}		
 
@@ -231,7 +228,7 @@ public class EventProcessor {
 	public String processDataflowStructure(Dataflow df, String dataflowID, String externalName) {
 
 		dataflowDepth++;
-		
+
 		try {
 
 			List<Var> vars = new ArrayList<Var>();
@@ -239,7 +236,7 @@ public class EventProcessor {
 			// check whether we already have this WF in the DB
 			List<String> wfNames = null;
 			try {
-				wfNames = getPq().getAllWFnames();
+				wfNames = pq.getAllWFnames();
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -251,7 +248,7 @@ public class EventProcessor {
 				// clearing the portion of the static DB that pertains to this specific WF.
 				// it is going to be rewritten right away in the rest of this method
 				// this is simpler to implement than selectively avoiding duplicate writes to the DB
-				getPw().clearDBStatic(dataflowID);
+				pw.clearDBStatic(dataflowID);
 
 			} else {
 //				logger.warn("new workflow structure with ID "+dataflowID);
@@ -266,21 +263,21 @@ public class EventProcessor {
 			if ((parentDataflow = wfNestingMap.get(dataflowID)) == null) {
 
 				// this is a top level dataflow description
-				getPw().addWFId(dataflowID); // set its dataflowID with no parent
+				pw.addWFId(dataflowID); // set its dataflowID with no parent
 
 			} else {
 
 				// we are processing a nested workflow structure
 //				logger.info("this dataflow is nested within "+parentDataflow);
 
-				getPw().addWFId(dataflowID, parentDataflow); // set its dataflowID along with its parent
+				pw.addWFId(dataflowID, parentDataflow); // set its dataflowID along with its parent
 
 				// override wfInstanceID to point to top level
 				//	wfInstanceID = pq.getWFInstanceID(parentDataflow);
 
 			}
 
-			getPw().addWFInstanceId(dataflowID, getWfInstanceID());  // wfInstanceID stripped by stripWfInstanceHeader() above
+			pw.addWFInstanceId(dataflowID, wfInstanceID);  // wfInstanceID stripped by stripWfInstanceHeader() above
 
 
 			// //////
@@ -301,7 +298,7 @@ public class EventProcessor {
 				if (activities != null && !activities.isEmpty()) {
 					pType = activities.get(0).getClass().getCanonicalName();
 				}
-				getPw().addProcessor(pName, pType, dataflowID);
+				pw.addProcessor(pName, pType, dataflowID);
 
 				// ///
 				// add all input ports for this processor as input variables
@@ -356,7 +353,7 @@ public class EventProcessor {
 						/// RECURSIVE CALL 
 						//////////////
 						processDataflowStructure(nested, nested.getInternalIdentier(), p.getLocalName());
-						
+
 						//List<? extends Processor> procs = nested.getProcessors();						
 //						for (Processor nestedP:procs) {
 //						System.out.println("recursion on nested processor: "+nestedP.getLocalName());
@@ -421,7 +418,7 @@ public class EventProcessor {
 				vars.add(outputVar);
 			}
 
-			getPw().addVariables(vars, dataflowID);
+			pw.addVariables(vars, dataflowID);
 
 			// ////
 			// add arc records using the dataflow links
@@ -455,7 +452,7 @@ public class EventProcessor {
 				if (sourcePname != null && sinkPname != null) {
 //					System.out.println("adding regular internal arc");
 
-					getPw().addArc(l.getSource().getName(), sourcePname, l.getSink()
+					pw.addArc(l.getSource().getName(), sourcePname, l.getSink()
 							.getName(), sinkPname, dataflowID);
 
 				} else if (sourcePname == null) {
@@ -468,7 +465,7 @@ public class EventProcessor {
 
 //					System.out.println("adding arc from dataflow input");
 
-					getPw().addArc(l.getSource().getName(),
+					pw.addArc(l.getSource().getName(),
 							sourcePname, l.getSink().getName(),
 							sinkPname, dataflowID);
 
@@ -483,7 +480,7 @@ public class EventProcessor {
 
 					//					System.out.println("adding arc to dataflow output");
 
-					getPw().addArc(l.getSource().getName(), sourcePname, l.getSink()
+					pw.addArc(l.getSource().getName(), sourcePname, l.getSink()
 							.getName(), sinkPname,
 							dataflowID);
 				}
@@ -602,28 +599,24 @@ public class EventProcessor {
 		} else if (provenanceItem.getEventType().equals(SharedVocabulary.END_WORKFLOW_EVENT_TYPE)) {
 			
 			// use this event to do housekeeping on the input/output varbindings 
-//			logger.info("end of workflow processing");
-			
-			
-			//fillInputVarBindings();  // OBSOLETE
-			//fillOutputVarBindings();// OBSOLETE 
-			
+
 			dataflowDepth--;
 			if (dataflowDepth == 0) {
+
 				// process the outputs accumulated by WorkflowDataProcessor
-				wfdp.processTrees(topLevelDataflowName, wfInstanceID);
+				getWfdp().processTrees(topLevelDataflowName, wfInstanceID);
 
 				patchTopLevelnputs();
 
 				// PM changed 23/4/09
 				reconcileTopLevelOutputs();  // patchTopLevelOutputs		
 				workflowStructureDone = false; // CHECK reset for next run... 
-
 			}
+
 
 		} else if (provenanceItem.getEventType().equals(SharedVocabulary.WORKFLOW_DATA_EVENT_TYPE)) {
 			// give this event to a WorkflowDataProcessor object for pre-processing
-			wfdp.addWorkflowDataItem(provenanceItem);
+			getWfdp().addWorkflowDataItem(provenanceItem);
 //			logger.info("Received workflow data - not processing");
 			//FIXME not sure  - needs to be stored somehow
 
@@ -640,17 +633,12 @@ public class EventProcessor {
 	 */
 	public void patchTopLevelnputs() {
 
-		// only do the patching on the top level
-	//	if (dataflowDepth > 0) {
-	//		System.out.println("patchTopLevelnputs called on a subflow -- nothing to do");
-	//		return;
-	//	}
 		// for each input I to topLevelDataflow:
 		// pick first outgoing arc with sink P:X
 		// copy value X to I -- this can be a collection, so copy everything
 
 		// get all global input vars
-		
+
 //		logger.info("\n\n BACKPATCHING GLOBAL INPUTS with dataflowDepth = "+dataflowDepth+"*******\n");
 
 		List<Var> inputs=null;
@@ -658,7 +646,7 @@ public class EventProcessor {
 			inputs = getPq().getInputVars(topLevelDataflowName, topLevelDataflowID, getWfInstanceID());
 
 			for (Var input:inputs)  {
-				
+
 //				logger.info("global input: "+input.getVName());
 
 				Map<String,String> queryConstraints = new HashMap<String,String>();
@@ -673,7 +661,7 @@ public class EventProcessor {
 				String targetVname = outgoingArcs.get(0).getSinkVarNameRef();
 
 //				logger.info("copying values from ["+targetPname+":"+targetVname+"] for instance ID: ["+wfInstanceID+"]");
-				
+
 				queryConstraints.clear();
 				queryConstraints.put("varNameRef", targetVname);
 				queryConstraints.put("V.pNameRef", targetPname);
@@ -685,23 +673,24 @@ public class EventProcessor {
 //				logger.info("found the following VBs:");
 				for (VarBinding vb:VBs) {
 //					logger.info(vb.getValue());
-	
+
 					// insert VarBinding back into VB with the global input varname
 					vb.setPNameRef(input.getPName());
 					vb.setVarNameRef(input.getVName());
 					getPw().addVarBinding(vb);
 					
 //					logger.info("added");
-					
+
 				}
-				
+
 			}
 		} catch (SQLException e) {
 			logger.warn("Patch top level inputs problem for provenance: " + e);
 		}
 
 	}
-	
+
+
 	// PM added 23/4/09
 	/**
 	 * reconcile the top level outputs with the results from its immediate precedessors in the graph.<br/>
@@ -818,7 +807,7 @@ public class EventProcessor {
 				queryConstraints.put("PNameRef", output.getPName());
 				queryConstraints.put("varNameRef", output.getVName());
 
-				List<NestedListNode> oCollections = getPq().getNestedListNodes(queryConstraints);
+				List<NestedListNode> oCollections = pq.getNestedListNodes(queryConstraints);
 
 				// insert back as collection refs for Y -- catch duplicates
 				for (NestedListNode nln:oCollections) {
@@ -838,10 +827,9 @@ public class EventProcessor {
 		}
 
 	}
-	
+
 	/**
-	 * fills in the VBs for the global outputs-- this removes the need for explicit events
-	 * that account for these value bindings...
+	 * OBSOLETE
 	 */
 	public void patchTopLevelOutputs() {
 
@@ -850,13 +838,13 @@ public class EventProcessor {
 		// copy value Y to O -- if this is a collection, do a deep copy
 
 		// get all global input vars
-		
+
 		List<Var> outputs=null;
 		try {
 			outputs = getPq().getOutputVars(topLevelDataflowName, topLevelDataflowID);
 
 			for (Var output:outputs)  {
-				
+
 				Map<String,String> queryConstraints = new HashMap<String,String>();
 
 				queryConstraints.put("sinkVarNameRef", output.getVName());
@@ -866,12 +854,10 @@ public class EventProcessor {
 
 				// there can be only one -- but check that there is one!
 				if (incomingArcs.size()==0)  continue;
-				
+
 				String sourcePname = incomingArcs.get(0).getSourcePnameRef();
 				String sourceVname = incomingArcs.get(0).getSourceVarNameRef();
 
-				logger.info("copying values from ["+sourcePname+":"+sourceVname+"] for instance ID: ["+wfInstanceID+"]");
-				
 				queryConstraints.clear();
 				queryConstraints.put("varNameRef", sourceVname);
 				queryConstraints.put("V.pNameRef", sourcePname);
@@ -879,20 +865,20 @@ public class EventProcessor {
 				queryConstraints.put("V.wfInstanceRef", topLevelDataflowID);
 
 				List<VarBinding> VBs = pq.getVarBindings(queryConstraints);
-				
+
 //				logger.info("found the following VBs:");
 				for (VarBinding vb:VBs) {
 //					logger.info(vb.getValue());
-	
+
 					// insert VarBinding back into VB with the global output varname
 					vb.setPNameRef(output.getPName());
 					vb.setVarNameRef(output.getVName());
 					getPw().addVarBinding(vb);
 					
 //					logger.info("added");
-					
+
 				}
-				
+
 			}
 		} catch (SQLException e) {
 			logger.warn("Patch top level output problem for provenance: " + e);
@@ -925,8 +911,8 @@ public class EventProcessor {
 		}
 
 	}
-	
-	
+
+
 	/**
 	 * if b involves a value within a collection , _and_ it is copied from a value generated during a previous iteration,
 	 * then this method propagates the list reference to that iteration value, which wouldn't have it 
@@ -972,9 +958,11 @@ public class EventProcessor {
 		}
 
 	}
-	
-	
 
+
+	/**
+	 * create one new VarBinding record for each input port binding
+	 */
 	@SuppressWarnings("unchecked")
 	private void processInput(InputDataProvenanceItem provenanceItem, ProcBinding procBinding) {
 
@@ -995,8 +983,6 @@ public class EventProcessor {
 //				processVarBinding(valueEl, processor, portName, iterationVector,
 //				dataflow);
 
-				//processVarBinding(valueEl, procBinding.getPNameRef(), portName, procBinding.getIterationVector(),
-				//		getWfInstanceID());
 				List<VarBinding> newBindings = processVarBinding(valueEl, procBinding.getPNameRef(), portName, procBinding.getIterationVector(),
 						wfInstanceID);
 				// this is a list whenever valueEl is of type list: in this case processVarBinding recursively
@@ -1010,6 +996,7 @@ public class EventProcessor {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+
 			}
 		}
 
@@ -1073,7 +1060,6 @@ public class EventProcessor {
 		vb.setCollIDRef(collIdRef);
 		vb.setPositionInColl(positionInCollection);
 
-
 		if (valueType.equals("literal")) {
 
 //			logger.info("processing literal value");
@@ -1101,6 +1087,7 @@ public class EventProcessor {
 			try {
 				getPw().addVarBinding(vb);
 				newBindings.add(vb);
+
 			} catch (SQLException e) {
 				logger.warn("Problem processing var binding: " + e);
 			}
@@ -1110,7 +1097,6 @@ public class EventProcessor {
 			// add entries to the Collection and to the VarBinding tables
 			// list id --> Collection.collId
 
-//			logger.info("processing list value");
 			String collId = valueEl.getAttributeValue("id");
 			try {
 
@@ -1144,6 +1130,7 @@ public class EventProcessor {
 							iterationId, wfInstanceRef, iterationVector);
 
 					newBindings.addAll(bindings);
+
 					positionInCollection++;
 				}
 
@@ -1154,27 +1141,10 @@ public class EventProcessor {
 			logger.info("unrecognized value type element for "
 					+ processorId + ": " + valueType);
 		}
+
 		return newBindings;
 	}
 
-	/**
-	 * dummy impl -- waiting for T2 to provide the real ID as part of the event
-	 * message
-	 * 
-	 * @param root
-	 * @return
-	 */
-	public String getWorkflowID(Element root) {
-
-		Element nameEl = root.getChild("name");
-
-		if (nameEl != null)
-			return nameEl.getText();
-
-		else
-			return "N/A";
-
-	}
 
 	/**
 	 * OBSOLETE: returns the iteration vector x,y,z,... from [x,y,z,...]
@@ -1207,7 +1177,7 @@ public class EventProcessor {
 		//FIXME needs to do something rather than ignoring the writing out
 		// only save iteration events
 //		if (!eventType.equals("iteration")) return;
-		
+
 		// URL resource =
 		// getClass().getClassLoader().getResource(TEST_EVENTS_FOLDER);
 		File f1 = null;
@@ -1224,6 +1194,11 @@ public class EventProcessor {
                 new FileOutputStream(f)));
 		en.writeObject(provenanceItem);
 		en.close();
+//		fw.write(content);
+//		fw.flush();
+//		fw.close();
+
+//		FileWriter fw = new FileWriter(f);
 //		fw.write(content);
 //		fw.flush();
 //		fw.close();
@@ -1250,7 +1225,7 @@ public class EventProcessor {
 		// backpropagate VarBinding from the target var of the arc to the source
 		for (Arc aArc : arcs) {
 
-//				logger.info("propagating VarBinding from ["
+//			logger.info("propagating VarBinding from ["
 //			+ aArc.getSinkPnameRef() + "/" + aArc.getSinkVarNameRef()
 //			+ "] to input [" + aArc.getSourcePnameRef() + "/"
 //			+ aArc.getSourceVarNameRef() + "]");
@@ -1259,7 +1234,7 @@ public class EventProcessor {
 			Map<String, String> vbConstraints = new HashMap<String, String>();
 			vbConstraints.put("VB.PNameRef", aArc.getSinkPnameRef());
 			vbConstraints.put("VB.varNameRef", aArc.getSinkVarNameRef());
-			vbConstraints.put("VB.wfInstanceRef", getWfInstanceID());
+			vbConstraints.put("VB.wfInstanceRef", wfInstanceID);
 
 			List<VarBinding> vbList = getPq().getVarBindings(vbConstraints); // DB
 			// QUERY
@@ -1296,7 +1271,7 @@ public class EventProcessor {
 		// output
 		for (Arc aArc : arcs) {
 
-//				logger.info("fwd propagating VarBinding from ["
+//			logger.info("fwd propagating VarBinding from ["
 //			+ aArc.getSourcePnameRef() + "/"
 //			+ aArc.getSourceVarNameRef() + "] to input ["
 //			+ aArc.getSinkPnameRef() + "/" + aArc.getSinkVarNameRef()
@@ -1503,6 +1478,14 @@ public class EventProcessor {
 
 	public String getWfInstanceID() {
 		return wfInstanceID;
+	}
+
+	public void setWfdp(WorkflowDataProcessor wfdp) {
+		this.wfdp = wfdp;
+	}
+
+	public WorkflowDataProcessor getWfdp() {
+		return wfdp;
 	}
 
 }
