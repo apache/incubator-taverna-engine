@@ -64,16 +64,21 @@ public abstract class AbstractXMLDeserializer implements
 
 	protected Object createBean(Element element, ClassLoader cl) {
 		Element configElement;
-		if (element.getName().equals(CONFIG_BEAN)
-				&& element.getNamespace().equals(T2_WORKFLOW_NAMESPACE)) {
+		
+		// Note - don't check for CONFIG_BEAN/T2_WORKFLOW_NAMESPACE as 
+		// the annotations are such beans, but they are not in a <configBean> element.
+			
+		// Instead, we simply check if the "encoding" attribute is there, which it 
+		// should be
+		if (element.getAttribute(BEAN_ENCODING) != null) {
 			configElement = element;
 		} else {
 			// Find it one element below
 			configElement = element
 					.getChild(CONFIG_BEAN, T2_WORKFLOW_NAMESPACE);
 			if (configElement == null) {
-				// Not found
-				return null;
+				throw new IllegalArgumentException("Can't find bean element {" + 
+						T2_WORKFLOW_NAMESPACE + "}" + CONFIG_BEAN);
 			}
 		}
 		
