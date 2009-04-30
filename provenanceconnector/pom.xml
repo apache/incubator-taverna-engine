@@ -13,6 +13,9 @@
 	<url>http://maven.apache.org</url>
 	<repositories>
 		<repository>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
 			<id>tupelo2</id>
 			<name>tupelo2</name>
 			<url>http://dlt-dev.ncsa.uiuc.edu/m2</url>
