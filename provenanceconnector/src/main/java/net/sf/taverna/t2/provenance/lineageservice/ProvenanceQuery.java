@@ -1033,10 +1033,11 @@ public abstract class ProvenanceQuery {
 	 * @param proc
 	 * @param var2Path
 	 * @param path
+	 * @param returnOutputs returns inputs *and* outputs if set to true
 	 * @return
 	 */
 	public LineageSQLQuery lineageQueryGen(String wfInstance, String proc,
-			Map<Var, String> var2Path, Var outputVar, String path) {
+			Map<Var, String> var2Path, Var outputVar, String path, boolean returnOutputs) {
 		// setup
 		StringBuffer effectivePath = new StringBuffer();
 
@@ -1069,7 +1070,8 @@ public abstract class ProvenanceQuery {
 		// generation
 		if (!var2Path.isEmpty()) { // generate query to retrieve inputs
 
-			return generateSQL(wfInstance, proc, effectivePath.toString(), true); // true
+			// returnOutputs => SQL generator will *not* constrain to return inputs only  
+			return generateSQL(wfInstance, proc, effectivePath.toString(), returnOutputs); 
 			// ->
 			// fetch
 			// input
@@ -1096,10 +1098,11 @@ public abstract class ProvenanceQuery {
 	 * @param wfInstance
 	 * @param proc
 	 * @param effectivePath
+	 * @param returnOutputs returns both inputs and outputs if set to true
 	 * @return
 	 */
 	public LineageSQLQuery generateSQL(String wfInstance, String proc,
-			String effectivePath, boolean fetchInputs) {
+			String effectivePath, boolean returnOutputs) {
 	
 		LineageSQLQuery lq = new LineageSQLQuery();
 	
@@ -1115,9 +1118,8 @@ public abstract class ProvenanceQuery {
 		lineageQueryConstraints.put("W.instanceID", wfInstance);
 		lineageQueryConstraints.put("VB.PNameRef", proc);
 		
-		// limit to inputs -- 
-		// outputs only need to be returned when proc has no inputs (i.e. assume outputs are constants in this case)
-		if (fetchInputs)	lineageQueryConstraints.put("V.inputOrOutput", "1");
+		// limit to inputs? 
+		if (!returnOutputs)	lineageQueryConstraints.put("V.inputOrOutput", "1");
 		
 
 		if (effectivePath != null ) {
@@ -1162,7 +1164,6 @@ public abstract class ProvenanceQuery {
 
 				while (rs.next()) {
 
-
 					String type = lqr.ATOM_TYPE; // temp -- FIXME
 
 				String wfInstance = rs.getString("wfInstanceRef");
@@ -1171,6 +1172,8 @@ public abstract class ProvenanceQuery {
 				String it   = rs.getString("iteration");
 				String coll = rs.getString("collIDRef");
 				String value = rs.getString("value");
+				boolean isInput = (rs.getInt("inputOrOutput") == 1) ? true : false;
+				
 				//FIXME there is no D and no VB - this is in generateSQL, not simpleLineageQuery
 				//String resolvedValue = rs.getString("D.data");
 				
@@ -1182,7 +1185,7 @@ public abstract class ProvenanceQuery {
 					// it,
 					// value, resolvedValue, type);
 				//FIXME if the data is required then the query needs fixed
-				lqr.addLineageQueryResultRecord(proc, var, wfInstance, it, value, null, type);	
+				lqr.addLineageQueryResultRecord(proc, var, wfInstance, it, value, null, type, isInput);	
 				}
 
 				return lqr;
