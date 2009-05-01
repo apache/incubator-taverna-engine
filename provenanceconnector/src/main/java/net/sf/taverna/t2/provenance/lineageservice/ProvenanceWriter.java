@@ -490,7 +490,7 @@ public abstract class ProvenanceWriter {
 			cnt++;
 
 		} catch (SQLException e) {
-			System.out.println(e);
+//			System.out.println(e);
 			// the same ID will come in several times -- duplications are
 			// expected, don't panic
 			// System.out.println("****  insert failed due to ["+e.getMessage()+"]");

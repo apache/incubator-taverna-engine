@@ -44,7 +44,7 @@ public class LineageQueryResult {
 			String iteration,
 			String value,
 			String resolvedValue,
-			String type) {
+			String type, boolean isInput) {
 
 		LineageQueryResultRecord record = new LineageQueryResultRecord();
 
@@ -54,6 +54,7 @@ public class LineageQueryResult {
 		record.setVname(vname);
 		record.setIteration(iteration);
 		record.setResolvedValue(resolvedValue);
+		record.setInput(isInput);
 
 		getRecords().add(record);
 	}

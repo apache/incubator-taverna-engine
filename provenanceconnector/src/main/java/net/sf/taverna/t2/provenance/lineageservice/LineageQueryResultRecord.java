@@ -29,7 +29,8 @@ public class LineageQueryResultRecord {
 	String value;     // atomic or XML-formatted collection -- this is actually a reference to the value...
 	String resolvedValue;
 	String type;  // one of referenceSet, referenceSetCollection
-	private boolean printResolvedValue;
+	boolean printResolvedValue;
+	boolean isInput; 
 
 	public String toString() {
 
@@ -136,5 +137,21 @@ public class LineageQueryResultRecord {
 	public void setPrintResolvedValue(boolean b) {
 		this.printResolvedValue = b
 		;	}
+
+
+	/**
+	 * @return the isInput
+	 */
+	public boolean isInput() {
+		return isInput;
+	}
+
+
+	/**
+	 * @param isInput the isInput to set
+	 */
+	public void setInput(boolean isInput) {
+		this.isInput = isInput;
+	}
 
 }

@@ -64,34 +64,47 @@ public class ProvenanceAnalysis {
 	private Map<String,List<String>> annotations = null;  // user-made annotations to processors
 
 	// Tupelo for OPM -- 4/09
-	private Context context = null;
-	private ProvenanceContextFacade graph = null;
-	private ProvenanceAccount account = null;
+//	private Context context = null;
+//	private ProvenanceAccount account = null;
+
+	private boolean ready = false; // set to true as soon as init succeeds. this means pa is ready to answer queries
+
+	private boolean returnOutputs = false; // by default only return input bindings
 
 	private OPMManager aOPMManager = new OPMManager();
-	
-	public ProvenanceAnalysis() {
-		
-	}
+
+	public ProvenanceAnalysis() { ; }
 
 	public ProvenanceAnalysis(ProvenanceQuery pq) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
+
 		this.pq = pq;
-		initGraph();
+
+		setReady(tryInit());
 	}
+
+
+	private boolean tryInit() throws SQLException {
+
+		if (getWFInstanceIDs() != null && getWFInstanceIDs().size()>0) {
+			initGraph();
+			return true;
+		} else 
+			return false;		
+	}
+
 	/**
-	 * Call to create the opm graph and annotation loader
+	 * Call to create the opm graph and annotation loader. 
+	 * this may fail due to queries being issued before DB is populated, minimally with wfInstanceID 
 	 */
 	public void initGraph() {
-		
+
 		// OPM management
-		aOPMManager = new OPMManager();
-		graph = aOPMManager.getGraph();		
 
 		try {
 			aOPMManager.createAccount(getWFInstanceIDs().get(0));
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+//			e.printStackTrace();
 		}
 	}
 
@@ -124,7 +137,8 @@ public class ProvenanceAnalysis {
 	 * @param pname for a specific processor [required]
 	 * @param a specific (input or output) variable [optional]
 	 * @param iteration and a specific iteration [optional]
-	 * @return a lineage query ready to be executed
+	 * @return a lineage query ready to be executed, or null if we cannot return an answer because we are not ready
+	 * (for instance the DB is not yet populated) 
 	 * @throws SQLException
 	 */
 	public LineageQueryResult fetchIntermediateResult(
@@ -132,6 +146,11 @@ public class ProvenanceAnalysis {
 			String pname,
 			String vname,
 			String iteration) throws SQLException  {
+
+		if (!isReady()) {
+			setReady(tryInit());
+			if (!isReady())  return null;
+		}
 
 		LineageSQLQuery lq = getPq().simpleLineageQuery(wfInstance, pname, vname, iteration);
 
@@ -160,8 +179,17 @@ public class ProvenanceAnalysis {
 			Set<String> selectedProcessors
 	) throws SQLException  {
 
+		if (!isReady()) {
+			setReady(tryInit());
+			if (!isReady())  return null;
+		}
+
+		// are we returning all outputs in addition to the inputs?
+		System.out.println("return outputs: "+isReturnOutputs());
+
 		Map<String, List<LineageQueryResult>> results = new HashMap<String, List<LineageQueryResult>>();
 
+		// run a query for each variable in the entire workflow graph
 		if (path.equals(ALL_PATHS_KEYWORD)) {
 
 			Map<String, String> vbConstraints = new HashMap<String, String>();
@@ -174,8 +202,8 @@ public class ProvenanceAnalysis {
 			for (VarBinding vb:vbList) {
 
 				// path is of the form [x,y..]  we need it as x,y... 
-				 path = vb.getIteration().substring(1, vb.getIteration().length()-1);
-				
+				path = vb.getIteration().substring(1, vb.getIteration().length()-1);
+
 				List<LineageQueryResult> result = computeLineageSingleBinding(
 						wfInstance, var, proc, path, selectedProcessors);
 				results.put(vb.getIteration(), result);
@@ -189,13 +217,17 @@ public class ProvenanceAnalysis {
 
 
 	/**
-	 * main lineage query method
+	 * main lineage query method. queries the provenance DB 
+	 * with a single originating proc/var/path and a set of selected Processors
 	 * @param wfInstance
 	 * @param var
 	 * @param proc
 	 * @param path
 	 * @param selectedProcessors
-	 * @return
+	 * @return a list of bindings. each binding involves an input var for one of the selectedProcessors. Note 
+	 * each var can contribute multiple bindings, i.e., when all elements in a collection bound to the var are retrieved.
+	 * Note also that bindings for input vars are returned as well, when the query is configured with returnOutputs = true
+	 * {@link ProvenanceAnalysis#isReturnOutputs() }
 	 * @throws SQLException
 	 */
 	public List<LineageQueryResult> computeLineageSingleBinding(
@@ -276,15 +308,17 @@ public class ProvenanceAnalysis {
 		// CHECK there can be multiple (pname, varname) pairs, i.e., in case of nested workflows
 		// here we pick the first that turns up -- we would need to let users choose, or process all of them...
 
-		// OPM: fetch value for this variable and assert it as an Artifact in the OPM graph
-		// CHECK  
+//		begin OPM fumbling
+
+		// fetch value for this variable and assert it as an Artifact in the OPM graph
 		Map<String, String> vbConstraints = new HashMap<String, String>();
 		vbConstraints.put("VB.PNameRef", v.getPName());
 		vbConstraints.put("VB.varNameRef", v.getVName());
 		vbConstraints.put("VB.wfInstanceRef", wfInstance);
 		if (path != null) { 
-			
+
 			// account for x,y,.. format as well as [x,y,...]  depending on where the request is coming from
+			// TODO this is just irritating must be removed
 			if (path.startsWith("[")) 
 				vbConstraints.put("VB.iteration", path);
 			else
@@ -301,7 +335,7 @@ public class ProvenanceAnalysis {
 					v.getPName()+" var = "+v.getVName()+" iteration = "+path);
 			return lqList;
 		}
-		
+
 		VarBinding vb = vbList.get(0);
 
 		String URIFriendlyIterationVector = vb.getIteration().
@@ -313,9 +347,9 @@ public class ProvenanceAnalysis {
 		} else
 			role = vb.getPNameRef()+"/"+vb.getVarNameRef();
 
-
 		aOPMManager.addArtifact(vb.getValue());
 		aOPMManager.createRole(role);
+//		end OPM fumbling
 
 		if (v.isInput() || getPq().isDataflow(proc)) { // if vName is input, then do a xfer() step
 
@@ -449,8 +483,6 @@ public class ProvenanceAnalysis {
 			}
 		}
 
-
-		/////
 		// accumulate this proc to current path 
 		currentPath.add(proc);
 
@@ -487,22 +519,28 @@ public class ProvenanceAnalysis {
 			// this is not a prob when doing path projections
 			// but we still want to generate SQL if this is a selected proc
 			// in this case we flag proc as outputs-only and generate SQL for the current output
-			// using the current path, which becomes the element in collection		
+			// using the current path, which becomes the element in collection	
+
+			// CHECK do the same even if we do have inputs, but returnOutputs is set to true
 			if (var2Path.isEmpty()) {
 
-				lq = getPq().generateSQL(wfInstance, proc, path, false);  // false -> fetch output vars
+				lq = getPq().generateSQL(wfInstance, proc, path, true);  // true -> fetch output vars
 
 			} else {
+
 				// dnl of output var defines length of suffix to path that we are going to use for query
 				// if var2Path is null this generates a trivial query for the current output var and current path CHECK
-				lq = getPq().lineageQueryGen(wfInstance, proc, var2Path, outputVar, path);
+				
+				// note: if returnOutputs is true then this returns outputs ** in addition to ** inputs
+				lq = getPq().lineageQueryGen(wfInstance, proc, var2Path, outputVar, path, isReturnOutputs());
 
 				// if OPM is on, execute the query so we get the value we need for the Artifact node 
 				LineageQueryResult inputs = getPq().runLineageQuery(lq);
 
-				//
-				// update OPM graph
-				//
+//
+//				update OPM graph
+//
+				
 				for (LineageQueryResultRecord resultRecord: inputs.getRecords()) {
 
 					String URIFriendlyIterationVector = resultRecord.getIteration().
@@ -546,7 +584,12 @@ public class ProvenanceAnalysis {
 								aOPMManager.getCurrentAccount(),
 								true);   // true -> prevent duplicates CHECK
 					}
-				}	// end OPM update		
+				}	
+				
+//
+//				end OPM update		
+//
+				
 			}
 			lqList.add(lq);
 		}
@@ -928,6 +971,34 @@ public class ProvenanceAnalysis {
 
 	public ProvenanceQuery getPq() {
 		return pq;
+	}
+
+	/**
+	 * @return the ready
+	 */
+	public boolean isReady() {
+		return ready;
+	}
+
+	/**
+	 * @param ready the ready to set
+	 */
+	public void setReady(boolean ready) {
+		this.ready = ready;
+	}
+
+	/**
+	 * @return the returnOutputs
+	 */
+	public boolean isReturnOutputs() {
+		return returnOutputs;
+	}
+
+	/**
+	 * @param returnOutputs the returnOutputs to set
+	 */
+	public void setReturnOutputs(boolean returnOutputs) {
+		this.returnOutputs = returnOutputs;
 	}
 
 
