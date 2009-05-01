@@ -785,7 +785,7 @@ public abstract class ProvenanceWriter {
 		}
 		// System.out.println(result+ " rows removed from DB");
 
-		logger.info(" **** DB cleared STATIC ****");
+		logger.info("DB cleared STATIC");
 	}
 
 	/**
@@ -849,7 +849,7 @@ public abstract class ProvenanceWriter {
 		// result = stmt.executeUpdate(q);
 		// // System.out.println(result+ " rows removed from DB");
 		//
-		logger.info(" **** DB cleared STATICfor wfID " + wfID + " ****");
+		logger.info("DB cleared STATICfor wfID " + wfID);
 	}
 
 	/**
@@ -898,7 +898,7 @@ public abstract class ProvenanceWriter {
 		q = "DELETE FROM Data";
 		result = stmt.executeUpdate(q);
 
-		logger.info(" **** DB cleared DYNAMIC ****");
+		logger.info("DB cleared DYNAMIC");
 
 	}
 

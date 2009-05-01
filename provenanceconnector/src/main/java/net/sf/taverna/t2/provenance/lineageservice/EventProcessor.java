@@ -158,6 +158,7 @@ public class EventProcessor {
 //		XMLDeserializer deserializer = instance.getDeserializer();
 
 		setWfInstanceID(((WorkflowProvenanceItem)provenanceItem).getIdentifier());
+		logger.info("Workflow instance is: " + getWfInstanceID());
 		Dataflow df = null;
 
 //		System.out.println("starting deserialiser");
