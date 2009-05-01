@@ -23,6 +23,8 @@ package net.sf.taverna.t2.provenance.lineageservice;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import org.apache.log4j.Logger;
+
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector;
 import net.sf.taverna.t2.provenance.item.ProvenanceItem;
 import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
@@ -38,6 +40,8 @@ import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
 // FIXME is this class really needed. Can't we just push the
 // acceptRawProvanceEvent up into the ProvenanceConnector?
 public class Provenance {
+	
+	private static Logger logger = Logger.getLogger(Provenance.class);
 
 	protected ProvenanceQuery pq;
 
@@ -160,8 +164,7 @@ public class Provenance {
 		if (eventType.equals(SharedVocabulary.WORKFLOW_EVENT_TYPE)) {
 			// process the workflow structure
 
-			System.out
-					.println("Provenance: ************  processing event of type "
+			logger.info("processing event of type "
 							+ SharedVocabulary.WORKFLOW_EVENT_TYPE);
 			String workflowID = getEp()
 					.processWorkflowStructure(provenanceItem);

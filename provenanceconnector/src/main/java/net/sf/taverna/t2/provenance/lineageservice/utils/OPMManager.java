@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.UnionContext;
@@ -29,6 +30,8 @@ import org.tupeloproject.rdf.xml.RdfXmlWriter;
  *
  */
 public class OPMManager {
+	
+	private static Logger logger = Logger.getLogger(OPMManager.class);
 
 	private static final String OPM_TAVERNA_NAMESPACE = "http://taverna.opm.org/";
 	private static final String OPM_GRAPH_FILE = "src/test/resources/provenance-testing/OPM/OPMGraph.rdf";
@@ -100,7 +103,7 @@ public class OPMManager {
 			try {
 				context.addTriple(processResource, Resource.uriRef(OPM_TAVERNA_NAMESPACE+"iteration"), iterationVector);
 			} catch (OperatorException e) {
-				System.out.println("OPM iteration triple creation exception: "+e.getMessage());
+				logger.warn("OPM iteration triple creation exception: "+e.getMessage());
 			}
 		}
 	}
@@ -234,7 +237,7 @@ public class OPMManager {
 			RdfXmlWriter writer = new RdfXmlWriter();				
 			writer.write(allTriples, new FileWriter(OPM_GRAPH_FILE));
 
-			System.out.println("OPM graph written to "+OPM_GRAPH_FILE);
+			logger.info("OPM graph written to "+OPM_GRAPH_FILE);
 
 		} catch (OperatorException e) {
 			// TODO Auto-generated catch block

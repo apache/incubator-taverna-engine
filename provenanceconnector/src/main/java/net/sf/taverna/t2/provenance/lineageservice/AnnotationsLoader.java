@@ -27,16 +27,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 
 /**
- * @author paolo
+ * @author Paolo Missier
  *
  */
 public class AnnotationsLoader {
+	
+	private static Logger logger = Logger.getLogger(AnnotationsLoader.class);
 
 
 	/**
@@ -69,7 +72,7 @@ public class AnnotationsLoader {
 			for (Element el:processors) {
 				
 				String pName = el.getAttributeValue("name");
-				System.out.println("processor name: "+pName);
+				logger.info("processor name: "+pName);
 				
 				List<String>  annotations = new ArrayList<String>();
 				// extract all annotations for this pname
@@ -79,7 +82,7 @@ public class AnnotationsLoader {
 				for (Element annotElement: annotEl) {
 					
 					String annot = annotElement.getAttributeValue("type");
-					System.out.println("annotation: "+annot);
+					logger.info("annotation: "+annot);
 
 					// add this annotation
 					annotations.add(annot);

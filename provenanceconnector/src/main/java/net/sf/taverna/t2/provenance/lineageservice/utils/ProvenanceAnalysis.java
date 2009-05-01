@@ -33,6 +33,7 @@ import net.sf.taverna.t2.provenance.lineageservice.LineageQueryResultRecord;
 import net.sf.taverna.t2.provenance.lineageservice.LineageSQLQuery;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceQuery;
 
+import org.apache.log4j.Logger;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.provenance.ProvenanceAccount;
 import org.tupeloproject.provenance.ProvenanceArtifact;
@@ -45,6 +46,8 @@ import org.tupeloproject.provenance.impl.ProvenanceContextFacade;
  * assumes a provenance DB ready to be queried
  */
 public class ProvenanceAnalysis {
+	
+	private static Logger logger = Logger.getLogger(ProvenanceAnalysis.class);
 
 	private static final String IP_ANNOTATION = "index-preserving";
 	private static final String OUTPUT_CONTAINER_PROCESSOR = "_OUTPUT_";
@@ -98,16 +101,16 @@ public class ProvenanceAnalysis {
 		annotations = al.getAnnotations(annotationFile);
 
 		if (annotations == null) {
-			System.out.println("WARNING: no annotations have been loaded");
+			logger.warn("no annotations have been loaded");
 			return;
 		}
 
-		System.out.println("processor annotations for lineage refinement: ");
+		logger.info("processor annotations for lineage refinement: ");
 		for (Map.Entry<String,List<String>> entry:annotations.entrySet())  {
 
-			System.out.println("annotations for proc "+entry.getKey());
+			logger.info("annotations for proc "+entry.getKey());
 			for (String ann: (List<String>) entry.getValue()) {
-				System.out.println(ann);
+				logger.info(ann);
 			}
 		}
 
@@ -205,7 +208,7 @@ public class ProvenanceAnalysis {
 
 //		Map<String, LineageSQLQuery>  varName2lqList =  new HashMap<String, LineageSQLQuery>();
 
-		System.out.println("timing starts...");
+//		System.out.println("timing starts...");
 		long start = System.currentTimeMillis();
 
 		List<LineageSQLQuery>  lqList =  searchDataflowGraph(wfInstance, var, proc, path, selectedProcessors);
@@ -221,8 +224,8 @@ public class ProvenanceAnalysis {
 		stop = System.currentTimeMillis();
 
 		long qrt = stop-start;
-		System.out.println("search time: "+gst+"ms\nlineage query response time: "+qrt+" ms");
-		System.out.println("total exec time "+(gst+qrt)+"ms");
+//		System.out.println("search time: "+gst+"ms\nlineage query response time: "+qrt+" ms");
+//		System.out.println("total exec time "+(gst+qrt)+"ms");
 
 		return results;
 	}
@@ -265,7 +268,7 @@ public class ProvenanceAnalysis {
 		List<Var> vars = getPq().getVars(varQueryConstraints);
 
 		if (vars.isEmpty())  {
-			System.out.println("variable ("+var+","+proc+") not found, lineage query terminated");
+			logger.info("variable ("+var+","+proc+") not found, lineage query terminated");
 			return null;
 		}
 
@@ -294,7 +297,7 @@ public class ProvenanceAnalysis {
 
 		// map the resulting varBinding to an Artifact
 		if (vbList == null) {
-			System.out.println("no entry corresponding to conditions: proc="+
+			logger.info("no entry corresponding to conditions: proc="+
 					v.getPName()+" var = "+v.getVName()+" iteration = "+path);
 			return lqList;
 		}

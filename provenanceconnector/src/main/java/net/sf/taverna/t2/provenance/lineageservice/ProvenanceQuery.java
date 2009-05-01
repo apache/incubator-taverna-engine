@@ -554,7 +554,7 @@ public abstract class ProvenanceQuery {
 		Statement stmt;
 		try {
 			stmt = getConnection().createStatement();
-			System.out.println("getProcBindings: executing: " + q);
+//			System.out.println("getProcBindings: executing: " + q);
 
 			boolean success = stmt.execute(q);
 			// System.out.println("result: "+success);

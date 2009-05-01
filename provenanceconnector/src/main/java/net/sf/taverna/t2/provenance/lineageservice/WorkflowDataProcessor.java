@@ -9,18 +9,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import net.sf.taverna.t2.provenance.item.ProvenanceItem;
 import net.sf.taverna.t2.provenance.item.WorkflowDataProvenanceItem;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceUtils;
 import net.sf.taverna.t2.provenance.lineageservice.utils.VarBinding;
-
-import org.jdom.Element;
 
 /**
  * @author paolo
  *
  */
 public class WorkflowDataProcessor {
+	
+	private static Logger logger = Logger.getLogger(WorkflowDataProcessor.class);
 
 	// set of trees (impl as lists), one for each varname
 	Map<String, List<WorkflowDataNode>> workflowDataTrees = new HashMap<String, List<WorkflowDataNode>>();  
@@ -76,7 +78,7 @@ public class WorkflowDataProcessor {
 	 */
 	public void processTrees(String dataflowID, String wfInstanceRef) {
 
-		System.out.println("processing output trees");
+		logger.info("processing output trees");
 
 		for (Map.Entry<String, List<WorkflowDataNode>> entry:workflowDataTrees.entrySet()) {
 
@@ -85,16 +87,16 @@ public class WorkflowDataProcessor {
 
 			try {
 
-				System.out.println("storing tree for var "+varName);
+				logger.info("storing tree for var "+varName);
 				for (WorkflowDataNode node:tree) {
 					if (node.isList) {
 
-						System.out.println("creating collection entry for "+
+						logger.info("creating collection entry for "+
 								node.value+" with index "+
 								node.index);
 						
 						if (node.getParent()!=null) {
-							System.out.println(" and parent "+node.parent.index);
+							logger.info(" and parent "+node.parent.index);
 						// write a collection record to DB
 						getPw().addCollection(dataflowID, 
 								              node.getValue(), 
@@ -112,7 +114,7 @@ public class WorkflowDataProcessor {
 						}
 
 					} else {
-						System.out.println("creating VarBinding for "+node.value+" with index "+node.index);
+						logger.info("creating VarBinding for "+node.value+" with index "+node.index);
 						
 						VarBinding vb = new VarBinding();
 
@@ -124,7 +126,7 @@ public class WorkflowDataProcessor {
 						vb.setValue(node.getValue());
 						
 						if (node.getParent()!=null) {
-							System.out.println(" in collection "+node.getParent().value+
+							logger.info(" in collection "+node.getParent().value+
 									" with index "+node.getParent().getIndex());
 							
 							vb.setCollIDRef(node.getParent().getValue());

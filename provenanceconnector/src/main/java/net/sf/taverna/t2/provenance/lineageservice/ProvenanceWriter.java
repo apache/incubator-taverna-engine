@@ -43,7 +43,7 @@ import net.sf.taverna.t2.provenance.lineageservice.utils.VarBinding;
  * 
  */
 public abstract class ProvenanceWriter {
-	
+
 	private static Logger logger = Logger.getLogger(ProvenanceWriter.class);
 
 	protected Connection connection;
@@ -331,13 +331,13 @@ public abstract class ProvenanceWriter {
 	 */
 	public void addProcessor(String name, String type, String wfNameRef)
 			throws SQLException {
-//		Statement stmt = null;
+		// Statement stmt = null;
 		PreparedStatement ps = null;
 		try {
 			ps = getConnection()
 					.prepareStatement(
 							"INSERT INTO Processor (pname, type, wfInstanceRef) VALUES (?,?,?)");
-//			stmt = getConnection().createStatement();
+			// stmt = getConnection().createStatement();
 		} catch (InstantiationException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -352,8 +352,9 @@ public abstract class ProvenanceWriter {
 		ps.setString(1, name);
 		ps.setString(2, type);
 		ps.setString(3, wfNameRef);
-//		String q = "INSERT INTO Processor (pname, type, wfInstanceRef) VALUES (\'"
-//				+ name + "\'," + "\'" + type + "\'," + "\'" + wfNameRef + "\')";
+		// String q =
+		// "INSERT INTO Processor (pname, type, wfInstanceRef) VALUES (\'"
+		// + name + "\'," + "\'" + type + "\'," + "\'" + wfNameRef + "\')";
 
 		// System.out.println("executing: "+q);
 
@@ -461,7 +462,6 @@ public abstract class ProvenanceWriter {
 
 		return newParentCollectionId;
 	}
-	
 
 	/**
 	 * adds (dataRef, data) pairs to the Data table (only for string data)
@@ -469,7 +469,7 @@ public abstract class ProvenanceWriter {
 	// FIXME needs the db statement corrected
 	public void addData(String dataRef, String wfInstanceId, byte[] data)
 			throws SQLException {
-	
+
 		Statement stmt;
 		try {
 			// stmt = getConnection().createStatement();
@@ -484,11 +484,11 @@ public abstract class ProvenanceWriter {
 			// "INSERT INTO Data (dataReference,wfInstanceID,data) VALUES (?1,?2,?3)";
 			// +
 			// "\'" +dataRef+"\', \'" + wfInstanceId+ "\'," + data + ")";
-	
+
 			int result = ps.executeUpdate();
-	
+
 			cnt++;
-	
+
 		} catch (SQLException e) {
 			System.out.println(e);
 			// the same ID will come in several times -- duplications are
@@ -504,10 +504,10 @@ public abstract class ProvenanceWriter {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	
-	}
-	public void addVarBinding(VarBinding vb) throws SQLException {
 
+	}
+
+	public void addVarBinding(VarBinding vb) throws SQLException {
 		Statement stmt = null;
 		PreparedStatement ps = null;
 
@@ -548,7 +548,7 @@ public abstract class ProvenanceWriter {
 			// + vb.getPositionInColl() + ")";
 
 			// if (cnt % 100 == 0) {
-			System.out.println("Var binding: instance ["
+			logger.info("Var binding: instance ["
 					+ vb.getWfInstanceRef() + "] processor ["
 					+ vb.getPNameRef() + "] varName [" + vb.getVarNameRef()
 					+ "] collIdRef [" + vb.getCollIDRef() + "] iteration ["
@@ -570,11 +570,11 @@ public abstract class ProvenanceWriter {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		} catch (SQLException e) {
-			System.out.println("**** it's bust insert failed due to [" + e.getMessage()
-					+ "]");
+			logger.warn("Var binding insert failed due to ["
+					+ e.getMessage() + "]");
 		}
 	}
-	
+
 	/**
 	 * persists var v back to DB
 	 * 
@@ -607,11 +607,11 @@ public abstract class ProvenanceWriter {
 			ps.setString(6, v.getVName());
 			ps.setString(7, v.getPName());
 			ps.setString(8, v.getWfInstanceRef());
-	
+
 			// stmt = getConnection().createStatement();
 			//			
 			// System.out.println("executing: "+u);
-	
+
 			boolean success = ps.execute();
 		} catch (InstantiationException e) {
 			logger.warn("Could not execute query: " + e);
@@ -620,7 +620,7 @@ public abstract class ProvenanceWriter {
 		} catch (ClassNotFoundException e) {
 			logger.warn("Could not execute query: " + e);
 		}
-	
+
 		// System.out.println("update executed");
 	}
 
@@ -629,8 +629,10 @@ public abstract class ProvenanceWriter {
 		Statement stmt;
 		PreparedStatement ps = null;
 		try {
-			ps = getConnection().prepareStatement("UPDATE VarBinding SET valueType = ?, value = ?, ref = ?," +
-					"collIdRef = ? WHERE varNameRef = ? AND wfInstanceRef = ? AND pnameRef = ? AND positionInColl = ? AND iteration = ?");
+			ps = getConnection()
+					.prepareStatement(
+							"UPDATE VarBinding SET valueType = ?, value = ?, ref = ?,"
+									+ "collIdRef = ? WHERE varNameRef = ? AND wfInstanceRef = ? AND pnameRef = ? AND positionInColl = ? AND iteration = ?");
 
 			ps.setString(1, vb.getValueType());
 			ps.setString(2, vb.getValue());
@@ -641,57 +643,67 @@ public abstract class ProvenanceWriter {
 			ps.setString(7, vb.getPNameRef());
 			ps.setInt(8, vb.getPositionInColl());
 			ps.setString(9, vb.getIteration());
-			
-//			String q = "UPDATE VarBinding SET "+
-//			"valueType = \""+vb.getValueType()+"\", "+
-//			"value  = \""+vb.getValue()+"\", "+
-//			"ref    = \""+vb.getRef()+"\", "+			       
-//			"collIdRef    = \""+vb.getCollIDRef()+"\" "+
-//			"WHERE varNameRef = \""+vb.getVarNameRef()+"\" and "+
-//			"wfInstanceRef = \""+vb.getWfInstanceRef()+"\" and "+
-//			"pnameRef = \""+vb.getPNameRef()+"\" and "+
-//			"positionInColl = \""+vb.getPositionInColl()+"\" and "+
-//			"iteration    = \""+vb.getIteration()+"\" ";
-			
-//			if (cnt % 100 == 0) {
-//			System.out.println("Var binding: instance ["+vb.getWfInstanceRef()+"] processor ["+vb.getPNameRef()+"] varName ["+vb.getVarNameRef()+
-//					"] collIdRef ["+vb.getCollIDRef()+"] iteration ["+vb.getIteration()+
-//					"] positionInCollection ["+vb.getPositionInColl()+"] value ["+vb.getValue()+"]");
-//			}
-			
-			
+
+			// String q = "UPDATE VarBinding SET "+
+			// "valueType = \""+vb.getValueType()+"\", "+
+			// "value  = \""+vb.getValue()+"\", "+
+			// "ref    = \""+vb.getRef()+"\", "+
+			// "collIdRef    = \""+vb.getCollIDRef()+"\" "+
+			// "WHERE varNameRef = \""+vb.getVarNameRef()+"\" and "+
+			// "wfInstanceRef = \""+vb.getWfInstanceRef()+"\" and "+
+			// "pnameRef = \""+vb.getPNameRef()+"\" and "+
+			// "positionInColl = \""+vb.getPositionInColl()+"\" and "+
+			// "iteration    = \""+vb.getIteration()+"\" ";
+
+			// if (cnt % 100 == 0) {
+			// System.out.println("Var binding: instance ["+vb.getWfInstanceRef()+"] processor ["+vb.getPNameRef()+"] varName ["+vb.getVarNameRef()+
+			// "] collIdRef ["+vb.getCollIDRef()+"] iteration ["+vb.getIteration()+
+			// "] positionInCollection ["+vb.getPositionInColl()+"] value ["+vb.getValue()+"]");
+			// }
+
 			int result = ps.executeUpdate();
 
 			cnt++;
 
 		} catch (SQLException e) {
-			logger.info("****  insert failed due to ["+e.getMessage()+"]");
+			logger.info("****  insert failed due to [" + e.getMessage() + "]");
 		} catch (InstantiationException e) {
-			logger.info("****  insert failed due to ["+e.getMessage()+"]");
+			logger.info("****  insert failed due to [" + e.getMessage() + "]");
 		} catch (IllegalAccessException e) {
-			logger.info("****  insert failed due to ["+e.getMessage()+"]");
+			logger.info("****  insert failed due to [" + e.getMessage() + "]");
 		} catch (ClassNotFoundException e) {
-			logger.info("****  insert failed due to ["+e.getMessage()+"]");
+			logger.info("****  insert failed due to [" + e.getMessage() + "]");
 		}
 	}
-	
-	public void replaceCollectionRecord(NestedListNode nln, String prevPName, String prevVarName) {
 
-		Statement stmt;
+	public void replaceCollectionRecord(NestedListNode nln, String prevPName,
+			String prevVarName) {
+
+		// Statement stmt;
+		PreparedStatement ps = null;
 		try {
-			stmt = getConnection().createStatement();
+			ps = getConnection()
+					.prepareStatement(
+							"DELETE FROM Collection WHERE collId = ? and wfInstanceRef = ?"
+									+ " and varNameRef = ? and pnameRef = ? and iteration = ?");
+			ps.setString(1, nln.getCollId());
+			ps.setString(2, nln.getWfInstanceRef());
+			ps.setString(3, prevVarName);
+			ps.setString(4, prevPName);
+			ps.setString(5, nln.getIteration());
+			// stmt = getConnection().createStatement();
 
-			String q = "DELETE FROM Collection WHERE "+
-			"collId = \""+nln.getCollId()+"\" and "+
-			"wfInstanceRef = \""+nln.getWfInstanceRef()+"\" and "+
-			"varNameRef = \""+prevVarName+"\" and "+
-			"pnameRef = \""+prevPName+"\" and "+
-			"iteration = \""+nln.getIteration()+"\" ";
+			// String q = "DELETE FROM Collection WHERE "+
+			// "collId = \""+nln.getCollId()+"\" and "+
+			// "wfInstanceRef = \""+nln.getWfInstanceRef()+"\" and "+
+			// "varNameRef = \""+prevVarName+"\" and "+
+			// "pnameRef = \""+prevPName+"\" and "+
+			// "iteration = \""+nln.getIteration()+"\" ";
 
-			int result = stmt.executeUpdate(q);
+			int result = ps.executeUpdate();
 
 		} catch (SQLException e) {
-			System.out.println("****  delete failed due to ["+e.getMessage()+"]");
+			logger.warn("delete failed due to [" + e.getMessage() + "]");
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -701,20 +713,17 @@ public abstract class ProvenanceWriter {
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} 	
-		
+		}
+
 		try {
-			
-			addCollection(prevPName, 
-					      nln.getCollId(), 
-					      nln.getParentCollIdRef(), 
-					      nln.getIteration(), 
-					      prevVarName, 
-					      nln.getWfInstanceRef());
+
+			addCollection(prevPName, nln.getCollId(), nln.getParentCollIdRef(),
+					nln.getIteration(), prevVarName, nln.getWfInstanceRef());
 
 		} catch (SQLException e) {
-			System.out.println("****  insert failed due to ["+e.getMessage()+"]");
-		} 
+			logger.warn("insert failed due to [" + e.getMessage()
+					+ "]");
+		}
 	}
 
 	/**
@@ -788,23 +797,27 @@ public abstract class ProvenanceWriter {
 		String q = null;
 		int result = 0;
 
-//		Statement stmt = null;
+		// Statement stmt = null;
 		PreparedStatement ps = null;
 		try {
-			ps = getConnection().prepareStatement("DELETE FROM Workflow WHERE wfname = ?");
+			ps = getConnection().prepareStatement(
+					"DELETE FROM Workflow WHERE wfname = ?");
 			ps.setString(1, wfID);
 			ps.executeUpdate();
-			ps = getConnection().prepareStatement("DELETE FROM Processor WHERE wfInstanceRef = ?");
+			ps = getConnection().prepareStatement(
+					"DELETE FROM Processor WHERE wfInstanceRef = ?");
 			ps.setString(1, wfID);
 			ps.executeUpdate();
-			ps = getConnection().prepareStatement("DELETE FROM Arc WHERE wfInstanceRef = ?");
+			ps = getConnection().prepareStatement(
+					"DELETE FROM Arc WHERE wfInstanceRef = ?");
 			ps.setString(1, wfID);
 			ps.executeUpdate();
-			ps = getConnection().prepareStatement("DELETE FROM Var WHERE wfInstanceRef = ?");
+			ps = getConnection().prepareStatement(
+					"DELETE FROM Var WHERE wfInstanceRef = ?");
 			ps.setString(1, wfID);
 			ps.executeUpdate();
-			
-//			stmt = getConnection().createStatement();
+
+			// stmt = getConnection().createStatement();
 		} catch (InstantiationException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -816,26 +829,26 @@ public abstract class ProvenanceWriter {
 			e1.printStackTrace();
 		}
 
-//		q = "DELETE FROM Workflow WHERE wfname = \"" + wfID + "\"";
-//		// System.out.println("executing: "+q);
-//		result = stmt.executeUpdate(q);
-//		// System.out.println(result+ " rows removed from DB");
-//
-//		q = "DELETE FROM Processor WHERE wfInstanceRef = \"" + wfID + "\"";
-//		// System.out.println("executing: "+q);
-//		result = stmt.executeUpdate(q);
-//		// System.out.println(result+ " rows removed from DB");
-//
-//		q = "DELETE FROM Arc WHERE wfInstanceRef = \"" + wfID + "\"";
-//		// System.out.println("executing: "+q);
-//		result = stmt.executeUpdate(q);
-//		// System.out.println(result+ " rows removed from DB");
-//
-//		q = "DELETE FROM Var WHERE wfInstanceRef = \"" + wfID + "\"";
-//		// System.out.println("executing: "+q);
-//		result = stmt.executeUpdate(q);
-//		// System.out.println(result+ " rows removed from DB");
-//
+		// q = "DELETE FROM Workflow WHERE wfname = \"" + wfID + "\"";
+		// // System.out.println("executing: "+q);
+		// result = stmt.executeUpdate(q);
+		// // System.out.println(result+ " rows removed from DB");
+		//
+		// q = "DELETE FROM Processor WHERE wfInstanceRef = \"" + wfID + "\"";
+		// // System.out.println("executing: "+q);
+		// result = stmt.executeUpdate(q);
+		// // System.out.println(result+ " rows removed from DB");
+		//
+		// q = "DELETE FROM Arc WHERE wfInstanceRef = \"" + wfID + "\"";
+		// // System.out.println("executing: "+q);
+		// result = stmt.executeUpdate(q);
+		// // System.out.println(result+ " rows removed from DB");
+		//
+		// q = "DELETE FROM Var WHERE wfInstanceRef = \"" + wfID + "\"";
+		// // System.out.println("executing: "+q);
+		// result = stmt.executeUpdate(q);
+		// // System.out.println(result+ " rows removed from DB");
+		//
 		logger.info(" **** DB cleared STATICfor wfID " + wfID + " ****");
 	}
 
@@ -972,7 +985,7 @@ public abstract class ProvenanceWriter {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void setDbURL(String dbURL) {
 		this.dbURL = dbURL;
 	}
