@@ -17,8 +17,8 @@
 			<property name="depth"/>
 			<property name="referenceType"/>
 		</component>
-		<property name="message"/>
-		<property name="exceptionMessage"/>
+		<property name="message" length="10000"/>
+		<property name="exceptionMessage" length="10000"/>
 		<list name="stackTraceList" cascade="all" lazy="false">
 			<key column="id" not-null="true"/>
 			<list-index column="i" base="0" />
