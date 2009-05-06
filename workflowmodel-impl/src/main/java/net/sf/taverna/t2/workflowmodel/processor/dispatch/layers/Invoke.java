@@ -195,12 +195,12 @@ public class Invoke extends AbstractDispatchLayer<Object> {
 				DispatchErrorType errorType) {
 			logger.warn("Failed (" + errorType + ") invoking " + asyncActivity
 					+ " for job " + jobEvent + ": " + message, t);
-			MonitorManager.getInstance().deregisterNode(
-					invocationProcessIdentifier);
 			getAbove().receiveError(
 					new DispatchErrorEvent(jobEvent.getOwningProcess(),
 							jobEvent.getIndex(), jobEvent.getContext(),
 							message, t, errorType, asyncActivity));
+			MonitorManager.getInstance().deregisterNode(
+					invocationProcessIdentifier);
 		}
 
 		public InvocationContext getContext() {
@@ -212,11 +212,6 @@ public class Invoke extends AbstractDispatchLayer<Object> {
 		}
 
 		public void receiveCompletion(int[] completionIndex) {
-			if (completionIndex.length == 0) {
-				// Final result, clean up monitor state
-				MonitorManager.getInstance().deregisterNode(
-						invocationProcessIdentifier);
-			}
 			if (sentJob) {
 				int[] newIndex;
 				if (completionIndex.length == 0) {
@@ -254,15 +249,15 @@ public class Invoke extends AbstractDispatchLayer<Object> {
 				receiveResult(emptyListMap, new int[0]);
 			}
 
-		}
-
-		public void receiveResult(Map<String, T2Reference> data, int[] index) {
-
-			if (index.length == 0) {
+			if (completionIndex.length == 0) {
 				// Final result, clean up monitor state
 				MonitorManager.getInstance().deregisterNode(
 						invocationProcessIdentifier);
 			}
+		}
+
+		public void receiveResult(Map<String, T2Reference> data, int[] index) {
+
 
 			// Construct a new result map using the activity mapping
 			// (activity output name to processor output name)
@@ -300,6 +295,12 @@ public class Invoke extends AbstractDispatchLayer<Object> {
 			getAbove().receiveResult(resultEvent);
 
 			sentJob = true;
+
+			if (index.length == 0) {
+				// Final result, clean up monitor state
+				MonitorManager.getInstance().deregisterNode(
+						invocationProcessIdentifier);
+			}
 		}	
 
 		public void requestRun(Runnable runMe) {

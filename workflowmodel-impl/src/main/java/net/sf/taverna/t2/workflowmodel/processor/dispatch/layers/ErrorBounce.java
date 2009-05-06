@@ -121,7 +121,7 @@ public class ErrorBounce extends AbstractDispatchLayer<Object> implements
 	 */
 	@Override
 	public void receiveError(DispatchErrorEvent errorEvent) {
-		getState(errorEvent.getOwningProcess()).incrementErrorsTranslated();this.
+		getState(errorEvent.getOwningProcess()).incrementErrorsTranslated();
 		sendErrorOutput(errorEvent, errorEvent.getCause(), null);
 	}
 
