@@ -60,10 +60,10 @@ public abstract class ProvenanceWriter {
 	 * @throws ClassNotFoundException
 	 */
 	protected abstract void openConnection() throws InstantiationException,
-			IllegalAccessException, ClassNotFoundException;
+	IllegalAccessException, ClassNotFoundException;
 
 	public Connection getConnection() throws InstantiationException,
-			IllegalAccessException, ClassNotFoundException {
+	IllegalAccessException, ClassNotFoundException {
 		if (connection == null) {
 			openConnection();
 		}
@@ -84,8 +84,8 @@ public abstract class ProvenanceWriter {
 		Statement stmt = null;
 		try {
 			ps = getConnection()
-					.prepareStatement(
-							"INSERT INTO Var (varname, pNameRef, inputOrOutput, nestingLevel, wfInstanceRef) VALUES(?,?,?,?,?)");
+			.prepareStatement(
+					"INSERT INTO Var (varname, pNameRef, inputOrOutput, nestingLevel, wfInstanceRef) VALUES(?,?,?,?,?)");
 			stmt = getConnection().createStatement();
 		} catch (InstantiationException e1) {
 			// TODO Auto-generated catch block
@@ -143,13 +143,13 @@ public abstract class ProvenanceWriter {
 	 * @param wfId
 	 */
 	public void addArc(Var sourceVar, Var sinkVar, String wfId)
-			throws SQLException {
+	throws SQLException {
 		Statement stmt = null;
 		PreparedStatement ps = null;
 		try {
 			ps = getConnection()
-					.prepareStatement(
-							"INSERT INTO wfInstanceRef (wfInstanceRef, sourcePNameRef, SourceVarNameRef, sinkPNameRef,sinkVarNameRef) VALUES(?,?,?,?,?)");
+			.prepareStatement(
+					"INSERT INTO wfInstanceRef (wfInstanceRef, sourcePNameRef, SourceVarNameRef, sinkPNameRef,sinkVarNameRef) VALUES(?,?,?,?,?)");
 			stmt = getConnection().createStatement();
 		} catch (InstantiationException e1) {
 			// TODO Auto-generated catch block
@@ -187,13 +187,13 @@ public abstract class ProvenanceWriter {
 
 	public void addArc(String sourceVarName, String sourceProcName,
 			String sinkVarName, String sinkProcName, String wfId)
-			throws SQLException {
+	throws SQLException {
 		PreparedStatement ps = null;
 		Statement stmt = null;
 		try {
 			ps = getConnection()
-					.prepareStatement(
-							"INSERT INTO Arc (wfInstanceRef, sourcePNameRef, sourceVarNameRef, sinkPNameRef, sinkVarNameRef) VALUES(?,?,?,?,?)");
+			.prepareStatement(
+					"INSERT INTO Arc (wfInstanceRef, sourcePNameRef, sourceVarNameRef, sinkPNameRef, sinkVarNameRef) VALUES(?,?,?,?,?)");
 			stmt = getConnection().createStatement();
 		} catch (InstantiationException e1) {
 			// TODO Auto-generated catch block
@@ -230,7 +230,7 @@ public abstract class ProvenanceWriter {
 		PreparedStatement ps = null;
 		try {
 			ps = getConnection().prepareStatement(
-					"INSERT INTO Workflow (wfName) VALUES (?)");
+			"INSERT INTO Workflow (wfName) VALUES (?)");
 			stmt = getConnection().createStatement();
 		} catch (InstantiationException e1) {
 			// TODO Auto-generated catch block
@@ -256,7 +256,7 @@ public abstract class ProvenanceWriter {
 		PreparedStatement ps = null;
 		try {
 			ps = getConnection().prepareStatement(
-					"INSERT INTO Workflow (wfname, parentWFname) VALUES (?,?)");
+			"INSERT INTO Workflow (wfname, parentWFname) VALUES (?,?)");
 			stmt = getConnection().createStatement();
 		} catch (InstantiationException e1) {
 			// TODO Auto-generated catch block
@@ -280,13 +280,13 @@ public abstract class ProvenanceWriter {
 	}
 
 	public void addWFInstanceId(String wfId, String wfInstanceId)
-			throws SQLException {
+	throws SQLException {
 		Statement stmt = null;
 		PreparedStatement ps = null;
 		try {
 			ps = getConnection()
-					.prepareStatement(
-							"INSERT INTO WfInstance (instanceID, wfnameRef) VALUES (?,?)");
+			.prepareStatement(
+					"INSERT INTO WfInstance (instanceID, wfnameRef) VALUES (?,?)");
 			stmt = getConnection().createStatement();
 		} catch (InstantiationException e1) {
 			// TODO Auto-generated catch block
@@ -330,13 +330,13 @@ public abstract class ProvenanceWriter {
 	 * @throws SQLException
 	 */
 	public void addProcessor(String name, String type, String wfNameRef)
-			throws SQLException {
+	throws SQLException {
 		// Statement stmt = null;
 		PreparedStatement ps = null;
 		try {
 			ps = getConnection()
-					.prepareStatement(
-							"INSERT INTO Processor (pname, type, wfInstanceRef) VALUES (?,?,?)");
+			.prepareStatement(
+					"INSERT INTO Processor (pname, type, wfInstanceRef) VALUES (?,?,?)");
 			// stmt = getConnection().createStatement();
 		} catch (InstantiationException e1) {
 			// TODO Auto-generated catch block
@@ -368,8 +368,8 @@ public abstract class ProvenanceWriter {
 		PreparedStatement ps = null;
 		try {
 			ps = getConnection()
-					.prepareStatement(
-							"INSERT INTO ProcBinding (pnameRef, execIDRef, iteration, actName) VALUES(?,?,?,?)");
+			.prepareStatement(
+					"INSERT INTO ProcBinding (pnameRef, execIDRef, iteration, actName) VALUES(?,?,?,?)");
 			stmt = getConnection().createStatement();
 		} catch (InstantiationException e1) {
 			// TODO Auto-generated catch block
@@ -413,8 +413,8 @@ public abstract class ProvenanceWriter {
 		PreparedStatement ps = null;
 		try {
 			ps = getConnection()
-					.prepareStatement(
-							"INSERT INTO Collection (PNameRef, wfInstanceRef, varNameRef, iteration, parentCollIdRef, collId) VALUES(?,?,?,?,?,?)");
+			.prepareStatement(
+					"INSERT INTO Collection (PNameRef, wfInstanceRef, varNameRef, iteration, parentCollIdRef, collId) VALUES(?,?,?,?,?,?)");
 			stmt = getConnection().createStatement();
 		} catch (InstantiationException e1) {
 			// TODO Auto-generated catch block
@@ -466,17 +466,16 @@ public abstract class ProvenanceWriter {
 	/**
 	 * adds (dataRef, data) pairs to the Data table (only for string data)
 	 */
-	// FIXME needs the db statement corrected
 	public void addData(String dataRef, String wfInstanceId, byte[] data)
-			throws SQLException {
+	throws SQLException {
 
 		Statement stmt;
 		try {
 			// stmt = getConnection().createStatement();
 			PreparedStatement ps = null;
 			ps = getConnection()
-					.prepareStatement(
-							"INSERT INTO Data (dataReference,wfInstanceID,data) VALUES (?,?,?)");
+			.prepareStatement(
+					"INSERT INTO Data (dataReference,wfInstanceID,data) VALUES (?,?,?)");
 			ps.setString(1, dataRef);
 			ps.setString(2, wfInstanceId);
 			ps.setBytes(3, data);
@@ -504,8 +503,20 @@ public abstract class ProvenanceWriter {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 	}
+
+
+	/**
+	 * 
+	 * @param dataRef
+	 * @param wfInstanceId
+	 * @param data  the data in bytearray form, untyped
+	 * @param dve  an instance of a DataExtractor. This maps the data bytearray to a string according to the
+	 * semantics of the data prior to inserting the data into the DB. It's a bit of a hack used in this impl. to extract significant parts of an XMLEncoded bean
+	 * that can be then used in other contexts (mainly, in OPM graphs, where a raw byte array would not be interpreted).
+	 * @throws SQLException
+	 */
+
 
 	public void addVarBinding(VarBinding vb) throws SQLException {
 		Statement stmt = null;
@@ -513,8 +524,8 @@ public abstract class ProvenanceWriter {
 
 		try {
 			ps = getConnection()
-					.prepareStatement(
-							"INSERT INTO VarBinding (pnameRef, wfInstanceRef, varNameRef, valueType, value, ref, collIdRef, iteration,positionInColl) VALUES(?,?,?,?,?,?,?,?,?)");
+			.prepareStatement(
+					"INSERT INTO VarBinding (pnameRef, wfInstanceRef, varNameRef, valueType, value, ref, collIdRef, iteration,positionInColl) VALUES(?,?,?,?,?,?,?,?,?)");
 			stmt = getConnection().createStatement();
 
 			ps.setString(1, vb.getPNameRef());
@@ -594,9 +605,9 @@ public abstract class ProvenanceWriter {
 		// + "AND wfInstanceRef = \'" + v.getWfInstanceRef() + "\'";
 		try {
 			ps = getConnection()
-					.prepareStatement(
-							"UPDATE Var SET type = ?, inputOrOutput=?, nestingLevel = ?,"
-									+ "actualNestingLevel = ?, anlSet = ? WHERE varName = ? AND pnameRef = ? AND wfInstanceRef = ?");
+			.prepareStatement(
+					"UPDATE Var SET type = ?, inputOrOutput=?, nestingLevel = ?,"
+					+ "actualNestingLevel = ?, anlSet = ? WHERE varName = ? AND pnameRef = ? AND wfInstanceRef = ?");
 			ps.setString(1, v.getType());
 			int i = v.isInput() ? 1 : 0;
 			ps.setInt(2, i);
@@ -630,9 +641,9 @@ public abstract class ProvenanceWriter {
 		PreparedStatement ps = null;
 		try {
 			ps = getConnection()
-					.prepareStatement(
-							"UPDATE VarBinding SET valueType = ?, value = ?, ref = ?,"
-									+ "collIdRef = ? WHERE varNameRef = ? AND wfInstanceRef = ? AND pnameRef = ? AND positionInColl = ? AND iteration = ?");
+			.prepareStatement(
+					"UPDATE VarBinding SET valueType = ?, value = ?, ref = ?,"
+					+ "collIdRef = ? WHERE varNameRef = ? AND wfInstanceRef = ? AND pnameRef = ? AND positionInColl = ? AND iteration = ?");
 
 			ps.setString(1, vb.getValueType());
 			ps.setString(2, vb.getValue());
@@ -683,9 +694,9 @@ public abstract class ProvenanceWriter {
 		PreparedStatement ps = null;
 		try {
 			ps = getConnection()
-					.prepareStatement(
-							"DELETE FROM Collection WHERE collId = ? and wfInstanceRef = ?"
-									+ " and varNameRef = ? and pnameRef = ? and iteration = ?");
+			.prepareStatement(
+					"DELETE FROM Collection WHERE collId = ? and wfInstanceRef = ?"
+					+ " and varNameRef = ? and pnameRef = ? and iteration = ?");
 			ps.setString(1, nln.getCollId());
 			ps.setString(2, nln.getWfInstanceRef());
 			ps.setString(3, prevVarName);
@@ -801,19 +812,19 @@ public abstract class ProvenanceWriter {
 		PreparedStatement ps = null;
 		try {
 			ps = getConnection().prepareStatement(
-					"DELETE FROM Workflow WHERE wfname = ?");
+			"DELETE FROM Workflow WHERE wfname = ?");
 			ps.setString(1, wfID);
 			ps.executeUpdate();
 			ps = getConnection().prepareStatement(
-					"DELETE FROM Processor WHERE wfInstanceRef = ?");
+			"DELETE FROM Processor WHERE wfInstanceRef = ?");
 			ps.setString(1, wfID);
 			ps.executeUpdate();
 			ps = getConnection().prepareStatement(
-					"DELETE FROM Arc WHERE wfInstanceRef = ?");
+			"DELETE FROM Arc WHERE wfInstanceRef = ?");
 			ps.setString(1, wfID);
 			ps.executeUpdate();
 			ps = getConnection().prepareStatement(
-					"DELETE FROM Var WHERE wfInstanceRef = ?");
+			"DELETE FROM Var WHERE wfInstanceRef = ?");
 			ps.setString(1, wfID);
 			ps.executeUpdate();
 
@@ -946,29 +957,29 @@ public abstract class ProvenanceWriter {
 		try {
 			stmt = getConnection().createStatement();
 			String q = "INSERT INTO DD (PFrom,VFrom,valFrom,PTo,VTo,valTo,iteration,wfInstance) VALUES ("
-					+ "\'"
-					+ pFrom
-					+ "\',"
-					+ "\'"
-					+ vFrom
-					+ "\",  "
-					+ "valFrom = \""
-					+ valFrom
-					+ "\", "
-					+ "PTo = \""
-					+ pTo
-					+ "\", "
-					+ "VTo = \""
-					+ vTo
-					+ "\", "
-					+ "valTo  = \""
-					+ valTo
-					+ "\", "
-					+ "iteration = \""
-					+ iteration
-					+ "\", "
-					+ "wfInstance = \""
-					+ wfInstanceID + "\"; ";
+				+ "\'"
+				+ pFrom
+				+ "\',"
+				+ "\'"
+				+ vFrom
+				+ "\",  "
+				+ "valFrom = \""
+				+ valFrom
+				+ "\", "
+				+ "PTo = \""
+				+ pTo
+				+ "\", "
+				+ "VTo = \""
+				+ vTo
+				+ "\", "
+				+ "valTo  = \""
+				+ valTo
+				+ "\", "
+				+ "iteration = \""
+				+ iteration
+				+ "\", "
+				+ "wfInstance = \""
+				+ wfInstanceID + "\"; ";
 
 			stmt.executeUpdate(q);
 		} catch (InstantiationException e1) {

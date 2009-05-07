@@ -6,6 +6,7 @@ package net.sf.taverna.t2.provenance.lineageservice.utils;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -21,6 +22,7 @@ import org.tupeloproject.provenance.ProvenanceProcess;
 import org.tupeloproject.provenance.ProvenanceRole;
 import org.tupeloproject.provenance.ProvenanceUsedArc;
 import org.tupeloproject.provenance.impl.ProvenanceContextFacade;
+import org.tupeloproject.rdf.Literal;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.xml.RdfXmlWriter;
@@ -30,11 +32,12 @@ import org.tupeloproject.rdf.xml.RdfXmlWriter;
  *
  */
 public class OPMManager {
-	
+
 	private static Logger logger = Logger.getLogger(OPMManager.class);
 
 	private static final String OPM_TAVERNA_NAMESPACE = "http://taverna.opm.org/";
 	private static final String OPM_GRAPH_FILE = "src/test/resources/provenance-testing/OPM/OPMGraph.rdf";
+	private static final String VALUE_PROP = "value";
 
 	ProvenanceContextFacade graph = null;
 	Context context = null;
@@ -43,7 +46,7 @@ public class OPMManager {
 	ProvenanceArtifact currentArtifact = null;
 	ProvenanceRole     currentRole = null;
 	ProvenanceProcess currentProcess = null;
-
+	
 	public OPMManager() {
 
 		// init Tupelo RDF provenance graph
@@ -56,6 +59,14 @@ public class OPMManager {
 		graph = new ProvenanceContextFacade(mc);
 	}
 
+	
+	/**
+	 * default implementation of tis method returns null -- has no idea how to extract simple values from incoming artifact values 
+	 * @return
+	 */
+	public List<DataValueExtractor> getDataValueExtractor() { return null; }
+	
+	
 	/**
 	 * 	create new account to hold the causality graph
 	 *  and give it a Resource name
@@ -69,22 +80,75 @@ public class OPMManager {
 	}
 
 
-	public void addArtifact(String aName) {
+	/**
+	 * 
+	 * @param aName
+	 * @param aValue  actual value can be used optionally as part of a separate triple. Whether this is used or not 
+	 * depends on the settings, see {@link OPMManager.addValueTriple}
+	 */
+	public void addArtifact(String aName, String aValue) {
 
 		Resource r = Resource.uriRef(aName);
 		currentArtifact = graph.newArtifact(aName, r);
 		graph.assertArtifact(currentArtifact);
-		
+
+		if (aValue != null) {
+//			System.out.println("OPMManager::addArtifact: aValue is NOT NULL");
+			
+			// if we have a valid DataValueExtractor, use it here
+			List<DataValueExtractor> dveList;
+			String extractedValue = aValue;  // default is same value
+			if ((dveList = getDataValueExtractor()) != null) {
+
+				// try all available extractors... UGLY but data comes with NO TYPE at all!
+				for (DataValueExtractor dve: dveList) {
+					try {
+						
+//						System.out.println("OPMManager::addArtifact: trying extractor "+dve.getClass().getName());
+						extractedValue = dve.extractString(aValue);						
+//						System.out.println("OPMManager::addArtifact: - extracted value = "+extractedValue);
+						break; // extractor worked
+					} catch (Exception e) {
+						// no panic, reset value and try another extractor
+//						System.out.println("OPMManager::addArtifact: extractor failed");
+						extractedValue = aValue;
+					}
+				}
+			}
+			
+//			System.out.println("OPMManager::addArtifact: using value "+extractedValue);
+			try {
+				Literal lValue = Resource.literal(extractedValue);
+				context.addTriple(r, Resource.uriRef(OPM_TAVERNA_NAMESPACE+VALUE_PROP), lValue);
+			} catch (OperatorException e) {
+				logger.warn("OPM iteration triple creation exception: "+e.getMessage());
+			}
+		}  else {
+//			System.out.println("OPMManager::addArtifact: aValue for ["+aName+"] is NULL");
+		}
 	}
 
-	
+
+	/**
+	 * no actual value is recorded
+	 * @param aName
+	 */
+	public void addArtifact(String aName) {
+
+		Resource r = Resource.uriRef(aName);
+		currentArtifact = graph.newArtifact(aName, r);
+		graph.assertArtifact(currentArtifact);		
+	}
+
+
+
 	public void createRole(String aRole) {
 
 		Resource r = Resource.uriRef(OPM_TAVERNA_NAMESPACE+aRole);		
 		currentRole = graph.newRole(aRole, r);
 	}
 
-	
+
 	public void addProcess(String proc, String iterationVector, String URIfriendlyIterationVector) {
 
 		String processID;
@@ -96,7 +160,7 @@ public class OPMManager {
 		Resource processResource = Resource.uriRef(processID);					
 		currentProcess = graph.newProcess(processID, processResource);
 		graph.assertProcess(currentProcess );
-		
+
 		// add a triple to specify the iteration vector for this occurrence of Process, if it is available
 		if (URIfriendlyIterationVector.length() > 0) {
 //			Resource inputProcessSubject = ((RdfProvenanceProcess) process).getSubject();
@@ -247,7 +311,6 @@ public class OPMManager {
 			e.printStackTrace();
 		}		
 	}
-
 
 
 }

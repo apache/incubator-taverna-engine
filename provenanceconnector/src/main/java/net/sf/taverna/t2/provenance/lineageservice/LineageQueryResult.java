@@ -32,11 +32,13 @@ public class LineageQueryResult {
 
 	final public static String COLL_TYPE = "referenceSetCollection";
 	final public static String ATOM_TYPE = "referenceSet";
+	
+	boolean printResolvedValue;
 
 	private List<LineageQueryResultRecord> records = new ArrayList<LineageQueryResultRecord>();
 
 	public ListIterator<LineageQueryResultRecord> iterator() { return getRecords().listIterator(); }
-	
+
 	public void addLineageQueryResultRecord(
 			String pname,
 			String vname,
@@ -65,6 +67,32 @@ public class LineageQueryResult {
 
 	public List<LineageQueryResultRecord> getRecords() {
 		return records;
+	}
+
+
+	public String toString() {
+
+		StringBuffer sb = new StringBuffer();
+		for (LineageQueryResultRecord record:getRecords()) {
+			
+			record.setPrintResolvedValue(printResolvedValue);
+			sb.append("***  record: ****\n"+record.toString());
+		}		
+		return sb.toString();
+	}
+
+	/**
+	 * @return the printResolvedValue
+	 */
+	public boolean isPrintResolvedValue() {
+		return printResolvedValue;
+	}
+
+	/**
+	 * @param printResolvedValue the printResolvedValue to set
+	 */
+	public void setPrintResolvedValue(boolean printResolvedValue) {
+		this.printResolvedValue = printResolvedValue;
 	}
 }
 
