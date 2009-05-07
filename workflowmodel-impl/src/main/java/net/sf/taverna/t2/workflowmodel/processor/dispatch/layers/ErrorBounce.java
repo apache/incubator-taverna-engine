@@ -30,6 +30,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import net.sf.taverna.t2.invocation.Event;
 import net.sf.taverna.t2.monitor.MonitorableProperty;
@@ -79,6 +81,8 @@ public class ErrorBounce extends AbstractDispatchLayer<Object> implements
 	 * bounce instance
 	 */
 	private Map<String, ErrorBounceState> state = new HashMap<String, ErrorBounceState>();
+	
+	private Timer timer = new Timer("ErrorBounce layer state cleanup", true);
 
 	private synchronized ErrorBounceState getState(String owningProcess) {
 		if (state.containsKey(owningProcess)) {
@@ -167,8 +171,15 @@ public class ErrorBounce extends AbstractDispatchLayer<Object> implements
 		return null;
 	}
 
-	public void finishedWith(String owningProcess) {
-		state.remove(owningProcess);
+	public void finishedWith(final String owningProcess) {
+		// Delay the removal of the state to give the monitor
+		// a chance to poll
+		timer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				state.remove(owningProcess);
+			}			
+		}, 1000);
 	}
 
 	/**

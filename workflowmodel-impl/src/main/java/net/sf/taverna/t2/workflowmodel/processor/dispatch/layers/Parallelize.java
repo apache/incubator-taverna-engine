@@ -25,6 +25,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -81,6 +83,8 @@ public class Parallelize extends AbstractDispatchLayer<ParallelizeConfig>
 	private Map<String, StateModel> stateMap = new HashMap<String, StateModel>();
 
 	private ParallelizeConfig config = new ParallelizeConfig();
+
+	private Timer timer = new Timer("Parallelize layer state cleanup", true);
 
 	int sentJobsCount = 0;
 
@@ -189,11 +193,18 @@ public class Parallelize extends AbstractDispatchLayer<ParallelizeConfig>
 	}
 
 	@Override
-	public void finishedWith(String owningProcess) {
+	public void finishedWith(final String owningProcess) {
 		// System.out.println("Removing state map for " + owningProcess);
-		synchronized(stateMap) {
-			stateMap.remove(owningProcess);
-		}
+		// Delay the removal of the state to give the monitor
+		// a chance to poll
+		timer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				synchronized(stateMap) {
+					stateMap.remove(owningProcess);
+				}
+			}			
+		}, 1000);
 	}
 
 	public void configure(ParallelizeConfig config) {
