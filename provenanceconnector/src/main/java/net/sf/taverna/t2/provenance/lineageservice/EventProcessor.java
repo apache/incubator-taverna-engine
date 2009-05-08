@@ -621,6 +621,9 @@ public class EventProcessor {
 //			logger.info("Received workflow data - not processing");
 			//FIXME not sure  - needs to be stored somehow
 
+		} else if (provenanceItem.getEventType().equals((SharedVocabulary.ERROR_EVENT_TYPE))) {
+			//TODO process the error
+			
 		} else {
 			// TODO broken, should we throw something here?
 			return;
