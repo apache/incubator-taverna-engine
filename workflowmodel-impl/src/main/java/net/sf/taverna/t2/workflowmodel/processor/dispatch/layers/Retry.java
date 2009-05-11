@@ -56,7 +56,7 @@ public class Retry extends AbstractErrorHandlerLayer<RetryConfig> {
 
 	private RetryConfig config = new RetryConfig();
 
-	private static Timer retryTimer = new Timer(true);
+	private static Timer retryTimer = new Timer("Retry timer", true);
 
 	public Retry() {
 		super();
