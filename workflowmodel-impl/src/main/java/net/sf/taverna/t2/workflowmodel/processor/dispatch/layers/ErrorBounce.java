@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.Timer;
 import java.util.TimerTask;
 
 import net.sf.taverna.t2.invocation.Event;
@@ -179,7 +178,7 @@ public class ErrorBounce extends AbstractDispatchLayer<Object> implements
 			public void run() {
 				state.remove(owningProcess);
 			}			
-		}, 1000);
+		}, CLEANUP_DELAY_MS);
 	}
 
 	/**

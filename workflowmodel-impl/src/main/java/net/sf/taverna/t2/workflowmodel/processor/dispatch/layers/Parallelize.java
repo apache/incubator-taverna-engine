@@ -20,17 +20,19 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.processor.dispatch.layers;
 
+import static net.sf.taverna.t2.workflowmodel.processor.dispatch.description.DispatchLayerStateEffect.CREATE_PROCESS_STATE;
+import static net.sf.taverna.t2.workflowmodel.processor.dispatch.description.DispatchLayerStateEffect.NO_EFFECT;
+import static net.sf.taverna.t2.workflowmodel.processor.dispatch.description.DispatchLayerStateEffect.REMOVE_PROCESS_STATE;
+import static net.sf.taverna.t2.workflowmodel.processor.dispatch.description.DispatchMessageType.JOB;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-
-import org.apache.log4j.Logger;
 
 import net.sf.taverna.t2.invocation.Completion;
 import net.sf.taverna.t2.invocation.IterationInternalEvent;
@@ -53,8 +55,8 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchErrorEv
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchJobEvent;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchJobQueueEvent;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchResultEvent;
-import static net.sf.taverna.t2.workflowmodel.processor.dispatch.description.DispatchLayerStateEffect.*;
-import static net.sf.taverna.t2.workflowmodel.processor.dispatch.description.DispatchMessageType.*;
+
+import org.apache.log4j.Logger;
 
 /**
  * Dispatch layer which consumes a queue of events and fires off a fixed number
@@ -202,7 +204,7 @@ public class Parallelize extends AbstractDispatchLayer<ParallelizeConfig>
 					stateMap.remove(owningProcess);
 				}
 			}			
-		}, 1000);
+		}, CLEANUP_DELAY_MS);
 	}
 
 	public void configure(ParallelizeConfig config) {

@@ -39,6 +39,8 @@ public abstract class AbstractDispatchLayer<ConfigurationType> implements
 
 	protected static Timer cleanupTimer = new Timer("Dispatch stack state cleanup", true);
 	
+	protected static final int CLEANUP_DELAY_MS = 1000;
+	
 	public void setDispatchStack(DispatchStack parentStack) {
 		this.dispatchStack = parentStack;
 	}
