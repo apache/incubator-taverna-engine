@@ -84,8 +84,6 @@ public class Parallelize extends AbstractDispatchLayer<ParallelizeConfig>
 
 	private ParallelizeConfig config = new ParallelizeConfig();
 
-	private Timer timer = new Timer("Parallelize layer state cleanup", true);
-
 	int sentJobsCount = 0;
 
 	int completedJobsCount = 0;
@@ -197,7 +195,7 @@ public class Parallelize extends AbstractDispatchLayer<ParallelizeConfig>
 		// System.out.println("Removing state map for " + owningProcess);
 		// Delay the removal of the state to give the monitor
 		// a chance to poll
-		timer.schedule(new TimerTask() {
+		cleanupTimer.schedule(new TimerTask() {
 			@Override
 			public void run() {
 				synchronized(stateMap) {

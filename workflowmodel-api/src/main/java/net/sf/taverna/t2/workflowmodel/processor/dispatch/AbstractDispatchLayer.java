@@ -20,6 +20,8 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.processor.dispatch;
 
+import java.util.Timer;
+
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchCompletionEvent;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchErrorEvent;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchJobEvent;
@@ -35,6 +37,8 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchResultE
 public abstract class AbstractDispatchLayer<ConfigurationType> implements
 		DispatchLayer<ConfigurationType> {
 
+	protected static Timer cleanupTimer = new Timer("Dispatch stack state cleanup", true);
+	
 	public void setDispatchStack(DispatchStack parentStack) {
 		this.dispatchStack = parentStack;
 	}

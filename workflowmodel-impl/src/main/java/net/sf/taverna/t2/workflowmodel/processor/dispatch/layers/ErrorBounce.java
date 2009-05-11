@@ -82,7 +82,7 @@ public class ErrorBounce extends AbstractDispatchLayer<Object> implements
 	 */
 	private Map<String, ErrorBounceState> state = new HashMap<String, ErrorBounceState>();
 	
-	private Timer timer = new Timer("ErrorBounce layer state cleanup", true);
+	
 
 	private synchronized ErrorBounceState getState(String owningProcess) {
 		if (state.containsKey(owningProcess)) {
@@ -174,7 +174,7 @@ public class ErrorBounce extends AbstractDispatchLayer<Object> implements
 	public void finishedWith(final String owningProcess) {
 		// Delay the removal of the state to give the monitor
 		// a chance to poll
-		timer.schedule(new TimerTask() {
+		cleanupTimer.schedule(new TimerTask() {
 			@Override
 			public void run() {
 				state.remove(owningProcess);
