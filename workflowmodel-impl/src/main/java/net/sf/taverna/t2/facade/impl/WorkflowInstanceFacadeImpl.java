@@ -52,7 +52,6 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayer;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchStack;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.ErrorBounce;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.IntermediateProvenance;
-import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.Invoke;
 
 import org.apache.log4j.Logger;
 
