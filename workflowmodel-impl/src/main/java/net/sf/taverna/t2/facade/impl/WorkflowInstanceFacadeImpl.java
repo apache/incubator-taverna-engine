@@ -50,6 +50,7 @@ import net.sf.taverna.t2.workflowmodel.InvalidDataflowException;
 import net.sf.taverna.t2.workflowmodel.Processor;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayer;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchStack;
+import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.ErrorBounce;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.IntermediateProvenance;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.Invoke;
 
@@ -141,7 +142,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 				continue;
 			}
 			for (int j = 0; j < layers.size(); j++) {
-				if (! (layers.get(j) instanceof Invoke)) {
+				if (! (layers.get(j) instanceof ErrorBounce)) {
 					continue;
 				}
 				DispatchLayer<?> provenance = new IntermediateProvenance();
@@ -153,7 +154,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 				Edits edits = EditsRegistry.getEdits();
 				try {
 					edits.getAddDispatchLayerEdit(dispatchStack, provenance,
-							j - 1).doEdit();
+							j).doEdit();
 					break;
 				} catch (EditException e) {
 					logger.warn("adding provenance layer to dispatch stack failed "
