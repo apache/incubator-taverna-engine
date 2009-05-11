@@ -1141,6 +1141,19 @@ public class EventProcessor {
 			} catch (SQLException e) {
 //				logger.warn("Problem processing var binding: " + e);
 			}
+		} else if (valueType.equals("error")) {
+			try {
+				vb.setIterationVector(iterationVector);
+				vb.setValue(valueEl.getAttributeValue("id"));
+
+				getPw().addVarBinding(vb);
+
+				newBindings.add(vb);
+
+			} catch (SQLException e) {
+				logger.info("Process Var Binding problem with provenance"
+						+ e.getMessage());
+			}
 		} else {
 			logger.info("unrecognized value type element for "
 					+ processorId + ": " + valueType);
