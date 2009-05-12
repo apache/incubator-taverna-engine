@@ -20,6 +20,7 @@
  ******************************************************************************/
 package net.sf.taverna.t2.provenance.lineageservice;
 
+import java.beans.ExceptionListener;
 import java.beans.XMLEncoder;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -108,9 +109,9 @@ public class EventProcessor {
 	private ProvenanceQuery pq = null;
 
 	public EventProcessor(){
-	
+
 	}
-	
+
 	/**
 	 * @param pw
 	 * @throws SQLException
@@ -148,31 +149,12 @@ public class EventProcessor {
 			return null;
 		}
 
-//		System.out.println("ep processing structure");
-
-		// strip the new <workflowItem identifier="57a70081-3d8b-462c-aa35-3b63d7326002">
-		// before passing the rest to the deser.
-//		Element wfStructureRootEl = stripWfInstanceHeader(content); // sets wfInstanceID (the id of this run)
-
-//		XMLDeserializerRegistry instance = XMLDeserializerRegistry.getInstance();
-//		XMLDeserializer deserializer = instance.getDeserializer();
-
 		setWfInstanceID(((WorkflowProvenanceItem)provenanceItem).getIdentifier());
 		logger.info("Workflow instance is: " + getWfInstanceID());
 		Dataflow df = null;
 
-//		System.out.println("starting deserialiser");
-//		try {
-			df = ((WorkflowProvenanceItem)provenanceItem).getDataflow();
-//			df = deserializer.deserializeDataflow(wfStructureRootEl);
-//		} catch (DeserializationException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (EditException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} // original content minus stripped topmost workflow element
-//		System.out.println("deserialised");
+		df = ((WorkflowProvenanceItem)provenanceItem).getDataflow();
+
 
 		workflowStructureDone = true;
 
@@ -598,7 +580,7 @@ public class EventProcessor {
 				// e.printStackTrace();
 			}
 		} else if (provenanceItem.getEventType().equals(SharedVocabulary.END_WORKFLOW_EVENT_TYPE)) {
-			
+
 			// use this event to do housekeeping on the input/output varbindings 
 
 			dataflowDepth--;
@@ -623,7 +605,7 @@ public class EventProcessor {
 
 		} else if (provenanceItem.getEventType().equals((SharedVocabulary.ERROR_EVENT_TYPE))) {
 			//TODO process the error
-			
+
 		} else {
 			// TODO broken, should we throw something here?
 			return;
@@ -673,7 +655,7 @@ public class EventProcessor {
 				queryConstraints.put("V.wfInstanceRef", topLevelDataflowID);
 
 				List<VarBinding> VBs = getPq().getVarBindings(queryConstraints);
-				
+
 //				logger.info("found the following VBs:");
 				for (VarBinding vb:VBs) {
 //					logger.info(vb.getValue());
@@ -682,7 +664,7 @@ public class EventProcessor {
 					vb.setPNameRef(input.getPName());
 					vb.setVarNameRef(input.getVName());
 					getPw().addVarBinding(vb);
-					
+
 //					logger.info("added");
 
 				}
@@ -701,7 +683,9 @@ public class EventProcessor {
 	 * various cases have to be considered: predecessors may include records that are not in the output, 
 	 * while the output may include nested list structures that are not in the precedessors. This method accounts
 	 * for a 2-way reconciliation that considers all possible cases.<br/>
-	 * at the end, outputs and their predecessors contain the same data
+	 * at the end, outputs and their predecessors contain the same data.<p/>
+	 * NOTE: if we assume that data values (URIs) are <em>always</em> unique then this is greatly simplified by just
+	 * comparing two sets of value records by their URIs and reconciling them. But this is not the way it is done here
 	 */
 	public void reconcileTopLevelOutputs() {
 		/*
@@ -771,6 +755,12 @@ public class EventProcessor {
 				// (assume the YValues values are a superset of OValues)!)
 
 				for (VarBinding yValue:YValues) {
+
+
+//					System.out.println("reconcileTopLevelOutputs:: processing "+
+//					yValue.getPNameRef()+"/"+yValue.getVarNameRef()+"/"+yValue.getValue()+
+//					" with collid "+yValue.getCollIDRef());
+
 					// look for a matching record in VarBinding for output O
 					queryConstraints.clear();
 					queryConstraints.put("varNameRef", output.getVName());
@@ -784,16 +774,27 @@ public class EventProcessor {
 					}
 					List<VarBinding> matchingOValues = pq.getVarBindings(queryConstraints);
 
+//					System.out.println("querying for matching oValues: ");
+
 					// result at most size 1
 					if (matchingOValues.size() > 0) {
+
 						VarBinding oValue = matchingOValues.get(0);
+
+//						System.out.println("found "+oValue.getPNameRef()+"/"+oValue.getVarNameRef()+"/"+oValue.getValue()+
+//						" with collid "+oValue.getCollIDRef());
 
 						// copy collection info from oValue to yValue						
 						yValue.setCollIDRef(oValue.getCollIDRef());
 						yValue.setPositionInColl(oValue.getPositionInColl());
 
 						pw.updateVarBinding(yValue);
+
+//						System.out.println("oValue copied to yValue");
 					} else {
+
+//						System.out.println("no match found");
+
 						// copy the yValue to O 
 						// insert VarBinding back into VB with the global output varname
 						yValue.setPNameRef(output.getPName());
@@ -834,6 +835,7 @@ public class EventProcessor {
 
 	/**
 	 * OBSOLETE
+	 * 	@deprecated
 	 */
 	public void patchTopLevelOutputs() {
 
@@ -878,7 +880,7 @@ public class EventProcessor {
 					vb.setPNameRef(output.getPName());
 					vb.setVarNameRef(output.getVName());
 					getPw().addVarBinding(vb);
-					
+
 //					logger.info("added");
 
 				}
@@ -918,48 +920,69 @@ public class EventProcessor {
 
 
 	/**
-	 * if b involves a value within a collection , _and_ it is copied from a value generated during a previous iteration,
-	 * then this method propagates the list reference to that iteration value, which wouldn't have it 
+	 * this method reconciles values in varBindings across an arc: Firstly, if vb's value is within a collection,
+	 *  _and_ it is copied from a value generated during a previous iteration,
+	 * then this method propagates the list reference to that iteration value, which wouldn't have it.
+	 * Conversely, if vb is going to be input to an iteration, then it's lost its containing list node, and we
+	 * put it back in by looking at the corresponding predecessor 
 	 * @param vb
 	 * @throws SQLException 
 	 */
 	private void backpatchIterationResults(List<VarBinding> newBindings) throws SQLException {
 
+		System.out.println("backpatchIterationResults: start");
 		for (VarBinding vb:newBindings) {
 
-			if (vb.getCollIDRef()!= null)  {  // this is a member of a collection
+			System.out.println("backpatchIterationResults: processing vb "+vb.getPNameRef()+"/"+vb.getVarNameRef()+"="+vb.getValue());
 
-				// look for its antecedent
-				Map<String,String> queryConstraints = new HashMap<String,String>();
+//			if (vb.getCollIDRef()!= null)  {  // this is a member of a collection
 
-				queryConstraints.put("sinkVarNameRef", vb.getVarNameRef());
-				queryConstraints.put("sinkPNameRef", vb.getPNameRef());				
-				queryConstraints.put("wfInstanceRef", pq.getWFNameFromInstanceID(vb.getWfInstanceRef()));  // CHECK wfInstanceID
+//			System.out.println("...which is inside a collection ");
 
-				List<Arc> incomingArcs = pq.getArcs(queryConstraints);
+			// look for its antecedent
+			Map<String,String> queryConstraints = new HashMap<String,String>();
 
-				// there can be only one -- but check that there is one!
-				if (incomingArcs.size()==0)  return;
+			queryConstraints.put("sinkVarNameRef", vb.getVarNameRef());
+			queryConstraints.put("sinkPNameRef", vb.getPNameRef());				
+			queryConstraints.put("wfInstanceRef", pq.getWFNameFromInstanceID(vb.getWfInstanceRef()));  // CHECK wfInstanceID
 
-				String sourcePname = incomingArcs.get(0).getSourcePnameRef();
-				String sourceVname = incomingArcs.get(0).getSourceVarNameRef();
+			List<Arc> incomingArcs = pq.getArcs(queryConstraints);
 
-				// get the varbindings for this port and select the one with the same value as b
-				queryConstraints.clear();
-				queryConstraints.put("varNameRef", sourceVname);
-				queryConstraints.put("V.pNameRef", sourcePname);
-				queryConstraints.put("VB.value", vb.getValue());
-				queryConstraints.put("VB.wfInstanceRef", vb.getWfInstanceRef());
+			// there can be only one -- but check that there is one!
+			if (incomingArcs.size()==0)  return;
 
-				List<VarBinding> VBs = pq.getVarBindings(queryConstraints);
+			String sourcePname = incomingArcs.get(0).getSourcePnameRef();
+			String sourceVname = incomingArcs.get(0).getSourceVarNameRef();
 
-				for (VarBinding b:VBs) {
+			// get the varbindings for this port and select the one with the same value as b
+			// or should it be the same iteration vector??
+			queryConstraints.clear();
+			queryConstraints.put("varNameRef", sourceVname);
+			queryConstraints.put("V.pNameRef", sourcePname);
+			queryConstraints.put("VB.iteration", vb.getIteration());
+//			queryConstraints.put("VB.value", vb.getValue());
+			queryConstraints.put("VB.wfInstanceRef", vb.getWfInstanceRef());
+
+			List<VarBinding> VBs = pq.getVarBindings(queryConstraints);
+
+			// reconcile
+			for (VarBinding b:VBs) {
+
+				System.out.println("backpatching "+sourceVname+" "+sourcePname);
+
+				if (vb.getCollIDRef() != null && b.getCollIDRef() == null) {
 					b.setCollIDRef(vb.getCollIDRef());
 					b.setPositionInColl(vb.getPositionInColl());
-					getPw().updateVarBinding(b);
+					getPw().updateVarBinding(b);						
+				} else if (vb.getCollIDRef() == null && b.getCollIDRef() != null) {
+					vb.setCollIDRef(b.getCollIDRef());
+					vb.setPositionInColl(b.getPositionInColl());
+					getPw().updateVarBinding(vb);						
+
 				}
 			}
 		}
+//		}
 
 	}
 
@@ -1042,7 +1065,7 @@ public class EventProcessor {
 	private List<VarBinding>  processVarBinding(Element valueEl, String processorId,
 			String portName, String collIdRef, int positionInCollection,
 			String parentCollectionRef, String iterationId, String wfInstanceRef, String itVector) {
-		
+
 		List<VarBinding> newBindings = new ArrayList<VarBinding>();
 
 		String valueType = valueEl.getName();
@@ -1073,7 +1096,7 @@ public class EventProcessor {
 				vb.setValue(valueEl.getAttributeValue("id"));
 
 				getPw().addVarBinding(vb);
-				
+
 				newBindings.add(vb);
 
 			} catch (SQLException e) {
@@ -1114,9 +1137,9 @@ public class EventProcessor {
 				positionInCollection = 1;  // also use this as a suffix to extend the iteration vector
 
 				// extend iteration vector to account for additional levels within the list
-				
+
 				String originalIterationVector = iterationVector;
-				
+
 				// children can be any base type, including list itself -- so
 				// use recursion
 				for (Element el : listElements) {
@@ -1128,7 +1151,7 @@ public class EventProcessor {
 					} else {
 						iterationVector = "["+ Integer.toString(positionInCollection-1) + "]";
 					}
-					
+
 					List<VarBinding> bindings = processVarBinding(el, processorId, portName, collId,
 							positionInCollection, parentCollectionRef,
 							iterationId, wfInstanceRef, iterationVector);
@@ -1191,12 +1214,14 @@ public class EventProcessor {
 	 * @throws IOException
 	 */
 	public void saveEvent(ProvenanceItem provenanceItem, SharedVocabulary eventType) throws IOException {
-		//FIXME needs to do something rather than ignoring the writing out
-		// only save iteration events
-//		if (!eventType.equals("iteration")) return;
 
-		// URL resource =
-		// getClass().getClassLoader().getResource(TEST_EVENTS_FOLDER);
+		
+		// HACK -- XMLEncoder fails on IterationEvents and there is no way to catch the exception...
+		// so avoid this case
+		if (eventType.equals(SharedVocabulary.ITERATION_EVENT_TYPE))  return;
+		
+//		System.out.println("saveEvent: start");
+
 		File f1 = null;
 
 		f1 = new File(TEST_EVENTS_FOLDER);
@@ -1205,12 +1230,28 @@ public class EventProcessor {
 		String fname = "event_" + eventCnt++ + "_" + eventType + ".xml";
 		File f = new File(f1, fname);
 
-//		System.out.println("saving to " + f); // save event for later inspection
 //		FileWriter fw = new FileWriter(f);
+
 		XMLEncoder en = new XMLEncoder(new BufferedOutputStream(
-                new FileOutputStream(f)));
+				new FileOutputStream(f)));
+
+		en.setExceptionListener(new ExceptionListener()
+		{
+			public void exceptionThrown(Exception e)
+			{
+				System.out.println("XML encoding ERROR: ");
+				e.printStackTrace();
+				return;
+			}
+		});
+
+//		System.out.println("saving to " + f); // save event for later inspection
 		en.writeObject(provenanceItem);
+
+//		System.out.println("writer ok");
 		en.close();
+//		System.out.println("closed");
+
 //		fw.write(content);
 //		fw.flush();
 //		fw.close();
@@ -1221,6 +1262,8 @@ public class EventProcessor {
 //		fw.close();
 
 //		System.out.println("saved as file " + fname);
+
+
 	}
 
 	/**

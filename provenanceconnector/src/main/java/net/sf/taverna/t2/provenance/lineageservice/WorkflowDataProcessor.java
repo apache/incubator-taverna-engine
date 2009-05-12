@@ -18,7 +18,7 @@ import net.sf.taverna.t2.provenance.lineageservice.utils.VarBinding;
 
 /**
  * @author paolo
- *
+ * this class manages the outputs from a workflow, as they come along through WorkflowData events
  */
 public class WorkflowDataProcessor {
 	
@@ -31,7 +31,8 @@ public class WorkflowDataProcessor {
 	ProvenanceWriter pw = null;
 
 	/**
-	 * adds this event to the tree structure for its varname
+	 * adds the input ProvenanceItem event to the tree structure corresponding to the varname found in the item. 
+	 * Repeated invocations of this method incrementally reconstruct the tree structure for each of the workflow outputs
 	 * @param root
 	 */
 	public void addWorkflowDataItem(ProvenanceItem provenanceItem) {
@@ -45,7 +46,7 @@ public class WorkflowDataProcessor {
 		String iterationToString = ProvenanceUtils.iterationToString(index);
 		wdn.setIndex(iterationToString);
 
-		if (wdn.getValue().contains("list")) wdn.setList(true);
+		if (wdn.getValue().contains("list")) wdn.setList(true);  // HACK
 		else wdn.setList(false);
 
 		// position this wdn into the tree associated to its varname

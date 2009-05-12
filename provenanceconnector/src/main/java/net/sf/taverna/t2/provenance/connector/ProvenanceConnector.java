@@ -82,11 +82,13 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 	public ProvenanceConnector(Provenance provenance,
 			ProvenanceAnalysis provenanceAnalysis, String dbURL,
 			boolean isClearDB, String saveEvents) {
-		this.provenance = provenance;
+		
+		setProvenance(provenance);
 		this.setProvenanceAnalysis(provenanceAnalysis);
 		this.dbURL = dbURL;
 		this.isClearDB = isClearDB;
 		this.saveEvents = saveEvents;
+		getProvenance().setSaveEvents(this.saveEvents);
 	}
 
 	protected Connection getConnection() throws InstantiationException,

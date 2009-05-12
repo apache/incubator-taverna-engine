@@ -37,10 +37,10 @@ import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
  * @author Ian Dunlop
  * 
  */
-// FIXME is this class really needed. Can't we just push the
-// acceptRawProvanceEvent up into the ProvenanceConnector?
+//FIXME is this class really needed. Can't we just push the
+//acceptRawProvanceEvent up into the ProvenanceConnector?
 public class Provenance {
-	
+
 	private static Logger logger = Logger.getLogger(Provenance.class);
 
 	protected ProvenanceQuery pq;
@@ -49,7 +49,7 @@ public class Provenance {
 
 	protected EventProcessor ep;
 
-	protected String saveEvents;
+	private String saveEvents;
 
 	protected String location;
 
@@ -147,27 +147,34 @@ public class Provenance {
 	protected void processEvent(ProvenanceItem provenanceItem,
 			SharedVocabulary eventType) throws SQLException, IOException {
 
-		// saveEvent for debugging / testing
-		if (saveEvents != null && saveEvents.equals("all")) {
 
-			getEp().saveEvent(provenanceItem, eventType);
-			// System.out.println("event saved");
+		// only attempt to save the data events, since the workflow itself may not be XMLEncode-able
+		if (!eventType.equals(SharedVocabulary.WORKFLOW_EVENT_TYPE)) {
+			
+			// saveEvent for debugging / testing
+			if (saveEvents != null && saveEvents.equals("all")) {
 
-		} else if (saveEvents != null && saveEvents.equals("iteration")) {
-			if (eventType.equals("iteration"))
-
+//				System.out.println("processEvent: calling saveEvent");
+				
 				getEp().saveEvent(provenanceItem, eventType);
-			// System.out.println("event saved");
+//				 System.out.println("event saved");
 
+			} else if (saveEvents != null && saveEvents.equals("iteration")) {
+				if (eventType.equals("iteration"))
+
+					getEp().saveEvent(provenanceItem, eventType);
+				// System.out.println("event saved");
+
+			}
 		}
 
 		if (eventType.equals(SharedVocabulary.WORKFLOW_EVENT_TYPE)) {
 			// process the workflow structure
 
 			logger.info("processing event of type "
-							+ SharedVocabulary.WORKFLOW_EVENT_TYPE);
+					+ SharedVocabulary.WORKFLOW_EVENT_TYPE);
 			String workflowID = getEp()
-					.processWorkflowStructure(provenanceItem);
+			.processWorkflowStructure(provenanceItem);
 
 			// add propagation of anl code here
 			if (workflowID != null)

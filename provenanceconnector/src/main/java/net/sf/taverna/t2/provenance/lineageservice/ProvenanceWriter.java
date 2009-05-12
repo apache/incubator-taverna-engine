@@ -643,7 +643,7 @@ public abstract class ProvenanceWriter {
 			ps = getConnection()
 			.prepareStatement(
 					"UPDATE VarBinding SET valueType = ?, value = ?, ref = ?,"
-					+ "collIdRef = ? WHERE varNameRef = ? AND wfInstanceRef = ? AND pnameRef = ? AND positionInColl = ? AND iteration = ?");
+					+ "collIdRef = ? WHERE varNameRef = ? AND wfInstanceRef = ? AND pnameRef = ? AND iteration = ?");
 
 			ps.setString(1, vb.getValueType());
 			ps.setString(2, vb.getValue());
@@ -652,8 +652,8 @@ public abstract class ProvenanceWriter {
 			ps.setString(5, vb.getVarNameRef());
 			ps.setString(6, vb.getWfInstanceRef());
 			ps.setString(7, vb.getPNameRef());
-			ps.setInt(8, vb.getPositionInColl());
-			ps.setString(9, vb.getIteration());
+//			ps.setInt(8, vb.getPositionInColl());
+			ps.setString(8, vb.getIteration());
 
 			// String q = "UPDATE VarBinding SET "+
 			// "valueType = \""+vb.getValueType()+"\", "+
@@ -667,13 +667,17 @@ public abstract class ProvenanceWriter {
 			// "iteration    = \""+vb.getIteration()+"\" ";
 
 			// if (cnt % 100 == 0) {
-			// System.out.println("Var binding: instance ["+vb.getWfInstanceRef()+"] processor ["+vb.getPNameRef()+"] varName ["+vb.getVarNameRef()+
-			// "] collIdRef ["+vb.getCollIDRef()+"] iteration ["+vb.getIteration()+
-			// "] positionInCollection ["+vb.getPositionInColl()+"] value ["+vb.getValue()+"]");
+//			System.out.println("updateVarBinding : "+ps.toString());
+			
+//			 System.out.println("updateVarBinding with  instance ["+vb.getWfInstanceRef()+"] processor ["+vb.getPNameRef()+"] varName ["+vb.getVarNameRef()+
+//			 "] collIdRef ["+vb.getCollIDRef()+"] iteration ["+vb.getIteration()+
+//			 "] positionInCollection ["+vb.getPositionInColl()+"] value ["+vb.getValue()+"]");
 			// }
 
 			int result = ps.executeUpdate();
 
+//			System.out.println("updateVarBinding : result "+result);
+			
 			cnt++;
 
 		} catch (SQLException e) {
