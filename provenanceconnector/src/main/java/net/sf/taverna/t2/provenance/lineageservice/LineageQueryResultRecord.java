@@ -27,6 +27,7 @@ public class LineageQueryResultRecord {
 	String wfInstance;
 	String iteration;
 	String value;     // atomic or XML-formatted collection -- this is actually a reference to the value...
+	String collIdRef;
 	String resolvedValue;
 	String type;  // one of referenceSet, referenceSetCollection
 	boolean printResolvedValue;
@@ -39,11 +40,13 @@ public class LineageQueryResultRecord {
 			" var "+getVname()+" " +
 			"iteration: "+getIteration()+
 			" value: "+getValue()+
+			" collection id: "+getCollIdRef()+
 			" resolvedValue: "+getResolvedValue();
 		else  
 			return "proc "+getPname()+
 			" var "+getVname()+" " +
 			"iteration: "+getIteration()+
+			" collection id: "+getCollIdRef()+
 			" value: "+getValue();
 	}
 
@@ -152,6 +155,22 @@ public class LineageQueryResultRecord {
 	 */
 	public void setInput(boolean isInput) {
 		this.isInput = isInput;
+	}
+
+
+	/**
+	 * @return the collIdRef
+	 */
+	public String getCollIdRef() {
+		return collIdRef;
+	}
+
+
+	/**
+	 * @param collIdRef the collIdRef to set
+	 */
+	public void setCollIdRef(String collIdRef) {
+		this.collIdRef = collIdRef;
 	}
 
 }

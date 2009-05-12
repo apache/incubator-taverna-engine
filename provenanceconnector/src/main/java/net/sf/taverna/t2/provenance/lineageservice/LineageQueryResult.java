@@ -44,6 +44,7 @@ public class LineageQueryResult {
 			String vname,
 			String wfInstance,
 			String iteration,
+			String collIdRef,
 			String value,
 			String resolvedValue,
 			String type, boolean isInput) {
@@ -57,6 +58,7 @@ public class LineageQueryResult {
 		record.setIteration(iteration);
 		record.setResolvedValue(resolvedValue);
 		record.setInput(isInput);
+		record.setCollIdRef(collIdRef);
 
 		getRecords().add(record);
 	}

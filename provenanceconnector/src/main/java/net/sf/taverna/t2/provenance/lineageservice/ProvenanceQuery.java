@@ -1195,7 +1195,7 @@ public abstract class ProvenanceQuery {
 						String resolvedValue = rs.getString("D.data");
 
 //						System.out.println("resolved value: "+resolvedValue);
-						lqr.addLineageQueryResultRecord(proc, var, wfInstance, it, value, resolvedValue, type, isInput);
+						lqr.addLineageQueryResultRecord(proc, var, wfInstance, it, coll, value, resolvedValue, type, isInput);
 					}  else {
 					//	System.out.println("proc ["+proc+"] var ["+var+"] iteration ["+it+"] collection ["+ coll+"] value ["+value+"]");
 
@@ -1203,7 +1203,7 @@ public abstract class ProvenanceQuery {
 					// it,
 					// value, resolvedValue, type);
 					//FIXME if the data is required then the query needs fixing
-						lqr.addLineageQueryResultRecord(proc, var, wfInstance, it, value, null, type, isInput);
+						lqr.addLineageQueryResultRecord(proc, var, wfInstance, it, coll, value, null, type, isInput);
 					}
 				}
 
