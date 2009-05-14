@@ -3,11 +3,15 @@
  */
 package net.sf.taverna.t2.provenance.lineageservice.utils;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+
+import javax.xml.bind.JAXBException;
 
 import org.apache.log4j.Logger;
 import org.tupeloproject.kernel.Context;
@@ -27,6 +31,13 @@ import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.xml.RdfXmlWriter;
 
+import org.openprovenance.model.Artifact;
+import org.openprovenance.model.OPMGraph;
+import org.openprovenance.model.OPMToDot;
+import org.openprovenance.model.Process;
+import org.openprovenance.rdf.OPMRdf2Xml;
+
+
 /**
  * @author paolo
  *
@@ -36,16 +47,24 @@ public class OPMManager {
 	private static Logger logger = Logger.getLogger(OPMManager.class);
 
 	private static final String OPM_TAVERNA_NAMESPACE = "http://taverna.opm.org/";
-	private static final String OPM_GRAPH_FILE = "src/test/resources/provenance-testing/OPM/OPMGraph.rdf";
+	private static final String OPM_RDF_GRAPH_FILE = "src/test/resources/provenance-testing/OPM/OPMGraph.rdf";
+	private static final String OPM_XML_GRAPH_FILE = "src/test/resources/provenance-testing/OPM/OPMGraph.xml";
+	private static final String  OPM_DOT_FILE = "src/test/resources/provenance-testing/OPM/OPMGraph.dot";
+	private static final String DOT_CONFIG_FILE = "src/test/resources/provenance-testing/OPM/defaultConfig.xml";
+
 	private static final String VALUE_PROP = "value";
+
+	private static final String OPM_PDF_FILE = null;
+
+
 
 	ProvenanceContextFacade graph = null;
 	Context context = null;
 
-	ProvenanceAccount currentAccount = null;
+	ProvenanceAccount  currentAccount = null;
 	ProvenanceArtifact currentArtifact = null;
 	ProvenanceRole     currentRole = null;
-	ProvenanceProcess currentProcess = null;
+	ProvenanceProcess  currentProcess = null;
 	
 	public OPMManager() {
 
@@ -84,7 +103,8 @@ public class OPMManager {
 	 * 
 	 * @param aName
 	 * @param aValue  actual value can be used optionally as part of a separate triple. Whether this is used or not 
-	 * depends on the settings, see {@link OPMManager.addValueTriple}
+	 * depends on the settings, see {@link OPMManager.addValueTriple}.
+	 * This also sets the currentArtifact to the newly created artifact
 	 */
 	public void addArtifact(String aName, String aValue) {
 
@@ -299,9 +319,9 @@ public class OPMManager {
 			Set<Triple> allTriples = context.getTriples();
 
 			RdfXmlWriter writer = new RdfXmlWriter();				
-			writer.write(allTriples, new FileWriter(OPM_GRAPH_FILE));
+			writer.write(allTriples, new FileWriter(OPM_RDF_GRAPH_FILE));
 
-			logger.info("OPM graph written to "+OPM_GRAPH_FILE);
+			logger.info("OPM graph written to "+OPM_RDF_GRAPH_FILE);
 
 		} catch (OperatorException e) {
 			// TODO Auto-generated catch block
@@ -310,6 +330,49 @@ public class OPMManager {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
+	}
+	
+	
+	
+	/**
+	 * simply invokes the org.openprovenance for converting an RDF OPM graph to an XML OPM graph
+	 * @return a hard-coded filename for the converted XML OPM graph
+	 * @throws OperatorException
+	 * @throws IOException
+	 * @throws JAXBException
+	 */
+	public String Rdf2Xml() throws OperatorException, IOException, JAXBException {
+		
+		OPMRdf2Xml converter = new OPMRdf2Xml();
+		converter.convert(OPM_RDF_GRAPH_FILE, OPM_XML_GRAPH_FILE);		
+		return OPM_XML_GRAPH_FILE;
+	}
+
+
+	/**
+	 * creates a dot file from the current OPMGraph. <br/>
+	 * DOT NOT USE NEEDS FIXING
+	 * @return
+	 * @throws IOException 
+	 * @throws OperatorException 
+	 */
+	public String Rdf2Dot() throws OperatorException, IOException {
+		
+		OPMRdf2Xml converter = new OPMRdf2Xml();
+		OPMGraph graph = converter.convert(OPM_RDF_GRAPH_FILE);
+		
+		List<Process> processes = graph.getProcesses().getProcess();		
+		for (Process p:processes) { p.setId("\""+p.getId()+"\""); }
+		
+		List<Artifact> artifacts = graph.getArtifacts().getArtifact();		
+		for (Artifact a:artifacts) { a.setId("\""+a.getId()+"\""); }
+		
+//		OPMToDot aOPMToDot = new OPMToDot(DOT_CONFIG_FILE);  		
+		OPMToDot aOPMToDot = new OPMToDot();  		
+	
+		aOPMToDot.convert(graph, new File(OPM_DOT_FILE));
+		return OPM_DOT_FILE;
+		
 	}
 
 

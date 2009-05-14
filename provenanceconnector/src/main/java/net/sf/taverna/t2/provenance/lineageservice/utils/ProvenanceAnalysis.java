@@ -20,12 +20,15 @@
  ******************************************************************************/
 package net.sf.taverna.t2.provenance.lineageservice.utils;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.xml.bind.JAXBException;
 
 import net.sf.taverna.t2.provenance.lineageservice.AnnotationsLoader;
 import net.sf.taverna.t2.provenance.lineageservice.LineageQueryResult;
@@ -35,6 +38,7 @@ import net.sf.taverna.t2.provenance.lineageservice.ProvenanceQuery;
 
 import org.apache.log4j.Logger;
 import org.tupeloproject.kernel.Context;
+import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.provenance.ProvenanceAccount;
 import org.tupeloproject.provenance.ProvenanceArtifact;
 import org.tupeloproject.provenance.ProvenanceRole;
@@ -119,7 +123,35 @@ public class ProvenanceAnalysis {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
 
+
+	/**
+	 * asks the OPM manager to convert its current RDF OPMGraph to XML 
+	 * @return the filename of the OPM XML file
+	 * @throws OperatorException
+	 * @throws IOException
+	 * @throws JAXBException
+	 */
+	public String OPMRdf2Xml() throws OperatorException, IOException, JAXBException {
+		if (isReady()) {
+			return aOPMManager.Rdf2Xml();
+		}  
+		return null;
+	}
+
+	/**
+	 * asks the OPM manager to create a dot file representing its current RDF OPMGraph<br/>
+	 * needs fixing
+	 * @return
+	 * @throws IOException 
+	 * @throws OperatorException 
+	 */
+	public String OPMRdf2Dot() throws OperatorException, IOException {
+		if (isReady()) {
+			return aOPMManager.Rdf2Dot();
+		}  
+		return null;		
 	}
 
 
@@ -166,7 +198,7 @@ public class ProvenanceAnalysis {
 			if (!isReady())  return null;
 		}
 
-		
+
 		LineageSQLQuery lq = getPq().simpleLineageQuery(wfInstance, pname, vname, iteration);
 
 		return getPq().runLineageQuery(lq, isIncludeDataValue());
@@ -323,58 +355,12 @@ public class ProvenanceAnalysis {
 		// CHECK there can be multiple (pname, varname) pairs, i.e., in case of nested workflows
 		// here we pick the first that turns up -- we would need to let users choose, or process all of them...
 
-//		begin OPM fumbling
 
-			// fetch value for this variable and assert it as an Artifact in the OPM graph
-			Map<String, String> vbConstraints = new HashMap<String, String>();
-			vbConstraints.put("VB.PNameRef", v.getPName());
-			vbConstraints.put("VB.varNameRef", v.getVName());
-			vbConstraints.put("VB.wfInstanceRef", wfInstance);
-			if (path != null) { 
 
-				// account for x,y,.. format as well as [x,y,...]  depending on where the request is coming from
-				// TODO this is just irritating must be removed
-				if (path.startsWith("[")) 
-					vbConstraints.put("VB.iteration", path);
-				else
-					vbConstraints.put("VB.iteration", "["+path+"]");
-			}
-
-			List<VarBinding> vbList = getPq().getVarBindings(vbConstraints); // DB
-
-			// use only the first result (expect only one) -- in this method we assume path is not null
-
-			// map the resulting varBinding to an Artifact
-			if (vbList == null || vbList.size()==0) {
-				System.out.println("no entry corresponding to conditions: proc="+
-						v.getPName()+" var = "+v.getVName()+" iteration = "+path);
-				return lqList;
-			}
-
-			VarBinding vb = vbList.get(0);
-
-			String URIFriendlyIterationVector = vb.getIteration().
-			replace(',', '-').replace('[', ' ').replace(']', ' ').trim();
-
-			String role;
-			if (URIFriendlyIterationVector.length()>0) {
-				role = vb.getPNameRef()+"/"+vb.getVarNameRef()+"?it="+URIFriendlyIterationVector;
-			} else
-				role = vb.getPNameRef()+"/"+vb.getVarNameRef();
-
-			if (isRecordArtifactValues())
-				aOPMManager.addArtifact(vb.getValue(), vb.getResolvedValue());
-			else 
-				aOPMManager.addArtifact(vb.getValue());
-
-			aOPMManager.createRole(role);
-//			end OPM fumbling
-		
 		if (v.isInput() || getPq().isDataflow(proc)) { // if vName is input, then do a xfer() step
 
 			// rec. accumulates SQL queries into lqList
-			xferStep(wfInstance, var, proc, path, 
-					selectedProcessors, lqList, aOPMManager.getCurrentArtifact(), aOPMManager.getCurrentRole());
+			xferStep(wfInstance, var, proc, path, selectedProcessors, lqList);
 
 		} else { // start with xform
 
@@ -387,7 +373,6 @@ public class ProvenanceAnalysis {
 		return lqList;
 
 	}  // end searchDataflowGraph
-
 
 
 
@@ -460,9 +445,7 @@ public class ProvenanceAnalysis {
 				int delta = inputVar.getActualNestingLevel() - inputVar.getTypeNestingLevel();
 				var2delta.put(inputVar, new Integer(delta));
 				minPathLength += delta;
-
 //				System.out.println("xform() from ["+proc+"] upwards to ["+inputVar.getPName()+":"+inputVar.getVName()+"]");
-
 			}
 
 			String iterationVector[] = path.split(",");
@@ -515,7 +498,6 @@ public class ProvenanceAnalysis {
 			for (String s:currentPath) {
 				if (!getPq().isDataflow(s)) pathCopy.add(s);
 			}			
-
 			paths.add(pathCopy);			
 		}
 
@@ -530,6 +512,7 @@ public class ProvenanceAnalysis {
 		Map<String, ProvenanceArtifact> var2Artifact = new HashMap<String, ProvenanceArtifact>();
 		Map<String, ProvenanceRole> var2ArtifactRole = new HashMap<String, ProvenanceRole>();
 
+		// if this transformation is important to the user, produce an output and also an OPM graph fragment
 		if (selectedProcessors.isEmpty() || selectedProcessors.contains(proc)) {
 
 			LineageSQLQuery lq;
@@ -542,49 +525,109 @@ public class ProvenanceAnalysis {
 
 			// CHECK do the same even if we do have inputs, but returnOutputs is set to true
 			if (var2Path.isEmpty()) {
-
 				lq = getPq().generateSQL(wfInstance, proc, path, true);  // true -> fetch output vars
-
 			} else {
-
-				// dnl of output var defines length of suffix to path that we are going to use for query
-				// if var2Path is null this generates a trivial query for the current output var and current path CHECK
-
 				// note: if returnOutputs is true then this returns outputs ** in addition to ** inputs
 				lq = getPq().lineageQueryGen(wfInstance, proc, var2Path, outputVar, path, isReturnOutputs());
+			}
+			lqList.add(lq);
+
+			// BEGIN OPM update section
+			//
+			// create OPM artifact and role for the output var of this xform
+			//
+			if (aOPMManager!=null) {
+				// fetch value for this variable and assert it as an Artifact in the OPM graph
+				Map<String, String> vbConstraints = new HashMap<String, String>();
+				vbConstraints.put("VB.PNameRef", outputVar.getPName());
+				vbConstraints.put("VB.varNameRef", outputVar.getVName());
+				vbConstraints.put("VB.wfInstanceRef", wfInstance);
+				if (path != null) { 
+
+					// account for x,y,.. format as well as [x,y,...]  depending on where the request is coming from
+					// TODO this is just irritating must be removed
+					if (path.startsWith("[")) 
+						vbConstraints.put("VB.iteration", path);
+					else
+						vbConstraints.put("VB.iteration", "["+path+"]");
+				}
+
+				List<VarBinding> vbList = getPq().getVarBindings(vbConstraints); // DB
+
+				// use only the first result (expect only one) -- in this method we assume path is not null
+
+				// map the resulting varBinding to an Artifact
+				if (vbList == null || vbList.size()==0) {
+					System.out.println("no entry corresponding to conditions: proc="+
+							outputVar.getPName()+" var = "+outputVar.getVName()+" iteration = "+path);
+				}
+				VarBinding vb = vbList.get(0);
+
+				String URIFriendlyIterationVector = vb.getIteration().
+				replace(',', '-').replace('[', ' ').replace(']', ' ').trim();
+
+				String role;
+				if (URIFriendlyIterationVector.length()>0) {
+					role = vb.getPNameRef()+"/"+vb.getVarNameRef()+"?it="+URIFriendlyIterationVector;
+				} else
+					role = vb.getPNameRef()+"/"+vb.getVarNameRef();
+
+
+
+				// 
+				// create OPM process for this xform
+				//
 
 				// if OPM is on, execute the query so we get the value we need for the Artifact node 
 				LineageQueryResult inputs = getPq().runLineageQuery(lq, isIncludeDataValue());
 
+				if (aOPMManager!=null && inputs.getRecords().size()>0 && !pq.isDataflow(proc)) {
 
-//				update OPM graph
+					if (isRecordArtifactValues())
+						aOPMManager.addArtifact(vb.getValue(), vb.getResolvedValue());
+					else 
+						aOPMManager.addArtifact(vb.getValue());
 
+					aOPMManager.createRole(role);
 
+					String iteration = inputs.getRecords().get(0).getIteration();
+
+					URIFriendlyIterationVector = iteration.
+					replace(',', '-').replace('[', ' ').replace(']', ' ').trim();
+
+					// assert proc as Process -- include iteration vector to separate different activations of the same process					
+					aOPMManager.addProcess(proc, iteration, URIFriendlyIterationVector);
+
+					//
+					// create OPM generatedBy property between output value and this process node
+					// avoid the pathological case where a dataflow generates its own inputs
+					//
+					aOPMManager.assertGeneratedBy(
+							aOPMManager.getCurrentArtifact(), 
+							aOPMManager.getCurrentProcess(), 
+							aOPMManager.getCurrentRole(), 
+							aOPMManager.getCurrentAccount(),
+							true);   // true -> prevent duplicates CHECK						
+				}
+
+				//	update OPM graph with inputs and used properties
 				for (LineageQueryResultRecord resultRecord: inputs.getRecords()) {
 
-					String URIFriendlyIterationVector = resultRecord.getIteration().
+					URIFriendlyIterationVector = resultRecord.getIteration().
 					replace(',', '-').replace('[', ' ').replace(']', ' ').trim();
 
 					boolean found = false;  // used to avoid duplicate process resources
 
 					if (aOPMManager!=null) {
 
-						// assert proc as Process -- include iteration vector to separate different activations of the same process					
-						aOPMManager.addProcess(proc, resultRecord.getIteration(), URIFriendlyIterationVector);
+						// map each input var in the resultRecord to an Artifact
+						// create new Resource for the resultRecord
+						//    use the value as URI for the Artifact, and resolvedValue as the actual value
 
-						if (aOPMManager.getCurrentArtifact() != null && aOPMManager.getCurrentRole() != null) {
-
-							aOPMManager.assertGeneratedBy(
-									aOPMManager.getCurrentArtifact(), 
-									aOPMManager.getCurrentProcess(), 
-									aOPMManager.getCurrentRole(), 
-									aOPMManager.getCurrentAccount(),
-									true);   // true -> prevent duplicates CHECK						
-
-
-							// map each input var in the resultRecord to an Artifact
-							// create new Resource for the resultRecord
-							//    use the value as URI for the Artifact, and resolvedValue as the actual value
+						//
+						// create OPM artifact and role for the input var obtained by path projection
+						//
+						if (resultRecord.isInput())  {
 
 							if (isRecordArtifactValues())							
 								aOPMManager.addArtifact(resultRecord.getValue(), resultRecord.getResolvedValue());
@@ -592,47 +635,38 @@ public class ProvenanceAnalysis {
 								aOPMManager.addArtifact(resultRecord.getValue());
 							var2Artifact.put(resultRecord.getVname(), aOPMManager.getCurrentArtifact());
 
-							String role;
 							if (URIFriendlyIterationVector.length()>0) {
 								role = resultRecord.getPname()+"/"+resultRecord.getVname()+"?it="+URIFriendlyIterationVector;
 							} else
 								role = resultRecord.getPname()+"/"+resultRecord.getVname();
 
-							aOPMManager.createRole(role);					
+							aOPMManager.createRole(role);	// this also sets currentRole to role				
 							var2ArtifactRole.put(resultRecord.getVname(), aOPMManager.getCurrentRole());
+
+
+							//
+							// create OPM used property between process and the input var obtained by path projection
+							//
+							// avoid output variables, it would assert that P used one of its outputs!
 
 							aOPMManager.assertUsed(
 									aOPMManager.getCurrentArtifact(), 
 									aOPMManager.getCurrentProcess(), 
 									aOPMManager.getCurrentRole(), 
 									aOPMManager.getCurrentAccount(),
-									true);   // true -> prevent duplicates CHECK
+									true);   // true -> prevent duplicates CHECK	
 						}
 					}
-
-				}	
-
-
-//				end OPM update		
-
-
+				}
 			}
-			lqList.add(lq);
+//			END OPM update section
 		}
 
 		// recursion -- xfer path is next up
 		for (Var inputVar: inputVars) {
-
-			// fetch the Artifact corresponding to this input var
-			ProvenanceArtifact currentInputArtifact = var2Artifact.get(inputVar.getVName());
-			ProvenanceRole currentInputArtifactRole = var2ArtifactRole.get(inputVar.getVName());
-
-			xferStep(wfInstance, inputVar.getVName(), inputVar.getPName(), var2Path.get(inputVar), selectedProcessors, lqList, 
-					currentInputArtifact, currentInputArtifactRole);	
+			xferStep(wfInstance, inputVar.getVName(), inputVar.getPName(), var2Path.get(inputVar), selectedProcessors, lqList);	
 		}
-
 		currentPath.remove(currentPath.size()-1);  // CHECK	
-
 	}  // end xformStep
 
 
@@ -642,9 +676,7 @@ public class ProvenanceAnalysis {
 			String proc,
 			String path, 
 			Set<String> selectedProcessors,
-			List<LineageSQLQuery> lqList,
-			ProvenanceArtifact currentOutputArtifact,
-			ProvenanceRole currentOutputArtifactRole) throws SQLException {
+			List<LineageSQLQuery> lqList) throws SQLException {
 
 		String sourceProcName = null;
 		String sourceVarName  = null;
@@ -690,15 +722,6 @@ public class ProvenanceAnalysis {
 		xformStep(wfInstanceID, outputVar, sourceProcName, path, selectedProcessors, lqList);
 
 	} // end xferStep2
-
-
-
-
-
-
-
-
-
 
 
 	/**
