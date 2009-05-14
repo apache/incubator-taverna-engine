@@ -121,8 +121,8 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 			workflowItem.setParentId(dataflow.getInternalIdentier());
 
 			addProvenanceLayerToProcessors(dataflow, workflowItem);
-			context.getProvenanceReporter().addProvenanceItem(workflowItem);
 			context.getProvenanceReporter().setSessionID(workflowItem.getIdentifier());
+			context.getProvenanceReporter().addProvenanceItem(workflowItem);
 		}
 		facadeResultListener = new FacadeResultListener(dataflow, workflowItem);
 	}
