@@ -930,9 +930,11 @@ public class EventProcessor {
 	 */
 	private void backpatchIterationResults(List<VarBinding> newBindings) throws SQLException {
 
+//		System.out.println("backpatchIterationResults: start");
 		logger.info("backpatchIterationResults: start");
 		for (VarBinding vb:newBindings) {
 
+//			System.out.println("backpatchIterationResults: processing vb "+vb.getPNameRef()+"/"+vb.getVarNameRef()+"="+vb.getValue());
 			logger.info("backpatchIterationResults: processing vb "+vb.getPNameRef()+"/"+vb.getVarNameRef()+"="+vb.getValue());
 
 //			if (vb.getCollIDRef()!= null)  {  // this is a member of a collection
@@ -968,6 +970,7 @@ public class EventProcessor {
 			// reconcile
 			for (VarBinding b:VBs) {
 
+//				System.out.println("backpatching "+sourceVname+" "+sourcePname);
 				logger.info("backpatching "+sourceVname+" "+sourcePname);
 
 				if (vb.getCollIDRef() != null && b.getCollIDRef() == null) {
