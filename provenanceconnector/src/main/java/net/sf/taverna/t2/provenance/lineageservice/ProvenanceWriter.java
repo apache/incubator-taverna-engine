@@ -233,14 +233,11 @@ public abstract class ProvenanceWriter {
 			"INSERT INTO Workflow (wfName) VALUES (?)");
 			stmt = getConnection().createStatement();
 		} catch (InstantiationException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			logger.warn(e1);
 		} catch (IllegalAccessException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			logger.warn(e1);
 		} catch (ClassNotFoundException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			logger.warn(e1);
 		}
 
 		ps.setString(1, wfId);
@@ -259,14 +256,11 @@ public abstract class ProvenanceWriter {
 			"INSERT INTO Workflow (wfname, parentWFname) VALUES (?,?)");
 			stmt = getConnection().createStatement();
 		} catch (InstantiationException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			logger.warn(e1);
 		} catch (IllegalAccessException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			logger.warn(e1);
 		} catch (ClassNotFoundException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			logger.warn(e1);
 		}
 
 		ps.setString(1, wfId);
@@ -289,14 +283,11 @@ public abstract class ProvenanceWriter {
 					"INSERT INTO WfInstance (instanceID, wfnameRef) VALUES (?,?)");
 			stmt = getConnection().createStatement();
 		} catch (InstantiationException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			logger.warn(e1);
 		} catch (IllegalAccessException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			logger.warn(e1);
 		} catch (ClassNotFoundException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			logger.warn(e1);
 		}
 
 		ps.setString(1, wfInstanceId);
