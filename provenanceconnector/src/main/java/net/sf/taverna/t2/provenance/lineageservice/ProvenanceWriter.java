@@ -120,7 +120,7 @@ public abstract class ProvenanceWriter {
 			ps.setInt(3, isInput);
 			ps.setInt(4, i);
 			ps.setString(5, wfId);
-			// System.out.println("executing: "+q);
+			//System.out.println("executing: "+ps);
 
 			try {
 
@@ -149,7 +149,7 @@ public abstract class ProvenanceWriter {
 		try {
 			ps = getConnection()
 			.prepareStatement(
-					"INSERT INTO wfInstanceRef (wfInstanceRef, sourcePNameRef, SourceVarNameRef, sinkPNameRef,sinkVarNameRef) VALUES(?,?,?,?,?)");
+					"INSERT INTO Arc (wfInstanceRef, sourcePNameRef, SourceVarNameRef, sinkPNameRef,sinkVarNameRef) VALUES(?,?,?,?,?)");
 			stmt = getConnection().createStatement();
 		} catch (InstantiationException e1) {
 			// TODO Auto-generated catch block
@@ -550,7 +550,7 @@ public abstract class ProvenanceWriter {
 			// + vb.getPositionInColl() + ")";
 
 			// if (cnt % 100 == 0) {
-			logger.info("Var binding: instance ["
+			logger.debug("Var binding: instance ["
 					+ vb.getWfInstanceRef() + "] processor ["
 					+ vb.getPNameRef() + "] varName [" + vb.getVarNameRef()
 					+ "] collIdRef [" + vb.getCollIDRef() + "] iteration ["
