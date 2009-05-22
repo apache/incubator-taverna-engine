@@ -113,7 +113,7 @@ public class ProvenanceAnalysis {
 		} catch (IllegalAccessException e1) {
 			e1.printStackTrace();
 		} catch (ClassNotFoundException e1) {
-			System.out.println("chosen OPMmanager: "+OPMManagerClass+" not available, reverting to default");
+			logger.info("chosen OPMmanager: "+OPMManagerClass+" not available, reverting to default");
 			aOPMManager  = new OPMManager();
 		}
 
@@ -232,7 +232,7 @@ public class ProvenanceAnalysis {
 		}
 
 		// are we returning all outputs in addition to the inputs?
-		System.out.println("return outputs: "+isReturnOutputs());
+		logger.info("return outputs: "+isReturnOutputs());
 
 		Map<String, List<LineageQueryResult>> results = new HashMap<String, List<LineageQueryResult>>();
 
@@ -558,7 +558,7 @@ public class ProvenanceAnalysis {
 
 				// map the resulting varBinding to an Artifact
 				if (vbList == null || vbList.size()==0) {
-					System.out.println("no entry corresponding to conditions: proc="+
+					logger.info("no entry corresponding to conditions: proc="+
 							outputVar.getPName()+" var = "+outputVar.getVName()+" iteration = "+path);
 				}
 				VarBinding vb = vbList.get(0);
