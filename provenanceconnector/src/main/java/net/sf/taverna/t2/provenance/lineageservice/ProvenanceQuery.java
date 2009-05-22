@@ -659,7 +659,7 @@ public abstract class ProvenanceQuery {
 
 			}
 		} catch (Exception e) {
-			logger.warn(e.getMessage());
+			logger.warn("Add VB failed:" + e.getMessage());
 		}
 		return result;
 	}
