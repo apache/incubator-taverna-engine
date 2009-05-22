@@ -49,7 +49,7 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.security.auth.x500.X500Principal;
 
 import net.sf.taverna.raven.appconfig.ApplicationRuntime;
-import net.sf.taverna.t2.security.agents.SecurityAgentManager;
+//import net.sf.taverna.t2.security.agents.SecurityAgentManager;
 
 import org.apache.log4j.Logger;
 
@@ -336,7 +336,7 @@ public class CredentialManager {
 
 				keystore.load(null, null);
 
-				// Immediatelly save the new (empty) keystore to the file
+				// Immediately save the new (empty) keystore to the file
 				fos = new FileOutputStream(ksFile);
 				keystore.store(fos, masterPassword.toCharArray());
 				
@@ -362,7 +362,7 @@ public class CredentialManager {
 	
 	/**
 	 * Loads lists of service URLs associated with private key aliases from a
-	 * file and populates the serviceURLs hasmap.
+	 * file and populates the serviceURLs hashmap.
 	 */
 	public void loadServiceURLs() throws CMException {
 		
@@ -1224,13 +1224,13 @@ public class CredentialManager {
 	/**
 	 * Gets a Security Agent Manager instance.
 	 */
-	public SecurityAgentManager getSecurityAgentManager() throws CMNotInitialisedException{
-		
-		if (!isInitialised) {
-			throw new CMNotInitialisedException(
-					"Credential Manager not initialised.");
-		}
-
-		return new SecurityAgentManager(keystore, serviceURLs, truststore);
-	}
+//	public SecurityAgentManager getSecurityAgentManager() throws CMNotInitialisedException{
+//		
+//		if (!isInitialised) {
+//			throw new CMNotInitialisedException(
+//					"Credential Manager not initialised.");
+//		}
+//
+//		return new SecurityAgentManager(keystore, serviceURLs, truststore);
+//	}
 }
