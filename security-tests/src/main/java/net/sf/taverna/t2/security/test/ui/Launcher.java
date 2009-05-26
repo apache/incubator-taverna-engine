@@ -32,7 +32,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
-import net.sf.taverna.t2.security.credentialmanager.ui.CredentialManagerGUI;
+import net.sf.taverna.t2.workbench.ui.credentialmanager.CredentialManagerGUI;
 import net.sf.taverna.t2.security.profiles.WSSecurityProfile;
 import net.sf.taverna.t2.security.profiles.ui.WSSecurityProfileChooser;
 

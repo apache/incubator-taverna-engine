@@ -23,6 +23,7 @@
 		<t2.infrastructure.version>1.10-SNAPSHOT</t2.infrastructure.version>
 		<t2.core.version>0.6-SNAPSHOT</t2.core.version>
 		<t2.lang.version>0.5-SNAPSHOT</t2.lang.version>
+		<t2.ui-api.version>0.4-SNAPSHOT</t2.ui-api.version>
 		<bouncycastle.version>136</bouncycastle.version>
 		<wss4j.version>1.5.4</wss4j.version>
 		<axis.version>1.4</axis.version>

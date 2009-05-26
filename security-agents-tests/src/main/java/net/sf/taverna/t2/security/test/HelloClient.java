@@ -129,7 +129,7 @@ public static void main(String [] args) {
 		
   	
 
-    	SecurityAgentManager saManager = credManager.getSecurityAgentManager();
+    	/*SecurityAgentManager saManager = credManager.getSecurityAgentManager();
     	
     	WSSecurityProfile wsSecprof = new WSSecurityProfile();
     	wsSecprof.setWSSecurityProfileString(wssEngineConfigurationString);
@@ -141,7 +141,7 @@ public static void main(String [] args) {
     	// check if agent is null
     	
 		call.setProperty("security_agent", sa);
-		
+		*/
 		/*T2WSDoAllSender t2WSDoAllSender = new T2WSDoAllSender();
 		t2WSDoAllSender.setOption(WSHandlerConstants.ACTION, WSConstants.UT);
 		t2WSDoAllSender.setOption(WSHandlerConstants.PASSWORD_TYPE, WSConstants.PW_TEXT);		
