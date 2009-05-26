@@ -55,6 +55,7 @@ public class XMLSerializerImpl implements XMLSerializer, XMLSerializationConstan
 		Element result = new Element(WORKFLOW, T2_WORKFLOW_NAMESPACE);
 		// For future use
 		result.setAttribute(WORKFLOW_VERSION, "1");
+		result.setAttribute(PRODUCED_BY, this.getProducedBy());
 		Element dataflowElement = DataflowXMLSerializer.getInstance().serializeDataflow(dataflow);
 		dataflowElement.setAttribute(DATAFLOW_ROLE, DATAFLOW_ROLE_TOP);
 		result.addContent(dataflowElement);
@@ -84,5 +85,15 @@ public class XMLSerializerImpl implements XMLSerializer, XMLSerializationConstan
 		
 	}
 
+	private String producedBy = UNSPECIFIED;
+
+	public void setProducedBy(String producedBy) {
+		this.producedBy = producedBy;
+	}
 	
+	public String getProducedBy() {
+		return this.producedBy;
+	}
+
+
 }
