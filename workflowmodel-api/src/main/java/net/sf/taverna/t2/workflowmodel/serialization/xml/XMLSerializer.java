@@ -33,6 +33,7 @@ import org.jdom.Element;
  * a definition of these.
  * 
  * @author Stuart Owen
+ * @author Alan R Williams
  *
  */
 public interface XMLSerializer {
@@ -44,5 +45,14 @@ public interface XMLSerializer {
 	 * @throws SerializationException if there is a problem serializing the dataflow
 	 */
 	Element serializeDataflow(Dataflow dataflow) throws SerializationException;
+	
+	/**
+	 * Specify what program produced the serialization
+	 * 
+	 * @param producedBy
+	 */
+	void setProducedBy(String producedBy);
+	
+	String getProducedBy();
 
 }
