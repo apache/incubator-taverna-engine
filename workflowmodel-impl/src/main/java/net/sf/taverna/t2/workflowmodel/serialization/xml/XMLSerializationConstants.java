@@ -111,8 +111,10 @@ public interface XMLSerializationConstants {
 	static final String DATAFLOW_REFERENCE="ref";
 	static final String DATAFLOW_ID="id";
 	
+	static final String PRODUCED_BY="producedBy";
+	
 	//Attribute values
 	static final String DATAFLOW_ROLE_TOP="top";
 	static final String DATAFLOW_ROLE_NESTED="nested";
-	
+    static final String UNSPECIFIED = "unspecified";	
 }
