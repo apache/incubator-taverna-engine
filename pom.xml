@@ -35,7 +35,6 @@
 		<module>credential-manager</module>
 		<module>security-agents</module>
 		<module>security-profiles</module>
-		<module>security-tests</module>
 		<module>security-agents-tests</module>
 	</modules>
 	<build>
