@@ -6,6 +6,8 @@ package net.sf.taverna.t2.provenance.lineageservice.utils;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -46,17 +48,14 @@ public class OPMManager {
 
 	private static Logger logger = Logger.getLogger(OPMManager.class);
 
-	private static final String OPM_TAVERNA_NAMESPACE = "http://taverna.opm.org/";
+	public static final String OPM_TAVERNA_NAMESPACE = "http://taverna.opm.org/";
 	private static final String OPM_RDF_GRAPH_FILE = "src/test/resources/provenance-testing/OPM/OPMGraph.rdf";
 	private static final String OPM_XML_GRAPH_FILE = "src/test/resources/provenance-testing/OPM/OPMGraph.xml";
 	private static final String  OPM_DOT_FILE = "src/test/resources/provenance-testing/OPM/OPMGraph.dot";
 	private static final String DOT_CONFIG_FILE = "src/test/resources/provenance-testing/OPM/defaultConfig.xml";
 
 	private static final String VALUE_PROP = "value";
-
 	private static final String OPM_PDF_FILE = null;
-
-
 
 	ProvenanceContextFacade graph = null;
 	Context context = null;
@@ -65,7 +64,7 @@ public class OPMManager {
 	ProvenanceArtifact currentArtifact = null;
 	ProvenanceRole     currentRole = null;
 	ProvenanceProcess  currentProcess = null;
-	
+
 	public OPMManager() {
 
 		// init Tupelo RDF provenance graph
@@ -78,14 +77,14 @@ public class OPMManager {
 		graph = new ProvenanceContextFacade(mc);
 	}
 
-	
+
 	/**
-	 * default implementation of tis method returns null -- has no idea how to extract simple values from incoming artifact values 
+	 * default implementation of this method returns null -- has no idea how to extract simple values from incoming artifact values 
 	 * @return
 	 */
 	public List<DataValueExtractor> getDataValueExtractor() { return null; }
-	
-	
+
+
 	/**
 	 * 	create new account to hold the causality graph
 	 *  and give it a Resource name
@@ -108,13 +107,26 @@ public class OPMManager {
 	 */
 	public void addArtifact(String aName, String aValue) {
 
-		Resource r = Resource.uriRef(aName);
-		currentArtifact = graph.newArtifact(aName, r);
+		String artID=aName;
+		// make sure artifact name is a good URI
+		try {
+			URI artURI = new URI(aName);
+
+			if (artURI.getAuthority() == null) {
+				artID = OPM_TAVERNA_NAMESPACE+aName;				
+			}
+		} catch (URISyntaxException e1) {
+			artID = OPM_TAVERNA_NAMESPACE+aName;
+		}
+
+
+		Resource r = Resource.uriRef(artID);
+		currentArtifact = graph.newArtifact(artID, r);
 		graph.assertArtifact(currentArtifact);
 
 		if (aValue != null) {
 //			System.out.println("OPMManager::addArtifact: aValue is NOT NULL");
-			
+
 			// if we have a valid DataValueExtractor, use it here
 			List<DataValueExtractor> dveList;
 			String extractedValue = aValue;  // default is same value
@@ -123,7 +135,7 @@ public class OPMManager {
 				// try all available extractors... UGLY but data comes with NO TYPE at all!
 				for (DataValueExtractor dve: dveList) {
 					try {
-						
+
 //						System.out.println("OPMManager::addArtifact: trying extractor "+dve.getClass().getName());
 						extractedValue = dve.extractString(aValue);						
 //						System.out.println("OPMManager::addArtifact: - extracted value = "+extractedValue);
@@ -135,7 +147,7 @@ public class OPMManager {
 					}
 				}
 			}
-			
+
 //			System.out.println("OPMManager::addArtifact: using value "+extractedValue);
 			try {
 				Literal lValue = Resource.literal(extractedValue);
@@ -172,10 +184,24 @@ public class OPMManager {
 	public void addProcess(String proc, String iterationVector, String URIfriendlyIterationVector) {
 
 		String processID;
-		if (URIfriendlyIterationVector.length()>0) {
-			processID = OPM_TAVERNA_NAMESPACE+proc+"?it="+URIfriendlyIterationVector;
-		} else
+
+		// PM added 5/09 -- a process name may already be a URI -- this happens for example when we export back OPM
+		// after importing a workflow from our own OPM... in this case, do not pre-pend a new URI scheme
+
+		try {
+			URI procURI = new URI(proc);
+
+			if (procURI.getAuthority() == null) {
+				processID = OPM_TAVERNA_NAMESPACE+proc;				
+			} else {
+				processID = proc;
+			}
+		} catch (URISyntaxException e1) {
 			processID = OPM_TAVERNA_NAMESPACE+proc;
+		}
+		if (URIfriendlyIterationVector.length()>0) {
+			processID = processID+"?it="+URIfriendlyIterationVector;
+		}
 
 		Resource processResource = Resource.uriRef(processID);					
 		currentProcess = graph.newProcess(processID, processResource);
@@ -240,6 +266,8 @@ public class OPMManager {
 	public ProvenanceContextFacade getGraph() {
 		return graph;
 	}
+
+
 
 	/**
 	 * @return the account
@@ -331,9 +359,9 @@ public class OPMManager {
 			e.printStackTrace();
 		}		
 	}
-	
-	
-	
+
+
+
 	/**
 	 * simply invokes the org.openprovenance for converting an RDF OPM graph to an XML OPM graph
 	 * @return a hard-coded filename for the converted XML OPM graph
@@ -342,7 +370,7 @@ public class OPMManager {
 	 * @throws JAXBException
 	 */
 	public String Rdf2Xml() throws OperatorException, IOException, JAXBException {
-		
+
 		OPMRdf2Xml converter = new OPMRdf2Xml();
 		converter.convert(OPM_RDF_GRAPH_FILE, OPM_XML_GRAPH_FILE);		
 		return OPM_XML_GRAPH_FILE;
@@ -357,22 +385,30 @@ public class OPMManager {
 	 * @throws OperatorException 
 	 */
 	public String Rdf2Dot() throws OperatorException, IOException {
-		
+
 		OPMRdf2Xml converter = new OPMRdf2Xml();
 		OPMGraph graph = converter.convert(OPM_RDF_GRAPH_FILE);
-		
+
 		List<Process> processes = graph.getProcesses().getProcess();		
 		for (Process p:processes) { p.setId("\""+p.getId()+"\""); }
-		
+
 		List<Artifact> artifacts = graph.getArtifacts().getArtifact();		
 		for (Artifact a:artifacts) { a.setId("\""+a.getId()+"\""); }
-		
+
 //		OPMToDot aOPMToDot = new OPMToDot(DOT_CONFIG_FILE);  		
 		OPMToDot aOPMToDot = new OPMToDot();  		
-	
+
 		aOPMToDot.convert(graph, new File(OPM_DOT_FILE));
 		return OPM_DOT_FILE;
-		
+
+	}
+
+
+	/**
+	 * @param graph the graph to set
+	 */
+	public void setGraph(ProvenanceContextFacade graph) {
+		this.graph = graph;
 	}
 
 

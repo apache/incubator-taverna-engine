@@ -73,6 +73,8 @@ public class ProvenanceAnalysis {
 
 	private boolean includeDataValue = false; // forces the lineage queries to return de-referenced data values
 
+	private boolean generateOPMGraph = true;
+
 	// TODO extract this to prefs -- selects which OPMManager is to be used to export to OPM
 	private String OPMManagerClass = "net.sf.taverna.t2.provenance.lineageservice.ext.pc3.PANSTARRSOPMManager";
 
@@ -246,6 +248,10 @@ public class ProvenanceAnalysis {
 
 			List<VarBinding> vbList = getPq().getVarBindings(vbConstraints); // DB
 
+			if (vbList.isEmpty()) {
+				logger.warn(ALL_PATHS_KEYWORD+" specified for paths but no varBindings found. nothing to compute");
+			}
+
 			for (VarBinding vb:vbList) {
 
 				// path is of the form [x,y..]  we need it as x,y... 
@@ -354,8 +360,6 @@ public class ProvenanceAnalysis {
 		Var v = vars.get(0); 		// expect exactly one record
 		// CHECK there can be multiple (pname, varname) pairs, i.e., in case of nested workflows
 		// here we pick the first that turns up -- we would need to let users choose, or process all of them...
-
-
 
 		if (v.isInput() || getPq().isDataflow(proc)) { // if vName is input, then do a xfer() step
 
@@ -536,7 +540,13 @@ public class ProvenanceAnalysis {
 			//
 			// create OPM artifact and role for the output var of this xform
 			//
-			if (aOPMManager!=null) {
+			boolean doOPM = (aOPMManager == null);  // any problem below will set this to false
+
+			String role = null;
+			VarBinding vb = null;
+			String URIFriendlyIterationVector =null;
+
+			if (doOPM) {
 				// fetch value for this variable and assert it as an Artifact in the OPM graph
 				Map<String, String> vbConstraints = new HashMap<String, String>();
 				vbConstraints.put("VB.PNameRef", outputVar.getPName());
@@ -558,27 +568,28 @@ public class ProvenanceAnalysis {
 
 				// map the resulting varBinding to an Artifact
 				if (vbList == null || vbList.size()==0) {
-					logger.info("no entry corresponding to conditions: proc="+
+					logger.warn("no entry corresponding to conditions: proc="+
 							outputVar.getPName()+" var = "+outputVar.getVName()+" iteration = "+path);
+					doOPM = false;
+				}  else {
+					vb = vbList.get(0);
+
+					URIFriendlyIterationVector = vb.getIteration().
+					replace(',', '-').replace('[', ' ').replace(']', ' ').trim();
+
+					if (URIFriendlyIterationVector.length()>0) {
+						role = vb.getPNameRef()+"/"+vb.getVarNameRef()+"?it="+URIFriendlyIterationVector;
+					} else
+						role = vb.getPNameRef()+"/"+vb.getVarNameRef();
 				}
-				VarBinding vb = vbList.get(0);
+			}
 
-				String URIFriendlyIterationVector = vb.getIteration().
-				replace(',', '-').replace('[', ' ').replace(']', ' ').trim();
+			// 
+			// create OPM process for this xform
+			//
 
-				String role;
-				if (URIFriendlyIterationVector.length()>0) {
-					role = vb.getPNameRef()+"/"+vb.getVarNameRef()+"?it="+URIFriendlyIterationVector;
-				} else
-					role = vb.getPNameRef()+"/"+vb.getVarNameRef();
-
-
-
-				// 
-				// create OPM process for this xform
-				//
-
-				// if OPM is on, execute the query so we get the value we need for the Artifact node 
+			// if OPM is on, execute the query so we get the value we need for the Artifact node
+			if (doOPM) {
 				LineageQueryResult inputs = getPq().runLineageQuery(lq, isIncludeDataValue());
 
 				if (aOPMManager!=null && inputs.getRecords().size()>0 && !pq.isDataflow(proc)) {
@@ -618,44 +629,41 @@ public class ProvenanceAnalysis {
 
 					boolean found = false;  // used to avoid duplicate process resources
 
-					if (aOPMManager!=null) {
+					// map each input var in the resultRecord to an Artifact
+					// create new Resource for the resultRecord
+					//    use the value as URI for the Artifact, and resolvedValue as the actual value
 
-						// map each input var in the resultRecord to an Artifact
-						// create new Resource for the resultRecord
-						//    use the value as URI for the Artifact, and resolvedValue as the actual value
+					//
+					// create OPM artifact and role for the input var obtained by path projection
+					//
+					if (resultRecord.isInput())  {
+
+						if (isRecordArtifactValues())							
+							aOPMManager.addArtifact(resultRecord.getValue(), resultRecord.getResolvedValue());
+						else 
+							aOPMManager.addArtifact(resultRecord.getValue());
+						var2Artifact.put(resultRecord.getVname(), aOPMManager.getCurrentArtifact());
+
+						if (URIFriendlyIterationVector.length()>0) {
+							role = resultRecord.getPname()+"/"+resultRecord.getVname()+"?it="+URIFriendlyIterationVector;
+						} else
+							role = resultRecord.getPname()+"/"+resultRecord.getVname();
+
+						aOPMManager.createRole(role);	// this also sets currentRole to role				
+						var2ArtifactRole.put(resultRecord.getVname(), aOPMManager.getCurrentRole());
+
 
 						//
-						// create OPM artifact and role for the input var obtained by path projection
+						// create OPM used property between process and the input var obtained by path projection
 						//
-						if (resultRecord.isInput())  {
+						// avoid output variables, it would assert that P used one of its outputs!
 
-							if (isRecordArtifactValues())							
-								aOPMManager.addArtifact(resultRecord.getValue(), resultRecord.getResolvedValue());
-							else 
-								aOPMManager.addArtifact(resultRecord.getValue());
-							var2Artifact.put(resultRecord.getVname(), aOPMManager.getCurrentArtifact());
-
-							if (URIFriendlyIterationVector.length()>0) {
-								role = resultRecord.getPname()+"/"+resultRecord.getVname()+"?it="+URIFriendlyIterationVector;
-							} else
-								role = resultRecord.getPname()+"/"+resultRecord.getVname();
-
-							aOPMManager.createRole(role);	// this also sets currentRole to role				
-							var2ArtifactRole.put(resultRecord.getVname(), aOPMManager.getCurrentRole());
-
-
-							//
-							// create OPM used property between process and the input var obtained by path projection
-							//
-							// avoid output variables, it would assert that P used one of its outputs!
-
-							aOPMManager.assertUsed(
-									aOPMManager.getCurrentArtifact(), 
-									aOPMManager.getCurrentProcess(), 
-									aOPMManager.getCurrentRole(), 
-									aOPMManager.getCurrentAccount(),
-									true);   // true -> prevent duplicates CHECK	
-						}
+						aOPMManager.assertUsed(
+								aOPMManager.getCurrentArtifact(), 
+								aOPMManager.getCurrentProcess(), 
+								aOPMManager.getCurrentRole(), 
+								aOPMManager.getCurrentAccount(),
+								true);   // true -> prevent duplicates CHECK	
 					}
 				}
 			}
@@ -1077,6 +1085,20 @@ public class ProvenanceAnalysis {
 	 */
 	public void setIncludeDataValue(boolean includeDataValue) {
 		this.includeDataValue = includeDataValue;
+	}
+
+	/**
+	 * @return the generateOPMGraph
+	 */
+	public boolean isGenerateOPMGraph() {
+		return generateOPMGraph;
+	}
+
+	/**
+	 * @param generateOPMGraph the generateOPMGraph to set
+	 */
+	public void setGenerateOPMGraph(boolean generateOPMGraph) {
+		this.generateOPMGraph = generateOPMGraph;
 	}
 
 
