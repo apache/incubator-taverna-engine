@@ -28,26 +28,38 @@ public class LineageQueryResultRecord {
 	String iteration;
 	String value;     // atomic or XML-formatted collection -- this is actually a reference to the value...
 	String collIdRef;
+	String parentCollIDRef;
 	String resolvedValue;
 	String type;  // one of referenceSet, referenceSetCollection
 	boolean printResolvedValue;
 	boolean isInput; 
+	boolean isCollection;
 
 	public String toString() {
 
-		if (printResolvedValue)
-			return "proc "+getPname()+
+		if (isCollection) {
+			return "COLLECTION: proc "+getPname()+
 			" var "+getVname()+" " +
-			"iteration: "+getIteration()+
+			" iteration: "+getIteration()+
 			" value: "+getValue()+
 			" collection id: "+getCollIdRef()+
-			" resolvedValue: "+getResolvedValue();
-		else  
-			return "proc "+getPname()+
-			" var "+getVname()+" " +
-			"iteration: "+getIteration()+
-			" collection id: "+getCollIdRef()+
-			" value: "+getValue();
+			" parent collection: "+getParentCollIDRef();
+		} else {
+
+			if (printResolvedValue)
+				return "proc "+getPname()+
+				" var "+getVname()+" " +
+				" iteration: "+getIteration()+
+				" value: "+getValue()+
+				" collection id: "+getCollIdRef()+
+				" resolvedValue: "+getResolvedValue();
+			else  
+				return "proc "+getPname()+
+				" var "+getVname()+" " +
+				" iteration: "+getIteration()+
+				" collection id: "+getCollIdRef()+
+				" value: "+getValue();
+		}
 	}
 
 
@@ -171,6 +183,38 @@ public class LineageQueryResultRecord {
 	 */
 	public void setCollIdRef(String collIdRef) {
 		this.collIdRef = collIdRef;
+	}
+
+
+	/**
+	 * @return the isCollection
+	 */
+	public boolean isCollection() {
+		return isCollection;
+	}
+
+
+	/**
+	 * @param isCollection the isCollection to set
+	 */
+	public void setCollection(boolean isCollection) {
+		this.isCollection = isCollection;
+	}
+
+
+	/**
+	 * @return the parentCollIDRef
+	 */
+	public String getParentCollIDRef() {
+		return parentCollIDRef;
+	}
+
+
+	/**
+	 * @param parentCollIDRef the parentCollIDRef to set
+	 */
+	public void setParentCollIDRef(String parentCollIDRef) {
+		this.parentCollIDRef = parentCollIDRef;
 	}
 
 }

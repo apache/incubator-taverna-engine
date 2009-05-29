@@ -29,23 +29,11 @@ package net.sf.taverna.t2.provenance.lineageservice;
  */
 public class LineageSQLQuery {
 
-	String SQLQuery = null;
+	String vbQuery = null;
+	String collQuery = null;
 	
 	int nestingLevel = 0;  // =0 => use var values, >0 => use enclosing collection
 
-	/**
-	 * @return the sQLQuery
-	 */
-	public String getSQLQuery() {
-		return SQLQuery;
-	}
-
-	/**
-	 * @param query the sQLQuery to set
-	 */
-	public void setSQLQuery(String query) {
-		SQLQuery = query;
-	}
 
 	/**
 	 * @return the nestingLevel
@@ -59,6 +47,34 @@ public class LineageSQLQuery {
 	 */
 	public void setNestingLevel(int nestingLevel) {
 		this.nestingLevel = nestingLevel;
+	}
+
+	/**
+	 * @return the collQuery
+	 */
+	public String getCollQuery() {
+		return collQuery;
+	}
+
+	/**
+	 * @param collQuery the collQuery to set
+	 */
+	public void setCollQuery(String collQuery) {
+		this.collQuery = collQuery;
+	}
+
+	/**
+	 * @return the vbQuery
+	 */
+	public String getVbQuery() {
+		return vbQuery;
+	}
+
+	/**
+	 * @param vbQuery the vbQuery to set
+	 */
+	public void setVbQuery(String vbQuery) {
+		this.vbQuery = vbQuery;
 	}
 	
 }

@@ -79,7 +79,7 @@ public class WorkflowDataProcessor {
 	 */
 	public void processTrees(String dataflowID, String wfInstanceRef) {
 
-		logger.info("processing output trees");
+		logger.debug("processing output trees");
 
 		for (Map.Entry<String, List<WorkflowDataNode>> entry:workflowDataTrees.entrySet()) {
 
@@ -88,16 +88,16 @@ public class WorkflowDataProcessor {
 
 			try {
 
-				logger.info("storing tree for var "+varName);
+				logger.debug("storing tree for var "+varName);
 				for (WorkflowDataNode node:tree) {
 					if (node.isList) {
 
-						logger.info("creating collection entry for "+
+						logger.debug("creating collection entry for "+
 								node.value+" with index "+
 								node.index);
 						
 						if (node.getParent()!=null) {
-							logger.info(" and parent "+node.parent.index);
+							logger.debug(" and parent "+node.parent.index);
 						// write a collection record to DB
 						getPw().addCollection(dataflowID, 
 								              node.getValue(), 
@@ -115,7 +115,7 @@ public class WorkflowDataProcessor {
 						}
 
 					} else {
-						logger.info("creating VarBinding for "+node.value+" with index "+node.index);
+						logger.debug("creating VarBinding for "+node.value+" with index "+node.index);
 						
 						VarBinding vb = new VarBinding();
 
@@ -127,7 +127,7 @@ public class WorkflowDataProcessor {
 						vb.setValue(node.getValue());
 						
 						if (node.getParent()!=null) {
-							logger.info(" in collection "+node.getParent().value+
+							logger.debug(" in collection "+node.getParent().value+
 									" with index "+node.getParent().getIndex());
 							
 							vb.setCollIDRef(node.getParent().getValue());

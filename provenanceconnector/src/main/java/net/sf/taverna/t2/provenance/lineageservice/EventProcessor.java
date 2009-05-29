@@ -150,7 +150,7 @@ public class EventProcessor {
 		}
 
 		setWfInstanceID(((WorkflowProvenanceItem)provenanceItem).getIdentifier());
-		logger.info("Workflow instance is: " + getWfInstanceID());
+		logger.debug("Workflow instance is: " + getWfInstanceID());
 		Dataflow df = null;
 
 		df = ((WorkflowProvenanceItem)provenanceItem).getDataflow();
@@ -931,11 +931,11 @@ public class EventProcessor {
 	private void backpatchIterationResults(List<VarBinding> newBindings) throws SQLException {
 
 //		System.out.println("backpatchIterationResults: start");
-		logger.info("backpatchIterationResults: start");
+		logger.debug("backpatchIterationResults: start");
 		for (VarBinding vb:newBindings) {
 
 //			System.out.println("backpatchIterationResults: processing vb "+vb.getPNameRef()+"/"+vb.getVarNameRef()+"="+vb.getValue());
-			logger.info("backpatchIterationResults: processing vb "+vb.getPNameRef()+"/"+vb.getVarNameRef()+"="+vb.getValue());
+			logger.debug("backpatchIterationResults: processing vb "+vb.getPNameRef()+"/"+vb.getVarNameRef()+"="+vb.getValue());
 
 //			if (vb.getCollIDRef()!= null)  {  // this is a member of a collection
 
@@ -971,7 +971,7 @@ public class EventProcessor {
 			for (VarBinding b:VBs) {
 
 //				System.out.println("backpatching "+sourceVname+" "+sourcePname);
-				logger.info("backpatching "+sourceVname+" "+sourcePname);
+				logger.debug("backpatching "+sourceVname+" "+sourcePname);
 
 				if (vb.getCollIDRef() != null && b.getCollIDRef() == null) {
 					b.setCollIDRef(vb.getCollIDRef());
@@ -1103,7 +1103,7 @@ public class EventProcessor {
 				newBindings.add(vb);
 
 			} catch (SQLException e) {
-				logger.info("Process Var Binding problem with provenance" + e.getMessage());
+				logger.warn("Process Var Binding problem with provenance" + e.getMessage());
 			}
 
 		} else if (valueType.equals("referenceSet")) {
@@ -1177,11 +1177,11 @@ public class EventProcessor {
 				newBindings.add(vb);
 
 			} catch (SQLException e) {
-				logger.info("Process Var Binding problem with provenance"
+				logger.warn("Process Var Binding problem with provenance"
 						+ e.getMessage());
 			}
 		} else {
-			logger.info("unrecognized value type element for "
+			logger.warn("unrecognized value type element for "
 					+ processorId + ": " + valueType);
 		}
 
@@ -1218,11 +1218,11 @@ public class EventProcessor {
 	 */
 	public void saveEvent(ProvenanceItem provenanceItem, SharedVocabulary eventType) throws IOException {
 
-		
+
 		// HACK -- XMLEncoder fails on IterationEvents and there is no way to catch the exception...
 		// so avoid this case
 		if (eventType.equals(SharedVocabulary.ITERATION_EVENT_TYPE))  return;
-		
+
 //		System.out.println("saveEvent: start");
 
 		File f1 = null;
@@ -1383,13 +1383,14 @@ public class EventProcessor {
 
 		// propagate through 1 level of processors, ignore nesting. A subworkflow here is
 		// simply a processor
+		logger.info("calling propagateANL with "+wfInstanceRef);
 		propagateANLWithinSubflow(wfInstanceRef);
 
 		// now fetch all children workflows and recurse
 		List<String> children = getPq().getChildrenOfWorkflow(wfInstanceRef);
 
 		for (String childWFName: children) {			
-			propagateANL(childWFName); // CHECK				
+			propagateANL(childWFName); // CHECK recursion is correct?		
 		}
 
 //		// is any of the processors at this level a dataflow itself?
@@ -1430,12 +1431,12 @@ public class EventProcessor {
 		// temp queue
 		List<String> Q = new ArrayList<String>();
 
-		// System.out.println("propagateANL: processors in the graph");
+		 logger.debug("propagateANL: processors in the graph");
 
 		// init Q with root nodes
 		for (Map.Entry<String, Integer> entry : processorsLinks.entrySet()) {
 
-			// System.out.println(entry.getKey()+" has "+entry.getValue().intValue()+" predecessors");
+			logger.debug(entry.getKey()+" has "+entry.getValue().intValue()+" predecessors");
 
 			if (entry.getValue().intValue() == 0) {
 				Q.add(entry.getKey());
@@ -1463,25 +1464,30 @@ public class EventProcessor {
 			}
 		} // end loop on Q
 
-//		System.out.println("toposort:");
-//		for (String p : L) {
-//		System.out.println(p);
-//		}
+		logger.debug("toposort:");
+		for (String p : L) {
+			logger.debug(p);
+		}
 
 		// sorted processor names in L at this point
 		// process them in order
 		for (String pname : L) {
 
+			logger.debug("setting ANL for "+pname+" input vars");
+			
 			// process pname's inputs -- set ANL to be the DNL if not set in
 			// prior steps
 			List<Var> inputs = getPq().getInputVars(pname, wfInstanceRef, null); // null -> do not use instance
 
 			int totalANL = 0;
 			for (Var iv : inputs) {
+				
 				if (iv.isANLset() == false) {
 					iv.setActualNestingLevel(iv.getTypeNestingLevel());
 					iv.setANLset(true);
 					getPw().updateVar(iv);
+
+					logger.debug("var: "+iv.getVName()+" set at nominal level "+iv.getActualNestingLevel());					
 				}
 
 				int delta_nl = iv.getActualNestingLevel() - iv.getTypeNestingLevel();
@@ -1490,7 +1496,22 @@ public class EventProcessor {
 				if (delta_nl < 0 ) delta_nl = iv.getTypeNestingLevel();
 
 				totalANL += delta_nl;
+				
+				// this should take care of the special case of the top level dataflow with inputs that have successors in the graph
+				// propagate this through all the links from this var
+				List<Var> successors = getPq().getSuccVars(pname, iv.getVName(),
+						wfInstanceRef);
+
+				logger.debug(successors.size()+ " successors for var "+iv.getVName());
+				
+				for (Var v : successors) {
+					v.setActualNestingLevel(iv.getActualNestingLevel());
+					v.setANLset(true);
+					getPw().updateVar(v);
+				}
 			}
+
+			logger.debug("setting ANL for "+pname+" output vars");
 
 			// process pname's outputs -- set ANL based on the sum formula (see
 			// paper)

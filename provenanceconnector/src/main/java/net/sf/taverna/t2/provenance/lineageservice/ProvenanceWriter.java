@@ -85,7 +85,7 @@ public abstract class ProvenanceWriter {
 		try {
 			ps = getConnection()
 			.prepareStatement(
-					"INSERT INTO Var (varname, pNameRef, inputOrOutput, nestingLevel, wfInstanceRef) VALUES(?,?,?,?,?)");
+			"INSERT INTO Var (varname, pNameRef, inputOrOutput, nestingLevel, wfInstanceRef) VALUES(?,?,?,?,?)");
 			stmt = getConnection().createStatement();
 		} catch (InstantiationException e1) {
 			// TODO Auto-generated catch block
@@ -149,7 +149,7 @@ public abstract class ProvenanceWriter {
 		try {
 			ps = getConnection()
 			.prepareStatement(
-					"INSERT INTO Arc (wfInstanceRef, sourcePNameRef, SourceVarNameRef, sinkPNameRef,sinkVarNameRef) VALUES(?,?,?,?,?)");
+			"INSERT INTO Arc (wfInstanceRef, sourcePNameRef, SourceVarNameRef, sinkPNameRef,sinkVarNameRef) VALUES(?,?,?,?,?)");
 			stmt = getConnection().createStatement();
 		} catch (InstantiationException e1) {
 			// TODO Auto-generated catch block
@@ -160,29 +160,30 @@ public abstract class ProvenanceWriter {
 		} catch (ClassNotFoundException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
+
+			// String q =
+			// "INSERT INTO wfInstanceRef (wfInstanceRef, sourcePNameRef, SourceVarNameRef, sinkPNameRef,sinkVarNameRef) VALUES(\'"
+			// + wfId
+			// + "\',\'"
+			// + sourceVar.getPName()
+			// + "\',\'"
+			// + sourceVar.getVName()
+			// + "\',\'"
+			// + sinkVar.getPName()
+			// + "\',\'"
+			// + sinkVar.getVName() + "\')";
+
+			ps.setString(1, wfId);
+			ps.setString(2, sourceVar.getPName());
+			ps.setString(3, sourceVar.getVName());
+			ps.setString(4, sinkVar.getPName());
+			ps.setString(5, sinkVar.getVName());
+
+			// System.out.println("executing: "+q);
+			int result = ps.executeUpdate();
+			// System.out.println("workflow id: "+result+" rows added to DB");
 		}
 
-		// String q =
-		// "INSERT INTO wfInstanceRef (wfInstanceRef, sourcePNameRef, SourceVarNameRef, sinkPNameRef,sinkVarNameRef) VALUES(\'"
-		// + wfId
-		// + "\',\'"
-		// + sourceVar.getPName()
-		// + "\',\'"
-		// + sourceVar.getVName()
-		// + "\',\'"
-		// + sinkVar.getPName()
-		// + "\',\'"
-		// + sinkVar.getVName() + "\')";
-
-		ps.setString(1, wfId);
-		ps.setString(2, sourceVar.getPName());
-		ps.setString(3, sourceVar.getVName());
-		ps.setString(4, sinkVar.getPName());
-		ps.setString(5, sinkVar.getVName());
-
-		// System.out.println("executing: "+q);
-		int result = ps.executeUpdate();
-		// System.out.println("workflow id: "+result+" rows added to DB");
 	}
 
 	public void addArc(String sourceVarName, String sourceProcName,
@@ -193,7 +194,7 @@ public abstract class ProvenanceWriter {
 		try {
 			ps = getConnection()
 			.prepareStatement(
-					"INSERT INTO Arc (wfInstanceRef, sourcePNameRef, sourceVarNameRef, sinkPNameRef, sinkVarNameRef) VALUES(?,?,?,?,?)");
+			"INSERT INTO Arc (wfInstanceRef, sourcePNameRef, sourceVarNameRef, sinkPNameRef, sinkVarNameRef) VALUES(?,?,?,?,?)");
 			stmt = getConnection().createStatement();
 		} catch (InstantiationException e1) {
 			// TODO Auto-generated catch block
@@ -280,7 +281,7 @@ public abstract class ProvenanceWriter {
 		try {
 			ps = getConnection()
 			.prepareStatement(
-					"INSERT INTO WfInstance (instanceID, wfnameRef) VALUES (?,?)");
+			"INSERT INTO WfInstance (instanceID, wfnameRef) VALUES (?,?)");
 			stmt = getConnection().createStatement();
 		} catch (InstantiationException e1) {
 			logger.warn(e1);
@@ -327,7 +328,7 @@ public abstract class ProvenanceWriter {
 		try {
 			ps = getConnection()
 			.prepareStatement(
-					"INSERT INTO Processor (pname, type, wfInstanceRef) VALUES (?,?,?)");
+			"INSERT INTO Processor (pname, type, wfInstanceRef) VALUES (?,?,?)");
 			// stmt = getConnection().createStatement();
 		} catch (InstantiationException e1) {
 			// TODO Auto-generated catch block
@@ -360,7 +361,7 @@ public abstract class ProvenanceWriter {
 		try {
 			ps = getConnection()
 			.prepareStatement(
-					"INSERT INTO ProcBinding (pnameRef, execIDRef, iteration, actName) VALUES(?,?,?,?)");
+			"INSERT INTO ProcBinding (pnameRef, execIDRef, iteration, actName) VALUES(?,?,?,?)");
 			stmt = getConnection().createStatement();
 		} catch (InstantiationException e1) {
 			// TODO Auto-generated catch block
@@ -405,7 +406,7 @@ public abstract class ProvenanceWriter {
 		try {
 			ps = getConnection()
 			.prepareStatement(
-					"INSERT INTO Collection (PNameRef, wfInstanceRef, varNameRef, iteration, parentCollIdRef, collId) VALUES(?,?,?,?,?,?)");
+			"INSERT INTO Collection (PNameRef, wfInstanceRef, varNameRef, iteration, parentCollIdRef, collId) VALUES(?,?,?,?,?,?)");
 			stmt = getConnection().createStatement();
 		} catch (InstantiationException e1) {
 			// TODO Auto-generated catch block
@@ -466,7 +467,7 @@ public abstract class ProvenanceWriter {
 			PreparedStatement ps = null;
 			ps = getConnection()
 			.prepareStatement(
-					"INSERT INTO Data (dataReference,wfInstanceID,data) VALUES (?,?,?)");
+			"INSERT INTO Data (dataReference,wfInstanceID,data) VALUES (?,?,?)");
 			ps.setString(1, dataRef);
 			ps.setString(2, wfInstanceId);
 			ps.setBytes(3, data);
@@ -516,7 +517,7 @@ public abstract class ProvenanceWriter {
 		try {
 			ps = getConnection()
 			.prepareStatement(
-					"INSERT INTO VarBinding (pnameRef, wfInstanceRef, varNameRef, valueType, value, ref, collIdRef, iteration,positionInColl) VALUES(?,?,?,?,?,?,?,?,?)");
+			"INSERT INTO VarBinding (pnameRef, wfInstanceRef, varNameRef, valueType, value, ref, collIdRef, iteration,positionInColl) VALUES(?,?,?,?,?,?,?,?,?)");
 			stmt = getConnection().createStatement();
 
 			ps.setString(1, vb.getPNameRef());
@@ -659,16 +660,16 @@ public abstract class ProvenanceWriter {
 
 			// if (cnt % 100 == 0) {
 //			System.out.println("updateVarBinding : "+ps.toString());
-			
-//			 System.out.println("updateVarBinding with  instance ["+vb.getWfInstanceRef()+"] processor ["+vb.getPNameRef()+"] varName ["+vb.getVarNameRef()+
-//			 "] collIdRef ["+vb.getCollIDRef()+"] iteration ["+vb.getIteration()+
-//			 "] positionInCollection ["+vb.getPositionInColl()+"] value ["+vb.getValue()+"]");
+
+//			System.out.println("updateVarBinding with  instance ["+vb.getWfInstanceRef()+"] processor ["+vb.getPNameRef()+"] varName ["+vb.getVarNameRef()+
+//			"] collIdRef ["+vb.getCollIDRef()+"] iteration ["+vb.getIteration()+
+//			"] positionInCollection ["+vb.getPositionInColl()+"] value ["+vb.getValue()+"]");
 			// }
 
 			int result = ps.executeUpdate();
 
 //			System.out.println("updateVarBinding : result "+result);
-			
+
 			cnt++;
 
 		} catch (SQLException e) {
