@@ -138,11 +138,18 @@ public abstract class ProvenanceQuery {
 		String q0 = "SELECT  * FROM Var V JOIN WfInstance W ON W.wfnameRef = V.wfInstanceRef";
 
 		String q = addWhereClauseToQuery(q0, queryConstraints, true);
+		
+		List<String> orderAttr = new ArrayList<String>();
+		orderAttr.add("V.order");
 
+		String q1 = addOrderByToQuery(q, orderAttr, true);
+
+//		logger.info("q1 = "+q1);
+		
 		Statement stmt;
 		try {
 			stmt = getConnection().createStatement();
-			boolean success = stmt.execute(q.toString());
+			boolean success = stmt.execute(q1.toString());
 
 			if (success) {
 				ResultSet rs = stmt.getResultSet();
@@ -1188,6 +1195,9 @@ public abstract class ProvenanceQuery {
 		vbQueryConstraints.put("W.instanceID", wfInstance);
 		vbQueryConstraints.put("VB.PNameRef", proc);
 
+		if (effectivePath != null && effectivePath.length() > 0) {
+			vbQueryConstraints.put("VB.iteration", "["+ effectivePath.toString() + "]"); // PM 1/09 -- path
+		}
 		vbQuery = addWhereClauseToQuery(vbQuery, vbQueryConstraints, false);
 
 		List<String> orderAttr = new ArrayList<String>();
@@ -1209,7 +1219,7 @@ public abstract class ProvenanceQuery {
 		Statement stmt;
 		String q = lq.getCollQuery();
 
-		logger.info("running collection quey: "+q);
+		logger.info("running collection query: "+q);
 
 		try {
 			stmt = getConnection().createStatement();
@@ -1254,6 +1264,9 @@ public abstract class ProvenanceQuery {
 
 		Statement stmt;
 		String q = lq.getVbQuery();
+		
+		logger.info("running VB query: "+q);
+
 		try {
 			stmt = getConnection().createStatement();
 			boolean success = stmt.execute(q);

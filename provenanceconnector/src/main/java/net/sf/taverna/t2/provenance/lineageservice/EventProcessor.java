@@ -155,7 +155,6 @@ public class EventProcessor {
 
 		df = ((WorkflowProvenanceItem)provenanceItem).getDataflow();
 
-
 		workflowStructureDone = true;
 
 		topLevelDataflowName = df.getLocalName();
@@ -297,6 +296,9 @@ public class EventProcessor {
 					inputVar.setVName(ip.getName());
 					inputVar.setTypeNestingLevel(ip.getDepth());
 					inputVar.setInput(true);
+
+					logger.info("processDataflowStructure: adding input var "+pName+":"+ip.getName());
+
 					vars.add(inputVar);
 				}
 
@@ -315,6 +317,7 @@ public class EventProcessor {
 					outputVar.setVName(op.getName());
 					outputVar.setTypeNestingLevel(op.getDepth());
 					outputVar.setInput(false);
+
 					vars.add(outputVar);
 				}
 
@@ -370,7 +373,8 @@ public class EventProcessor {
 				inputVar.setWfInstanceRef(dataflowID);
 				inputVar.setVName(ip.getName());
 				inputVar.setTypeNestingLevel(ip.getDepth());
-				inputVar.setInput(true);  // CHECK PM modified 11/08 -- input vars are actually outputs of input processors... 
+				inputVar.setInput(true);  // CHECK PM modified 11/08 -- input vars are actually outputs of input processors...
+
 				vars.add(inputVar);
 			}
 
@@ -998,9 +1002,33 @@ public class EventProcessor {
 
 		Element dataItemAsXML = ProvenanceUtils.getDataItemAsXML(provenanceItem);
 		List<Element> inputPorts = dataItemAsXML.getChildren("port");
+		int order = 0;
 		for (Element inputport : inputPorts) {
 
 			String portName = inputport.getAttributeValue("name");
+
+			logger.info("processInput: processing VarBinding for "+procBinding.getPNameRef()+"  "+portName);
+
+
+			try {
+				// add process order sequence to Var for this portName
+				
+				Map<String, String> queryConstraints = new HashMap<String, String>();
+				queryConstraints.put("wfInstanceRef", getPq().getWFNameFromInstanceID(wfInstanceID));
+				queryConstraints.put("pnameRef", procBinding.getPNameRef());
+				queryConstraints.put("varName", portName);
+				queryConstraints.put("inputOrOutput", "1");
+				
+				List<Var> vars = getPq().getVars(queryConstraints);
+				Var v = vars.get(0);
+				v.setPortNameOrder(order++);
+				
+				getPw().updateVar(v);
+				
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 
 			// value type may vary
 			List<Element> valueElements = inputport.getChildren(); // hopefully
@@ -1431,7 +1459,7 @@ public class EventProcessor {
 		// temp queue
 		List<String> Q = new ArrayList<String>();
 
-		 logger.debug("propagateANL: processors in the graph");
+		logger.debug("propagateANL: processors in the graph");
 
 		// init Q with root nodes
 		for (Map.Entry<String, Integer> entry : processorsLinks.entrySet()) {
@@ -1474,14 +1502,14 @@ public class EventProcessor {
 		for (String pname : L) {
 
 			logger.debug("setting ANL for "+pname+" input vars");
-			
+
 			// process pname's inputs -- set ANL to be the DNL if not set in
 			// prior steps
 			List<Var> inputs = getPq().getInputVars(pname, wfInstanceRef, null); // null -> do not use instance
 
 			int totalANL = 0;
 			for (Var iv : inputs) {
-				
+
 				if (iv.isANLset() == false) {
 					iv.setActualNestingLevel(iv.getTypeNestingLevel());
 					iv.setANLset(true);
@@ -1496,14 +1524,14 @@ public class EventProcessor {
 				if (delta_nl < 0 ) delta_nl = iv.getTypeNestingLevel();
 
 				totalANL += delta_nl;
-				
+
 				// this should take care of the special case of the top level dataflow with inputs that have successors in the graph
 				// propagate this through all the links from this var
 				List<Var> successors = getPq().getSuccVars(pname, iv.getVName(),
 						wfInstanceRef);
 
 				logger.debug(successors.size()+ " successors for var "+iv.getVName());
-				
+
 				for (Var v : successors) {
 					v.setActualNestingLevel(iv.getActualNestingLevel());
 					v.setANLset(true);

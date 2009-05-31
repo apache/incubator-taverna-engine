@@ -40,6 +40,7 @@ public class Var {
 	private int typeNestingLevel = 0;
 	private int actualNestingLevel = 0;
 	private boolean isANLset = false;  // set to true when the ANL has been set 
+	private int portNameOrder = 0;
 	
 	/**
 	 * @return the wfInstanceRef
@@ -142,6 +143,18 @@ public class Var {
 	}
 	public String getIdentifier() {
 		return identifier;
+	}
+	/**
+	 * @return the portNameOrder
+	 */
+	public int getPortNameOrder() {
+		return portNameOrder;
+	}
+	/**
+	 * @param portNameOrder the portNameOrder to set
+	 */
+	public void setPortNameOrder(int portNameOrder) {
+		this.portNameOrder = portNameOrder;
 	}
 
 

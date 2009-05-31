@@ -599,7 +599,7 @@ public abstract class ProvenanceWriter {
 			ps = getConnection()
 			.prepareStatement(
 					"UPDATE Var SET type = ?, inputOrOutput=?, nestingLevel = ?,"
-					+ "actualNestingLevel = ?, anlSet = ? WHERE varName = ? AND pnameRef = ? AND wfInstanceRef = ?");
+					+ "actualNestingLevel = ?, anlSet = ? , Var.order = ? WHERE varName = ? AND pnameRef = ? AND wfInstanceRef = ?");
 			ps.setString(1, v.getType());
 			int i = v.isInput() ? 1 : 0;
 			ps.setInt(2, i);
@@ -607,9 +607,10 @@ public abstract class ProvenanceWriter {
 			ps.setInt(4, v.getActualNestingLevel());
 			int j = v.isANLset() ? 1 : 0;
 			ps.setInt(5, j);
-			ps.setString(6, v.getVName());
-			ps.setString(7, v.getPName());
-			ps.setString(8, v.getWfInstanceRef());
+			ps.setInt(6, v.getPortNameOrder());
+			ps.setString(7, v.getVName());
+			ps.setString(8, v.getPName());
+			ps.setString(9, v.getWfInstanceRef());
 
 			// stmt = getConnection().createStatement();
 			//			

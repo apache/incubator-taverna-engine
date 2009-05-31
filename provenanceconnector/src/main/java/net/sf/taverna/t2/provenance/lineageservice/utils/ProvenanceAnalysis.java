@@ -540,7 +540,7 @@ public class ProvenanceAnalysis {
 			//
 			// create OPM artifact and role for the output var of this xform
 			//
-			boolean doOPM = (aOPMManager == null);  // any problem below will set this to false
+			boolean doOPM = (aOPMManager != null);  // any problem below will set this to false
 
 			String role = null;
 			VarBinding vb = null;
