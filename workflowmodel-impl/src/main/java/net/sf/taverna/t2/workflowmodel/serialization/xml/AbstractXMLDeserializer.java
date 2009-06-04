@@ -187,15 +187,22 @@ public abstract class AbstractXMLDeserializer implements
 					.getChildren(ANNOTATION_CHAIN, T2_WORKFLOW_NAMESPACE))) {
 				if (annotationChainElement == null) {
 					logger.info("annotationChainElement is null");
-				} else {
-					if (cl == null) {
-						logger.info("ClassLoader is null");
-					} else {
-						AnnotationChain ac = (AnnotationChain) createBean(
-								annotationChainElement, XMLDeserializerImpl.class.getClassLoader());
-						newAnnotationChains.add(ac);
-					}
+					continue;
 				}
+				if (cl == null) {
+					logger.info("ClassLoader is null");
+					continue;
+				}
+				AnnotationChain ac = (AnnotationChain) createBean(
+						annotationChainElement, XMLDeserializerImpl.class
+								.getClassLoader());
+				if ((ac == null) || (ac.getAssertions() == null)
+						|| (ac.getAssertions().size() == 0)) {
+					logger.warn("Null or empty annotation chain");
+					continue;
+				}
+				newAnnotationChains.add(ac);
+
 			}
 			annotated.setAnnotations(newAnnotationChains);
 		}
