@@ -138,14 +138,14 @@ public abstract class ProvenanceQuery {
 		String q0 = "SELECT  * FROM Var V JOIN WfInstance W ON W.wfnameRef = V.wfInstanceRef";
 
 		String q = addWhereClauseToQuery(q0, queryConstraints, true);
-		
+
 		List<String> orderAttr = new ArrayList<String>();
 		orderAttr.add("V.order");
 
 		String q1 = addOrderByToQuery(q, orderAttr, true);
 
 //		logger.info("q1 = "+q1);
-		
+
 		Statement stmt;
 		try {
 			stmt = getConnection().createStatement();
@@ -372,6 +372,14 @@ public abstract class ProvenanceQuery {
 		return result;
 	}
 
+	
+
+	/**
+	 * get the name of the dataflow for an input run ID
+	 * @param wfInstanceID
+	 * @return
+	 * @throws SQLException
+	 */
 	public String getWfNameRef(String wfInstanceID) throws SQLException {
 		String q = "SELECT wfnameRef FROM WfInstance where instanceID = \""
 			+ wfInstanceID + "\"";
@@ -514,13 +522,16 @@ public abstract class ProvenanceQuery {
 		return result;
 	}
 
+	
+
+	
 	/*
+	 * gets all available run instances, most recent first
 	 * @return a list of pairs <wfanme, wfinstance>
-	 * 
-	 * @seenet.sf.taverna.t2.provenance.lineageservice.mysql.ProvenanceQuery#
+	 * @see net.sf.taverna.t2.provenance.lineageservice.mysql.ProvenanceQuery#
 	 * getWFInstanceIDs()
 	 */
-	public List<String> getWFNamesByTime() throws SQLException {
+	public List<String> getWFInstancesByTime() throws SQLException {
 
 		List<String> result = new ArrayList<String>();
 
@@ -744,7 +755,7 @@ public abstract class ProvenanceQuery {
 
 		PreparedStatement ps = null;
 
-		logger.info("getProcessorsIncomingLinks("+wfnameRef+")");
+//		logger.info("getProcessorsIncomingLinks("+wfnameRef+")");
 
 		// get all processors and init their incoming links to 0
 		// String q = "SELECT pName FROM Processor "
@@ -781,7 +792,7 @@ public abstract class ProvenanceQuery {
 		////////////////
 		String parentWF = getParentOfWorkflow(wfnameRef);
 		if (parentWF == null) parentWF = wfnameRef;  // null parent means we are the top
-		logger.info("parent WF: "+parentWF);
+		logger.debug("parent WF: "+parentWF);
 
 //		String pNames = "('"+parentWF+"')";
 
@@ -815,7 +826,7 @@ public abstract class ProvenanceQuery {
 //		+ "AND sourcePNameRef NOT IN " + pNames
 		+ " GROUP BY sinkPNameRef";
 
-		logger.info("executing \n"+q);
+		logger.debug("executing \n"+q);
 
 		try {
 			stmt = getConnection().createStatement();
@@ -952,7 +963,7 @@ public abstract class ProvenanceQuery {
 
 	/**
 	 * get all processors of a given type within a structure identified by
-	 * wfnameRef (static reference). type constraint is ignored if value is null
+	 * wfnameRef (reference to dataflow). type constraint is ignored if value is null
 	 * 
 	 * @param wfnameRef
 	 * @param type
@@ -970,6 +981,13 @@ public abstract class ProvenanceQuery {
 		return getProcessors(constraints);
 	}
 
+
+	/**
+	 * generic method to fetch processors subject to additional query constraints
+	 * @param constraints
+	 * @return
+	 * @throws SQLException
+	 */
 	public List<ProvenanceProcessor> getProcessors(
 			Map<String, String> constraints) throws SQLException {
 		List<ProvenanceProcessor> result = new ArrayList<ProvenanceProcessor>();
@@ -1062,7 +1080,7 @@ public abstract class ProvenanceQuery {
 		q1 = addOrderByToQuery(q1, orderAttr, true);
 
 		// System.out.println("generated query: \n"+q1);
-		logger.info("Query is: " + q1);
+		logger.debug("Query is: " + q1);
 		lq.setVbQuery(q1);
 
 		return lq;
@@ -1219,7 +1237,11 @@ public abstract class ProvenanceQuery {
 		Statement stmt;
 		String q = lq.getCollQuery();
 
-		logger.info("running collection query: "+q);
+		LineageQueryResult lqr = new LineageQueryResult();
+		
+		if (q == null) return lqr;
+
+		logger.debug("running collection query: "+q);
 
 		try {
 			stmt = getConnection().createStatement();
@@ -1228,7 +1250,6 @@ public abstract class ProvenanceQuery {
 			if (success) {
 				ResultSet rs = stmt.getResultSet();
 
-				LineageQueryResult lqr = new LineageQueryResult();
 
 				while (rs.next()) {
 
@@ -1245,9 +1266,8 @@ public abstract class ProvenanceQuery {
 					// coll+"] value ["+value+"]");
 
 					lqr.addLineageQueryResultRecord(proc, var, wfInstance,
-					it, coll, parentColl, null, null, type, false, true);  // true -> is a collection
+							it, coll, parentColl, null, null, type, false, true);  // true -> is a collection
 				}
-				return lqr;
 			}
 		} catch (InstantiationException e) {
 			logger.warn("Could not execute query: " + e);
@@ -1256,7 +1276,7 @@ public abstract class ProvenanceQuery {
 		} catch (ClassNotFoundException e) {
 			logger.warn("Could not execute query: " + e);
 		}
-		return null;
+		return lqr;
 	}
 
 
@@ -1264,8 +1284,8 @@ public abstract class ProvenanceQuery {
 
 		Statement stmt;
 		String q = lq.getVbQuery();
-		
-		logger.info("running VB query: "+q);
+
+		logger.debug("running VB query: "+q);
 
 		try {
 			stmt = getConnection().createStatement();
@@ -1340,15 +1360,15 @@ public abstract class ProvenanceQuery {
 	 */
 	public LineageQueryResult runLineageQuery(LineageSQLQuery lq,
 			boolean includeDataValue) throws SQLException {
-		
+
 		LineageQueryResult result = runCollectionQuery(lq);
-		
+
 		if (result.getRecords().size() == 0)  // query was really VB			
 			return runVBQuery(lq, includeDataValue);
-		
+
 		return result;
 	}
-	
+
 
 
 	public List<LineageQueryResult> runLineageQueries(
@@ -1488,7 +1508,7 @@ public abstract class ProvenanceQuery {
 			ps = getConnection().prepareStatement(q);
 			ps.setString(1, childWFName);
 
-			logger.info("getParentOfWorkflow - query: "+q+"  with wfname = "+childWFName);
+			logger.debug("getParentOfWorkflow - query: "+q+"  with wfname = "+childWFName);
 
 
 			// stmt = getConnection().createStatement();
@@ -1501,7 +1521,7 @@ public abstract class ProvenanceQuery {
 
 					result = rs.getString("parentWFname");
 
-					logger.info("result: "+result);
+					logger.debug("result: "+result);
 					break;
 
 				}

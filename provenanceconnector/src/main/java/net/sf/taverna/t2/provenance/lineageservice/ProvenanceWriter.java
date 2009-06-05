@@ -187,8 +187,7 @@ public abstract class ProvenanceWriter {
 	}
 
 	public void addArc(String sourceVarName, String sourceProcName,
-			String sinkVarName, String sinkProcName, String wfId)
-	throws SQLException {
+			String sinkVarName, String sinkProcName, String wfId) {
 		PreparedStatement ps = null;
 		Statement stmt = null;
 		try {
@@ -196,16 +195,6 @@ public abstract class ProvenanceWriter {
 			.prepareStatement(
 			"INSERT INTO Arc (wfInstanceRef, sourcePNameRef, sourceVarNameRef, sinkPNameRef, sinkVarNameRef) VALUES(?,?,?,?,?)");
 			stmt = getConnection().createStatement();
-		} catch (InstantiationException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (IllegalAccessException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (ClassNotFoundException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
 
 		// String q =
 		// "INSERT INTO Arc (wfInstanceRef, sourcePNameRef, sourceVarNameRef, sinkPNameRef, sinkVarNameRef) VALUES(\'"
@@ -224,6 +213,21 @@ public abstract class ProvenanceWriter {
 		// System.out.println("executing: "+q);
 		int result = ps.executeUpdate();
 		// System.out.println("workflow id: "+result+" rows added to DB");
+		
+		} catch (InstantiationException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IllegalAccessException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (ClassNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+//			e.printStackTrace();
+		}
+
 	}
 
 	public void addWFId(String wfId) throws SQLException {

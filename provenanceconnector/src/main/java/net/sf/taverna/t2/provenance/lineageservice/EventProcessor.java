@@ -297,7 +297,7 @@ public class EventProcessor {
 					inputVar.setTypeNestingLevel(ip.getDepth());
 					inputVar.setInput(true);
 
-					logger.info("processDataflowStructure: adding input var "+pName+":"+ip.getName());
+//					logger.info("processDataflowStructure: adding input var "+pName+":"+ip.getName());
 
 					vars.add(inputVar);
 				}
@@ -1007,7 +1007,7 @@ public class EventProcessor {
 
 			String portName = inputport.getAttributeValue("name");
 
-			logger.info("processInput: processing VarBinding for "+procBinding.getPNameRef()+"  "+portName);
+//			logger.info("processInput: processing VarBinding for "+procBinding.getPNameRef()+"  "+portName);
 
 
 			try {
