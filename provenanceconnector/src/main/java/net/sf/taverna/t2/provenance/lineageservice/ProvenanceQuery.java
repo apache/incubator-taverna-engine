@@ -57,7 +57,7 @@ import org.jdom.Element;
  */
 public abstract class ProvenanceQuery {
 
-	Logger logger = Logger.getLogger(ProvenanceQuery.class);
+	protected Logger logger = Logger.getLogger(ProvenanceQuery.class);
 
 	protected Connection connection;
 
@@ -107,7 +107,7 @@ public abstract class ProvenanceQuery {
 		return q.toString();
 	}
 
-	private String addOrderByToQuery(String q0, List<String> orderAttr,
+	protected String addOrderByToQuery(String q0, List<String> orderAttr,
 			boolean terminate) {
 
 		// complete query according to constraints

@@ -44,7 +44,7 @@ import net.sf.taverna.t2.provenance.lineageservice.utils.VarBinding;
  */
 public abstract class ProvenanceWriter {
 
-	private static Logger logger = Logger.getLogger(ProvenanceWriter.class);
+	protected static Logger logger = Logger.getLogger(ProvenanceWriter.class);
 
 	protected Connection connection;
 
