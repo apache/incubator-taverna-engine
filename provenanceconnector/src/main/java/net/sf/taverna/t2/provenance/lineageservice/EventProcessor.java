@@ -603,7 +603,11 @@ public class EventProcessor {
 
 		} else if (provenanceItem.getEventType().equals(SharedVocabulary.WORKFLOW_DATA_EVENT_TYPE)) {
 			// give this event to a WorkflowDataProcessor object for pre-processing
-			getWfdp().addWorkflowDataItem(provenanceItem);
+			try {
+				getWfdp().addWorkflowDataItem(provenanceItem);
+			} catch (NumberFormatException e) {
+				logger.error(e);
+			}
 //			logger.info("Received workflow data - not processing");
 			//FIXME not sure  - needs to be stored somehow
 
@@ -1020,14 +1024,19 @@ public class EventProcessor {
 				queryConstraints.put("inputOrOutput", "1");
 				
 				List<Var> vars = getPq().getVars(queryConstraints);
+				try {
 				Var v = vars.get(0);
 				v.setPortNameOrder(order++);
 				
 				getPw().updateVar(v);
+				}
+				catch (IndexOutOfBoundsException e) {
+					logger.error(e);
+				}
 				
 			} catch (SQLException e1) {
 				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				logger.error(e1);
 			}
 
 			// value type may vary
