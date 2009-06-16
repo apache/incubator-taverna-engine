@@ -680,6 +680,8 @@ public class EventProcessor {
 			}
 		} catch (SQLException e) {
 			logger.warn("Patch top level inputs problem for provenance: " + e);
+		} catch (IndexOutOfBoundsException e) {
+			logger.error(e);
 		}
 
 	}
