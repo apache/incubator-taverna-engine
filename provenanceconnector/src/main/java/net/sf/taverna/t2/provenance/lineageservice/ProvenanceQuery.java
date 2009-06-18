@@ -365,6 +365,8 @@ public abstract class ProvenanceQuery {
 			logger.warn("Could not execute query: " + e);
 		} catch (ClassNotFoundException e) {
 			logger.warn("Could not execute query: " + e);
+		} catch (SQLException e) {
+			logger.error(e);
 		}
 
 		// System.out.println("getArcs: executing query\n"+q.toString());
