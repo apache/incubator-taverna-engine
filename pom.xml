@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<parent>
 		<groupId>net.sf.taverna</groupId>
 		<artifactId>parent</artifactId>
@@ -9,7 +8,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<name>Taverna 2 language extensions</name>
 	<groupId>net.sf.taverna.t2</groupId>
-	<version>0.5-SNAPSHOT</version>
+	<version>0.5</version>
 	<artifactId>lang</artifactId>
 	<packaging>pom</packaging>
 	<properties>
@@ -59,8 +58,8 @@
 		<module>uibuilder</module>
 	</modules>
 	<scm>
-		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/utils/net.sf.taverna.t2.lang/trunk/</connection>
-		<developerConnection>scm:svn:https://taverna.googlecode.com/svn/taverna/utils/net.sf.taverna.t2.lang/trunk/</developerConnection>
-		<url>http://code.google.com/p/taverna/source/browse/#svn/taverna/utils/net.sf.taverna.t2.lang/trunk/</url>
+		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/utils/net.sf.taverna.t2.lang/tags/lang-0.5</connection>
+		<developerConnection>scm:svn:https://taverna.googlecode.com/svn/taverna/utils/net.sf.taverna.t2.lang/tags/lang-0.5</developerConnection>
+		<url>http://code.google.com/p/taverna/source/browse/#svn/taverna/utils/net.sf.taverna.t2.lang/tags/lang-0.5</url>
 	</scm>
 </project>
