@@ -20,6 +20,8 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.serialization.xml;
 
+import net.sf.taverna.raven.log.Log;
+import net.sf.taverna.raven.repository.impl.LocalRepository;
 import net.sf.taverna.t2.workflowmodel.ConfigurationException;
 import net.sf.taverna.t2.workflowmodel.impl.Tools;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayer;
@@ -28,6 +30,8 @@ import org.jdom.Element;
 
 public class DispatchLayerXMLDeserializer extends AbstractXMLDeserializer {
 	private static DispatchLayerXMLDeserializer instance = new DispatchLayerXMLDeserializer();
+
+	private static Log logger = Log.getLogger(DispatchLayerXMLDeserializer.class);
 
 	private DispatchLayerXMLDeserializer() {
 
@@ -45,9 +49,7 @@ public class DispatchLayerXMLDeserializer extends AbstractXMLDeserializer {
 			try {
 				cl = getRavenLoader(ravenElement);
 			} catch (Exception ex) {
-				System.out.println("Exception loading raven classloader "
-						+ "for Activity instance");
-				ex.printStackTrace();
+				logger.error(ex);
 				// TODO - handle this properly, either by logging correctly or
 				// by going back to the repository and attempting to fetch the
 				// offending missing artifacts
@@ -65,7 +67,7 @@ public class DispatchLayerXMLDeserializer extends AbstractXMLDeserializer {
 			layer.configure(configObject);
 		} catch (ConfigurationException e) {
 			// TODO - handle this properly
-			e.printStackTrace();
+			logger.error(e);
 		}
 
 		return layer;
