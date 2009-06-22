@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import net.sf.taverna.raven.log.Log;
 import net.sf.taverna.t2.annotation.AbstractAnnotatedThing;
 import net.sf.taverna.t2.invocation.InvocationContext;
 import net.sf.taverna.t2.invocation.IterationInternalEvent;
@@ -51,6 +52,7 @@ import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationTypeMismatch
 import net.sf.taverna.t2.workflowmodel.processor.iteration.MissingIterationInputException;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.impl.IterationStrategyImpl;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.impl.IterationStrategyStackImpl;
+import net.sf.taverna.t2.workflowmodel.serialization.xml.DispatchLayerXMLDeserializer;
 
 /**
  * Implementation of Processor
@@ -85,6 +87,10 @@ public final class ProcessorImpl extends AbstractAnnotatedThing<Processor>
 	public transient int resultWrappingDepth = -1;
 
 	protected transient Map<String, Set<MonitorableProperty<?>>> monitorables = new HashMap<String, Set<MonitorableProperty<?>>>();
+	
+	private static Log logger = Log.getLogger(ProcessorImpl.class);
+
+
 
 	/**
 	 * <p>
@@ -256,7 +262,7 @@ public final class ProcessorImpl extends AbstractAnnotatedThing<Processor>
 			// This should never happen as we only get here if we've already
 			// checked that all the inputs have been provided. If it does happen
 			// we've got some deeper issues.
-			e.printStackTrace();
+			logger.error(e);
 			return false;
 		}
 
