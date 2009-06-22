@@ -8,7 +8,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<name>Taverna 2 language extensions</name>
 	<groupId>net.sf.taverna.t2</groupId>
-	<version>0.5</version>
+	<version>0.6-SNAPSHOT</version>
 	<artifactId>lang</artifactId>
 	<packaging>pom</packaging>
 	<properties>
@@ -58,8 +58,8 @@
 		<module>uibuilder</module>
 	</modules>
 	<scm>
-		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/utils/net.sf.taverna.t2.lang/tags/lang-0.5</connection>
-		<developerConnection>scm:svn:https://taverna.googlecode.com/svn/taverna/utils/net.sf.taverna.t2.lang/tags/lang-0.5</developerConnection>
-		<url>http://code.google.com/p/taverna/source/browse/#svn/taverna/utils/net.sf.taverna.t2.lang/tags/lang-0.5</url>
+		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/utils/net.sf.taverna.t2.lang/trunk/</connection>
+		<developerConnection>scm:svn:https://taverna.googlecode.com/svn/taverna/utils/net.sf.taverna.t2.lang/trunk/</developerConnection>
+		<url>http://code.google.com/p/taverna/source/browse/#svn/taverna/utils/net.sf.taverna.t2.lang/trunk/</url>
 	</scm>
 </project>

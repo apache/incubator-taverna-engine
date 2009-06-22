@@ -7,13 +7,13 @@
 	<parent>
 		<groupId>net.sf.taverna.t2</groupId>
 		<artifactId>lang</artifactId>
-		<version>0.5</version>
+		<version>0.6-SNAPSHOT</version>
 	</parent>
 	<dependencies>
 		<dependency>
 			<groupId>net.sf.taverna.t2.lang</groupId>
 			<artifactId>observer</artifactId>
-		<version>0.5</version>
+		<version>0.6-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>
