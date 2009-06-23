@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>net.sf.taverna.t2</groupId>
 		<artifactId>core</artifactId>
-		<version>0.6-SNAPSHOT</version>
+		<version>0.6</version>
 	</parent>
 	<groupId>net.sf.taverna.t2.core</groupId>
 	<artifactId>provenanceconnector</artifactId>
@@ -39,12 +39,12 @@
 		<dependency>
 			<groupId>net.sf.taverna.t2.core</groupId>
 			<artifactId>reference-api</artifactId>
-			<version>0.6-SNAPSHOT</version>
+			<version>0.6</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.taverna.t2.core</groupId>
 			<artifactId>workflowmodel-api</artifactId>
-			<version>0.6-SNAPSHOT</version>
+			<version>0.6</version>
 		</dependency>
 		<dependency>
 			<groupId>jdom</groupId>
@@ -56,11 +56,6 @@
 			<version>1.10</version>
 		</dependency>
 
-		<dependency>
-			<groupId>org.tupeloproject</groupId>
-			<artifactId>tupelo-cet</artifactId>
-			<version>2.5-20090416.190129-3</version>
-		</dependency>
 
 		<!-- Hibernate/JPA/Derby -->
 		<dependency>
@@ -160,6 +155,12 @@
 			<groupId>org.openprovenance</groupId>
 			<artifactId>opm</artifactId>
 			<version>1.0-20090428.084527-6</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.tupeloproject</groupId>
+			<artifactId>tupelo-cet</artifactId>
+			<version>2.5-20090416.190129-3</version>
 		</dependency>
 
 		<dependency>

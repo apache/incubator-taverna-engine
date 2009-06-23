@@ -10,12 +10,17 @@
 
 	<groupId>net.sf.taverna.t2</groupId>
 	<artifactId>core</artifactId>
-	<version>0.6-SNAPSHOT</version>
+	<version>0.6</version>
 	<packaging>pom</packaging>
 
 	<name>Taverna 2 Core</name>
 	<build>
 		<plugins>
+<plugin>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>2.0-beta-9</version>
+      </plugin>
+
 			<plugin>
 				<artifactId>maven-clover-plugin</artifactId>
 				<executions>
@@ -37,9 +42,9 @@
 	</build>
 	
 	<properties>
-		<t2.infrastructure.version>1.10-SNAPSHOT</t2.infrastructure.version>
-		<t2.core.version>0.6-SNAPSHOT</t2.core.version>
-		<t2.lang.version>0.5-SNAPSHOT</t2.lang.version>
+		<t2.infrastructure.version>1.10</t2.infrastructure.version>
+		<t2.core.version>0.6</t2.core.version>
+		<t2.lang.version>0.5</t2.lang.version>
 	</properties>
 	
 	<modules>
