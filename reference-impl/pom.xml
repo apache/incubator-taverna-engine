@@ -28,7 +28,7 @@
 		<dependency>
 			<groupId>net.sf.taverna.t2.core</groupId>
 			<artifactId>reference-api</artifactId>
-			<version>${t2.core.version}</version>
+			<version>0.6-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
@@ -48,7 +48,7 @@
 		<dependency>
 			<groupId>net.sf.taverna.t2.infrastructure</groupId>
 			<artifactId>platform</artifactId>
-			<version>${t2.infrastructure.version}</version>
+			<version>1.10</version>
 		</dependency>
 
 		<dependency>

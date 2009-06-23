@@ -21,19 +21,19 @@
 		<dependency>
 			<groupId>net.sf.taverna.t2.core</groupId>
 			<artifactId>workflowmodel-api</artifactId>
-			<version>${t2.core.version}</version>
+			<version>0.6-SNAPSHOT</version>
 		</dependency>
 		<!--<dependency>
 			<groupId>net.sf.taverna.t2.core</groupId>
 			<artifactId>provenanceconnector-api</artifactId>
-			<version>${t2.core.version}</version>
+			<version>0.6-SNAPSHOT</version>
 		</dependency>-->
         
 
 		<!--<dependency>
 			<groupId>net.sf.taverna.t2.infrastructure</groupId>
 			<artifactId>platform</artifactId>
-			<version>${t2.infrastructure.version}</version>
+			<version>1.10</version>
 			<scope>test</scope>
 			<exclusions>
 				<exclusion>
