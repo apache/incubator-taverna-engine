@@ -14,7 +14,7 @@
 		<!--<dependency>
 			<groupId>net.sf.taverna.t2.security</groupId>
 			<artifactId>security-agents</artifactId>
-			<version>${t2.security.version}</version>
+			<version>0.4-SNAPSHOT</version>
 		</dependency>-->
 		<dependency>
 			<groupId>log4j</groupId>
@@ -28,7 +28,7 @@
 		<dependency>
 			<groupId>net.sf.taverna.t2.infrastructure</groupId>
 			<artifactId>appconfig</artifactId>
-			<version>${t2.infrastructure.version}</version>
+			<version>1.10</version>
 		</dependency>
 	</dependencies>
 </project>
