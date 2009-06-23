@@ -14,7 +14,7 @@
 		<dependency>
 			<groupId>net.sf.taverna.t2.security</groupId>
 			<artifactId>credential-manager</artifactId>
-			<version>${t2.security.version}</version>
+			<version>0.4-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 				<groupId>net.sf.taverna.t2.ui-components</groupId>
@@ -24,7 +24,7 @@
 		<dependency>
 			<groupId>net.sf.taverna.t2.security</groupId>
 			<artifactId>security-profiles</artifactId>
-			<version>${t2.security.version}</version>
+			<version>0.4-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 </project>
