@@ -23,46 +23,6 @@
 			<artifactId>workflowmodel-api</artifactId>
 			<version>0.6-SNAPSHOT</version>
 		</dependency>
-		<!--<dependency>
-			<groupId>net.sf.taverna.t2.core</groupId>
-			<artifactId>provenanceconnector-api</artifactId>
-			<version>0.6-SNAPSHOT</version>
-		</dependency>-->
-        
-
-		<!--<dependency>
-			<groupId>net.sf.taverna.t2.infrastructure</groupId>
-			<artifactId>platform</artifactId>
-			<version>1.10</version>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.hibernate</groupId>
-					<artifactId>hibernate</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.springframework</groupId>
-					<artifactId>spring-jdbc</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.springframework</groupId>
-					<artifactId>spring-orm</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>geronimo-spec</groupId>
-					<artifactId>geronimo-spec-jta</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>net.sf.taverna.t2.infrastructure.raven</groupId>
-					<artifactId>raven</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>-->
-		<!--<dependency>
-			<groupId>net.sf.taverna.t2</groupId>
-			<artifactId>security-api</artifactId>
-			<version>${t2.security.version}</version>
-		</dependency>-->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

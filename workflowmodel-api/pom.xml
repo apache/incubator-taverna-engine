@@ -27,17 +27,7 @@
 			<artifactId>spi-discovery-api</artifactId>
 			<version>1.10</version>
 		</dependency>
-		<!--<dependency>
-			<groupId>net.sf.taverna.t2</groupId>
-			<artifactId>security-api</artifactId>
-			<version>${t2.security.version}</version>
-		</dependency>-->
-		<!--<dependency>
-			<groupId>net.sf.taverna.t2.core</groupId>
-			<artifactId>provenanceconnector-api</artifactId>
-			<version>0.6-SNAPSHOT</version>
-		</dependency>
-		--><dependency>
+                <dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
