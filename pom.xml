@@ -8,7 +8,7 @@
 	</parent>
 	<groupId>net.sf.taverna.t2.core</groupId>
 	<artifactId>reference-core-extensions</artifactId>
-	<version>0.5</version>
+	<version>0.6-SNAPSHOT</version>
 	<name>Implementation of core extension points</name>
 	<description>
 		Implementations of certain SPIs to provide a core set of
@@ -41,9 +41,9 @@
 		</repository>
 	</repositories>
 	<scm>
-		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/engine/net.sf.taverna.t2.core.reference-core-extensions/tags/reference-core-extensions-0.5</connection>
-		<developerConnection>scm:svn:https://taverna.googlecode.com/svn/taverna/engine/net.sf.taverna.t2.core.reference-core-extensions/tags/reference-core-extensions-0.5</developerConnection>
-		<url>http://code.google.com/p/taverna/source/browse/#svn/taverna/engine/net.sf.taverna.t2.core.reference-core-extensions/tags/reference-core-extensions-0.5</url>
+		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/engine/net.sf.taverna.t2.core.reference-core-extensions/trunk/</connection>
+		<developerConnection>scm:svn:https://taverna.googlecode.com/svn/taverna/engine/net.sf.taverna.t2.core.reference-core-extensions/trunk/</developerConnection>
+		<url>http://code.google.com/p/taverna/source/browse/#svn/taverna/engine/net.sf.taverna.t2.core.reference-core-extensions/trunk</url>
 	</scm>
 	<dependencies>
 		<dependency>
