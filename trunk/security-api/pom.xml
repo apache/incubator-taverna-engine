@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.sf.taverna.t2</groupId>
+		<artifactId>core</artifactId>
+		<version>0.6</version>
+	</parent>
+	<groupId>net.sf.taverna.t2</groupId>
+	<artifactId>security-api</artifactId>
+	<name>Security API</name>
+	<description>
+		Security system for Taverna 2, handles authentication concerns
+		for both data and process layers
+	</description>
+</project>

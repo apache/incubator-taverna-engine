@@ -1,0 +1,60 @@
+<dataflow xmlns="http://taverna.sf.net/2008/xml/t2flow" id="123">
+	<inputPorts />
+	<outputPorts />
+	<processors>
+		<processor>
+			<name>top</name>
+			<inputPorts />
+			<outputPorts>
+				<port>
+					<name>output</name>
+					<depth>0</depth>
+					<granularDepth>0</granularDepth>
+				</port>
+			</outputPorts>
+			<annotations />
+			<activities />
+			<dispatchStack />
+			<iterationStrategyStack>
+				<iteration>
+					<strategy />
+				</iteration>
+			</iterationStrategyStack>
+		</processor>
+		<processor>
+			<name>bottom</name>
+			<inputPorts>
+				<port>
+					<name>input</name>
+					<depth>0</depth>
+				</port>
+			</inputPorts>
+			<outputPorts />
+			<annotations />
+			<activities />
+			<dispatchStack />
+			<iterationStrategyStack>
+				<iteration>
+					<strategy>
+						<cross>
+							<port name="input" depth="0" />
+						</cross>
+					</strategy>
+				</iteration>
+			</iterationStrategyStack>
+		</processor>
+	</processors>
+	<conditions />
+	<datalinks>
+		<datalink>
+			<sink type="merge">
+				<processor>bottom</processor>
+				<port>input</port>
+			</sink>
+			<source type="processor">
+				<processor>top</processor>
+				<port>output</port>
+			</source>
+		</datalink>
+	</datalinks>
+</dataflow>

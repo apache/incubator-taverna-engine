@@ -1,0 +1,14 @@
+<activity xmlns="http://taverna.sf.net/2008/xml/t2flow">
+	<class>
+		net.sf.taverna.t2.workflowmodel.serialization.DummyActivity
+	</class>
+	<inputMap>
+		<map from="in" to="in" />
+	</inputMap>
+	<outputMap>
+		<map from="out" to="out" />
+	</outputMap>
+	<configBean encoding="xstream">
+		<int xmlns="">5</int>
+	</configBean>
+</activity>

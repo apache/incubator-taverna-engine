@@ -1,0 +1,2 @@
+# Implementation classes of ExternalReferenceBuilderSPI go here, one per line
+net.sf.taverna.t2referencetest.GreenBuilder
