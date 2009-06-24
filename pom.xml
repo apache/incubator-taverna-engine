@@ -10,7 +10,7 @@
 
 	<groupId>net.sf.taverna.t2</groupId>
 	<artifactId>core</artifactId>
-	<version>0.7-SNAPSHOT</version>
+	<version>0.7</version>
 	<packaging>pom</packaging>
 
 	<name>Taverna 2 Core</name>
@@ -42,8 +42,7 @@
 	</build>
 	
 	<properties>
-		<t2.infrastructure.version>1.10</t2.infrastructure.version>
-		<t2.core.version>0.6</t2.core.version>
+		<t2.infrastructure.version>1.11</t2.infrastructure.version>
 		<t2.lang.version>0.5</t2.lang.version>
 	</properties>
 	
