@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>net.sf.taverna.t2</groupId>
 		<artifactId>security</artifactId>
-		<version>0.5-SNAPSHOT</version>
+		<version>0.5</version>
 	</parent>
 	<groupId>net.sf.taverna.t2.security</groupId>
 	<artifactId>security-agents</artifactId>
@@ -15,15 +15,10 @@
 			<artifactId>wss4j</artifactId>
 			<version>${wss4j.version}</version>
 		</dependency>
-		<!--<dependency>
-			<groupId>axis</groupId>
-			<artifactId>axis</artifactId>
-			<version>${axis.version}</version>
-		</dependency>-->
 		<dependency>
 			<groupId>net.sf.taverna.t2.security</groupId>
 			<artifactId>security-profiles</artifactId>
-			<version>0.5-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>xml-apis</groupId>

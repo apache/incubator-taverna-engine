@@ -4,17 +4,12 @@
 	<parent>
 		<groupId>net.sf.taverna.t2</groupId>
 		<artifactId>security</artifactId>
-		<version>0.5-SNAPSHOT</version>
+		<version>0.5</version>
 	</parent>
 	<groupId>net.sf.taverna.t2.security</groupId>
 	<artifactId>credential-manager</artifactId>
 	<name>Credential manager</name>
 	<dependencies>
-		<!--<dependency>
-			<groupId>net.sf.taverna.t2.security</groupId>
-			<artifactId>security-agents</artifactId>
-			<version>0.4-SNAPSHOT</version>
-		</dependency>-->
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
@@ -27,7 +22,7 @@
 		<dependency>
 			<groupId>net.sf.taverna.t2.infrastructure</groupId>
 			<artifactId>appconfig</artifactId>
-			<version>1.10</version>
+			<version>${t2.infrastructure.version}</version>
 		</dependency>
 	</dependencies>
 </project>

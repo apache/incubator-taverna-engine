@@ -9,7 +9,7 @@
 
 	<groupId>net.sf.taverna.t2</groupId>
 	<artifactId>security</artifactId>
-	<version>0.5-SNAPSHOT</version>
+	<version>0.5</version>
 	<packaging>pom</packaging>
 
 	<name>Taverna 2 security</name>
@@ -18,11 +18,9 @@
 	</description>
 
 	<properties>
-		<t2.security.version>${project.version}</t2.security.version>
-		<t2.infrastructure.version>1.10</t2.infrastructure.version>
-		<t2.core.version>0.6</t2.core.version>
+		<t2.infrastructure.version>1.11</t2.infrastructure.version>
+		<t2.core.version>0.7</t2.core.version>
 		<t2.lang.version>0.5</t2.lang.version>
-<!--		<t2.ui-api.version>0.4-SNAPSHOT</t2.ui-api.version> -->
 		<bouncycastle.version>136</bouncycastle.version>
 		<wss4j.version>1.5.4</wss4j.version>
 		<axis.version>1.4</axis.version>
@@ -84,9 +82,9 @@
         </repository>
 	</repositories>
 	<scm>
-		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/engine/net.sf.taverna.t2.security/trunk/</connection>
-		<developerConnection>scm:svn:https://taverna.googlecode.com/svn/taverna/engine/net.sf.taverna.t2.security/trunk/</developerConnection>
-		<url>http://code.google.com/p/taverna/source/browse/#svn/taverna/engine/net.sf.taverna.t2.security/trunk/</url>
+		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/engine/net.sf.taverna.t2.security/tags/security-0.5</connection>
+		<developerConnection>scm:svn:https://taverna.googlecode.com/svn/taverna/engine/net.sf.taverna.t2.security/tags/security-0.5</developerConnection>
+		<url>http://code.google.com/p/taverna/source/browse/#svn/taverna/engine/net.sf.taverna.t2.security/tags/security-0.5</url>
 	</scm>
 	<dependencyManagement>
 		<dependencies>			
