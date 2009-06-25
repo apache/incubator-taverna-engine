@@ -8,7 +8,7 @@
 	</parent>
 	<groupId>net.sf.taverna.t2.core</groupId>
 	<artifactId>reference-core-extensions</artifactId>
-	<version>0.6-SNAPSHOT</version>
+	<version>0.6</version>
 	<name>Implementation of core extension points</name>
 	<description>
 		Implementations of certain SPIs to provide a core set of
@@ -27,7 +27,7 @@
 		store that is not hibernate based)
 	</description>
 	<properties>
-		<t2.core.version>0.7</t2.core.version>
+		<t2.core.version>0.8</t2.core.version>
 	</properties>
 	<repositories>
 		<repository>
@@ -41,9 +41,9 @@
 		</repository>
 	</repositories>
 	<scm>
-		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/engine/net.sf.taverna.t2.core.reference-core-extensions/trunk/</connection>
-		<developerConnection>scm:svn:https://taverna.googlecode.com/svn/taverna/engine/net.sf.taverna.t2.core.reference-core-extensions/trunk/</developerConnection>
-		<url>http://code.google.com/p/taverna/source/browse/#svn/taverna/engine/net.sf.taverna.t2.core.reference-core-extensions/trunk</url>
+		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/engine/net.sf.taverna.t2.core.reference-core-extensions/tags/reference-core-extensions-0.6</connection>
+		<developerConnection>scm:svn:https://taverna.googlecode.com/svn/taverna/engine/net.sf.taverna.t2.core.reference-core-extensions/tags/reference-core-extensions-0.6</developerConnection>
+		<url>http://code.google.com/p/taverna/source/browse/#svn/taverna/engine/net.sf.taverna.t2.core.reference-core-extensions/tags/reference-core-extensions-0.6</url>
 	</scm>
 	<dependencies>
 		<dependency>
