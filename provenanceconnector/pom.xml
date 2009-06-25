@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>net.sf.taverna.t2</groupId>
 		<artifactId>core</artifactId>
-		<version>0.7</version>
+		<version>0.8</version>
 	</parent>
 	<groupId>net.sf.taverna.t2.core</groupId>
 	<artifactId>provenanceconnector</artifactId>
@@ -39,12 +39,12 @@
 		<dependency>
 			<groupId>net.sf.taverna.t2.core</groupId>
 			<artifactId>reference-api</artifactId>
-			<version>0.6</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.taverna.t2.core</groupId>
 			<artifactId>workflowmodel-api</artifactId>
-			<version>0.6</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>jdom</groupId>
@@ -53,7 +53,7 @@
 		<dependency>
 			<groupId>net.sf.taverna.t2.infrastructure</groupId>
 			<artifactId>spi-discovery-api</artifactId>
-			<version>1.10</version>
+			<version>${t2.infrastructure.version}</version>
 		</dependency>
 
 
