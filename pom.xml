@@ -9,7 +9,7 @@
 
 	<groupId>net.sf.taverna.t2</groupId>
 	<artifactId>security</artifactId>
-	<version>0.6-SNAPSHOT</version>
+	<version>0.6</version>
 	<packaging>pom</packaging>
 
 	<name>Taverna 2 security</name>
@@ -19,7 +19,7 @@
 
 	<properties>
 		<t2.infrastructure.version>1.11</t2.infrastructure.version>
-		<t2.core.version>0.7</t2.core.version>
+		<t2.core.version>0.8</t2.core.version>
 		<t2.lang.version>0.5</t2.lang.version>
 		<bouncycastle.version>136</bouncycastle.version>
 		<wss4j.version>1.5.4</wss4j.version>
@@ -82,9 +82,9 @@
         </repository>
 	</repositories>
 	<scm>
-		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/engine/net.sf.taverna.t2.security/trunk/</connection>
-		<developerConnection>scm:svn:https://taverna.googlecode.com/svn/taverna/engine/net.sf.taverna.t2.security/trunk/</developerConnection>
-		<url>http://code.google.com/p/taverna/source/browse/#svn/taverna/engine/net.sf.taverna.t2.security/trunk/</url>
+		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/engine/net.sf.taverna.t2.security/tags/security-0.6</connection>
+		<developerConnection>scm:svn:https://taverna.googlecode.com/svn/taverna/engine/net.sf.taverna.t2.security/tags/security-0.6</developerConnection>
+		<url>http://code.google.com/p/taverna/source/browse/#svn/taverna/engine/net.sf.taverna.t2.security/tags/security-0.6</url>
 	</scm>
 	<dependencyManagement>
 		<dependencies>			
