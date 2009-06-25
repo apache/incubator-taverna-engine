@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>net.sf.taverna.t2</groupId>
 		<artifactId>security</artifactId>
-		<version>0.4-SNAPSHOT</version>
+		<version>0.6-SNAPSHOT</version>
 	</parent>
 	<groupId>net.sf.taverna.t2.security</groupId>
 	<artifactId>security-tests</artifactId>
@@ -14,17 +14,17 @@
 		<dependency>
 			<groupId>net.sf.taverna.t2.security</groupId>
 			<artifactId>credential-manager</artifactId>
-			<version>0.4-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 				<groupId>net.sf.taverna.t2.ui-components</groupId>
 				<artifactId>credential-manager-ui</artifactId>
-				<version>0.4-SNAPSHOT</version>
+				<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.taverna.t2.security</groupId>
 			<artifactId>security-profiles</artifactId>
-			<version>0.4-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 </project>
