@@ -28,6 +28,8 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchProviderException;
 
+import net.sf.taverna.raven.appconfig.ApplicationRuntime;
+
 /**
  * Provides utility methods for loading a keystore from a file.
  * 
@@ -38,10 +40,6 @@ public class CMUtil {
 	/**
 	 * Loads a Bouncy Castle "UBER"-type keystore from a file on the disk and
 	 * returns it.
-	 * 
-	 * @param ksFile - the file containing the keystore
-	 * @param masterPassword - masterpassword for the keystore
-	 * @throws CMException - if the keystore could not be loaded for some reason
 	 */
 	public static KeyStore load(File ksFile, String masterPassword) throws CMException {
 
@@ -120,5 +118,23 @@ public class CMUtil {
 			}
 		}
 		return keystore;
+	}
+	
+	
+	/**
+	 * Get the configuration directory where the security stuff will be/is saved to.
+	 */
+	public static File getSecurityConfigurationDirectory() {
+		
+		File home = ApplicationRuntime.getInstance().getApplicationHomeDir();
+		File configDirectory = new File(home,"conf");
+		if (!configDirectory.exists()) {
+			configDirectory.mkdir();
+		}
+		File secConfigDirectory = new File(configDirectory,"security");
+		if (!secConfigDirectory.exists()) {
+			secConfigDirectory.mkdir();
+		}
+		return secConfigDirectory;
 	}
 }
