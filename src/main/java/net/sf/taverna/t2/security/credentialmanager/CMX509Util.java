@@ -69,15 +69,14 @@ public class CMX509Util
     //                    DC      domainComponent
     //                    UID     userid
 
-    private static String emailAddress; // not from RFC 2253, yet some certificates contain this field
+    private String emailAddress; // not from RFC 2253, yet some certificates contain this field
     
-    private static String CN;
-    private static String L;
-    private static String ST;
-    private static String C;
-    private static String O;
-    private static String OU;
-
+    private String CN;
+    private String L;
+    private String ST;
+    private String C;
+    private String O;
+    private String OU;
     
     /**
      * Convert the supplied array of certificate objects into
@@ -102,10 +101,6 @@ public class CMX509Util
     
     /**
      * Convert the supplied certificate object into an X509Certificate object.
-     *
-     * @param certIn The Certificate object
-     * @return The converted X509Certificate object
-     * @throws CMException A problem occurred during the conversion
      */
     public static X509Certificate convertCertificate(Certificate certIn)
         throws CMException
@@ -120,8 +115,8 @@ public class CMX509Util
             throw new CMException("Failed to convert certificate", ex);
         }
     }
-      
     
+	
     /**
      * Load one or more certificates from the specified file.
      *
@@ -211,7 +206,7 @@ public class CMX509Util
      * Heavily based on DNParser class from omii-security-utils library
      */
 
-    public static void parseDN(String DNstr)
+    public void parseDN(String DNstr)
     {
         /////////////////////////////////////////////////////////////////////////////////////////////////////
         //		Parse the DN String and put into variables. First, tokenise using a "," character as a delimiter
@@ -367,39 +362,40 @@ public class CMX509Util
         }
     }
 
-    public static String getCN()
+    public String getCN()
     {
         return CN;
     }
 
-    public static String getEmailAddress()
+    public String getEmailAddress()
     {
         return emailAddress;
     }
 
-    public static String getOU()
+    public String getOU()
     {
         return OU;
     }
 
-    public static String getO()
+    public String getO()
     {
         return O;
     }
 
-    public static String getL()
+    public String getL()
     {
         return L;
     }
 
-    public static String getST()
+    public String getST()
     {
         return ST;
     }
 
-    public static String getC()
+    public String getC()
     {
         return C;
     }
+
 }
 
