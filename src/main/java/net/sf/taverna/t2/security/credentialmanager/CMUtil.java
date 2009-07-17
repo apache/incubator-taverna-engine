@@ -127,11 +127,11 @@ public class CMUtil {
 	public static File getSecurityConfigurationDirectory() {
 		
 		File home = ApplicationRuntime.getInstance().getApplicationHomeDir();
-		File configDirectory = new File(home,"conf");
-		if (!configDirectory.exists()) {
-			configDirectory.mkdir();
-		}
-		File secConfigDirectory = new File(configDirectory,"security");
+//		File configDirectory = new File(home,"conf");
+//		if (!configDirectory.exists()) {
+//			configDirectory.mkdir();
+//		}
+		File secConfigDirectory = new File(home,"security");
 		if (!secConfigDirectory.exists()) {
 			secConfigDirectory.mkdir();
 		}

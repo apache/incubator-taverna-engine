@@ -512,6 +512,10 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 		// Set the system property "javax.net.ssl.Truststore" to use Taverna's truststore 
 		System.setProperty("javax.net.ssl.trustStore", truststoreFile.getAbsolutePath());
 		System.setProperty("javax.net.ssl.trustStorePassword", masterPassword);
+		// Taverna distro for MAC contains info.plist file with some Java system properties set to
+		// use the Keychain which clashes with what we are setting here so wee need to clear them
+		System.clearProperty("javax.net.ssl.trustStoreType");
+		System.clearProperty("javax.net.ssl.trustStoreProvider");
 		return truststore;
 	}
 	
@@ -1633,12 +1637,16 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 	}
 
 	/**
-	 * Change the Keystore/Truststore password. 
+	 * Change the Keystore master password. Truststore is using a different
+	 * pre-set password. 
 	 */
 	public void changeMasterPassword(String newPassword) throws CMException{	
 		masterPassword = newPassword;
 		saveKeystore(KEYSTORE);
-		saveKeystore(TRUSTSTORE);
+		// We are using a different pre-set password for Truststore because 
+		// we need to initialise it earlier (for setting SSL system properties) 
+		// when we still do not know user's master password.
+		//saveKeystore(TRUSTSTORE);
 	}
 
 	public static void initialiseSSL() throws CMException {		
