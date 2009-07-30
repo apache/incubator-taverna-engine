@@ -20,7 +20,7 @@
 
 	<!-- Load core extensions, needed for String to reference support -->
 	<bean
-		raven:artifact="net.sf.taverna.t2:t2reference-core-extensions:0.1"
+		raven:artifact="net.sf.taverna.t2.core:reference-core-extensions:0.6"
 		raven:repository="raven.repository"
 		class="net.sf.taverna.t2.reference.impl.core.LoadCoreExtensions">
 	</bean>

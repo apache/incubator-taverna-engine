@@ -16,7 +16,7 @@
 		<system>
 			<!-- T2Reference API -->
 			<sys
-				artifact="net.sf.taverna.t2:t2reference-api:0.1" />
+				artifact="net.sf.taverna.t2.core:reference-api:0.8" />
 
 			<!-- T2Platform -->
 			<sys artifact="net.sf.taverna.t2:platform:0.1" />
