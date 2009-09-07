@@ -11,7 +11,7 @@
 
 	<!-- t2 reference generator -->
 	<bean id="t2reference.referenceGenerator"
-		raven:artifact="net.sf.taverna.t2.core:reference-impl:0.8"
+		raven:artifact="net.sf.taverna.t2.core:reference-impl:0.9-SNAPSHOT"
 		raven:repository="raven.repository"
 		class="net.sf.taverna.t2.reference.impl.SimpleT2ReferenceGenerator">
 		<property name="namespace" value="testNamespace" />
@@ -19,7 +19,7 @@
 
 	<!-- reference set service -->
 	<bean id="t2reference.service.referenceSetService"
-		raven:artifact="net.sf.taverna.t2.core:reference-impl:0.8"
+		raven:artifact="net.sf.taverna.t2.core:reference-impl:0.9-SNAPSHOT"
 		raven:repository="raven.repository"
 		class="net.sf.taverna.t2.reference.impl.ReferenceSetServiceImpl">
 		<property name="referenceSetDao">
@@ -35,7 +35,7 @@
 
 	<bean id="t2reference.augmentor"
 		class="net.sf.taverna.t2.reference.impl.ReferenceSetAugmentorImpl"
-		raven:artifact="net.sf.taverna.t2.core:reference-impl:0.8"
+		raven:artifact="net.sf.taverna.t2.core:reference-impl:0.9-SNAPSHOT"
 		raven:repository="raven.repository">
 		<property name="builderRegistry">
 			<bean
@@ -71,7 +71,7 @@
 
 	<!-- error document service -->
 	<bean id="t2reference.service.errorDocumentService"
-		raven:artifact="net.sf.taverna.t2.core:reference-impl:0.8"
+		raven:artifact="net.sf.taverna.t2.core:reference-impl:0.9-SNAPSHOT"
 		raven:repository="raven.repository"
 		class="net.sf.taverna.t2.reference.impl.ErrorDocumentServiceImpl">
 		<property name="errorDao">
@@ -84,7 +84,7 @@
 
 	<!-- list service -->
 	<bean id="t2reference.service.listService"
-		raven:artifact="net.sf.taverna.t2.core:reference-impl:0.8"
+		raven:artifact="net.sf.taverna.t2.core:reference-impl:0.9-SNAPSHOT"
 		raven:repository="raven.repository"
 		class="net.sf.taverna.t2.reference.impl.ListServiceImpl">
 		<property name="listDao">
