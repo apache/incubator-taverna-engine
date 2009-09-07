@@ -27,7 +27,7 @@
 		store that is not hibernate based)
 	</description>
 	<properties>
-		<t2.core.version>0.8</t2.core.version>
+		<t2.core.version>0.9-SNAPSHOT</t2.core.version>
 	</properties>
 	<repositories>
 		<repository>
