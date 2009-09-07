@@ -42,8 +42,8 @@
 	</build>
 	
 	<properties>
-		<t2.infrastructure.version>1.11</t2.infrastructure.version>
-		<t2.lang.version>0.5</t2.lang.version>
+		<t2.infrastructure.version>1.12-SNAPSHOT</t2.infrastructure.version>
+		<t2.lang.version>0.6-SNAPSHOT</t2.lang.version>
 	</properties>
 	
 	<modules>
