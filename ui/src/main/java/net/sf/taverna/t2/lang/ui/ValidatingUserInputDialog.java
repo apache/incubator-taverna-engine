@@ -128,8 +128,15 @@ public class ValidatingUserInputDialog extends JDialog {
 			}
 		});
 		textComponent.addKeyListener(new KeyAdapter() {
-			public void keyReleased(KeyEvent e) {
+			boolean okDown = false;
+			
+			public void keyPressed(KeyEvent e) {
 				if (okButton.isEnabled() && e.getKeyCode() == KeyEvent.VK_ENTER) {
+					okDown = true;
+				}
+			}
+			public void keyReleased(KeyEvent e) {
+				if (okDown && okButton.isEnabled() && e.getKeyCode() == KeyEvent.VK_ENTER) {
 					okButton.doClick();
 				}
 			}
@@ -191,14 +198,6 @@ public class ValidatingUserInputDialog extends JDialog {
 		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.TRAILING));
 		add(buttonPanel, BorderLayout.SOUTH);
 
-		cancelButton = new JButton("Cancel");
-		cancelButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				setVisible(false);
-			}
-		});
-		buttonPanel.add(cancelButton);
-
 		okButton = new JButton("OK");
 		okButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -208,6 +207,14 @@ public class ValidatingUserInputDialog extends JDialog {
 		});
 		okButton.setEnabled(false);
 		buttonPanel.add(okButton);
+
+		cancelButton = new JButton("Cancel");
+		cancelButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				setVisible(false);
+			}
+		});
+		buttonPanel.add(cancelButton);
 
 		setModal(true);
 		setDefaultCloseOperation(HIDE_ON_CLOSE);
@@ -243,7 +250,7 @@ public class ValidatingUserInputDialog extends JDialog {
 			valid = true;
 		}
 		okButton.setEnabled(valid);
-		okButton.setSelected(valid);
+//		okButton.setSelected(valid);
 	}
 
 	/**
