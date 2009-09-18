@@ -21,6 +21,8 @@
 package net.sf.taverna.t2.reference.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -55,6 +57,7 @@ import net.sf.taverna.t2.reference.ValueToReferenceConverterSPI;
  * ErrorDocumentService and ListService to enable.
  * 
  * @author Tom Oinn
+ * @author Alan R Williams
  */
 public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 		implements ReferenceService {
@@ -157,8 +160,77 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 		if (o instanceof T2Reference) {
 			return (T2Reference) o;
 		}
+		
+		if (o.getClass().isArray()) {
+			Class elementType = o.getClass().getComponentType();
+			if (elementType.getCanonicalName().equals("char")) {
+				char[] cArray = (char[]) o;
+				List<Character> cList = new ArrayList<Character>();
+				for (char c : cArray) {
+					cList.add(new Character(c));
+				}
+				o = cList;
+			} else if (elementType.getCanonicalName().equals("short")) {
+				short[] cArray = (short[]) o;
+				List<Short> cList = new ArrayList<Short>();
+				for (short c : cArray) {
+					cList.add(new Short(c));
+				}			
+				o = cList;
+			} else if (elementType.getCanonicalName().equals("int")) {
+				int[] cArray = (int[]) o;
+				List<Integer> cList = new ArrayList<Integer>();
+				for (int c : cArray) {
+					cList.add(new Integer(c));
+				}			
+				o = cList;
+			}  else if (elementType.getCanonicalName().equals("long")) {
+				long[] cArray = (long[]) o;
+				List<Long> cList = new ArrayList<Long>();
+				for (long c : cArray) {
+					cList.add(new Long(c));
+				}			
+				o = cList;
+			} else if (elementType.getCanonicalName().equals("float")) {
+				float[] cArray = (float[]) o;
+				List<Float> cList = new ArrayList<Float>();
+				for (float c : cArray) {
+					cList.add(new Float(c));
+				}			
+				o = cList;
+			} else if (elementType.getCanonicalName().equals("double")) {
+				double[] cArray = (double[]) o;
+				List<Double> cList = new ArrayList<Double>();
+				for (double c : cArray) {
+					cList.add(new Double(c));
+				}			
+				o = cList;
+			}  else if (elementType.getCanonicalName().equals("boolean")) {
+				boolean[] cArray = (boolean[]) o;
+				List<Boolean> cList = new ArrayList<Boolean>();
+				for (boolean c : cArray) {
+					cList.add(new Boolean(c));
+				}			
+				o = cList;
+			} else if (!elementType.getCanonicalName().equals("byte")){
+				// Covert arrays of objects
+				Object[] cArray = (Object[]) o;
+				List<Object> cList = new ArrayList<Object>();
+				for (Object c : cArray) {
+					cList.add(c);
+				}			
+				o = cList;
+			}
+		}
+		
+		// If a Collection but not a List
+		if ((o instanceof Collection) && !(o instanceof List)) {
+			List<Object> cList = new ArrayList<Object>();
+			cList.addAll((Collection)o);
+			o = cList;
+		}
 		// Next check lists.
-		else if (o instanceof List) {
+		if (o instanceof List) {
 			List<?> l = (List<?>) o;
 			// If the list is empty then register a new empty list of the
 			// appropriate depth and return it
