@@ -22,6 +22,7 @@ package net.sf.taverna.t2.annotation.annotationbeans;
 
 import net.sf.taverna.t2.annotation.AppliesTo;
 import net.sf.taverna.t2.workflowmodel.DataflowInputPort;
+import net.sf.taverna.t2.workflowmodel.DataflowOutputPort;
 
 /**
  * A String containing an example or a description of an example
@@ -29,7 +30,7 @@ import net.sf.taverna.t2.workflowmodel.DataflowInputPort;
  * @author Alan R Williams
  * 
  */
-@AppliesTo(targetObjectType = { DataflowInputPort.class }, many = false)
+@AppliesTo(targetObjectType = { DataflowInputPort.class , DataflowOutputPort.class }, many = false)
 public class ExampleValue extends AbstractTextualValueAssertion {
 
 	/**
