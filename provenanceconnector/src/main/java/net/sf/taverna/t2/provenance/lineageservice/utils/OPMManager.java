@@ -124,7 +124,9 @@ public class OPMManager {
 		currentArtifact = graph.newArtifact(artID, r);
 		graph.assertArtifact(currentArtifact);
 
-		if (aValue != null) {
+		if (false) {
+// following fragment commented out  
+//		if (aValue != null) {
 //			System.out.println("OPMManager::addArtifact: aValue is NOT NULL");
 
 			// if we have a valid DataValueExtractor, use it here
@@ -226,7 +228,7 @@ public class OPMManager {
 			boolean noDuplicates) {
 
 		boolean found = false;
-		if (noDuplicates) {
+		if (noDuplicates && artifact != null) {
 			Collection<ProvenanceGeneratedArc> generatedBy = graph.getGeneratedBy(artifact);
 
 			for (ProvenanceGeneratedArc arc:generatedBy) {						
@@ -235,7 +237,7 @@ public class OPMManager {
 			}
 		}
 
-		if (!noDuplicates || (noDuplicates && !found) )
+		if (!noDuplicates || (noDuplicates && !found) && artifact != null)
 			graph.assertGeneratedBy(artifact, process, role, account);
 	}
 
@@ -342,7 +344,7 @@ public class OPMManager {
 
 	public void writeGraph() {
 
-		// print out OPM graph for diagnostics
+		// print out OPM graph in RDF/XML form
 		try {
 			Set<Triple> allTriples = context.getTriples();
 

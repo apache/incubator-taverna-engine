@@ -75,7 +75,7 @@ public class OPMImporter {
 
 	/**
 	 * orphan artifacts are those that are in the graph but are never used neither generated. this 
-	 * indicates some problem with the graph structure
+	 * indicates some problem with the graph structure. this method is used for diagnostics after import has finished
 	 * @return
 	 */
 	public List<String> getOrphanArtifacts() {
@@ -84,6 +84,11 @@ public class OPMImporter {
 		List<String> allUsed = new ArrayList<String>();
 		List<String> orphans = new ArrayList<String>();
 
+		if (graph == null)  {
+			logger.warn("null graph while attempting to count orphan artifacts -- giving up");
+			return orphans; 
+		}
+		
 		Artifacts allArtifacts = graph.getArtifacts();
 
 		for ( Map.Entry<String, Map<String,List<String>>>entry: wgbArtifactsByAccount.entrySet()) {
@@ -108,7 +113,7 @@ public class OPMImporter {
 	public void importGraph(String XMLOPMGraphFilename) throws JAXBException, SQLException  {
 
 		try {
-			logger.info("OPM XML filename: "+XMLOPMGraphFilename);
+			logger.info("Importing OPM XML from file "+XMLOPMGraphFilename);
 
 			// deserialize an XML OPM graph from file
 			OPMDeserialiser deser = new OPMDeserialiser();
@@ -178,18 +183,22 @@ public class OPMImporter {
 				wtbSet.add((WasTriggeredBy) dep);
 			}
 		}
-		
+
 		// process these in the correct order
-		for (WasGeneratedBy dep: wgbSet) processWGBy(dep);
-		
+		int cnt =0;  // used to debug a nasty outofmemory error
+		for (WasGeneratedBy dep: wgbSet) {
+//			logger.debug(cnt++);
+			processWGBy(dep);
+		}
+
 		for (Used dep:usedSet) processUsed(dep);
-		
+
 		for (WasDerivedFrom dep: wdfSet) processWDF(dep);
-		
+
 		// we actually ignore the others... 
 
 		// *********
-		// complete the induced graph by building arcs using the Artfact -> [Var] maps
+		// complete the induced graph by building arcs using the Artifact -> [Var] maps
 		// *********
 
 		List<String>  accountNames = new ArrayList<String>();
@@ -206,6 +215,7 @@ public class OPMImporter {
 			Map<String, List<Var>> usedVars = usedVarsByAccount.get(wfName);
 			Map<String, List<Var>> wgbVars =  wgbVarsByAccount.get(wfName);
 
+			if (usedVars == null || wgbVars == null) continue;
 
 			// install an Arc from each wgb var to each used var when the artifact is the same
 			for (Map.Entry<String, List<Var>> entry:wgbVars.entrySet()) {
@@ -220,14 +230,12 @@ public class OPMImporter {
 				// note that we expect a single targetVar, but this is not guaranteed
 				for (Var sourceVar:sourceVars) {
 					for (Var targetVar:targetVars) {
-						pw.addArc(sourceVar, targetVar, wfName);
+						pw.addArc(sourceVar.getVName(), sourceVar.getPName(), targetVar.getVName(), targetVar.getPName(), wfName);
 					}
 				}
 			}
 		}
 	}
-
-
 
 	private void generateWFFromAccount(String accName) throws SQLException {
 
@@ -270,8 +278,7 @@ public class OPMImporter {
 			pw.addVariables(vars, wfName);
 			logger.debug("added var "+varName+" to workflow "+wfName);
 		} catch (SQLException e) {  // no panic -- just catch duplicates
-			System.out.println(e.getMessage());
-			e.printStackTrace();
+			logger.warn(e.getMessage());
 		}
 
 		// generate VarBindings (wfInstance, procName, varname, value)			
@@ -310,9 +317,16 @@ public class OPMImporter {
 		String varName  = role.getValue();
 		String value    = ((Artifact) artId.getId()).getId();
 
+		varName = removeBlanks(varName);
+
 		return processProcessArtifactDep(procName, value, varName, wfName, wfInstance, artifactIsInput);
 	}
 
+
+
+	private String removeBlanks(String varName) {		
+		return varName.replace(" ", "_");
+	}
 
 
 	/**
@@ -370,7 +384,6 @@ public class OPMImporter {
 				usedArtifacts.put(artifactName, processes);
 			}
 			processes.add(((org.openprovenance.model.Process) procID.getId()).getId());
-
 		}
 	}
 
@@ -379,7 +392,7 @@ public class OPMImporter {
 	/**
 	 * wgb(A,R,P,Acc): generates a Process for P, a Var for (P,R), an <em>output</em> VarBinding for (P,R,A) 
 	 * This is all relative to the workflow corresponding to account Acc. <br/>
-	 * this method also records all   
+	 * 
 	 * @param dep 
 	 * @throws SQLException 
 	 */

@@ -178,7 +178,22 @@ public class ProvenanceAnalysis {
 	}
 
 
+	/**
+	 * returns all available instances across all workflows
+	 * @return
+	 * @throws SQLException
+	 */
 	public List<String> getWFInstanceIDs() throws SQLException { return getPq().getWFInstanceIDs(); }
+
+
+	/**
+	 * returns all available instances for workflow wfName
+	 *@param wfName
+	 * @return
+	 * @throws SQLException
+	 */
+	public List<String> getWFInstanceID(String wfName) throws SQLException { return getPq().getWFInstanceID(wfName); }
+
 
 	/**
 	 * @param wfInstance lineage scope -- a specific instance
@@ -206,6 +221,41 @@ public class ProvenanceAnalysis {
 		return getPq().runLineageQuery(lq, isIncludeDataValue());
 	}
 
+	
+	public void computeLineageMultiVar(List<QueryVar> qvList,
+			String wfInstance, Set<String> selProcNames) throws SQLException {
+
+		// launch a lineage query for each target variable
+		for (QueryVar qv:qvList) {
+
+			// full lineage query			
+			logger.info("************\n lineage query: [instance, proc, port, path] = ["+
+					wfInstance+","+qv.getPname()+","+qv.getVname()+",["+qv.getPath()+"]]\n***********");
+
+			Map<String, List<LineageQueryResult>> results = 
+				computeLineage(wfInstance, qv.getVname(), qv.getPname(), qv.getPath(), selProcNames);
+
+			if (results == null) break;
+
+			// for each path
+			for (Map.Entry<String, List<LineageQueryResult>> pathResult:results.entrySet()) {
+
+				logger.info("results for var "+qv.getVname()+" path:"+pathResult.getKey());
+
+				// display results
+				for (LineageQueryResult result:pathResult.getValue()) {
+
+					//System.out.println("****** result: *****");
+					for (LineageQueryResultRecord r:result.getRecords()) {	
+
+						r.setPrintResolvedValue(false);					// unclutter visual output
+						System.out.println(r.toString());
+					}				
+				}
+			}
+		}
+		aOPMManager.writeGraph();
+	}
 
 	/**
 	 * facade for computeLineage: if path == ALL then it retrieves all VBs for (proc,var) ignoring path
@@ -265,6 +315,7 @@ public class ProvenanceAnalysis {
 			results.put(path, computeLineageSingleBinding(
 					wfInstance, var, proc, path, selectedProcessors));
 		}
+		
 		return results;		
 	}
 
@@ -272,7 +323,7 @@ public class ProvenanceAnalysis {
 	/**
 	 * main lineage query method. queries the provenance DB 
 	 * with a single originating proc/var/path and a set of selected Processors
-	 * @param wfInstance
+	 * @param wfID
 	 * @param var
 	 * @param proc
 	 * @param path
@@ -284,7 +335,7 @@ public class ProvenanceAnalysis {
 	 * @throws SQLException
 	 */
 	public List<LineageQueryResult> computeLineageSingleBinding(
-			String wfInstance,   // context
+			String wfID,   // context
 			String var,   // target var
 			String proc,   // qualified with its processor name
 			String path,   // possibly empty when no collections or no granular lineage required
@@ -296,28 +347,29 @@ public class ProvenanceAnalysis {
 //		System.out.println("timing starts...");
 		long start = System.currentTimeMillis();
 
-		List<LineageSQLQuery>  lqList =  searchDataflowGraph(wfInstance, var, proc, path, selectedProcessors);
+		List<LineageSQLQuery>  lqList =  searchDataflowGraph(wfID, var, proc, path, selectedProcessors);
 		long stop = System.currentTimeMillis();
 
 		long gst = stop-start;
 
 		// execute queries in the LineageSQLQuery list
-		// System.out.println("\n****************  executing lineage queries:  **************\n");
+		 logger.info("\n****************  executing lineage queries:  (includeDataValue is "+ isIncludeDataValue() +"**************\n");
 		start = System.currentTimeMillis();
 
 		List<LineageQueryResult> results =  getPq().runLineageQueries(lqList, isIncludeDataValue());
 		stop = System.currentTimeMillis();
 
 		long qrt = stop-start;
-//		System.out.println("search time: "+gst+"ms\nlineage query response time: "+qrt+" ms");
-//		System.out.println("total exec time "+(gst+qrt)+"ms");
+		logger.info("search time: "+gst+"ms\nlineage query response time: "+qrt+" ms");
+		logger.info("total exec time "+(gst+qrt)+"ms");
 
 		return results;
 	}
 
+	
 	/**
 	 * compute lineage queries using path projections
-	 * @param wfInstance the (single) instance defines the scope of a query<br/>
+	 * @param wfID the (single) instance defines the scope of a query<br/>
 	 * added 2/9: collect a list of paths in the process to be used by the naive query. In practice
 	 * we use this as the graph search phase that is needed by the naive query anyway
 	 * @param var
@@ -327,7 +379,7 @@ public class ProvenanceAnalysis {
 	 * @throws SQLException
 	 */
 	public List<LineageSQLQuery> searchDataflowGraph(
-			String wfInstance,   // context
+			String wfID,   // context
 			String var,   // target var
 			String proc,   // qualified with its processor name
 			String path,  // can be empty but not null
@@ -346,7 +398,7 @@ public class ProvenanceAnalysis {
 
 		// get (var, proc) from Var  to see if it's input/output
 		Map<String, String>  varQueryConstraints = new HashMap<String, String>();
-		varQueryConstraints.put("W.instanceID", wfInstance);
+		varQueryConstraints.put("W.instanceID", wfID);
 		varQueryConstraints.put("V.pnameRef", proc);  
 		varQueryConstraints.put("V.varName", var);  
 
@@ -364,15 +416,13 @@ public class ProvenanceAnalysis {
 		if (v.isInput() || getPq().isDataflow(proc)) { // if vName is input, then do a xfer() step
 
 			// rec. accumulates SQL queries into lqList
-			xferStep(wfInstance, var, proc, path, selectedProcessors, lqList);
+			xferStep(wfID, var, proc, path, selectedProcessors, lqList);
 
 		} else { // start with xform
 
 			// rec. accumulates SQL queries into lqList
-			xformStep(wfInstance, v, proc, path, selectedProcessors, lqList);			
+			xformStep(wfID, v, proc, path, selectedProcessors, lqList);			
 		}
-
-		aOPMManager.writeGraph();
 
 		return lqList;
 
@@ -382,7 +432,7 @@ public class ProvenanceAnalysis {
 
 	/**
 	 * accounts for an inverse transformation from one output to all inputs of a processor
-	 * @param wfInstance
+	 * @param wfID
 	 * @param var  the output var
 	 * @param proc  the processor
 	 * @param selectedProcessors  the processors for which we are interested in producing lineage 
@@ -390,7 +440,7 @@ public class ProvenanceAnalysis {
 	 * @param lqList  partial list of spot lineage queries, to be added to
 	 * @throws SQLException 
 	 */
-	private void xformStep(String wfInstance, 
+	private void xformStep(String wfID, 
 			Var outputVar, // we need the dnl from this output var
 			String proc,
 			String path,
@@ -426,7 +476,7 @@ public class ProvenanceAnalysis {
 
 		} else {
 
-			varsQueryConstraints.put("W.instanceID", wfInstance);
+			varsQueryConstraints.put("W.instanceID", wfID);
 			varsQueryConstraints.put("pnameRef", proc);  
 			varsQueryConstraints.put("inputOrOutput", "1");  
 
@@ -519,7 +569,7 @@ public class ProvenanceAnalysis {
 		// if this transformation is important to the user, produce an output and also an OPM graph fragment
 		if (selectedProcessors.isEmpty() || selectedProcessors.contains(proc)) {
 
-			LineageSQLQuery lq;
+//			LineageSQLQuery lq;
 
 			// processor may have no inputs.
 			// this is not a prob when doing path projections
@@ -528,13 +578,15 @@ public class ProvenanceAnalysis {
 			// using the current path, which becomes the element in collection	
 
 			// CHECK do the same even if we do have inputs, but returnOutputs is set to true
-			if (var2Path.isEmpty()) {
-				lq = getPq().generateSQL(wfInstance, proc, path, true);  // true -> fetch output vars
-			} else {
-				// note: if returnOutputs is true then this returns outputs ** in addition to ** inputs
-				lq = getPq().lineageQueryGen(wfInstance, proc, var2Path, outputVar, path, isReturnOutputs());
-			}
-			lqList.add(lq);
+//			if (var2Path.isEmpty()) {
+//			lq = getPq().generateSQL(wfInstance, proc, path, true);  // true -> fetch output vars
+//			} else {
+			// note: if returnOutputs is true then this returns outputs ** in addition to ** inputs
+//			lq = getPq().lineageQueryGen(wfInstance, proc, var2Path, outputVar, path, isReturnOutputs() || var2Path.isEmpty());
+//			}
+
+			List<LineageSQLQuery> newLqList = getPq().lineageQueryGen(wfID, proc, var2Path, outputVar, path, isReturnOutputs() || var2Path.isEmpty());
+			lqList.addAll(newLqList);
 
 			// BEGIN OPM update section
 			//
@@ -551,7 +603,8 @@ public class ProvenanceAnalysis {
 				Map<String, String> vbConstraints = new HashMap<String, String>();
 				vbConstraints.put("VB.PNameRef", outputVar.getPName());
 				vbConstraints.put("VB.varNameRef", outputVar.getVName());
-				vbConstraints.put("VB.wfInstanceRef", wfInstance);
+				vbConstraints.put("VB.wfInstanceRef", wfID);
+
 				if (path != null) { 
 
 					// account for x,y,.. format as well as [x,y,...]  depending on where the request is coming from
@@ -568,7 +621,7 @@ public class ProvenanceAnalysis {
 
 				// map the resulting varBinding to an Artifact
 				if (vbList == null || vbList.size()==0) {
-					logger.warn("no entry corresponding to conditions: proc="+
+					logger.debug("no entry corresponding to conditions: proc="+
 							outputVar.getPName()+" var = "+outputVar.getVName()+" iteration = "+path);
 					doOPM = false;
 				}  else {
@@ -581,33 +634,18 @@ public class ProvenanceAnalysis {
 						role = vb.getPNameRef()+"/"+vb.getVarNameRef()+"?it="+URIFriendlyIterationVector;
 					} else
 						role = vb.getPNameRef()+"/"+vb.getVarNameRef();
-				}
-			}
 
-			// 
-			// create OPM process for this xform
-			//
+					if (aOPMManager!=null && !pq.isDataflow(proc)) {
+						if (isRecordArtifactValues())
+							aOPMManager.addArtifact(vb.getValue(), vb.getResolvedValue());
+						else 
+							aOPMManager.addArtifact(vb.getValue());
 
-			// if OPM is on, execute the query so we get the value we need for the Artifact node
-			if (doOPM) {
-				LineageQueryResult inputs = getPq().runLineageQuery(lq, isIncludeDataValue());
-
-				if (aOPMManager!=null && inputs.getRecords().size()>0 && !pq.isDataflow(proc)) {
-
-					if (isRecordArtifactValues())
-						aOPMManager.addArtifact(vb.getValue(), vb.getResolvedValue());
-					else 
-						aOPMManager.addArtifact(vb.getValue());
-
-					aOPMManager.createRole(role);
-
-					String iteration = inputs.getRecords().get(0).getIteration();
-
-					URIFriendlyIterationVector = iteration.
-					replace(',', '-').replace('[', ' ').replace(']', ' ').trim();
+						aOPMManager.createRole(role);
+					}
 
 					// assert proc as Process -- include iteration vector to separate different activations of the same process					
-					aOPMManager.addProcess(proc, iteration, URIFriendlyIterationVector);
+					aOPMManager.addProcess(proc, vb.getIteration(), URIFriendlyIterationVector);
 
 					//
 					// create OPM generatedBy property between output value and this process node
@@ -618,26 +656,50 @@ public class ProvenanceAnalysis {
 							aOPMManager.getCurrentProcess(), 
 							aOPMManager.getCurrentRole(), 
 							aOPMManager.getCurrentAccount(),
-							true);   // true -> prevent duplicates CHECK						
+							true);   // true -> prevent duplicates CHECK
 				}
+			}
 
-				//	update OPM graph with inputs and used properties
-				for (LineageQueryResultRecord resultRecord: inputs.getRecords()) {
 
-					URIFriendlyIterationVector = resultRecord.getIteration().
-					replace(',', '-').replace('[', ' ').replace(']', ' ').trim();
+			// 
+			// create OPM process for this xform
+			//
+			for (LineageSQLQuery lq: newLqList) {
+				// if OPM is on, execute the query so we get the value we need for the Artifact node
+				LineageQueryResult inputs = getPq().runLineageQuery(lq, isIncludeDataValue());
 
-					boolean found = false;  // used to avoid duplicate process resources
+				if (doOPM && aOPMManager!=null && inputs.getRecords().size()>0 && !pq.isDataflow(proc)) {
 
-					// map each input var in the resultRecord to an Artifact
-					// create new Resource for the resultRecord
-					//    use the value as URI for the Artifact, and resolvedValue as the actual value
+//					if (isRecordArtifactValues())
+//					aOPMManager.addArtifact(vb.getValue(), vb.getResolvedValue());
+//					else 
+//					aOPMManager.addArtifact(vb.getValue());
 
-					//
-					// create OPM artifact and role for the input var obtained by path projection
-					//
-					if (resultRecord.isInput())  {
+//					aOPMManager.createRole(role);
 
+//					String iteration = inputs.getRecords().get(0).getIteration();
+
+//					URIFriendlyIterationVector = iteration.
+//					replace(',', '-').replace('[', ' ').replace(']', ' ').trim();
+
+					//	update OPM graph with inputs and used properties
+					for (LineageQueryResultRecord resultRecord: inputs.getRecords()) {
+
+						// process inputs only
+						if (!resultRecord.isInput()) continue;
+
+						URIFriendlyIterationVector = resultRecord.getIteration().
+						replace(',', '-').replace('[', ' ').replace(']', ' ').trim();
+
+						boolean found = false;  // used to avoid duplicate process resources
+
+						// map each input var in the resultRecord to an Artifact
+						// create new Resource for the resultRecord
+						//    use the value as URI for the Artifact, and resolvedValue as the actual value
+
+						//
+						// create OPM artifact and role for the input var obtained by path projection
+						//
 						if (isRecordArtifactValues())							
 							aOPMManager.addArtifact(resultRecord.getValue(), resultRecord.getResolvedValue());
 						else 
@@ -672,7 +734,7 @@ public class ProvenanceAnalysis {
 
 		// recursion -- xfer path is next up
 		for (Var inputVar: inputVars) {
-			xferStep(wfInstance, inputVar.getVName(), inputVar.getPName(), var2Path.get(inputVar), selectedProcessors, lqList);	
+			xferStep(wfID, inputVar.getVName(), inputVar.getPName(), var2Path.get(inputVar), selectedProcessors, lqList);	
 		}
 		currentPath.remove(currentPath.size()-1);  // CHECK	
 	}  // end xformStep
