@@ -54,7 +54,7 @@ public class EditsRegistry extends SPIRegistry<Edits> {
 			System.out.println("No Edits implementation defined");
 		} else {
 			if (instances.size() > 1)
-				logger.info("More than 1 Edits implementation defined, using the first");
+				logger.debug("More than 1 Edits implementation defined, using the first");
 			result = instances.get(0);
 		}
 		return result;
