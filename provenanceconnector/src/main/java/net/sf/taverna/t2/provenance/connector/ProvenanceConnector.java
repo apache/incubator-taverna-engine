@@ -287,7 +287,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 	public String getDataflowInstance(String dataflowId) {
 		String instanceID = null;
 		try {
-			instanceID = (getProvenance()).getPq().getWFInstanceID(dataflowId);
+			instanceID = (getProvenance()).getPq().getWFInstanceID(dataflowId).get(0);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
