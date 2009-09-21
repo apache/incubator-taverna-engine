@@ -1257,10 +1257,11 @@ public class EventProcessor {
 	 */
 	public void saveEvent(ProvenanceItem provenanceItem, SharedVocabulary eventType) throws IOException {
 
-
 		// HACK -- XMLEncoder fails on IterationEvents and there is no way to catch the exception...
 		// so avoid this case
-		if (eventType.equals(SharedVocabulary.ITERATION_EVENT_TYPE))  return;
+		if (eventType.equals(SharedVocabulary.ITERATION_EVENT_TYPE))  {
+			return;
+		}
 
 //		System.out.println("saveEvent: start");
 
@@ -1287,12 +1288,14 @@ public class EventProcessor {
 			}
 		});
 
-//		System.out.println("saving to " + f); // save event for later inspection
+		logger.debug("saving to " + f); // save event for later inspection
+		logger.debug(provenanceItem);
+		
 		en.writeObject(provenanceItem);
 
-//		System.out.println("writer ok");
+		logger.debug("writer ok");
 		en.close();
-//		System.out.println("closed");
+		logger.debug("closed");
 
 //		fw.write(content);
 //		fw.flush();

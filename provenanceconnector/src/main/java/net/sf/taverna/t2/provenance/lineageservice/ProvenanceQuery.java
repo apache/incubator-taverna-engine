@@ -365,8 +365,6 @@ public abstract class ProvenanceQuery {
 			logger.warn("Could not execute query: " + e);
 		} catch (ClassNotFoundException e) {
 			logger.warn("Could not execute query: " + e);
-		} catch (SQLException e) {
-			logger.error(e);
 		}
 
 		// System.out.println("getArcs: executing query\n"+q.toString());
@@ -414,44 +412,6 @@ public abstract class ProvenanceQuery {
 
 	}
 
-	/**
-	 * 
-	 * @param dataflowID
-	 * @return
-	 * @throws SQLException
-	 */
-	public String getWFInstanceID(String dataflowID) throws SQLException {
-		// String q = "SELECT instanceID FROM WfInstance where wfnameRef = \'"
-		// + dataflowID + "\'";
-		//
-		PreparedStatement ps = null;
-		// Statement stmt;
-		try {
-			ps = getConnection().prepareStatement(
-			"SELECT instanceID FROM WfInstance where wfnameRef = ?");
-			ps.setString(1, dataflowID);
-			// stmt = getConnection().createStatement();
-			boolean success = ps.execute();
-
-			if (success) {
-				ResultSet rs = ps.getResultSet();
-
-				if (rs.next()) {
-					return rs.getString("instanceID");
-				}
-			}
-
-		} catch (InstantiationException e) {
-			logger.warn("Could not execute query: " + e);
-		} catch (IllegalAccessException e) {
-			logger.warn("Could not execute query: " + e);
-		} catch (ClassNotFoundException e) {
-			logger.warn("Could not execute query: " + e);
-		}
-		return null;
-
-	}
-
 	public String getWFNameFromInstanceID(String wfInstanceID)
 	throws SQLException {
 
@@ -489,12 +449,54 @@ public abstract class ProvenanceQuery {
 	}
 
 	/**
+	 * 
+	 * @param dataflowID
+	 * @return
+	 * @throws SQLException
+	 */
+	public List<String> getWFInstanceID(String dataflowID) throws SQLException {
+		// String q = "SELECT instanceID FROM WfInstance where wfnameRef = \'"
+		// + dataflowID + "\'";
+		//
+		PreparedStatement ps = null;
+		// Statement stmt;
+		
+		List<String> result = new ArrayList<String>();
+
+		try {
+			ps = getConnection().prepareStatement(
+			"SELECT instanceID FROM WfInstance where wfnameRef = ? order by timestamp desc");
+			ps.setString(1, dataflowID);
+			// stmt = getConnection().createStatement();
+			boolean success = ps.execute();
+	
+			if (success) {
+				ResultSet rs = ps.getResultSet();
+	
+				while (rs.next()) {  
+					result.add(rs.getString("instanceID"));
+				}
+			}
+	
+		} catch (InstantiationException e) {
+			logger.warn("Could not execute query: " + e);
+		} catch (IllegalAccessException e) {
+			logger.warn("Could not execute query: " + e);
+		} catch (ClassNotFoundException e) {
+			logger.warn("Could not execute query: " + e);
+		}
+		return result;	
+	}
+
+	
+	/**
 	 * all WF instances, in reverse chronological order
 	 * 
 	 * @return
 	 * @throws SQLException
 	 */
 	public List<String> getWFInstanceIDs() throws SQLException {
+		
 		List<String> result = new ArrayList<String>();
 
 		String q = "SELECT instanceID FROM WfInstance order by timestamp desc";
@@ -533,7 +535,7 @@ public abstract class ProvenanceQuery {
 	 * @see net.sf.taverna.t2.provenance.lineageservice.mysql.ProvenanceQuery#
 	 * getWFInstanceIDs()
 	 */
-	public List<String> getWFInstancesByTime() throws SQLException {
+	public List<String> getWFNamesByTime() throws SQLException {
 
 		List<String> result = new ArrayList<String>();
 
@@ -755,6 +757,8 @@ public abstract class ProvenanceQuery {
 
 		boolean success;
 
+		String currentWorkflowProcessor = null;
+		
 		PreparedStatement ps = null;
 
 //		logger.info("getProcessorsIncomingLinks("+wfnameRef+")");
@@ -766,7 +770,7 @@ public abstract class ProvenanceQuery {
 		Statement stmt;
 		try {
 			ps = getConnection().prepareStatement(
-			"SELECT pName FROM Processor WHERE wfInstanceRef = ?");
+			"SELECT pName, type FROM Processor WHERE wfInstanceRef = ?");
 			ps.setString(1, wfnameRef);
 			// stmt = getConnection().createStatement();
 			success = ps.execute();
@@ -774,6 +778,12 @@ public abstract class ProvenanceQuery {
 			if (success) {
 				ResultSet rs = ps.getResultSet();
 				while (rs.next()) {
+					
+					// PM CHECK 6/09
+					if (rs.getString("type").equals("net.sf.taverna.t2.activities.dataflow.DataflowActivity")) {
+						currentWorkflowProcessor = rs.getString("pName");
+						logger.info("currentWorkflowProcessor = "+currentWorkflowProcessor);
+					}
 					result.put(rs.getString("pName"), new Integer(0));
 				}
 			}
@@ -822,13 +832,15 @@ public abstract class ProvenanceQuery {
 		// exclude processors connected to inputs -- those have 0 predecessors
 		// for our purposes
 		// and we add them later
+		
+		// PM 6/09 not sure we need to exclude arcs going into sub-flows?? so commented out the condition
 		String q = "SELECT sinkPNameRef, count(*) as cnt " + "FROM Arc "
 		+ "WHERE wfInstanceRef = \'" + wfnameRef + "\' "
 		+ "AND sinkPNameRef NOT IN " + pNames + " "
 //		+ "AND sourcePNameRef NOT IN " + pNames
 		+ " GROUP BY sinkPNameRef";
 
-		logger.debug("executing \n"+q);
+		logger.info("executing \n"+q);
 
 		try {
 			stmt = getConnection().createStatement();
@@ -837,10 +849,11 @@ public abstract class ProvenanceQuery {
 				ResultSet rs = stmt.getResultSet();
 				while (rs.next()) {
 
-					// e
+					if (!rs.getString("sinkPNameRef").equals(currentWorkflowProcessor)) 
 					result.put(rs.getString("sinkPNameRef"), new Integer(rs
 							.getInt("cnt")));
 				}
+				result.put(currentWorkflowProcessor,0);
 			}
 		} catch (InstantiationException e) {
 			logger.warn("Could not execute query: " + e);
@@ -1092,7 +1105,7 @@ public abstract class ProvenanceQuery {
 	 * if var2Path is null this generates a trivial query for the current output
 	 * var and current path
 	 * 
-	 * @param wfInstance
+	 * @param wfInstanceID
 	 * @param proc
 	 * @param var2Path
 	 * @param outputVar
@@ -1101,7 +1114,7 @@ public abstract class ProvenanceQuery {
 	 *            returns inputs *and* outputs if set to true
 	 * @return
 	 */
-	public LineageSQLQuery lineageQueryGen(String wfInstance, String proc,
+	public List<LineageSQLQuery> lineageQueryGen(String wfInstanceID, String proc,
 			Map<Var, String> var2Path, Var outputVar, String path,
 			boolean returnOutputs) {
 		// setup
@@ -1115,44 +1128,141 @@ public abstract class ProvenanceQuery {
 		// (v.getActualNestingLevel()-v.getTypeNestingLevel())+
 		// " and path "+var2Path.get(v));
 		// }
+		
+		
+		List<LineageSQLQuery>  newQueries = new ArrayList<LineageSQLQuery>();
+		
+		// use the calculated path for each input var
+		boolean isInput = true;
+		for (Var v:var2Path.keySet()) {
+			LineageSQLQuery q = generateSQL2(wfInstanceID, proc, v.getVName(), var2Path.get(v), isInput);
+			if (q != null) newQueries.add(q);  
+		}
+		
+		// is returnOutputs is true, then use proc, path for the output var as well
+		if (returnOutputs) {
+			
+			isInput = false;
+			
+			// CHECK not sure this is still valid
+//			if (path != null) {
+//
+//				int outputVarDnl = outputVar.getTypeNestingLevel();
+//				String pathArray[] = path.split(",");
+//
+//				for (int i = 0; i < pathArray.length - outputVarDnl; i++) {
+//					effectivePath.append(pathArray[i] + ",");
+//				}
+//				if (effectivePath.length() > 0)
+//					effectivePath.deleteCharAt(effectivePath.length() - 1);
+//			}			
+			LineageSQLQuery q = generateSQL2(wfInstanceID, proc, outputVar.getVName(), path, isInput);  // && !var2Path.isEmpty());
+			if (q != null) newQueries.add(q);  
+		}
+		return newQueries;
 
-		int outputVarDnl = outputVar.getTypeNestingLevel();
 		// System.out.println("dnl of output var "+outputVar.getVName()+": "+outputVarDnl);
 		// System.out.println("original path: "+path);
 
-		if (path != null) {
-
-			String pathArray[] = path.split(",");
-
-			for (int i = 0; i < pathArray.length - outputVarDnl; i++) {
-				effectivePath.append(pathArray[i] + ",");
-			}
-			if (effectivePath.length() > 0)
-				effectivePath.deleteCharAt(effectivePath.length() - 1);
-
-			// System.out.println("path used for query: "+effectivePath);
-		}
+		// CHECK not sure this is still valid
+//		if (path != null) {
+//
+//			String pathArray[] = path.split(",");
+//
+//			for (int i = 0; i < pathArray.length - outputVarDnl; i++) {
+//				effectivePath.append(pathArray[i] + ",");
+//			}
+//			if (effectivePath.length() > 0)
+//				effectivePath.deleteCharAt(effectivePath.length() - 1);
+//		}
 
 		// generation
-		if (!var2Path.isEmpty()) { // generate query to retrieve inputs
+//		if (!var2Path.isEmpty()) { // generate query to retrieve inputs
+//
+//			// returnOutputs => SQL generator will *not* constrain to return
+//			// inputs only
+//			return generateSQL(wfInstance, proc, effectivePath.toString(),
+//					returnOutputs);
+////			return generateSQL(wfInstance, proc, path,
+////					returnOutputs);
+//		} else { // generate query to retrieve outputs (this is a special case
+//			// where processor has no inputs)
+//
+//			// System.out.println("lineageQueryGen: proc has no inputs => return output values instead");
+////			return generateSQL(wfInstance, proc, path, false); // false -> fetch output vars only
+//			return generateSQL(wfInstance, proc, effectivePath.toString(), false); // false -> fetch output vars only
+//
+//		}
+//		return generateSQL(wfInstance, proc, effectivePath.toString(), returnOutputs);  // && !var2Path.isEmpty());
+	}
 
-			// returnOutputs => SQL generator will *not* constrain to return
-			// inputs only
-			return generateSQL(wfInstance, proc, effectivePath.toString(),
-					returnOutputs);
-			// ->
-			// fetch
-			// input
-			// vars
+	
+	
+	protected LineageSQLQuery generateSQL2(String wfInstance, String proc,
+			String var, String path,  boolean returnInput) {
 
-		} else { // generate query to retrieve outputs (this is a special case
-			// where processor has no inputs)
+		LineageSQLQuery lq = new LineageSQLQuery();
 
-			// System.out.println("lineageQueryGen: proc has no inputs => return output values instead");
-			return generateSQL(wfInstance, proc, effectivePath.toString(),
-					false); // false -> fetch output vars only
+		// constraints:
+		Map<String, String> collQueryConstraints = new HashMap<String, String>();
 
+		// base Collection query
+		String collQuery = "SELECT * FROM T2Provenance.Collection C JOIN wfInstance W ON "
+			+ "C.wfInstanceRef = W.instanceID "
+			+ "JOIN Var V on "
+			+ "V.wfInstanceRef = W.wfnameRef and C.PNameRef = V.pnameRef and C.varNameRef = V.varName ";			
+
+		collQueryConstraints.put("W.instanceID", wfInstance);
+		collQueryConstraints.put("C.PNameRef", proc);
+
+		if (path != null && path.length() > 0) {
+			collQueryConstraints.put("C.iteration", "["+ path + "]"); // PM 1/09 -- path
 		}
+
+		// inputs or outputs?
+		if (returnInput) collQueryConstraints.put("V.inputOrOutput", "1");
+		else collQueryConstraints.put("V.inputOrOutput", "0");
+		
+		collQuery = addWhereClauseToQuery(collQuery, collQueryConstraints, false);
+
+		lq.setCollQuery(collQuery);
+
+		//  vb query
+
+		Map<String, String> vbQueryConstraints = new HashMap<String, String>();
+
+		// base VarBinding query
+		String vbQuery = "SELECT * FROM VarBinding VB JOIN wfInstance W ON "
+			+ "VB.wfInstanceRef = W.instanceID "
+			+ "JOIN Var V on "
+			+ "V.wfInstanceRef = W.wfnameRef and VB.PNameRef = V.pnameRef and VB.varNameRef = V.varName "
+			+ "LEFT OUTER JOIN Data D ON D.wfInstanceID = VB.wfInstanceRef and D.dataReference = VB.value";
+
+		vbQueryConstraints.put("W.instanceID", wfInstance);
+		vbQueryConstraints.put("VB.PNameRef", proc);
+		vbQueryConstraints.put("VB.varNameRef", var);
+
+		if (path != null && path.length() > 0) {
+			vbQueryConstraints.put("VB.iteration", "["+ path + "]"); // PM 1/09 -- path
+		}
+		
+		// limit to inputs?
+		if (returnInput) vbQueryConstraints.put("V.inputOrOutput", "1");
+		else vbQueryConstraints.put("V.inputOrOutput", "0");
+
+		vbQuery = addWhereClauseToQuery(vbQuery, vbQueryConstraints, false);
+
+		List<String> orderAttr = new ArrayList<String>();
+		orderAttr.add("varNameRef");
+		orderAttr.add("iteration");
+
+		vbQuery = addOrderByToQuery(vbQuery, orderAttr, true);
+
+		// System.out.println("generated query: \n"+q1);
+
+		lq.setVbQuery(vbQuery);
+
+		return lq;
 	}
 
 	/**
@@ -1195,7 +1305,7 @@ public abstract class ProvenanceQuery {
 		}
 
 		// limit to inputs?
-		if (!returnOutputs) collQueryConstraints.put("V.inputOrOutput", "1");
+		if (returnOutputs) collQueryConstraints.put("V.inputOrOutput", "1");
 
 		collQuery = addWhereClauseToQuery(collQuery, collQueryConstraints, false);
 
@@ -1218,6 +1328,10 @@ public abstract class ProvenanceQuery {
 		if (effectivePath != null && effectivePath.length() > 0) {
 			vbQueryConstraints.put("VB.iteration", "["+ effectivePath.toString() + "]"); // PM 1/09 -- path
 		}
+		
+		// limit to inputs?
+		if (!returnOutputs) vbQueryConstraints.put("V.inputOrOutput", "1");
+
 		vbQuery = addWhereClauseToQuery(vbQuery, vbQueryConstraints, false);
 
 		List<String> orderAttr = new ArrayList<String>();

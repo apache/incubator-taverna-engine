@@ -171,7 +171,7 @@ public class Provenance {
 		if (eventType.equals(SharedVocabulary.WORKFLOW_EVENT_TYPE)) {
 			// process the workflow structure
 
-			logger.info("processing event of type "
+			logger.debug("processing event of type "
 					+ SharedVocabulary.WORKFLOW_EVENT_TYPE);
 			String workflowID = getEp()
 			.processWorkflowStructure(provenanceItem);
