@@ -44,7 +44,7 @@ public class LineageQueryResultRecord {
 			" iteration: "+getIteration()+
 			" value: "+getValue()+
 			" collection id: "+getCollIdRef()+
-			" parent collection: "+getParentCollIDRef());
+			" parent collection: "+getParentCollIDRef();
 		} else {
 
 			if (printResolvedValue)
@@ -53,13 +53,13 @@ public class LineageQueryResultRecord {
 				" iteration: "+getIteration()+
 				" value: "+getValue()+
 				" collection id: "+getCollIdRef()+
-				" resolvedValue: "+getResolvedValue());
+				" resolvedValue: "+getResolvedValue();
 			else  
 				return "proc "+getPname()+
 				" var "+getVname()+" " +
 				" iteration: "+getIteration()+
 				" collection id: "+getCollIdRef()+
-				" value: "+getValue());
+				" value: "+getValue();
 		}
 	}
 
