@@ -53,6 +53,8 @@ public class Provenance {
 
 	protected String location;
 
+	private boolean isfirstWorkflowStructure = true;
+
 	public Provenance() {
 
 	}
@@ -150,14 +152,14 @@ public class Provenance {
 
 		// only attempt to save the data events, since the workflow itself may not be XMLEncode-able
 		if (!eventType.equals(SharedVocabulary.WORKFLOW_EVENT_TYPE)) {
-			
+
 			// saveEvent for debugging / testing
 			if (saveEvents != null && saveEvents.equals("all")) {
 
 //				System.out.println("processEvent: calling saveEvent");
-				
+
 				getEp().saveEvent(provenanceItem, eventType);
-//				 System.out.println("event saved");
+//				System.out.println("event saved");
 
 			} else if (saveEvents != null && saveEvents.equals("iteration")) {
 				if (eventType.equals("iteration"))
@@ -171,14 +173,20 @@ public class Provenance {
 		if (eventType.equals(SharedVocabulary.WORKFLOW_EVENT_TYPE)) {
 			// process the workflow structure
 
-			logger.debug("processing event of type "
-					+ SharedVocabulary.WORKFLOW_EVENT_TYPE);
-			String workflowID = getEp()
-			.processWorkflowStructure(provenanceItem);
 
-			// add propagation of anl code here
-			if (workflowID != null)
-				getEp().propagateANL(workflowID); // operates on the DB
+			if (isfirstWorkflowStructure) {
+
+				isfirstWorkflowStructure = false;
+
+				logger.debug("processing event of type "
+						+ SharedVocabulary.WORKFLOW_EVENT_TYPE);
+				String workflowID = getEp()
+				.processWorkflowStructure(provenanceItem);
+
+				// add propagation of anl code here
+				if (workflowID != null)
+					getEp().propagateANL(workflowID); // operates on the DB
+			}
 
 		} else {
 

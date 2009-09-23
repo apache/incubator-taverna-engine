@@ -141,7 +141,7 @@ public class EventProcessor {
 	 */
 	public String processWorkflowStructure(ProvenanceItem provenanceItem) {
 
-		// this flag is set to prevent processing of separate workflowProvenanceItems that describe nestd workflows.
+		// this flag is set to prevent processing of separate workflowProvenanceItems that describe nested workflows.
 		// the processing of all nested workflows is done as part of the very first workflowProvenanceItem that we receive,
 		// which is self-consistent. so we ignore all others
 		if (workflowStructureDone)  {
@@ -250,12 +250,12 @@ public class EventProcessor {
 			} else {
 
 				// we are processing a nested workflow structure
-//				logger.info("this dataflow is nested within "+parentDataflow);
+				logger.debug("this dataflow is nested within "+parentDataflow);
 
 				pw.addWFId(dataflowID, parentDataflow); // set its dataflowID along with its parent
 
-				// override wfInstanceID to point to top level
-				//	wfInstanceID = pq.getWFInstanceID(parentDataflow);
+				// override wfInstanceID to point to top level -- UNCOMMENTED PM 9/09  CHECK
+					wfInstanceID = pq.getWFInstanceID(parentDataflow).get(0);
 
 			}
 
