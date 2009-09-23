@@ -27,7 +27,7 @@
 			</snapshots>
 			<id>opm</id>
 			<name>opm</name>
-			<url>http://openprovenance.org/java/maven-snapshots</url>
+			<url>http://openprovenance.org/java/maven-releases</url>
 		</repository>
 	</repositories>
 	<dependencies>
@@ -160,35 +160,20 @@
 		<dependency>
 			<groupId>org.tupeloproject</groupId>
 			<artifactId>tupelo-cet</artifactId>
-			<version>2.5-20090416.190129-3</version>
+			<version>2.4.3</version>
 		</dependency>
 
-		<dependency>
-			<groupId>org.openprovenance</groupId>
-			<artifactId>tupelo</artifactId>
-			<version>1.0-20090428.084527-2</version>
-		</dependency>
-
-	</dependencies>
-  <dependencyManagement>
-	<dependencies>
 		<dependency>
 			<groupId>org.openprovenance</groupId>
 			<artifactId>opm</artifactId>
-			<version>1.0-20090428.084527-6</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.tupeloproject</groupId>
-			<artifactId>tupelo-cet</artifactId>
-			<version>2.5-20090416.190129-3</version>
+			<version>1.0.3</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.openprovenance</groupId>
-			<artifactId>tupelo</artifactId>
-			<version>1.0-20090428.084527-2</version>
+			<artifactId>toolbox</artifactId>
+			<version>1.0.3</version>
 		</dependency>
+
 	</dependencies>
-  </dependencyManagement>
 </project>
