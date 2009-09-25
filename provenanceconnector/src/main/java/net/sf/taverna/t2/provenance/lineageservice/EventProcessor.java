@@ -31,8 +31,10 @@ import java.io.StringReader;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.sf.taverna.t2.provenance.item.InputDataProvenanceItem;
 import net.sf.taverna.t2.provenance.item.IterationProvenanceItem;
@@ -42,6 +44,7 @@ import net.sf.taverna.t2.provenance.item.WorkflowProvenanceItem;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Arc;
 import net.sf.taverna.t2.provenance.lineageservice.utils.NestedListNode;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProcBinding;
+import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceUtils;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Var;
 import net.sf.taverna.t2.provenance.lineageservice.utils.VarBinding;
@@ -144,10 +147,7 @@ public class EventProcessor {
 		// this flag is set to prevent processing of separate workflowProvenanceItems that describe nested workflows.
 		// the processing of all nested workflows is done as part of the very first workflowProvenanceItem that we receive,
 		// which is self-consistent. so we ignore all others
-		if (workflowStructureDone)  {
-//			logger.info("Some nested workflow structure -- moving on");
-			return null;
-		}
+		if (workflowStructureDone)  { return null; }
 
 		setWfInstanceID(((WorkflowProvenanceItem)provenanceItem).getIdentifier());
 		logger.debug("Workflow instance is: " + getWfInstanceID());
@@ -162,12 +162,8 @@ public class EventProcessor {
 
 		// check whether we already have this WF in the DB
 		List<String> wfNames = null;
-		try {
-			wfNames = pq.getAllWFnames();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		try { wfNames = pq.getAllWFnames(); } 
+		catch (SQLException e) { e.printStackTrace(); }
 
 		if (wfNames != null && wfNames.contains(topLevelDataflowID)) {  // already in the DB
 //			logger.info("workflow structure with ID "+topLevelDataflowID+" is in the DB -- clearing static portion");
@@ -187,14 +183,12 @@ public class EventProcessor {
 
 		// record the top level dataflow as a processor in the DB
 		try {
-			pw.addProcessor(topLevelDataflowName, DATAFLOW_PROCESSOR_TYPE, topLevelDataflowID);
+			pw.addProcessor(topLevelDataflowName, DATAFLOW_PROCESSOR_TYPE, topLevelDataflowID, true);  // true -> is top level
 		} catch (SQLException e) {
 			logger.warn(e);
 		}
 
 //		logger.info("top level wf name: "+topLevelDataflowName);
-
-
 		return processDataflowStructure(df, topLevelDataflowID, df.getLocalName());  // null: no external name given to top level dataflow
 	}		
 
@@ -245,22 +239,20 @@ public class EventProcessor {
 			if ((parentDataflow = wfNestingMap.get(dataflowID)) == null) {
 
 				// this is a top level dataflow description
-				pw.addWFId(dataflowID); // set its dataflowID with no parent
+				pw.addWFId(dataflowID, null, externalName); // set its dataflowID with no parent
 
 			} else {
 
 				// we are processing a nested workflow structure
-				logger.debug("this dataflow is nested within "+parentDataflow);
+				logger.debug("dataflow "+dataflowID+" with external name "+externalName+" is nested within "+parentDataflow);
 
-				pw.addWFId(dataflowID, parentDataflow); // set its dataflowID along with its parent
+				pw.addWFId(dataflowID, parentDataflow, externalName); // set its dataflowID along with its parent
 
 				// override wfInstanceID to point to top level -- UNCOMMENTED PM 9/09  CHECK
-					wfInstanceID = pq.getWFInstanceID(parentDataflow).get(0);
+				wfInstanceID = pq.getWFInstanceID(parentDataflow).get(0);
 
 			}
-
 			pw.addWFInstanceId(dataflowID, wfInstanceID);  // wfInstanceID stripped by stripWfInstanceHeader() above
-
 
 			// //////
 			// add processors along with their variables
@@ -280,7 +272,7 @@ public class EventProcessor {
 				if (activities != null && !activities.isEmpty()) {
 					pType = activities.get(0).getClass().getCanonicalName();
 				}
-				pw.addProcessor(pName, pType, dataflowID);
+				pw.addProcessor(pName, pType, dataflowID, false);  // false: not a top level processor
 
 				// ///
 				// add all input ports for this processor as input variables
@@ -725,7 +717,7 @@ public class EventProcessor {
 		List<Var> outputs=null;
 		try {
 
-			outputs = pq.getOutputVars(topLevelDataflowName, topLevelDataflowID);
+			outputs = pq.getOutputVars(topLevelDataflowName, topLevelDataflowID, null);  // null InstanceID 
 
 			// for each output O
 			for (Var output:outputs)  {
@@ -843,64 +835,6 @@ public class EventProcessor {
 
 	}
 
-	/**
-	 * OBSOLETE
-	 * 	@deprecated
-	 */
-	public void patchTopLevelOutputs() {
-
-		// for each output O to topLevelDataflow:
-		// pick the only incoming arc with source P:Y
-		// copy value Y to O -- if this is a collection, do a deep copy
-
-		// get all global input vars
-
-		List<Var> outputs=null;
-		try {
-			outputs = getPq().getOutputVars(topLevelDataflowName, topLevelDataflowID);
-
-			for (Var output:outputs)  {
-
-				Map<String,String> queryConstraints = new HashMap<String,String>();
-
-				queryConstraints.put("sinkVarNameRef", output.getVName());
-				queryConstraints.put("sinkPNameRef", output.getPName());
-
-				List<Arc> incomingArcs = pq.getArcs(queryConstraints);
-
-				// there can be only one -- but check that there is one!
-				if (incomingArcs.size()==0)  continue;
-
-				String sourcePname = incomingArcs.get(0).getSourcePnameRef();
-				String sourceVname = incomingArcs.get(0).getSourceVarNameRef();
-
-				queryConstraints.clear();
-				queryConstraints.put("varNameRef", sourceVname);
-				queryConstraints.put("V.pNameRef", sourcePname);
-				queryConstraints.put("VB.wfInstanceRef", wfInstanceID);
-				queryConstraints.put("V.wfInstanceRef", topLevelDataflowID);
-
-				List<VarBinding> VBs = pq.getVarBindings(queryConstraints);
-
-//				logger.info("found the following VBs:");
-				for (VarBinding vb:VBs) {
-//					logger.info(vb.getValue());
-
-					// insert VarBinding back into VB with the global output varname
-					vb.setPNameRef(output.getPName());
-					vb.setVarNameRef(output.getVName());
-					getPw().addVarBinding(vb);
-
-//					logger.info("added");
-
-				}
-
-			}
-		} catch (SQLException e) {
-			logger.warn("Patch top level output problem for provenance: " + e);
-		}
-
-	}
 
 
 
@@ -956,7 +890,7 @@ public class EventProcessor {
 
 			queryConstraints.put("sinkVarNameRef", vb.getVarNameRef());
 			queryConstraints.put("sinkPNameRef", vb.getPNameRef());				
-			queryConstraints.put("wfInstanceRef", pq.getWFNameFromInstanceID(vb.getWfInstanceRef()));  // CHECK wfInstanceID
+			queryConstraints.put("wfInstanceRef", pq.getWfNameRef(vb.getWfInstanceRef()));  // CHECK wfInstanceID
 
 			List<Arc> incomingArcs = pq.getArcs(queryConstraints);
 
@@ -1018,24 +952,23 @@ public class EventProcessor {
 
 			try {
 				// add process order sequence to Var for this portName
-				
+
 				Map<String, String> queryConstraints = new HashMap<String, String>();
-				queryConstraints.put("wfInstanceRef", getPq().getWFNameFromInstanceID(wfInstanceID));
+				queryConstraints.put("wfInstanceRef", getPq().getWfNameRef(wfInstanceID));
 				queryConstraints.put("pnameRef", procBinding.getPNameRef());
 				queryConstraints.put("varName", portName);
 				queryConstraints.put("inputOrOutput", "1");
-				
+
 				List<Var> vars = getPq().getVars(queryConstraints);
 				try {
-				Var v = vars.get(0);
-				v.setPortNameOrder(order++);
-				
-				getPw().updateVar(v);
+					Var v = vars.get(0);
+					v.setPortNameOrder(order++);
+					getPw().updateVar(v);
 				}
 				catch (IndexOutOfBoundsException e) {
 					logger.error(e);
 				}
-				
+
 			} catch (SQLException e1) {
 				// TODO Auto-generated catch block
 				logger.error(e1);
@@ -1290,7 +1223,7 @@ public class EventProcessor {
 
 		logger.debug("saving to " + f); // save event for later inspection
 		logger.debug(provenanceItem);
-		
+
 		en.writeObject(provenanceItem);
 
 		logger.debug("writer ok");
@@ -1393,25 +1326,297 @@ public class EventProcessor {
 
 			for (VarBinding vb : vbList) {
 				// add a new VarBinding for the input
-
-				//		System.out.println("found binding to propagate:");
-//				System.out
-//				.println(vb.getPNameRef() + "/" + vb.getVarNameRef()
-//				+ "/" + vb.getWfInstanceRef() + "/"
-//				+ vb.getIteration());
-
-//				vb.setPNameRef(aArc.getSinkPnameRef());
-//				vb.setVarNameRef(aArc.getSinkVarNameRef());
-				// all other attributes are the same --> CHECK!!
-
-				//		System.out.println(vb.toString());
-
 				getPw().addVarBinding(vb); // DB UPDATE
 			}
 
 		}
 	}
 
+
+	/**
+	 * silly class to hold pairs of strings. any better way??
+	 * @author paolo
+	 *
+	 */
+	class Pair {
+		String v1, v2;
+
+		public Pair(String current, String wfNameRef) {
+			v1=current; v2=wfNameRef;
+		}
+
+		/**
+		 * @return the v1
+		 */
+		public String getV1() {
+			return v1;
+		}
+
+		/**
+		 * @param v1 the v1 to set
+		 */
+		public void setV1(String v1) {
+			this.v1 = v1;
+		}
+
+		/**
+		 * @return the v2
+		 */
+		public String getV2() {
+			return v2;
+		}
+
+		/**
+		 * @param v2 the v2 to set
+		 */
+		public void setV2(String v2) {
+			this.v2 = v2;
+		}
+
+	}
+
+	public List<Pair> toposort(String dataflowName, String wfInstanceId) throws SQLException  {
+
+		String wfNameRef = pq.getWfNameForDataflow(dataflowName, wfInstanceID);
+
+		// fetch processors along with the count of their predecessors
+		Map<String, Integer> predecessorsCount = getPq().getPredecessorsCount(wfInstanceId);
+		Map<String, List<String>> successorsOf = new HashMap<String, List<String>>();
+		List<String> procList = pq.getContainedProcessors(dataflowName, wfInstanceId);
+
+//		logger.debug("toposort on "+dataflowName);
+
+//		logger.debug("contained procs: ");
+		for (String s:procList) { 
+
+			List<String> successors = getPq().getSuccProcessors(s, wfNameRef, wfInstanceId);
+			successorsOf.put(s, successors);
+
+//			logger.debug(s+" with "+predecessorsCount.get(s)+" predecessors and successors:");
+
+//			for (String s1:successors) { logger.debug(s1); }
+		}
+
+		List<Pair>  sorted = tsort(procList, dataflowName, predecessorsCount, successorsOf, wfNameRef, wfInstanceId);
+
+//		logger.debug("tsort:");
+//		for (String p : sorted) { logger.debug(p); }
+
+		for (int i=0; i< sorted.size(); i++) {
+
+			String procName = sorted.get(i).getV1();
+
+			if (pq.isDataflow(procName) && !procName.equals(dataflowName)) {  // handle weirdness: a dataflow is contained within itself..
+				// recurse on procName
+
+//				logger.debug("recursion on "+procName);
+				List<Pair> sortedSublist = toposort(procName, wfInstanceId);
+
+				// replace procName with sortedSublist in sorted
+				sorted.remove(i);
+				sorted.addAll(i, sortedSublist);				
+			}
+		}
+		return sorted;
+	}
+
+
+
+	/**
+	 * STUB
+	 * @param procList
+	 * @param predecessorsCount 
+	 * @param successorsOf 
+	 * @param wfInstanceId 
+	 * @return
+	 * @throws SQLException 
+	 */
+	public List<Pair> tsort(List<String> procList, 
+			String dataflowName, 
+			Map<String, Integer> predecessorsCount, 
+			Map<String, List<String>> successorsOf, 
+			String wfNameRef, String wfInstanceId) throws SQLException {
+
+		List<Pair> L = new ArrayList<Pair>();		// holds sorted elements
+		List<String> Q = new ArrayList<String>(); 		// temp queue
+		Set<String> visited = new HashSet<String>();
+
+//		logger.debug("queue init with procList");
+		// init queue with procList processors that have no predecessors
+		for (String proc:procList) {			
+
+//			logger.debug("dataflowName: "+dataflowName+" proc: "+proc);
+
+			if (predecessorsCount.get(proc) == null || predecessorsCount.get(proc) == 0 &&
+					!proc.equals(dataflowName)) {
+
+				Q.add(proc);				
+			}
+//			logger.debug(proc + " added to queue");
+//			} else 
+//			logger.debug(proc+" not added to queue");
+		}
+
+//		logger.debug("queue has "+Q.size()+" elements");
+		while (!Q.isEmpty()) {
+
+			String current = Q.remove(0);
+//			logger.debug("extracted "+current+" and added to L");
+			L.add(new Pair(current,wfNameRef));
+
+//			for (String s:L) logger.debug(s);
+
+			List<String> successors = successorsOf.get(current);
+
+//			logger.debug("\n****successors of "+current);
+
+			if (successors == null) continue;
+
+			// reduce the number of predecessors to each of the successors by one
+			// NB we must traverse an additional arc through a nested workflow input if the successor is a dataflow!!
+			for (String succ : successors) {
+
+//				logger.debug(succ);
+
+				// decrease edge count for each successor processor
+				Integer cnt = predecessorsCount.get(succ);
+				predecessorsCount.put(succ, new Integer(cnt.intValue() - 1));
+
+//				logger.debug("now "+succ+" has "+predecessorsCount.get(succ)+" predecessors");
+
+				if (predecessorsCount.get(succ) == 0 && !succ.equals(dataflowName)) {
+					Q.add(succ);
+//					logger.debug("adding "+succ+" to queue");
+				}
+			}
+		} // end loop on Q
+		return L;
+	}
+
+
+	public void propagateANL2(String wfInstanceId) throws SQLException {
+
+		String top = pq.getTopLevelDataflowName(wfInstanceId);
+
+		// //////////////////////
+		// PHASE I: toposort the processors in the whole graph
+		// //////////////////////
+		List<Pair> sorted = toposort(top, wfInstanceId);
+
+		logger.debug("final sorted list of processors");
+		for (Pair p:sorted) {  logger.debug(p.getV1()+"  in wfnameRef "+p.getV2()); }
+
+		// //////////////////////
+		// PHASE II: traverse and set anl on each port
+		// //////////////////////
+
+//		logger.debug("***** STARTING ANL *****");
+
+//		// sorted processor names in L at this point
+//		// process them in order
+		for (Pair pnameInContext : sorted) {
+
+//			logger.debug("setting ANL for "+pnameInContext.getV1()+" input vars");
+
+//			// process pname's inputs -- set ANL to be the DNL if not set in prior steps
+			String pname     = pnameInContext.getV1();
+			String wfNameRef = pnameInContext.getV2();
+
+//			logger.debug("processor "+pname);
+
+			List<Var> inputs = getPq().getInputVars(pname, wfNameRef, wfInstanceId); // null -> do not use instance (??) CHECK
+
+//			logger.debug(inputs.size()+" inputs for "+pnameInContext.getV1());
+
+			int totalANL = 0;
+			for (Var iv : inputs) {
+
+				if (iv.isANLset() == false) {
+					iv.setActualNestingLevel(iv.getTypeNestingLevel());
+					iv.setANLset(true);
+					getPw().updateVar(iv);
+
+//					logger.debug("var: "+iv.getVName()+" set at nominal level "+iv.getActualNestingLevel());					
+				}
+
+				int delta_nl = iv.getActualNestingLevel() - iv.getTypeNestingLevel();
+
+				// if delta_nl < 0 then Taverna wraps the value into a list --> use dnl(X) in this case
+				if (delta_nl < 0 ) delta_nl = 0;// CHECK iv.getTypeNestingLevel();
+//				logger.debug("delta for "+iv.getVName()+" "+delta_nl);
+
+				totalANL += delta_nl;
+
+				// this should take care of the special case of the top level dataflow with inputs that have successors in the graph
+				// propagate this through all the links from this var
+//				List<Var> successors = getPq().getSuccVars(pname, iv.getVName(), wfInstanceId);
+
+//				logger.debug(successors.size()+ " successors for var "+iv.getVName());
+
+//				for (Var v : successors) {
+//				v.setActualNestingLevel(iv.getActualNestingLevel());
+//				v.setANLset(true);
+//				getPw().updateVar(v);
+//				}
+			}
+//			logger.debug("total anl: "+totalANL);
+
+//			logger.debug("now setting ANL for "+pname+" output vars");
+
+			// process pname's outputs -- set ANL based on the sum formula (see
+			// paper)
+			List<Var> outputs = getPq().getOutputVars(pname, wfNameRef, wfInstanceId);
+			for (Var ov : outputs) {
+
+				ov.setActualNestingLevel(ov.getTypeNestingLevel() + totalANL);
+
+				logger.debug("anl for "+pname+":"+ov.getVName()+" = "+(ov.getTypeNestingLevel() + totalANL));
+				ov.setANLset(true);
+				getPw().updateVar(ov);
+
+				// propagate this through all the links from this var
+				List<Var> successors = getPq().getSuccVars(pname, ov.getVName(), wfNameRef);
+
+//				logger.debug(successors.size()+ " successors for var "+ov.getVName());
+
+				for (Var v : successors) {
+
+					List<Var> toBeProcessed = new ArrayList<Var>();
+					toBeProcessed.add(v);
+
+					if (pq.isDataflow(v.getPName()) && v.isInput()) {  // this is the input to a nested workflow
+						
+						String tempWfNameRef = pq.getWfNameForDataflow(v.getPName(), wfInstanceId);
+						List<Var> realSuccessors = getPq().getSuccVars(v.getPName(), v.getVName(), tempWfNameRef);	
+						
+//						logger.debug("realSuccessors size = "+realSuccessors.size());
+						
+						toBeProcessed.remove(0);
+						toBeProcessed.addAll(realSuccessors);
+						
+					}  else if (pq.isDataflow(v.getPName()) && !v.isInput()) {  // this is the output to a nested workflow
+
+						String tempWfNameRef = pq.getWfNameForDataflow(v.getPName(), wfInstanceId);
+						List<Var> realSuccessors = getPq().getSuccVars(v.getPName(), v.getVName(), null);	
+						
+//						logger.debug("realSuccessors size = "+realSuccessors.size());
+						
+						toBeProcessed.remove(0);
+						toBeProcessed.addAll(realSuccessors);
+
+					}
+					
+					for (Var v1:toBeProcessed) {
+						v1.setActualNestingLevel(ov.getActualNestingLevel());
+						logger.debug("anl for "+v1.getPName()+":"+v1.getVName()+" = "+ov.getActualNestingLevel());
+
+						v1.setANLset(true);
+						getPw().updateVar(v1);
+					}
+				}
+			}
+		}
+	}
 
 
 	/**
@@ -1421,33 +1626,83 @@ public class EventProcessor {
 	 * 
 	 * @throws SQLException
 	 */
-	public void propagateANL(String wfInstanceRef) throws SQLException {
+//	public void propagateANL(String wfInstanceRef) throws SQLException {
 
-		// propagate through 1 level of processors, ignore nesting. A subworkflow here is
-		// simply a processor
-		logger.info("calling propagateANL with "+wfInstanceRef);
-		propagateANLWithinSubflow(wfInstanceRef);
+////	propagate through 1 level of processors, ignore nesting. A subworkflow here is
+////	simply a processor
+//	logger.info("calling propagateANL with "+wfInstanceRef);
+//	propagateANLWithinSubflow(wfInstanceRef);
 
-		// now fetch all children workflows and recurse
-		List<String> children = getPq().getChildrenOfWorkflow(wfInstanceRef);
+////	now fetch all children workflows and recurse
+//	List<String> children = getPq().getChildrenOfWorkflow(wfInstanceRef);
 
-		for (String childWFName: children) {			
-			propagateANL(childWFName); // CHECK recursion is correct?		
-		}
+//	for (String childWFName: children) {			
+//	propagateANL(childWFName); // CHECK recursion is correct?		
+//	}
+//	}
 
-//		// is any of the processors at this level a dataflow itself?
-//		// if so, propagateANL on this as well -- note how this is recursive
-//		for (String pname: processors.keySet()) {
 
-//		List<ProvenanceProcessor> procList = pq.getProcessors(DATAFLOW_PROCESSOR_TYPE, wfInstanceRef);
 
-//		for (ProvenanceProcessor dataflowProcessor: procList) { 
+//	public Map<String, Integer> propagateANL2WithinSubflow(String wfInstanceId) throws SQLException {
 
-//		// because this processor is a workflow itself, it is in the Workflow table as well
-//		// so we 
-//		}
-//		}
-	}
+
+
+////	sorted processor names in L at this point
+////	process them in order
+//	for (String pname : L) {
+
+
+//	int totalANL = 0;
+//	for (Var iv : inputs) {
+
+
+
+//	int delta_nl = iv.getActualNestingLevel() - iv.getTypeNestingLevel();
+
+////	if delta_nl < 0 then Taverna wraps the value into a list --> use dnl(X) in this case
+//	if (delta_nl < 0 ) delta_nl = iv.getTypeNestingLevel();
+
+//	totalANL += delta_nl;
+
+////	this should take care of the special case of the top level dataflow with inputs that have successors in the graph
+////	propagate this through all the links from this var
+//	List<Var> successors = getPq().getSuccVars(pname, iv.getVName(),
+//	wfInstanceId);
+
+//	logger.debug(successors.size()+ " successors for var "+iv.getVName());
+
+//	for (Var v : successors) {
+//	v.setActualNestingLevel(iv.getActualNestingLevel());
+//	v.setANLset(true);
+//	getPw().updateVar(v);
+//	}
+//	}
+
+//	logger.debug("setting ANL for "+pname+" output vars");
+
+////	process pname's outputs -- set ANL based on the sum formula (see
+////	paper)
+//	List<Var> outputs = getPq().getOutputVars(pname, wfInstanceId);
+//	for (Var ov : outputs) {
+
+//	ov.setActualNestingLevel(ov.getTypeNestingLevel() + totalANL);
+//	ov.setANLset(true);
+//	getPw().updateVar(ov);
+
+////	propagate this through all the links from this var
+//	List<Var> successors = getPq().getSuccVars(pname, ov.getVName(),
+//	wfInstanceId);
+
+//	for (Var v : successors) {
+//	v.setActualNestingLevel(ov.getActualNestingLevel());
+//	v.setANLset(true);
+//	getPw().updateVar(v);
+//	}
+//	}
+//	}
+//	return processorsLinks;
+//	}
+
 
 
 	/**
@@ -1458,125 +1713,125 @@ public class EventProcessor {
 	 * @return a list of processors that are immediately contained within wfInstanceRef. This is used by caller to recurse on 
 	 * sub-workflows
 	 */
-	public Map<String, Integer> propagateANLWithinSubflow(String wfInstanceRef) throws SQLException {
+//	public Map<String, Integer> propagateANLWithinSubflow(String wfInstanceRef) throws SQLException {
 
-		// //////////////////////
-		// PHASE I: toposort the processors in the whole graph
-		// //////////////////////
 
-		// fetch processors along with the count of their predecessors
-		Map<String, Integer> processorsLinks = getPq().getProcessorsIncomingLinks(wfInstanceRef);
+////	PHASE I: toposort the processors in the whole graph
 
-		// holds sorted elements
-		List<String> L = new ArrayList<String>();
 
-		// temp queue
-		List<String> Q = new ArrayList<String>();
+////	fetch processors along with the count of their predecessors
+//	Map<String, Integer> processorsLinks = getPq().getProcessorsIncomingLinks(wfInstanceRef);
 
-		logger.debug("propagateANL: processors in the graph");
+////	holds sorted elements
+//	List<String> L = new ArrayList<String>();
 
-		// init Q with root nodes
-		for (Map.Entry<String, Integer> entry : processorsLinks.entrySet()) {
+////	temp queue
+//	List<String> Q = new ArrayList<String>();
 
-			logger.debug(entry.getKey()+" has "+entry.getValue().intValue()+" predecessors");
+//	logger.debug("propagateANL: processors in the graph");
 
-			if (entry.getValue().intValue() == 0) {
-				Q.add(entry.getKey());
-			}
-		}
+////	init Q with root nodes
+//	for (Map.Entry<String, Integer> entry : processorsLinks.entrySet()) {
 
-		while (!Q.isEmpty()) {
+//	logger.debug(entry.getKey()+" has "+entry.getValue().intValue()+" predecessors");
 
-			String current = Q.remove(0);
-			L.add(current);
+//	if (entry.getValue().intValue() == 0) {
+//	Q.add(entry.getKey());
+//	}
+//	}
 
-			List<String> successors = getPq().getSuccProcessors(current,
-					wfInstanceRef);
+//	while (!Q.isEmpty()) {
 
-			for (String succ : successors) {
-				// decrease edge count for each successor processor
+//	String current = Q.remove(0);
+//	L.add(current);
 
-				Integer cnt = processorsLinks.get(succ);
+//	List<String> successors = getPq().getSuccProcessors(current,
+//	wfInstanceRef);
 
-				processorsLinks.put(succ, new Integer(cnt.intValue() - 1));
+//	for (String succ : successors) {
+////	decrease edge count for each successor processor
 
-				if (cnt.intValue() == 1) {
-					Q.add(succ);
-				}
-			}
-		} // end loop on Q
+//	Integer cnt = processorsLinks.get(succ);
 
-		logger.debug("toposort:");
-		for (String p : L) {
-			logger.debug(p);
-		}
+//	processorsLinks.put(succ, new Integer(cnt.intValue() - 1));
 
-		// sorted processor names in L at this point
-		// process them in order
-		for (String pname : L) {
+//	if (cnt.intValue() == 1) {
+//	Q.add(succ);
+//	}
+//	}
+//	} // end loop on Q
 
-			logger.debug("setting ANL for "+pname+" input vars");
+//	logger.debug("toposort:");
+//	for (String p : L) {
+//	logger.debug(p);
+//	}
 
-			// process pname's inputs -- set ANL to be the DNL if not set in
-			// prior steps
-			List<Var> inputs = getPq().getInputVars(pname, wfInstanceRef, null); // null -> do not use instance
+////	sorted processor names in L at this point
+////	process them in order
+//	for (String pname : L) {
 
-			int totalANL = 0;
-			for (Var iv : inputs) {
+//	logger.debug("setting ANL for "+pname+" input vars");
 
-				if (iv.isANLset() == false) {
-					iv.setActualNestingLevel(iv.getTypeNestingLevel());
-					iv.setANLset(true);
-					getPw().updateVar(iv);
+////	process pname's inputs -- set ANL to be the DNL if not set in
+////	prior steps
+//	List<Var> inputs = getPq().getInputVars(pname, wfInstanceRef, null); // null -> do not use instance
 
-					logger.debug("var: "+iv.getVName()+" set at nominal level "+iv.getActualNestingLevel());					
-				}
+//	int totalANL = 0;
+//	for (Var iv : inputs) {
 
-				int delta_nl = iv.getActualNestingLevel() - iv.getTypeNestingLevel();
+//	if (iv.isANLset() == false) {
+//	iv.setActualNestingLevel(iv.getTypeNestingLevel());
+//	iv.setANLset(true);
+//	getPw().updateVar(iv);
 
-				// if delta_nl < 0 then Taverna wraps the value into a list --> use dnl(X) in this case
-				if (delta_nl < 0 ) delta_nl = iv.getTypeNestingLevel();
+//	logger.debug("var: "+iv.getVName()+" set at nominal level "+iv.getActualNestingLevel());					
+//	}
 
-				totalANL += delta_nl;
+//	int delta_nl = iv.getActualNestingLevel() - iv.getTypeNestingLevel();
 
-				// this should take care of the special case of the top level dataflow with inputs that have successors in the graph
-				// propagate this through all the links from this var
-				List<Var> successors = getPq().getSuccVars(pname, iv.getVName(),
-						wfInstanceRef);
+////	if delta_nl < 0 then Taverna wraps the value into a list --> use dnl(X) in this case
+//	if (delta_nl < 0 ) delta_nl = iv.getTypeNestingLevel();
 
-				logger.debug(successors.size()+ " successors for var "+iv.getVName());
+//	totalANL += delta_nl;
 
-				for (Var v : successors) {
-					v.setActualNestingLevel(iv.getActualNestingLevel());
-					v.setANLset(true);
-					getPw().updateVar(v);
-				}
-			}
+////	this should take care of the special case of the top level dataflow with inputs that have successors in the graph
+////	propagate this through all the links from this var
+//	List<Var> successors = getPq().getSuccVars(pname, iv.getVName(),
+//	wfInstanceRef);
 
-			logger.debug("setting ANL for "+pname+" output vars");
+//	logger.debug(successors.size()+ " successors for var "+iv.getVName());
 
-			// process pname's outputs -- set ANL based on the sum formula (see
-			// paper)
-			List<Var> outputs = getPq().getOutputVars(pname, wfInstanceRef);
-			for (Var ov : outputs) {
+//	for (Var v : successors) {
+//	v.setActualNestingLevel(iv.getActualNestingLevel());
+//	v.setANLset(true);
+//	getPw().updateVar(v);
+//	}
+//	}
 
-				ov.setActualNestingLevel(ov.getTypeNestingLevel() + totalANL);
-				ov.setANLset(true);
-				getPw().updateVar(ov);
+//	logger.debug("setting ANL for "+pname+" output vars");
 
-				// propagate this through all the links from this var
-				List<Var> successors = getPq().getSuccVars(pname, ov.getVName(),
-						wfInstanceRef);
+////	process pname's outputs -- set ANL based on the sum formula (see
+////	paper)
+//	List<Var> outputs = getPq().getOutputVars(pname, wfInstanceRef);
+//	for (Var ov : outputs) {
 
-				for (Var v : successors) {
-					v.setActualNestingLevel(ov.getActualNestingLevel());
-					v.setANLset(true);
-					getPw().updateVar(v);
-				}
-			}
-		}
-		return processorsLinks;
-	}
+//	ov.setActualNestingLevel(ov.getTypeNestingLevel() + totalANL);
+//	ov.setANLset(true);
+//	getPw().updateVar(ov);
+
+////	propagate this through all the links from this var
+//	List<Var> successors = getPq().getSuccVars(pname, ov.getVName(),
+//	wfInstanceRef);
+
+//	for (Var v : successors) {
+//	v.setActualNestingLevel(ov.getActualNestingLevel());
+//	v.setANLset(true);
+//	getPw().updateVar(v);
+//	}
+//	}
+//	}
+//	return processorsLinks;
+//	}
 
 
 	public void setPw(ProvenanceWriter pw) {

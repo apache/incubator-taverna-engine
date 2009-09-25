@@ -256,7 +256,7 @@ public class OPMImporter {
 
 		// generate Process
 		try {
-			pw.addProcessor(procName, wfName);
+			pw.addProcessor(procName, wfName, false);
 			logger.debug("added processor "+procName+" to workflow "+wfName);
 		} catch (SQLException e) {  // no panic -- just catch duplicates
 			logger.warn(e.getMessage());
@@ -523,7 +523,7 @@ public class OPMImporter {
 			String procName = PROC_NAME+"_"+procNameCounter++;
 
 			try {
-				pw.addProcessor(procName, wfName);
+				pw.addProcessor(procName, wfName, false);
 				logger.info("created non-native added processor "+procName+" to workflow "+wfName);
 			} catch (SQLException e) {  // no panic -- just catch duplicates
 				logger.warn(e.getMessage());

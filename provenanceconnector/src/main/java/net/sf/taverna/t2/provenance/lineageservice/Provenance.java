@@ -184,8 +184,10 @@ public class Provenance {
 				.processWorkflowStructure(provenanceItem);
 
 				// add propagation of anl code here
-				if (workflowID != null)
-					getEp().propagateANL(workflowID); // operates on the DB
+				getEp().propagateANL2(provenanceItem.getIdentifier());
+				
+//				if (workflowID != null)
+//					getEp().propagateANL(workflowID); // operates on the DB
 			}
 
 		} else {

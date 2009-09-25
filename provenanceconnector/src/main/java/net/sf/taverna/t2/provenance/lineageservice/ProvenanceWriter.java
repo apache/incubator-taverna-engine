@@ -246,19 +246,15 @@ public abstract class ProvenanceWriter {
 		}
 
 		ps.setString(1, wfId);
-		// String q = "INSERT INTO Workflow (wfName) VALUES (\'" + wfId + "\')";
-
-		// System.out.println("executing: "+q);
 		int result = ps.executeUpdate();
-		// System.out.println("workflow id: "+result+" rows added to DB");
 	}
 
-	public void addWFId(String wfId, String parentWFname) throws SQLException {
+	public void addWFId(String wfId, String parentWFname,String externalName) throws SQLException {
 		Statement stmt = null;
 		PreparedStatement ps = null;
 		try {
 			ps = getConnection().prepareStatement(
-			"INSERT INTO Workflow (wfname, parentWFname) VALUES (?,?)");
+			"INSERT INTO Workflow (wfname, parentWFname, externalName) VALUES (?,?,?)");
 			stmt = getConnection().createStatement();
 		} catch (InstantiationException e1) {
 			logger.warn(e1);
@@ -270,6 +266,7 @@ public abstract class ProvenanceWriter {
 
 		ps.setString(1, wfId);
 		ps.setString(2, parentWFname);
+		ps.setString(3, externalName);
 		// String q = "INSERT INTO Workflow (wfname, parentWFname) VALUES (\'"
 		// + wfId + "\'," + "\'" + parentWFname + "\')";
 
@@ -312,8 +309,8 @@ public abstract class ProvenanceWriter {
 	 * @param name
 	 * @throws SQLException
 	 */
-	public void addProcessor(String name, String wfID) throws SQLException {
-		addProcessor(name, null, wfID);
+	public void addProcessor(String name, String wfID, boolean isTopLevel) throws SQLException {
+		addProcessor(name, null, wfID, isTopLevel);  
 	}
 
 	/**
@@ -325,39 +322,34 @@ public abstract class ProvenanceWriter {
 	 * @param wfNameRef
 	 * @throws SQLException
 	 */
-	public void addProcessor(String name, String type, String wfNameRef)
+	public void addProcessor(String name, String type, String wfNameRef, boolean isTopLevel)
 	throws SQLException {
-		// Statement stmt = null;
+
+//		logger.debug("addProcessor: adding proc "+name+" to "+wfNameRef);
+		
 		PreparedStatement ps = null;
 		try {
 			ps = getConnection()
 			.prepareStatement(
-			"INSERT INTO Processor (pname, type, wfInstanceRef) VALUES (?,?,?)");
+			"INSERT INTO Processor (pname, type, wfInstanceRef, isTopLevel) VALUES (?,?,?,?)");
 			// stmt = getConnection().createStatement();
 		} catch (InstantiationException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		} catch (IllegalAccessException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		} catch (ClassNotFoundException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 
 		ps.setString(1, name);
 		ps.setString(2, type);
 		ps.setString(3, wfNameRef);
-		// String q =
-		// "INSERT INTO Processor (pname, type, wfInstanceRef) VALUES (\'"
-		// + name + "\'," + "\'" + type + "\'," + "\'" + wfNameRef + "\')";
-
-		// System.out.println("executing: "+q);
+		ps.setBoolean(4, isTopLevel);
 
 		int result = ps.executeUpdate();
-
-		// System.out.println("*** addProcessor: "+result+ " rows added to DB");
 	}
+	
+	
 
 	public void addProcessorBinding(ProcBinding pb) throws SQLException {
 		Statement stmt = null;
@@ -555,13 +547,13 @@ public abstract class ProvenanceWriter {
 			// + vb.getPositionInColl() + ")";
 
 			// if (cnt % 100 == 0) {
-			logger.debug("Var binding: instance ["
-					+ vb.getWfInstanceRef() + "] processor ["
-					+ vb.getPNameRef() + "] varName [" + vb.getVarNameRef()
-					+ "] collIdRef [" + vb.getCollIDRef() + "] iteration ["
-					+ vb.getIteration() + "] positionInCollection ["
-					+ vb.getPositionInColl() + "] value [" + vb.getValue()
-					+ "]");
+//			logger.debug("Var binding: instance ["
+//					+ vb.getWfInstanceRef() + "] processor ["
+//					+ vb.getPNameRef() + "] varName [" + vb.getVarNameRef()
+//					+ "] collIdRef [" + vb.getCollIDRef() + "] iteration ["
+//					+ vb.getIteration() + "] positionInCollection ["
+//					+ vb.getPositionInColl() + "] value [" + vb.getValue()
+//					+ "]");
 			// }
 
 			int result = ps.executeUpdate();
