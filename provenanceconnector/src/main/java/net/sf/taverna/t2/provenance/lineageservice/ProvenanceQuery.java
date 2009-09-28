@@ -144,7 +144,7 @@ public abstract class ProvenanceQuery {
 
 		String q1 = addOrderByToQuery(q, orderAttr, true);
 
-//		logger.info("q1 = "+q1);
+//		logger.debug("getVars query = "+q1);
 
 		Statement stmt;
 		try {
@@ -383,6 +383,7 @@ public abstract class ProvenanceQuery {
 	 * @throws SQLException
 	 */
 	public String getWfNameRef(String wfInstanceID) throws SQLException {
+		
 		String q = "SELECT wfnameRef FROM WfInstance where instanceID = \""
 			+ wfInstanceID + "\"";
 
@@ -610,7 +611,7 @@ public abstract class ProvenanceQuery {
 
 		q = addWhereClauseToQuery(q, constraints, true);
 
-		logger.debug("getVarBindings query: \n"+q);
+//		logger.debug("getVarBindings query: \n"+q);
 		Statement stmt;
 		try {
 			stmt = getConnection().createStatement();

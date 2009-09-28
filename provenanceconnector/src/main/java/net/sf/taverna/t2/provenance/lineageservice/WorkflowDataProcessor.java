@@ -37,8 +37,6 @@ public class WorkflowDataProcessor {
 	 */
 	public void addWorkflowDataItem(ProvenanceItem provenanceItem) {
 
-//		Element portEl = root.getChild("port"); // this determines the tree to use
-
 		WorkflowDataNode wdn = new WorkflowDataNode();
 		wdn.setVarName(((WorkflowDataProvenanceItem)provenanceItem).getPortName());
 		wdn.setValue(((WorkflowDataProvenanceItem)provenanceItem).getData().toString());

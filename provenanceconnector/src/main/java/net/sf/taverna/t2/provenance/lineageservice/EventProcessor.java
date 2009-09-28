@@ -106,14 +106,10 @@ public class EventProcessor {
 
 	// dedicated class for processing WorkflowData events which carry workflow output info 
 	private WorkflowDataProcessor  wfdp;
-
-
 	private ProvenanceWriter pw = null;
-	private ProvenanceQuery pq = null;
+	private ProvenanceQuery  pq = null;
 
-	public EventProcessor(){
-
-	}
+	public EventProcessor() { }
 
 	/**
 	 * @param pw
@@ -150,7 +146,7 @@ public class EventProcessor {
 		if (workflowStructureDone)  { return null; }
 
 		setWfInstanceID(((WorkflowProvenanceItem)provenanceItem).getIdentifier());
-		logger.debug("Workflow instance is: " + getWfInstanceID());
+//		logger.debug("Workflow instance is: " + getWfInstanceID());
 		Dataflow df = null;
 
 		df = ((WorkflowProvenanceItem)provenanceItem).getDataflow();
@@ -158,7 +154,7 @@ public class EventProcessor {
 		workflowStructureDone = true;
 
 		topLevelDataflowName = df.getLocalName();
-		topLevelDataflowID = df.getInternalIdentier();
+		topLevelDataflowID   = df.getInternalIdentier();
 
 		// check whether we already have this WF in the DB
 		List<String> wfNames = null;
@@ -203,6 +199,8 @@ public class EventProcessor {
 	@SuppressWarnings("unchecked")
 	public String processDataflowStructure(Dataflow df, String dataflowID, String externalName) {
 
+		String localWfInstanceID = getWfInstanceID();
+		
 		dataflowDepth++;
 
 		try {
@@ -225,7 +223,6 @@ public class EventProcessor {
 				// it is going to be rewritten right away in the rest of this method
 				// this is simpler to implement than selectively avoiding duplicate writes to the DB
 				pw.clearDBStatic(dataflowID);
-
 			} else {
 //				logger.warn("new workflow structure with ID "+dataflowID);
 			}
@@ -249,10 +246,12 @@ public class EventProcessor {
 				pw.addWFId(dataflowID, parentDataflow, externalName); // set its dataflowID along with its parent
 
 				// override wfInstanceID to point to top level -- UNCOMMENTED PM 9/09  CHECK
-				wfInstanceID = pq.getWFInstanceID(parentDataflow).get(0);
+				localWfInstanceID = pq.getWFInstanceID(parentDataflow).get(0);
+//				logger.debug("overriding nested WFRef "+getWfInstanceID()+" with parent WFRef "+localWfInstanceID);
+				
 
 			}
-			pw.addWFInstanceId(dataflowID, wfInstanceID);  // wfInstanceID stripped by stripWfInstanceHeader() above
+			pw.addWFInstanceId(dataflowID, localWfInstanceID);  // wfInstanceID stripped by stripWfInstanceHeader() above
 
 			// //////
 			// add processors along with their variables
@@ -470,6 +469,8 @@ public class EventProcessor {
 			logger.warn("Problem processing provenance for dataflow: " + e);
 		}
 
+//		logger.debug("wfInstanceID at the end of processDataflowStructure: "+getWfInstanceID());
+		
 		return dataflowID;
 	}
 
@@ -510,24 +511,21 @@ public class EventProcessor {
 	 * when the iteration event is received. Uses the map of procBindings to
 	 * process event id and the map of child ids to parent ids to ensure that
 	 * the correct proc binding is used
+	 * @param currentWorkflowID 
 	 * 
 	 * @param d
 	 * @param context 
 	 */
-	public void processProcessEvent(ProvenanceItem provenanceItem) {
-
-//		Element root = d.getRootElement();
-
-//		logger.info("PROCESSING EVENT of type "+root.getName());
+	public void processProcessEvent(ProvenanceItem provenanceItem, String currentWorkflowID) {
 
 		if (provenanceItem.getEventType().equals(SharedVocabulary.PROCESS_EVENT_TYPE)) {
 
-			String parentId = provenanceItem.getParentId();  // this is a the workflowID
+			String parentId = provenanceItem.getParentId();  // this is the workflowID
 			String identifier = provenanceItem.getIdentifier();  // use this as wfInstanceID if this is the top-level process
 
 			parentChildMap.put(identifier, parentId);
 			ProcBinding pb = new ProcBinding();
-			pb.setExecIDRef(getWfInstanceID());  // PM modified
+			pb.setExecIDRef(getWfInstanceID());  
 			procBindingMap.put(identifier, pb);
 
 		} else if (provenanceItem.getEventType().equals(SharedVocabulary.PROCESSOR_EVENT_TYPE)) {
@@ -563,9 +561,9 @@ public class EventProcessor {
 
 			String itVector = extractIterationVector(ProvenanceUtils.iterationToString(((IterationProvenanceItem)provenanceItem).getIteration()));
 			procBinding.setIterationVector(itVector);
-			InputDataProvenanceItem inputDataEl = ((IterationProvenanceItem)provenanceItem).getInputDataItem();
+			InputDataProvenanceItem   inputDataEl = ((IterationProvenanceItem)provenanceItem).getInputDataItem();
 			OutputDataProvenanceItem outputDataEl = ((IterationProvenanceItem)provenanceItem).getOutputDataItem();
-			processInput(inputDataEl, procBinding);
+			processInput(inputDataEl, procBinding, currentWorkflowID);
 			processOutput(outputDataEl, procBinding);
 
 			try {
@@ -595,11 +593,11 @@ public class EventProcessor {
 
 		} else if (provenanceItem.getEventType().equals(SharedVocabulary.WORKFLOW_DATA_EVENT_TYPE)) {
 			// give this event to a WorkflowDataProcessor object for pre-processing
-			try {
+//			try {
 				getWfdp().addWorkflowDataItem(provenanceItem);
-			} catch (NumberFormatException e) {
-				logger.error(e);
-			}
+//			} catch (NumberFormatException e) {
+//				logger.error(e);
+//			}
 //			logger.info("Received workflow data - not processing");
 			//FIXME not sure  - needs to be stored somehow
 
@@ -852,8 +850,6 @@ public class EventProcessor {
 			if (valueElements != null && valueElements.size() > 0) {
 
 				Element valueEl = valueElements.get(0); // only really 1 child
-//				processVarBinding(valueEl, processor, portName, iterationVector,
-//				dataflow);
 
 				processVarBinding(valueEl,  procBinding.getPNameRef(), portName, procBinding.getIterationVector(),
 						getWfInstanceID());
@@ -936,9 +932,10 @@ public class EventProcessor {
 
 	/**
 	 * create one new VarBinding record for each input port binding
+	 * @param currentWorkflowID 
 	 */
 	@SuppressWarnings("unchecked")
-	private void processInput(InputDataProvenanceItem provenanceItem, ProcBinding procBinding) {
+	private void processInput(InputDataProvenanceItem provenanceItem, ProcBinding procBinding, String currentWorkflowID) {
 
 		Element dataItemAsXML = ProvenanceUtils.getDataItemAsXML(provenanceItem);
 		List<Element> inputPorts = dataItemAsXML.getChildren("port");
@@ -946,20 +943,24 @@ public class EventProcessor {
 		for (Element inputport : inputPorts) {
 
 			String portName = inputport.getAttributeValue("name");
-
 //			logger.info("processInput: processing VarBinding for "+procBinding.getPNameRef()+"  "+portName);
-
 
 			try {
 				// add process order sequence to Var for this portName
-
+				
 				Map<String, String> queryConstraints = new HashMap<String, String>();
-				queryConstraints.put("wfInstanceRef", getPq().getWfNameRef(wfInstanceID));
+				queryConstraints.put("wfInstanceRef", currentWorkflowID);
 				queryConstraints.put("pnameRef", procBinding.getPNameRef());
 				queryConstraints.put("varName", portName);
 				queryConstraints.put("inputOrOutput", "1");
 
+//				logger.debug("using wfInstanceID "+currentWorkflowID);
+
 				List<Var> vars = getPq().getVars(queryConstraints);
+				
+//        				logger.debug("vars");
+//        				for (Var v:vars) {logger.debug(v.getVName()); }
+        				
 				try {
 					Var v = vars.get(0);
 					v.setPortNameOrder(order++);
@@ -1494,7 +1495,7 @@ public class EventProcessor {
 	}
 
 
-	public void propagateANL2(String wfInstanceId) throws SQLException {
+	public void propagateANL(String wfInstanceId) throws SQLException {
 
 		String top = pq.getTopLevelDataflowName(wfInstanceId);
 

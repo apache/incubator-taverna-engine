@@ -22,12 +22,16 @@ package net.sf.taverna.t2.provenance.lineageservice;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector;
 import net.sf.taverna.t2.provenance.item.ProvenanceItem;
+import net.sf.taverna.t2.provenance.item.WorkflowProvenanceItem;
 import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
+import net.sf.taverna.t2.workflowmodel.Dataflow;
 
 /**
  * Implemented by the database class that a {@link ProvenanceConnector}
@@ -44,20 +48,16 @@ public class Provenance {
 	private static Logger logger = Logger.getLogger(Provenance.class);
 
 	protected ProvenanceQuery pq;
-
 	protected ProvenanceWriter pw;
-
 	protected EventProcessor ep;
 
 	private String saveEvents;
-
 	protected String location;
-
 	private boolean isfirstWorkflowStructure = true;
 
-	public Provenance() {
+	private List<String> workflowIDStack = new ArrayList<String>();
 
-	}
+	public Provenance() {	;}
 
 	public Provenance(EventProcessor eventProcessor, String location) {
 		this.ep = eventProcessor;
@@ -149,23 +149,18 @@ public class Provenance {
 	protected void processEvent(ProvenanceItem provenanceItem,
 			SharedVocabulary eventType) throws SQLException, IOException {
 
-
 		// only attempt to save the data events, since the workflow itself may not be XMLEncode-able
 		if (!eventType.equals(SharedVocabulary.WORKFLOW_EVENT_TYPE)) {
 
 			// saveEvent for debugging / testing
 			if (saveEvents != null && saveEvents.equals("all")) {
 
-//				System.out.println("processEvent: calling saveEvent");
-
 				getEp().saveEvent(provenanceItem, eventType);
-//				System.out.println("event saved");
 
 			} else if (saveEvents != null && saveEvents.equals("iteration")) {
-				if (eventType.equals("iteration"))
 
+				if (eventType.equals("iteration"))
 					getEp().saveEvent(provenanceItem, eventType);
-				// System.out.println("event saved");
 
 			}
 		}
@@ -173,40 +168,36 @@ public class Provenance {
 		if (eventType.equals(SharedVocabulary.WORKFLOW_EVENT_TYPE)) {
 			// process the workflow structure
 
-
 			if (isfirstWorkflowStructure) {
 
 				isfirstWorkflowStructure = false;
-
-				logger.debug("processing event of type "
-						+ SharedVocabulary.WORKFLOW_EVENT_TYPE);
-				String workflowID = getEp()
-				.processWorkflowStructure(provenanceItem);
-
-				// add propagation of anl code here
-				getEp().propagateANL2(provenanceItem.getIdentifier());
+//				logger.debug("processing event of type "
+//						+ SharedVocabulary.WORKFLOW_EVENT_TYPE);
+				workflowIDStack.add(0,getEp().processWorkflowStructure(provenanceItem));
 				
-//				if (workflowID != null)
-//					getEp().propagateANL(workflowID); // operates on the DB
+//				logger.debug("pushed workflowID "+workflowIDStack.get(0));
+
+				getEp().propagateANL(provenanceItem.getIdentifier());
+			} else {
+				
+				Dataflow df = ((WorkflowProvenanceItem)provenanceItem).getDataflow();
+				workflowIDStack.add(0,df.getInternalIdentier());
+//				logger.debug("pushed workflowID "+workflowIDStack.get(0));
 			}
 
+		} else if (provenanceItem.getEventType().equals(SharedVocabulary.END_WORKFLOW_EVENT_TYPE)) {
+
+			String currentWorkflowID = workflowIDStack.get(0);
+			workflowIDStack.remove(0);
+			
+//			logger.debug("popped workflowID "+currentWorkflowID);
+
+			getEp().processProcessEvent(provenanceItem, currentWorkflowID);
+			
 		} else {
-
-			// parse the event into DOM
-			// SAXBuilder b = new SAXBuilder();
-			// Document d;
-
-			// try {
-			// d = b.build (new StringReader(provenanceItem));
-
-			getEp().processProcessEvent(provenanceItem);
-
-			// } catch (JDOMException e) {
-			// e.printStackTrace();
-			// } catch (IOException e) {
-			// e.printStackTrace();
-			// }
-
+			
+//			logger.debug("using workflowID "+workflowIDStack.get(0));
+			getEp().processProcessEvent(provenanceItem, workflowIDStack.get(0));
 		}
 
 	}
