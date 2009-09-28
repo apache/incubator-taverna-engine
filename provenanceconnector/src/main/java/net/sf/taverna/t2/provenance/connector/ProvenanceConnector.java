@@ -39,9 +39,9 @@ import net.sf.taverna.t2.provenance.lineageservice.EventProcessor;
 import net.sf.taverna.t2.provenance.lineageservice.LineageQueryResult;
 import net.sf.taverna.t2.provenance.lineageservice.LineageQueryResultRecord;
 import net.sf.taverna.t2.provenance.lineageservice.Provenance;
+import net.sf.taverna.t2.provenance.lineageservice.ProvenanceAnalysis;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceQuery;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceWriter;
-import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceAnalysis;
 import net.sf.taverna.t2.provenance.reporter.ProvenanceReporter;
 
 import org.apache.log4j.Logger;
