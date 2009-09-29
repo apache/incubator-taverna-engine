@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
+import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import net.sf.taverna.t2.facade.FailureListener;
@@ -38,6 +39,7 @@ import net.sf.taverna.t2.monitor.MonitorableProperty;
 import net.sf.taverna.t2.provenance.item.DataflowRunComplete;
 import net.sf.taverna.t2.provenance.item.WorkflowDataProvenanceItem;
 import net.sf.taverna.t2.provenance.item.WorkflowProvenanceItem;
+import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.utility.TypedTreeModel;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
 import net.sf.taverna.t2.workflowmodel.DataflowInputPort;
@@ -87,6 +89,8 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 	protected List<ResultListener> resultListeners = new ArrayList<ResultListener>();
 
 	private boolean provEnabled = false;
+	
+	private WeakHashMap<String, T2Reference> pushedDataMap = new WeakHashMap<String, T2Reference> ();
 
 	public WorkflowInstanceFacadeImpl(final Dataflow dataflow,
 			InvocationContext context, String parentProcess)
@@ -201,6 +205,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 		// constraints.
 		for (DataflowInputPort port : dataflow.getInputPorts()) {
 			if (portName.equals(port.getName())) {
+				pushedDataMap.put(portName, token.getData());
 				port.receiveEvent(token.pushOwningProcess(localName));
 			}
 		}
@@ -281,6 +286,10 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 			}
 
 		}
+	}
+
+	public WeakHashMap<String, T2Reference> getPushedDataMap() {
+		return pushedDataMap;
 	}
 
 }
