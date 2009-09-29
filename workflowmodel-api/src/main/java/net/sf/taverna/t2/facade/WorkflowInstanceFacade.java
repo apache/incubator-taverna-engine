@@ -26,6 +26,7 @@ import net.sf.taverna.t2.invocation.InvocationContext;
 import net.sf.taverna.t2.invocation.TokenOrderException;
 import net.sf.taverna.t2.invocation.WorkflowDataToken;
 import net.sf.taverna.t2.monitor.MonitorNode;
+import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.utility.TypedTreeModel;
 import net.sf.taverna.t2.workflowmodel.ControlBoundary;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
@@ -155,5 +156,10 @@ public interface WorkflowInstanceFacade {
      * Return the invocation context used by this facade
      */
 	public InvocationContext getContext();
+	
+	/**
+	 * Return a map of the data pushed on the named port
+	 */
+	public WeakHashMap<String, T2Reference> getPushedDataMap();
 
 }
