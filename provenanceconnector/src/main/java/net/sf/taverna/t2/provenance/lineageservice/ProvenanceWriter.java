@@ -26,6 +26,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
+import java.util.logging.Level;
+import net.sf.taverna.t2.provenance.connector.JDBCConnector;
 import org.apache.log4j.Logger;
 
 import net.sf.taverna.t2.provenance.lineageservice.utils.NestedListNode;
@@ -40,34 +42,20 @@ import net.sf.taverna.t2.provenance.lineageservice.utils.VarBinding;
  * 
  * @author Paolo Missier
  * @author Ian Dunlop
+ * @author Stuart Owen
  * 
  */
 public abstract class ProvenanceWriter {
 
-	protected static Logger logger = Logger.getLogger(ProvenanceWriter.class);
-
-	protected Connection connection;
+	protected static Logger logger = Logger.getLogger(ProvenanceWriter.class);	
 
 	private String dbURL;
 
-	protected int cnt; // counts number of calls to VarBinding
-
-	/**
-	 * Database specific connection code
-	 * 
-	 * @throws InstantiationException
-	 * @throws IllegalAccessException
-	 * @throws ClassNotFoundException
-	 */
-	protected abstract void openConnection() throws InstantiationException,
-	IllegalAccessException, ClassNotFoundException;
+	protected int cnt; // counts number of calls to VarBinding	
 
 	public Connection getConnection() throws InstantiationException,
-	IllegalAccessException, ClassNotFoundException {
-		if (connection == null) {
-			openConnection();
-		}
-		return connection;
+	IllegalAccessException, ClassNotFoundException,SQLException {
+		return JDBCConnector.getConnection();
 	}
 
 	/**
@@ -82,8 +70,10 @@ public abstract class ProvenanceWriter {
 	public void addVariables(List<Var> vars, String wfId) throws SQLException {
 		PreparedStatement ps = null;
 		Statement stmt = null;
+                Connection connection = null;
 		try {
-			ps = getConnection()
+                        connection= getConnection();
+			ps = connection
 			.prepareStatement(
 			"INSERT INTO Var (varname, pNameRef, inputOrOutput, nestingLevel, wfInstanceRef) VALUES(?,?,?,?,?)");
 			stmt = getConnection().createStatement();
@@ -133,6 +123,8 @@ public abstract class ProvenanceWriter {
 			}
 
 		}
+
+                if (connection!=null) connection.close();
 	}
 
 	/**
@@ -146,8 +138,10 @@ public abstract class ProvenanceWriter {
 	throws SQLException {
 		Statement stmt = null;
 		PreparedStatement ps = null;
+                Connection connection=null;
 		try {
-			ps = getConnection()
+                        connection = getConnection();
+			ps = connection
 			.prepareStatement(
 			"INSERT INTO Arc (wfInstanceRef, sourcePNameRef, SourceVarNameRef, sinkPNameRef,sinkVarNameRef) VALUES(?,?,?,?,?)");
 			stmt = getConnection().createStatement();
@@ -182,19 +176,22 @@ public abstract class ProvenanceWriter {
 			// System.out.println("executing: "+q);
 			int result = ps.executeUpdate();
 			// System.out.println("workflow id: "+result+" rows added to DB");
-		}
+		} finally {
+                    if (connection != null) connection.close();
+                }
 
 	}
 
 	public void addArc(String sourceVarName, String sourceProcName,
 			String sinkVarName, String sinkProcName, String wfId) {
 		PreparedStatement ps = null;
-		Statement stmt = null;
+		Connection connection = null;
 		try {
-			ps = getConnection()
+                        connection = getConnection();
+			ps = connection
 			.prepareStatement(
 			"INSERT INTO Arc (wfInstanceRef, sourcePNameRef, sourceVarNameRef, sinkPNameRef, sinkVarNameRef) VALUES(?,?,?,?,?)");
-			stmt = getConnection().createStatement();
+			
 
 		// String q =
 		// "INSERT INTO Arc (wfInstanceRef, sourcePNameRef, sourceVarNameRef, sinkPNameRef, sinkVarNameRef) VALUES(\'"
@@ -226,52 +223,72 @@ public abstract class ProvenanceWriter {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 //			e.printStackTrace();
-		}
+		} finally {
+                    if (connection != null) try {
+                connection.close();
+            } catch (SQLException ex) {
+                logger.error("There was an error closing the database connection",ex);
+            }
+                }
 
 	}
 
 	public void addWFId(String wfId) throws SQLException {
-		Statement stmt = null;
+		
 		PreparedStatement ps = null;
+                Connection connection = null;
 		try {
-			ps = getConnection().prepareStatement(
+                        connection = getConnection();
+			ps = connection.prepareStatement(
 			"INSERT INTO Workflow (wfName) VALUES (?)");
-			stmt = getConnection().createStatement();
+                        ps.setString(1, wfId);
+                        ps.executeUpdate();
+			
 		} catch (InstantiationException e1) {
 			logger.warn(e1);
 		} catch (IllegalAccessException e1) {
 			logger.warn(e1);
 		} catch (ClassNotFoundException e1) {
 			logger.warn(e1);
-		}
+		} finally {
+                    if (connection!=null) {
+                        connection.close();
+                    }
+                }
 
-		ps.setString(1, wfId);
-		int result = ps.executeUpdate();
+
+
+
 	}
 
 	public void addWFId(String wfId, String parentWFname,String externalName) throws SQLException {
 		Statement stmt = null;
 		PreparedStatement ps = null;
+                Connection connection = null;
 		try {
-			ps = getConnection().prepareStatement(
+                        connection = getConnection();
+			ps = connection.prepareStatement(
 			"INSERT INTO Workflow (wfname, parentWFname, externalName) VALUES (?,?,?)");
-			stmt = getConnection().createStatement();
-		} catch (InstantiationException e1) {
-			logger.warn(e1);
-		} catch (IllegalAccessException e1) {
-			logger.warn(e1);
-		} catch (ClassNotFoundException e1) {
-			logger.warn(e1);
-		}
-
-		ps.setString(1, wfId);
+                        ps.setString(1, wfId);
 		ps.setString(2, parentWFname);
 		ps.setString(3, externalName);
 		// String q = "INSERT INTO Workflow (wfname, parentWFname) VALUES (\'"
 		// + wfId + "\'," + "\'" + parentWFname + "\')";
 
 		// System.out.println("executing: "+q);
-		int result = ps.executeUpdate();
+		ps.executeUpdate();
+			
+		} catch (InstantiationException e1) {
+			logger.warn(e1);
+		} catch (IllegalAccessException e1) {
+			logger.warn(e1);
+		} catch (ClassNotFoundException e1) {
+			logger.warn(e1);
+		} finally {
+                    if (connection != null) connection.close();
+                }
+
+		
 		// System.out.println("workflow id: "+result+" rows added to DB");
 	}
 
@@ -279,27 +296,32 @@ public abstract class ProvenanceWriter {
 	throws SQLException {
 		Statement stmt = null;
 		PreparedStatement ps = null;
+                Connection connection = null;
 		try {
-			ps = getConnection()
+                        connection = getConnection();
+			ps = connection
 			.prepareStatement(
 			"INSERT INTO WfInstance (instanceID, wfnameRef) VALUES (?,?)");
-			stmt = getConnection().createStatement();
-		} catch (InstantiationException e1) {
-			logger.warn(e1);
-		} catch (IllegalAccessException e1) {
-			logger.warn(e1);
-		} catch (ClassNotFoundException e1) {
-			logger.warn(e1);
-		}
 
-		ps.setString(1, wfInstanceId);
+                        ps.setString(1, wfInstanceId);
 		ps.setString(2, wfId);
 		// String q =
 		// "INSERT INTO WfInstance (instanceID, wfnameRef) VALUES (\'"
 		// + wfInstanceId + "\'" + ", \'" + wfId + "\')";
 
 		// System.out.println("executing: "+q);
-		int result = ps.executeUpdate();
+		ps.executeUpdate();
+		} catch (InstantiationException e1) {
+			logger.warn(e1);
+		} catch (IllegalAccessException e1) {
+			logger.warn(e1);
+		} catch (ClassNotFoundException e1) {
+			logger.warn(e1);
+		} finally {
+                    if (connection!=null) connection.close();
+                }
+
+		
 		// System.out.println("workflow id: "+result+" rows added to DB");
 	}
 
@@ -328,25 +350,30 @@ public abstract class ProvenanceWriter {
 //		logger.debug("addProcessor: adding proc "+name+" to "+wfNameRef);
 		
 		PreparedStatement ps = null;
+                Connection connection = null;
 		try {
-			ps = getConnection()
+                        connection = getConnection();
+			ps = connection
 			.prepareStatement(
 			"INSERT INTO Processor (pname, type, wfInstanceRef, isTopLevel) VALUES (?,?,?,?)");
-			// stmt = getConnection().createStatement();
+
+                        ps.setString(1, name);
+		ps.setString(2, type);
+		ps.setString(3, wfNameRef);
+		ps.setBoolean(4, isTopLevel);
+
+		int result = ps.executeUpdate();
 		} catch (InstantiationException e1) {
 			e1.printStackTrace();
 		} catch (IllegalAccessException e1) {
 			e1.printStackTrace();
 		} catch (ClassNotFoundException e1) {
 			e1.printStackTrace();
-		}
+		} finally {
+                    if (connection != null) connection.close();
+                }
 
-		ps.setString(1, name);
-		ps.setString(2, type);
-		ps.setString(3, wfNameRef);
-		ps.setBoolean(4, isTopLevel);
-
-		int result = ps.executeUpdate();
+		
 	}
 	
 	
@@ -354,23 +381,13 @@ public abstract class ProvenanceWriter {
 	public void addProcessorBinding(ProcBinding pb) throws SQLException {
 		Statement stmt = null;
 		PreparedStatement ps = null;
+                Connection connection = null;
 		try {
-			ps = getConnection()
+                        connection = getConnection();
+			ps = connection
 			.prepareStatement(
 			"INSERT INTO ProcBinding (pnameRef, execIDRef, iteration, actName) VALUES(?,?,?,?)");
-			stmt = getConnection().createStatement();
-		} catch (InstantiationException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (IllegalAccessException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (ClassNotFoundException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-
-		ps.setString(1, pb.getPNameRef());
+			ps.setString(1, pb.getPNameRef());
 		ps.setString(2, pb.getExecIDRef());
 		ps.setString(3, pb.getIterationVector());
 		ps.setString(4, pb.getActName());
@@ -386,9 +403,22 @@ public abstract class ProvenanceWriter {
 
 		ps.executeUpdate();
 
-		// System.out.println("Processor binding: processor ["+pb.getPNameRef()+"] activity ["+pb.getActName()+"]");
-		// System.out.println("*** addProcessorBinding: "+result+
-		// " rows added to DB");
+		} catch (InstantiationException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IllegalAccessException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (ClassNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} finally {
+                    if (connection != null) connection.close();
+                }
+
+		
+
+		
 
 	}
 
@@ -399,23 +429,14 @@ public abstract class ProvenanceWriter {
 
 		Statement stmt = null;
 		PreparedStatement ps = null;
+                Connection connection = null;
 		try {
-			ps = getConnection()
+                        connection = getConnection();
+			ps = connection
 			.prepareStatement(
 			"INSERT INTO Collection (PNameRef, wfInstanceRef, varNameRef, iteration, parentCollIdRef, collId) VALUES(?,?,?,?,?,?)");
-			stmt = getConnection().createStatement();
-		} catch (InstantiationException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (IllegalAccessException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (ClassNotFoundException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
 
-		if (parentCollectionId == null) {
+                        if (parentCollectionId == null) {
 			// this is a top-level list
 			parentCollectionId = "TOP";
 		}
@@ -444,7 +465,22 @@ public abstract class ProvenanceWriter {
 
 		// System.out.println("collection: processor ["+processorId+"] collId ["+collId+"]");
 
-		int result = ps.executeUpdate();
+		ps.executeUpdate();
+			
+		} catch (InstantiationException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IllegalAccessException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (ClassNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} finally {
+                    if (connection != null) connection.close();
+                }
+
+		
 
 		// System.out.println("*** collection: "+result+ " rows added to DB");
 
@@ -457,11 +493,12 @@ public abstract class ProvenanceWriter {
 	public void addData(String dataRef, String wfInstanceId, byte[] data)
 	throws SQLException {
 
+                Connection connection = null;
 		Statement stmt;
 		try {
-			// stmt = getConnection().createStatement();
+			connection = getConnection();
 			PreparedStatement ps = null;
-			ps = getConnection()
+			ps = connection
 			.prepareStatement(
 			"INSERT INTO Data (dataReference,wfInstanceID,data) VALUES (?,?,?)");
 			ps.setString(1, dataRef);
@@ -490,7 +527,9 @@ public abstract class ProvenanceWriter {
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		} finally {
+                    if (connection != null) connection.close();
+                }
 	}
 
 
@@ -509,9 +548,11 @@ public abstract class ProvenanceWriter {
 	public void addVarBinding(VarBinding vb) throws SQLException {
 		Statement stmt = null;
 		PreparedStatement ps = null;
+                Connection connection = null;
 
 		try {
-			ps = getConnection()
+                        connection = getConnection();
+			ps = connection
 			.prepareStatement(
 			"INSERT INTO VarBinding (pnameRef, wfInstanceRef, varNameRef, valueType, value, ref, collIdRef, iteration,positionInColl) VALUES(?,?,?,?,?,?,?,?,?)");
 			stmt = getConnection().createStatement();
@@ -571,7 +612,9 @@ public abstract class ProvenanceWriter {
 		} catch (SQLException e) {
 			logger.warn("Var binding insert failed due to ["
 					+ e.getMessage() + "]");
-		}
+		} finally {
+                    if (connection != null) connection.close();
+                }
 	}
 
 	/**
@@ -591,8 +634,10 @@ public abstract class ProvenanceWriter {
 		// + "WHERE varName = \'" + v.getVName() + "\' "
 		// + "AND pnameRef = \'" + v.getPName() + "\' "
 		// + "AND wfInstanceRef = \'" + v.getWfInstanceRef() + "\'";
+                Connection connection = null;
 		try {
-			ps = getConnection()
+                        connection = getConnection();
+			ps = connection
 			.prepareStatement(
 					"UPDATE Var SET type = ?, inputOrOutput=?, nestingLevel = ?,"
 					+ "actualNestingLevel = ?, anlSet = ? , Var.order = ? WHERE varName = ? AND pnameRef = ? AND wfInstanceRef = ?");
@@ -619,7 +664,9 @@ public abstract class ProvenanceWriter {
 			logger.warn("Could not execute query: " + e);
 		} catch (ClassNotFoundException e) {
 			logger.warn("Could not execute query: " + e);
-		}
+		} finally {
+                    if (connection != null) connection.close();
+                }
 
 		// System.out.println("update executed");
 	}
@@ -628,8 +675,10 @@ public abstract class ProvenanceWriter {
 
 		Statement stmt;
 		PreparedStatement ps = null;
+                Connection connection = null;
 		try {
-			ps = getConnection()
+                        connection = getConnection();
+			ps = connection
 			.prepareStatement(
 					"UPDATE VarBinding SET valueType = ?, value = ?, ref = ?,"
 					+ "collIdRef = ? WHERE varNameRef = ? AND wfInstanceRef = ? AND pnameRef = ? AND iteration = ?");
@@ -677,7 +726,13 @@ public abstract class ProvenanceWriter {
 			logger.info("****  insert failed due to [" + e.getMessage() + "]");
 		} catch (ClassNotFoundException e) {
 			logger.info("****  insert failed due to [" + e.getMessage() + "]");
-		}
+		} finally {
+                    if (connection != null) try {
+                connection.close();
+            } catch (SQLException ex) {
+                logger.error("There was an error closing the database connection",ex);
+            }
+                }
 	}
 
 	public void replaceCollectionRecord(NestedListNode nln, String prevPName,
@@ -685,8 +740,10 @@ public abstract class ProvenanceWriter {
 
 		// Statement stmt;
 		PreparedStatement ps = null;
+                Connection connection = null;
 		try {
-			ps = getConnection()
+                        connection = getConnection();
+			ps = connection
 			.prepareStatement(
 					"DELETE FROM Collection WHERE collId = ? and wfInstanceRef = ?"
 					+ " and varNameRef = ? and pnameRef = ? and iteration = ?");
@@ -717,7 +774,13 @@ public abstract class ProvenanceWriter {
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		} finally {
+                    if (connection != null) try {
+                connection.close();
+            } catch (SQLException ex) {
+                logger.error("There was an error closing the database connection",ex);
+            }
+                }
 
 		try {
 
@@ -740,8 +803,10 @@ public abstract class ProvenanceWriter {
 		int result = 0;
 
 		Statement stmt = null;
+                Connection connection = null;
 		try {
-			stmt = getConnection().createStatement();
+                        connection = getConnection();
+			stmt = connection.createStatement();
 		} catch (InstantiationException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -756,39 +821,22 @@ public abstract class ProvenanceWriter {
 			q = "DELETE FROM Workflow";
 			// System.out.println("executing: "+q);
 			result = stmt.executeUpdate(q);
-		} catch (SQLException e) {
 
-		}
-		// System.out.println(result+ " rows removed from DB");
-
-		try {
-
-			q = "DELETE FROM Processor";
+                        q = "DELETE FROM Processor";
 			result = stmt.executeUpdate(q);
-		} catch (SQLException e) {
 
-		}
-		// System.out.println("executing: "+q);
-		// System.out.println(result+ " rows removed from DB");
-		try {
-
-			q = "DELETE FROM Arc";
+                        q = "DELETE FROM Arc";
 			result = stmt.executeUpdate(q);
-			// System.out.println("executing: "+q);
-		} catch (SQLException e) {
 
-		}
-		// System.out.println(result+ " rows removed from DB");
-		try {
-			q = "DELETE FROM Var";
+                        q = "DELETE FROM Var";
 			// System.out.println("executing: "+q);
 			result = stmt.executeUpdate(q);
-
 		} catch (SQLException e) {
 
-		}
-		// System.out.println(result+ " rows removed from DB");
-
+		} finally {
+                    if (connection != null) connection.close();
+                }
+		
 		logger.info("DB cleared STATIC");
 	}
 
@@ -803,8 +851,10 @@ public abstract class ProvenanceWriter {
 
 		// Statement stmt = null;
 		PreparedStatement ps = null;
+                Connection connection = null;
 		try {
-			ps = getConnection().prepareStatement(
+                        connection = getConnection();
+			ps = connection.prepareStatement(
 			"DELETE FROM Workflow WHERE wfname = ?");
 			ps.setString(1, wfID);
 			ps.executeUpdate();
@@ -831,28 +881,13 @@ public abstract class ProvenanceWriter {
 		} catch (ClassNotFoundException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
-		}
+		} finally {
+                    if (connection != null) {
+                        connection.close();
+                    }
+                }
 
-		// q = "DELETE FROM Workflow WHERE wfname = \"" + wfID + "\"";
-		// // System.out.println("executing: "+q);
-		// result = stmt.executeUpdate(q);
-		// // System.out.println(result+ " rows removed from DB");
-		//
-		// q = "DELETE FROM Processor WHERE wfInstanceRef = \"" + wfID + "\"";
-		// // System.out.println("executing: "+q);
-		// result = stmt.executeUpdate(q);
-		// // System.out.println(result+ " rows removed from DB");
-		//
-		// q = "DELETE FROM Arc WHERE wfInstanceRef = \"" + wfID + "\"";
-		// // System.out.println("executing: "+q);
-		// result = stmt.executeUpdate(q);
-		// // System.out.println(result+ " rows removed from DB");
-		//
-		// q = "DELETE FROM Var WHERE wfInstanceRef = \"" + wfID + "\"";
-		// // System.out.println("executing: "+q);
-		// result = stmt.executeUpdate(q);
-		// // System.out.println(result+ " rows removed from DB");
-		//
+		
 		logger.info("DB cleared STATICfor wfID " + wfID);
 	}
 
@@ -864,22 +899,13 @@ public abstract class ProvenanceWriter {
 	public void clearDBDynamic() throws SQLException {
 		String q = null;
 		int result = 0;
-
+                Connection connection = null;
 		Statement stmt = null;
 		try {
-			stmt = getConnection().createStatement();
-		} catch (InstantiationException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (IllegalAccessException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (ClassNotFoundException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+                        connection = getConnection();
+			stmt = connection.createStatement();
 
-		q = "DELETE FROM WfInstance";
+                        q = "DELETE FROM WfInstance";
 		// System.out.println("executing: "+q);
 		result = stmt.executeUpdate(q);
 		// System.out.println(result+ " rows removed from DB");
@@ -902,6 +928,21 @@ public abstract class ProvenanceWriter {
 		q = "DELETE FROM Data";
 		result = stmt.executeUpdate(q);
 
+		} catch (InstantiationException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IllegalAccessException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (ClassNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} finally {
+                    if (connection != null) connection.close();
+                }
+
+		
+
 		logger.info("DB cleared DYNAMIC");
 
 	}
@@ -909,9 +950,11 @@ public abstract class ProvenanceWriter {
 	public void clearDD() {
 
 		Statement stmt = null;
+                Connection connection = null;
 
 		try {
-			stmt = getConnection().createStatement();
+                        connection = getConnection();
+			stmt = connection.createStatement();
 			String q = "DELETE FROM DD";
 			stmt.executeUpdate(q);
 		} catch (InstantiationException e1) {
@@ -926,7 +969,13 @@ public abstract class ProvenanceWriter {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		} finally {
+                    if (connection != null) try {
+                connection.close();
+            } catch (SQLException ex) {
+                logger.error("There was an error closing the database connection.",ex);
+            }
+                }
 	}
 
 	/**
@@ -946,9 +995,11 @@ public abstract class ProvenanceWriter {
 			String wfInstanceID) {
 
 		Statement stmt = null;
+                Connection connection = null;
 
 		try {
-			stmt = getConnection().createStatement();
+                        connection = getConnection();
+			stmt = connection.createStatement();
 			String q = "INSERT INTO DD (PFrom,VFrom,valFrom,PTo,VTo,valTo,iteration,wfInstance) VALUES ("
 				+ "\'"
 				+ pFrom
@@ -987,7 +1038,13 @@ public abstract class ProvenanceWriter {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		} finally {
+                    if (connection != null) try {
+                connection.close();
+            } catch (SQLException ex) {
+                logger.error("There was an error closing the database connection.",ex);
+            }
+                }
 	}
 
 	public void setDbURL(String dbURL) {

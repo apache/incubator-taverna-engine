@@ -27,11 +27,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import net.sf.taverna.t2.provenance.item.ProvenanceItem;
 import net.sf.taverna.t2.provenance.item.WorkflowProvenanceItem;
@@ -51,312 +49,298 @@ import org.apache.log4j.Logger;
  * inside the InvocationContext
  * 
  * @author Ian Dunlop
+ * @author Stuart Owen
  * 
  */
 public abstract class ProvenanceConnector implements ProvenanceReporter {
 
-	private static Logger logger = Logger.getLogger(ProvenanceConnector.class);
+    private static Logger logger = Logger.getLogger(ProvenanceConnector.class);
+    private String saveEvents;    
+    private ProvenanceAnalysis provenanceAnalysis;
+    private ExecutorService executor = Executors.newSingleThreadExecutor();
+    private boolean isClearDB = false;
+    private Provenance provenance;
+    private String dbURL;
+    private boolean finished = false;
+    private String sessionID;
 
-	private String saveEvents;
+    public ProvenanceConnector() {
+        
+    }
 
-	protected Connection connection;
+    public ProvenanceConnector(Provenance provenance,
+            ProvenanceAnalysis provenanceAnalysis, String dbURL,
+            boolean isClearDB, String saveEvents) {
 
-	private ProvenanceAnalysis provenanceAnalysis;
+        setProvenance(provenance);
+        this.setProvenanceAnalysis(provenanceAnalysis);
+        this.dbURL = dbURL;
+        this.isClearDB = isClearDB;
+        this.saveEvents = saveEvents;
+        getProvenance().setSaveEvents(this.saveEvents);
+    }
 
-	private ExecutorService executor = Executors.newSingleThreadExecutor();
+    protected Connection getConnection() throws InstantiationException,
+            IllegalAccessException, ClassNotFoundException, SQLException {
+        return JDBCConnector.getConnection();
+    }
 
-	private boolean isClearDB = false;
+    /**
+     * Used by database backed provenance stores. Ask the implementation to
+     * create the database. Requires each datbase type to create all its own
+     * tables
+     */
+    public abstract void createDatabase();    
 
-	private Provenance provenance;
+    /**
+     * Clear all the values in the database but keep the db there
+     */
+    public void clearDatabase() {
+        String q = null;
+        Connection connection = null;
 
-	private String dbURL;
+        Statement stmt = null;
+        try {
+            connection = getConnection();
+            stmt=connection.createStatement();
+        } catch (SQLException e) {
+            logger.warn("Could not create database statement :" + e);
+        } catch (InstantiationException e) {
+            logger.warn("Could not create database statement :" + e);
+        } catch (IllegalAccessException e) {
+            logger.warn("Could not create database statement :" + e);
+        } catch (ClassNotFoundException e) {
+            logger.warn("Could not create database statement :" + e);
+        }
 
-	private boolean finished = false;
 
-	private String sessionID;
 
-	public ProvenanceConnector() {
+        q = "DELETE FROM Workflow";
+        try {
+            stmt.executeUpdate(q);
+        } catch (SQLException e) {
+            logger.warn("Could not execute statement " + q + " :" + e);
+        }
 
-	}
+        q = "DELETE FROM Processor";
+        try {
+            stmt.executeUpdate(q);
+        } catch (SQLException e) {
+            logger.warn("Could not execute statement " + q + " :" + e);
+        }
 
-	public ProvenanceConnector(Provenance provenance,
-			ProvenanceAnalysis provenanceAnalysis, String dbURL,
-			boolean isClearDB, String saveEvents) {
-		
-		setProvenance(provenance);
-		this.setProvenanceAnalysis(provenanceAnalysis);
-		this.dbURL = dbURL;
-		this.isClearDB = isClearDB;
-		this.saveEvents = saveEvents;
-		getProvenance().setSaveEvents(this.saveEvents);
-	}
+        q = "DELETE FROM Arc";
+        try {
+            stmt.executeUpdate(q);
+        } catch (SQLException e) {
+            logger.warn("Could not execute statement " + q + " :" + e);
+        }
 
-	protected Connection getConnection() throws InstantiationException,
-			IllegalAccessException, ClassNotFoundException {
-		if (connection == null) {
-			openConnection();
-		}
-		return connection;
-	}
+        q = "DELETE FROM Var";
+        try {
+            stmt.executeUpdate(q);
+        } catch (SQLException e) {
+            logger.warn("Could not execute statement " + q + " :" + e);
+        }
 
-	/**
-	 * Used by database backed provenance stores. Ask the implementation to
-	 * create the database. Requires each datbase type to create all its own
-	 * tables
-	 */
-	public abstract void createDatabase();
+        q = "DELETE FROM WfInstance";
+        try {
+            stmt.executeUpdate(q);
+        } catch (SQLException e) {
+            logger.warn("Could not execute statement " + q + " :" + e);
+        }
 
-	/**
-	 * Used by database backed provenance stores. Ask the implementation to
-	 * delete the database.
-	 */
-	public abstract void deleteDatabase();
+        q = "DELETE FROM ProcBinding";
+        try {
+            stmt.executeUpdate(q);
+        } catch (SQLException e) {
+            logger.warn("Could not execute statement " + q + " :" + e);
+        }
 
-	/**
-	 * Clear all the values in the database but keep the db there
-	 */
-	public void clearDatabase() {
-		String q = null;
+        q = "DELETE FROM VarBinding";
+        try {
+            stmt.executeUpdate(q);
+        } catch (SQLException e) {
+            logger.warn("Could not execute statement " + q + " :" + e);
+        }
 
-		Statement stmt = null;
-		try {
-			stmt = getConnection().createStatement();
-		} catch (SQLException e) {
-			logger.warn("Could not create database statement :" + e);
-		} catch (InstantiationException e) {
-			logger.warn("Could not create database statement :" + e);
-		} catch (IllegalAccessException e) {
-			logger.warn("Could not create database statement :" + e);
-		} catch (ClassNotFoundException e) {
-			logger.warn("Could not create database statement :" + e);
-		}
+        q = "DELETE FROM Collection";
+        try {
+            stmt.executeUpdate(q);
+        } catch (SQLException e) {
+            logger.warn("Could not execute statement " + q + " :" + e);
+        }
 
-		q = "DELETE FROM Workflow";
-		try {
-			stmt.executeUpdate(q);
-		} catch (SQLException e) {
-			logger.warn("Could not execute statement " + q + " :" + e);
-		}
+        q = "DELETE FROM Data";
+        try {
+            stmt.executeUpdate(q);
+        } catch (SQLException e) {
+            logger.warn("Could not execute statement " + q + " :" + e);
+        }
 
-		q = "DELETE FROM Processor";
-		try {
-			stmt.executeUpdate(q);
-		} catch (SQLException e) {
-			logger.warn("Could not execute statement " + q + " :" + e);
-		}
+        if (connection!=null) try {
+            connection.close();
+        } catch (SQLException ex) {
+            logger.error("Error closing connection",ex);
+        }
+    }
 
-		q = "DELETE FROM Arc";
-		try {
-			stmt.executeUpdate(q);
-		} catch (SQLException e) {
-			logger.warn("Could not execute statement " + q + " :" + e);
-		}
+    /**
+     * The name for this type of provenance connector. Is used by the workbench
+     * to ensure it adds the correct one to the InvocationContext
+     *
+     * @return
+     */
+    public abstract String getName();
 
-		q = "DELETE FROM Var";
-		try {
-			stmt.executeUpdate(q);
-		} catch (SQLException e) {
-			logger.warn("Could not execute statement " + q + " :" + e);
-		}
+    /**
+     * A unique identifier for this run of provenance, should correspond to the
+     * initial {@link WorkflowProvenanceItem} idenifier that gets sent through
+     *
+     * @param identifier
+     */
+    public void setSessionID(String sessionID) {
+        this.sessionID = sessionID;
+    }
 
-		q = "DELETE FROM WfInstance";
-		try {
-			stmt.executeUpdate(q);
-		} catch (SQLException e) {
-			logger.warn("Could not execute statement " + q + " :" + e);
-		}
+    /**
+     * What is the unique identifier used by this connector
+     *
+     * @return
+     */
+    public String getSessionID() {
+        return sessionID;
+    }
 
-		q = "DELETE FROM ProcBinding";
-		try {
-			stmt.executeUpdate(q);
-		} catch (SQLException e) {
-			logger.warn("Could not execute statement " + q + " :" + e);
-		}
+    public boolean isClearDB() {
+        return isClearDB;
+    }
 
-		q = "DELETE FROM VarBinding";
-		try {
-			stmt.executeUpdate(q);
-		} catch (SQLException e) {
-			logger.warn("Could not execute statement " + q + " :" + e);
-		}
+    public void setClearDB(boolean isClearDB) {
+        this.isClearDB = isClearDB;
+    }
 
-		q = "DELETE FROM Collection";
-		try {
-			stmt.executeUpdate(q);
-		} catch (SQLException e) {
-			logger.warn("Could not execute statement " + q + " :" + e);
-		}
+    /**
+     * Set up the the {@link EventProcessor}, {@link ProvenanceWriter} &
+     * {@link ProvenanceQuery}. Since it is an SPI you don't want any code
+     * cluttering the default constructor. Call this method after instantiation
+     * and after the dbURL has been set.
+     */
+    public abstract void init();
 
-		q = "DELETE FROM Data";
-		try {
-			stmt.executeUpdate(q);
-		} catch (SQLException e) {
-			logger.warn("Could not execute statement " + q + " :" + e);
-		}
-	}
+    public List<LineageQueryResultRecord> getIntermediateValues(
+            final String wfInstance, final String pname, final String vname,
+            final String iteration) throws Exception {
+        LineageQueryResult fetchIntermediateResult = getProvenanceAnalysis().fetchIntermediateResult(wfInstance, pname, vname, iteration);
 
-	/**
-	 * The name for this type of provenance connector. Is used by the workbench
-	 * to ensure it adds the correct one to the InvocationContext
-	 * 
-	 * @return
-	 */
-	public abstract String getName();
+        LineageQueryResult result = null;
+        FutureTask<LineageQueryResult> future = new FutureTask<LineageQueryResult>(
+                new Callable<LineageQueryResult>() {
 
-	/**
-	 * A unique identifier for this run of provenance, should correspond to the
-	 * initial {@link WorkflowProvenanceItem} idenifier that gets sent through
-	 * 
-	 * @param identifier
-	 */
-	public void setSessionID(String sessionID) {
-		this.sessionID = sessionID;
-	}
-
-	/**
-	 * What is the unique identifier used by this connector
-	 * 
-	 * @return
-	 */
-	public String getSessionID() {
-		return sessionID;
-	}
-
-	public boolean isClearDB() {
-		return isClearDB;
-	}
-
-	public void setClearDB(boolean isClearDB) {
-		this.isClearDB = isClearDB;
-	}
-
-	/**
-	 * Set up the the {@link EventProcessor}, {@link ProvenanceWriter} &
-	 * {@link ProvenanceQuery}. Since it is an SPI you don't want any code
-	 * cluttering the default constructor. Call this method after instantiation
-	 * and after the dbURL has been set.
-	 */
-	public abstract void init();
-
-	public List<LineageQueryResultRecord> getIntermediateValues(
-			final String wfInstance, final String pname, final String vname,
-			final String iteration) throws Exception {
-		LineageQueryResult fetchIntermediateResult = getProvenanceAnalysis()
-				.fetchIntermediateResult(wfInstance, pname, vname, iteration);
-
-		LineageQueryResult result = null;
-		FutureTask<LineageQueryResult> future = new FutureTask<LineageQueryResult>(
-				new Callable<LineageQueryResult>() {
-
-					public LineageQueryResult call() throws Exception {
-						try {
+                    public LineageQueryResult call() throws Exception {
+                        try {
 //							LineageSQLQuery simpleLineageQuery = provenance
 //									.getPq().simpleLineageQuery(wfInstance,
 //											pname, vname, iteration);
-							LineageQueryResult runLineageQuery = getProvenanceAnalysis()
-									.fetchIntermediateResult(wfInstance, pname,
-											vname, iteration);
+                            LineageQueryResult runLineageQuery = getProvenanceAnalysis().fetchIntermediateResult(wfInstance, pname,
+                                    vname, iteration);
 
-							// runLineageQuery = provenance.getPq()
-							// .runLineageQuery(simpleLineageQuery);
-							return runLineageQuery;
-						} catch (SQLException e) {
-							throw e;
-						}
-					}
+                            // runLineageQuery = provenance.getPq()
+                            // .runLineageQuery(simpleLineageQuery);
+                            return runLineageQuery;
+                        } catch (SQLException e) {
+                            throw e;
+                        }
+                    }
+                });
 
-				});
+        getExecutor().submit(future);
 
-		getExecutor().submit(future);
+        try {
+            return future.get().getRecords();
+        } catch (InterruptedException e1) {
+            throw e1;
+        } catch (ExecutionException e1) {
+            throw e1;
+        }
 
-		try {
-			return future.get().getRecords();
-		} catch (InterruptedException e1) {
-			throw e1;
-		} catch (ExecutionException e1) {
-			throw e1;
-		}
+    }
 
-	}
+    public List<LineageQueryResultRecord> computeLineage(String wfInstance,
+            String var, String proc, String path, Set<String> selectedProcessors) {
+        return null;
+    }
 
-	public List<LineageQueryResultRecord> computeLineage(String wfInstance,
-			String var, String proc, String path, Set<String> selectedProcessors) {
-		return null;
-	}
+    public String getDataflowInstance(String dataflowId) {
+        String instanceID = null;
+        try {
+            instanceID = (getProvenance()).getPq().getWFInstanceID(dataflowId).get(0);
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return instanceID;
+    }
 
-	public String getDataflowInstance(String dataflowId) {
-		String instanceID = null;
-		try {
-			instanceID = (getProvenance()).getPq().getWFInstanceID(dataflowId).get(0);
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return instanceID;
-	}
+    /**
+     * @return the saveEvents
+     */
+    public String getSaveEvents() {
+        return saveEvents;
+    }
 
-	/**
-	 * @return the saveEvents
-	 */
-	public String getSaveEvents() {
-		return saveEvents;
-	}
+    /**
+     * @param saveEvents
+     *            the saveEvents to set
+     */
+    public void setSaveEvents(String saveEvents) {
+        this.saveEvents = saveEvents;
+    }
 
-	/**
-	 * @param saveEvents
-	 *            the saveEvents to set
-	 */
-	public void setSaveEvents(String saveEvents) {
-		this.saveEvents = saveEvents;
-	}
 
-	protected abstract void openConnection() throws InstantiationException,
-			IllegalAccessException, ClassNotFoundException;
+    public void setDbURL(String dbURL) {
+        this.dbURL = dbURL;
+    }
 
-	public void setDbURL(String dbURL) {
-		this.dbURL = dbURL;
-	}
+    public String getDbURL() {
+        return dbURL;
+    }
 
-	public String getDbURL() {
-		return dbURL;
-	}
+    public void setProvenance(Provenance provenance) {
+        this.provenance = provenance;
+    }
 
-	public void setProvenance(Provenance provenance) {
-		this.provenance = provenance;
-	}
+    public Provenance getProvenance() {
+        return provenance;
+    }
 
-	public Provenance getProvenance() {
-		return provenance;
-	}
+    public void setFinished(boolean finished) {
+        this.finished = finished;
+    }
 
-	public void setFinished(boolean finished) {
-		this.finished = finished;
-	}
+    public boolean isFinished() {
+        return finished;
+    }
 
-	public boolean isFinished() {
-		return finished;
-	}
+    public void setExecutor(ExecutorService executor) {
+        this.executor = executor;
+    }
 
-	public void setExecutor(ExecutorService executor) {
-		this.executor = executor;
-	}
+    public synchronized ExecutorService getExecutor() {
+        return executor;
+    }
 
-	public synchronized ExecutorService getExecutor() {
-		return executor;
-	}
+    public void setProvenanceAnalysis(ProvenanceAnalysis provenanceAnalysis) {
+        this.provenanceAnalysis = provenanceAnalysis;
+    }
 
-	public void setProvenanceAnalysis(ProvenanceAnalysis provenanceAnalysis) {
-		this.provenanceAnalysis = provenanceAnalysis;
-	}
-
-	/**
-	 * Use this {@link ProvenanceAnalysis} to carry out lineage queries on the
-	 * provenance
-	 * 
-	 * @return
-	 */
-	public ProvenanceAnalysis getProvenanceAnalysis() {
-		return provenanceAnalysis;
-	}
-
+    /**
+     * Use this {@link ProvenanceAnalysis} to carry out lineage queries on the
+     * provenance
+     *
+     * @return
+     */
+    public ProvenanceAnalysis getProvenanceAnalysis() {
+        return provenanceAnalysis;
+    }
 }
