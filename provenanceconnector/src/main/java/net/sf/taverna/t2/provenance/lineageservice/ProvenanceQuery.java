@@ -384,12 +384,11 @@ public abstract class ProvenanceQuery {
 	 */
 	public String getWfNameRef(String wfInstanceID) throws SQLException {
 		
-		String q = "SELECT wfnameRef FROM WfInstance where instanceID = \""
-			+ wfInstanceID + "\"";
+		String q = "SELECT wfnameRef FROM WfInstance where instanceID = ?";
 
-		Statement stmt = null;
+		PreparedStatement stmt = null;
 		try {
-			stmt = getConnection().createStatement();
+			stmt = getConnection().prepareStatement(q);
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -400,8 +399,9 @@ public abstract class ProvenanceQuery {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		stmt.setString(1, wfInstanceID);
 
-		boolean success = stmt.execute(q);
+		boolean success = stmt.execute();
 
 		if (success) {
 			ResultSet rs = stmt.getResultSet();
