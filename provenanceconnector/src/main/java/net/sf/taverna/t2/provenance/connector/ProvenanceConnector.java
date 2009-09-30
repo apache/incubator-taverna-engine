@@ -239,14 +239,9 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 
                     public LineageQueryResult call() throws Exception {
                         try {
-//							LineageSQLQuery simpleLineageQuery = provenance
-//									.getPq().simpleLineageQuery(wfInstance,
-//											pname, vname, iteration);
+
                             LineageQueryResult runLineageQuery = getProvenanceAnalysis().fetchIntermediateResult(wfInstance, pname,
                                     vname, iteration);
-
-                            // runLineageQuery = provenance.getPq()
-                            // .runLineageQuery(simpleLineageQuery);
                             return runLineageQuery;
                         } catch (SQLException e) {
                             throw e;
@@ -276,8 +271,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
         try {
             instanceID = (getProvenance()).getPq().getWFInstanceID(dataflowId).get(0);
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.error("Error finding the dataflow instance",e);
         }
         return instanceID;
     }

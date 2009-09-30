@@ -34,7 +34,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import java.util.logging.Level;
 import net.sf.taverna.t2.provenance.connector.JDBCConnector;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Arc;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DDRecord;
@@ -381,93 +380,88 @@ public abstract class ProvenanceQuery {
             }
         }
 
-        // System.out.println("getArcs: executing query\n"+q.toString());
-
         return result;
     }
 
     public String getWfNameRef(String wfInstanceID) throws SQLException {
 
-		String q = "SELECT wfnameRef FROM WfInstance where instanceID = ?";
+        String q = "SELECT wfnameRef FROM WfInstance where instanceID = ?";
 
-		PreparedStatement stmt = null;
-                Connection connection = null;
-                String result = null;
+        PreparedStatement stmt = null;
+        Connection connection = null;
+        String result = null;
 
-		try {
-                        connection = getConnection();
-			stmt = connection.prepareStatement(q);
-                        stmt.setString(1, wfInstanceID);
+        try {
+            connection = getConnection();
+            stmt = connection.prepareStatement(q);
+            stmt.setString(1, wfInstanceID);
 
-		boolean success = stmt.execute();
+            boolean success = stmt.execute();
 
-		if (success) {
-			ResultSet rs = stmt.getResultSet();
+            if (success) {
+                ResultSet rs = stmt.getResultSet();
 
-			if (rs.next()) {
-				result = rs.getString("wfnameRef");
-			}
-		}
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally {
-                    if (connection != null) connection.close();
+                if (rs.next()) {
+                    result = rs.getString("wfnameRef");
                 }
+            }
+        } catch (InstantiationException e) {
+            logger.error("Error finding the workflow reference", e);
+        } catch (IllegalAccessException e) {
+            logger.error("Error finding the workflow reference", e);
+        } catch (ClassNotFoundException e) {
+            logger.error("Error finding the workflow reference", e);
+        } finally {
+            if (connection != null) {
+                connection.close();
+            }
+        }
 
-		return result;
-	}
+        return result;
+    }
 
+    /**
+     *
+     * @param dataflowID
+     * @return
+     * @throws SQLException
+     */
+    public List<String> getWFInstanceID(String dataflowID) throws SQLException {
 
+        PreparedStatement ps = null;
+        Connection connection = null;
 
-	/**
-	 *
-	 * @param dataflowID
-	 * @return
-	 * @throws SQLException
-	 */
-	public List<String> getWFInstanceID(String dataflowID) throws SQLException {
-		// String q = "SELECT instanceID FROM WfInstance where wfnameRef = \'"
-		// + dataflowID + "\'";
-		//
-		PreparedStatement ps = null;
-		Connection connection = null;
+        List<String> result = new ArrayList<String>();
 
-		List<String> result = new ArrayList<String>();
+        try {
+            connection = getConnection();
+            ps = connection.prepareStatement(
+                    "SELECT instanceID FROM WfInstance where wfnameRef = ? order by timestamp desc");
+            ps.setString(1, dataflowID);
 
-		try {
-                        connection = getConnection();
-			ps = connection.prepareStatement(
-			"SELECT instanceID FROM WfInstance where wfnameRef = ? order by timestamp desc");
-			ps.setString(1, dataflowID);
-			// stmt = getConnection().createStatement();
-			boolean success = ps.execute();
+            boolean success = ps.execute();
 
-			if (success) {
-				ResultSet rs = ps.getResultSet();
+            if (success) {
+                ResultSet rs = ps.getResultSet();
 
-				while (rs.next()) {
-					result.add(rs.getString("instanceID"));
-				}
-			}
-
-		} catch (InstantiationException e) {
-			logger.warn("Could not execute query: " + e);
-		} catch (IllegalAccessException e) {
-			logger.warn("Could not execute query: " + e);
-		} catch (ClassNotFoundException e) {
-			logger.warn("Could not execute query: " + e);
-		} finally {
-                    if (connection != null) connection.close();
+                while (rs.next()) {
+                    result.add(rs.getString("instanceID"));
                 }
-		return result;
-	}
+            }
+
+        } catch (InstantiationException e) {
+            logger.warn("Could not execute query: " + e);
+        } catch (IllegalAccessException e) {
+            logger.warn("Could not execute query: " + e);
+        } catch (ClassNotFoundException e) {
+            logger.warn("Could not execute query: " + e);
+        } finally {
+            if (connection != null) {
+                connection.close();
+            }
+        }
+        return result;
+    }
 
     /**
      * all WF instances, in reverse chronological order
@@ -575,10 +569,8 @@ public abstract class ProvenanceQuery {
         try {
             connection = getConnection();
             stmt = connection.createStatement();
-            // System.out.println("getProcBindings: executing: " + q);
 
             boolean success = stmt.execute(q);
-            // System.out.println("result: "+success);
 
             if (success) {
                 ResultSet rs = stmt.getResultSet();
@@ -627,23 +619,16 @@ public abstract class ProvenanceQuery {
             throws SQLException {
         List<VarBinding> result = new ArrayList<VarBinding>();
 
-        // String q = "SELECT * FROM VarBinding VB join Var V "
-        // + "on (VB.varNameRef = V.varName and VB.PNameRef =  V.PNameRef) "
-        // +
-        // "JOIN WfInstance W ON VB.wfInstanceRef = W.instanceID and V.wfInstanceRef = wfnameRef ";
-
         String q = "SELECT * FROM VarBinding VB join Var V " + "on (VB.varNameRef = V.varName and VB.PNameRef =  V.PNameRef) " + "JOIN WfInstance W ON VB.wfInstanceRef = W.instanceID and V.wfInstanceRef = wfnameRef " + "LEFT OUTER JOIN Data D ON D.wfInstanceID = VB.wfInstanceRef and D.dataReference = VB.value";
 
         q = addWhereClauseToQuery(q, constraints, true);
 
-//		logger.debug("getVarBindings query: \n"+q);
         Statement stmt = null;
         Connection connection = null;
         try {
             connection = getConnection();
             stmt = connection.createStatement();
             boolean success = stmt.execute(q);
-            // System.out.println("result: "+success);
 
             if (success) {
                 ResultSet rs = stmt.getResultSet();
@@ -700,17 +685,12 @@ public abstract class ProvenanceQuery {
             connection = getConnection();
             stmt = connection.createStatement();
         } catch (InstantiationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.error("Error finding the nested list nodes", e);
         } catch (IllegalAccessException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.error("Error finding the nested list nodes", e);
         } catch (ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.error("Error finding the nested list nodes", e);
         }
-
-        // System.out.println("executing: "+q);
 
         boolean success;
         try {
@@ -744,129 +724,130 @@ public abstract class ProvenanceQuery {
         return result;
     }
 
-    public Map<String, Integer> getPredecessorsCount(String wfInstanceID)  {
+    public Map<String, Integer> getPredecessorsCount(String wfInstanceID) {
 
-		PreparedStatement ps = null;
+        PreparedStatement ps = null;
 
-		Map<String, Integer> result = new HashMap<String, Integer>();
+        Map<String, Integer> result = new HashMap<String, Integer>();
 
-		// get all arcs for the entire workflow structure for this particular instance
-		Connection connection = null;
-		try {
+        // get all arcs for the entire workflow structure for this particular instance
+        Connection connection = null;
+        try {
 
-                connection = getConnection();
-		ps = connection.prepareStatement(
-					"SELECT A.sourcePNameRef as source , A.sinkPNameRef as sink, A.wfInstanceRef as wfName1, W1.wfName as wfName2, W2.wfName as wfName3 "+
-					"FROM Arc A join WFInstance I on A.wfInstanceRef = I.wfnameRef "+
-					"left outer join Workflow W1 on W1.externalName = A.sourcePNameRef "+
-					"left outer join Workflow W2 on W2.externalName = A.sinkPNameRef "+
-			"where I.instanceID = ? order by wfInstanceRef");
-			ps.setString(1, wfInstanceID);
-			boolean success = ps.execute();
+            connection = getConnection();
+            ps = connection.prepareStatement(
+                    "SELECT A.sourcePNameRef as source , A.sinkPNameRef as sink, A.wfInstanceRef as wfName1, W1.wfName as wfName2, W2.wfName as wfName3 " +
+                    "FROM Arc A join WFInstance I on A.wfInstanceRef = I.wfnameRef " +
+                    "left outer join Workflow W1 on W1.externalName = A.sourcePNameRef " +
+                    "left outer join Workflow W2 on W2.externalName = A.sinkPNameRef " +
+                    "where I.instanceID = ? order by wfInstanceRef");
+            ps.setString(1, wfInstanceID);
+            boolean success = ps.execute();
 
-			if (success) {
-				ResultSet rs = ps.getResultSet();
-				while (rs.next()) {
+            if (success) {
+                ResultSet rs = ps.getResultSet();
+                while (rs.next()) {
 
-					String sink   = rs.getString("sink");
-					String source = rs.getString("source");
+                    String sink = rs.getString("sink");
+                    String source = rs.getString("source");
 
-					if (result.get(sink) == null) result.put(sink, 0);
+                    if (result.get(sink) == null) {
+                        result.put(sink, 0);
+                    }
 
-					String name1 = rs.getString("wfName1");
-					String name2 = rs.getString("wfName2");
-					String name3 = rs.getString("wfName3");
+                    String name1 = rs.getString("wfName1");
+                    String name2 = rs.getString("wfName2");
+                    String name3 = rs.getString("wfName3");
 
-					if (isDataflow(source) && name1.equals(name2)) continue;
-					if (isDataflow(sink) && name1.equals(name3)) continue;
+                    if (isDataflow(source) && name1.equals(name2)) {
+                        continue;
+                    }
+                    if (isDataflow(sink) && name1.equals(name3)) {
+                        continue;
+                    }
 
-					result.put(sink, result.get(sink)+1);
-				}
-			}
-		} catch (InstantiationException e1) {
-			logger.warn("Could not execute query: " + e1);
-		} catch (IllegalAccessException e1) {
-			logger.warn("Could not execute query: " + e1);
-		} catch (ClassNotFoundException e1) {
-			logger.warn("Could not execute query: " + e1);
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally {
-                    if (connection!=null) {
+                    result.put(sink, result.get(sink) + 1);
+                }
+            }
+        } catch (InstantiationException e1) {
+            logger.warn("Could not execute query: " + e1);
+        } catch (IllegalAccessException e1) {
+            logger.warn("Could not execute query: " + e1);
+        } catch (ClassNotFoundException e1) {
+            logger.warn("Could not execute query: " + e1);
+        } catch (SQLException e) {
+            logger.error("Error executing query", e);
+        } finally {
+            if (connection != null) {
                 try {
                     connection.close();
                 } catch (SQLException ex) {
-                    logger.error("There was an error closing the database connection",ex);
+                    logger.error("There was an error closing the database connection", ex);
                 }
-                    }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * new impl of getProcessorsIncomingLinks whicih avoids complications due to nesting, and relies on the wfInstanceID
+     * rather than the wfnameRef
+     * @param wfInstanceID
+     * @return
+     */
+    public Map<String, Integer> getPredecessorsCountOld(String wfInstanceID) {
+
+        PreparedStatement ps = null;
+
+        Map<String, Integer> result = new HashMap<String, Integer>();
+
+        // get all arcs for the entire workflow structure for this particular instance
+        Connection connection = null;
+        try {
+
+            connection = getConnection();
+            ps = connection.prepareStatement(
+                    "SELECT sinkPnameRef, P1.type, count(*) as pred " +
+                    " FROM Arc A join WfInstance I on A.wfInstanceRef = I.wfnameRef " +
+                    " join Processor P1 on P1.pname = A.sinkPnameRef " +
+                    " join Processor P2 on P2.pname = A.sourcePnameRef " +
+                    "  where I.instanceID = ? " +
+                    "  and P2.type <> 'net.sf.taverna.t2.activities.dataflow.DataflowActivity' " +
+                    " and ((P1.type = 'net.sf.taverna.t2.activities.dataflow.DataflowActivity' and P1.wfInstanceRef = A.wfInstanceRef) or " +
+                    " (P1.type <> 'net.sf.taverna.t2.activities.dataflow.DataflowActivity')) " +
+                    " group by A.sinkPnameRef, type");
+            ps.setString(1, wfInstanceID);
+            boolean success = ps.execute();
+
+            if (success) {
+                ResultSet rs = ps.getResultSet();
+                while (rs.next()) {
+
+                    int cnt = rs.getInt("pred");
+
+                    result.put(rs.getString("sinkPnameRef"), new Integer(cnt));
                 }
-		return result;
-	}
-
-
-	/**
-	 * new impl of getProcessorsIncomingLinks whicih avoids complications due to nesting, and relies on the wfInstanceID
-	 * rather than the wfnameRef
-	 * @param wfInstanceID
-	 * @return
-	 */
-	public Map<String, Integer> getPredecessorsCountOld(String wfInstanceID)  {
-
-		PreparedStatement ps = null;
-
-		Map<String, Integer> result = new HashMap<String, Integer>();
-
-		// get all arcs for the entire workflow structure for this particular instance
-		Connection connection = null;
-		try {
-
-                        connection = getConnection();
-			ps = connection.prepareStatement(
-					"SELECT sinkPnameRef, P1.type, count(*) as pred "+
-					" FROM Arc A join WfInstance I on A.wfInstanceRef = I.wfnameRef "+
-					" join Processor P1 on P1.pname = A.sinkPnameRef "+
-					" join Processor P2 on P2.pname = A.sourcePnameRef "+
-					"  where I.instanceID = ? "+
-					"  and P2.type <> 'net.sf.taverna.t2.activities.dataflow.DataflowActivity' "+
-					" and ((P1.type = 'net.sf.taverna.t2.activities.dataflow.DataflowActivity' and P1.wfInstanceRef = A.wfInstanceRef) or "+
-					" (P1.type <> 'net.sf.taverna.t2.activities.dataflow.DataflowActivity')) "+
-			" group by A.sinkPnameRef, type");
-			ps.setString(1, wfInstanceID);
-			boolean success = ps.execute();
-
-			if (success) {
-				ResultSet rs = ps.getResultSet();
-				while (rs.next()) {
-
-					int cnt = rs.getInt("pred");
-
-//					if (rs.getString("type").equals("net.sf.taverna.t2.activities.dataflow.DataflowActivity")) cnt--;
-
-					result.put(rs.getString("sinkPnameRef"), new Integer(cnt));
-				}
-			}
-		} catch (InstantiationException e1) {
-			logger.warn("Could not execute query: " + e1);
-		} catch (IllegalAccessException e1) {
-			logger.warn("Could not execute query: " + e1);
-		} catch (ClassNotFoundException e1) {
-			logger.warn("Could not execute query: " + e1);
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally {
-                    if (connection!=null) {
+            }
+        } catch (InstantiationException e1) {
+            logger.warn("Could not execute query: " + e1);
+        } catch (IllegalAccessException e1) {
+            logger.warn("Could not execute query: " + e1);
+        } catch (ClassNotFoundException e1) {
+            logger.warn("Could not execute query: " + e1);
+        } catch (SQLException e) {
+            logger.warn("Could not execute query: " + e);
+        } finally {
+            if (connection != null) {
                 try {
                     connection.close();
                 } catch (SQLException ex) {
-                    logger.error("There was an error closing the database connection",ex);
+                    logger.error("There was an error closing the database connection", ex);
                 }
-                    }
-                }
-		return result;
-	}
-    
+            }
+        }
+        return result;
+    }
+
     /**
      * used in the toposort phase -- propagation of anl() values through the
      * graph
@@ -891,12 +872,6 @@ public abstract class ProvenanceQuery {
 
         PreparedStatement ps = null;
 
-//		logger.info("getProcessorsIncomingLinks("+wfnameRef+")");
-
-        // get all processors and init their incoming links to 0
-        // String q = "SELECT pName FROM Processor "
-        // + "WHERE wfInstanceRef = \'" + wfnameRef + "\'";
-        //
         Statement stmt;
         Connection connection = null;
         try {
@@ -904,7 +879,7 @@ public abstract class ProvenanceQuery {
             ps = connection.prepareStatement(
                     "SELECT pName, type FROM Processor WHERE wfInstanceRef = ?");
             ps.setString(1, wfnameRef);
-            
+
             success = ps.execute();
 
             if (success) {
@@ -927,13 +902,12 @@ public abstract class ProvenanceQuery {
             logger.warn("Could not execute query: " + e1);
         } finally {
             try {
-                    connection.close();
-                } catch (SQLException ex) {
-                    logger.error("An error occurred closing the database connection",ex);
-                }
-            connection=null;
+                connection.close();
+            } catch (SQLException ex) {
+                logger.error("An error occurred closing the database connection", ex);
+            }
+            connection = null;
         }
-        // System.out.println("executing: "+q);
 
         // fetch the name of the top-level dataflow. We use this to exclude arcs
         // outgoing from its inputs
@@ -946,8 +920,6 @@ public abstract class ProvenanceQuery {
             parentWF = wfnameRef;  // null parent means we are the top
         }
         logger.debug("parent WF: " + parentWF);
-
-//		String pNames = "('"+parentWF+"')";
 
         // get nested dataflows -- we want to avoid these in the toposort algorithm
         List<ProvenanceProcessor> procs = getProcessors(
@@ -968,10 +940,6 @@ public abstract class ProvenanceQuery {
         }
         pNames.append(")");
 
-        // List<String> pNames = new ArrayList<String>();
-        // for (ProvenanceProcessor p:procs) { pNames.add(p.getPname()); }
-        //
-        // String topLevelFlowName = pNames.get(0);
 
         // exclude processors connected to inputs -- those have 0 predecessors
         // for our purposes
@@ -984,7 +952,7 @@ public abstract class ProvenanceQuery {
         logger.info("executing \n" + q);
 
         try {
-            connection=getConnection();
+            connection = getConnection();
             stmt = connection.createStatement();
             success = stmt.execute(q);
             if (success) {
@@ -1005,10 +973,10 @@ public abstract class ProvenanceQuery {
             logger.warn("Could not execute query: " + e);
         } finally {
             try {
-                    connection.close();
-                } catch (SQLException ex) {
-                    logger.error("An error occurred closing the database connection",ex);
-                }
+                connection.close();
+            } catch (SQLException ex) {
+                logger.error("An error occurred closing the database connection", ex);
+            }
         }
 
         return result;
@@ -1028,11 +996,8 @@ public abstract class ProvenanceQuery {
 
             ps.setString(1, vName);
             ps.setString(2, pName);
-            // stmt = getConnection().createStatement();
-//			logger.debug(ps.toString());
 
             boolean success = ps.execute();
-            // System.out.println("result: "+success);
 
             if (success) {
                 ResultSet rs = ps.getResultSet();
@@ -1071,11 +1036,9 @@ public abstract class ProvenanceQuery {
             logger.warn("Could not execute query: " + e);
         } finally {
             if (connection != null) {
-            connection.close();
+                connection.close();
             }
         }
-
-        // System.out.println("executing: "+q);
 
         return result;
     }
@@ -1086,21 +1049,17 @@ public abstract class ProvenanceQuery {
 
         PreparedStatement ps = null;
 
-        // String q = "SELECT distinct sinkPNameRef " + "FROM Arc "
-        // + "WHERE wfInstanceRef = \'" + wfInstanceRef + "\' "
-        // + "AND sourcePNameRef = \'" + pName + "\'";
-
         Connection connection = null;
         try {
-            connection=getConnection();
+            connection = getConnection();
             ps = connection.prepareStatement(
                     "SELECT distinct sinkPNameRef FROM Arc A JOIN Wfinstance I on A.wfInstanceRef = I.wfnameRef " + "WHERE A.wfInstanceRef = ? and I.instanceID = ? AND sourcePNameRef = ?");
             ps.setString(1, wfNameRef);
             ps.setString(2, wfInstanceId);
             ps.setString(3, pName);
-            // stmt = getConnection().createStatement();
+
             boolean success = ps.execute();
-            // System.out.println("result: "+success);
+
 
             if (success) {
                 ResultSet rs = ps.getResultSet();
@@ -1117,11 +1076,9 @@ public abstract class ProvenanceQuery {
             logger.warn("Could not execute query: " + e);
         } finally {
             if (connection != null) {
-            connection.close();
+                connection.close();
             }
         }
-
-        // System.out.println("executing: "+q);
 
         return result;
     }
@@ -1166,7 +1123,6 @@ public abstract class ProvenanceQuery {
             connection = getConnection();
             stmt = connection.createStatement();
             boolean success = stmt.execute(q);
-            // System.out.println("result: "+success);
 
             if (success) {
                 ResultSet rs = stmt.getResultSet();
@@ -1194,8 +1150,6 @@ public abstract class ProvenanceQuery {
             }
         }
 
-        // System.out.println("executing: "+q);
-
         return result;
     }
 
@@ -1211,13 +1165,6 @@ public abstract class ProvenanceQuery {
     public LineageSQLQuery simpleLineageQuery(String wfInstance, String pname,
             String vname, String iteration) {
         LineageSQLQuery lq = new LineageSQLQuery();
-
-        // base query
-        // String q1 = "SELECT * FROM VarBinding VB JOIN WfInstance W ON "
-        // + "VB.wfInstanceRef = W.instanceID "
-        // + "JOIN Var V on "
-        // +
-        // "V.wfInstanceRef = W.wfnameRef and VB.PNameRef = V.pnameRef and VB.varNameRef = V.varName";
 
         String q1 = "SELECT * FROM VarBinding VB join Var V " + "on (VB.varNameRef = V.varName and VB.PNameRef =  V.PNameRef) " + "JOIN WfInstance W ON VB.wfInstanceRef = W.instanceID and V.wfInstanceRef = wfnameRef " + "LEFT OUTER JOIN Data D ON D.wfInstanceID = VB.wfInstanceRef and D.dataReference = VB.value";
 
@@ -1247,7 +1194,6 @@ public abstract class ProvenanceQuery {
 
         q1 = addOrderByToQuery(q1, orderAttr, true);
 
-        // System.out.println("generated query: \n"+q1);
         logger.debug("Query is: " + q1);
         lq.setVbQuery(q1);
 
@@ -1273,16 +1219,6 @@ public abstract class ProvenanceQuery {
         // setup
         StringBuffer effectivePath = new StringBuffer();
 
-        // System.out.println("generating SQL for proc ="+proc);
-        // System.out.println("input vars:");
-        // for (Var v: var2Path.keySet()) {
-        // System.out.println(v.getVName()+
-        // " with delta-nl "+
-        // (v.getActualNestingLevel()-v.getTypeNestingLevel())+
-        // " and path "+var2Path.get(v));
-        // }
-
-
         List<LineageSQLQuery> newQueries = new ArrayList<LineageSQLQuery>();
 
         // use the calculated path for each input var
@@ -1299,18 +1235,6 @@ public abstract class ProvenanceQuery {
 
             isInput = false;
 
-            // CHECK not sure this is still valid
-//			if (path != null) {
-
-//			int outputVarDnl = outputVar.getTypeNestingLevel();
-//			String pathArray[] = path.split(",");
-
-//			for (int i = 0; i < pathArray.length - outputVarDnl; i++) {
-//			effectivePath.append(pathArray[i] + ",");
-//			}
-//			if (effectivePath.length() > 0)
-//			effectivePath.deleteCharAt(effectivePath.length() - 1);
-//			}			
             LineageSQLQuery q = generateSQL2(wfInstanceID, proc, outputVar.getVName(), path, isInput);  // && !var2Path.isEmpty());
             if (q != null) {
                 newQueries.add(q);
@@ -1318,75 +1242,72 @@ public abstract class ProvenanceQuery {
         }
         return newQueries;
 
-   
+
     }
 
     protected LineageSQLQuery generateSQL2(String wfInstance, String proc,
-			String var, String path,  boolean returnInput) {
+            String var, String path, boolean returnInput) {
 
-		LineageSQLQuery lq = new LineageSQLQuery();
+        LineageSQLQuery lq = new LineageSQLQuery();
 
-		// constraints:
-		Map<String, String> collQueryConstraints = new HashMap<String, String>();
+        // constraints:
+        Map<String, String> collQueryConstraints = new HashMap<String, String>();
 
-		// base Collection query
-		String collQuery = "SELECT * FROM Collection C JOIN wfInstance W ON "
-			+ "C.wfInstanceRef = W.instanceID "
-			+ "JOIN Var V on "
-			+ "V.wfInstanceRef = W.wfnameRef and C.PNameRef = V.pnameRef and C.varNameRef = V.varName ";
+        // base Collection query
+        String collQuery = "SELECT * FROM Collection C JOIN wfInstance W ON " + "C.wfInstanceRef = W.instanceID " + "JOIN Var V on " + "V.wfInstanceRef = W.wfnameRef and C.PNameRef = V.pnameRef and C.varNameRef = V.varName ";
 
-		collQueryConstraints.put("W.instanceID", wfInstance);
-		collQueryConstraints.put("C.PNameRef", proc);
+        collQueryConstraints.put("W.instanceID", wfInstance);
+        collQueryConstraints.put("C.PNameRef", proc);
 
-		if (path != null && path.length() > 0) {
-			collQueryConstraints.put("C.iteration", "["+ path + "]"); // PM 1/09 -- path
-		}
+        if (path != null && path.length() > 0) {
+            collQueryConstraints.put("C.iteration", "[" + path + "]"); // PM 1/09 -- path
+        }
 
-		// inputs or outputs?
-		if (returnInput) collQueryConstraints.put("V.inputOrOutput", "1");
-		else collQueryConstraints.put("V.inputOrOutput", "0");
+        // inputs or outputs?
+        if (returnInput) {
+            collQueryConstraints.put("V.inputOrOutput", "1");
+        } else {
+            collQueryConstraints.put("V.inputOrOutput", "0");
+        }
 
-		collQuery = addWhereClauseToQuery(collQuery, collQueryConstraints, false);
+        collQuery = addWhereClauseToQuery(collQuery, collQueryConstraints, false);
 
-		lq.setCollQuery(collQuery);
+        lq.setCollQuery(collQuery);
 
-		//  vb query
+        //  vb query
 
-		Map<String, String> vbQueryConstraints = new HashMap<String, String>();
+        Map<String, String> vbQueryConstraints = new HashMap<String, String>();
 
-		// base VarBinding query
-		String vbQuery = "SELECT * FROM VarBinding VB JOIN wfInstance W ON "
-			+ "VB.wfInstanceRef = W.instanceID "
-			+ "JOIN Var V on "
-			+ "V.wfInstanceRef = W.wfnameRef and VB.PNameRef = V.pnameRef and VB.varNameRef = V.varName "
-			+ "LEFT OUTER JOIN Data D ON D.wfInstanceID = VB.wfInstanceRef and D.dataReference = VB.value";
+        // base VarBinding query
+        String vbQuery = "SELECT * FROM VarBinding VB JOIN wfInstance W ON " + "VB.wfInstanceRef = W.instanceID " + "JOIN Var V on " + "V.wfInstanceRef = W.wfnameRef and VB.PNameRef = V.pnameRef and VB.varNameRef = V.varName " + "LEFT OUTER JOIN Data D ON D.wfInstanceID = VB.wfInstanceRef and D.dataReference = VB.value";
 
-		vbQueryConstraints.put("W.instanceID", wfInstance);
-		vbQueryConstraints.put("VB.PNameRef", proc);
-		vbQueryConstraints.put("VB.varNameRef", var);
+        vbQueryConstraints.put("W.instanceID", wfInstance);
+        vbQueryConstraints.put("VB.PNameRef", proc);
+        vbQueryConstraints.put("VB.varNameRef", var);
 
-		if (path != null && path.length() > 0) {
-			vbQueryConstraints.put("VB.iteration", "["+ path + "]"); // PM 1/09 -- path
-		}
+        if (path != null && path.length() > 0) {
+            vbQueryConstraints.put("VB.iteration", "[" + path + "]"); // PM 1/09 -- path
+        }
 
-		// limit to inputs?
-		if (returnInput) vbQueryConstraints.put("V.inputOrOutput", "1");
-		else vbQueryConstraints.put("V.inputOrOutput", "0");
+        // limit to inputs?
+        if (returnInput) {
+            vbQueryConstraints.put("V.inputOrOutput", "1");
+        } else {
+            vbQueryConstraints.put("V.inputOrOutput", "0");
+        }
 
-		vbQuery = addWhereClauseToQuery(vbQuery, vbQueryConstraints, false);
+        vbQuery = addWhereClauseToQuery(vbQuery, vbQueryConstraints, false);
 
-		List<String> orderAttr = new ArrayList<String>();
-		orderAttr.add("varNameRef");
-		orderAttr.add("iteration");
+        List<String> orderAttr = new ArrayList<String>();
+        orderAttr.add("varNameRef");
+        orderAttr.add("iteration");
 
-		vbQuery = addOrderByToQuery(vbQuery, orderAttr, true);
+        vbQuery = addOrderByToQuery(vbQuery, orderAttr, true);
 
-		// System.out.println("generated query: \n"+q1);
+        lq.setVbQuery(vbQuery);
 
-		lq.setVbQuery(vbQuery);
-
-		return lq;
-	}
+        return lq;
+    }
 
     /**
      * if effectivePath is not null: query varBinding using: wfInstanceRef =
@@ -1407,68 +1328,64 @@ public abstract class ProvenanceQuery {
      * @return
      */
     public LineageSQLQuery generateSQL(String wfInstance, String proc,
-			String effectivePath, boolean returnOutputs) {
+            String effectivePath, boolean returnOutputs) {
 
-		LineageSQLQuery lq = new LineageSQLQuery();
+        LineageSQLQuery lq = new LineageSQLQuery();
 
-		// constraints:
-		Map<String, String> collQueryConstraints = new HashMap<String, String>();
+        // constraints:
+        Map<String, String> collQueryConstraints = new HashMap<String, String>();
 
-		// base Collection query
-		String collQuery = "SELECT * FROM Collection C JOIN wfInstance W ON "
-			+ "C.wfInstanceRef = W.instanceID "
-			+ "JOIN Var V on "
-			+ "V.wfInstanceRef = W.wfnameRef and C.PNameRef = V.pnameRef and C.varNameRef = V.varName ";
+        // base Collection query
+        String collQuery = "SELECT * FROM Collection C JOIN wfInstance W ON " + "C.wfInstanceRef = W.instanceID " + "JOIN Var V on " + "V.wfInstanceRef = W.wfnameRef and C.PNameRef = V.pnameRef and C.varNameRef = V.varName ";
 
-		collQueryConstraints.put("W.instanceID", wfInstance);
-		collQueryConstraints.put("C.PNameRef", proc);
+        collQueryConstraints.put("W.instanceID", wfInstance);
+        collQueryConstraints.put("C.PNameRef", proc);
 
-		if (effectivePath != null && effectivePath.length() > 0) {
-			collQueryConstraints.put("C.iteration", "["+ effectivePath.toString() + "]"); // PM 1/09 -- path
-		}
+        if (effectivePath != null && effectivePath.length() > 0) {
+            collQueryConstraints.put("C.iteration", "[" + effectivePath.toString() + "]"); // PM 1/09 -- path
+        }
 
-		// limit to inputs?
-		if (returnOutputs) collQueryConstraints.put("V.inputOrOutput", "1");
+        // limit to inputs?
+        if (returnOutputs) {
+            collQueryConstraints.put("V.inputOrOutput", "1");
+        }
 
-		collQuery = addWhereClauseToQuery(collQuery, collQueryConstraints, false);
+        collQuery = addWhereClauseToQuery(collQuery, collQueryConstraints, false);
 
-		lq.setCollQuery(collQuery);
+        lq.setCollQuery(collQuery);
 
-		//  vb query
+        //  vb query
 
-		Map<String, String> vbQueryConstraints = new HashMap<String, String>();
+        Map<String, String> vbQueryConstraints = new HashMap<String, String>();
 
-		// base VarBinding query
-		String vbQuery = "SELECT * FROM VarBinding VB JOIN wfInstance W ON "
-			+ "VB.wfInstanceRef = W.instanceID "
-			+ "JOIN Var V on "
-			+ "V.wfInstanceRef = W.wfnameRef and VB.PNameRef = V.pnameRef and VB.varNameRef = V.varName "
-			+ "LEFT OUTER JOIN Data D ON D.wfInstanceID = VB.wfInstanceRef and D.dataReference = VB.value";
+        // base VarBinding query
+        String vbQuery = "SELECT * FROM VarBinding VB JOIN wfInstance W ON " + "VB.wfInstanceRef = W.instanceID " + "JOIN Var V on " + "V.wfInstanceRef = W.wfnameRef and VB.PNameRef = V.pnameRef and VB.varNameRef = V.varName " + "LEFT OUTER JOIN Data D ON D.wfInstanceID = VB.wfInstanceRef and D.dataReference = VB.value";
 
-		vbQueryConstraints.put("W.instanceID", wfInstance);
-		vbQueryConstraints.put("VB.PNameRef", proc);
+        vbQueryConstraints.put("W.instanceID", wfInstance);
+        vbQueryConstraints.put("VB.PNameRef", proc);
 
-		if (effectivePath != null && effectivePath.length() > 0) {
-			vbQueryConstraints.put("VB.iteration", "["+ effectivePath.toString() + "]"); // PM 1/09 -- path
-		}
+        if (effectivePath != null && effectivePath.length() > 0) {
+            vbQueryConstraints.put("VB.iteration", "[" + effectivePath.toString() + "]"); // PM 1/09 -- path
+        }
 
-		// limit to inputs?
-		if (!returnOutputs) vbQueryConstraints.put("V.inputOrOutput", "1");
+        // limit to inputs?
+        if (!returnOutputs) {
+            vbQueryConstraints.put("V.inputOrOutput", "1");
+        }
 
-		vbQuery = addWhereClauseToQuery(vbQuery, vbQueryConstraints, false);
+        vbQuery = addWhereClauseToQuery(vbQuery, vbQueryConstraints, false);
 
-		List<String> orderAttr = new ArrayList<String>();
-		orderAttr.add("varNameRef");
-		orderAttr.add("iteration");
+        List<String> orderAttr = new ArrayList<String>();
+        orderAttr.add("varNameRef");
+        orderAttr.add("iteration");
 
-		vbQuery = addOrderByToQuery(vbQuery, orderAttr, true);
+        vbQuery = addOrderByToQuery(vbQuery, orderAttr, true);
 
-		// System.out.println("generated query: \n"+q1);
 
-		lq.setVbQuery(vbQuery);
+        lq.setVbQuery(vbQuery);
 
-		return lq;
-	}
+        return lq;
+    }
 
     public LineageQueryResult runCollectionQuery(LineageSQLQuery lq) throws SQLException {
 
@@ -1503,9 +1420,6 @@ public abstract class ProvenanceQuery {
                     String it = rs.getString("iteration");
                     String coll = rs.getString("collID");
                     String parentColl = rs.getString("parentCollIDRef");
-
-                    // System.out.println("proc ["+proc+"] var ["+var+"] iteration ["+it+"] collection ["+
-                    // coll+"] value ["+value+"]");
 
                     lqr.addLineageQueryResultRecord(proc, var, wfInstance,
                             it, coll, parentColl, null, null, type, false, true);  // true -> is a collection
@@ -1565,13 +1479,7 @@ public abstract class ProvenanceQuery {
                         lqr.addLineageQueryResultRecord(proc, var, wfInstance,
                                 it, coll, null, value, resolvedValue, type, isInput, false);  // false -> not a collection
                     } else {
-                        // System.out.println("proc ["+proc+"] var ["+var+"] iteration ["+it+"] collection ["+
-                        // coll+"] value ["+value+"]");
 
-                        // lqr.addLineageQueryResultRecord(proc, var,
-                        // wfInstance,
-                        // it,
-                        // value, resolvedValue, type);
                         // FIXME if the data is required then the query needs
                         // fixing
                         lqr.addLineageQueryResultRecord(proc, var, wfInstance,
@@ -1713,19 +1621,16 @@ public abstract class ProvenanceQuery {
         // dataflow name -> wfRef
         String containerDataflow = getWfNameForDataflow(dataflowName, instanceID);
 
-//		logger.debug("containerDataflow: "+containerDataflow);
-
-
         // get all processors within containerDataflow
         PreparedStatement ps = null;
         Connection connection = null;
         try {
             connection = getConnection();
             ps = connection.prepareStatement(
-					"SELECT pname FROM Processor P  join wfInstance I on P.wfInstanceRef = I.wfnameRef "+
-			"where wfInstanceRef = ? and I.instanceID = ?");
-			ps.setString(1, containerDataflow);
-			ps.setString(2, instanceID);
+                    "SELECT pname FROM Processor P  join wfInstance I on P.wfInstanceRef = I.wfnameRef " +
+                    "where wfInstanceRef = ? and I.instanceID = ?");
+            ps.setString(1, containerDataflow);
+            ps.setString(2, instanceID);
 
 
             boolean success = ps.execute();
@@ -1743,14 +1648,13 @@ public abstract class ProvenanceQuery {
         } catch (ClassNotFoundException e) {
             logger.warn("Could not execute query: " + e);
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.warn("Could not execute query: " + e);
         } finally {
             try {
-                    connection.close();
-                } catch (SQLException ex) {
-                    logger.error("An error occurred closing the database connection",ex);
-                }
+                connection.close();
+            } catch (SQLException ex) {
+                logger.error("An error occurred closing the database connection", ex);
+            }
         }
         return result;
     }
@@ -1762,8 +1666,8 @@ public abstract class ProvenanceQuery {
         try {
             connection = getConnection();
             ps = connection.prepareStatement(
-					"SELECT pname FROM Processor P  join wfInstance I on P.wfInstanceRef = I.wfnameRef "+
-			"where  I.instanceID =? and isTopLevel = 1");
+                    "SELECT pname FROM Processor P  join wfInstance I on P.wfInstanceRef = I.wfnameRef " +
+                    "where  I.instanceID =? and isTopLevel = 1");
 
 
             ps.setString(1, wfInstanceID);
@@ -1782,14 +1686,13 @@ public abstract class ProvenanceQuery {
         } catch (ClassNotFoundException e) {
             logger.warn("Could not execute query: " + e);
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.warn("Could not execute query: " + e);
         } finally {
             try {
-                    connection.close();
-                } catch (SQLException ex) {
-                    logger.error("An error occurred closing the database connection",ex);
-                }
+                connection.close();
+            } catch (SQLException ex) {
+                logger.error("An error occurred closing the database connection", ex);
+            }
         }
         return null;
     }
@@ -1800,13 +1703,12 @@ public abstract class ProvenanceQuery {
         Connection connection = null;
         try {
             connection = getConnection();
-            
+
             ps = connection.prepareStatement(
                     "SELECT wfname FROM Workflow W join WfInstance I on W.wfname = I.wfNameRef WHERE W.externalName = ? and I.instanceID = ?");
             ps.setString(1, dataflowName);
             ps.setString(2, instanceID);
 
-//			logger.debug(ps.toString());
             boolean success = ps.execute();
 
             if (success) {
@@ -1825,10 +1727,12 @@ public abstract class ProvenanceQuery {
             logger.error("Could not execute query: " + e);
         } finally {
             try {
-                    if (connection!=null) connection.close();
-                } catch (SQLException ex) {
-                    logger.error("An error occurred closing the database connection",ex);
+                if (connection != null) {
+                    connection.close();
                 }
+            } catch (SQLException ex) {
+                logger.error("An error occurred closing the database connection", ex);
+            }
         }
         return null;
     }
@@ -1846,7 +1750,7 @@ public abstract class ProvenanceQuery {
             ps = connection.prepareStatement(
                     "SELECT wfname FROM Workflow WHERE parentWFname = ? ");
             ps.setString(1, parentWFName);
-            // stmt = getConnection().createStatement();
+
             boolean success = ps.execute();
 
             if (success) {
@@ -1863,7 +1767,9 @@ public abstract class ProvenanceQuery {
         } catch (ClassNotFoundException e) {
             logger.warn("Could not execute query: " + e);
         } finally {
-            if (connection != null) connection.close();            
+            if (connection != null) {
+                connection.close();
+            }
         }
         return result;
     }
@@ -1876,9 +1782,6 @@ public abstract class ProvenanceQuery {
      * @throws SQLException
      */
     public String getParentOfWorkflow(String childWFName) throws SQLException {
-
-        // String q = "SELECT parentWFname FROM Workflow WHERE wfname = \'"
-        // + childWFName + "\'";
 
         PreparedStatement ps = null;
         String result = null;
@@ -1893,8 +1796,6 @@ public abstract class ProvenanceQuery {
 
             logger.debug("getParentOfWorkflow - query: " + q + "  with wfname = " + childWFName);
 
-
-            // stmt = getConnection().createStatement();
             boolean success = ps.execute();
 
             if (success) {
@@ -1916,7 +1817,9 @@ public abstract class ProvenanceQuery {
         } catch (ClassNotFoundException e) {
             logger.warn("Could not execute query: " + e);
         } finally {
-            if (connection != null) connection.close();
+            if (connection != null) {
+                connection.close();
+            }
         }
 
         return result;
@@ -1936,11 +1839,8 @@ public abstract class ProvenanceQuery {
 
             if (success) {
                 ResultSet rs = stmt.getResultSet();
-
                 while (rs.next()) {
-
                     result.add(rs.getString("wfname"));
-
                 }
             }
         } catch (InstantiationException e) {
@@ -1975,7 +1875,7 @@ public abstract class ProvenanceQuery {
             ps = connection.prepareStatement(
                     "SELECT type FROM Processor WHERE pname = ?");
             ps.setString(1, procName);
-            // stmt = getConnection().createStatement();
+
             boolean success = ps.execute();
 
             if (success) {
@@ -2021,23 +1921,21 @@ public abstract class ProvenanceQuery {
                 }
             }
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.warn("Could not execute query: " + e);
         } catch (InstantiationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.warn("Could not execute query: " + e);
         } catch (IllegalAccessException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.warn("Could not execute query: " + e);
         } catch (ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.warn("Could not execute query: " + e);
         } finally {
             try {
-                    if (connection!=null) connection.close();
-                } catch (SQLException ex) {
-                    logger.error("An error occurred closing the database connection",ex);
+                if (connection != null) {
+                    connection.close();
                 }
+            } catch (SQLException ex) {
+                logger.error("An error occurred closing the database connection", ex);
+            }
         }
         return null;
     }
@@ -2054,61 +1952,66 @@ public abstract class ProvenanceQuery {
      * @throws SQLException
      */
     public List<DDRecord> queryDD(String p, String var, String value,
-			String iteration, String wfInstance) throws SQLException {
+            String iteration, String wfInstance) throws SQLException {
 
-		List<DDRecord> result = new ArrayList<DDRecord>();
+        List<DDRecord> result = new ArrayList<DDRecord>();
 
-		Map<String, String> queryConstraints = new HashMap<String, String>();
+        Map<String, String> queryConstraints = new HashMap<String, String>();
 
-		queryConstraints.put("pTo", p);
-		queryConstraints.put("vTo", var);
-		if (value != null)
-			queryConstraints.put("valTo", value);
-		if (iteration != null)
-			queryConstraints.put("iteration", iteration);
-		if (wfInstance != null)
-			queryConstraints.put("wfInstance", wfInstance);
+        queryConstraints.put("pTo", p);
+        queryConstraints.put("vTo", var);
+        if (value != null) {
+            queryConstraints.put("valTo", value);
+        }
+        if (iteration != null) {
+            queryConstraints.put("iteration", iteration);
+        }
+        if (wfInstance != null) {
+            queryConstraints.put("wfInstance", wfInstance);
+        }
 
-		String q = "SELECT * FROM   DD ";
+        String q = "SELECT * FROM   DD ";
 
-		q = addWhereClauseToQuery(q, queryConstraints, true); // true: terminate
-		// SQL statement
+        q = addWhereClauseToQuery(q, queryConstraints, true); // true: terminate
+        // SQL statement
 
-		Statement stmt;
-                Connection connection = null;
-		try {
-                        connection = getConnection();
-			stmt = connection.createStatement();
-			boolean success = stmt.execute(q);
+        Statement stmt;
+        Connection connection = null;
+        try {
+            connection = getConnection();
+            stmt = connection.createStatement();
+            boolean success = stmt.execute(q);
 
-			if (success) {
-				ResultSet rs = stmt.getResultSet();
+            if (success) {
+                ResultSet rs = stmt.getResultSet();
 
-				while (rs.next()) {
+                while (rs.next()) {
 
-					DDRecord aDDrecord = new DDRecord();
-					aDDrecord.setPFrom(rs.getString("pFrom"));
-					aDDrecord.setVFrom(rs.getString("vFrom"));
-					aDDrecord.setValFrom(rs.getString("valFrom"));
-					aDDrecord.setPTo(rs.getString("pTo"));
-					aDDrecord.setVTo(rs.getString("vTo"));
-					aDDrecord.setValTo(rs.getString("valTo"));
+                    DDRecord aDDrecord = new DDRecord();
+                    aDDrecord.setPFrom(rs.getString("pFrom"));
+                    aDDrecord.setVFrom(rs.getString("vFrom"));
+                    aDDrecord.setValFrom(rs.getString("valFrom"));
+                    aDDrecord.setPTo(rs.getString("pTo"));
+                    aDDrecord.setVTo(rs.getString("vTo"));
+                    aDDrecord.setValTo(rs.getString("valTo"));
 
-					result.add(aDDrecord);
-				}
-				return result;
-			}
-		} catch (InstantiationException e) {
-			logger.warn("Could not execute query: " + e);
-		} catch (IllegalAccessException e) {
-			logger.warn("Could not execute query: " + e);
-		} catch (ClassNotFoundException e) {
-			logger.warn("Could not execute query: " + e);
-		} finally {
-                    if (connection != null) connection.close();
+                    result.add(aDDrecord);
                 }
-		return null;
-	}
+                return result;
+            }
+        } catch (InstantiationException e) {
+            logger.warn("Could not execute query: " + e);
+        } catch (IllegalAccessException e) {
+            logger.warn("Could not execute query: " + e);
+        } catch (ClassNotFoundException e) {
+            logger.warn("Could not execute query: " + e);
+        } finally {
+            if (connection != null) {
+                connection.close();
+            }
+        }
+        return null;
+    }
 
     public Set<DDRecord> queryArcsForDD(String p, String v, String val,
             String wfInstance) throws SQLException {
@@ -2131,7 +2034,6 @@ public abstract class ProvenanceQuery {
             ps.setString(3, v);
             ps.setString(4, val);
 
-            // stmt = getConnection().createStatement();
             boolean success = ps.execute();
 
             if (success) {
@@ -2155,7 +2057,9 @@ public abstract class ProvenanceQuery {
         } catch (ClassNotFoundException e) {
             logger.warn("Could not execute query: " + e);
         } finally {
-            if (connection!=null) connection.close();
+            if (connection != null) {
+                connection.close();
+            }
         }
         return null;
     }
@@ -2173,7 +2077,7 @@ public abstract class ProvenanceQuery {
             ps = connection.prepareStatement(
                     "SELECT DISTINCT PFrom, vFrom, valFrom FROM DD where wfInstance = ?");
             ps.setString(1, wfInstance);
-            
+
             boolean success = ps.execute();
 
             if (success) {
@@ -2197,7 +2101,9 @@ public abstract class ProvenanceQuery {
         } catch (ClassNotFoundException e) {
             logger.warn("Could not execute query: " + e);
         } finally {
-            if (connection!=null) connection.close();
+            if (connection != null) {
+                connection.close();
+            }
         }
 
         return null;
@@ -2213,49 +2119,52 @@ public abstract class ProvenanceQuery {
     }
 
     public boolean isRootProcessorOfWorkflow(String procName, String wfName,
-			String wfInstanceId) {
+            String wfInstanceId) {
 
-		PreparedStatement ps = null;
-                Connection connection = null;
+        PreparedStatement ps = null;
+        Connection connection = null;
 
-		try {
-                        connection = getConnection();
-			ps = connection.prepareStatement(
-					"SELECT * FROM Arc A join wfInstance I on A.wfInstanceRef = I.wfnameRef "+
-					"join Processor P on P.pname = A.sourcePnameRef where sourcePnameRef = ? "+
-					"and P.wfInstanceRef <> A.wfInstanceRef "+
-					"and I.instanceID = ? "+
-			"and sinkPNameRef = ? ");
+        try {
+            connection = getConnection();
+            ps = connection.prepareStatement(
+                    "SELECT * FROM Arc A join wfInstance I on A.wfInstanceRef = I.wfnameRef " +
+                    "join Processor P on P.pname = A.sourcePnameRef where sourcePnameRef = ? " +
+                    "and P.wfInstanceRef <> A.wfInstanceRef " +
+                    "and I.instanceID = ? " +
+                    "and sinkPNameRef = ? ");
 
-			ps.setString(1, wfName);
-			ps.setString(2, wfInstanceId);
-			ps.setString(3, procName);
+            ps.setString(1, wfName);
+            ps.setString(2, wfInstanceId);
+            ps.setString(3, procName);
 
-			boolean success = ps.execute();
+            boolean success = ps.execute();
 
-			if (success) {
-				ResultSet rs = ps.getResultSet();
+            if (success) {
+                ResultSet rs = ps.getResultSet();
 
-				if (rs.next()) { return true; }
-			}
-		} catch (InstantiationException e) {
-			logger.warn("Could not execute query: " + e);
-		} catch (IllegalAccessException e) {
-			logger.warn("Could not execute query: " + e);
-		} catch (ClassNotFoundException e) {
-			logger.warn("Could not execute query: " + e);
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally {
-                    if (connection!=null) try {
-                connection.close();
-            } catch (SQLException ex) {
-                logger.error("There was an error closing the database connection",ex);
-            }
+                if (rs.next()) {
+                    return true;
                 }
-		return false;
-	}
+            }
+        } catch (InstantiationException e) {
+            logger.warn("Could not execute query: " + e);
+        } catch (IllegalAccessException e) {
+            logger.warn("Could not execute query: " + e);
+        } catch (ClassNotFoundException e) {
+            logger.warn("Could not execute query: " + e);
+        } catch (SQLException e) {
+            logger.warn("Could not execute query: " + e);
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException ex) {
+                    logger.error("There was an error closing the database connection", ex);
+                }
+            }
+        }
+        return false;
+    }
 }
 
     
