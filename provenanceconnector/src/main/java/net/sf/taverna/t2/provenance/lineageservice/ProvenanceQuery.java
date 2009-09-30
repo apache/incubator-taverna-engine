@@ -717,7 +717,7 @@ public abstract class ProvenanceQuery {
 		try {
 			ps = getConnection().prepareStatement(					
 					"SELECT A.sourcePNameRef as source , A.sinkPNameRef as sink, A.wfInstanceRef as wfName1, W1.wfName as wfName2, W2.wfName as wfName3 "+
-					"FROM T2Provenance.Arc A join WFInstance I on A.wfInstanceRef = I.wfnameRef "+ 
+					"FROM Arc A join WFInstance I on A.wfInstanceRef = I.wfnameRef "+ 
 					"left outer join Workflow W1 on W1.externalName = A.sourcePNameRef "+
 					"left outer join Workflow W2 on W2.externalName = A.sinkPNameRef "+
 			"where I.instanceID = ? order by wfInstanceRef");
@@ -774,7 +774,7 @@ public abstract class ProvenanceQuery {
 		try {
 			ps = getConnection().prepareStatement(					
 					"SELECT sinkPnameRef, P1.type, count(*) as pred "+
-					" FROM T2Provenance.Arc A join WfInstance I on A.wfInstanceRef = I.wfnameRef "+ 
+					" FROM Arc A join WfInstance I on A.wfInstanceRef = I.wfnameRef "+ 
 					" join Processor P1 on P1.pname = A.sinkPnameRef "+ 
 					" join Processor P2 on P2.pname = A.sourcePnameRef "+
 					"  where I.instanceID = ? "+
@@ -1277,7 +1277,7 @@ public abstract class ProvenanceQuery {
 		Map<String, String> collQueryConstraints = new HashMap<String, String>();
 
 		// base Collection query
-		String collQuery = "SELECT * FROM T2Provenance.Collection C JOIN wfInstance W ON "
+		String collQuery = "SELECT * FROM Collection C JOIN wfInstance W ON "
 			+ "C.wfInstanceRef = W.instanceID "
 			+ "JOIN Var V on "
 			+ "V.wfInstanceRef = W.wfnameRef and C.PNameRef = V.pnameRef and C.varNameRef = V.varName ";			
@@ -1362,7 +1362,7 @@ public abstract class ProvenanceQuery {
 		Map<String, String> collQueryConstraints = new HashMap<String, String>();
 
 		// base Collection query
-		String collQuery = "SELECT * FROM T2Provenance.Collection C JOIN wfInstance W ON "
+		String collQuery = "SELECT * FROM Collection C JOIN wfInstance W ON "
 			+ "C.wfInstanceRef = W.instanceID "
 			+ "JOIN Var V on "
 			+ "V.wfInstanceRef = W.wfnameRef and C.PNameRef = V.pnameRef and C.varNameRef = V.varName ";			
@@ -1656,7 +1656,7 @@ public abstract class ProvenanceQuery {
 		PreparedStatement ps = null;
 		try {
 			ps = getConnection().prepareStatement(
-					"SELECT pname FROM T2Provenance.Processor P  join wfInstance I on P.wfInstanceRef = I.wfnameRef "+
+					"SELECT pname FROM Processor P  join wfInstance I on P.wfInstanceRef = I.wfnameRef "+
 			"where wfInstanceRef = ? and I.instanceID = ?");
 			ps.setString(1, containerDataflow);
 			ps.setString(2, instanceID);
@@ -1688,7 +1688,7 @@ public abstract class ProvenanceQuery {
 		PreparedStatement ps = null;
 		try {
 			ps = getConnection().prepareStatement(
-					"SELECT pname FROM T2Provenance.Processor P  join wfInstance I on P.wfInstanceRef = I.wfnameRef "+ 
+					"SELECT pname FROM Processor P  join wfInstance I on P.wfInstanceRef = I.wfnameRef "+ 
 			"where  I.instanceID =? and isTopLevel = 1");
 
 			ps.setString(1, wfInstanceID);
@@ -1899,7 +1899,7 @@ public abstract class ProvenanceQuery {
 
 		try {
 			ps = getConnection().prepareStatement(
-					"SELECT * FROM T2Provenance.Processor P join wfInstance I on P.wfInstanceRef = I.wfNameRef "+
+					"SELECT * FROM Processor P join wfInstance I on P.wfInstanceRef = I.wfNameRef "+
 					" where I.instanceID = ? "+
 			" and isTopLevel = 1 ");
 			ps.setString(1, wfInstanceID);
@@ -2106,7 +2106,7 @@ public abstract class ProvenanceQuery {
 
 		try {
 			ps = getConnection().prepareStatement(
-					"SELECT * FROM T2Provenance.Arc A join wfInstance I on A.wfInstanceRef = I.wfnameRef "+ 
+					"SELECT * FROM Arc A join wfInstance I on A.wfInstanceRef = I.wfnameRef "+ 
 					"join Processor P on P.pname = A.sourcePnameRef where sourcePnameRef = ? "+
 					"and P.wfInstanceRef <> A.wfInstanceRef "+
 					"and I.instanceID = ? "+
