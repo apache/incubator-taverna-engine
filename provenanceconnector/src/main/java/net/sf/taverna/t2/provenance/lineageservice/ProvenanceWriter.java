@@ -26,7 +26,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
-import java.util.logging.Level;
 import net.sf.taverna.t2.provenance.connector.JDBCConnector;
 import org.apache.log4j.Logger;
 
@@ -660,7 +659,7 @@ public abstract class ProvenanceWriter {
      */
     public void clearDBStatic(String wfID) throws SQLException {
         String q = null;
-        
+
 
         PreparedStatement ps = null;
         Connection connection = null;
@@ -682,7 +681,6 @@ public abstract class ProvenanceWriter {
                     "DELETE FROM Var WHERE wfInstanceRef = ?");
             ps.setString(1, wfID);
             ps.executeUpdate();
-
 
         } catch (InstantiationException e1) {
             logger.warn("Error deleting provenance records", e1);
@@ -706,7 +704,7 @@ public abstract class ProvenanceWriter {
      */
     public void clearDBDynamic() throws SQLException {
         String q = null;
-        int result = 0;
+
         Connection connection = null;
         Statement stmt = null;
         try {
@@ -715,25 +713,25 @@ public abstract class ProvenanceWriter {
 
             q = "DELETE FROM WfInstance";
 
-            result = stmt.executeUpdate(q);
+            stmt.executeUpdate(q);
 
             q = "DELETE FROM ProcBinding";
 
-            result = stmt.executeUpdate(q);
+            stmt.executeUpdate(q);
 
 
             q = "DELETE FROM VarBinding";
 
-            result = stmt.executeUpdate(q);
+            stmt.executeUpdate(q);
 
 
             q = "DELETE FROM Collection";
 
-            result = stmt.executeUpdate(q);
+            stmt.executeUpdate(q);
 
 
             q = "DELETE FROM Data";
-            result = stmt.executeUpdate(q);
+            stmt.executeUpdate(q);
 
         } catch (InstantiationException e1) {
             logger.warn("Error execting delete query for provenance records", e1);
