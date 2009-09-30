@@ -21,7 +21,9 @@
 package net.sf.taverna.t2.workflowmodel.serialization.xml;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import net.sf.taverna.t2.workflowmodel.Dataflow;
 import net.sf.taverna.t2.workflowmodel.Processor;
@@ -48,7 +50,7 @@ public class XMLSerializerImpl implements XMLSerializer, XMLSerializationConstan
 	 */
 	public Element serializeDataflow(Dataflow dataflow)
 			throws SerializationException {
-		List<Dataflow> innerDataflows = new ArrayList<Dataflow>();
+		Set<Dataflow> innerDataflows = new HashSet<Dataflow>();
 		
 		gatherDataflows(dataflow,innerDataflows);
 		
@@ -60,17 +62,20 @@ public class XMLSerializerImpl implements XMLSerializer, XMLSerializationConstan
 		dataflowElement.setAttribute(DATAFLOW_ROLE, DATAFLOW_ROLE_TOP);
 		result.addContent(dataflowElement);
 		
+		Set<String> outputIds = new HashSet<String>();
 		for (Dataflow innerDataflow : innerDataflows) {
-			Element innerDataflowElement = DataflowXMLSerializer.getInstance().serializeDataflow(innerDataflow);
-			innerDataflowElement.setAttribute(DATAFLOW_ROLE,DATAFLOW_ROLE_NESTED);
-			result.addContent(innerDataflowElement);
+			String currentId = innerDataflow.getInternalIdentier();
+			if (outputIds.add(currentId)) {
+				Element innerDataflowElement = DataflowXMLSerializer.getInstance().serializeDataflow(innerDataflow);
+				innerDataflowElement.setAttribute(DATAFLOW_ROLE,DATAFLOW_ROLE_NESTED);
+				result.addContent(innerDataflowElement);
+			}
 		}
 
 		return result;
 	}
 
-	private void gatherDataflows(Dataflow dataflow,
-			List<Dataflow> innerDataflows) {
+	private void gatherDataflows(Dataflow dataflow, Set<Dataflow> innerDataflows) {
 		for (Processor p : dataflow.getProcessors()) {
 			for (Activity<?> a : p.getActivityList()) {
 				if (a.getConfiguration() instanceof Dataflow) {
