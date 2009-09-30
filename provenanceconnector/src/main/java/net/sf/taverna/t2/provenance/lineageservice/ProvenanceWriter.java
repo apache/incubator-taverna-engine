@@ -126,8 +126,7 @@ public abstract class ProvenanceWriter {
             ps.setString(3, sourceVar.getVName());
             ps.setString(4, sinkVar.getPName());
             ps.setString(5, sinkVar.getVName());
-
-            // System.out.println("executing: "+q);
+            
             int result = ps.executeUpdate();
 
         } catch (InstantiationException e1) {
@@ -503,7 +502,7 @@ public abstract class ProvenanceWriter {
             ps.setString(9, v.getWfInstanceRef());
 
 
-            boolean success = ps.execute();
+            ps.execute();
         } catch (InstantiationException e) {
             logger.warn("Could not execute query: " + e);
         } catch (IllegalAccessException e) {
@@ -519,8 +518,7 @@ public abstract class ProvenanceWriter {
     }
 
     public void updateVarBinding(VarBinding vb) {
-
-        Statement stmt;
+        
         PreparedStatement ps = null;
         Connection connection = null;
         try {
