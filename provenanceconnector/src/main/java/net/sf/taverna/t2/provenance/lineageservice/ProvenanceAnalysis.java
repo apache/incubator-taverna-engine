@@ -30,6 +30,8 @@ import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 
+import net.sf.taverna.t2.provenance.api.NativeAnswer;
+import net.sf.taverna.t2.provenance.api.QueryAnswer;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Arc;
 import net.sf.taverna.t2.provenance.lineageservice.utils.QueryVar;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Var;
@@ -204,7 +206,7 @@ public class ProvenanceAnalysis {
 	 * (for instance the DB is not yet populated) 
 	 * @throws SQLException
 	 */
-	public LineageQueryResult fetchIntermediateResult(
+	public Dependencies fetchIntermediateResult(
 			String wfInstance,
 			String pname,
 			String vname,
@@ -222,9 +224,15 @@ public class ProvenanceAnalysis {
 	}
 
 	
-	public void computeLineageMultiVar(List<QueryVar> qvList,
-			String wfInstance, Set<String> selProcNames) throws SQLException {
+	
+	public QueryAnswer lineageQuery(List<QueryVar> qvList,
+			String wfInstance, Map<String, List<String>> selectedProcessors) throws SQLException {
 
+		QueryAnswer  completeAnswer = new QueryAnswer();
+		NativeAnswer nativeAnswer   = new NativeAnswer();
+		
+		Map<QueryVar, Map<String, List<Dependencies>>> answerContent = new HashMap<QueryVar, Map<String, List<Dependencies>>>();
+		
 		// launch a lineage query for each target variable
 		for (QueryVar qv:qvList) {
 
@@ -232,29 +240,35 @@ public class ProvenanceAnalysis {
 			logger.info("************\n lineage query: [instance, proc, port, path] = ["+
 					wfInstance+","+qv.getPname()+","+qv.getVname()+",["+qv.getPath()+"]]\n***********");
 
-			Map<String, List<LineageQueryResult>> results = 
-				computeLineage(wfInstance, qv.getVname(), qv.getPname(), qv.getPath(), selProcNames);
+			Map<String, List<Dependencies>> a = 
+				computeLineageSingleVar(wfInstance, qv.getVname(), qv.getPname(), qv.getPath(), selectedProcessors);
 
-			if (results == null) break;
-
-			// for each path
-			for (Map.Entry<String, List<LineageQueryResult>> pathResult:results.entrySet()) {
-
-				logger.info("results for var "+qv.getVname()+" path:"+pathResult.getKey());
-
-				// display results
-				for (LineageQueryResult result:pathResult.getValue()) {
-
-					//System.out.println("****** result: *****");
-					for (LineageQueryResultRecord r:result.getRecords()) {	
-
-						r.setPrintResolvedValue(false);					// unclutter visual output
-						System.out.println(r.toString());
-					}				
-				}
-			}
+			answerContent.put(qv, a);
 		}
-		aOPMManager.writeGraph();
+		
+		nativeAnswer.setAnswer(answerContent);
+		
+		String _OPM_asXML_File;
+		try {
+			
+			_OPM_asXML_File = aOPMManager.Rdf2Xml();
+			String _OPM_asRDF_File = aOPMManager.writeGraph();
+
+			completeAnswer.setOPMAnswer_AsRDF(_OPM_asRDF_File);
+			completeAnswer.setOPMAnswer_AsXML(_OPM_asXML_File);
+
+		} catch (OperatorException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JAXBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return completeAnswer;
 	}
 
 	/**
@@ -270,12 +284,12 @@ public class ProvenanceAnalysis {
 	 * @return a map <pre>{ path -> List<LineageQueryResult> }</pre>, one entry for each path
 	 * @throws SQLException
 	 */
-	public Map<String, List<LineageQueryResult>> computeLineage (
+	public Map<String, List<Dependencies>> computeLineageSingleVar (
 			String wfInstance,   // context
 			String var,   // target var
 			String proc,   // qualified with its processor name
 			String path,   // possibly empty when no collections or no granular lineage required
-			Set<String> selectedProcessors
+			Map<String, List<String>> selectedProcessors
 	) throws SQLException  {
 
 		if (!isReady()) {
@@ -286,7 +300,7 @@ public class ProvenanceAnalysis {
 		// are we returning all outputs in addition to the inputs?
 		logger.info("return outputs: "+isReturnOutputs());
 
-		Map<String, List<LineageQueryResult>> results = new HashMap<String, List<LineageQueryResult>>();
+		Map<String, List<Dependencies>> qa = new HashMap<String, List<Dependencies>>();
 
 		// run a query for each variable in the entire workflow graph
 		if (path.equals(ALL_PATHS_KEYWORD)) {
@@ -307,16 +321,15 @@ public class ProvenanceAnalysis {
 				// path is of the form [x,y..]  we need it as x,y... 
 				path = vb.getIteration().substring(1, vb.getIteration().length()-1);
 
-				List<LineageQueryResult> result = computeLineageSingleBinding(
+				List<Dependencies> result = computeLineageSingleBinding(
 						wfInstance, var, proc, path, selectedProcessors);
-				results.put(vb.getIteration(), result);
+				qa.put(vb.getIteration(), result);
 			}
 		}  else {
-			results.put(path, computeLineageSingleBinding(
+			qa.put(path, computeLineageSingleBinding(
 					wfInstance, var, proc, path, selectedProcessors));
 		}
-		
-		return results;		
+		return qa;		
 	}
 
 
@@ -334,12 +347,12 @@ public class ProvenanceAnalysis {
 	 * {@link ProvenanceAnalysis#isReturnOutputs() }
 	 * @throws SQLException
 	 */
-	public List<LineageQueryResult> computeLineageSingleBinding(
+	public List<Dependencies> computeLineageSingleBinding(
 			String wfID,   // context
 			String var,   // target var
 			String proc,   // qualified with its processor name
 			String path,   // possibly empty when no collections or no granular lineage required
-			Set<String> selectedProcessors
+			Map<String, List<String>> selectedProcessors
 	) throws SQLException  {
 
 //		Map<String, LineageSQLQuery>  varName2lqList =  new HashMap<String, LineageSQLQuery>();
@@ -356,7 +369,7 @@ public class ProvenanceAnalysis {
 		 logger.info("\n****************  executing lineage queries:  (includeDataValue is "+ isIncludeDataValue() +"**************\n");
 		start = System.currentTimeMillis();
 
-		List<LineageQueryResult> results =  getPq().runLineageQueries(lqList, isIncludeDataValue());
+		List<Dependencies> results =  getPq().runLineageQueries(lqList, isIncludeDataValue());
 		stop = System.currentTimeMillis();
 
 		long qrt = stop-start;
@@ -375,7 +388,7 @@ public class ProvenanceAnalysis {
 	 * @param var
 	 * @param proc
 	 * @param path  within var (can be empty but not null)
-	 * @param selectedProcessors  only report lineage when you reach any of these processors
+	 * @param selectedProcessors pairs (wfID, proceName), encoded as a Map. only report lineage when you reach any of these processors
 	 * @throws SQLException
 	 */
 	public List<LineageSQLQuery> searchDataflowGraph(
@@ -383,14 +396,17 @@ public class ProvenanceAnalysis {
 			String var,   // target var
 			String proc,   // qualified with its processor name
 			String path,  // can be empty but not null
-			Set<String> selectedProcessors
+			Map<String, List<String>> selectedProcessors
 	) throws SQLException  {
 
 		List<LineageSQLQuery>  lqList =  new ArrayList<LineageSQLQuery>();
 
+		// TODO we are ignoring the wfId context information in the list of selected processors!!
+		
 		// init paths accumulation. here "path" is a path in the graph, not within a collection!
 		//  associate an empty list of paths to each selected processor
-		for (String sp:selectedProcessors) { validPaths.put(sp, new ArrayList<List<String>>()); }
+		for (List<String> sp:selectedProcessors.values()) 
+			for (String s:sp) { validPaths.put(s, new ArrayList<List<String>>()); }
 
 		currentPath = new ArrayList<String>();
 
@@ -444,7 +460,7 @@ public class ProvenanceAnalysis {
 			Var outputVar, // we need the dnl from this output var
 			String proc,
 			String path,
-			Set<String> selectedProcessors, 
+			Map<String, List<String>> selectedProcessors, 
 			List<LineageSQLQuery> lqList 
 	) throws SQLException {
 
@@ -543,7 +559,9 @@ public class ProvenanceAnalysis {
 		currentPath.add(proc);
 
 		// if this is a selected processor, add a copy of the current path to the list of paths for the processor
-		if (selectedProcessors.contains(proc)) { 
+		
+		// TODO not considering the containing workflow context in selectedProcessors
+		if (selectedProcessors.values().contains(proc)) { 
 			List<List<String>> paths = validPaths.get(proc);
 
 			// copy the path since the original will change
@@ -567,7 +585,7 @@ public class ProvenanceAnalysis {
 		Map<String, ProvenanceRole> var2ArtifactRole = new HashMap<String, ProvenanceRole>();
 
 		// if this transformation is important to the user, produce an output and also an OPM graph fragment
-		if (selectedProcessors.isEmpty() || selectedProcessors.contains(proc)) {
+		if (selectedProcessors.isEmpty() || selectedProcessors.values().contains(proc)) {
 
 //			LineageSQLQuery lq;
 
@@ -666,7 +684,7 @@ public class ProvenanceAnalysis {
 			//
 			for (LineageSQLQuery lq: newLqList) {
 				// if OPM is on, execute the query so we get the value we need for the Artifact node
-				LineageQueryResult inputs = getPq().runLineageQuery(lq, isIncludeDataValue());
+				Dependencies inputs = getPq().runLineageQuery(lq, isIncludeDataValue());
 
 				if (doOPM && aOPMManager!=null && inputs.getRecords().size()>0 && !pq.isDataflow(proc)) {
 
@@ -745,7 +763,7 @@ public class ProvenanceAnalysis {
 			String var, 
 			String proc,
 			String path, 
-			Set<String> selectedProcessors,
+			Map<String, List<String>> selectedProcessors,
 			List<LineageSQLQuery> lqList) throws SQLException {
 
 		String sourceProcName = null;

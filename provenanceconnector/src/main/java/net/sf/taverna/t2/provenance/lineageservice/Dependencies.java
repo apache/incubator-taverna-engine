@@ -28,7 +28,7 @@ import java.util.ListIterator;
  * @author paolo
  * bean to hold results from an SQL query to VarBinding join Var
  */
-public class LineageQueryResult {
+public class Dependencies {
 
 	final public static String COLL_TYPE = "referenceSetCollection";
 	final public static String ATOM_TYPE = "referenceSet";

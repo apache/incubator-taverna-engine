@@ -1387,11 +1387,11 @@ public abstract class ProvenanceQuery {
         return lq;
     }
 
-    public LineageQueryResult runCollectionQuery(LineageSQLQuery lq) throws SQLException {
+    public Dependencies runCollectionQuery(LineageSQLQuery lq) throws SQLException {
 
         String q = lq.getCollQuery();
 
-        LineageQueryResult lqr = new LineageQueryResult();
+        Dependencies lqr = new Dependencies();
 
         if (q == null) {
             return lqr;
@@ -1439,7 +1439,7 @@ public abstract class ProvenanceQuery {
         return lqr;
     }
 
-    public LineageQueryResult runVBQuery(LineageSQLQuery lq, boolean includeDataValue) throws SQLException {
+    public Dependencies runVBQuery(LineageSQLQuery lq, boolean includeDataValue) throws SQLException {
 
         String q = lq.getVbQuery();
 
@@ -1455,7 +1455,7 @@ public abstract class ProvenanceQuery {
             if (success) {
                 ResultSet rs = stmt.getResultSet();
 
-                LineageQueryResult lqr = new LineageQueryResult();
+                Dependencies lqr = new Dependencies();
 
                 while (rs.next()) {
 
@@ -1516,10 +1516,10 @@ public abstract class ProvenanceQuery {
      * @return
      * @throws SQLException
      */
-    public LineageQueryResult runLineageQuery(LineageSQLQuery lq,
+    public Dependencies runLineageQuery(LineageSQLQuery lq,
             boolean includeDataValue) throws SQLException {
 
-        LineageQueryResult result = runCollectionQuery(lq);
+    	Dependencies result = runCollectionQuery(lq);
 
         if (result.getRecords().size() == 0) // query was really VB
         {
@@ -1529,11 +1529,11 @@ public abstract class ProvenanceQuery {
         return result;
     }
 
-    public List<LineageQueryResult> runLineageQueries(
+    public List<Dependencies> runLineageQueries(
             List<LineageSQLQuery> lqList, boolean includeDataValue)
             throws SQLException {
 
-        List<LineageQueryResult> allResults = new ArrayList<LineageQueryResult>();
+        List<Dependencies> allResults = new ArrayList<Dependencies>();
 
         if (lqList == null) {
             logger.warn("lineage queries list is NULL, nothing to evaluate");
@@ -1557,7 +1557,7 @@ public abstract class ProvenanceQuery {
      * @param lqr
      * @return a jdom Document with the collection
      */
-    public Document recordsToCollection(LineageQueryResult lqr) {
+    public Document recordsToCollection(Dependencies lqr) {
         // process each var name in turn
         // lqr ordered by var name and by iteration number
         Document d = new Document(new Element("list"));

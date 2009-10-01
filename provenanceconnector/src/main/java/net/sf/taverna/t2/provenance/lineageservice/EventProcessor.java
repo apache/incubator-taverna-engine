@@ -594,6 +594,7 @@ public class EventProcessor {
 		} else if (provenanceItem.getEventType().equals(SharedVocabulary.WORKFLOW_DATA_EVENT_TYPE)) {
 			// give this event to a WorkflowDataProcessor object for pre-processing
 //			try {
+			// TODO may generate an exception when the data is an error CHECK
 				getWfdp().addWorkflowDataItem(provenanceItem);
 //			} catch (NumberFormatException e) {
 //				logger.error(e);
