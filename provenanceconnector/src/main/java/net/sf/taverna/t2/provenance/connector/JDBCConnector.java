@@ -39,7 +39,7 @@ public class JDBCConnector {
             DataSource ds = (DataSource) context.lookup("jdbc/taverna");
             connection = ds.getConnection();            
         } catch (NamingException ex) {
-            throw new SQLException("Unable to retrieve database connection for name jdbc/taverna",ex);
+            throw new SQLException("Unable to retrieve database connection for name jdbc/taverna");
         }
 
         return connection;
