@@ -23,6 +23,9 @@ import javax.sql.DataSource;
 public class JDBCConnector {
 
     /**
+     * Provides a connection to a database, that has been defined externally as a JNDI DataSource with the name 'jdbc/taverna'
+     *
+     * The client is responsible for closing the connection once finished with.
      *
      * @return a connection to the database
      * @throws InstantiationException
