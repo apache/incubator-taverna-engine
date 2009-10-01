@@ -344,7 +344,7 @@ public class OPMManager {
 		this.currentProcess = currentProcess;
 	}
 
-	public void writeGraph() {
+	public String writeGraph() {
 
 		// print out OPM graph in RDF/XML form
 		try {
@@ -362,6 +362,7 @@ public class OPMManager {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
+		return OPM_RDF_GRAPH_FILE;
 	}
 
 
