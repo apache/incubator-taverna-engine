@@ -24,7 +24,6 @@ import java.util.List;
 
 import net.sf.taverna.t2.workflowmodel.Datalink;
 import net.sf.taverna.t2.workflowmodel.EventHandlingInputPort;
-import net.sf.taverna.t2.workflowmodel.InputPort;
 import net.sf.taverna.t2.workflowmodel.Merge;
 import net.sf.taverna.t2.workflowmodel.MergeInputPort;
 import net.sf.taverna.t2.workflowmodel.MergeOutputPort;
@@ -32,13 +31,16 @@ import net.sf.taverna.t2.workflowmodel.Port;
 import net.sf.taverna.t2.workflowmodel.ProcessorPort;
 import net.sf.taverna.t2.workflowmodel.impl.BasicEventForwardingOutputPort;
 import net.sf.taverna.t2.workflowmodel.impl.MergeInputPortImpl;
-import net.sf.taverna.t2.workflowmodel.impl.MergeOutputPortImpl;
 import net.sf.taverna.t2.workflowmodel.serialization.SerializationException;
 
+import org.apache.log4j.Logger;
 import org.jdom.Element;
 
 public class DatalinksXMLSerializer extends AbstractXMLSerializer {
 	private static DatalinksXMLSerializer instance = new DatalinksXMLSerializer();
+	
+	private static Logger logger = Logger.getLogger(DatalinksXMLSerializer.class);
+
 
 	private DatalinksXMLSerializer() {
 
@@ -55,30 +57,27 @@ public class DatalinksXMLSerializer extends AbstractXMLSerializer {
 
 		DATALINK_TYPES dataLinkSinkType = determineDatalinkType(link.getSink());
 		sink.setAttribute(DATALINK_TYPE, dataLinkSinkType.toString());
+		Datalink effectiveLink = link;
+		
+		if (dataLinkSinkType == DATALINK_TYPES.MERGE) {
+			Merge m = ((MergeInputPortImpl) link.getSink()).getMerge();
+			effectiveLink = (Datalink) m
+					.getOutputPort().getOutgoingLinks().toArray()[0];
+			dataLinkSinkType = determineDatalinkType(effectiveLink.getSink());
+		}
 
 		if (dataLinkSinkType == DATALINK_TYPES.PROCESSOR) {
-			ProcessorPort port = (ProcessorPort) link.getSink();
+			ProcessorPort port = (ProcessorPort) effectiveLink.getSink();
 			Element proc = new Element(PROCESSOR, T2_WORKFLOW_NAMESPACE);
 			proc.setText(port.getProcessor().getLocalName());
 			sink.addContent(proc);
 			Element portElement = new Element(PROCESSOR_PORT,
 					T2_WORKFLOW_NAMESPACE);
-			portElement.setText(link.getSink().getName());
+			portElement.setText(effectiveLink.getSink().getName());
 			sink.addContent(portElement);
-		} else if (dataLinkSinkType == DATALINK_TYPES.MERGE) {
-			Merge m = ((MergeInputPortImpl) link.getSink()).getMerge();
-			ProcessorPort processorPort = (ProcessorPort) ((Datalink) m
-					.getOutputPort().getOutgoingLinks().toArray()[0]).getSink();
-			Element proc = new Element(PROCESSOR, T2_WORKFLOW_NAMESPACE);
-			proc.setText(processorPort.getProcessor().getLocalName());
-			sink.addContent(proc);
-			Element procPort = new Element(PROCESSOR_PORT,
-					T2_WORKFLOW_NAMESPACE);
-			procPort.setText(((InputPort) processorPort).getName());
-			sink.addContent(procPort);
-		} else if (dataLinkSinkType == DATALINK_TYPES.DATAFLOW) {
+		}  else if (dataLinkSinkType == DATALINK_TYPES.DATAFLOW) {
 			Element portElement = new Element(PORT, T2_WORKFLOW_NAMESPACE);
-			portElement.setText(link.getSink().getName());
+			portElement.setText(effectiveLink.getSink().getName());
 			sink.addContent(portElement);
 		}
 
@@ -96,16 +95,7 @@ public class DatalinksXMLSerializer extends AbstractXMLSerializer {
 			portElement.setText(link.getSource().getName());
 			source.addContent(portElement);
 		} else if (dataLinkSourceType == DATALINK_TYPES.MERGE) {
-			Merge m = ((MergeOutputPortImpl) link.getSource()).getMerge();
-			ProcessorPort processorPort = (ProcessorPort) ((Datalink) m
-					.getOutputPort().getOutgoingLinks().toArray()[0]).getSink();
-			Element proc = new Element(PROCESSOR, T2_WORKFLOW_NAMESPACE);
-			proc.setText(processorPort.getProcessor().getLocalName());
-			source.addContent(proc);
-			Element procPort = new Element(PROCESSOR_PORT,
-					T2_WORKFLOW_NAMESPACE);
-			procPort.setText(((InputPort) processorPort).getName());
-			source.addContent(procPort);
+			logger.error("Not expecting DATALINK_TYPES.MERGE");
 		} else if (dataLinkSourceType == DATALINK_TYPES.DATAFLOW) {
 			Element portElement = new Element(PORT, T2_WORKFLOW_NAMESPACE);
 			portElement.setText(link.getSource().getName());
@@ -124,9 +114,6 @@ public class DatalinksXMLSerializer extends AbstractXMLSerializer {
 			return DATALINK_TYPES.MERGE;
 		} else if (port instanceof ProcessorPort) {
 			return DATALINK_TYPES.PROCESSOR;
-		} else if (port instanceof MergeInputPort
-				|| port instanceof MergeOutputPort) {
-			return DATALINK_TYPES.MERGE;
 		} else if (port instanceof BasicEventForwardingOutputPort
 				|| port instanceof EventHandlingInputPort) {
 			return DATALINK_TYPES.DATAFLOW;

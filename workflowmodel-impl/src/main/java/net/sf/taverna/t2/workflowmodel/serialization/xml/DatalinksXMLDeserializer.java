@@ -153,32 +153,20 @@ public class DatalinksXMLDeserializer extends AbstractXMLDeserializer {
 			Dataflow dataflow, Map<String, Processor> createdProcessors)
 			throws DeserializationException, EditException {
 		EventHandlingInputPort result = null;
-		String sinkType = sink.getAttributeValue(DATALINK_TYPE);
 		String portName = sink.getChildText(PORT, T2_WORKFLOW_NAMESPACE);
-		if (sinkType.equals(DATALINK_TYPES.PROCESSOR.toString())) {
-			String processorName = sink.getChildText(PROCESSOR,
-					T2_WORKFLOW_NAMESPACE);
-			result = findProcessorInputPort(createdProcessors, portName,
-					processorName);
-		} else if (sinkType.equals(DATALINK_TYPES.DATAFLOW.toString())) {
+		String processorName = sink.getChildText(PROCESSOR, T2_WORKFLOW_NAMESPACE);
+		if ((processorName == null) || processorName.equals("")) {
 			for (DataflowOutputPort port : dataflow.getOutputPorts()) {
 				if (port.getName().equals(portName)) {
 					result = port.getInternalInputPort();
 					break;
 				}
 			}
-		} else if (sinkType.equals(DATALINK_TYPES.MERGE.toString())) {
-			String processorName = sink.getChildText(PROCESSOR,
-					T2_WORKFLOW_NAMESPACE);
-			String processorPort = sink.getChildText(PROCESSOR_PORT,
-					T2_WORKFLOW_NAMESPACE);
-			EventHandlingInputPort processorInputPort = findProcessorInputPort(
-					createdProcessors, processorPort, processorName);
-			result = processorInputPort;
 		} else {
-			throw new DeserializationException(
-					"Unable to recognise datalink sink type:" + sinkType);
-		}
+			EventHandlingInputPort processorInputPort = findProcessorInputPort(
+					createdProcessors, portName, processorName);
+			result = processorInputPort;
+		} 
 		return result;
 	}
 
