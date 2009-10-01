@@ -1,12 +1,8 @@
 package net.sf.taverna.t2.provenance.lineageservice.utils;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-
-@Entity
 public class WorkflowInstance {
-	@Id
-	private String instanceID;
+
+        private String instanceID;
 	
 	private String wfnameRef;
 	

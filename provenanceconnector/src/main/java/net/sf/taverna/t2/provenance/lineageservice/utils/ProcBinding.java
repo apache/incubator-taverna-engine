@@ -20,17 +20,13 @@
  ******************************************************************************/
 package net.sf.taverna.t2.provenance.lineageservice.utils;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+
 
 /**
  * @author Paolo Missier
  *
  */
-@Entity
 public class ProcBinding {
-	@Id @GeneratedValue
 	private String identifier;
 
 	private String pNameRef;

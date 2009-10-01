@@ -20,18 +20,13 @@
  ******************************************************************************/
 package net.sf.taverna.t2.provenance.lineageservice.utils;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 
 /**
  * a Var that has no pName is either a WF input or output, depending on isInput
  * @author Paolo Missier
  */
-@Entity
 public class ProvenanceProcessor {
 	
-	@Id @GeneratedValue
 	private
 	String identifier;
 

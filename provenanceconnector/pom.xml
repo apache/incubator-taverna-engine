@@ -39,39 +39,30 @@
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>net.sf.taverna.t2.core</groupId>
-			<artifactId>reference-api</artifactId>
-			<version>${project.version}</version>
-		</dependency>
+		
 		<dependency>
 			<groupId>net.sf.taverna.t2.core</groupId>
 			<artifactId>workflowmodel-api</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+                
 		<dependency>
 			<groupId>jdom</groupId>
 			<artifactId>jdom</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>net.sf.taverna.t2.infrastructure</groupId>
 			<artifactId>spi-discovery-api</artifactId>
 			<version>${t2.infrastructure.version}</version>
 		</dependency>
-		
-			<dependency>
+
+		<dependency>
 			<groupId>net.sf.taverna.t2.ui-components</groupId>
 			<artifactId>provenance-config</artifactId>
 			<version>${t2.ui.components.version}</version>
-		</dependency>
-		
+		</dependency>		
 
-
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-annotations</artifactId>
-			<version>3.2.1.ga</version>
-		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
