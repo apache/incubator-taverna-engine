@@ -12,6 +12,9 @@
 	<artifactId>provenanceconnector</artifactId>
 	<name>Database storage and analysis of provenance info</name>
 	<url>http://maven.apache.org</url>
+	<properties>
+			<t2.ui.components.version>0.10-SNAPSHOT</t2.ui.components.version>
+	</properties>
 	<repositories>
 		<repository>
 			<snapshots>
@@ -50,51 +53,48 @@
 			<groupId>jdom</groupId>
 			<artifactId>jdom</artifactId>
 		</dependency>
-                
 		<dependency>
 			<groupId>net.sf.taverna.t2.infrastructure</groupId>
 			<artifactId>spi-discovery-api</artifactId>
 			<version>${t2.infrastructure.version}</version>
 		</dependency>
+		
+			<dependency>
+			<groupId>net.sf.taverna.t2.ui-components</groupId>
+			<artifactId>provenance-config</artifactId>
+			<version>${t2.ui.components.version}</version>
+		</dependency>
+		
 
-               
 
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-annotations</artifactId>
 			<version>3.2.1.ga</version>
 		</dependency>
-
-		
-
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>commons-lang</groupId>
-			<artifactId>commons-lang</artifactId>			
+			<artifactId>commons-lang</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.openprovenance</groupId>
 			<artifactId>opm</artifactId>
 			<version>1.0-20090428.084527-6</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.tupeloproject</groupId>
 			<artifactId>tupelo-cet</artifactId>
 			<version>2.4.3</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.openprovenance</groupId>
 			<artifactId>opm</artifactId>
 			<version>1.0.3</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.openprovenance</groupId>
 			<artifactId>toolbox</artifactId>
