@@ -51,17 +51,13 @@ public  class ProvenanceAccess {
 			}
 			logger.info("Provenance being captured using: " + 
 					provenanceConnector);
-			String dbURL = ProvenanceConfiguration.getInstance().getProperty("dbURL");
-//			String user = ProvenanceConfiguration.getInstance().getProperty("dbUser");
-//			String password = ProvenanceConfiguration.getInstance().getProperty("dbPassword");
 			
-			if (dbURL != null) {
-				//FIXME if dburl does not exist then throw exception
-				provenanceConnector.setDbURL(dbURL);	
-			}
 			//slight change, the init is outside but it also means that the init call has to ensure that the dbURL
 			//is set correctly
 			provenanceConnector.init();
+			
+			pa = provenanceConnector.getProvenanceAnalysis();
+			pq = pa.getPq();
 		}
 		
 	}
@@ -78,19 +74,6 @@ public  class ProvenanceAccess {
 
 		ReadProvenanceConfiguration config = new ReadProvenanceConfiguration(configFile);
 		
-		String DB_URL_LOCAL = config.getString("dbhost");  // URL of database server //$NON-NLS-1$
-		String DB_USER      = config.getString("dbuser");                        // database user id //$NON-NLS-1$
-		String DB_PASSWD    = config.getString("dbpassword"); //$NON-NLS-1$
-
-		// String derbyjdbcString = "jdbc:derby:/Users/paolo/Library/Application Support/taverna-2.1-SNAPSHOT-20090511/db";
-
-		String mySQLjdbcString = "jdbc:mysql://" + DB_URL_LOCAL + "/T2Provenance?user="
-		+ DB_USER + "&password=" + DB_PASSWD;
-
-		
-		pq.setDbURL(mySQLjdbcString);
-		pa = new ProvenanceAnalysis(pq);
-
 	}
 
 
