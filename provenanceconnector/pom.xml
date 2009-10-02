@@ -66,11 +66,6 @@
 			<artifactId>commons-lang</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.openprovenance</groupId>
-			<artifactId>opm</artifactId>
-			<version>1.0-20090428.084527-6</version>
-		</dependency>
-		<dependency>
 			<groupId>org.tupeloproject</groupId>
 			<artifactId>tupelo-cet</artifactId>
 			<version>2.4.3</version>
