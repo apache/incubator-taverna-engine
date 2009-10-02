@@ -83,10 +83,10 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
         getProvenance().setSaveEvents(this.saveEvents);
     }
     
-    /**
-//   * Uses a {@link ScheduledThreadPoolExecutor} to process events in a Thread
-//   * safe manner
-//   */
+   /**
+   * Uses a {@link ScheduledThreadPoolExecutor} to process events in a Thread
+   * safe manner
+   */
   public synchronized void addProvenanceItem(
           final ProvenanceItem provenanceItem) {
 
