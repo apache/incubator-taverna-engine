@@ -20,6 +20,7 @@
  ******************************************************************************/
 package net.sf.taverna.t2.provenance.connector;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -42,6 +43,7 @@ import net.sf.taverna.t2.provenance.lineageservice.ProvenanceAnalysis;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceQuery;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceWriter;
 import net.sf.taverna.t2.provenance.reporter.ProvenanceReporter;
+import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
 
 import net.sf.taverna.t2.reference.ReferenceService;
 import org.apache.log4j.Logger;
@@ -80,6 +82,38 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
         this.saveEvents = saveEvents;
         getProvenance().setSaveEvents(this.saveEvents);
     }
+    
+    /**
+//   * Uses a {@link ScheduledThreadPoolExecutor} to process events in a Thread
+//   * safe manner
+//   */
+  public synchronized void addProvenanceItem(
+          final ProvenanceItem provenanceItem) {
+
+      if (provenanceItem.getEventType().equals(
+              SharedVocabulary.END_WORKFLOW_EVENT_TYPE)) {
+          logger.info("EVENT: " + provenanceItem.getEventType());
+      }
+
+      Runnable runnable = new Runnable() {
+
+          public void run() {
+              try {
+
+                  getProvenance().acceptRawProvenanceEvent(
+                          provenanceItem.getEventType(), provenanceItem);
+
+              } catch (SQLException e) {
+                  logger.warn("Could not add provenance for " + provenanceItem.getEventType() + " " + provenanceItem.getIdentifier() + " " + e);
+              } catch (IOException e) {
+                  logger.warn("Could not add provenance for " + provenanceItem.getEventType() + " " + provenanceItem.getIdentifier() + " " + e);
+              }
+
+          }
+      };
+      getExecutor().execute(runnable);
+
+  }
 
     public ReferenceService getReferenceService() {
         return referenceService;
@@ -250,22 +284,16 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
     public List<LineageQueryResultRecord> getIntermediateValues(
             final String wfInstance, final String pname, final String vname,
             final String iteration) throws Exception {
-        Dependencies fetchIntermediateResult = getProvenanceAnalysis().fetchIntermediateResult(wfInstance, pname, vname, iteration);
 
-        Dependencies result = null;
         FutureTask<Dependencies> future = new FutureTask<Dependencies>(
                 new Callable<Dependencies>() {
 
                     public Dependencies call() throws Exception {
                         try {
-//							LineageSQLQuery simpleLineageQuery = provenance
-//									.getPq().simpleLineageQuery(wfInstance,
-//											pname, vname, iteration);
+
                             Dependencies runLineageQuery = getProvenanceAnalysis().fetchIntermediateResult(wfInstance, pname,
                                     vname, iteration);
 
-                            // runLineageQuery = provenance.getPq()
-                            // .runLineageQuery(simpleLineageQuery);
                             return runLineageQuery;
                         } catch (SQLException e) {
                             throw e;

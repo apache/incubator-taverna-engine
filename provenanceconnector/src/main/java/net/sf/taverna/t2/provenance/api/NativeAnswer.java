@@ -3,7 +3,6 @@
  */
 package net.sf.taverna.t2.provenance.api;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 

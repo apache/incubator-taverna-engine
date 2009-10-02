@@ -6,7 +6,6 @@ package net.sf.taverna.t2.provenance.api;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import net.sf.taverna.t2.provenance.ProvenanceConnectorRegistry;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector;
@@ -14,9 +13,7 @@ import net.sf.taverna.t2.provenance.lineageservice.Dependencies;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceAnalysis;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceQuery;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
-import net.sf.taverna.t2.provenance.lineageservice.utils.QueryVar;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Var;
-import net.sf.taverna.t2.workbench.provenance.ProvenanceConfiguration;
 
 import org.apache.log4j.Logger;
 
@@ -30,10 +27,13 @@ public  class ProvenanceAccess {
 
 	ProvenanceAnalysis pa = null;
 	ProvenanceQuery pq;
-	Query q = null;	
+	Query q = null;
+
+	private String connectorType;	
 	
 	
-	public ProvenanceAccess() {
+	public ProvenanceAccess(String connectorType) {
+		this.connectorType = connectorType;
 		init();
 	}
 
@@ -41,8 +41,7 @@ public  class ProvenanceAccess {
 	public void init() {
 
 		ProvenanceConnector provenanceConnector = null;
-		if (ProvenanceConfiguration.getInstance().getProperty("enabled").equalsIgnoreCase("yes")) {
-			String connectorType = ProvenanceConfiguration.getInstance().getProperty("connector");
+		
 
 			for (ProvenanceConnector connector:ProvenanceConnectorRegistry.getInstance().getInstances()) {
 				if (connectorType.equalsIgnoreCase(connector.getName())) {
@@ -58,7 +57,7 @@ public  class ProvenanceAccess {
 			
 			pa = provenanceConnector.getProvenanceAnalysis();
 			pq = pa.getPq();
-		}
+		
 		
 	}
 	

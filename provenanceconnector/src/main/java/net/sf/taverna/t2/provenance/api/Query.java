@@ -6,7 +6,6 @@ package net.sf.taverna.t2.provenance.api;
 import java.util.List;
 import java.util.Map;
 
-import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 import net.sf.taverna.t2.provenance.lineageservice.utils.QueryVar;
 
 /**
