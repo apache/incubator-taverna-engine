@@ -435,6 +435,18 @@ public class EventProcessor {
 					} else {
 						sourcePname = INPUT_CONTAINER_PROCESSOR;
 					}
+					
+					//Ian added this logic since there were some null sinkPnameRefs with merge ports
+					
+					if (sinkPname == null) {
+						// link is to dataflow output
+
+						if (externalName != null) {  // link from subflow input
+							sinkPname = externalName;
+						} else {
+							sinkPname = OUTPUT_CONTAINER_PROCESSOR;
+						}
+					}
 
 //					System.out.println("adding arc from dataflow input");
 
@@ -449,6 +461,17 @@ public class EventProcessor {
 						sinkPname = externalName;
 					} else {
 						sinkPname = OUTPUT_CONTAINER_PROCESSOR;
+					}
+					
+					//Ian added this bit at the same time as the null sinkPnameRef logic above - hope it is correct
+					
+					if (sourcePname == null) {
+						// link is from dataflow input or subflow input
+						if (externalName != null) {  // link from subflow input
+							sourcePname = externalName;
+						} else {
+							sourcePname = INPUT_CONTAINER_PROCESSOR;
+						}
 					}
 
 					//					System.out.println("adding arc to dataflow output");
