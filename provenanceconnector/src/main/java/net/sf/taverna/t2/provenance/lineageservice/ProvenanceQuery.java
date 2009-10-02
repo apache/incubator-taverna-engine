@@ -478,11 +478,11 @@ public abstract class ProvenanceQuery {
 			if (dataflowID != null) {
 				ps = connection.prepareStatement(
 				"SELECT * FROM WfInstance where wfnameRef = ? order by timestamp desc");
+				ps.setString(1, dataflowID);
 			} else {
 				ps = connection.prepareStatement(
 				"SELECT * FROM WfInstance order by timestamp desc");            	
 			}
-			ps.setString(1, dataflowID);
 
 			boolean success = ps.execute();
 
