@@ -4,6 +4,7 @@
 package net.sf.taverna.t2.provenance.api;
 
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -13,7 +14,9 @@ import net.sf.taverna.t2.provenance.lineageservice.Dependencies;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceAnalysis;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceQuery;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
+import net.sf.taverna.t2.provenance.lineageservice.utils.QueryVar;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Var;
+import net.sf.taverna.t2.provenance.lineageservice.utils.WorkflowInstance;
 
 import org.apache.log4j.Logger;
 
@@ -27,40 +30,39 @@ public  class ProvenanceAccess {
 
 	ProvenanceAnalysis pa = null;
 	ProvenanceQuery pq;
-	Query q = null;
+	Query q = null;	
 
 	private String connectorType;	
-	
-	
+
+
 	public ProvenanceAccess(String connectorType) {
 		this.connectorType = connectorType;
 		init();
 	}
 
-	
+
 	public void init() {
 
 		ProvenanceConnector provenanceConnector = null;
-		
 
-			for (ProvenanceConnector connector:ProvenanceConnectorRegistry.getInstance().getInstances()) {
-				if (connectorType.equalsIgnoreCase(connector.getName())) {
-					provenanceConnector = connector;
-				}
+
+		for (ProvenanceConnector connector:ProvenanceConnectorRegistry.getInstance().getInstances()) {
+			if (connectorType.equalsIgnoreCase(connector.getName())) {
+				provenanceConnector = connector;
 			}
-			logger.info("Provenance being captured using: " + 
-					provenanceConnector);
-			
-			//slight change, the init is outside but it also means that the init call has to ensure that the dbURL
-			//is set correctly
-			provenanceConnector.init();
-			
-			pa = provenanceConnector.getProvenanceAnalysis();
-			pq = pa.getPq();
-		
-		
+		}
+		logger.info("Provenance being captured using: " + 
+				provenanceConnector);
+
+		//slight change, the init is outside but it also means that the init call has to ensure that the dbURL
+		//is set correctly
+		provenanceConnector.init();
+
+		pa = provenanceConnector.getProvenanceAnalysis();
+		pq = pa.getPq();
 	}
-	
+
+
 	/**
 	 * TODO insert source selection code here
 	 * @param configFile
@@ -72,13 +74,13 @@ public  class ProvenanceAccess {
 	public void init(String configFile) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 
 		ReadProvenanceConfiguration config = new ReadProvenanceConfiguration(configFile);
-		
+
 	}
 
 
 /////////
-///  main provenance query methods
-////////
+//	/  main provenance query methods
+
 
 
 	/**
@@ -116,15 +118,23 @@ public  class ProvenanceAccess {
 
 
 	/**
-	 * allowable conditions to be determined and documented here
-	
+	 * allowable conditions to be determined and documented here.
+
 	 * @param workflowId defines the scope of the query - if null then the query runs on all available workflows
-	 * @param conditions additional conditions to be defined
-	 * @return a list of wfInstanceID, each representing one run 
+	 * @param conditions additional conditions to be defined. They are currently ignored
+	 * @return a list of wfInstanceID, each representing one run of the same workflow
 	 */
-	public List<String> listRuns(String workflowId, Map<String, String> conditions) {
-		return null; // TODO
+	public List<WorkflowInstance> listRuns(String workflowId, Map<String, String> conditions) {
+
+		try {
+			return pq.getWFInstanceID(workflowId);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
 	}
+
 
 	/**
 	 * implement using clearDynamic() method or a variation. Collect references and forward
@@ -135,12 +145,46 @@ public  class ProvenanceAccess {
 		return; // TODO
 	}
 
-	public String getWorkflowID(String workflowInstanceID) {
-		return null; // TODO
+
+	/**
+	 * returns a set of workflowIDs for a given runID. The set is a singleton if the workflow has no nesting, 
+	 * but in general it contains one workflowID for each nested workflow involved in the run
+	 * @param workflowInstanceID
+	 * @return
+	 */
+	public List<String> getWorkflowID(String runID) {
+
+		try {
+			return pq.getWfNames(runID);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+
+	public String getTopLevelWorkflowID(String runID) {
+
+		try {
+			return pq.getTopLevelWfName(runID);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 
 
+	public List<WorkflowInstance> getAllWorkflowIDs() {
+		try {
+			return pq.getWFInstanceID(null);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+
+	}
 
 //	/ access static workflow structure 
 
@@ -152,8 +196,8 @@ public  class ProvenanceAccess {
 	 * @return a map workflowID -> list(ProvenanceProcessor).
 	 * Each entry is for one composing sub-workflow (if no nesting then this contains only one workflow, namely the top level one) 
 	 */
-	public Map<String, List<ProvenanceProcessor>> getProcessorsInWorkflow(String workflowID) {
-		return null; // TODO
+	public Map<String, List<ProvenanceProcessor>> getProcessorsInWorkflow(String workflowID) {		
+		return pq.getProcessorsDeep(null, workflowID);
 	}
 
 
@@ -164,7 +208,18 @@ public  class ProvenanceAccess {
 	 * @return
 	 */
 	public List<Var> getPortsForProcessor(String workflowID, String processorName) {
-		return null; // TODO
+
+		Map<String, String> queryConstraints = new HashMap<String, String>();
+		queryConstraints.put("wfInstanceRef", workflowID);
+		queryConstraints.put("pnameRef", processorName);
+
+		try {
+			return pq.getVars(queryConstraints);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return null;
+
 	}
 
 

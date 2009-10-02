@@ -8,13 +8,7 @@ public class WorkflowInstance {
 	
 	private String timestamp;
 
-	public void setIdentifier(String identifier) {
-		this.instanceID = identifier;
-	}
 
-	public String getIdentifier() {
-		return instanceID;
-	}
 
 	public void setWorkflowIdentifier(String workflowIdentifier) {
 		this.wfnameRef = workflowIdentifier;
@@ -30,6 +24,20 @@ public class WorkflowInstance {
 
 	public String getTimestamp() {
 		return timestamp;
+	}
+
+	/**
+	 * @return the instanceID
+	 */
+	public String getInstanceID() {
+		return instanceID;
+	}
+
+	/**
+	 * @param instanceID the instanceID to set
+	 */
+	public void setInstanceID(String instanceID) {
+		this.instanceID = instanceID;
 	}
 	
 

@@ -43,6 +43,7 @@ import net.sf.taverna.t2.provenance.item.WorkflowProvenanceItem;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Arc;
 import net.sf.taverna.t2.provenance.lineageservice.utils.NestedListNode;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProcBinding;
+import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceUtils;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Var;
 import net.sf.taverna.t2.provenance.lineageservice.utils.VarBinding;
@@ -240,7 +241,7 @@ public class EventProcessor {
 				pw.addWFId(dataflowID, parentDataflow, externalName); // set its dataflowID along with its parent
 
 				// override wfInstanceID to point to top level -- UNCOMMENTED PM 9/09  CHECK
-				localWfInstanceID = pq.getWFInstanceID(parentDataflow).get(0);
+				localWfInstanceID = pq.getWFInstanceID(parentDataflow).get(0).getInstanceID();
 //				logger.debug("overriding nested WFRef "+getWfInstanceID()+" with parent WFRef "+localWfInstanceID);
 				
 
@@ -881,7 +882,7 @@ public class EventProcessor {
 
 			queryConstraints.put("sinkVarNameRef", vb.getVarNameRef());
 			queryConstraints.put("sinkPNameRef", vb.getPNameRef());				
-			queryConstraints.put("wfInstanceRef", pq.getWfNameRef(vb.getWfInstanceRef()));  // CHECK wfInstanceID
+			queryConstraints.put("wfInstanceRef", pq.getWfNames(vb.getWfInstanceRef()).get(0));  // CHECK picking first element in list...
 
 			List<Arc> incomingArcs = pq.getArcs(queryConstraints);
 

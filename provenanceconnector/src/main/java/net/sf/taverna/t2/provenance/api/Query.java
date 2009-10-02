@@ -6,6 +6,7 @@ package net.sf.taverna.t2.provenance.api;
 import java.util.List;
 import java.util.Map;
 
+import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 import net.sf.taverna.t2.provenance.lineageservice.utils.QueryVar;
 
 /**
@@ -16,7 +17,7 @@ public class Query {
 	 
 	List<QueryVar> targetVars;
 	String runID;
-	Map<String, List<String>> selectedProcessors;
+	List<ProvenanceProcessor> selectedProcessors;
 	
 	/**
 	 * @return the targetVars
@@ -45,13 +46,13 @@ public class Query {
 	/**
 	 * @return the selectedProcessors
 	 */
-	public Map<String, List<String>> getSelectedProcessors() {
+	public List<ProvenanceProcessor>  getSelectedProcessors() {
 		return selectedProcessors;
 	}
 	/**
 	 * @param selectedProcessors the selectedProcessors to set
 	 */
-	public void setSelectedProcessors(Map<String, List<String>> selectedProcessors) {
+	public void setSelectedProcessors(List<ProvenanceProcessor>  selectedProcessors) {
 		this.selectedProcessors = selectedProcessors;
 	}
 }

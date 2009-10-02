@@ -59,7 +59,7 @@ import org.apache.log4j.Logger;
 public abstract class ProvenanceConnector implements ProvenanceReporter {
 
     private static Logger logger = Logger.getLogger(ProvenanceConnector.class);
-    private String saveEvents;
+    private String saveEvents;    
     private ProvenanceAnalysis provenanceAnalysis;
     private ExecutorService executor = Executors.newSingleThreadExecutor();
     private boolean isClearDB = false;
@@ -70,6 +70,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
     private InvocationContext invocationContext;
 
     public ProvenanceConnector() {
+        
     }
 
     public ProvenanceConnector(Provenance provenance,
@@ -82,54 +83,6 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
         this.saveEvents = saveEvents;
         getProvenance().setSaveEvents(this.saveEvents);
     }
-    
-   /**
-   * Uses a {@link ScheduledThreadPoolExecutor} to process events in a Thread
-   * safe manner
-   */
-  public synchronized void addProvenanceItem(
-          final ProvenanceItem provenanceItem) {
-
-      if (provenanceItem.getEventType().equals(
-              SharedVocabulary.END_WORKFLOW_EVENT_TYPE)) {
-          logger.info("EVENT: " + provenanceItem.getEventType());
-      }
-
-      Runnable runnable = new Runnable() {
-
-          public void run() {
-              try {
-
-                  getProvenance().acceptRawProvenanceEvent(
-                          provenanceItem.getEventType(), provenanceItem);
-
-              } catch (SQLException e) {
-                  logger.warn("Could not add provenance for " + provenanceItem.getEventType() + " " + provenanceItem.getIdentifier() + " " + e);
-              } catch (IOException e) {
-                  logger.warn("Could not add provenance for " + provenanceItem.getEventType() + " " + provenanceItem.getIdentifier() + " " + e);
-              }
-
-          }
-      };
-      getExecutor().execute(runnable);
-
-  }
-
-    public ReferenceService getReferenceService() {
-        return referenceService;
-    }
-
-    public void setReferenceService(ReferenceService referenceService) {
-        this.referenceService = referenceService;
-    }
-
-    public InvocationContext getInvocationContext() {
-        return invocationContext;
-    }
-
-    public void setInvocationContext(InvocationContext invocationContext) {
-        this.invocationContext = invocationContext;
-    }
 
     protected Connection getConnection() throws InstantiationException,
             IllegalAccessException, ClassNotFoundException, SQLException {
@@ -141,7 +94,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
      * create the database. Requires each datbase type to create all its own
      * tables
      */
-    public abstract void createDatabase();
+    public abstract void createDatabase();    
 
     /**
      * Clear all the values in the database but keep the db there
@@ -229,12 +182,10 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
             logger.warn("Could not execute statement " + q + " :" + e);
         }
 
-        if (connection != null) {
-            try {
-                connection.close();
-            } catch (SQLException ex) {
-                logger.error("Error closing connection", ex);
-            }
+        if (connection!=null) try {
+            connection.close();
+        } catch (SQLException ex) {
+            logger.error("Error closing connection",ex);
         }
     }
 
@@ -321,7 +272,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
     public String getDataflowInstance(String dataflowId) {
         String instanceID = null;
         try {
-            instanceID = (getProvenance()).getPq().getWFInstanceID(dataflowId).get(0);
+            instanceID = (getProvenance()).getPq().getWFInstanceID(dataflowId).get(0).getInstanceID();
         } catch (SQLException e) {
             logger.error("Error finding the dataflow instance", e);
         }
