@@ -31,6 +31,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 
+import net.sf.taverna.t2.invocation.InvocationContext;
 import net.sf.taverna.t2.provenance.item.ProvenanceItem;
 import net.sf.taverna.t2.provenance.item.WorkflowProvenanceItem;
 import net.sf.taverna.t2.provenance.lineageservice.Dependencies;
@@ -42,6 +43,7 @@ import net.sf.taverna.t2.provenance.lineageservice.ProvenanceQuery;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceWriter;
 import net.sf.taverna.t2.provenance.reporter.ProvenanceReporter;
 
+import net.sf.taverna.t2.reference.ReferenceService;
 import org.apache.log4j.Logger;
 
 /**
@@ -55,29 +57,44 @@ import org.apache.log4j.Logger;
 public abstract class ProvenanceConnector implements ProvenanceReporter {
 
     private static Logger logger = Logger.getLogger(ProvenanceConnector.class);
-    private String saveEvents;    
+    private String saveEvents;
     private ProvenanceAnalysis provenanceAnalysis;
     private ExecutorService executor = Executors.newSingleThreadExecutor();
     private boolean isClearDB = false;
     private Provenance provenance;
-    private String dbURL;
     private boolean finished = false;
     private String sessionID;
+    private ReferenceService referenceService;
+    private InvocationContext invocationContext;
 
     public ProvenanceConnector() {
-        
     }
 
     public ProvenanceConnector(Provenance provenance,
-            ProvenanceAnalysis provenanceAnalysis, String dbURL,
+            ProvenanceAnalysis provenanceAnalysis,
             boolean isClearDB, String saveEvents) {
 
         setProvenance(provenance);
         this.setProvenanceAnalysis(provenanceAnalysis);
-        this.dbURL = dbURL;
         this.isClearDB = isClearDB;
         this.saveEvents = saveEvents;
         getProvenance().setSaveEvents(this.saveEvents);
+    }
+
+    public ReferenceService getReferenceService() {
+        return referenceService;
+    }
+
+    public void setReferenceService(ReferenceService referenceService) {
+        this.referenceService = referenceService;
+    }
+
+    public InvocationContext getInvocationContext() {
+        return invocationContext;
+    }
+
+    public void setInvocationContext(InvocationContext invocationContext) {
+        this.invocationContext = invocationContext;
     }
 
     protected Connection getConnection() throws InstantiationException,
@@ -90,7 +107,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
      * create the database. Requires each datbase type to create all its own
      * tables
      */
-    public abstract void createDatabase();    
+    public abstract void createDatabase();
 
     /**
      * Clear all the values in the database but keep the db there
@@ -102,7 +119,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
         Statement stmt = null;
         try {
             connection = getConnection();
-            stmt=connection.createStatement();
+            stmt = connection.createStatement();
         } catch (SQLException e) {
             logger.warn("Could not create database statement :" + e);
         } catch (InstantiationException e) {
@@ -178,10 +195,12 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
             logger.warn("Could not execute statement " + q + " :" + e);
         }
 
-        if (connection!=null) try {
-            connection.close();
-        } catch (SQLException ex) {
-            logger.error("Error closing connection",ex);
+        if (connection != null) {
+            try {
+                connection.close();
+            } catch (SQLException ex) {
+                logger.error("Error closing connection", ex);
+            }
         }
     }
 
@@ -229,46 +248,43 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
     public abstract void init();
 
     public List<LineageQueryResultRecord> getIntermediateValues(
-			final String wfInstance, final String pname, final String vname,
-			final String iteration) throws Exception {
-		Dependencies fetchIntermediateResult = getProvenanceAnalysis()
-				.fetchIntermediateResult(wfInstance, pname, vname, iteration);
+            final String wfInstance, final String pname, final String vname,
+            final String iteration) throws Exception {
+        Dependencies fetchIntermediateResult = getProvenanceAnalysis().fetchIntermediateResult(wfInstance, pname, vname, iteration);
 
-		Dependencies result = null;
-		FutureTask<Dependencies> future = new FutureTask<Dependencies>(
-				new Callable<Dependencies>() {
+        Dependencies result = null;
+        FutureTask<Dependencies> future = new FutureTask<Dependencies>(
+                new Callable<Dependencies>() {
 
-					public Dependencies call() throws Exception {
-						try {
+                    public Dependencies call() throws Exception {
+                        try {
 //							LineageSQLQuery simpleLineageQuery = provenance
 //									.getPq().simpleLineageQuery(wfInstance,
 //											pname, vname, iteration);
-							Dependencies runLineageQuery = getProvenanceAnalysis()
-									.fetchIntermediateResult(wfInstance, pname,
-											vname, iteration);
+                            Dependencies runLineageQuery = getProvenanceAnalysis().fetchIntermediateResult(wfInstance, pname,
+                                    vname, iteration);
 
-							// runLineageQuery = provenance.getPq()
-							// .runLineageQuery(simpleLineageQuery);
-							return runLineageQuery;
-						} catch (SQLException e) {
-							throw e;
-						}
-					}
+                            // runLineageQuery = provenance.getPq()
+                            // .runLineageQuery(simpleLineageQuery);
+                            return runLineageQuery;
+                        } catch (SQLException e) {
+                            throw e;
+                        }
+                    }
+                });
 
-				});
+        getExecutor().submit(future);
 
-		getExecutor().submit(future);
+        try {
+            return future.get().getRecords();
+        } catch (InterruptedException e1) {
+            throw e1;
+        } catch (ExecutionException e1) {
+            throw e1;
+        }
 
-		try {
-			return future.get().getRecords();
-		} catch (InterruptedException e1) {
-			throw e1;
-		} catch (ExecutionException e1) {
-			throw e1;
-		}
+    }
 
-	}
-    
     public List<LineageQueryResultRecord> computeLineage(String wfInstance,
             String var, String proc, String path, Set<String> selectedProcessors) {
         return null;
@@ -279,7 +295,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
         try {
             instanceID = (getProvenance()).getPq().getWFInstanceID(dataflowId).get(0);
         } catch (SQLException e) {
-            logger.error("Error finding the dataflow instance",e);
+            logger.error("Error finding the dataflow instance", e);
         }
         return instanceID;
     }
@@ -297,15 +313,6 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
      */
     public void setSaveEvents(String saveEvents) {
         this.saveEvents = saveEvents;
-    }
-
-
-    public void setDbURL(String dbURL) {
-        this.dbURL = dbURL;
-    }
-
-    public String getDbURL() {
-        return dbURL;
     }
 
     public void setProvenance(Provenance provenance) {

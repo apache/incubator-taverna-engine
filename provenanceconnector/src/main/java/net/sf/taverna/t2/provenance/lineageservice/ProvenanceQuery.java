@@ -59,8 +59,7 @@ import org.jdom.Element;
  */
 public abstract class ProvenanceQuery {
 
-    protected Logger logger = Logger.getLogger(ProvenanceQuery.class);
-    private String dbURL;
+    protected Logger logger = Logger.getLogger(ProvenanceQuery.class);    
     public static String DATAFLOW_TYPE = "net.sf.taverna.t2.activities.dataflow.DataflowActivity";
 
     public Connection getConnection() throws InstantiationException,
@@ -2108,15 +2107,7 @@ public abstract class ProvenanceQuery {
 
         return null;
 
-    }
-
-    public void setDbURL(String dbURL) {
-        this.dbURL = dbURL;
-    }
-
-    public String getDbURL() {
-        return dbURL;
-    }
+    }  
 
     public boolean isRootProcessorOfWorkflow(String procName, String wfName,
             String wfInstanceId) {

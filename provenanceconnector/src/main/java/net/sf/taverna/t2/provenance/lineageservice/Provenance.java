@@ -52,32 +52,24 @@ public class Provenance {
 	protected EventProcessor ep;
 
 	private String saveEvents;
-	protected String location;
+	
 	private boolean isfirstWorkflowStructure = true;
 
 	private List<String> workflowIDStack = new ArrayList<String>();
 
 	public Provenance() {	;}
 
-	public Provenance(EventProcessor eventProcessor, String location) {
+	public Provenance(EventProcessor eventProcessor) {
 		this.ep = eventProcessor;
 		this.pq = ep.getPq();
-		this.pw = ep.getPw();
-		this.location = location;
+		this.pw = ep.getPw();		
 	}
 
 	public void clearDB() throws SQLException {
 		getPw().clearDBStatic();
 		getPw().clearDBDynamic();
 	}
-
-	public void setLocation(String location) {
-		this.location = location;
-	}
-
-	public String getLocation() {
-		return location;
-	}
+	
 
 	/**
 	 * @return the saveEvents

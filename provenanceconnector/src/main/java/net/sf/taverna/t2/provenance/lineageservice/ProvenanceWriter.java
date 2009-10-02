@@ -46,8 +46,7 @@ import net.sf.taverna.t2.provenance.lineageservice.utils.VarBinding;
  */
 public abstract class ProvenanceWriter {
 
-    protected static Logger logger = Logger.getLogger(ProvenanceWriter.class);
-    private String dbURL;
+    protected static Logger logger = Logger.getLogger(ProvenanceWriter.class);    
     protected int cnt; // counts number of calls to VarBinding
 
     public Connection getConnection() throws InstantiationException,
@@ -822,11 +821,4 @@ public abstract class ProvenanceWriter {
         }
     }
 
-    public void setDbURL(String dbURL) {
-        this.dbURL = dbURL;
-    }
-
-    public String getDbURL() {
-        return dbURL;
-    }
 }

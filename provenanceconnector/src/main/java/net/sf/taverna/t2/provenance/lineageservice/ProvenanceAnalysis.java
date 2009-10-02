@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 
@@ -39,12 +38,9 @@ import net.sf.taverna.t2.provenance.lineageservice.utils.VarBinding;
 import net.sf.taverna.t2.provenance.opm.OPMManager;
 
 import org.apache.log4j.Logger;
-import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
-import org.tupeloproject.provenance.ProvenanceAccount;
 import org.tupeloproject.provenance.ProvenanceArtifact;
 import org.tupeloproject.provenance.ProvenanceRole;
-import org.tupeloproject.provenance.impl.ProvenanceContextFacade;
 
 /**
  * @author paolo<p/>
