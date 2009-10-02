@@ -8,7 +8,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -18,6 +17,11 @@ import javax.xml.bind.JAXBException;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DataValueExtractor;
 
 import org.apache.log4j.Logger;
+import org.openprovenance.model.Artifact;
+import org.openprovenance.model.OPMGraph;
+import org.openprovenance.model.OPMToDot;
+import org.openprovenance.model.Process;
+import org.openprovenance.rdf.OPMRdf2Xml;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.UnionContext;
@@ -34,12 +38,6 @@ import org.tupeloproject.rdf.Literal;
 import org.tupeloproject.rdf.Resource;
 import org.tupeloproject.rdf.Triple;
 import org.tupeloproject.rdf.xml.RdfXmlWriter;
-
-import org.openprovenance.model.Artifact;
-import org.openprovenance.model.OPMGraph;
-import org.openprovenance.model.OPMToDot;
-import org.openprovenance.model.Process;
-import org.openprovenance.rdf.OPMRdf2Xml;
 
 
 /**
@@ -356,11 +354,9 @@ public class OPMManager {
 			logger.info("OPM graph written to "+OPM_RDF_GRAPH_FILE);
 
 		} catch (OperatorException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Could not write graph: " + e);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Could not write graph: " + e);
 		}		
 		return OPM_RDF_GRAPH_FILE;
 	}

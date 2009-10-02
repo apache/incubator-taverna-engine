@@ -15,6 +15,10 @@ import java.util.UUID;
 
 import javax.xml.bind.JAXBException;
 
+import net.sf.taverna.t2.provenance.lineageservice.ProvenanceWriter;
+import net.sf.taverna.t2.provenance.lineageservice.utils.Var;
+import net.sf.taverna.t2.provenance.lineageservice.utils.VarBinding;
+
 import org.apache.log4j.Logger;
 import org.openprovenance.model.Account;
 import org.openprovenance.model.AccountId;
@@ -32,12 +36,6 @@ import org.openprovenance.model.WasControlledBy;
 import org.openprovenance.model.WasDerivedFrom;
 import org.openprovenance.model.WasGeneratedBy;
 import org.openprovenance.model.WasTriggeredBy;
-import org.tupeloproject.rdf.Resource;
-
-import net.sf.taverna.t2.provenance.lineageservice.EventProcessor;
-import net.sf.taverna.t2.provenance.lineageservice.ProvenanceWriter;
-import net.sf.taverna.t2.provenance.lineageservice.utils.Var;
-import net.sf.taverna.t2.provenance.lineageservice.utils.VarBinding;
 
 /**
  * @author paolo
@@ -296,7 +294,7 @@ public class OPMImporter {
 			pw.addVarBinding(vb);
 			logger.debug("added var binding with value "+value+" to workflow instance "+wfInstance);
 		} catch (SQLException e) {  // no panic -- just catch duplicates
-			System.out.println(e.getMessage());
+			logger.error("Failed to add var binding: " + e.getMessage());
 		}
 
 		return outputVar;
