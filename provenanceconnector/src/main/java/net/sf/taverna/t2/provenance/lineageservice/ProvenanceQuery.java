@@ -461,7 +461,6 @@ public abstract class ProvenanceQuery {
 
 
 	/**
-	 *
 	 * @param dataflowID
 	 * @return
 	 * @throws SQLException
