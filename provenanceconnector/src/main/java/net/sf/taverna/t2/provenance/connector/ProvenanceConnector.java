@@ -31,8 +31,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
-import net.sf.taverna.t2.invocation.InvocationContext;
 import net.sf.taverna.t2.provenance.item.ProvenanceItem;
 import net.sf.taverna.t2.provenance.item.WorkflowProvenanceItem;
 import net.sf.taverna.t2.provenance.lineageservice.Dependencies;
@@ -43,9 +43,7 @@ import net.sf.taverna.t2.provenance.lineageservice.ProvenanceAnalysis;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceQuery;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceWriter;
 import net.sf.taverna.t2.provenance.reporter.ProvenanceReporter;
-import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
 
-import net.sf.taverna.t2.reference.ReferenceService;
 import org.apache.log4j.Logger;
 
 /**
@@ -66,8 +64,6 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
     private Provenance provenance;
     private boolean finished = false;
     private String sessionID;
-    private ReferenceService referenceService;
-    private InvocationContext invocationContext;
 
     public ProvenanceConnector() {
         
@@ -83,6 +79,33 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
         this.saveEvents = saveEvents;
         getProvenance().setSaveEvents(this.saveEvents);
     }
+    
+   /**
+   * Uses a {@link ScheduledThreadPoolExecutor} to process events in a Thread
+   * safe manner
+   */
+  public synchronized void addProvenanceItem(
+          final ProvenanceItem provenanceItem) {
+
+      Runnable runnable = new Runnable() {
+
+          public void run() {
+              try {
+
+                  getProvenance().acceptRawProvenanceEvent(
+                          provenanceItem.getEventType(), provenanceItem);
+
+              } catch (SQLException e) {
+                  logger.warn("Could not add provenance for " + provenanceItem.getEventType() + " " + provenanceItem.getIdentifier() + " " + e);
+              } catch (IOException e) {
+                  logger.warn("Could not add provenance for " + provenanceItem.getEventType() + " " + provenanceItem.getIdentifier() + " " + e);
+              }
+
+          }
+      };
+      getExecutor().execute(runnable);
+
+  }
 
     protected Connection getConnection() throws InstantiationException,
             IllegalAccessException, ClassNotFoundException, SQLException {
