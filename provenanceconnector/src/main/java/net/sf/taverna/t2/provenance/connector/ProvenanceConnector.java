@@ -33,6 +33,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
+import net.sf.taverna.t2.invocation.InvocationContext;
 import net.sf.taverna.t2.provenance.item.ProvenanceItem;
 import net.sf.taverna.t2.provenance.item.WorkflowProvenanceItem;
 import net.sf.taverna.t2.provenance.lineageservice.Dependencies;
@@ -43,6 +44,7 @@ import net.sf.taverna.t2.provenance.lineageservice.ProvenanceAnalysis;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceQuery;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceWriter;
 import net.sf.taverna.t2.provenance.reporter.ProvenanceReporter;
+import net.sf.taverna.t2.reference.ReferenceService;
 
 import org.apache.log4j.Logger;
 
@@ -64,6 +66,8 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
     private Provenance provenance;
     private boolean finished = false;
     private String sessionID;
+	private InvocationContext invocationContext;
+	private ReferenceService referenceService;
 
     public ProvenanceConnector() {
         
@@ -354,4 +358,22 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
     public ProvenanceAnalysis getProvenanceAnalysis() {
         return provenanceAnalysis;
     }
+    
+	public InvocationContext getInvocationContext() {
+		return invocationContext;
+	}
+
+	public ReferenceService getReferenceService() {
+		return referenceService;
+	}
+
+	public void setInvocationContext(InvocationContext invocationContext) {
+		this.invocationContext = invocationContext;
+		
+	}
+
+	public void setReferenceService(ReferenceService referenceService) {
+		this.referenceService = referenceService;
+		
+	}
 }
