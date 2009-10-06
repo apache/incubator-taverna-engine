@@ -246,6 +246,7 @@ public class ProvenanceAnalysis {
 		}
 
 		nativeAnswer.setAnswer(answerContent);
+		completeAnswer.setNativeAnswer(nativeAnswer);
 
 		String _OPM_asXML_File;
 		try {

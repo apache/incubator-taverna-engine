@@ -429,7 +429,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 	/**
 	 * @param writer the writer to set
 	 */
-	public void setWriter(ProvenanceWriter writer) {
+	protected void setWriter(ProvenanceWriter writer) {
 		this.writer = writer;
 	}
 
@@ -443,7 +443,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 	/**
 	 * @param query the query to set
 	 */
-	public void setQuery(ProvenanceQuery query) {
+	protected void setQuery(ProvenanceQuery query) {
 		this.query = query;
 	}
 

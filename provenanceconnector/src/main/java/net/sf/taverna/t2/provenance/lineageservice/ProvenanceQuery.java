@@ -389,15 +389,14 @@ public abstract class ProvenanceQuery {
 
 		List<String> wfNames = new ArrayList<String>();
 
-		List<Workflow> workflows = getWorkflows(runID);
+		List<Workflow> workflows = getWorkflowForRun(runID);
 
 		for (Workflow w:workflows) { 	
 			if (w.getParentWFname() == null) { return w.getWfname(); }
 		}		
 		return null;		
 	}
-
-
+	
 	/**
 	 * returns the names of all workflows (top level + nested) for a given runID
 	 * @param runID
@@ -408,7 +407,7 @@ public abstract class ProvenanceQuery {
 
 		List<String> wfNames = new ArrayList<String>();
 
-		List<Workflow> workflows = getWorkflows(runID);
+		List<Workflow> workflows = getWorkflowForRun(runID);
 
 		for (Workflow w:workflows) { wfNames.add(w.getWfname()); }
 
@@ -416,7 +415,13 @@ public abstract class ProvenanceQuery {
 	}
 
 
-	public List<Workflow> getWorkflows(String runID) throws SQLException {
+	/**
+	 * returns the workflows associated to a single runID
+	 * @param runID
+	 * @return
+	 * @throws SQLException
+	 */
+	public List<Workflow> getWorkflowForRun(String runID) throws SQLException {
 
 		List<Workflow> result = new ArrayList<Workflow>();
 
@@ -458,7 +463,7 @@ public abstract class ProvenanceQuery {
 		return result;
 	}
 
-
+	
 
 	/**
 	 * @param dataflowID
@@ -2205,6 +2210,106 @@ public abstract class ProvenanceQuery {
 			}
 		}
 		return false;
+	}
+	
+
+	public List<Workflow> getContainingWorkflowsForProcessor(
+			String pname) {
+
+		List<Workflow> wfList = new ArrayList<Workflow>();
+		
+		PreparedStatement ps = null;
+		Connection connection = null;
+
+		try {
+			connection = getConnection();
+			ps = connection.prepareStatement(
+					"SELECT * FROM T2Provenance.Processor P "+
+					"join Workflow W on P.wfInstanceRef = W.wfName "+
+					"where pname = ? ");
+
+			ps.setString(1, pname);
+
+			boolean success = ps.execute();
+			if (success) {
+				ResultSet rs = ps.getResultSet();
+
+				while (rs.next()) {
+					Workflow wf = new Workflow();
+					wf.setWfName(rs.getString("wfInstanceRef"));
+					wf.setParentWFname(rs.getString("parentWFName"));
+					
+					wfList.add(wf);
+				}
+			}
+		} catch (InstantiationException e) {
+			logger.warn("Could not execute query: " + e);
+		} catch (IllegalAccessException e) {
+			logger.warn("Could not execute query: " + e);
+		} catch (ClassNotFoundException e) {
+			logger.warn("Could not execute query: " + e);
+		} catch (SQLException e) {
+			logger.warn("Could not execute query: " + e);
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (SQLException ex) {
+					logger.error("There was an error closing the database connection", ex);
+				}
+			}
+		}
+		return wfList;
+	}
+
+	
+	
+	
+	public Workflow getWorkflow(String dataflowID) {
+		
+		PreparedStatement ps = null;
+		Connection connection = null;
+
+		try {
+			connection = getConnection();
+			ps = connection.prepareStatement(
+					 "SELECT * FROM T2Provenance.Workflow W "+
+					"where wfname = ? ");
+
+			ps.setString(1, dataflowID);
+
+			boolean success = ps.execute();
+			if (success) {
+				ResultSet rs = ps.getResultSet();
+
+				if (rs.next()) {
+					Workflow wf = new Workflow();
+					wf.setWfName(rs.getString("wfname"));
+					wf.setParentWFname(rs.getString("parentWFName"));
+					wf.setExternalName(rs.getString("externalName"));
+					
+					return wf;
+				}
+			}
+		} catch (InstantiationException e) {
+			logger.warn("Could not execute query: " + e);
+		} catch (IllegalAccessException e) {
+			logger.warn("Could not execute query: " + e);
+		} catch (ClassNotFoundException e) {
+			logger.warn("Could not execute query: " + e);
+		} catch (SQLException e) {
+			logger.warn("Could not execute query: " + e);
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (SQLException ex) {
+					logger.error("There was an error closing the database connection", ex);
+				}
+			}
+		}
+		return null;
+		
 	}
 }
 

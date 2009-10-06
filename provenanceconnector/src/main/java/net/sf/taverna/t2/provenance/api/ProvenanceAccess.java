@@ -16,6 +16,7 @@ import net.sf.taverna.t2.provenance.lineageservice.ProvenanceQuery;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 import net.sf.taverna.t2.provenance.lineageservice.utils.QueryVar;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Var;
+import net.sf.taverna.t2.provenance.lineageservice.utils.Workflow;
 import net.sf.taverna.t2.provenance.lineageservice.utils.WorkflowInstance;
 
 import org.apache.log4j.Logger;
@@ -102,10 +103,21 @@ public  class ProvenanceAccess {
 	// implement using fetchIntermediateResults
 	public Dependencies fetchPortData(
 			String wfInstance,
+			String workflowId,
 			String pname,
-			String vname,
+			String port,
 			String iteration) {
-		return null; // TODO
+		
+		logger.info("running fetchPortData on instance "+wfInstance+" workflow "+workflowId+
+			     " processor "+pname+" port "+port+" iteration "+iteration);
+		// TODO add context workflowID to query
+		try {
+			return pa.fetchIntermediateResult(wfInstance, pname, port, iteration);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 
@@ -186,6 +198,15 @@ public  class ProvenanceAccess {
 //	/ access static workflow structure 
 
 
+	/**
+	 * given a processor name, returns all workflow IDs that contain a processor by that name.
+	 * This simply calls the underlying method with the same signature
+	 */
+	public List<Workflow> getContainingWorkflowsForProcessor(String pname) {
+		return pq.getContainingWorkflowsForProcessor(pname);
+	}
+
+
 
 	/**
 	 * 
@@ -197,6 +218,30 @@ public  class ProvenanceAccess {
 		return pq.getProcessorsDeep(null, workflowID);
 	}
 
+
+	/**
+	 * list all ports for a processor
+	 * @param workflowID
+	 * @param processorName
+	 * @return
+	 */
+	public List<Var> getPortsForDataflow(String dataflowID) {
+
+		Workflow w = pq.getWorkflow(dataflowID);
+		
+		Map<String, String> queryConstraints = new HashMap<String, String>();
+		queryConstraints.put("wfInstanceRef", dataflowID);
+		queryConstraints.put("pnameRef", w.getExternalName());
+
+		try {
+			return pq.getVars(queryConstraints);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	
 
 	/**
 	 * list all ports for a processor
@@ -216,7 +261,6 @@ public  class ProvenanceAccess {
 			e.printStackTrace();
 		}
 		return null;
-
 	}
 
 
