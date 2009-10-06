@@ -33,6 +33,8 @@ import net.sf.taverna.t2.facade.WorkflowInstanceFacade;
 import net.sf.taverna.t2.invocation.InvocationContext;
 import net.sf.taverna.t2.invocation.TokenOrderException;
 import net.sf.taverna.t2.invocation.WorkflowDataToken;
+import net.sf.taverna.t2.lang.observer.Observable;
+import net.sf.taverna.t2.lang.observer.Observer;
 import net.sf.taverna.t2.monitor.MonitorManager;
 import net.sf.taverna.t2.monitor.MonitorNode;
 import net.sf.taverna.t2.monitor.MonitorableProperty;
@@ -50,6 +52,8 @@ import net.sf.taverna.t2.workflowmodel.Edits;
 import net.sf.taverna.t2.workflowmodel.EditsRegistry;
 import net.sf.taverna.t2.workflowmodel.InvalidDataflowException;
 import net.sf.taverna.t2.workflowmodel.Processor;
+import net.sf.taverna.t2.workflowmodel.impl.ProcessorFinishedMessage;
+import net.sf.taverna.t2.workflowmodel.impl.ProcessorImpl;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayer;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchStack;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.ErrorBounce;
@@ -81,6 +85,10 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 
 	private Dataflow dataflow;
 	private ResultListener facadeResultListener;
+	// In case workflow has no output ports we have to listen to individual processors to know when the workflow has finished
+	private List<ProcessorFinishedObserver> processorFinishedObservers;
+	// How many processors have finished so far
+	private int numberOfProcessorsFinished;
 	private String instanceOwningProcessId;
 	private String localName;
 	private MonitorManager monitorManager = MonitorManager.getInstance();
@@ -129,6 +137,19 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 			context.getProvenanceReporter().addProvenanceItem(workflowItem);
 		}
 		facadeResultListener = new FacadeResultListener(dataflow, workflowItem);
+		
+		// If workflow has no output ports then we have to monitor all its processors to know when 
+		// the workflow has finished running
+		if (dataflow.getOutputPorts().size() == 0){
+			processorFinishedObservers = new ArrayList<ProcessorFinishedObserver>();
+			// Register an observer with each of the processors
+			for (Processor processor: dataflow.getProcessors()){
+				ProcessorFinishedObserver observer = new ProcessorFinishedObserver(workflowItem);
+				((ProcessorImpl) processor).addObserver(observer);
+				processorFinishedObservers.add(observer);
+			}
+			numberOfProcessorsFinished = 0;
+		}
 	}
 
 	private void addProvenanceLayerToProcessors(Dataflow dataflow2, WorkflowProvenanceItem workflowItem) {
@@ -285,6 +306,56 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 				}
 			}
 
+		}
+	}
+	
+
+	private class ProcessorFinishedObserver implements Observer<ProcessorFinishedMessage>{
+
+		private WorkflowProvenanceItem workflowItem;
+
+		public ProcessorFinishedObserver(WorkflowProvenanceItem workflowItem) {
+			this.workflowItem = workflowItem;
+		}
+
+		public void notify(Observable<ProcessorFinishedMessage> sender,
+				ProcessorFinishedMessage message) throws Exception {
+			
+			numberOfProcessorsFinished++;
+			
+			// De-register the processor node from the monitor
+			MonitorManager.getInstance().deregisterNode(message.getOwningProcess());
+			
+			// All processors have finished => the workflow run has finished
+			if (numberOfProcessorsFinished == dataflow.getProcessors().size()){
+				
+				// De-register the workflow node from the monitor (if this is the top level 
+				// workflow object) as for some reason it does not get de-registered when
+				// there are not output ports 
+				if (dataflow.getLocalName().split(":").length==1){ // this is a top level workflow
+					MonitorManager.getInstance().deregisterNode(instanceOwningProcessId+":"+
+							dataflow.getLocalName());
+				}
+
+				// De-register this facade node from the monitor - this will effectively
+				// tell the monitor that the workflow run has finished
+				MonitorManager.getInstance().deregisterNode(
+						instanceOwningProcessId);
+				
+				synchronized (this) {
+					if (provEnabled) {
+						DataflowRunComplete dataflowRunComplete = new DataflowRunComplete();
+						dataflowRunComplete.setParentId(workflowItem
+								.getIdentifier());
+						dataflowRunComplete
+								.setProcessId(instanceOwningProcessId);
+						dataflowRunComplete.setIdentifier(UUID.randomUUID()
+								.toString());
+						context.getProvenanceReporter().addProvenanceItem(
+								dataflowRunComplete);
+					}
+				}
+			}
 		}
 	}
 

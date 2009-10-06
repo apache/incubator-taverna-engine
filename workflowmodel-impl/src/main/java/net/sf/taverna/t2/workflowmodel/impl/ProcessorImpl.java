@@ -32,6 +32,9 @@ import net.sf.taverna.raven.log.Log;
 import net.sf.taverna.t2.annotation.AbstractAnnotatedThing;
 import net.sf.taverna.t2.invocation.InvocationContext;
 import net.sf.taverna.t2.invocation.IterationInternalEvent;
+import net.sf.taverna.t2.lang.observer.MultiCaster;
+import net.sf.taverna.t2.lang.observer.Observable;
+import net.sf.taverna.t2.lang.observer.Observer;
 import net.sf.taverna.t2.monitor.MonitorManager;
 import net.sf.taverna.t2.monitor.MonitorableProperty;
 import net.sf.taverna.t2.reference.T2Reference;
@@ -52,7 +55,6 @@ import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationTypeMismatch
 import net.sf.taverna.t2.workflowmodel.processor.iteration.MissingIterationInputException;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.impl.IterationStrategyImpl;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.impl.IterationStrategyStackImpl;
-import net.sf.taverna.t2.workflowmodel.serialization.xml.DispatchLayerXMLDeserializer;
 
 /**
  * Implementation of Processor
@@ -62,7 +64,7 @@ import net.sf.taverna.t2.workflowmodel.serialization.xml.DispatchLayerXMLDeseria
  * 
  */
 public final class ProcessorImpl extends AbstractAnnotatedThing<Processor>
-		implements Processor {
+		implements Processor, Observable<ProcessorFinishedMessage> {
 
 	protected List<ConditionImpl> conditions = new ArrayList<ConditionImpl>();
 
@@ -90,8 +92,8 @@ public final class ProcessorImpl extends AbstractAnnotatedThing<Processor>
 	
 	private static Log logger = Log.getLogger(ProcessorImpl.class);
 
-
-
+	private MultiCaster<ProcessorFinishedMessage> processorFinishedMultiCaster = new MultiCaster<ProcessorFinishedMessage>(this);
+	
 	/**
 	 * <p>
 	 * Create a new processor implementation with default blank iteration
@@ -176,7 +178,8 @@ public final class ProcessorImpl extends AbstractAnnotatedThing<Processor>
 								enclosingProcess);
 					}
 				}
-
+				// Tell whoever is interested that the processor has finished executing
+				processorFinishedMultiCaster.notify(new ProcessorFinishedMessage(owningProcess));
 			}
 
 			public void receiveMonitorableProperty(MonitorableProperty<?> prop,
@@ -385,5 +388,17 @@ public final class ProcessorImpl extends AbstractAnnotatedThing<Processor>
 		// properties from layers.
 		MonitorManager.getInstance().registerNode(this,
 				dataflowOwningProcess + ":" + getLocalName(), properties);
+	}
+
+	public void addObserver(Observer<ProcessorFinishedMessage> observer) {
+		processorFinishedMultiCaster.addObserver(observer);
+	}
+
+	public List<Observer<ProcessorFinishedMessage>> getObservers() {
+		return processorFinishedMultiCaster.getObservers();
+	}
+
+	public void removeObserver(Observer<ProcessorFinishedMessage> observer) {
+		processorFinishedMultiCaster.removeObserver(observer);
 	}
 }
