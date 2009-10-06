@@ -74,7 +74,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 	private WorkflowDataProcessor wfdp;
 	private EventProcessor eventProcessor;
 
-	public ProvenanceConnector() {	}
+	public ProvenanceConnector() { }
 
 
 	/**
@@ -85,14 +85,16 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 	 */
 	public void init() {
 
+                createDatabase();
+
 		try {
 			setWfdp(new WorkflowDataProcessor());
 			getWfdp().setPq(getQuery());
 			getWfdp().setPw(getWriter());
 
 			setEventProcessor(new EventProcessor());
-			getEventProcessor().setPw(writer);
-			getEventProcessor().setPq(query);
+			getEventProcessor().setPw(getWriter());
+			getEventProcessor().setPq(getQuery());
 			getEventProcessor().setWfdp(getWfdp());
 
 			setProvenanceAnalysis(new ProvenanceAnalysis(getQuery()));
