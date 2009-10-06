@@ -76,17 +76,6 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 
 	public ProvenanceConnector() {	}
 
-//	public ProvenanceConnector(Provenance provenance,
-//	ProvenanceAnalysis provenanceAnalysis,
-//	boolean isClearDB, String saveEvents) {
-
-//	setProvenance(provenance);
-//	this.setProvenanceAnalysis(provenanceAnalysis);
-//	this.isClearDB = isClearDB;
-//	this.saveEvents = saveEvents;
-//	getProvenance().setSaveEvents(this.saveEvents);
-//	}
-
 
 	/**
 	 * Set up the the {@link EventProcessor}, {@link ProvenanceWriter} &
