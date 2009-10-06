@@ -1088,7 +1088,7 @@ public class EventProcessor {
 				vb.setIterationVector(iterationVector);
 				vb.setValue(valueEl.getAttributeValue("id"));
 
-				logger.info("calling addVarBinding on "+vb.getPNameRef()+" : "+vb.getVarNameRef()); 
+//				logger.info("calling addVarBinding on "+vb.getPNameRef()+" : "+vb.getVarNameRef()); 
 				getPw().addVarBinding(vb);
 
 				newBindings.add(vb);
@@ -1106,7 +1106,7 @@ public class EventProcessor {
 			vb.setRef(valueEl.getChildText("reference"));
 
 			try {
-				logger.info("calling addVarBinding on "+vb.getPNameRef()+" : "+vb.getVarNameRef()); 
+//				logger.info("calling addVarBinding on "+vb.getPNameRef()+" : "+vb.getVarNameRef()); 
 				getPw().addVarBinding(vb);
 				newBindings.add(vb);
 

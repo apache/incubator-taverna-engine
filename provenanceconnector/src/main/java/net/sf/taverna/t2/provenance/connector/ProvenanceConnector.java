@@ -43,6 +43,7 @@ import net.sf.taverna.t2.provenance.lineageservice.Provenance;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceAnalysis;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceQuery;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceWriter;
+import net.sf.taverna.t2.provenance.lineageservice.WorkflowDataProcessor;
 import net.sf.taverna.t2.provenance.reporter.ProvenanceReporter;
 import net.sf.taverna.t2.reference.ReferenceService;
 
@@ -62,15 +63,64 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 	private String saveEvents;    
 	private ProvenanceAnalysis provenanceAnalysis;
 	private ExecutorService executor = Executors.newSingleThreadExecutor();
-	private boolean isClearDB = false;
-	private Provenance provenance;
 	private boolean finished = false;
 	private String sessionID;
 	private InvocationContext invocationContext;
 	private ReferenceService referenceService;
-	
-	public ProvenanceConnector() {
 
+	private Provenance provenance;
+	private ProvenanceWriter writer;
+	private ProvenanceQuery query;
+	private WorkflowDataProcessor wfdp;
+	private EventProcessor eventProcessor;
+
+	public ProvenanceConnector() {	}
+
+//	public ProvenanceConnector(Provenance provenance,
+//	ProvenanceAnalysis provenanceAnalysis,
+//	boolean isClearDB, String saveEvents) {
+
+//	setProvenance(provenance);
+//	this.setProvenanceAnalysis(provenanceAnalysis);
+//	this.isClearDB = isClearDB;
+//	this.saveEvents = saveEvents;
+//	getProvenance().setSaveEvents(this.saveEvents);
+//	}
+
+
+	/**
+	 * Set up the the {@link EventProcessor}, {@link ProvenanceWriter} &
+	 * {@link ProvenanceQuery}. Since it is an SPI you don't want any code
+	 * cluttering the default constructor. Call this method after instantiation
+	 * and after the dbURL has been set.
+	 */
+	public void init() {
+
+		try {
+			setWfdp(new WorkflowDataProcessor());
+			getWfdp().setPq(getQuery());
+			getWfdp().setPw(getWriter());
+
+			setEventProcessor(new EventProcessor());
+			getEventProcessor().setPw(writer);
+			getEventProcessor().setPq(query);
+			getEventProcessor().setWfdp(getWfdp());
+
+			setProvenanceAnalysis(new ProvenanceAnalysis(getQuery()));
+			setProvenance(new Provenance(getEventProcessor()));
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 
@@ -103,16 +153,6 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 		this.referenceService = referenceService;
 	}
 
-	public ProvenanceConnector(Provenance provenance,
-			ProvenanceAnalysis provenanceAnalysis,
-			boolean isClearDB, String saveEvents) {
-
-		setProvenance(provenance);
-		this.setProvenanceAnalysis(provenanceAnalysis);
-		this.isClearDB = isClearDB;
-		this.saveEvents = saveEvents;
-		getProvenance().setSaveEvents(this.saveEvents);
-	}
 
 	/**
 	 * Uses a {@link ScheduledThreadPoolExecutor} to process events in a Thread
@@ -153,97 +193,112 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 	 */
 	public abstract void createDatabase();    
 
+
+	public void clearDatabase() { clearDatabase(true); }
+  
 	/**
 	 * Clear all the values in the database but keep the db there
 	 */
-	public void clearDatabase() {
-		String q = null;
-		Connection connection = null;
+	public void clearDatabase(boolean isClearDB) {
 
-		Statement stmt = null;
-		try {
-			connection = getConnection();
-			stmt = connection.createStatement();
-		} catch (SQLException e) {
-			logger.warn("Could not create database statement :" + e);
-		} catch (InstantiationException e) {
-			logger.warn("Could not create database statement :" + e);
-		} catch (IllegalAccessException e) {
-			logger.warn("Could not create database statement :" + e);
-		} catch (ClassNotFoundException e) {
-			logger.warn("Could not create database statement :" + e);
+		if (isClearDB) {
+			logger.info("clearing DB");
+			try {
+				getWriter().clearDBStatic();
+				getWriter().clearDBDynamic();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else {
+			System.out.println("clearDB is FALSE: not clearing");
 		}
 
+//		String q = null;
+//		Connection connection = null;
 
+//		Statement stmt = null;
+//		try {
+//		connection = getConnection();
+//		stmt = connection.createStatement();
+//		} catch (SQLException e) {
+//		logger.warn("Could not create database statement :" + e);
+//		} catch (InstantiationException e) {
+//		logger.warn("Could not create database statement :" + e);
+//		} catch (IllegalAccessException e) {
+//		logger.warn("Could not create database statement :" + e);
+//		} catch (ClassNotFoundException e) {
+//		logger.warn("Could not create database statement :" + e);
+//		}
 
-		q = "DELETE FROM Workflow";
-		try {
-			stmt.executeUpdate(q);
-		} catch (SQLException e) {
-			logger.warn("Could not execute statement " + q + " :" + e);
-		}
+//		q = "DELETE FROM Workflow";
+//		try {
+//		stmt.executeUpdate(q);
+//		} catch (SQLException e) {
+//		logger.warn("Could not execute statement " + q + " :" + e);
+//		}
 
-		q = "DELETE FROM Processor";
-		try {
-			stmt.executeUpdate(q);
-		} catch (SQLException e) {
-			logger.warn("Could not execute statement " + q + " :" + e);
-		}
+//		q = "DELETE FROM Processor";
+//		try {
+//		stmt.executeUpdate(q);
+//		} catch (SQLException e) {
+//		logger.warn("Could not execute statement " + q + " :" + e);
+//		}
 
-		q = "DELETE FROM Arc";
-		try {
-			stmt.executeUpdate(q);
-		} catch (SQLException e) {
-			logger.warn("Could not execute statement " + q + " :" + e);
-		}
+//		q = "DELETE FROM Arc";
+//		try {
+//		stmt.executeUpdate(q);
+//		} catch (SQLException e) {
+//		logger.warn("Could not execute statement " + q + " :" + e);
+//		}
 
-		q = "DELETE FROM Var";
-		try {
-			stmt.executeUpdate(q);
-		} catch (SQLException e) {
-			logger.warn("Could not execute statement " + q + " :" + e);
-		}
+//		q = "DELETE FROM Var";
+//		try {
+//		stmt.executeUpdate(q);
+//		} catch (SQLException e) {
+//		logger.warn("Could not execute statement " + q + " :" + e);
+//		}
 
-		q = "DELETE FROM WfInstance";
-		try {
-			stmt.executeUpdate(q);
-		} catch (SQLException e) {
-			logger.warn("Could not execute statement " + q + " :" + e);
-		}
+//		q = "DELETE FROM WfInstance";
+//		try {
+//		stmt.executeUpdate(q);
+//		} catch (SQLException e) {
+//		logger.warn("Could not execute statement " + q + " :" + e);
+//		}
 
-		q = "DELETE FROM ProcBinding";
-		try {
-			stmt.executeUpdate(q);
-		} catch (SQLException e) {
-			logger.warn("Could not execute statement " + q + " :" + e);
-		}
+//		q = "DELETE FROM ProcBinding";
+//		try {
+//		stmt.executeUpdate(q);
+//		} catch (SQLException e) {
+//		logger.warn("Could not execute statement " + q + " :" + e);
+//		}
 
-		q = "DELETE FROM VarBinding";
-		try {
-			stmt.executeUpdate(q);
-		} catch (SQLException e) {
-			logger.warn("Could not execute statement " + q + " :" + e);
-		}
+//		q = "DELETE FROM VarBinding";
+//		try {
+//		stmt.executeUpdate(q);
+//		} catch (SQLException e) {
+//		logger.warn("Could not execute statement " + q + " :" + e);
+//		}
 
-		q = "DELETE FROM Collection";
-		try {
-			stmt.executeUpdate(q);
-		} catch (SQLException e) {
-			logger.warn("Could not execute statement " + q + " :" + e);
-		}
+//		q = "DELETE FROM Collection";
+//		try {
+//		stmt.executeUpdate(q);
+//		} catch (SQLException e) {
+//		logger.warn("Could not execute statement " + q + " :" + e);
+//		}
 
-		q = "DELETE FROM Data";
-		try {
-			stmt.executeUpdate(q);
-		} catch (SQLException e) {
-			logger.warn("Could not execute statement " + q + " :" + e);
-		}
+//		q = "DELETE FROM Data";
+//		try {
+//		stmt.executeUpdate(q);
+//		} catch (SQLException e) {
+//		logger.warn("Could not execute statement " + q + " :" + e);
+//		}
 
-		if (connection!=null) try {
-			connection.close();
-		} catch (SQLException ex) {
-			logger.error("Error closing connection",ex);
-		}
+//		if (connection!=null) try {
+//		connection.close();
+//		} catch (SQLException ex) {
+//		logger.error("Error closing connection",ex);
+//		}
 	}
 
 	/**
@@ -272,22 +327,6 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 	public String getSessionID() {
 		return sessionID;
 	}
-
-	public boolean isClearDB() {
-		return isClearDB;
-	}
-
-	public void setClearDB(boolean isClearDB) {
-		this.isClearDB = isClearDB;
-	}
-
-	/**
-	 * Set up the the {@link EventProcessor}, {@link ProvenanceWriter} &
-	 * {@link ProvenanceQuery}. Since it is an SPI you don't want any code
-	 * cluttering the default constructor. Call this method after instantiation
-	 * and after the dbURL has been set.
-	 */
-	public abstract void init();
 
 	public List<LineageQueryResultRecord> getIntermediateValues(
 			final String wfInstance, final String pname, final String vname,
@@ -339,7 +378,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 	/**
 	 * @return the saveEvents
 	 */
-	 public String getSaveEvents() {
+	public String getSaveEvents() {
 		return saveEvents;
 	}
 
@@ -347,7 +386,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 	 * @param saveEvents
 	 *            the saveEvents to set
 	 */
-	 public void setSaveEvents(String saveEvents) {
+	public void setSaveEvents(String saveEvents) {
 		this.saveEvents = saveEvents;
 	}
 
@@ -387,5 +426,61 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 	 */
 	public ProvenanceAnalysis getProvenanceAnalysis() {
 		return provenanceAnalysis;
+	}
+
+	/**
+	 * @return the writer
+	 */
+	public ProvenanceWriter getWriter() {
+		return writer;
+	}
+
+	/**
+	 * @param writer the writer to set
+	 */
+	public void setWriter(ProvenanceWriter writer) {
+		this.writer = writer;
+	}
+
+	/**
+	 * @return the query
+	 */
+	public ProvenanceQuery getQuery() {
+		return query;
+	}
+
+	/**
+	 * @param query the query to set
+	 */
+	public void setQuery(ProvenanceQuery query) {
+		this.query = query;
+	}
+
+	/**
+	 * @return the wfdp
+	 */
+	public WorkflowDataProcessor getWfdp() {
+		return wfdp;
+	}
+
+	/**
+	 * @param wfdp the wfdp to set
+	 */
+	public void setWfdp(WorkflowDataProcessor wfdp) {
+		this.wfdp = wfdp;
+	}
+
+	/**
+	 * @return the eventProcessor
+	 */
+	public EventProcessor getEventProcessor() {
+		return eventProcessor;
+	}
+
+	/**
+	 * @param eventProcessor the eventProcessor to set
+	 */
+	public void setEventProcessor(EventProcessor eventProcessor) {
+		this.eventProcessor = eventProcessor;
 	}
 }

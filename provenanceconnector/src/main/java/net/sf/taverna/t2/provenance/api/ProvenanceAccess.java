@@ -49,15 +49,14 @@ public  class ProvenanceAccess {
 				provenanceConnector = connector;
 			}
 		}
-		logger.info("Provenance being captured using: " + 
-				provenanceConnector);
+		logger.info("Provenance being captured using: " + provenanceConnector);
 
 		//slight change, the init is outside but it also means that the init call has to ensure that the dbURL
 		//is set correctly
 		provenanceConnector.init();
 
 		pa = provenanceConnector.getProvenanceAnalysis();
-		pq = pa.getPq();
+		pq = provenanceConnector.getQuery();
 	}
 
 
