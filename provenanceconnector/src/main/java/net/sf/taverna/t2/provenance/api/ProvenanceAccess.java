@@ -28,6 +28,7 @@ public  class ProvenanceAccess {
 
 	private static Logger logger = Logger.getLogger(ProvenanceAccess.class);
 
+	ProvenanceConnector provenanceConnector = null;
 	ProvenanceAnalysis pa = null;
 	ProvenanceQuery pq;
 	Query q = null;	
@@ -42,9 +43,6 @@ public  class ProvenanceAccess {
 
 
 	public void init() {
-
-		ProvenanceConnector provenanceConnector = null;
-
 
 		for (ProvenanceConnector connector:ProvenanceConnectorRegistry.getInstance().getInstances()) {
 			if (connectorType.equalsIgnoreCase(connector.getName())) {
@@ -294,6 +292,56 @@ public  class ProvenanceAccess {
 	public  boolean isAttachOPMArtifactValues() {
 		return false; // TODO
 	}
+
+
+	/**
+	 * @return the provenanceConnector
+	 */
+	public ProvenanceConnector getProvenanceConnector() {
+		return provenanceConnector;
+	}
+
+
+	/**
+	 * @param provenanceConnector the provenanceConnector to set
+	 */
+	public void setProvenanceConnector(ProvenanceConnector provenanceConnector) {
+		this.provenanceConnector = provenanceConnector;
+	}
+
+
+	/**
+	 * @return the pa
+	 */
+	public ProvenanceAnalysis getPa() {
+		return pa;
+	}
+
+
+	/**
+	 * @param pa the pa to set
+	 */
+	public void setPa(ProvenanceAnalysis pa) {
+		this.pa = pa;
+	}
+
+
+	/**
+	 * @return the pq
+	 */
+	public ProvenanceQuery getPq() {
+		return pq;
+	}
+
+
+	/**
+	 * @param pq the pq to set
+	 */
+	public void setPq(ProvenanceQuery pq) {
+		this.pq = pq;
+	}
+	
+	
 
 
 
