@@ -3,77 +3,139 @@
  */
 package net.sf.taverna.t2.provenance.api;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import java.util.logging.Level;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import net.sf.taverna.platform.spring.RavenAwareClassPathXmlApplicationContext;
+import net.sf.taverna.t2.invocation.InvocationContext;
 import net.sf.taverna.t2.provenance.ProvenanceConnectorRegistry;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector;
 import net.sf.taverna.t2.provenance.lineageservice.Dependencies;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceAnalysis;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceQuery;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
-import net.sf.taverna.t2.provenance.lineageservice.utils.QueryVar;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Var;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Workflow;
 import net.sf.taverna.t2.provenance.lineageservice.utils.WorkflowInstance;
 
+import net.sf.taverna.t2.provenance.reporter.ProvenanceReporter;
+import net.sf.taverna.t2.reference.ReferenceService;
+import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.log4j.Logger;
+import org.springframework.context.ApplicationContext;
 
 /**
  * @author paolo
+ * @author Stuart Owen
  *
  */
-public  class ProvenanceAccess {
+public class ProvenanceAccess {
 
-	private static Logger logger = Logger.getLogger(ProvenanceAccess.class);
+    
+    private static Logger logger = Logger.getLogger(ProvenanceAccess.class);
+    ProvenanceConnector provenanceConnector = null;
+    ProvenanceAnalysis pa = null;
+    ProvenanceQuery pq;
+    Query q = null;
+    private String connectorType;
 
-	ProvenanceConnector provenanceConnector = null;
-	ProvenanceAnalysis pa = null;
-	ProvenanceQuery pq;
-	Query q = null;	
+    public ProvenanceAccess(String connectorType) {
+        this.connectorType = connectorType;
+        init();
+    }
 
-	private String connectorType;	
+    
+    /**
+     * Initialises a named JNDI DataSource if not already set up externally.
+     * The DataSource is named jdbc/taverna
+     */
+    public static void initDataSource(String driverClassName, String jdbcUrl, String username, String password, int minIdle, int maxIdle, int maxActive) {
+        System.setProperty(Context.INITIAL_CONTEXT_FACTORY,
+                    "org.osjava.sj.memory.MemoryContextFactory");
+            System.setProperty("org.osjava.sj.jndi.shared", "true");
+            
+        BasicDataSource ds = new BasicDataSource();
+        ds.setDriverClassName(driverClassName);
+        ds.setDefaultTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+        ds.setMaxActive(maxActive);
+        ds.setMinIdle(minIdle);
+        ds.setMaxIdle(maxIdle);
+        ds.setDefaultAutoCommit(true);
+        if (username != null) {
+            ds.setUsername(username);
+        }
+        if (password != null) {
+            ds.setPassword(password);
+        }
 
+        ds.setUrl(jdbcUrl);
 
-	public ProvenanceAccess(String connectorType) {
-		this.connectorType = connectorType;
-		init();
-	}
+        InitialContext context;
+        try {
+            context = new InitialContext();
+            context.rebind("jdbc/taverna", ds);
+        } catch (NamingException ex) {
+            java.util.logging.Logger.getLogger(ProvenanceAccess.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 
+    /**
+     * Initialises a default Reference Service for storing data and their associated references.
+     * This creates a reference service using the named JNDI Data Source 'jdbc/taverna'.
+     * 
+     */
+    public void initDefaultReferenceService() {
+       ApplicationContext appContext = new RavenAwareClassPathXmlApplicationContext("hibernateReferenceServiceContext.xml");
 
-	public void init() {
+		final ReferenceService referenceService = (ReferenceService) appContext
+		.getBean("t2reference.service.referenceService");
 
-		for (ProvenanceConnector connector:ProvenanceConnectorRegistry.getInstance().getInstances()) {
-			if (connectorType.equalsIgnoreCase(connector.getName())) {
-				provenanceConnector = connector;
+		InvocationContext context =  new InvocationContext() {
+
+			public ReferenceService getReferenceService() {
+				return referenceService;
 			}
-		}
-		logger.info("Provenance being captured using: " + provenanceConnector);
 
-		//slight change, the init is outside but it also means that the init call has to ensure that the dbURL
-		//is set correctly
-		provenanceConnector.init();
+			public ProvenanceReporter getProvenanceReporter() {
+				return provenanceConnector;
+			}
 
-		pa = provenanceConnector.getProvenanceAnalysis();
-		pq = provenanceConnector.getQuery();
-	}
+			public <T> List<? extends T> getEntities(Class<T> entityType) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+		};
+		provenanceConnector.setReferenceService(context.getReferenceService()); // CHECK context.getReferenceService());
+		provenanceConnector.setInvocationContext(context);
+    }
 
+    public static void initDataSource(String driverClassName,String jdbcUrl) {
+        initDataSource(driverClassName,jdbcUrl,null,null,10,50,50);
+    }
 
-	/**
-	 * TODO insert source selection code here
-	 * @param configFile
-	 * @throws SQLException 
-	 * @throws ClassNotFoundException 
-	 * @throws IllegalAccessException 
-	 * @throws InstantiationException 
-	 */
-	public void init(String configFile) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
+    public void init() {
 
-		ReadProvenanceConfiguration config = new ReadProvenanceConfiguration(configFile);
+        for (ProvenanceConnector connector : ProvenanceConnectorRegistry.getInstance().getInstances()) {
+            if (connectorType.equalsIgnoreCase(connector.getName())) {
+                provenanceConnector = connector;
+            }
+        }
+        logger.info("Provenance being captured using: " + provenanceConnector);
 
-	}
+        //slight change, the init is outside but it also means that the init call has to ensure that the dbURL
+        //is set correctly
+        provenanceConnector.init();
+
+        pa = provenanceConnector.getProvenanceAnalysis();
+        pq = provenanceConnector.getQuery();
+    }
 
 
 /////////
@@ -83,9 +145,9 @@ public  class ProvenanceAccess {
 
 	/**
 	 * Main provenance query. Doc to be supplied. Needs to be extended to multiple runs.
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
-	public QueryAnswer executeQuery (Query pq) throws SQLException {				
+	public QueryAnswer executeQuery (Query pq) throws SQLException {
 		return pa.lineageQuery(pq.getTargetVars(), pq.getRunID(), pq.getSelectedProcessors());
 	}
 
@@ -96,7 +158,7 @@ public  class ProvenanceAccess {
 	 * @param a specific (input or output) variable [optional]
 	 * @param iteration and a specific iteration [optional]
 	 * @return a lineage query ready to be executed, or null if we cannot return an answer because we are not ready
-	 * (for instance the DB is not yet populated) 
+	 * (for instance the DB is not yet populated)
 	 * @throws SQLException
 	 */
 
@@ -107,7 +169,7 @@ public  class ProvenanceAccess {
 			String pname,
 			String port,
 			String iteration) {
-		
+
 		logger.info("running fetchPortData on instance "+wfInstance+" workflow "+workflowId+
 			     " processor "+pname+" port "+port+" iteration "+iteration);
 		// TODO add context workflowID to query
@@ -147,16 +209,16 @@ public  class ProvenanceAccess {
 
 	/**
 	 * implement using clearDynamic() method or a variation. Collect references and forward
-	 * them for deletion by the DataManager 
+	 * them for deletion by the DataManager
 	 * @param runID
 	 */
-	public void removeRun(String runID) { 
+	public void removeRun(String runID) {
 		return; // TODO
 	}
 
 
 	/**
-	 * returns a set of workflowIDs for a given runID. The set is a singleton if the workflow has no nesting, 
+	 * returns a set of workflowIDs for a given runID. The set is a singleton if the workflow has no nesting,
 	 * but in general it contains one workflowID for each nested workflow involved in the run
 	 * @param workflowInstanceID
 	 * @return
@@ -195,7 +257,7 @@ public  class ProvenanceAccess {
 
 	}
 
-//	/ access static workflow structure 
+//	/ access static workflow structure
 
 
 	/**
@@ -209,12 +271,12 @@ public  class ProvenanceAccess {
 
 
 	/**
-	 * 
+	 *
 	 * @param workflowID
 	 * @return a map workflowID -> list(ProvenanceProcessor).
-	 * Each entry is for one composing sub-workflow (if no nesting then this contains only one workflow, namely the top level one) 
+	 * Each entry is for one composing sub-workflow (if no nesting then this contains only one workflow, namely the top level one)
 	 */
-	public Map<String, List<ProvenanceProcessor>> getProcessorsInWorkflow(String workflowID) {		
+	public Map<String, List<ProvenanceProcessor>> getProcessorsInWorkflow(String workflowID) {
 		return pq.getProcessorsDeep(null, workflowID);
 	}
 
@@ -228,7 +290,7 @@ public  class ProvenanceAccess {
 	public List<Var> getPortsForDataflow(String dataflowID) {
 
 		Workflow w = pq.getWorkflow(dataflowID);
-		
+
 		Map<String, String> queryConstraints = new HashMap<String, String>();
 		queryConstraints.put("wfInstanceRef", dataflowID);
 		queryConstraints.put("pnameRef", w.getExternalName());
@@ -241,7 +303,7 @@ public  class ProvenanceAccess {
 		return null;
 	}
 
-	
+
 
 	/**
 	 * list all ports for a processor
@@ -275,7 +337,7 @@ public  class ProvenanceAccess {
 
 
 
-//	/ configure provenance query functionality 
+//	/ configure provenance query functionality
 
 
 
@@ -294,7 +356,7 @@ public  class ProvenanceAccess {
 
 	/**
 	 * include actual values that appear on ports, rather than just the references<br>
-	 * default is FALSE 
+	 * default is FALSE
 	 * @param active
 	 */
 	public void toggleIncludeDataValues(boolean active) {
@@ -312,7 +374,7 @@ public  class ProvenanceAccess {
 
 	/**
 	 * should an OPM graph be generated in response to a query?<br>
-	 * default is TRUE 
+	 * default is TRUE
 	 */
 	public void toggleOPMGeneration(boolean active) {
 		return; // TODO
@@ -383,12 +445,5 @@ public  class ProvenanceAccess {
 	public void setPq(ProvenanceQuery pq) {
 		this.pq = pq;
 	}
-	
-	
-
-
-
-
-
 
 }
