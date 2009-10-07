@@ -453,11 +453,12 @@ public abstract class ProvenanceWriter {
             ps.setString(8, vb.getIteration());
             ps.setInt(9, vb.getPositionInColl());
 
+//           logger.debug("addVarBinding query: \n"+ps.toString());
+            ps.executeUpdate();
+//            logger.debug("insert done");
 
-
-            int result = ps.executeUpdate();
-
-            cnt++;
+            cnt++;  // who uses this?
+            
         } catch (InstantiationException e1) {
             logger.warn("Error inserting record for a varBinding", e1);
         } catch (IllegalAccessException e1) {
@@ -523,17 +524,18 @@ public abstract class ProvenanceWriter {
         try {
             connection = getConnection();
             ps = connection.prepareStatement(
-                    "UPDATE VarBinding SET valueType = ?, value = ?, ref = ?," + "collIdRef = ? WHERE varNameRef = ? AND wfInstanceRef = ? AND pnameRef = ? AND iteration = ?");
+                    "UPDATE VarBinding SET valueType = ?, value = ?, ref = ?, collIdRef = ?, positionInColl = ? "+
+                    "WHERE varNameRef = ? AND wfInstanceRef = ? AND pnameRef = ? AND iteration = ?");
 
             ps.setString(1, vb.getValueType());
             ps.setString(2, vb.getValue());
             ps.setString(3, vb.getRef());
             ps.setString(4, vb.getCollIDRef());
-            ps.setString(5, vb.getVarNameRef());
-            ps.setString(6, vb.getWfInstanceRef());
-            ps.setString(7, vb.getPNameRef());
-
-            ps.setString(8, vb.getIteration());
+            ps.setInt(5, vb.getPositionInColl());
+            ps.setString(6, vb.getVarNameRef());
+            ps.setString(7, vb.getWfInstanceRef());
+            ps.setString(8, vb.getPNameRef());
+            ps.setString(9, vb.getIteration());
 
             ps.executeUpdate();
 
