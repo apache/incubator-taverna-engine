@@ -92,7 +92,17 @@ public class ProvenanceAccess {
      * 
      */
     public void initDefaultReferenceService() {
-       ApplicationContext appContext = new RavenAwareClassPathXmlApplicationContext("hibernateReferenceServiceContext.xml");
+       initReferenceService("hibernateReferenceServiceContext.xml");
+    }
+
+    /**
+     * Initialises the Reference Service for a given hibernate context definition.
+     * This mapping file must be available in the root of the classpath.
+     *
+     * @param hibernateContext
+     */
+    public void initReferenceService(String hibernateContext) {
+        ApplicationContext appContext = new RavenAwareClassPathXmlApplicationContext(hibernateContext);
 
 		final ReferenceService referenceService = (ReferenceService) appContext
 		.getBean("t2reference.service.referenceService");
@@ -114,6 +124,7 @@ public class ProvenanceAccess {
 		};
 		provenanceConnector.setReferenceService(context.getReferenceService()); // CHECK context.getReferenceService());
 		provenanceConnector.setInvocationContext(context);
+
     }
 
     public static void initDataSource(String driverClassName,String jdbcUrl) {
