@@ -51,11 +51,28 @@ public class ProvenanceAccess {
         init();
     }
 
-    
     /**
-     * Initialises a named JNDI DataSource if not already set up externally.
-     * The DataSource is named jdbc/taverna
+     * A simplified data source intitialisation method, where only a driver name and jdbc url is required.
+     * If the driver supports multiple connections, then a pool will be created of 10 min idle, 50 max idle, and 50 max active connections.
+     *
+     * @param driverClassName
+     * @param jdbcUrl
      */
+    public static void initDataSource(String driverClassName,String jdbcUrl) {
+        initDataSource(driverClassName,jdbcUrl,null,null,10,50,50);
+    }
+   /**
+    * Initialises a named JNDI DataSource if not already set up externally.
+    * The DataSource is named jdbc/taverna
+    *
+    * @param driverClassName - the classname for the driver to be used.
+    * @param jdbcUrl - the jdbc connection url
+    * @param username - the username, if required (otherwise null)
+    * @param password - the password, if required (oteherwise null)
+    * @param minIdle - if the driver supports multiple connections, then the minumum number of idle connections in the pool
+    * @param maxIdle - if the driver supports multiple connections, then the maximum number of idle connections in the pool
+    * @param maxActive - if the driver supports multiple connections, then the minumum number of connections in the pool
+    */
     public static void initDataSource(String driverClassName, String jdbcUrl, String username, String password, int minIdle, int maxIdle, int maxActive) {
         System.setProperty(Context.INITIAL_CONTEXT_FACTORY,
                     "org.osjava.sj.memory.MemoryContextFactory");
@@ -127,9 +144,7 @@ public class ProvenanceAccess {
 
     }
 
-    public static void initDataSource(String driverClassName,String jdbcUrl) {
-        initDataSource(driverClassName,jdbcUrl,null,null,10,50,50);
-    }
+    
 
     public void init() {
 
