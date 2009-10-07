@@ -27,19 +27,22 @@ import java.util.List;
 import net.sf.taverna.t2.annotation.Annotated;
 import net.sf.taverna.t2.annotation.HierarchyTraversal;
 import net.sf.taverna.t2.invocation.InvocationContext;
+import net.sf.taverna.t2.lang.observer.Observable;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchStack;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationStrategyStack;
 
 /**
  * A single node within the dataflow digraph, the Processor is the basic
- * functional unit within a Taverna workflow.
+ * functional unit within a Taverna workflow. It should also notify interested
+ * observers when it has finished execution (including all iterations of the processor).
  * 
  * @author Tom Oinn
+ * @author Alex Nenadic
  * 
  */
 @ControlBoundary
-public interface Processor extends TokenProcessingEntity, Annotated<Processor> {
+public interface Processor extends TokenProcessingEntity, Annotated<Processor>, Observable<ProcessorFinishedEvent>  {
 
 	/**
 	 * The iteration strategy is responsible for combining input data events
