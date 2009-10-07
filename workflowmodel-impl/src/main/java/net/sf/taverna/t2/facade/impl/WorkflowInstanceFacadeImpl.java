@@ -52,7 +52,7 @@ import net.sf.taverna.t2.workflowmodel.Edits;
 import net.sf.taverna.t2.workflowmodel.EditsRegistry;
 import net.sf.taverna.t2.workflowmodel.InvalidDataflowException;
 import net.sf.taverna.t2.workflowmodel.Processor;
-import net.sf.taverna.t2.workflowmodel.impl.ProcessorFinishedMessage;
+import net.sf.taverna.t2.workflowmodel.ProcessorFinishedEvent;
 import net.sf.taverna.t2.workflowmodel.impl.ProcessorImpl;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayer;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchStack;
@@ -281,7 +281,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 				if (portsToComplete == 0) {
 					// Received complete events on all ports, can
 					// un-register this node from the monitor
-					MonitorManager.getInstance().deregisterNode(
+					monitorManager.deregisterNode(
 							instanceOwningProcessId.split(":"));
 					if (provEnabled) {
 						DataflowRunComplete dataflowRunComplete = new DataflowRunComplete();
@@ -310,7 +310,11 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 	}
 	
 
-	private class ProcessorFinishedObserver implements Observer<ProcessorFinishedMessage>{
+	/**
+	 * An observer of events that occur when a processor finishes with execution.
+	 *
+	 */
+	private class ProcessorFinishedObserver implements Observer<ProcessorFinishedEvent>{
 
 		private WorkflowProvenanceItem workflowItem;
 
@@ -318,29 +322,30 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 			this.workflowItem = workflowItem;
 		}
 
-		public void notify(Observable<ProcessorFinishedMessage> sender,
-				ProcessorFinishedMessage message) throws Exception {
+		public void notify(Observable<ProcessorFinishedEvent> sender,
+				ProcessorFinishedEvent message) throws Exception {
 			
 			numberOfProcessorsFinished++;
 			
-			// De-register the processor node from the monitor
-			MonitorManager.getInstance().deregisterNode(message.getOwningProcess());
+			// De-register the processor node from the monitor as it has finished
+			monitorManager.deregisterNode(message.getOwningProcess());
+			
+			// De-register this observer from the processor
+			message.getProcessor().removeObserver(this);
 			
 			// All processors have finished => the workflow run has finished
 			if (numberOfProcessorsFinished == dataflow.getProcessors().size()){
 				
 				// De-register the workflow node from the monitor (if this is the top level 
 				// workflow object) as for some reason it does not get de-registered when
-				// there are not output ports 
+				// there are no output ports 
 				if (dataflow.getLocalName().split(":").length==1){ // this is a top level workflow
-					MonitorManager.getInstance().deregisterNode(instanceOwningProcessId+":"+
-							dataflow.getLocalName());
+					monitorManager.deregisterNode(instanceOwningProcessId + ":" + dataflow.getLocalName());
 				}
 
 				// De-register this facade node from the monitor - this will effectively
 				// tell the monitor that the workflow run has finished
-				MonitorManager.getInstance().deregisterNode(
-						instanceOwningProcessId);
+				monitorManager.deregisterNode(instanceOwningProcessId);
 				
 				synchronized (this) {
 					if (provEnabled) {
@@ -355,6 +360,9 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 								dataflowRunComplete);
 					}
 				}
+				
+				// Also remove this observer from the list of processor observers maintained by the facade
+				processorFinishedObservers.remove(this);
 			}
 		}
 	}

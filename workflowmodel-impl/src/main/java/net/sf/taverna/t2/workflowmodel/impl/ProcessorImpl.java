@@ -33,7 +33,6 @@ import net.sf.taverna.t2.annotation.AbstractAnnotatedThing;
 import net.sf.taverna.t2.invocation.InvocationContext;
 import net.sf.taverna.t2.invocation.IterationInternalEvent;
 import net.sf.taverna.t2.lang.observer.MultiCaster;
-import net.sf.taverna.t2.lang.observer.Observable;
 import net.sf.taverna.t2.lang.observer.Observer;
 import net.sf.taverna.t2.monitor.MonitorManager;
 import net.sf.taverna.t2.monitor.MonitorableProperty;
@@ -43,6 +42,7 @@ import net.sf.taverna.t2.workflowmodel.Dataflow;
 import net.sf.taverna.t2.workflowmodel.DataflowValidationReport;
 import net.sf.taverna.t2.workflowmodel.InvalidDataflowException;
 import net.sf.taverna.t2.workflowmodel.Processor;
+import net.sf.taverna.t2.workflowmodel.ProcessorFinishedEvent;
 import net.sf.taverna.t2.workflowmodel.ProcessorInputPort;
 import net.sf.taverna.t2.workflowmodel.ProcessorOutputPort;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
@@ -61,10 +61,11 @@ import net.sf.taverna.t2.workflowmodel.processor.iteration.impl.IterationStrateg
  * 
  * @author Tom Oinn
  * @author Stuart Owen
+ * @author Alex Nenadic
  * 
  */
 public final class ProcessorImpl extends AbstractAnnotatedThing<Processor>
-		implements Processor, Observable<ProcessorFinishedMessage> {
+		implements Processor{
 
 	protected List<ConditionImpl> conditions = new ArrayList<ConditionImpl>();
 
@@ -92,7 +93,7 @@ public final class ProcessorImpl extends AbstractAnnotatedThing<Processor>
 	
 	private static Log logger = Log.getLogger(ProcessorImpl.class);
 
-	private MultiCaster<ProcessorFinishedMessage> processorFinishedMultiCaster = new MultiCaster<ProcessorFinishedMessage>(this);
+	private MultiCaster<ProcessorFinishedEvent> processorFinishedMultiCaster = new MultiCaster<ProcessorFinishedEvent>(this);
 	
 	/**
 	 * <p>
@@ -179,7 +180,7 @@ public final class ProcessorImpl extends AbstractAnnotatedThing<Processor>
 					}
 				}
 				// Tell whoever is interested that the processor has finished executing
-				processorFinishedMultiCaster.notify(new ProcessorFinishedMessage(owningProcess));
+				processorFinishedMultiCaster.notify(new ProcessorFinishedEvent(this.getProcessor(), owningProcess));
 			}
 
 			public void receiveMonitorableProperty(MonitorableProperty<?> prop,
@@ -390,15 +391,15 @@ public final class ProcessorImpl extends AbstractAnnotatedThing<Processor>
 				dataflowOwningProcess + ":" + getLocalName(), properties);
 	}
 
-	public void addObserver(Observer<ProcessorFinishedMessage> observer) {
+	public void addObserver(Observer<ProcessorFinishedEvent> observer) {
 		processorFinishedMultiCaster.addObserver(observer);
 	}
 
-	public List<Observer<ProcessorFinishedMessage>> getObservers() {
+	public List<Observer<ProcessorFinishedEvent>> getObservers() {
 		return processorFinishedMultiCaster.getObservers();
 	}
 
-	public void removeObserver(Observer<ProcessorFinishedMessage> observer) {
+	public void removeObserver(Observer<ProcessorFinishedEvent> observer) {
 		processorFinishedMultiCaster.removeObserver(observer);
 	}
 }

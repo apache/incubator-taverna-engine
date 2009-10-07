@@ -26,9 +26,11 @@ import java.util.Set;
 
 import net.sf.taverna.t2.annotation.AnnotationChain;
 import net.sf.taverna.t2.invocation.InvocationContext;
+import net.sf.taverna.t2.lang.observer.Observer;
 import net.sf.taverna.t2.workflowmodel.Condition;
 import net.sf.taverna.t2.workflowmodel.Edit;
 import net.sf.taverna.t2.workflowmodel.Processor;
+import net.sf.taverna.t2.workflowmodel.ProcessorFinishedEvent;
 import net.sf.taverna.t2.workflowmodel.ProcessorInputPort;
 import net.sf.taverna.t2.workflowmodel.ProcessorOutputPort;
 import net.sf.taverna.t2.workflowmodel.health.HealthReport;
@@ -114,6 +116,21 @@ public class DummyProcessor implements Processor{
 	}
 
 	public void setAnnotations(Set<AnnotationChain> annotations) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void addObserver(Observer<ProcessorFinishedEvent> observer) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public List<Observer<ProcessorFinishedEvent>> getObservers() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public void removeObserver(Observer<ProcessorFinishedEvent> observer) {
 		// TODO Auto-generated method stub
 		
 	}
