@@ -42,6 +42,7 @@ public class IterationProvenanceItem implements ProvenanceItem {
 	private String parentId;
 	private String identifier;
 	private SharedVocabulary eventType = SharedVocabulary.ITERATION_EVENT_TYPE;
+	private String workflowId;
 
 	public IterationProvenanceItem() {
 	}
@@ -104,6 +105,18 @@ public class IterationProvenanceItem implements ProvenanceItem {
 
 	public void setParentId(String parentId) {
 		this.parentId = parentId;
+	}
+
+	public void setWorklfowId(String workflowId) {
+		this.setWorkflowId(workflowId);
+	}
+
+	public void setWorkflowId(String workflowId) {
+		this.workflowId = workflowId;
+	}
+
+	public String getWorkflowId() {
+		return workflowId;
 	}
 	
 
