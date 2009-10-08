@@ -46,6 +46,7 @@ public class WorkflowDataProvenanceItem implements ProvenanceItem {
 	private SharedVocabulary eventType = SharedVocabulary.WORKFLOW_DATA_EVENT_TYPE;
 	private boolean isFinal;
 	private int[] index;
+	private String workflowId;
 
 	public WorkflowDataProvenanceItem() {
 	}
@@ -117,6 +118,14 @@ public class WorkflowDataProvenanceItem implements ProvenanceItem {
 	
 	public boolean isFinal() {
 		return isFinal;
+	}
+	
+	public String getWorkflowId() {
+		return workflowId;
+	}
+
+	public void setWorkflowId(String workflowId) {
+		this.workflowId = workflowId;	
 	}
 
 }

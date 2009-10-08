@@ -44,6 +44,7 @@ public class ProcessorProvenanceItem implements ProvenanceItem {
 	private String parentId;
 	private String identifier;
 	private SharedVocabulary eventType = SharedVocabulary.PROCESSOR_EVENT_TYPE;
+	private String workflowId;
 
 	public ProcessorProvenanceItem() {
 	}
@@ -92,6 +93,14 @@ public class ProcessorProvenanceItem implements ProvenanceItem {
 	
 	public String getIdentifier() {
 		return identifier;
+	}
+	
+	public String getWorkflowId() {
+		return workflowId;
+	}
+
+	public void setWorkflowId(String workflowId) {
+		this.workflowId = workflowId;	
 	}
 
 

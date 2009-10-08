@@ -37,6 +37,7 @@ public class DataflowRunComplete implements ProvenanceItem {
 	private String parentId;
 	private String identifier;
 	private SharedVocabulary eventType = SharedVocabulary.END_WORKFLOW_EVENT_TYPE;
+	private String workflowId;
 
 	public SharedVocabulary getEventType() {
 		return eventType;
@@ -64,6 +65,14 @@ public class DataflowRunComplete implements ProvenanceItem {
 
 	public String getProcessId() {
 		return processId;
+	}
+
+	public String getWorkflowId() {
+		return workflowId;
+	}
+
+	public void setWorkflowId(String workflowId) {
+		this.workflowId = workflowId;		
 	}
 
 }

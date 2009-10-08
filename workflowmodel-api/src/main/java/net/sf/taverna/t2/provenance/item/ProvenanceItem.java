@@ -87,5 +87,17 @@ public interface ProvenanceItem {
 	 * @return
 	 */
 	public String getParentId();
+	
+	/**
+	 * The uuid that belongs to the actual dataflow
+	 * @param workflowId
+	 */
+	public void setWorkflowId(String workflowId);
+	
+	/**
+	 * The uuid that belongs to the actual dataflow
+	 * @return a string representation of a uuid
+	 */
+	public String getWorkflowId();
 
 }

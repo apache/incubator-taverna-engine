@@ -44,6 +44,7 @@ public class ProcessProvenanceItem implements ProvenanceItem {
 	private String processId;
 	private String dataflowID;
 	private SharedVocabulary eventType = SharedVocabulary.PROCESS_EVENT_TYPE;
+	private String workflowId;
 
 	public ProcessProvenanceItem() {
 		
@@ -115,6 +116,14 @@ public class ProcessProvenanceItem implements ProvenanceItem {
 	
 	public String getDataflowID() {
 		return dataflowID;
+	}
+	
+	public String getWorkflowId() {
+		return workflowId;
+	}
+
+	public void setWorkflowId(String workflowId) {
+		this.workflowId = workflowId;	
 	}
 
 }

@@ -38,6 +38,7 @@ public abstract class DataProvenanceItem implements ProvenanceItem {
 	/** A map of port name to data reference */
 	private Map<String, T2Reference> dataMap;
 	private ReferenceService referenceService;
+	private String workflowId;
 
 	/**
 	 * Is this {@link ProvenanceItem} for input or output data
@@ -76,6 +77,14 @@ public abstract class DataProvenanceItem implements ProvenanceItem {
 
 	public ReferenceService getReferenceService() {
 		return referenceService;
+	}
+	
+	public String getWorkflowId() {
+		return workflowId;
+	}
+
+	public void setWorkflowId(String workflowId) {
+		this.workflowId = workflowId;	
 	}
 
 }
