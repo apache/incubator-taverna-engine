@@ -142,6 +142,7 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 						iterationProvenanceItem1.setProcessId(owningProcess);
 						iterationProvenanceItem1.setIdentifier(UUID
 								.randomUUID().toString());
+						iterationProvenanceItem1.setWorkflowId(workflowItem.getParentId());
 
 						for (Entry<ActivityProvenanceItem, List<Object>> entrySet : activityProvenanceItemMap
 								.entrySet()) {
@@ -327,6 +328,8 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 		String[] split = jobEvent.getOwningProcess().split(":");
 		provenanceItem = new ProcessProvenanceItem();
 		//FIXME are the facade id and dataflow name really needed? 
+		String parentDataflowId = workflowItem.getParentId();
+		provenanceItem.setWorkflowId(parentDataflowId);
 		provenanceItem.setFacadeID(split[0]);
 		provenanceItem.setDataflowID(split[1]);
 		provenanceItem.setProcessId(jobEvent.getOwningProcess());
@@ -334,6 +337,7 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 		provenanceItem.setParentId(workflowItem.getIdentifier());
 		ProcessorProvenanceItem processorProvItem;
 		processorProvItem = new ProcessorProvenanceItem();
+		processorProvItem.setWorkflowId(parentDataflowId);
 		processorProvItem.setProcessId(jobEvent
 				.getOwningProcess());
 		processorProvItem.setIdentifier(UUID.randomUUID().toString());
@@ -344,7 +348,7 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 
 		IterationProvenanceItem iterationProvItem = null;
 		iterationProvItem = new IterationProvenanceItem();
-		iterationProvItem.setWorklfowId(workflowItem.getParentId());
+		iterationProvItem.setWorklfowId(parentDataflowId);
 		iterationProvItem.setIteration(jobEvent.getIndex());
 		iterationProvItem.setIdentifier(UUID.randomUUID().toString());
 		ReferenceService referenceService = jobEvent.getContext()
@@ -370,6 +374,7 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 		for (Activity<?> activity : jobEvent.getActivities()) {
 			if (activity instanceof AsynchronousActivity) {
 				ActivityProvenanceItem activityProvItem = new ActivityProvenanceItem();
+				activityProvItem.setWorkflowId(parentDataflowId);
 				activityProvItem.setIdentifier(UUID.randomUUID().toString());
 				iterationProvItem.setParentId(activityProvItem.getIdentifier());
 				// getConnector().addProvenanceItem(iterationProvItem);

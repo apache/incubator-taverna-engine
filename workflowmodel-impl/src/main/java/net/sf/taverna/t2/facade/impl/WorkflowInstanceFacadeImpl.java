@@ -266,6 +266,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 				workflowDataProvenanceItem.setData(token.getData());
 				workflowDataProvenanceItem.setReferenceService(context.getReferenceService());
 				workflowDataProvenanceItem.setParentId(workflowItem.getIdentifier());
+				workflowDataProvenanceItem.setWorkflowId(workflowItem.getParentId());
 				workflowDataProvenanceItem.setIdentifier(UUID.randomUUID().toString());
 				workflowDataProvenanceItem.setParentId(instanceOwningProcessId);
 				workflowDataProvenanceItem.setProcessId(instanceOwningProcessId);
@@ -286,6 +287,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 					if (provEnabled) {
 						DataflowRunComplete dataflowRunComplete = new DataflowRunComplete();
 						dataflowRunComplete.setParentId(workflowItem.getIdentifier());
+						dataflowRunComplete.setWorkflowId(workflowItem.getParentId());
 						dataflowRunComplete
 								.setProcessId(instanceOwningProcessId);
 						dataflowRunComplete.setIdentifier(UUID.randomUUID().toString());
