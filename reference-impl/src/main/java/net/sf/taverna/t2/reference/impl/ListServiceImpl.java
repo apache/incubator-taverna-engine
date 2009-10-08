@@ -50,6 +50,9 @@ public class ListServiceImpl extends AbstractListServiceImpl implements
 
 	public IdentifiedList<T2Reference> registerEmptyList(int depth)
 			throws ListServiceException {
+		if (depth < 1) {
+			throw new ListServiceException("Can't register empty lists of depth " + depth);
+		}
 		checkDao();
 		checkGenerator();
 		T2ReferenceImpl newReference = T2ReferenceImpl
@@ -78,6 +81,9 @@ public class ListServiceImpl extends AbstractListServiceImpl implements
 		boolean containsErrors = false;
 		// Track depth, ensure that all items have the same depth, fail if not.
 		int depth = items.get(0).getDepth();
+		if (depth < 0) {
+			throw new ListServiceException("Can't register list of depth less than 1, but first item " + items.get(0) + " has depth " + depth);
+		}
 		T2ReferenceListImpl newList = new T2ReferenceListImpl();
 		int counter = 0;
 		for (T2Reference ref : items) {

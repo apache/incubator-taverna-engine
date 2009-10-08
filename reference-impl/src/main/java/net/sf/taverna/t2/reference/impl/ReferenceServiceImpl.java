@@ -143,6 +143,9 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 	private T2Reference getNameForObject(Object o, int currentDepth,
 			boolean useConverterSPI, ReferenceContext context)
 			throws ReferenceServiceException {
+		if (currentDepth < 0) {
+			throw new ReferenceServiceException("Cannot register at depth " + currentDepth + ": " + o);
+		}
 		// First check whether this is an Identified, and if so whether it
 		// already has an ID. If this is the case then return it, we assume that
 		// anything which has an identifier already allocated must have been
@@ -231,6 +234,9 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 		}
 		// Next check lists.
 		if (o instanceof List) {
+			if (currentDepth < 1) {
+				throw new ReferenceServiceException("Cannot register list at depth " + currentDepth);
+			}
 			List<?> l = (List<?>) o;
 			// If the list is empty then register a new empty list of the
 			// appropriate depth and return it
