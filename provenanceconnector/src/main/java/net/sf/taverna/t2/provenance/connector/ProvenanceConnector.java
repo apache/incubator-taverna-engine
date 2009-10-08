@@ -150,10 +150,10 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 	 */
 	public synchronized void addProvenanceItem(
 			final ProvenanceItem provenanceItem) {
-
-		Runnable runnable = new Runnable() {
-
-			public void run() {
+//no threading required as db now uses connection pool
+//		Runnable runnable = new Runnable() {
+//
+//			public void run() {
 				try {
 
 					getProvenance().acceptRawProvenanceEvent(
@@ -165,9 +165,9 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 					logger.warn("Could not add provenance for " + provenanceItem.getEventType() + " " + provenanceItem.getIdentifier() + " " + e);
 				}
 
-			}
-		};
-		getExecutor().execute(runnable);
+//			}
+//		};
+//		getExecutor().execute(runnable);
 
 	}
 
