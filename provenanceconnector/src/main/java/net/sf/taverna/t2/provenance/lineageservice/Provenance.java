@@ -57,7 +57,7 @@ public class Provenance {
 
 	private List<String> workflowIDStack = new ArrayList<String>();
 
-	public Provenance() {	;}
+	public Provenance() {	}
 
 	public Provenance(EventProcessor eventProcessor) {
 		this.ep = eventProcessor;
