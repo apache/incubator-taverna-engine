@@ -23,7 +23,6 @@ package net.sf.taverna.t2.provenance.connector;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
