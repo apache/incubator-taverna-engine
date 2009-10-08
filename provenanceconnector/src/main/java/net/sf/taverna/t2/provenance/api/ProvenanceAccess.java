@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 
 import javax.naming.Context;
@@ -249,7 +250,7 @@ public class ProvenanceAccess {
 
 		// implement using clearDynamic() method or a variation. Collect references and forward
 		try {
-			List<String> danglingDataRefs = pw.clearDBDynamic(runID);
+			Set<String> danglingDataRefs = pw.clearDBDynamic(runID);
 			
 			logger.debug("references collected during removeRun:");
 			for (String s:danglingDataRefs) {
