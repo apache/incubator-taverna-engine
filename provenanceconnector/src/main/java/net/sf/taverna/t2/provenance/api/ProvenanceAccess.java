@@ -22,6 +22,7 @@ import net.sf.taverna.t2.provenance.connector.ProvenanceConnector;
 import net.sf.taverna.t2.provenance.lineageservice.Dependencies;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceAnalysis;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceQuery;
+import net.sf.taverna.t2.provenance.lineageservice.ProvenanceWriter;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Var;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Workflow;
@@ -45,6 +46,7 @@ public class ProvenanceAccess {
     ProvenanceConnector provenanceConnector = null;
     ProvenanceAnalysis pa = null;
     ProvenanceQuery pq;
+    ProvenanceWriter pw;
     Query q = null;
     private String connectorType;
 
@@ -163,6 +165,7 @@ public class ProvenanceAccess {
 
         pa = provenanceConnector.getProvenanceAnalysis();
         pq = provenanceConnector.getQuery();
+        pw = provenanceConnector.getWriter();
     }
 
 
@@ -236,15 +239,42 @@ public class ProvenanceAccess {
 
 
 	/**
-	 * implement using clearDynamic() method or a variation. Collect references and forward
+	 * removes all records that pertain to a specific run. Optionally it also removes the static description of the 
+	 * workflow(s) associated with the run  
+	 *  
 	 * them for deletion by the DataManager
-	 * @param runID
+	 * @param runID the internal ID of a run. This can be obtained using {@link #listRuns(String, Map)}
 	 */
-	public void removeRun(String runID) {
-		return; // TODO
+	public void removeRun(String runID, boolean removeWorkflows) {
+
+		// implement using clearDynamic() method or a variation. Collect references and forward
+		try {
+			List<String> danglingDataRefs = pw.clearDBDynamic(runID);
+			
+			logger.debug("references collected during removeRun:");
+			for (String s:danglingDataRefs) {
+				logger.debug(s);
+			}
+			
+			// TODO send the list of dangling refs to the Data manager for removal of the corresponding data values
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return; // TODO do the static part
 	}
 
 
+	/**
+	 * removes all records pertaining to the static structure of a workflow.<br/>
+	 * 
+	 * @param wfName
+	 */
+	public void removeWorkflow(String wfName) {
+		// TODO
+	}
+	
+	
 	/**
 	 * returns a set of workflowIDs for a given runID. The set is a singleton if the workflow has no nesting,
 	 * but in general it contains one workflowID for each nested workflow involved in the run

@@ -26,6 +26,7 @@ package net.sf.taverna.t2.provenance.lineageservice.utils;
  */
 public class VarBinding {
 
+	String wfNameRef;
 	String varNameRef;
 	String wfInstanceRef;
 	String value;
@@ -44,6 +45,7 @@ public class VarBinding {
 		
 		sb.append("**** VarBinding: \n").
 			append("wfInstanceRef = "+wfInstanceRef+"\n").
+			append("wfNameRef = "+wfNameRef+"\n").
 			append("PNameRef = "+PNameRef+"\n").
 			append("varNameRef = "+varNameRef+"\n").
 			append("iteration = "+iterationVector+"\n").
@@ -181,6 +183,22 @@ public class VarBinding {
 	 */
 	public void setResolvedValue(String resolvedValue) {
 		this.resolvedValue = resolvedValue;
+	}
+
+
+	/**
+	 * @return the wfNameRef
+	 */
+	public String getWfNameRef() {
+		return wfNameRef;
+	}
+
+
+	/**
+	 * @param wfNameRef the wfNameRef to set
+	 */
+	public void setWfNameRef(String wfNameRef) {
+		this.wfNameRef = wfNameRef;
 	}
 	
 	

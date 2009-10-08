@@ -73,7 +73,8 @@ public class WorkflowDataProcessor {
 	/**
 	 * writes records to VarBinding or Collection by traversing the trees<br/>
 	 * expect this to be invoked after workflow completion
-	 * @param wfInstanceRef
+	 * @param wfInstanceRef  the runID
+	 * @param dataflowID the external name of the dataflow (not the UUID)
 	 */
 	public void processTrees(String dataflowID, String wfInstanceRef) {
 
@@ -117,6 +118,7 @@ public class WorkflowDataProcessor {
 						
 						VarBinding vb = new VarBinding();
 
+						vb.setWfNameRef(dataflowID);
 						vb.setWfInstanceRef(wfInstanceRef);
 						vb.setPNameRef(dataflowID);
 						// vb.setValueType(); // TODO not sure what to set this to

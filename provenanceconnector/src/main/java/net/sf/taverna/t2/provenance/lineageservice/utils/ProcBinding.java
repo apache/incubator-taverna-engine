@@ -31,6 +31,7 @@ public class ProcBinding {
 
 	private String pNameRef;
 	private String execIDRef;
+	private String wfNameRef;
 	private String actName;
 	private String iterationVector;
 	
@@ -41,6 +42,7 @@ public class ProcBinding {
 		
 		sb.append("**** ProcBinding: \n").
 			append("execIDRef = "+execIDRef+"\n").
+			append("wfNameRef = "+wfNameRef+"\n").
 			append("PNameRef = "+pNameRef+"\n").
 			append("actName = "+actName+"\n").
 			append("iteration = "+iterationVector+"\n");
@@ -103,6 +105,20 @@ public class ProcBinding {
 
 	public String getIdentifier() {
 		return identifier;
+	}
+
+	/**
+	 * @return the wfNameRef
+	 */
+	public String getWfNameRef() {
+		return wfNameRef;
+	}
+
+	/**
+	 * @param wfNameRef the wfNameRef to set
+	 */
+	public void setWfNameRef(String wfNameRef) {
+		this.wfNameRef = wfNameRef;
 	}
 	
 	

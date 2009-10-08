@@ -23,11 +23,14 @@ package net.sf.taverna.t2.provenance.lineageservice;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector;
+import net.sf.taverna.t2.provenance.item.IterationProvenanceItem;
 import net.sf.taverna.t2.provenance.item.ProvenanceItem;
 import net.sf.taverna.t2.provenance.item.WorkflowProvenanceItem;
 import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
@@ -56,6 +59,8 @@ public class Provenance {
 	private boolean isfirstWorkflowStructure = true;
 
 	private List<String> workflowIDStack = new ArrayList<String>();
+	
+	private Map<String, String> workflowIDMap = new HashMap<String, String>(); 
 
 	public Provenance() {	}
 
@@ -162,6 +167,12 @@ public class Provenance {
 
 			if (isfirstWorkflowStructure) {
 
+				String dataflowId = ((WorkflowProvenanceItem) provenanceItem).getDataflow().getInternalIdentier();
+				String instanceId = provenanceItem.getIdentifier();
+				
+				workflowIDMap.put(instanceId, dataflowId);
+//				logger.debug("pushed workflowID "+dataflowId);
+				
 				isfirstWorkflowStructure = false;
 //				logger.debug("processing event of type "
 //						+ SharedVocabulary.WORKFLOW_EVENT_TYPE);
@@ -172,24 +183,38 @@ public class Provenance {
 				getEp().propagateANL(provenanceItem.getIdentifier());
 			} else {
 				
+				String dataflowId = ((WorkflowProvenanceItem) provenanceItem).getDataflow().getInternalIdentier();
+				String instanceId = provenanceItem.getIdentifier();
+				
+				workflowIDMap.put(instanceId, dataflowId);
+//				logger.debug("pushed workflowID "+dataflowId);
+
 				Dataflow df = ((WorkflowProvenanceItem)provenanceItem).getDataflow();
 				workflowIDStack.add(0,df.getInternalIdentier());
-//				logger.debug("pushed workflowID "+workflowIDStack.get(0));
 			}
 
 		} else if (provenanceItem.getEventType().equals(SharedVocabulary.END_WORKFLOW_EVENT_TYPE)) {
 
-			String currentWorkflowID = workflowIDStack.get(0);
-			workflowIDStack.remove(0);
+//			String currentWorkflowID = workflowIDStack.get(0);
+//			workflowIDStack.remove(0);
+			
+
+			String currentWorkflowID = workflowIDMap.get(provenanceItem.getParentId());
 			
 //			logger.debug("popped workflowID "+currentWorkflowID);
-
+			
 			getEp().processProcessEvent(provenanceItem, currentWorkflowID);
 			
-		} else {
+		} else {  // all other event types (iteration etc.)
 			
-//			logger.debug("using workflowID "+workflowIDStack.get(0));
-			getEp().processProcessEvent(provenanceItem, workflowIDStack.get(0));
+//			logger.debug("processEvent of type "+provenanceItem.getEventType()+" for item of type "+provenanceItem.getClass().getName());
+			String currentWorkflowID = provenanceItem.getWorkflowId();
+//			String currentWorkflowID = workflowIDMap.get(provenanceItem.getParentId());
+
+//			logger.debug("setting currentWorkflowID to "+ currentWorkflowID);
+			getEp().processProcessEvent(provenanceItem, currentWorkflowID);
+		
+//			getEp().processProcessEvent(provenanceItem, workflowIDStack.get(0));
 		}
 
 	}

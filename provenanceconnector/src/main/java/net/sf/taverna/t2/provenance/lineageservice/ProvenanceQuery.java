@@ -597,9 +597,9 @@ public abstract class ProvenanceQuery {
 					pb.setExecIDRef(rs.getString("execIDRef"));
 					pb.setIterationVector(rs.getString("iteration"));
 					pb.setPNameRef(rs.getString("pnameRef"));
+					pb.setWfNameRef(rs.getString("wfNameRef"));
 
 					result.add(pb);
-
 				}
 			}
 		} catch (InstantiationException e) {
@@ -634,7 +634,10 @@ public abstract class ProvenanceQuery {
 	throws SQLException {
 		List<VarBinding> result = new ArrayList<VarBinding>();
 
-		String q = "SELECT * FROM VarBinding VB join Var V " + "on (VB.varNameRef = V.varName and VB.PNameRef =  V.PNameRef) " + "JOIN WfInstance W ON VB.wfInstanceRef = W.instanceID and V.wfInstanceRef = wfnameRef " + "LEFT OUTER JOIN Data D ON D.wfInstanceID = VB.wfInstanceRef and D.dataReference = VB.value";
+		String q = "SELECT * FROM VarBinding VB join Var V " + 
+		           "on (VB.varNameRef = V.varName and VB.PNameRef =  V.PNameRef and VB.wfNameRef = V.wfInstanceRef) " + 
+		           "JOIN WfInstance W ON VB.wfInstanceRef = W.instanceID and VB.wfNameRef = W.wfnameRef " + 
+		           "LEFT OUTER JOIN Data D ON D.wfInstanceID = VB.wfInstanceRef and D.dataReference = VB.value";
 
 		q = addWhereClauseToQuery(q, constraints, true);
 
@@ -651,6 +654,7 @@ public abstract class ProvenanceQuery {
 				while (rs.next()) {
 					VarBinding vb = new VarBinding();
 
+					vb.setWfNameRef(rs.getString("wfNameRef"));
 					vb.setVarNameRef(rs.getString("varNameRef"));
 					vb.setWfInstanceRef(rs.getString("wfInstanceRef"));
 					vb.setValue(rs.getString("value"));
@@ -1219,7 +1223,10 @@ public abstract class ProvenanceQuery {
 			String vname, String iteration) {
 		LineageSQLQuery lq = new LineageSQLQuery();
 
-		String q1 = "SELECT * FROM VarBinding VB join Var V " + "on (VB.varNameRef = V.varName and VB.PNameRef =  V.PNameRef) " + "JOIN WfInstance W ON VB.wfInstanceRef = W.instanceID and V.wfInstanceRef = wfnameRef " + "LEFT OUTER JOIN Data D ON D.wfInstanceID = VB.wfInstanceRef and D.dataReference = VB.value";
+		String q1 = "SELECT * FROM VarBinding VB join Var V " + 
+		            "on (VB.varNameRef = V.varName and VB.PNameRef =  V.PNameRef) " + 
+		            "JOIN WfInstance W ON VB.wfInstanceRef = W.instanceID and V.wfInstanceRef = wfnameRef " + 
+		            "LEFT OUTER JOIN Data D ON D.wfInstanceID = VB.wfInstanceRef and D.dataReference = VB.value";
 
 		// constraints:
 		Map<String, String> lineageQueryConstraints = new HashMap<String, String>();

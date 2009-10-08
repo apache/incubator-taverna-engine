@@ -150,7 +150,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 	 */
 	public synchronized void addProvenanceItem(
 			final ProvenanceItem provenanceItem) {
-//no threading required as db now uses connection pool
+
 //		Runnable runnable = new Runnable() {
 //
 //			public void run() {
@@ -164,7 +164,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 				} catch (IOException e) {
 					logger.warn("Could not add provenance for " + provenanceItem.getEventType() + " " + provenanceItem.getIdentifier() + " " + e);
 				}
-
+//
 //			}
 //		};
 //		getExecutor().execute(runnable);
@@ -195,7 +195,14 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 			logger.info("clearing DB");
 			try {
 				getWriter().clearDBStatic();
-				getWriter().clearDBDynamic();
+				
+				Set<String> danglingDataRefs = getWriter().clearDBDynamic();
+				
+				logger.info("references collected during removeRun:");
+				for (String s:danglingDataRefs) {
+					logger.info(s);
+				}
+				
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
