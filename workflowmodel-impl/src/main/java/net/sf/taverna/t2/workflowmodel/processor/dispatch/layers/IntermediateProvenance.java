@@ -344,6 +344,7 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 
 		IterationProvenanceItem iterationProvItem = null;
 		iterationProvItem = new IterationProvenanceItem();
+		iterationProvItem.setWorklfowId(workflowItem.getParentId());
 		iterationProvItem.setIteration(jobEvent.getIndex());
 		iterationProvItem.setIdentifier(UUID.randomUUID().toString());
 		ReferenceService referenceService = jobEvent.getContext()
@@ -405,8 +406,8 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 	@Override
 	public void receiveResult(DispatchResultEvent resultEvent) {
 		// FIXME use the connector from the result event context
-
 		IterationProvenanceItem iterationProvItem = getIterationProvItem(resultEvent);
+		
 		ReferenceService referenceService = resultEvent.getContext()
 				.getReferenceService();
 		
@@ -451,8 +452,7 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 	
 	@Override
 	public void receiveResultCompletion(DispatchCompletionEvent completionEvent) {
-		// TODO Auto-generated method stub
-		
+		// TODO Auto-generated method stub		
 		super.receiveResultCompletion(completionEvent);
 	}
 
