@@ -8,14 +8,16 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import java.util.logging.Level;
+
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+
 import net.sf.taverna.platform.spring.RavenAwareClassPathXmlApplicationContext;
 import net.sf.taverna.t2.invocation.InvocationContext;
-import net.sf.taverna.t2.provenance.ProvenanceConnectorRegistry;
+import net.sf.taverna.t2.provenance.ProvenanceConnectorFactory;
+import net.sf.taverna.t2.provenance.ProvenanceConnectorFactoryRegistry;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector;
 import net.sf.taverna.t2.provenance.lineageservice.Dependencies;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceAnalysis;
@@ -24,9 +26,9 @@ import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Var;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Workflow;
 import net.sf.taverna.t2.provenance.lineageservice.utils.WorkflowInstance;
-
 import net.sf.taverna.t2.provenance.reporter.ProvenanceReporter;
 import net.sf.taverna.t2.reference.ReferenceService;
+
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.log4j.Logger;
 import org.springframework.context.ApplicationContext;
@@ -148,9 +150,9 @@ public class ProvenanceAccess {
 
     public void init() {
 
-        for (ProvenanceConnector connector : ProvenanceConnectorRegistry.getInstance().getInstances()) {
-            if (connectorType.equalsIgnoreCase(connector.getName())) {
-                provenanceConnector = connector;
+        for (ProvenanceConnectorFactory factory : ProvenanceConnectorFactoryRegistry.getInstance().getInstances()) {
+            if (connectorType.equalsIgnoreCase(factory.getConnectorType())) {
+                provenanceConnector = factory.getProvenanceConnector();
             }
         }
         logger.info("Provenance being captured using: " + provenanceConnector);
