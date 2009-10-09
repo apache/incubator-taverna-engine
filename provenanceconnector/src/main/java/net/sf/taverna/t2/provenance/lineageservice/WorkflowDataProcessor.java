@@ -157,6 +157,12 @@ public class WorkflowDataProcessor {
 	private int getPosition(WorkflowDataNode node) {
 		
 		String[] vector = node.getIndex().substring(1, node.getIndex().length()-1).split(",");
+		//TODO need some logic  here to avoid trying to parse "" as integer, this is my try
+		System.out.println("Vector length is " + vector.length);
+		System.out.println("get position is " + vector[vector.length-1]);
+		if ((vector[vector.length-1]).equals("")) {
+			return 1;
+		}
 		return Integer.parseInt(vector[vector.length-1]) +1;
 	}
 
