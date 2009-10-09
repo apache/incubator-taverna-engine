@@ -25,17 +25,13 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import net.sf.taverna.t2.invocation.InvocationContext;
 import net.sf.taverna.t2.provenance.item.ProvenanceItem;
 import net.sf.taverna.t2.provenance.item.WorkflowProvenanceItem;
-import net.sf.taverna.t2.provenance.lineageservice.Dependencies;
 import net.sf.taverna.t2.provenance.lineageservice.EventProcessor;
 import net.sf.taverna.t2.provenance.lineageservice.LineageQueryResultRecord;
 import net.sf.taverna.t2.provenance.lineageservice.Provenance;
@@ -323,38 +319,6 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 	 */
 	public String getSessionID() {
 		return sessionID;
-	}
-
-	public List<LineageQueryResultRecord> getIntermediateValues(
-			final String wfInstance, final String pname, final String vname,
-			final String iteration) throws Exception {
-
-		FutureTask<Dependencies> future = new FutureTask<Dependencies>(
-				new Callable<Dependencies>() {
-
-					public Dependencies call() throws Exception {
-						try {
-
-							Dependencies runLineageQuery = getProvenanceAnalysis().fetchIntermediateResult(wfInstance, pname,
-									vname, iteration);
-
-							return runLineageQuery;
-						} catch (SQLException e) {
-							throw e;
-						}
-					}
-				});
-
-		getExecutor().submit(future);
-
-		try {
-			return future.get().getRecords();
-		} catch (InterruptedException e1) {
-			throw e1;
-		} catch (ExecutionException e1) {
-			throw e1;
-		}
-
 	}
 
 	public List<LineageQueryResultRecord> computeLineage(String wfInstance,
