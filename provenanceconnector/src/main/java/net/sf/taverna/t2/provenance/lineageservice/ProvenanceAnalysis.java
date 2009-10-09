@@ -201,12 +201,14 @@ public class ProvenanceAnalysis {
 	 * @param pname for a specific processor [required]
 	 * @param a specific (input or output) variable [optional]
 	 * @param iteration and a specific iteration [optional]
+	 * @param wfNameRef 
 	 * @return a lineage query ready to be executed, or null if we cannot return an answer because we are not ready
 	 * (for instance the DB is not yet populated) 
 	 * @throws SQLException
 	 */
 	public Dependencies fetchIntermediateResult(
 			String wfInstance,
+			String wfNameRef,
 			String pname,
 			String vname,
 			String iteration) throws SQLException  {
@@ -217,7 +219,7 @@ public class ProvenanceAnalysis {
 		}
 
 
-		LineageSQLQuery lq = getPq().simpleLineageQuery(wfInstance, pname, vname, iteration);
+		LineageSQLQuery lq = getPq().simpleLineageQuery(wfInstance, wfNameRef, pname, vname, iteration);
 
 		return getPq().runLineageQuery(lq, isIncludeDataValue());
 	}

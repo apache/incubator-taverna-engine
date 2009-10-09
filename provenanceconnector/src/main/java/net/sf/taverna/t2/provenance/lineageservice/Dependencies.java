@@ -40,6 +40,7 @@ public class Dependencies {
 	public ListIterator<LineageQueryResultRecord> iterator() { return getRecords().listIterator(); }
 
 	public void addLineageQueryResultRecord(
+			String wfNameRef,
 			String pname,
 			String vname,
 			String wfInstance,
@@ -52,6 +53,7 @@ public class Dependencies {
 
 		LineageQueryResultRecord record = new LineageQueryResultRecord();
 
+		record.setWfName(wfNameRef);
 		record.setWfInstance(wfInstance);
 		record.setPname(pname);
 		record.setValue(value);

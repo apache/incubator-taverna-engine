@@ -206,7 +206,7 @@ public class ProvenanceAccess {
 			     " processor "+pname+" port "+port+" iteration "+iteration);
 		// TODO add context workflowID to query
 		try {
-			return pa.fetchIntermediateResult(wfInstance, pname, port, iteration);
+			return pa.fetchIntermediateResult(wfInstance, workflowId, pname, port, iteration);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

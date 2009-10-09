@@ -22,6 +22,7 @@ package net.sf.taverna.t2.provenance.lineageservice;
 
 public class LineageQueryResultRecord {
 
+	String wfName;
 	String pname;
 	String vname;
 	String wfInstance;
@@ -48,14 +49,16 @@ public class LineageQueryResultRecord {
 		} else {
 
 			if (printResolvedValue)
-				return "proc "+getPname()+
+				return "workflow "+ getWfName()+
+				" proc "+getPname()+
 				" var "+getVname()+" " +
 				" iteration: "+getIteration()+
 				" value: "+getValue()+
 				" collection id: "+getCollIdRef()+
 				" resolvedValue: "+getResolvedValue();
 			else  
-				return "proc "+getPname()+
+				return "workflow "+ getWfName()+
+				" proc "+getPname()+
 				" var "+getVname()+" " +
 				" iteration: "+getIteration()+
 				" collection id: "+getCollIdRef()+
@@ -216,6 +219,22 @@ public class LineageQueryResultRecord {
 	 */
 	public void setParentCollIDRef(String parentCollIDRef) {
 		this.parentCollIDRef = parentCollIDRef;
+	}
+
+
+	/**
+	 * @return the wfName
+	 */
+	public String getWfName() {
+		return wfName;
+	}
+
+
+	/**
+	 * @param wfName the wfName to set
+	 */
+	public void setWfName(String wfName) {
+		this.wfName = wfName;
 	}
 
 }

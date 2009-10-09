@@ -1219,13 +1219,13 @@ public abstract class ProvenanceQuery {
 	 * @param iteration
 	 * @return
 	 */
-	public LineageSQLQuery simpleLineageQuery(String wfInstance, String pname,
+	public LineageSQLQuery simpleLineageQuery(String wfInstance, String wfNameRef, String pname,
 			String vname, String iteration) {
 		LineageSQLQuery lq = new LineageSQLQuery();
 
 		String q1 = "SELECT * FROM VarBinding VB join Var V " + 
 		            "on (VB.varNameRef = V.varName and VB.PNameRef =  V.PNameRef) " + 
-		            "JOIN WfInstance W ON VB.wfInstanceRef = W.instanceID and V.wfInstanceRef = wfnameRef " + 
+		            "JOIN WfInstance W ON VB.wfInstanceRef = W.instanceID and V.wfInstanceRef = VB.wfnameRef " + 
 		            "LEFT OUTER JOIN Data D ON D.wfInstanceID = VB.wfInstanceRef and D.dataReference = VB.value";
 
 		// constraints:
@@ -1233,6 +1233,7 @@ public abstract class ProvenanceQuery {
 
 		lineageQueryConstraints.put("W.instanceID", wfInstance);
 		lineageQueryConstraints.put("VB.PNameRef", pname);
+		lineageQueryConstraints.put("VB.wfNameRef", wfNameRef);
 
 		if (vname != null) {
 			lineageQueryConstraints.put("VB.varNameRef", vname);
@@ -1474,6 +1475,7 @@ public abstract class ProvenanceQuery {
 
 					String type = lqr.ATOM_TYPE; // temp -- FIXME
 
+					String wfNameRef = rs.getString("wfNameRef");
 					String wfInstance = rs.getString("wfInstanceRef");
 					String proc = rs.getString("PNameRef");
 					String var = rs.getString("varNameRef");
@@ -1481,7 +1483,7 @@ public abstract class ProvenanceQuery {
 					String coll = rs.getString("collID");
 					String parentColl = rs.getString("parentCollIDRef");
 
-					lqr.addLineageQueryResultRecord(proc, var, wfInstance,
+					lqr.addLineageQueryResultRecord(wfNameRef, proc, var, wfInstance,
 							it, coll, parentColl, null, null, type, false, true);  // true -> is a collection
 				}
 			}
@@ -1521,6 +1523,7 @@ public abstract class ProvenanceQuery {
 
 					String type = lqr.ATOM_TYPE; // temp -- FIXME
 
+					String wfNameRef = rs.getString("wfNameRef");
 					String wfInstance = rs.getString("wfInstanceRef");
 					String proc = rs.getString("PNameRef");
 					String var = rs.getString("varNameRef");
@@ -1536,13 +1539,13 @@ public abstract class ProvenanceQuery {
 						String resolvedValue = rs.getString("D.data");
 
 						// System.out.println("resolved value: "+resolvedValue);
-						lqr.addLineageQueryResultRecord(proc, var, wfInstance,
+						lqr.addLineageQueryResultRecord(wfNameRef, proc, var, wfInstance,
 								it, coll, null, value, resolvedValue, type, isInput, false);  // false -> not a collection
 					} else {
 
 						// FIXME if the data is required then the query needs
 						// fixing
-						lqr.addLineageQueryResultRecord(proc, var, wfInstance,
+						lqr.addLineageQueryResultRecord(wfNameRef, proc, var, wfInstance,
 								it, coll, null, value, null, type, isInput, false);
 					}
 				}
