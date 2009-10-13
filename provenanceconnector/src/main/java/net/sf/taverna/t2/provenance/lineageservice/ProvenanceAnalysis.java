@@ -183,7 +183,7 @@ public class ProvenanceAnalysis {
 	 * @return
 	 * @throws SQLException
 	 */
-	public List<WorkflowInstance> getWFInstanceIDs() throws SQLException { return getPq().getWFInstanceID(null); }
+	public List<WorkflowInstance> getWFInstanceIDs() throws SQLException { return getPq().getRuns(null, null); }
 
 
 	/**
@@ -193,7 +193,7 @@ public class ProvenanceAnalysis {
 	 * @throws SQLException
 	 */
 	public List<WorkflowInstance> getWFInstanceID(String wfName) throws SQLException { 
-		return getPq().getWFInstanceID(wfName); }
+		return getPq().getRuns(wfName, null); }
 
 
 	/**

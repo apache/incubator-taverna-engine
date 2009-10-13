@@ -248,7 +248,7 @@ public class EventProcessor {
 				pw.addWFId(dataflowID, parentDataflow, externalName); // set its dataflowID along with its parent
 
 				// override wfInstanceID to point to top level -- UNCOMMENTED PM 9/09  CHECK
-				localWfInstanceID = pq.getWFInstanceID(parentDataflow).get(0).getInstanceID();
+				localWfInstanceID = pq.getRuns(parentDataflow, null).get(0).getInstanceID();
 //				logger.debug("overriding nested WFRef "+getWfInstanceID()+" with parent WFRef "+localWfInstanceID);
 
 
@@ -1413,12 +1413,14 @@ public class EventProcessor {
 
 	public List<Pair> toposort(String dataflowName, String wfInstanceId) throws SQLException  {
 
-		String wfNameRef = pq.getWfNameForDataflow(dataflowName, wfInstanceID);
+//		String wfNameRef = pq.getWfNameForDataflow(dataflowName, wfInstanceID);
+		String wfNameRef = pq.getWfNameForDataflow(dataflowName);
 
 		// fetch processors along with the count of their predecessors
 		Map<String, Integer> predecessorsCount = getPq().getPredecessorsCount(wfInstanceId);
 		Map<String, List<String>> successorsOf = new HashMap<String, List<String>>();
-		List<String> procList = pq.getContainedProcessors(dataflowName, wfInstanceId);
+//		List<String> procList = pq.getContainedProcessors(dataflowName, wfInstanceId);
+		List<String> procList = pq.getContainedProcessors(dataflowName);
 
 //		logger.debug("toposort on "+dataflowName);
 
@@ -1622,7 +1624,8 @@ public class EventProcessor {
 
 					if (pq.isDataflow(v.getPName()) && v.isInput()) {  // this is the input to a nested workflow
 
-						String tempWfNameRef = pq.getWfNameForDataflow(v.getPName(), wfInstanceId);
+//						String tempWfNameRef = pq.getWfNameForDataflow(v.getPName(), wfInstanceId);
+						String tempWfNameRef = pq.getWfNameForDataflow(v.getPName());
 						List<Var> realSuccessors = getPq().getSuccVars(v.getPName(), v.getVName(), tempWfNameRef);	
 
 //						logger.debug("realSuccessors size = "+realSuccessors.size());
@@ -1632,7 +1635,8 @@ public class EventProcessor {
 
 					}  else if (pq.isDataflow(v.getPName()) && !v.isInput()) {  // this is the output to a nested workflow
 
-						String tempWfNameRef = pq.getWfNameForDataflow(v.getPName(), wfInstanceId);
+//						String tempWfNameRef = pq.getWfNameForDataflow(v.getPName(), wfInstanceId);
+						String tempWfNameRef = pq.getWfNameForDataflow(v.getPName());
 						List<Var> realSuccessors = getPq().getSuccVars(v.getPName(), v.getVName(), null);	
 
 //						logger.debug("realSuccessors size = "+realSuccessors.size());

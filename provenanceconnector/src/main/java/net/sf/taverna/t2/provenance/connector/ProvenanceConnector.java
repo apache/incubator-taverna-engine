@@ -321,6 +321,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 		return sessionID;
 	}
 
+
 	public List<LineageQueryResultRecord> computeLineage(String wfInstance,
 			String var, String proc, String path, Set<String> selectedProcessors) {
 		return null;
@@ -329,7 +330,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 	public String getDataflowInstance(String dataflowId) {
 		String instanceID = null;
 		try {
-			instanceID = (getProvenance()).getPq().getWFInstanceID(dataflowId).get(0).getInstanceID();
+			instanceID = (getProvenance()).getPq().getRuns(dataflowId, null).get(0).getInstanceID();
 		} catch (SQLException e) {
 			logger.error("Error finding the dataflow instance", e);
 		}

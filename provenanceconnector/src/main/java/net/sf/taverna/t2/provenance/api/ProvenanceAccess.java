@@ -180,7 +180,8 @@ public class ProvenanceAccess {
 	 * @throws SQLException
 	 */
 	public QueryAnswer executeQuery (Query pq) throws SQLException {
-		return pa.lineageQuery(pq.getTargetVars(), pq.getRunID(), pq.getSelectedProcessors());
+		// uses the latest run -- this will be extended to multiple runs
+		return pa.lineageQuery(pq.getTargetVars(), pq.getRunIDList().get(0), pq.getSelectedProcessors());
 	}
 
 
@@ -202,8 +203,12 @@ public class ProvenanceAccess {
 			String port,
 			String iteration) {
 
-		logger.info("running fetchPortData on instance "+wfInstance+" workflow "+workflowId+
-			     " processor "+pname+" port "+port+" iteration "+iteration);
+		logger.info("running fetchPortData on \n" +
+				    "instance "+wfInstance+
+				    "\n workflow "+workflowId+
+			        "\nprocessor "+pname+
+			        "\nport "+port+
+			        "\niteration "+iteration);
 		// TODO add context workflowID to query
 		try {
 			return pa.fetchIntermediateResult(wfInstance, workflowId, pname, port, iteration);
@@ -230,7 +235,7 @@ public class ProvenanceAccess {
 	public List<WorkflowInstance> listRuns(String workflowId, Map<String, String> conditions) {
 
 		try {
-			return pq.getWFInstanceID(workflowId);
+			return pq.getRuns(workflowId, conditions);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -307,7 +312,7 @@ public class ProvenanceAccess {
 
 	public List<WorkflowInstance> getAllWorkflowIDs() {
 		try {
-			return pq.getWFInstanceID(null);
+			return pq.getRuns(null, null);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -339,6 +344,8 @@ public class ProvenanceAccess {
 		return pq.getProcessorsDeep(null, workflowID);
 	}
 
+	
+	
 
 	/**
 	 * list all ports for a processor
@@ -503,6 +510,10 @@ public class ProvenanceAccess {
 	 */
 	public void setPq(ProvenanceQuery pq) {
 		this.pq = pq;
+	}
+
+	public String getWorkflowIDForExternalName(String workflowNameScope) {
+		return pq.getWfNameForDataflow(workflowNameScope);
 	}
 
 }

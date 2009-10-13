@@ -396,7 +396,7 @@ public abstract class ProvenanceQuery {
 		}		
 		return null;		
 	}
-	
+
 	/**
 	 * returns the names of all workflows (top level + nested) for a given runID
 	 * @param runID
@@ -463,49 +463,54 @@ public abstract class ProvenanceQuery {
 		return result;
 	}
 
-	
+
 
 	/**
 	 * @param dataflowID
+	 * @param conditions currently oly understands "from" and "to" as timestamps for range queries
 	 * @return
 	 * @throws SQLException
 	 */
-	public List<WorkflowInstance> getWFInstanceID(String dataflowID) throws SQLException {
+	public List<WorkflowInstance> getRuns(String dataflowID, Map<String, String> conditions) throws SQLException {
 
 		PreparedStatement ps = null;
 		Connection connection = null;
 
 		List<WorkflowInstance> result = new ArrayList<WorkflowInstance>();
 
+		String q = "SELECT * FROM WfInstance I join Workflow W on I.wfnameRef = W.wfname";
+
+		List<String> conds = new ArrayList<String>();
+
+		if (dataflowID != null) { conds.add("wfnameRef = '"+dataflowID+"'"); }
+		if (conditions != null) {
+			if (conditions.get("from") != null) { conds.add("timestamp >= "+conditions.get("from")); }
+			if (conditions.get("to") != null) { conds.add("timestamp <= "+conditions.get("to")); }
+		}
+		if (conds.size()>0) { q = q + " where '"+conds.get(0)+"'"; conds.remove(0); }
+
+		while (conds.size()>0) {
+			q = q + " and '"+conds.get(0)+"'"; 
+			conds.remove(0); 
+		}
+
 		try {
 			connection = getConnection();
-
-			if (dataflowID != null) {
-				ps = connection.prepareStatement(
-				"SELECT * FROM WfInstance where wfnameRef = ? order by timestamp desc");
-				ps.setString(1, dataflowID);
-			} else {
-				ps = connection.prepareStatement(
-				"SELECT * FROM WfInstance order by timestamp desc");            	
-			}
+			ps = connection.prepareStatement(q);
 
 			boolean success = ps.execute();
 
 			if (success) {
 				ResultSet rs = ps.getResultSet();
-
 				while (rs.next()) {
-
 					WorkflowInstance i = new WorkflowInstance();
-
 					i.setInstanceID(rs.getString("instanceID"));
 					i.setTimestamp(rs.getString("timestamp"));
 					i.setWorkflowIdentifier(rs.getString("wfnameRef"));
-
+					i.setWorkflowExternalName(rs.getString("externalName"));
 					result.add(i);
 				}
 			}
-
 		} catch (InstantiationException e) {
 			logger.warn("Could not execute query: " + e);
 		} catch (IllegalAccessException e) {
@@ -635,9 +640,9 @@ public abstract class ProvenanceQuery {
 		List<VarBinding> result = new ArrayList<VarBinding>();
 
 		String q = "SELECT * FROM VarBinding VB join Var V " + 
-		           "on (VB.varNameRef = V.varName and VB.PNameRef =  V.PNameRef and VB.wfNameRef = V.wfInstanceRef) " + 
-		           "JOIN WfInstance W ON VB.wfInstanceRef = W.instanceID and VB.wfNameRef = W.wfnameRef " + 
-		           "LEFT OUTER JOIN Data D ON D.wfInstanceID = VB.wfInstanceRef and D.dataReference = VB.value";
+		"on (VB.varNameRef = V.varName and VB.PNameRef =  V.PNameRef and VB.wfNameRef = V.wfInstanceRef) " + 
+		"JOIN WfInstance W ON VB.wfInstanceRef = W.instanceID and VB.wfNameRef = W.wfnameRef " + 
+		"LEFT OUTER JOIN Data D ON D.wfInstanceID = VB.wfInstanceRef and D.dataReference = VB.value";
 
 		q = addWhereClauseToQuery(q, constraints, true);
 
@@ -1224,9 +1229,9 @@ public abstract class ProvenanceQuery {
 		LineageSQLQuery lq = new LineageSQLQuery();
 
 		String q1 = "SELECT * FROM VarBinding VB join Var V " + 
-		            "on (VB.varNameRef = V.varName and VB.PNameRef =  V.PNameRef) " + 
-		            "JOIN WfInstance W ON VB.wfInstanceRef = W.instanceID and V.wfInstanceRef = VB.wfnameRef " + 
-		            "LEFT OUTER JOIN Data D ON D.wfInstanceID = VB.wfInstanceRef and D.dataReference = VB.value";
+		"on (VB.varNameRef = V.varName and VB.PNameRef =  V.PNameRef and VB.wfNameRef=V.wfInstanceRef) " + 
+		"JOIN WfInstance W ON VB.wfInstanceRef = W.instanceID and VB.wfNameRef = W.wfnameRef " + 
+		"LEFT OUTER JOIN Data D ON D.wfInstanceID = VB.wfInstanceRef and D.dataReference = VB.value";
 
 		// constraints:
 		Map<String, String> lineageQueryConstraints = new HashMap<String, String>();
@@ -1677,12 +1682,12 @@ public abstract class ProvenanceQuery {
 	 * @param dataflowName the name of a processor of type DataFlowActivity
 	 * @return
 	 */
-	public List<String> getContainedProcessors(String dataflowName, String instanceID) {
+	public List<String> getContainedProcessors(String dataflowName) {
 
 		List<String> result = new ArrayList<String>();
 
 		// dataflow name -> wfRef
-		String containerDataflow = getWfNameForDataflow(dataflowName, instanceID);
+		String containerDataflow = getWfNameForDataflow(dataflowName);
 
 		// get all processors within containerDataflow
 		PreparedStatement ps = null;
@@ -1690,10 +1695,12 @@ public abstract class ProvenanceQuery {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-					"SELECT pname FROM Processor P  join wfInstance I on P.wfInstanceRef = I.wfnameRef " +
-			"where wfInstanceRef = ? and I.instanceID = ?");
+//					"SELECT pname FROM Processor P  join wfInstance I on P.wfInstanceRef = I.wfnameRef " +
+//			"where wfInstanceRef = ? and I.instanceID = ?");
+					"SELECT pname FROM Processor P " +
+					"where wfInstanceRef = ?");
 			ps.setString(1, containerDataflow);
-			ps.setString(2, instanceID);
+//			ps.setString(2, instanceID);
 
 
 			boolean success = ps.execute();
@@ -1760,7 +1767,14 @@ public abstract class ProvenanceQuery {
 		return null;
 	}
 
-	public String getWfNameForDataflow(String dataflowName, String instanceID) {
+	
+	/**
+	 * returns the internal ID of a dataflow given its external name
+	 * @param dataflowName
+	 * @param instanceID
+	 * @return
+	 */
+	public String getWfNameForDataflow(String dataflowName) {
 
 		PreparedStatement ps = null;
 		Connection connection = null;
@@ -1768,9 +1782,10 @@ public abstract class ProvenanceQuery {
 			connection = getConnection();
 
 			ps = connection.prepareStatement(
-			"SELECT wfname FROM Workflow W join WfInstance I on W.wfname = I.wfNameRef WHERE W.externalName = ? and I.instanceID = ?");
+//			"SELECT wfname FROM Workflow W join WfInstance I on W.wfname = I.wfNameRef WHERE W.externalName = ? and I.instanceID = ?");
+			"SELECT wfname FROM Workflow W WHERE W.externalName = ?");
 			ps.setString(1, dataflowName);
-			ps.setString(2, instanceID);
+//			ps.setString(2, instanceID);
 
 			boolean success = ps.execute();
 
@@ -2221,13 +2236,13 @@ public abstract class ProvenanceQuery {
 		}
 		return false;
 	}
-	
+
 
 	public List<Workflow> getContainingWorkflowsForProcessor(
 			String pname) {
 
 		List<Workflow> wfList = new ArrayList<Workflow>();
-		
+
 		PreparedStatement ps = null;
 		Connection connection = null;
 
@@ -2236,7 +2251,7 @@ public abstract class ProvenanceQuery {
 			ps = connection.prepareStatement(
 					"SELECT * FROM T2Provenance.Processor P "+
 					"join Workflow W on P.wfInstanceRef = W.wfName "+
-					"where pname = ? ");
+			"where pname = ? ");
 
 			ps.setString(1, pname);
 
@@ -2248,7 +2263,7 @@ public abstract class ProvenanceQuery {
 					Workflow wf = new Workflow();
 					wf.setWfName(rs.getString("wfInstanceRef"));
 					wf.setParentWFname(rs.getString("parentWFName"));
-					
+
 					wfList.add(wf);
 				}
 			}
@@ -2272,19 +2287,19 @@ public abstract class ProvenanceQuery {
 		return wfList;
 	}
 
-	
-	
-	
+
+
+
 	public Workflow getWorkflow(String dataflowID) {
-		
+
 		PreparedStatement ps = null;
 		Connection connection = null;
 
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-					 "SELECT * FROM T2Provenance.Workflow W "+
-					"where wfname = ? ");
+					"SELECT * FROM T2Provenance.Workflow W "+
+			"where wfname = ? ");
 
 			ps.setString(1, dataflowID);
 
@@ -2297,7 +2312,7 @@ public abstract class ProvenanceQuery {
 					wf.setWfName(rs.getString("wfname"));
 					wf.setParentWFname(rs.getString("parentWFName"));
 					wf.setExternalName(rs.getString("externalName"));
-					
+
 					return wf;
 				}
 			}
@@ -2319,7 +2334,7 @@ public abstract class ProvenanceQuery {
 			}
 		}
 		return null;
-		
+
 	}
 }
 

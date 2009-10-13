@@ -16,7 +16,7 @@ import net.sf.taverna.t2.provenance.lineageservice.utils.QueryVar;
 public class Query {
 	 
 	List<QueryVar> targetVars;
-	String runID;
+	List<String> runIDList;
 	List<ProvenanceProcessor> selectedProcessors;
 	
 	/**
@@ -32,18 +32,6 @@ public class Query {
 		this.targetVars = targetVars;
 	}
 	/**
-	 * @return the runID
-	 */
-	public String getRunID() {
-		return runID;
-	}
-	/**
-	 * @param runID the runID to set
-	 */
-	public void setRunID(String runID) {
-		this.runID = runID;
-	}
-	/**
 	 * @return the selectedProcessors
 	 */
 	public List<ProvenanceProcessor>  getSelectedProcessors() {
@@ -54,5 +42,17 @@ public class Query {
 	 */
 	public void setSelectedProcessors(List<ProvenanceProcessor>  selectedProcessors) {
 		this.selectedProcessors = selectedProcessors;
+	}
+	/**
+	 * @return the runIDList
+	 */
+	public List<String> getRunIDList() {
+		return runIDList;
+	}
+	/**
+	 * @param runIDList the runIDList to set
+	 */
+	public void setRunIDList(List<String> runIDList) {
+		this.runIDList = runIDList;
 	}
 }
