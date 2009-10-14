@@ -98,10 +98,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 	// Truststore containing trusted certificates of CA authorities and services.
 	private static KeyStore truststore;
 
-	
-	
-
-	
 	// A map of service URLs associated with private key aliases, i.e. aliases
 	// are keys in the hashmap and lists of URLs are hashmap values.
 	private static HashMap<String,ArrayList<String>> serviceURLsForKeyPairs;
@@ -109,7 +105,11 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 	// Constants denoting which of the two keystores we are currently 
 	// performing operations on.
 	public static final String KEYSTORE = "Keystore";
+	
 	public static final String TRUSTSTORE = "Truststore";
+	// Default password for Truststore - needed as the Truststore needs to be populated
+	// sometimes before the Workbench starts up - e.g. in case of caGrid when trusted CAs
+	// need to be inserted there at startup.
 	private static final String TRUSTSTORE_PASSWORD = "raehiekooshe0eghiPhi";
 
 	// Credential Manager singleton
