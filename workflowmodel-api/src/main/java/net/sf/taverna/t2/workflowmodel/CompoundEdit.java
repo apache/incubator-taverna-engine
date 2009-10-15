@@ -53,6 +53,10 @@ public class CompoundEdit implements Edit<Object> {
 		this.childEdits = edits;
 	}
 
+	public List<Edit<?>> getChildEdits() {
+		return childEdits;
+	}
+
 	/**
 	 * Attempts to call the doEdit method of all child edits. If any of those
 	 * children throws an EditException any successful edits are rolled back and
