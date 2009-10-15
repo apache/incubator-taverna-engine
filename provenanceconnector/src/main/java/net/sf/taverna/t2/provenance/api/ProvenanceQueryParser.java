@@ -13,6 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -43,7 +44,7 @@ public class ProvenanceQueryParser {
 	private static final String RANGE_TO = "to";
 
 	private static final String PORT_SELECTION_EL = "portSelection";
-	private static final String WORKFLOW_NAME_ATTR = "externalName";
+	private static final String WORKFLOW_NAME_ATTR = "name";
 	private static final String PORT_EL = "port";
 	private static final String WORKFLOW_EL = "workflow";
 	private static final String PROCESSOR_EL = "processor";
@@ -52,6 +53,8 @@ public class ProvenanceQueryParser {
 	private static final String PORT_NAME_EL = "name";
 
 	private static final String PROC_FOCUS_EL = "processorFocus";
+
+	private static final String INDEX_ATTR = "index";
 
 	private ProvenanceAccess pAccess;
 
@@ -88,6 +91,7 @@ public class ProvenanceQueryParser {
 
 		q.setRunIDList(parseWorkflowAndRuns(d));  // sets the set of runs 
 		q.setTargetVars(parsePortSelection(d));
+		q.setSelectedProcessors(parseProcessorFocus(d));
 
 		return q;
 	}
@@ -107,7 +111,7 @@ public class ProvenanceQueryParser {
 		Element processorFocusEl = root.getChild(PROC_FOCUS_EL);
 
 		if (processorFocusEl == null) {  // completely implicit: set to output ports of topLevelWorkflowID
-			return processProcessorFocus(mainWorkflowID, null);
+			return processProcessorFocus(mainWorkflowID, mainWorkflowExternalName, null);
 		}
 
 		logger.debug("setting explicit processor focus");
@@ -115,13 +119,23 @@ public class ProvenanceQueryParser {
 		// expect a sequence of a mix of PROCESSOR or WORKFLOW elements
 		List<Element> children = processorFocusEl.getChildren();
 		for (Element childEl: children) {
+
 			logger.debug("processing element "+childEl.getName());
+
 			if (childEl.getName().equals(WORKFLOW_EL)) { // 
 				logger.debug("processorFocus>workflow");  // set new workflow scope
 				selectedProcessors.addAll(processWorkflowFocus(childEl));
+
 			} else if (childEl.getName().equals(PROCESSOR_EL)) { // ports within this processor
-				selectedProcessors.addAll(processProcessorFocus(mainWorkflowID, childEl));
+				logger.debug("processorFocus>processor");  // set new workflow scope		
+				String procName = childEl.getAttributeValue(PROC_NAME_ATTR);
+				if (procName == null) {
+					logger.warn("processor name not found in processorFocus > processor element");
+					continue;
+				}
+				selectedProcessors.addAll(processProcessorFocus(mainWorkflowID, procName, childEl));
 			}
+
 		}
 		return selectedProcessors;
 	}
@@ -130,14 +144,16 @@ public class ProvenanceQueryParser {
 
 	/**
 	 * here we are processing <processor> within <workflow> within <processorFocus>
+	 * @param procScope 
+	 * @param procScope 
 	 */
-	private List<ProvenanceProcessor> processProcessorFocus(String workflowID, Element childEl) {
+	private List<ProvenanceProcessor> processProcessorFocus(String workflowID, String procScope, Element childEl) {
 
-		String processorNameScope = childEl.getAttributeValue(PROC_NAME_ATTR);
-		if (processorNameScope == null) {
-			logger.warn("no processor name found in <processor> tag");
-			return null;
-		}
+//		String processorNameScope = childEl.getAttributeValue(PROC_NAME_ATTR);
+//		if (processorNameScope == null) {
+//		logger.warn("no processor name found in <processor> tag");
+//		return null;
+//		}
 
 		// get the ProvenanceProcessor object within the current scope
 
@@ -146,7 +162,7 @@ public class ProvenanceQueryParser {
 
 		List<ProvenanceProcessor> myProcs = allProcessors.get(workflowID);  // processors for this specific workflow
 		for (ProvenanceProcessor pp:myProcs) {
-			if (processorNameScope.equals(pp.getPname())) {
+			if (procScope.equals(pp.getPname())) {
 				List<ProvenanceProcessor> ppList = new ArrayList<ProvenanceProcessor>();
 				ppList.add(pp);
 				return ppList;
@@ -173,9 +189,25 @@ public class ProvenanceQueryParser {
 		}
 		String workflowIDScope = pAccess.getWorkflowIDForExternalName(workflowNameScope);
 
-		List<Element> children = childEl.getChildren();  // expect <processor> elements
-		for (Element portEl:children) {
-			processors.addAll(processProcessorFocus(workflowNameScope, childEl));
+		List<Element> children = childEl.getChildren();  // expect <processor> elements, or nothing
+		if (children.size()==0) {  // add all processors within this workflow	
+
+			// does a deep traversal of nesting hierarchy collecting all processors along the way
+			Map<String, List<ProvenanceProcessor>> allProcs = pAccess.getProcessorsInWorkflow(workflowIDScope);
+			for (Map.Entry<String, List<ProvenanceProcessor>> procList:allProcs.entrySet()) {
+				processors.addAll(procList.getValue());				
+			}
+			return processors;		
+		}
+		for (Element processorEl:children) {
+			String procScope = processorEl.getAttributeValue(PROC_NAME_ATTR);
+
+			if (!processorEl.getName().equals(PROCESSOR_EL) || procScope == null) {
+				logger.debug("no processorFocus > workflow > processor element or "+
+						" no attribute "+PROC_NAME_ATTR+" in element processorFocus > workflow > processor");
+				continue;
+			}
+			processors.addAll(processProcessorFocus(workflowIDScope, procScope, childEl));
 		}
 		return processors;		
 	}
@@ -190,22 +222,35 @@ public class ProvenanceQueryParser {
 
 		List<Var> ports = pAccess.getPortsForProcessor(workflowID, procName);
 
-		boolean allPorts = false;
-		if (childEl == null) {  allPorts = true; }
-
 		List<Element> children = childEl.getChildren();
+		boolean allPorts = false;
+		if (children.size() == 0) {  allPorts = true; }
+
+		Map<String, String> portToIndex = new HashMap<String, String>();
 		for (Element portEl:children) {
-			portNames.add(portEl.getAttributeValue(PORT_NAME_ATTR));			
+			if (portEl.getName().equals(PORT_EL))  {
+				String portName = portEl.getAttributeValue(PORT_NAME_ATTR);
+				String index    = portEl.getAttributeValue(INDEX_ATTR);
+				portNames.add(portName);
+				if (index == null) portToIndex.put(portName, "ALL");
+				else portToIndex.put(portName, index);
+			}
 		}
 
 		for (Var p:ports) {
+			if (p.isInput())  continue;
 			if (allPorts || portNames.contains(p.getVName())) {					
 				QueryVar qv = new QueryVar();
 				qv.setWfName(p.getWfInstanceRef());
 				qv.setPname(p.getPName());
 				qv.setVname(p.getVName());
-				// any other field to set???
+				String index = portToIndex.get(p.getVName());
+				if (index != null) qv.setPath(portToIndex.get(p.getVName()));
+				else qv.setPath("ALL");
 				queryVars.add(qv);
+				
+				logger.debug("adding port "+p.getPName()+":"+p.getVName()+" to targetVars");
+				
 			}
 		}
 		return queryVars;
@@ -220,18 +265,22 @@ public class ProvenanceQueryParser {
 	}
 
 
+	@SuppressWarnings("unchecked")
 	private List<QueryVar> parseWorkflow(Element workflowEl) {
 
 		List<QueryVar>  queryVars = new ArrayList<QueryVar>();
 
 		String workflowNameScope = workflowEl.getAttributeValue(WORKFLOW_NAME_ATTR);
 		String workflowIDScope = pAccess.getWorkflowIDForExternalName(workflowNameScope);
+		//String defaultProcName = pAccess.getProcessorNameForWorkflowID(workflowIDScope);
 
 		// expect nested processor elements
 		List<Element> children = workflowEl.getChildren();
 		for (Element childEl:children) {
 			if (childEl.getName().equals(PROCESSOR_EL)) {
 				queryVars.addAll(parseProcessor(workflowIDScope, childEl));
+			} else if (childEl.getName().equals(PORT_EL)) {   // pport with implicit processor scope = workflow scope 
+				queryVars.addAll(parsePorts(workflowIDScope, workflowNameScope, workflowEl));  // pass the parent's element
 			}
 		}
 		return queryVars;
@@ -268,7 +317,7 @@ public class ProvenanceQueryParser {
 			} else if (childEl.getName().equals(PROCESSOR_EL)) { // ports within this processor
 				queryVars.addAll(parseProcessor(mainWorkflowID, childEl));
 			} else if (childEl.getName().equals(PORT_EL)) { // ports within this processor
-				queryVars.addAll(parsePorts(mainWorkflowID, mainWorkflowExternalName, childEl));
+				queryVars.addAll(parsePorts(mainWorkflowID, mainWorkflowExternalName, portSelection));
 			}
 		}
 		return queryVars;
@@ -352,29 +401,33 @@ public class ProvenanceQueryParser {
 
 					for (WorkflowInstance i:feasibleWfInstances) {
 
+						Date fromInstanceDate = null;
+						Date toInstanceDate = null;
 						DateFormat f = new SimpleDateFormat();
-						Date fromDate;
-						try {
-							fromDate = f.parse(from);
-							Date fromInstanceDate = f.parse(i.getTimestamp());
-							Date toDate = f.parse(to);
-							Date toInstanceDate = f.parse(i.getTimestamp());
-							if (fromDate == null || (fromDate != null && fromDate.before(fromInstanceDate))) {
-								if (toDate == null || (toDate != null && toInstanceDate.before(toDate)));
-								runsScope.add(i.getInstanceID());
+						Date fromDate=null, toDate=null;
+
+						if (from != null) {
+							try {
+								fromDate = f.parse(from);
+								fromInstanceDate = f.parse(i.getTimestamp());
+							} catch (ParseException e) {
+								logger.warn(from+" cannot be parsed as a date -- ignored");
 							}
-						} catch (ParseException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+						}
+
+						if (to != null) {
+							try {
+								toDate = f.parse(to);
+								toInstanceDate = f.parse(i.getTimestamp());
+							} catch (ParseException e) {
+								logger.warn(to+" cannot be parsed as a date -- ignored");
+							}
+						}
+						if (fromDate == null || (fromDate != null && fromDate.before(fromInstanceDate))) {
+							if (toDate == null || (toDate != null && toInstanceDate.before(toDate)));
+							runsScope.add(i.getInstanceID());
 						}
 					}
-
-
-//					Map<String, String> conds  = new java.util.HashMap<String, String>();
-//					conds.put("from", from);
-//					conds.put("to", to);
-//					List<WorkflowInstance> rangeWfInstances = pAccess.listRuns(null, conds);
-//					for (WorkflowInstance i:rangeWfInstances) { runsScope.add(i.getInstanceID()); }
 				}
 			}
 		} else {

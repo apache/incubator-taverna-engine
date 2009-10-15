@@ -512,8 +512,13 @@ public class ProvenanceAccess {
 		this.pq = pq;
 	}
 
-	public String getWorkflowIDForExternalName(String workflowNameScope) {
-		return pq.getWfNameForDataflow(workflowNameScope);
+	public String getWorkflowIDForExternalName(String workflowName) {
+		return pq.getWfNameForDataflow(workflowName);
 	}
+	
+	public String getProcessorNameForWorkflowID(String workflowID) {
+		return pq.getProcessorForWorkflow(workflowID);
+	}
+	
 
 }

@@ -1215,6 +1215,47 @@ public abstract class ProvenanceQuery {
 		return result;
 	}
 
+	
+	public String getProcessorForWorkflow(String workflowID) {
+	
+		PreparedStatement ps = null;
+		Connection connection = null;
+		try {
+			connection = getConnection();
+			ps = connection.prepareStatement(
+					"SELECT * from Processor WHERE wfInstanceRef = ?");
+			ps.setString(1, workflowID);
+
+			boolean success = ps.execute();
+			if (success) {
+				ResultSet rs = ps.getResultSet();
+				if (rs.next()) {  return rs.getString("pname"); }
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		return null;
+	}
+	
 	/**
 	 * simplest possible pinpoint query. Uses iteration info straight away. Assumes result is in VarBinding not in Collection
 	 *
