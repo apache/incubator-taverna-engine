@@ -14,6 +14,8 @@ import javax.swing.text.Document;
  */
 public class DialogTextArea extends JTextArea {
 
+	private static Font newFont = Font.decode("Dialog");
+	
 	/**
 	 * 
 	 */
@@ -23,7 +25,7 @@ public class DialogTextArea extends JTextArea {
 	 * 
 	 */
 	public DialogTextArea() {
-		setFont(Font.getFont("Dialog"));
+		updateFont();
 	}
 
 	/**
@@ -31,7 +33,7 @@ public class DialogTextArea extends JTextArea {
 	 */
 	public DialogTextArea(String text) {
 		super(text);
-		setFont(Font.getFont("Dialog"));
+		updateFont();
 	}
 
 	/**
@@ -39,7 +41,7 @@ public class DialogTextArea extends JTextArea {
 	 */
 	public DialogTextArea(Document doc) {
 		super(doc);
-		setFont(Font.getFont("Dialog"));
+		updateFont();
 	}
 
 	/**
@@ -48,7 +50,7 @@ public class DialogTextArea extends JTextArea {
 	 */
 	public DialogTextArea(int rows, int columns) {
 		super(rows, columns);
-		setFont(Font.getFont("Dialog"));
+		updateFont();
 	}
 
 	/**
@@ -58,7 +60,7 @@ public class DialogTextArea extends JTextArea {
 	 */
 	public DialogTextArea(String text, int rows, int columns) {
 		super(text, rows, columns);
-		setFont(Font.getFont("Dialog"));
+		updateFont();
 	}
 
 	/**
@@ -69,7 +71,13 @@ public class DialogTextArea extends JTextArea {
 	 */
 	public DialogTextArea(Document doc, String text, int rows, int columns) {
 		super(doc, text, rows, columns);
-		setFont(Font.getFont("Dialog"));
+		updateFont();
+	}
+	
+	private void updateFont() {
+		if (newFont != null) {
+			this.setFont(newFont);
+		}
 	}
 
 }
