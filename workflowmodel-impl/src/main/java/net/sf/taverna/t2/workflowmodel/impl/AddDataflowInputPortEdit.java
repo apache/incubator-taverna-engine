@@ -57,4 +57,9 @@ public class AddDataflowInputPortEdit extends AbstractDataflowEdit {
 		}
 	}
 
+	public DataflowInputPort getDataflowInputPort() {
+		return dataflowInputPort;
+	}
+
+
 }

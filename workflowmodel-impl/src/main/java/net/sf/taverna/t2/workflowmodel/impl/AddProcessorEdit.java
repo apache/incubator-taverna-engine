@@ -34,6 +34,10 @@ public class AddProcessorEdit extends AbstractDataflowEdit{
 	
 	private Processor processor;
 	
+	public Processor getProcessor() {
+		return processor;
+	}
+
 	protected AddProcessorEdit(Dataflow dataflow, Processor processor) {
 		super(dataflow);
 		this.processor=processor;

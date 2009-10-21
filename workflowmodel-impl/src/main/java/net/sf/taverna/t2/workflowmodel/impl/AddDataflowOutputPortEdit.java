@@ -56,5 +56,11 @@ public class AddDataflowOutputPortEdit extends AbstractDataflowEdit {
 			//this port has already been added
 		}
 	}
+	
+	public DataflowOutputPort getDataflowOutputPort() {
+		return dataflowOutputPort;
+	}
+
+
 
 }
