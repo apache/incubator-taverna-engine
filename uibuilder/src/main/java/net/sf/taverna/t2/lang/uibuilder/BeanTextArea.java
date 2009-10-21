@@ -6,13 +6,14 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
-import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.text.JTextComponent;
 
+import net.sf.taverna.t2.lang.ui.DialogTextArea;
+
 /**
- * Bean editor based on a JTextArea for use with longer strings such as
+ * Bean editor based on a DialogTextArea for use with longer strings such as
  * descriptions. Supports the 'nofilter' property, if this is not specified then
  * the text inserted initially (but not on subsequent events such as property
  * change messages) will be filtered to remove multiple whitespace elements,
@@ -36,7 +37,7 @@ public class BeanTextArea extends BeanTextComponent implements
 	@SuppressWarnings( { "serial", "unchecked" })
 	@Override
 	protected JTextComponent getTextComponent() {
-		JTextArea result = new JTextArea() {
+		DialogTextArea result = new DialogTextArea() {
 			@Override
 			public void setText(String text) {
 				if (!initialized && !getProperties().containsKey("nofilter")) {
@@ -57,7 +58,7 @@ public class BeanTextArea extends BeanTextComponent implements
 				return new Dimension(0, super.getPreferredSize().height);
 			}
 		};
-		// Fix to add borders to JTextArea on old look and feel implementations,
+		// Fix to add borders to DialogTextArea on old look and feel implementations,
 		// the new one (Nimbus) already has this
 		if (!UIManager.getLookAndFeel().getName().equals("Nimbus")) {
 			result.setBorder(UIManager.getBorder("TextField.border"));
