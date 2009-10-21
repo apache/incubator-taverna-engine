@@ -43,7 +43,7 @@ public class ProcessorXMLSerializer extends AbstractXMLSerializer {
 		return instance;
 	}
 
-	protected Element processorToXML(Processor processor) throws IOException,
+	public Element processorToXML(Processor processor) throws IOException,
 			JDOMException {
 
 		Element result = new Element(PROCESSOR, T2_WORKFLOW_NAMESPACE);
