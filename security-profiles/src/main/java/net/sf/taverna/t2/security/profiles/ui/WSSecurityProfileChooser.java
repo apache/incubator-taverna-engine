@@ -50,7 +50,6 @@ import javax.swing.JPanel;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
@@ -58,6 +57,7 @@ import javax.swing.border.EtchedBorder;
 
 import org.apache.log4j.Logger;
 
+import net.sf.taverna.t2.lang.ui.DialogTextArea;
 import net.sf.taverna.t2.security.profiles.NoSuchSecurityPropertyException;
 import net.sf.taverna.t2.security.profiles.SecurityProperties;
 import net.sf.taverna.t2.security.profiles.TransportProperties;
@@ -338,7 +338,7 @@ public class WSSecurityProfileChooser extends JDialog
         jcmbSecurityProfiles.setMaximumRowCount(15);
         JLabel jlSecurityProfileDescription = new JLabel("Description");
         jlSecurityProfileDescription.setFont(new Font(null, Font.BOLD, 11));
-        final JTextArea jtaSecurityProfileDescription = new JTextArea(
+        final DialogTextArea jtaSecurityProfileDescription = new DialogTextArea(
         		wsSecurityProfileDescriptions.elementAt(jcmbSecurityProfiles.getSelectedIndex())); //description text area
         jtaSecurityProfileDescription.setEditable(false);
         jtaSecurityProfileDescription.setOpaque(false);
