@@ -17,6 +17,11 @@ public class DialogTextArea extends JTextArea {
 	/**
 	 * 
 	 */
+	private static final long serialVersionUID = 2329063139827993252L;
+
+	/**
+	 * 
+	 */
 	public DialogTextArea() {
 		setFont(Font.getFont("Dialog"));
 	}
