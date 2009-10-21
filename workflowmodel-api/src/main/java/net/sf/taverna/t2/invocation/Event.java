@@ -162,5 +162,20 @@ public abstract class Event<EventType extends Event<?>> {
 			return owner + ":" + newLocalProcess;
 		}
 	}
+	
+
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(getClass().getSimpleName());
+		sb.append(' ');
+		sb.append(owner);
+		sb.append('[');
+		for (int i : index) {
+			sb.append(i);
+			sb.append(" ");
+		}
+		sb.append(']');
+		return sb.toString();
+	};
 
 }
