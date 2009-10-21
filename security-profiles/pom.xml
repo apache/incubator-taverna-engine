@@ -41,5 +41,10 @@
 			<artifactId>appconfig</artifactId>
 			<version>${t2.infrastructure.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>net.sf.taverna.t2.lang</groupId>
+			<artifactId>ui</artifactId>
+			<version>${t2.lang.version}</version>
+		</dependency>
 	</dependencies>
 </project>
