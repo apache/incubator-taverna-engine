@@ -213,8 +213,7 @@ public class ProvenanceAccess {
 		try {
 			return pa.fetchIntermediateResult(wfInstance, workflowId, pname, port, iteration);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Problem with fetching intermediate results: " + e);
 		}
 		return null;
 	}
@@ -237,8 +236,7 @@ public class ProvenanceAccess {
 		try {
 			return pq.getRuns(workflowId, conditions);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Problem with listing runs: " + e);
 			return null;
 		}
 	}
@@ -264,7 +262,7 @@ public class ProvenanceAccess {
 			
 			// TODO send the list of dangling refs to the Data manager for removal of the corresponding data values
 		} catch (SQLException e) {
-			e.printStackTrace();
+			logger.error("Problem with removing run : " + runID + " : "+ e);
 		}
 		
 		return; // TODO do the static part
@@ -292,7 +290,7 @@ public class ProvenanceAccess {
 		try {
 			return pq.getWfNames(runID);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			logger.error("Problem getting workflow ID: " + runID + " : " + e);
 		}
 		return null;
 	}
@@ -303,7 +301,7 @@ public class ProvenanceAccess {
 		try {
 			return pq.getTopLevelWfName(runID);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			logger.error("Problem getting top level workflow: " + runID + " : " + e);
 		}
 		return null;
 	}
@@ -314,8 +312,7 @@ public class ProvenanceAccess {
 		try {
 			return pq.getRuns(null, null);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Problem getting all workflow IDs: " + e);
 			return null;
 		}
 
@@ -364,7 +361,7 @@ public class ProvenanceAccess {
 		try {
 			return pq.getVars(queryConstraints);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			logger.error("Problem getting ports for dataflow: " + dataflowID + " : " + e);
 		}
 		return null;
 	}
@@ -386,7 +383,7 @@ public class ProvenanceAccess {
 		try {
 			return pq.getVars(queryConstraints);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			logger.error("Problem getting ports for processor: " + processorName + " worflow: " + workflowID + " : " + e);
 		}
 		return null;
 	}

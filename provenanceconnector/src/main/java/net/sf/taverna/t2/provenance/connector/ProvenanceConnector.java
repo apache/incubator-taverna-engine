@@ -95,17 +95,13 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 			setProvenanceAnalysis(new ProvenanceAnalysis(getQuery()));
 			setProvenance(new Provenance(getEventProcessor()));
 		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Problem with provenance initialisation: " + e);
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Problem with provenance initialisation: " + e);
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Problem with provenance initialisation: " + e);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Problem with provenance initialisation: " + e);
 		}
 	}
 
@@ -200,8 +196,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 				}
 				
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Problem clearing database: " + e);
 			}
 		} else {
 			System.out.println("clearDB is FALSE: not clearing");

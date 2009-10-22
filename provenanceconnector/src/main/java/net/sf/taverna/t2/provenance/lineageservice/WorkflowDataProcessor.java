@@ -140,8 +140,7 @@ public class WorkflowDataProcessor {
 					}
 				}
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Problem processing trees for workflow: " +dataflowID + " instance: " + wfInstanceRef + " : " + e);
 			}
 
 		}

@@ -111,19 +111,18 @@ public class ProvenanceAnalysis {
 		try {
 			aOPMManager  = (OPMManager) Class.forName(OPMManagerClass).newInstance();
 		} catch (InstantiationException e1) {
-			e1.printStackTrace();
+			logger.error("Problem initialising opm graph: " + e1);
 		} catch (IllegalAccessException e1) {
-			e1.printStackTrace();
+			logger.error("Problem initialising opm graph: " + e1);
 		} catch (ClassNotFoundException e1) {
-			logger.info("chosen OPMmanager: "+OPMManagerClass+" not available, reverting to default");
+			logger.warn("chosen OPMmanager: "+OPMManagerClass+" not available, reverting to default");
 			aOPMManager  = new OPMManager();
 		}
 
 		try {
 			aOPMManager.createAccount(getWFInstanceIDs().get(0).getInstanceID());
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Could not initialise OPM Manager: " + e);
 		}
 	}
 
@@ -260,14 +259,11 @@ public class ProvenanceAnalysis {
 			completeAnswer.setOPMAnswer_AsXML(_OPM_asXML_File);
 
 		} catch (OperatorException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Problem running query: " + e);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Problem running query: " + e);
 		} catch (JAXBException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Problem running query: " + e);
 		}
 
 		return completeAnswer;

@@ -625,14 +625,11 @@ cnt++;  // who uses this?
 			connection = getConnection();
 			stmt = connection.createStatement();
 		} catch (InstantiationException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			logger.error("Problem clearing static DB: " + e1);
 		} catch (IllegalAccessException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			logger.error("Problem clearing static DB: " + e1);
 		} catch (ClassNotFoundException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			logger.error("Problem clearing static DB: " + e1);
 		}
 		try {
 			q = "DELETE FROM Workflow";
@@ -823,8 +820,7 @@ cnt++;  // who uses this?
 		} catch (ClassNotFoundException e1) {
 			logger.warn("Error execting delete query for provenance records", e1);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Problem collecting value references for: " + runID + " : " + e);  
 		} finally {
 			if (connection != null) {
 				connection.close();

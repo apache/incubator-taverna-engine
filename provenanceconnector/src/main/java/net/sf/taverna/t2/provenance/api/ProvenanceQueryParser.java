@@ -6,7 +6,6 @@ package net.sf.taverna.t2.provenance.api;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.StringReader;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -79,14 +78,11 @@ public class ProvenanceQueryParser {
 		try {
 			d = b.build (new FileReader((XMLQuerySpecFilename)));
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Problem parsing provenance query: " + e);
 		} catch (JDOMException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Problem parsing provenance query: " + e);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Problem parsing provenance query: " + e);
 		}
 
 		q.setRunIDList(parseWorkflowAndRuns(d));  // sets the set of runs 

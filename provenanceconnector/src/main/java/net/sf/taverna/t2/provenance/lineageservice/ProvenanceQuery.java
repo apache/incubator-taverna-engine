@@ -1159,8 +1159,7 @@ public abstract class ProvenanceQuery {
 				}
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Problem getting nested workflow processors for: " + wfnameRef + " : " + e);
 		}
 		return result;
 	}
@@ -1232,24 +1231,19 @@ public abstract class ProvenanceQuery {
 				if (rs.next()) {  return rs.getString("pname"); }
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Problem getting processor for workflow: " + workflowID+ " : " + e);
 		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Problem getting processor for workflow: " + workflowID+ " : " + e);
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Problem getting processor for workflow: " + workflowID+ " : " + e);
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Problem getting processor for workflow: " + workflowID+ " : " + e);
 		} finally {
 			if (connection != null) {
 				try {
 					connection.close();
 				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.error("Problem getting processor for workflow: " + workflowID+ " : " + e);
 				}
 			}
 		}

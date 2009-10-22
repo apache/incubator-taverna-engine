@@ -160,8 +160,11 @@ public class EventProcessor {
 
 		// check whether we already have this WF in the DB
 		List<String> wfNames = null;
-		try { wfNames = pq.getAllWFnames(); } 
-		catch (SQLException e) { e.printStackTrace(); }
+		try {
+			wfNames = pq.getAllWFnames();
+		} catch (SQLException e) { 
+			logger.warn("Problem processing workflow structure:" + e);
+		}
 
 		if (wfNames != null && wfNames.contains(topLevelDataflowID)) {  // already in the DB
 //			logger.info("workflow structure with ID "+topLevelDataflowID+" is in the DB -- clearing static portion");
@@ -214,8 +217,7 @@ public class EventProcessor {
 			try {
 				wfNames = pq.getAllWFnames();
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.warn("Problem processing dataflow structure for " + dataflowID + " :" + e);
 			}
 
 			if (wfNames != null && wfNames.contains(dataflowID)) {  // already in the DB
@@ -521,9 +523,9 @@ public class EventProcessor {
 			return workflowEl;
 
 		} catch (JDOMException e) {
-			e.printStackTrace();
+			logger.warn("Problem stripping workflow instance header: " + e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.warn("Problem stripping workflow instance header: " + e);
 		}
 
 
@@ -597,7 +599,6 @@ public class EventProcessor {
 			} catch (SQLException e) {
 
 				logger.info("WARNING: provenance has duplicate processor binding -- due to workflow nesting");
-				 e.printStackTrace();
 			}
 		} else if (provenanceItem.getEventType().equals(SharedVocabulary.END_WORKFLOW_EVENT_TYPE)) {
 
@@ -854,8 +855,7 @@ public class EventProcessor {
 			} // for each output var
 
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.warn("Problem reconciling top level outputs: " + e);
 		}
 
 	}
@@ -1024,8 +1024,8 @@ public class EventProcessor {
 				try {
 					backpatchIterationResults(newBindings);
 				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.warn("Problem with back patching iteration results: " + e);
+
 				}
 
 			} else {
@@ -1251,8 +1251,7 @@ public class EventProcessor {
 		{
 			public void exceptionThrown(Exception e)
 			{
-				System.out.println("XML encoding ERROR: ");
-				e.printStackTrace();
+				logger.warn("XML encoding ERROR: " + e);
 				return;
 			}
 		});
