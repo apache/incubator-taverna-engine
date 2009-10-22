@@ -9,4 +9,10 @@
 	<groupId>net.sf.taverna.t2.lang</groupId>
 	<artifactId>io</artifactId>
 	<name>IO utility classes</name>
+		<dependencies>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+		</dependency>
+	</dependencies>
 </project>
