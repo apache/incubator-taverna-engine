@@ -26,13 +26,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import org.apache.log4j.Logger;
+
 /**
  * Devours an input stream and allows the contents to be read as a String once
  * the stream has completed.
  * 
  * @author Tom Oinn
+ * @author Alan R Williams
  */
 public class StreamDevourer extends Thread {
+	
+	private static Logger logger = Logger.getLogger(StreamDevourer.class);
+
+	private static byte[] newLine = System.getProperty("line.separator").getBytes();
 
 	BufferedReader br;
 
@@ -55,8 +62,8 @@ public class StreamDevourer extends Thread {
 			this.join();
 			return output.toString();
 		} catch (InterruptedException ie) {
-			ie.printStackTrace();
-			return "Interrupted!";
+			logger.error(ie);
+			return "Interrupted";
 		}
 	}
 
@@ -81,11 +88,17 @@ public class StreamDevourer extends Thread {
 			String line = null;
 			while ((line = br.readLine()) != null) {
 				// && line.endsWith("</svg>") == false) {
-				output.write(line.getBytes());
+				if (line.endsWith("\\") && !line.endsWith("\\\\")) {
+					line = line.substring(0, line.length() - 1);
+					output.write(line.getBytes());
+				} else {
+					output.write(line.getBytes());
+					output.write(newLine);
+				}
 			}
 			br.close();
 		} catch (IOException ioe) {
-			ioe.printStackTrace();
+			logger.error(ioe);
 		}
 	}
 
