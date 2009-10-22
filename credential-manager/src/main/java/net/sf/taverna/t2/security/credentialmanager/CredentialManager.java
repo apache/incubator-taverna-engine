@@ -513,7 +513,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 		System.setProperty("javax.net.ssl.trustStore", truststoreFile.getAbsolutePath());
 		System.setProperty("javax.net.ssl.trustStorePassword", masterPassword);
 		// Taverna distro for MAC contains info.plist file with some Java system properties set to
-		// use the Keychain which clashes with what we are setting here so wee need to clear them
+		// use the Keychain which clashes with what we are setting here so we need to clear them
 		System.clearProperty("javax.net.ssl.trustStoreType");
 		System.clearProperty("javax.net.ssl.trustStoreProvider");
 		return truststore;
