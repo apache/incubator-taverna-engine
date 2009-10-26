@@ -203,12 +203,11 @@ public class ProvenanceAccess {
 			String port,
 			String iteration) {
 
-		logger.info("running fetchPortData on \n" +
-				    "instance "+wfInstance+
-				    "\n workflow "+workflowId+
-			        "\nprocessor "+pname+
-			        "\nport "+port+
-			        "\niteration "+iteration);
+		logger.info("running fetchPortData on instance "+wfInstance+
+				    " workflow "+workflowId+
+			        " processor "+pname+
+			        " port "+port+
+			        " iteration "+iteration);
 		// TODO add context workflowID to query
 		try {
 			return pa.fetchIntermediateResult(wfInstance, workflowId, pname, port, iteration);
