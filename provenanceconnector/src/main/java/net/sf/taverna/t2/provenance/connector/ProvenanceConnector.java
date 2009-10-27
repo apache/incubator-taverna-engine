@@ -95,13 +95,13 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 			setProvenanceAnalysis(new ProvenanceAnalysis(getQuery()));
 			setProvenance(new Provenance(getEventProcessor()));
 		} catch (InstantiationException e) {
-			logger.error("Problem with provenance initialisation: " + e);
+			logger.error("Problem with provenance initialisation: ",e);
 		} catch (IllegalAccessException e) {
-			logger.error("Problem with provenance initialisation: " + e);
+			logger.error("Problem with provenance initialisation: ",e);
 		} catch (ClassNotFoundException e) {
-			logger.error("Problem with provenance initialisation: " + e);
+			logger.error("Problem with provenance initialisation: ",e);
 		} catch (SQLException e) {
-			logger.error("Problem with provenance initialisation: " + e);
+			logger.error("Problem with provenance initialisation: ",e);
 		}
 	}
 
