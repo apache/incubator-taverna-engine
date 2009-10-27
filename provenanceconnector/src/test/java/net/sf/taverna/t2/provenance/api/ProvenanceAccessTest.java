@@ -9,7 +9,6 @@ import java.io.File;
 import java.sql.Connection;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
-import org.junit.Ignore;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
