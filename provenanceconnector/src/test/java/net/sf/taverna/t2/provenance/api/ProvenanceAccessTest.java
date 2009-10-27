@@ -24,8 +24,7 @@ public class ProvenanceAccessTest {
     /**
      * Test of initDataSource method, of class ProvenanceAccess.
      */
-    @Test
-    @Ignore("Temporarily disabled")
+    @Test    
     public void testInitDataSource() throws Exception {
         String driver = "org.apache.derby.jdbc.EmbeddedDriver";
         File tempDir = File.createTempFile("install", "dir");
@@ -41,8 +40,7 @@ public class ProvenanceAccessTest {
         assertNotNull(con);
     }
 
-    @Test
-    @Ignore("Temporarily disabled")
+    @Test    
     public void testInitDataSource2() throws Exception {
         String driver = "org.apache.derby.jdbc.EmbeddedDriver";
         File tempDir = File.createTempFile("install", "dir");
@@ -58,8 +56,7 @@ public class ProvenanceAccessTest {
         assertNotNull(con);
     }
 
-    @Test
-    @Ignore("Temporarily disabled")
+    @Test    
     public void testInitDefaultReferenceService() throws Exception {
         String driver = "org.apache.derby.jdbc.EmbeddedDriver";
         File tempDir = File.createTempFile("install", "dir");
