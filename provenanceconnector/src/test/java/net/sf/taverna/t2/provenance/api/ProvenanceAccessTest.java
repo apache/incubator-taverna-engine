@@ -9,6 +9,8 @@ import java.io.File;
 import java.sql.Connection;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
+
+import org.junit.Ignore;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -23,7 +25,7 @@ public class ProvenanceAccessTest {
     /**
      * Test of initDataSource method, of class ProvenanceAccess.
      */
-    @Test    
+    @Test        
     public void testInitDataSource() throws Exception {
         String driver = "org.apache.derby.jdbc.EmbeddedDriver";
         File tempDir = File.createTempFile("install", "dir");
@@ -56,6 +58,7 @@ public class ProvenanceAccessTest {
     }
 
     @Test    
+    @Ignore
     public void testInitDefaultReferenceService() throws Exception {
         String driver = "org.apache.derby.jdbc.EmbeddedDriver";
         File tempDir = File.createTempFile("install", "dir");
