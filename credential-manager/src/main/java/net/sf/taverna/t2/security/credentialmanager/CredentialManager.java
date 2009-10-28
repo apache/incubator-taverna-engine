@@ -20,6 +20,7 @@
  ******************************************************************************/
 package net.sf.taverna.t2.security.credentialmanager;
 
+import java.awt.Frame;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -33,12 +34,16 @@ import java.math.BigInteger;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.Key;
+import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.Provider;
+import java.security.SecureRandom;
 import java.security.Security;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -49,7 +54,14 @@ import java.util.List;
 import java.util.TreeMap;
 
 import javax.crypto.spec.SecretKeySpec;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 import javax.security.auth.x500.X500Principal;
+import javax.swing.JOptionPane;
 
 import net.sf.taverna.t2.lang.observer.MultiCaster;
 import net.sf.taverna.t2.lang.observer.Observable;
@@ -71,6 +83,8 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 	private static final String T2TRUSTSTORE_FILE = "t2truststore.jks";
 	private static final String SERVICE_URLS_FILE = "t2serviceURLs.txt";
 	private static final String T2KEYSTORE_FILE = "t2keystore.ubr";
+	
+	public static final char USERNAME_AND_PASSWORD_SEPARATOR_CHARACTER = ';'; // seems like a good separator as it will highly unlikely feature in username
 
 	// Log4J Logger
 	private static Logger logger = Logger.getLogger(CredentialManager.class);
@@ -88,7 +102,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 	// Service URLs file containing lists of service URLs associated with private key aliases.
 	// The alias points to the key pair entry to be used for a particular service.
 	private static File serviceURLsFile = new File(secConfigDirectory,SERVICE_URLS_FILE); 
-
 	
 	// Master password the Keystore and Truststore are created/accessed with. 
 	private static String masterPassword;
@@ -110,7 +123,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 	// Default password for Truststore - needed as the Truststore needs to be populated
 	// sometimes before the Workbench starts up - e.g. in case of caGrid when trusted CAs
 	// need to be inserted there at startup.
-	private static final String TRUSTSTORE_PASSWORD = "raehiekooshe0eghiPhi";
+	private static final String TRUSTSTORE_PASSWORD = "Tu/Ap%2_$dJt6*+Rca9v";//"raehiekooshe0eghiPhi";
 
 	// Credential Manager singleton
 	private static CredentialManager INSTANCE;
@@ -509,13 +522,17 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 			}			
 		}
 		
-		// Set the system property "javax.net.ssl.Truststore" to use Taverna's truststore 
-		System.setProperty("javax.net.ssl.trustStore", truststoreFile.getAbsolutePath());
-		System.setProperty("javax.net.ssl.trustStorePassword", masterPassword);
+		
 		// Taverna distro for MAC contains info.plist file with some Java system properties set to
 		// use the Keychain which clashes with what we are setting here so we need to clear them
 		System.clearProperty("javax.net.ssl.trustStoreType");
 		System.clearProperty("javax.net.ssl.trustStoreProvider");
+		
+		// Set the system property "javax.net.ssl.Truststore" to use Taverna's truststore 
+		//System.setProperty("javax.net.ssl.trustStore", truststoreFile.getAbsolutePath());
+		//System.setProperty("javax.net.ssl.trustStorePassword", masterPassword);
+		HttpsURLConnection.setDefaultSSLSocketFactory(createTavernaSSLSocketFactory());
+
 		return truststore;
 	}
 	
@@ -723,9 +740,10 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 
 	/**
 	 * Get a username and password pair for the given service, or null if it
-	 * does not exit.
+	 * does not exit. The returned array contains username as the first element and
+	 * password as the second.
 	 */
-	public String getUsernameAndPasswordForService(String serviceURL) throws CMException
+	public String[] getUsernameAndPasswordForService(String serviceURL) throws CMException
 	{
 		synchronized (Security.class) {
 			ArrayList<Provider> oldBCProviders = unregisterOldBCProviders();
@@ -740,8 +758,13 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 							.getKey(alias, null)));
 				}
 				if (passwordKey != null){
-					String unpasspair = new String(passwordKey.getEncoded()); // the decoded key contains string <USERNAME>" "<PASSWORD>
-					return unpasspair;
+					String unpasspair = new String(passwordKey.getEncoded()); // the decoded key contains string <USERNAME><SEPARATOR_CHARACTER><PASSWORD>
+					String username = unpasspair.substring(0, unpasspair.indexOf(CredentialManager.USERNAME_AND_PASSWORD_SEPARATOR_CHARACTER));
+	            	String password = unpasspair.substring(unpasspair.indexOf(CredentialManager.USERNAME_AND_PASSWORD_SEPARATOR_CHARACTER)+1);
+	            	String[] toReturn = new String[2];
+					toReturn[0] = username;
+					toReturn[1] = password;
+					return toReturn;
 				}
 				else{
 					return null;
@@ -823,11 +846,11 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 			 * the name "DUMMY" for algorithm name, as this is not checked for 
 			 * anyway.
 			 * 
-			 * Blank character is a good separator as it (most probably) will
-			 * not appear in the username.
+			 * Use a separator character that will
+			 * not appear in the username or password.
 			 */
-			String keyToSave = username + " " + password; 
-
+			String keyToSave = username + USERNAME_AND_PASSWORD_SEPARATOR_CHARACTER + password; 
+			
 			SecretKeySpec passwordKey = new SecretKeySpec(keyToSave.getBytes(),
 					"DUMMY");		
 			try {
@@ -1299,12 +1322,16 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 				throw (new CMException(exMessage));
 			}
 			finally{
+				// Set the new SSLSocketFactory to use the updated Truststore
+				HttpsURLConnection.setDefaultSSLSocketFactory(createTavernaSSLSocketFactory());		
+				logger.info("Credential Manager: Updating SSLSocketFactory after inserting a trusted certificate.");
 				// Add the old BC providers back and remove the one we have added
 				restoreOldBCProviders(oldBCProviders);
 			}
 		}
 	}
 
+	
 	/**
 	 * Create a Truststore alias for the trusted certificate as
 	 * 
@@ -1368,6 +1395,9 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 		deleteEntry(TRUSTSTORE, alias);
 		saveKeystore(TRUSTSTORE);
 		multiCaster.notify(new KeystoreChangedEvent(CredentialManager.TRUSTSTORE));
+		// Set the new SSLSocketFactory to use the updated Truststore
+		HttpsURLConnection.setDefaultSSLSocketFactory(createTavernaSSLSocketFactory());
+		logger.info("Credential Manager: Updating SSLSocketFactory after deleting a trusted certificate.");
 	}
 	
 	/**
@@ -1652,17 +1682,151 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 	public static void initialiseSSL() throws CMException {		
 		loadTruststore(TRUSTSTORE_PASSWORD);
 	}
+
 	
 	/**
-	 * Gets a Security Agent Manager instance.
+	 * Customised X509TrustManager that uses Credential Manager's
+	 * Truststore for trust management. If HTTPS connection to an
+	 * untrusted service is attempted it will also pop up a dialog
+	 * asking the user to confirm if they want to trust it.
+	 *
 	 */
-//	public SecurityAgentManager getSecurityAgentManager() throws CMNotInitialisedException{
-//		
-//		if (!isInitialised) {
-//			throw new CMNotInitialisedException(
-//					"Credential Manager not initialised.");
-//		}
-//
-//		return new SecurityAgentManager(keystore, serviceURLs, truststore);
-//	}
+	private static class MyX509TrustManager implements X509TrustManager {  
+
+		/*
+		 * The default X509TrustManager returned by SunX509. We'll delegate
+		 * decisions to it, and fall back to the logic in this class if the
+		 * default X509TrustManager doesn't trust it.
+		 */
+		X509TrustManager sunJSSEX509TrustManager;
+
+		MyX509TrustManager() throws Exception {
+			// create a "default" JSSE X509TrustManager.
+
+			TrustManagerFactory tmf = TrustManagerFactory.getInstance(
+					"SunX509", "SunJSSE");
+			tmf.init(truststore);
+
+			TrustManager tms[] = tmf.getTrustManagers();
+
+			/*
+			 * Iterate over the returned trustmanagers, look for an instance of
+			 * X509TrustManager. If found, use that as our "default" trust
+			 * manager.
+			 */
+			for (int i = 0; i < tms.length; i++) {
+				if (tms[i] instanceof X509TrustManager) {
+					sunJSSEX509TrustManager = (X509TrustManager) tms[i];
+					return;
+				}
+			}
+
+			/*
+			 * Find some other way to initialize, or else we have to fail the
+			 * constructor.
+			 */
+
+			throw new Exception("Could not initialize Trust Manager.");
+		}
+
+		/*
+		 * Delegate to the default trust manager.
+		 */
+		public void checkClientTrusted(X509Certificate[] chain, String authType)
+				throws CertificateException {
+			try {
+				sunJSSEX509TrustManager.checkClientTrusted(chain, authType);
+			} catch (CertificateException excep) {
+				// do any special handling here, or rethrow exception.
+				throw excep;
+			}
+		}
+
+		/*
+		 * Delegate to the default trust manager.
+		 */
+		public void checkServerTrusted(X509Certificate[] chain, String authType)
+				throws CertificateException {
+			try {
+				sunJSSEX509TrustManager.checkServerTrusted(chain, authType);
+			} catch (CertificateException excep) {
+				/*
+				 * Possibly pop up a dialog box asking whether to trust the 
+				 * server's certificate chain.
+				 */
+				if (!shouldTrust(chain)){
+					throw excep;
+				}
+			}
+		}
+
+		/*
+		 * Merely pass this through.
+		 */
+		public X509Certificate[] getAcceptedIssuers() {
+			return sunJSSEX509TrustManager.getAcceptedIssuers();
+		}
+	}
+
+	/**
+	 * Checks if a service is trusted and if not - asks user if they want to trust it.
+	 */
+	public static boolean shouldTrust(final X509Certificate[] chain){
+
+		logger.info("Asking the user if they want to trust certificate.");
+		// Ask user if they want to trust this service
+		ConfirmTrustedCertificateDialog confirmCertTrustDialog = new ConfirmTrustedCertificateDialog(
+				(Frame) null, "Untrusted HTTPS connection", true,
+				(X509Certificate) chain[0]);
+		confirmCertTrustDialog.setLocationRelativeTo(null);
+		confirmCertTrustDialog.setVisible(true);
+		boolean shouldTrust = confirmCertTrustDialog
+				.shouldTrust();
+		if (shouldTrust) {
+			try {
+				CredentialManager credManager = CredentialManager.getInstance();
+				credManager.saveTrustedCertificate((X509Certificate) chain[0]);
+				return (true);
+			} catch (CMException cme) {
+				logger.error("Credential Manager: Failed to "
+						+ "save trusted certificate.", cme);
+				return (false);
+			}
+		} else {
+			JOptionPane
+					.showMessageDialog(
+							null,
+							"As you refused to trust this host, you will not be able to its services from a workflow.",
+							"Untrusted HTTPS connection",
+							JOptionPane.INFORMATION_MESSAGE);
+			return (false);
+		}
+
+	}	
+	
+	/**
+	 * SSL Socket factory used by Taverna that uses special 
+	 * {@link MyX509TrustManager} that gets initialised every time
+	 * Credential Manager Truststore is updated.
+	 * 
+	 * Inspired by Tom Oinn's ThreadLocalSSLSoketFactory.
+	 */
+	public static SSLSocketFactory createTavernaSSLSocketFactory(){
+		SSLContext sc = null;
+		try {
+			sc = SSLContext.getInstance("SSL");
+		} catch (NoSuchAlgorithmException e1) {
+			e1.printStackTrace();
+		}
+
+		try {
+			sc.init(null, new TrustManager[] { new MyX509TrustManager() },
+					new SecureRandom());
+		} catch (KeyManagementException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return sc.getSocketFactory();
+	}
 }

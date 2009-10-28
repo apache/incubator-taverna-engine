@@ -125,8 +125,8 @@ public class SetMasterPasswordDialog extends JDialog {
             }
         });
         JPanel jpButtons = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        jpButtons.add(jbCancel);
         jpButtons.add(jbOK);
+        jpButtons.add(jbCancel);
         
         getContentPane().add(jpMain, BorderLayout.CENTER);
         getContentPane().add(jpButtons, BorderLayout.SOUTH);
