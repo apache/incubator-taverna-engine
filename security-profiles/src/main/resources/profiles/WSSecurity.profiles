@@ -1,7 +1,7 @@
 
 -----BEGIN PROFILE-----
 Name=Timestamp
-Description=This profile uses adds a timestamp header to the message.
+Description=This profile adds a timestamp header to the message.
 Profile=<deployment xmlns="http://xml.apache.org/axis/wsdd/" 
 		xmlns:java="http://xml.apache.org/axis/wsdd/providers/java"> 
 		<globalConfiguration>
@@ -68,7 +68,7 @@ Profile=<deployment xmlns="http://xml.apache.org/axis/wsdd/"
 
 -----BEGIN PROFILE-----
 Name=Username and digest password + Timestamp
-Description=This profile uses username and digets password authentication and adds a timestamp header to the message.
+Description=This profile uses username and digest password authentication and adds a timestamp header to the message.
 Profile=<deployment xmlns="http://xml.apache.org/axis/wsdd/" 
 		xmlns:java="http://xml.apache.org/axis/wsdd/providers/java"> 
 		<globalConfiguration>
