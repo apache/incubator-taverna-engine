@@ -69,6 +69,10 @@ public class MergeImpl implements Merge {
 	public String getLocalName() {
 		return this.name;
 	}
+	
+	protected void setName(String name) {
+		this.name = name;
+	}
 
 	/**
 	 * Adds a new input port to the internal list of ports.

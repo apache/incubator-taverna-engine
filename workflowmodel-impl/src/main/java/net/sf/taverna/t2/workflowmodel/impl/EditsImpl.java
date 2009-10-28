@@ -156,6 +156,11 @@ public class EditsImpl implements Edits {
 			DispatchLayer<?> layer) {
 		return new DeleteDispatchLayerEdit(stack, layer);
 	}
+	
+	public Edit<Merge> getRenameMergeEdit(Merge merge,
+			String newName) {
+		return new RenameMergeEdit(merge, newName);
+	}
 
 	public Edit<Processor> getRenameProcessorEdit(Processor processor,
 			String newName) {

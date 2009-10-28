@@ -714,6 +714,18 @@ public interface Edits {
 			String newName);
 
 	/**
+	 * Rename a merge
+	 * 
+	 * @param merge
+	 *            the merge to rename
+	 * @param newName
+	 *            the new name, must be unique within the workflow enclosing the
+	 *            merge instance
+	 */
+	public Edit<Merge> getRenameMergeEdit(Merge merge,
+			String newName);
+	
+	/**
 	 * Provide an edit that will configure a processors's iteration strategy
 	 * stack to the one provided.
 	 * 
