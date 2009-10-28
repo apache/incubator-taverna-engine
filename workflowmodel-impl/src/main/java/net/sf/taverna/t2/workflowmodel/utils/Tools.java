@@ -309,8 +309,8 @@ public class Tools {
 	/**
 	 * Find a unique port name given a list of existing ports.
 	 * <p>
-	 * If needed, the returned port name will have a numeric postfix, starting
-	 * from 2.
+	 * If needed, the returned port name will be prefixed with an underscore and a number, 
+	 * starting from 2. (The original being 'number 1')
 	 * <p>
 	 * Although not strictly needed by Taverna, for added user friendliness the
 	 * case of the existing port names are ignored when checking for uniqueness.
@@ -333,7 +333,7 @@ public class Tools {
 		String candidateName = suggestedPortName;
 		long counter = 2;
 		while (existingNames.contains(candidateName.toLowerCase())) {
-			candidateName = suggestedPortName + counter++;
+			candidateName = suggestedPortName + "_" + counter++;
 		}
 		return candidateName;
 	}
@@ -837,8 +837,9 @@ public class Tools {
 
 	/**
 	 * Find a unique processor name for the supplied Dataflow, based upon the
-	 * preferred name. If needed, a numeric suffix is added to the preferred
-	 * name, and incremented until it is unique, starting from 2.
+	 * preferred name. If needed, an underscore and a numeric suffix is added to
+	 * the preferred name, and incremented until it is unique, starting from 2.
+	 * (The original being 'number 1')
 	 * <p>
 	 * Note that this method checks the uniqueness against the names of all
 	 * {@link NamedWorkflowEntity}s, including {@link Merge}s.
@@ -864,7 +865,7 @@ public class Tools {
 		String uniqueName = preferredName;
 		long suffix = 2;
 		while (existingNames.contains(uniqueName.toLowerCase())) {
-			uniqueName = preferredName + suffix++;
+			uniqueName = preferredName + "_" + suffix++;
 		}
 		return uniqueName;
 	}
