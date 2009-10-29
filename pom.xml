@@ -30,8 +30,8 @@
 
 	<modules>
 		<module>credential-manager</module>
-		<module>security-agents</module>
-		<module>security-profiles</module>
+		<!--<module>security-agents</module>
+		<module>security-profiles</module>-->
 	</modules>
 	<build>
 		<plugins>
