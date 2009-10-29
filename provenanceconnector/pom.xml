@@ -67,7 +67,7 @@
 
         <dependency>
             <groupId>net.sf.taverna.t2.ui-impl</groupId>
-            <artifactId>reference-config</artifactId>
+            <artifactId>data-management-config</artifactId>
             <version>0.9-SNAPSHOT</version>
         </dependency>
 
