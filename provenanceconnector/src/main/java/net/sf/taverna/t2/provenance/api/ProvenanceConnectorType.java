@@ -5,12 +5,14 @@
 
 package net.sf.taverna.t2.provenance.api;
 
+import net.sf.taverna.t2.workbench.reference.config.DataManagementConfiguration;
+
 /**
  * Defines names for the common Provenance Connector types
  *
  * @author Stuart Owen
  */
 public class ProvenanceConnectorType {
-    public static String MYSQL="mysqlprovenance";
-    public static String DERBY="Derby DB Connector";
+    public static String MYSQL=DataManagementConfiguration.CONNECTOR_MYSQL;
+    public static String DERBY=DataManagementConfiguration.CONNECTOR_DERBY;
 }
