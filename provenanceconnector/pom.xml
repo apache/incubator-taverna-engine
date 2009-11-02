@@ -66,18 +66,10 @@
         </dependency>
 
         <dependency>
-            <groupId>net.sf.taverna.t2.ui-impl</groupId>
-            <artifactId>data-management-config</artifactId>
-            <version>0.9-SNAPSHOT</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
             <groupId>net.sf.taverna.t2.core</groupId>
             <artifactId>reference-core-extensions</artifactId>
             <version>0.7-SNAPSHOT</version>
         </dependency>
-
 
         <dependency>
             <groupId>commons-io</groupId>
@@ -134,6 +126,13 @@
             <groupId>net.sf.taverna.t2.core</groupId>
             <artifactId>provenance-derby</artifactId>
             <version>0.3-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>net.sf.taverna.t2.ui-impl</groupId>
+            <artifactId>data-management-config</artifactId>
+            <version>0.9-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
 
