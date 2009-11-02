@@ -761,7 +761,7 @@ public abstract class ProvenanceQuery {
 			connection = getConnection();
 			ps = connection.prepareStatement(
 					"SELECT A.sourcePNameRef as source , A.sinkPNameRef as sink, A.wfInstanceRef as wfName1, W1.wfName as wfName2, W2.wfName as wfName3 " +
-					"FROM Arc A join WFInstance I on A.wfInstanceRef = I.wfnameRef " +
+					"FROM Arc A join WfInstance I on A.wfInstanceRef = I.wfnameRef " +
 					"left outer join Workflow W1 on W1.externalName = A.sourcePNameRef " +
 					"left outer join Workflow W2 on W2.externalName = A.sinkPNameRef " +
 			"where I.instanceID = ? order by wfInstanceRef");
@@ -2134,13 +2134,13 @@ public abstract class ProvenanceQuery {
 		PreparedStatement ps = null;
 		Connection connection = null;
 
-		String q = "SELECT DISTINCT A.sourcePNameRef AS p, A.sourceVarNameRef AS var, VB.value AS val " + "FROM   Arc A JOIN VarBinding VB ON VB.varNameRef = A.sinkVarNameRef AND VB.PNameRef = A.sinkPNameRef " + "JOIN   WFInstance WF ON WF.wfnameRef = A.wfInstanceRef AND WF.instanceID = VB.wfInstanceRef  " + "WHERE  WF.instanceID = '" + wfInstance + "' AND A.sinkPNameRef = '" + p + "' AND A.sinkVarNameRef = '" + v + "' AND VB.value = '" + val + "' ";
+		String q = "SELECT DISTINCT A.sourcePNameRef AS p, A.sourceVarNameRef AS var, VB.value AS val " + "FROM   Arc A JOIN VarBinding VB ON VB.varNameRef = A.sinkVarNameRef AND VB.PNameRef = A.sinkPNameRef " + "JOIN   WfInstance WF ON WF.wfnameRef = A.wfInstanceRef AND WF.instanceID = VB.wfInstanceRef  " + "WHERE  WF.instanceID = '" + wfInstance + "' AND A.sinkPNameRef = '" + p + "' AND A.sinkVarNameRef = '" + v + "' AND VB.value = '" + val + "' ";
 
 		// Statement stmt;
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-					"SELECT DISTINCT A.sourcePNameRef AS p, A.sourceVarNameRef AS var, VB.value AS val " + "FROM   Arc A JOIN VarBinding VB ON VB.varNameRef = A.sinkVarNameRef AND VB.PNameRef = A.sinkPNameRef " + "JOIN   WFInstance WF ON WF.wfnameRef = A.wfInstanceRef AND WF.instanceID = VB.wfInstanceRef  " + "WHERE  WF.instanceID = ? AND A.sinkPNameRef = ? AND A.sinkVarNameRef = ? AND VB.value = ?");
+					"SELECT DISTINCT A.sourcePNameRef AS p, A.sourceVarNameRef AS var, VB.value AS val " + "FROM   Arc A JOIN VarBinding VB ON VB.varNameRef = A.sinkVarNameRef AND VB.PNameRef = A.sinkPNameRef " + "JOIN   WfInstance WF ON WF.wfnameRef = A.wfInstanceRef AND WF.instanceID = VB.wfInstanceRef  " + "WHERE  WF.instanceID = ? AND A.sinkPNameRef = ? AND A.sinkVarNameRef = ? AND VB.value = ?");
 
 			ps.setString(1, wfInstance);
 			ps.setString(2, p);
