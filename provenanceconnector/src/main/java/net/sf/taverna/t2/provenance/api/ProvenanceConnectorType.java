@@ -5,7 +5,6 @@
 
 package net.sf.taverna.t2.provenance.api;
 
-import net.sf.taverna.t2.workbench.reference.config.DataManagementConfiguration;
 
 /**
  * Defines names for the common Provenance Connector types

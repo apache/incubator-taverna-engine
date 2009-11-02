@@ -120,28 +120,7 @@
             <artifactId>commons-dbcp</artifactId>
             <version>1.2.2</version>
         </dependency>
-
-        <!-- Test dependencies -->
-        <dependency>
-            <groupId>net.sf.taverna.t2.core</groupId>
-            <artifactId>provenance-derby</artifactId>
-            <version>0.3-SNAPSHOT</version>
-            <scope>test</scope>
-        </dependency>
         
-        <dependency>
-            <groupId>net.sf.taverna.t2.ui-impl</groupId>
-            <artifactId>data-management-config</artifactId>
-            <version>0.9-SNAPSHOT</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.derby</groupId>
-            <artifactId>derby</artifactId>
-            <version>10.5.3.0_1</version>
-            <scope>test</scope>
-        </dependency>
         
     </dependencies>
     
