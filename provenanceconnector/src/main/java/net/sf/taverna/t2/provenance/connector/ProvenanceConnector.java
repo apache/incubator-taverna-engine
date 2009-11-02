@@ -79,8 +79,8 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 	 * and after the dbURL has been set.
 	 */
 	public void init() {
-
-                createDatabase();
+		
+        createDatabase();
 
 		try {
 			setWfdp(new WorkflowDataProcessor());

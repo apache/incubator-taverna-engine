@@ -13,6 +13,6 @@ import net.sf.taverna.t2.workbench.reference.config.DataManagementConfiguration;
  * @author Stuart Owen
  */
 public class ProvenanceConnectorType {
-    public static String MYSQL=DataManagementConfiguration.CONNECTOR_MYSQL;
-    public static String DERBY=DataManagementConfiguration.CONNECTOR_DERBY;
+    public static String MYSQL="mysql";
+    public static String DERBY="derby";
 }
