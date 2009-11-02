@@ -57,8 +57,7 @@ public class ProvenanceAccessTest {
         assertNotNull(con);
     }
 
-    @Test    
-    @Ignore
+    @Test        
     public void testInitDefaultReferenceService() throws Exception {
         String driver = "org.apache.derby.jdbc.EmbeddedDriver";
         File tempDir = File.createTempFile("install", "dir");
