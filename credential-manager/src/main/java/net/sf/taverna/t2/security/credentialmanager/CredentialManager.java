@@ -130,6 +130,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 	
 	// Bouncy Castle provider
 	private static Provider bcProvider;
+	private static boolean sslInitialised = false;
 	
 	/**
 	 * Returns a CredentialManager singleton.
@@ -528,10 +529,16 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 		System.clearProperty("javax.net.ssl.trustStoreType");
 		System.clearProperty("javax.net.ssl.trustStoreProvider");
 		
+		// Not quite sure why we still need to set these two properties since we are creating our own
+		// SSLSocketFactory with our own TrustManager that uses Taverna's Truststore, but seem like
+		// after Taverna starts up and the first time it needs SSLSocketFactory for HTTPS connection 
+		// it is still using the default Java's keystore unless these properties are set.
 		// Set the system property "javax.net.ssl.Truststore" to use Taverna's truststore 
-		//System.setProperty("javax.net.ssl.trustStore", truststoreFile.getAbsolutePath());
-		//System.setProperty("javax.net.ssl.trustStorePassword", masterPassword);
+		System.setProperty("javax.net.ssl.trustStore", truststoreFile.getAbsolutePath());
+		System.setProperty("javax.net.ssl.trustStorePassword", TRUSTSTORE_PASSWORD);
 		HttpsURLConnection.setDefaultSSLSocketFactory(createTavernaSSLSocketFactory());
+
+		sslInitialised = true;
 
 		return truststore;
 	}
@@ -1679,8 +1686,12 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 		//saveKeystore(TRUSTSTORE);
 	}
 
-	public static void initialiseSSL() throws CMException {		
-		loadTruststore(TRUSTSTORE_PASSWORD);
+	public static void initialiseSSL() throws CMException {	
+		
+
+		if (!sslInitialised ){
+			loadTruststore(TRUSTSTORE_PASSWORD);
+		}
 	}
 
 	
@@ -1751,7 +1762,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 				sunJSSEX509TrustManager.checkServerTrusted(chain, authType);
 			} catch (CertificateException excep) {
 				/*
-				 * Possibly pop up a dialog box asking whether to trust the 
+				 * Pop up a dialog box asking whether to trust the 
 				 * server's certificate chain.
 				 */
 				if (!shouldTrust(chain)){

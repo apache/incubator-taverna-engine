@@ -32,6 +32,11 @@
 			<version>${t2.infrastructure.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>net.sf.taverna.t2.ui-api</groupId>
+			<artifactId>workbench-api</artifactId>
+			<version>${t2.ui.api.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 		</dependency>
