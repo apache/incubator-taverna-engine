@@ -179,13 +179,14 @@ public class ValidatingUserInputDialog extends JDialog {
 
 		JLabel inputLabel = new JLabel(inputTitle);
 		inputLabel.setBackground(Color.WHITE);
-		inputLabel.setFont(inputLabel.getFont().deriveFont(Font.BOLD));
+		Font baseFont = inputLabel.getFont();
+		inputLabel.setFont(baseFont.deriveFont(Font.BOLD));
 		messagePanel.add(inputLabel, BorderLayout.NORTH);
 
 		inputText = new JTextArea();
 		inputText.setMargin(new Insets(5, 10, 10, 10));
 		inputText.setMinimumSize(new Dimension(0, 30));
-		inputText.setFont(inputText.getFont().deriveFont(11f));
+		inputText.setFont(baseFont.deriveFont(11f));
 		inputText.setEditable(false);
 		inputText.setFocusable(false);
 		messagePanel.add(inputText, BorderLayout.CENTER);
