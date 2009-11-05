@@ -487,7 +487,7 @@ public abstract class ProvenanceQuery {
 			if (conditions.get("from") != null) { conds.add("timestamp >= "+conditions.get("from")); }
 			if (conditions.get("to") != null) { conds.add("timestamp <= "+conditions.get("to")); }
 		}
-		if (conds.size()>0) { q = q + " where '"+conds.get(0)+"'"; conds.remove(0); }
+		if (conds.size()>0) { q = q + " where "+conds.get(0); conds.remove(0); }
 
 		while (conds.size()>0) {
 			q = q + " and '"+conds.get(0)+"'"; 
@@ -498,6 +498,8 @@ public abstract class ProvenanceQuery {
 			connection = getConnection();
 			ps = connection.prepareStatement(q);
 
+			logger.debug(q);
+			
 			boolean success = ps.execute();
 
 			if (success) {
