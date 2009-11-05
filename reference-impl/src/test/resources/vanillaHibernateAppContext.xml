@@ -109,5 +109,13 @@
 			<ref local="sessionFactoryBean" />
 		</property>
 	</bean>
+	
+	<!-- Test list data access object -->
+	<bean id="testErrorDao"
+		class="net.sf.taverna.t2.reference.impl.HibernateErrorDocumentDao">
+		<property name="sessionFactory">
+			<ref local="sessionFactoryBean" />
+		</property>
+	</bean>
 
 </beans>

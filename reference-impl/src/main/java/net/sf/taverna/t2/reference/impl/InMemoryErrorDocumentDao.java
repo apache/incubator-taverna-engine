@@ -55,5 +55,9 @@ public class InMemoryErrorDocumentDao implements ErrorDocumentDao {
 	public synchronized void store(ErrorDocument theDoc) throws DaoException {
 		store.put(theDoc.getId(), theDoc);
 	}
+	
+	public synchronized boolean delete(ErrorDocument theDoc) throws DaoException {
+		return store.remove(theDoc.getId())!=null;
+	}
 
 }

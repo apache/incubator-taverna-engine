@@ -54,5 +54,8 @@ public interface ErrorDocumentDao {
 	 */
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public ErrorDocument get(T2Reference reference) throws DaoException;
+	
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = false)
+	public boolean delete(ErrorDocument errorDoc) throws DaoException;
 
 }

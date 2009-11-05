@@ -25,6 +25,7 @@ import net.sf.taverna.t2.reference.ErrorDocument;
 import net.sf.taverna.t2.reference.ErrorDocumentDao;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.reference.T2ReferenceType;
+import net.sf.taverna.t2.reference.annotations.DeleteIdentifiedOperation;
 import net.sf.taverna.t2.reference.annotations.GetIdentifiedOperation;
 import net.sf.taverna.t2.reference.annotations.PutIdentifiedOperation;
 
@@ -110,5 +111,30 @@ public class TransactionalHibernateErrorDocumentDao implements ErrorDocumentDao 
 			throw new DaoException(
 					"Supplied ErrorDocument not an instance of ErrorDocumentImpl");
 		}
+	}
+
+	@DeleteIdentifiedOperation
+	public boolean delete(ErrorDocument theDocument) throws DaoException {
+		if (theDocument.getId() == null) {
+			throw new DaoException(
+					"Supplied error document set has a null ID, allocate "
+							+ "an ID before calling the store method in the dao.");
+		} else if (theDocument.getId().getReferenceType().equals(
+				T2ReferenceType.ErrorDocument) == false) {
+			throw new DaoException("Strangely the list ID doesn't have type "
+					+ "T2ReferenceType.ErrorDocument, something has probably "
+					+ "gone badly wrong somewhere earlier!");
+		}
+		if (theDocument instanceof ErrorDocumentImpl) {
+			try {
+				sessionFactory.getCurrentSession().delete(theDocument);
+			} catch (Exception ex) {
+				throw new DaoException(ex);
+			}
+		} else {
+			throw new DaoException(
+					"Supplied ErrorDocument not an instance of ErrorDocumentImpl");
+		}
+		return true;
 	}
 }
