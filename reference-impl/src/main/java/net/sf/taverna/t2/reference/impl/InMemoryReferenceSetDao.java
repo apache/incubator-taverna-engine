@@ -59,5 +59,9 @@ public class InMemoryReferenceSetDao implements ReferenceSetDao {
 	public synchronized void update(ReferenceSet refSet) throws DaoException {
 		store.put(refSet.getId(), refSet);		
 	}
+	
+	public synchronized boolean delete(ReferenceSet refSet) throws DaoException {
+		return store.remove(refSet.getId())!=null;
+	}
 
 }

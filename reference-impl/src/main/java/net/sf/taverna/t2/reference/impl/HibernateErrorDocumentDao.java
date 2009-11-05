@@ -102,4 +102,5 @@ public class HibernateErrorDocumentDao extends HibernateDaoSupport implements
 					"Supplied ErrorDocument not an instance of ErrorDocumentImpl");
 		}
 	}
+		
 }

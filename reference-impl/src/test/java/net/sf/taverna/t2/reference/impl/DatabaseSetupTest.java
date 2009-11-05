@@ -29,6 +29,7 @@ import net.sf.taverna.t2.reference.ReferenceSetDao;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.reference.T2ReferenceType;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -124,7 +125,7 @@ public class DatabaseSetupTest {
 
 		
 		ReferenceSet returnedset = o.get(newReference);
-		System.out.println(returnedset);
+		Assert.assertNotNull(returnedset.getId());
 
 	}
 

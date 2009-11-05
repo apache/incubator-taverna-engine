@@ -21,7 +21,6 @@
 package net.sf.taverna.t2.reference.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,9 +28,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import net.sf.taverna.t2.reference.ContextualizedT2Reference;
 import net.sf.taverna.t2.reference.ErrorDocument;
@@ -51,6 +47,9 @@ import net.sf.taverna.t2.reference.T2ReferenceType;
 import net.sf.taverna.t2.reference.ValueCarryingExternalReference;
 import net.sf.taverna.t2.reference.ValueToReferenceConversionException;
 import net.sf.taverna.t2.reference.ValueToReferenceConverterSPI;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Implementation of ReferenceService, inject with ReferenceSetService,
@@ -165,7 +164,7 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 		}
 		
 		if (o.getClass().isArray()) {
-			Class elementType = o.getClass().getComponentType();
+			Class<?> elementType = o.getClass().getComponentType();
 			if (elementType.getCanonicalName().equals("char")) {
 				char[] cArray = (char[]) o;
 				List<Character> cList = new ArrayList<Character>();
@@ -651,6 +650,15 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 
 		return refPartsMap;
 
+	}
+
+	public boolean delete(String reference) {
+		T2Reference ref = referenceFromString(reference);
+		return delete(ref);
+	}
+
+	public boolean delete(T2Reference reference) {
+		return false;
 	}
 
 }

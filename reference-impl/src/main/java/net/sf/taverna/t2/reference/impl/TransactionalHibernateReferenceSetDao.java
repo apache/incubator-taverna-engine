@@ -25,6 +25,7 @@ import net.sf.taverna.t2.reference.ReferenceSet;
 import net.sf.taverna.t2.reference.ReferenceSetDao;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.reference.T2ReferenceType;
+import net.sf.taverna.t2.reference.annotations.DeleteIdentifiedOperation;
 import net.sf.taverna.t2.reference.annotations.GetIdentifiedOperation;
 import net.sf.taverna.t2.reference.annotations.PutIdentifiedOperation;
 
@@ -154,5 +155,31 @@ public class TransactionalHibernateReferenceSetDao implements ReferenceSetDao {
 			throw new DaoException(
 					"Reference must be an instance of T2ReferenceImpl");
 		}
+	}
+
+	@DeleteIdentifiedOperation
+	public boolean delete(ReferenceSet rs) throws DaoException {
+		if (rs.getId() == null) {
+			throw new DaoException(
+					"Supplied reference set has a null ID, allocate "
+							+ "an ID before calling the store method in the dao.");
+		} else if (rs.getId().getReferenceType().equals(
+				T2ReferenceType.ReferenceSet) == false) {
+			throw new DaoException(
+					"Strangely the reference set ID doesn't have type "
+							+ "T2ReferenceType.ReferenceSet, something has probably "
+							+ "gone badly wrong somewhere earlier!");
+		}
+		if (rs instanceof ReferenceSetImpl) {
+			try {
+				sessionFactory.getCurrentSession().delete(rs);
+			} catch (Exception ex) {
+				throw new DaoException(ex);
+			}
+		} else {
+			throw new DaoException(
+					"Supplied reference set not an instance of ReferenceSetImpl");
+		}
+		return true;
 	}
 }

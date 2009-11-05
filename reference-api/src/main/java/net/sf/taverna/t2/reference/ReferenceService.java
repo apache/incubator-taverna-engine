@@ -234,6 +234,10 @@ public interface ReferenceService {
 	 */
 	public T2Reference referenceFromString(String reference);
 	
+	public boolean delete(String reference);
+	
+	public boolean delete(T2Reference reference);
+	
 	/**
 	 * Returns the {@link ErrorDocumentService} this ReferenceService uses, use
 	 * this when you need functionality from that service explicitly.

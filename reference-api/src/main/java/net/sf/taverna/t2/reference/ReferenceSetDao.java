@@ -73,4 +73,7 @@ public interface ReferenceSetDao {
 	 */
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public ReferenceSet get(T2Reference ref) throws DaoException;
+	
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = false)
+	public boolean delete(ReferenceSet rs) throws DaoException;
 }
