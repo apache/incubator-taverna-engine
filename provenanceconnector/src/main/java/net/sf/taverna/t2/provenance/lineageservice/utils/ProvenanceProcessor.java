@@ -27,12 +27,24 @@ package net.sf.taverna.t2.provenance.lineageservice.utils;
  */
 public class ProvenanceProcessor {
 	
-	private
 	String identifier;
-
 	String pname;
 	String wfInstanceRef;
 	String type;
+	
+	
+	public String toString() {
+
+		StringBuffer sb = new StringBuffer();
+		sb.append("PROCESSOR: ****").
+		append("\nworkflow: "+getWfInstanceRef()).
+		append("\nprocessor name: "+getPname()).
+		append("\ntype: "+getType());
+
+		return sb.toString();
+	}
+
+	
 	/**
 	 * @return the wfInstanceRef
 	 */
