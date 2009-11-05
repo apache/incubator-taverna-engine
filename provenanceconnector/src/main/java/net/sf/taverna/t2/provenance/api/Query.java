@@ -14,11 +14,37 @@ import net.sf.taverna.t2.provenance.lineageservice.utils.QueryVar;
  *
  */
 public class Query {
-	 
+
+	String workflowName;
 	List<QueryVar> targetVars;
 	List<String> runIDList;
 	List<ProvenanceProcessor> selectedProcessors;
-	
+
+
+	public String toString() {
+
+		StringBuffer sb = new StringBuffer();
+		sb.append("QUERY SCOPE: ****\n").
+		append("\tworkflow name: ").append(getWorkflowName()).
+
+		append("\n\truns: ");
+		for (String r:getRunIDList()) {
+			sb.append("\n"+r);
+		}
+
+		sb.append("\nTARGET PORTS: ***\n");
+		for (QueryVar v:getTargetVars()) {
+			sb.append("\n"+v.toString());
+		}
+
+		sb.append("\nSELECTED PROCESSORS: ");
+		for (ProvenanceProcessor pp:getSelectedProcessors()) {
+			sb.append("\n"+pp.toString());
+		}
+
+		return sb.toString();
+	}
+
 	/**
 	 * @return the targetVars
 	 */
@@ -54,5 +80,19 @@ public class Query {
 	 */
 	public void setRunIDList(List<String> runIDList) {
 		this.runIDList = runIDList;
+	}
+
+	/**
+	 * @return the workflowName
+	 */
+	public String getWorkflowName() {
+		return workflowName;
+	}
+
+	/**
+	 * @param workflowName the workflowName to set
+	 */
+	public void setWorkflowName(String workflowName) {
+		this.workflowName = workflowName;
 	}
 }

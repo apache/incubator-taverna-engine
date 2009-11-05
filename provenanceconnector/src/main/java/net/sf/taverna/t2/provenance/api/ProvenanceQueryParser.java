@@ -25,6 +25,7 @@ import org.apache.log4j.Logger;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
+import org.jdom.Namespace;
 import org.jdom.input.SAXBuilder;
 
 /**
@@ -35,6 +36,9 @@ public class ProvenanceQueryParser {
 
 	private static Logger logger = Logger.getLogger(ProvenanceQueryParser.class);
 
+	
+	private static final String QUERY_EL = "scope";
+	private static final String PQUERY_EL = "pquery";
 	private static final String RUNS_EL = "runs";
 	private static final String RUN_ID = "id";
 	private static final Object RUN_EL = "run";
@@ -42,18 +46,21 @@ public class ProvenanceQueryParser {
 	private static final String RANGE_FROM = "from";
 	private static final String RANGE_TO = "to";
 
-	private static final String PORT_SELECTION_EL = "portSelection";
-	private static final String WORKFLOW_NAME_ATTR = "name";
-	private static final String PORT_EL = "port";
+	private static final String PORT_SELECTION_EL = "select";
+	private static final String WORKFLOW_NAME_ATTR = "workflow";
+	private static final String PORT_EL = "outputPort";
 	private static final String WORKFLOW_EL = "workflow";
 	private static final String PROCESSOR_EL = "processor";
 	private static final String PORT_NAME_ATTR = "name";
 	private static final String PROC_NAME_ATTR = "name";
 	private static final String PORT_NAME_EL = "name";
 
-	private static final String PROC_FOCUS_EL = "processorFocus";
+	private static final String PROC_FOCUS_EL = "focus";
 
 	private static final String INDEX_ATTR = "index";
+
+	private static final String PQUERY_NS = "http://taverna.org.uk/2009/provenance/pquery/";
+	private static Namespace ns = Namespace.getNamespace(PQUERY_NS);
 
 	private ProvenanceAccess pAccess;
 
@@ -73,8 +80,8 @@ public class ProvenanceQueryParser {
 		Document d=null; 
 
 		// parse the XML using JDOM
-		// new code to read off an XML spec of the query
 		SAXBuilder  b = new SAXBuilder();
+		
 		try {
 			d = b.build (new FileReader((XMLQuerySpecFilename)));
 		} catch (FileNotFoundException e) {
@@ -329,25 +336,34 @@ public class ProvenanceQueryParser {
 	 */	
 	@SuppressWarnings("unchecked")
 	private List<String> parseWorkflowAndRuns(Document d) {
-
+	
 		List<String> runsScope = new ArrayList<String>();  // list of run IDs
 		List<WorkflowInstance> feasibleWfInstances = new ArrayList<WorkflowInstance>();
 		List<String> feasibleRuns = new ArrayList<String>();
-
-		Element root = d.getRootElement();
-		Element workflowEl = root.getChild(WORKFLOW_EL);
-		if (workflowEl != null) {
-			mainWorkflowExternalName = workflowEl.getAttributeValue(WORKFLOW_NAME_ATTR);
-
+	
+		Element root = d.getRootElement();  // this should be a <pquery>
+		
+		if (!root.getName().equals(PQUERY_EL)) {
+			logger.fatal("input XML query is invalid");
+			return null;
+		}
+		
+		Element queryScopeEl = root.getChild(QUERY_EL, ns);
+		
+		// expect workflow ID 
+		
+		if (queryScopeEl != null) {
+			mainWorkflowExternalName = queryScopeEl.getAttributeValue(WORKFLOW_NAME_ATTR);
+	
 			if (mainWorkflowExternalName == null) {
 				logger.debug("no external name specified in workflow - giving up");
 				return null;
 			}
-
+	
 			//  validate this workflowID
 			List<WorkflowInstance>  allWfInstances = pAccess.listRuns(null, null); // returns all available runs ordered by timestamp
 			// is this workflow in one of the instances?
-
+	
 			for (WorkflowInstance i:allWfInstances) {
 				if (mainWorkflowExternalName.equals(i.getWorkflowExternalName())) {
 					mainWorkflowID = i.getWorkflowIdentifier();
@@ -356,27 +372,31 @@ public class ProvenanceQueryParser {
 					feasibleRuns.add(i.getInstanceID());
 				}
 			}
+			if (mainWorkflowID == null) {
+				logger.fatal("workflow name "+mainWorkflowExternalName+" not in DB, terminating query");
+				return null;
+			}
 		} else {
-			logger.fatal("no top-level <workflow> tag found, giving up");
+			logger.fatal("no <scope> tag found, giving up");
 			return null;
 		}
 		if (feasibleWfInstances.size() == 0) {
 			logger.debug("workflow "+mainWorkflowExternalName+" not found -- giving up");
 			return null;
 		}
-
+	
 		// get into the element and set the runs scope.
-		Element runs = workflowEl.getChild(RUNS_EL);
+		Element runs = queryScopeEl.getChild(RUNS_EL, ns);
 		if (runs != null) {
 			logger.debug("setting explicit runs scope");
-
+	
 			// expect a sequence of run elements and/ or a single <range> element
 			List<Element> runElList = runs.getChildren();
 			for (Element runEl:runElList) {
-
+	
 				// explicit runID given
 				if (runEl.getName().equals(RUN_EL)) {
-					String runID = runEl.getAttributeValue(RUN_ID);
+					String runID = runEl.getAttributeValue(RUN_ID, ns);
 					if (runID!=null) {
 						if (feasibleRuns.contains(runID)) {
 							logger.debug("adding runID "+runID+" to runs scope");
@@ -387,21 +407,21 @@ public class ProvenanceQueryParser {
 					} else {
 						logger.warn("<run> element with no ID");
 					}					
-
+	
 					// time range given 
 				} else if (runEl.getName().equals(RANGE_EL)) {
-					String from = runEl.getAttributeValue(RANGE_FROM);
-					String to   = runEl.getAttributeValue(RANGE_TO);
-
+					String from = runEl.getAttributeValue(RANGE_FROM,ns);
+					String to   = runEl.getAttributeValue(RANGE_TO,ns);
+	
 					logger.debug("processing runs range from "+from+" to "+to);
-
+	
 					for (WorkflowInstance i:feasibleWfInstances) {
-
+	
 						Date fromInstanceDate = null;
 						Date toInstanceDate = null;
 						DateFormat f = new SimpleDateFormat();
 						Date fromDate=null, toDate=null;
-
+	
 						if (from != null) {
 							try {
 								fromDate = f.parse(from);
@@ -410,7 +430,7 @@ public class ProvenanceQueryParser {
 								logger.warn(from+" cannot be parsed as a date -- ignored");
 							}
 						}
-
+	
 						if (to != null) {
 							try {
 								toDate = f.parse(to);
@@ -431,13 +451,12 @@ public class ProvenanceQueryParser {
 			logger.debug("null runs scope: using latest run");
 			if (feasibleWfInstances != null) runsScope.add(feasibleWfInstances.get(0).getInstanceID());
 		}
-
+	
 		logger.debug("runs scope:");
 		for (String r:runsScope) logger.debug(r);
-
+	
 		return runsScope;
 	}
-
 
 
 	/**
