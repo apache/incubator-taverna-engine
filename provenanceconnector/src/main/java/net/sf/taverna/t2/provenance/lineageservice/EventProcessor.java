@@ -494,6 +494,7 @@ public class EventProcessor {
 
 		} catch (Exception e) {
 			logger.warn("Problem processing provenance for dataflow: " + e);
+			e.printStackTrace();
 		}
 
 //		logger.debug("wfInstanceID at the end of processDataflowStructure: "+getWfInstanceID());
