@@ -20,6 +20,7 @@
  ******************************************************************************/
 package net.sf.taverna.t2.provenance.lineageservice;
 
+import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -467,7 +468,7 @@ public abstract class ProvenanceQuery {
 
 	/**
 	 * @param dataflowID
-	 * @param conditions currently oly understands "from" and "to" as timestamps for range queries
+	 * @param conditions currently only understands "from" and "to" as timestamps for range queries
 	 * @return
 	 * @throws SQLException
 	 */
@@ -510,6 +511,10 @@ public abstract class ProvenanceQuery {
 					i.setTimestamp(rs.getString("timestamp"));
 					i.setWorkflowIdentifier(rs.getString("wfnameRef"));
 					i.setWorkflowExternalName(rs.getString("externalName"));
+					Blob blob = rs.getBlob("dataflow");
+					long length = blob.length();
+					blob.getBytes(1, (int) length);
+					i.setDataflowBlob(blob.getBytes(1, (int) length));
 					result.add(i);
 				}
 			}

@@ -20,6 +20,7 @@
  ******************************************************************************/
 package net.sf.taverna.t2.provenance.lineageservice;
 
+import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -210,17 +211,18 @@ public abstract class ProvenanceWriter {
 		}
 	}
 
-	public void addWFId(String wfId, String parentWFname, String externalName) throws SQLException {
+	public void addWFId(String wfId, String parentWFname, String externalName, Blob dataflow) throws SQLException {
 
 		PreparedStatement ps = null;
 		Connection connection = null;
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-					"INSERT INTO Workflow (wfname, parentWFname, externalName) VALUES (?,?,?)");
+					"INSERT INTO Workflow (wfname, parentWFname, externalName, dataflow) VALUES (?,?,?, ?)");
 			ps.setString(1, wfId);
 			ps.setString(2, parentWFname);
 			ps.setString(3, externalName);
+			ps.setBlob(4, dataflow);
 
 			ps.executeUpdate();
 

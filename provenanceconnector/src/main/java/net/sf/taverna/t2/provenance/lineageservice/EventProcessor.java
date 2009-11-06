@@ -27,6 +27,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.StringWriter;
+import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,6 +36,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.sql.rowset.serial.SerialBlob;
 
 import net.sf.taverna.t2.provenance.item.InputDataProvenanceItem;
 import net.sf.taverna.t2.provenance.item.IterationProvenanceItem;
@@ -56,6 +60,7 @@ import net.sf.taverna.t2.workflowmodel.Processor;
 import net.sf.taverna.t2.workflowmodel.ProcessorInputPort;
 import net.sf.taverna.t2.workflowmodel.ProcessorOutputPort;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
+import net.sf.taverna.t2.workflowmodel.serialization.xml.XMLSerializerRegistry;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Level;
@@ -65,6 +70,7 @@ import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.Namespace;
 import org.jdom.input.SAXBuilder;
+import org.jdom.output.XMLOutputter;
 
 /**
  * @author paolo
@@ -238,16 +244,40 @@ public class EventProcessor {
 			// this could be a nested workflow -- in this case, override its wfInstanceID with that of its parent
 			String parentDataflow;
 			if ((parentDataflow = wfNestingMap.get(dataflowID)) == null) {
-
+				Element serializeDataflow = XMLSerializerRegistry.getInstance().getSerializer().serializeDataflow(df);
+				String dataflowString = null;
+				try {
+				    XMLOutputter outputter = new XMLOutputter();
+				    StringWriter stringWriter = new StringWriter();
+				    outputter.output(serializeDataflow, stringWriter);
+				    dataflowString = stringWriter.toString();
+				    
+				} catch (java.io.IOException e) {
+				    logger.error("Could not serialise dataflow: " + e);
+				}
+				
+				Blob blob = new SerialBlob(dataflowString.getBytes());
 				// this is a top level dataflow description
-				pw.addWFId(dataflowID, null, externalName); // set its dataflowID with no parent
+				pw.addWFId(dataflowID, null, externalName, blob); // set its dataflowID with no parent
 
 			} else {
-
+				Element serializeDataflow = XMLSerializerRegistry.getInstance().getSerializer().serializeDataflow(df);
+				String dataflowString = null;
+				try {
+				    XMLOutputter outputter = new XMLOutputter();
+				    StringWriter stringWriter = new StringWriter();
+				    outputter.output(serializeDataflow, stringWriter);
+				    dataflowString = stringWriter.toString();
+				    
+				} catch (java.io.IOException e) {
+				    logger.error("Could not serialise dataflow: " + e);
+				}
+				
+				Blob blob = new SerialBlob(dataflowString.getBytes());
 				// we are processing a nested workflow structure
 				logger.debug("dataflow "+dataflowID+" with external name "+externalName+" is nested within "+parentDataflow);
 
-				pw.addWFId(dataflowID, parentDataflow, externalName); // set its dataflowID along with its parent
+				pw.addWFId(dataflowID, parentDataflow, externalName, blob); // set its dataflowID along with its parent
 
 				// override wfInstanceID to point to top level -- UNCOMMENTED PM 9/09  CHECK
 				localWfInstanceID = pq.getRuns(parentDataflow, null).get(0).getInstanceID();
