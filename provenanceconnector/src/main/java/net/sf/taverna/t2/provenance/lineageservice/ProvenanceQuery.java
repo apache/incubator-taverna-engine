@@ -1176,7 +1176,7 @@ public abstract class ProvenanceQuery {
 			Map<String, String> constraints) throws SQLException {
 		List<ProvenanceProcessor> result = new ArrayList<ProvenanceProcessor>();
 
-		String q = "SELECT * FROM Processor P JOIN wfInstance W ON P.wfInstanceRef = W.wfnameRef";
+		String q = "SELECT * FROM Processor P JOIN WfInstance W ON P.wfInstanceRef = W.wfnameRef";
 
 		q = addWhereClauseToQuery(q, constraints, true);
 
@@ -1357,7 +1357,7 @@ public abstract class ProvenanceQuery {
 		Map<String, String> collQueryConstraints = new HashMap<String, String>();
 
 		// base Collection query
-		String collQuery = "SELECT * FROM Collection C JOIN wfInstance W ON " + "C.wfInstanceRef = W.instanceID " + "JOIN Var V on " + "V.wfInstanceRef = W.wfnameRef and C.PNameRef = V.pnameRef and C.varNameRef = V.varName ";
+		String collQuery = "SELECT * FROM Collection C JOIN WfInstance W ON " + "C.wfInstanceRef = W.instanceID " + "JOIN Var V on " + "V.wfInstanceRef = W.wfnameRef and C.PNameRef = V.pnameRef and C.varNameRef = V.varName ";
 
 		collQueryConstraints.put("W.instanceID", wfInstance);
 		collQueryConstraints.put("C.PNameRef", proc);
@@ -1382,7 +1382,7 @@ public abstract class ProvenanceQuery {
 		Map<String, String> vbQueryConstraints = new HashMap<String, String>();
 
 		// base VarBinding query
-		String vbQuery = "SELECT * FROM VarBinding VB JOIN wfInstance W ON " + 
+		String vbQuery = "SELECT * FROM VarBinding VB JOIN WfInstance W ON " + 
 						 "VB.wfInstanceRef = W.instanceID " + 
 						 "JOIN Var V on " + 
 						 "V.wfInstanceRef = W.wfnameRef and VB.PNameRef = V.pnameRef and VB.varNameRef = V.varName "; 
@@ -1443,7 +1443,7 @@ public abstract class ProvenanceQuery {
 		Map<String, String> collQueryConstraints = new HashMap<String, String>();
 
 		// base Collection query
-		String collQuery = "SELECT * FROM Collection C JOIN wfInstance W ON " + "C.wfInstanceRef = W.instanceID " + "JOIN Var V on " + "V.wfInstanceRef = W.wfnameRef and C.PNameRef = V.pnameRef and C.varNameRef = V.varName ";
+		String collQuery = "SELECT * FROM Collection C JOIN WfInstance W ON " + "C.wfInstanceRef = W.instanceID " + "JOIN Var V on " + "V.wfInstanceRef = W.wfnameRef and C.PNameRef = V.pnameRef and C.varNameRef = V.varName ";
 
 		collQueryConstraints.put("W.instanceID", wfInstance);
 		collQueryConstraints.put("C.PNameRef", proc);
@@ -1468,7 +1468,7 @@ public abstract class ProvenanceQuery {
 		// base VarBinding query
 //		String vbQuery = "SELECT * FROM VarBinding VB JOIN wfInstance W ON " + "VB.wfInstanceRef = W.instanceID " + "JOIN Var V on " + "V.wfInstanceRef = W.wfnameRef and VB.PNameRef = V.pnameRef and VB.varNameRef = V.varName " + "LEFT OUTER JOIN Data D ON D.wfInstanceID = VB.wfInstanceRef and D.dataReference = VB.value";
 
-		String vbQuery = "SELECT * FROM VarBinding VB JOIN wfInstance W ON " + 
+		String vbQuery = "SELECT * FROM VarBinding VB JOIN WfInstance W ON " + 
 						 "VB.wfInstanceRef = W.instanceID " + 
 						 "JOIN Var V on " + 
 						 "V.wfInstanceRef = W.wfnameRef and VB.PNameRef = V.pnameRef and VB.varNameRef = V.varName "; 
@@ -1783,7 +1783,7 @@ public abstract class ProvenanceQuery {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-					"SELECT pname FROM Processor P  join wfInstance I on P.wfInstanceRef = I.wfnameRef " +
+					"SELECT pname FROM Processor P  join WfInstance I on P.wfInstanceRef = I.wfnameRef " +
 			"where  I.instanceID =? and isTopLevel = 1");
 
 
@@ -2032,7 +2032,7 @@ public abstract class ProvenanceQuery {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-					"SELECT * FROM T2Provenance.Processor P join wfInstance I on P.wfInstanceRef = I.wfNameRef " +
+					"SELECT * FROM T2Provenance.Processor P join WfInstance I on P.wfInstanceRef = I.wfNameRef " +
 					" where I.instanceID = ? " +
 			" and isTopLevel = 1 ");
 			ps.setString(1, wfInstanceID);
@@ -2245,7 +2245,7 @@ public abstract class ProvenanceQuery {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-					"SELECT * FROM Arc A join wfInstance I on A.wfInstanceRef = I.wfnameRef " +
+					"SELECT * FROM Arc A join WfInstance I on A.wfInstanceRef = I.wfnameRef " +
 					"join Processor P on P.pname = A.sourcePnameRef where sourcePnameRef = ? " +
 					"and P.wfInstanceRef <> A.wfInstanceRef " +
 					"and I.instanceID = ? " +
