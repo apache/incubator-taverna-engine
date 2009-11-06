@@ -21,6 +21,7 @@
 package net.sf.taverna.t2.reference;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.transaction.annotation.Propagation;
@@ -234,9 +235,11 @@ public interface ReferenceService {
 	 */
 	public T2Reference referenceFromString(String reference);
 	
-	public boolean delete(String reference);
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = false)
+	public boolean delete(T2Reference reference) throws ReferenceServiceException;
 	
-	public boolean delete(T2Reference reference);
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = false)
+	public boolean delete(List<T2Reference> references) throws ReferenceServiceException;
 	
 	/**
 	 * Returns the {@link ErrorDocumentService} this ReferenceService uses, use
@@ -280,5 +283,7 @@ public interface ReferenceService {
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public Iterator<ContextualizedT2Reference> traverseFrom(T2Reference source,
 			int desiredDepth);
+	
+	
 
 }

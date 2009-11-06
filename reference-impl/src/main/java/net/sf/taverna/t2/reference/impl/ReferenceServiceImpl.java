@@ -57,6 +57,7 @@ import org.apache.commons.logging.LogFactory;
  * 
  * @author Tom Oinn
  * @author Alan R Williams
+ * @author Stuart Owen
  */
 public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 		implements ReferenceService {
@@ -650,15 +651,36 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 
 		return refPartsMap;
 
+	}	
+	
+
+	public boolean delete(List<T2Reference> references)
+			throws ReferenceServiceException {
+		boolean result=true;
+		for (T2Reference reference : references) {
+			delete(reference);
+		}
+		return result;
 	}
 
-	public boolean delete(String reference) {
-		T2Reference ref = referenceFromString(reference);
-		return delete(ref);
-	}
-
-	public boolean delete(T2Reference reference) {
-		return false;
+	public boolean delete(T2Reference reference)
+			throws ReferenceServiceException {
+		boolean result=false;
+		switch (reference.getReferenceType()) {
+		case IdentifiedList:
+			result=listService.delete(reference);
+			break;
+		case ReferenceSet:
+			result=referenceSetService.delete(reference);
+			break;
+		case ErrorDocument:
+			result=referenceSetService.delete(reference);
+			break;
+		default:
+			throw new ReferenceServiceException(
+					"Unknown reference type!");
+		}
+		return result;
 	}
 
 }

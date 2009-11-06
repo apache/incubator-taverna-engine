@@ -26,6 +26,7 @@ import net.sf.taverna.t2.reference.DaoException;
 import net.sf.taverna.t2.reference.IdentifiedList;
 import net.sf.taverna.t2.reference.ListService;
 import net.sf.taverna.t2.reference.ListServiceException;
+import net.sf.taverna.t2.reference.ReferenceServiceException;
 import net.sf.taverna.t2.reference.T2Reference;
 
 /**
@@ -111,6 +112,13 @@ public class ListServiceImpl extends AbstractListServiceImpl implements
 		} catch (Throwable t) {
 			throw new ListServiceException(t);
 		}
+	}
+
+	public boolean delete(T2Reference reference)
+			throws ReferenceServiceException {
+		checkDao();
+		IdentifiedList<T2Reference> list=listDao.get(reference);
+		return listDao.delete(list);
 	}
 
 }

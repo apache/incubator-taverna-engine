@@ -20,6 +20,7 @@
  ******************************************************************************/
 package net.sf.taverna.t2.reference;
 
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.transaction.annotation.Propagation;
@@ -165,5 +166,8 @@ public interface ReferenceSetService {
 			Set<Class<ExternalReferenceSPI>> ensureTypes,
 			ReferenceContext context, ReferenceSetServiceCallback callback)
 			throws ReferenceSetServiceException;
-
+	
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = false)
+	public boolean delete(T2Reference reference) throws ReferenceServiceException;
+	
 }

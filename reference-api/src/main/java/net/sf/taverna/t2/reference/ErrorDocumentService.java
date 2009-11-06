@@ -133,5 +133,8 @@ public interface ErrorDocumentService {
 	 */
 	public T2Reference getChild(T2Reference errorId)
 			throws ErrorDocumentServiceException;
+	
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = false)
+	public boolean delete(T2Reference reference) throws ReferenceServiceException;
 
 }

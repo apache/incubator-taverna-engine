@@ -122,5 +122,8 @@ public interface ListService {
 	 */
 	public void getListAsynch(T2Reference id, ListServiceCallback callback)
 			throws ListServiceException;
+	
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = false)
+	public boolean delete(T2Reference reference) throws ReferenceServiceException;
 
 }

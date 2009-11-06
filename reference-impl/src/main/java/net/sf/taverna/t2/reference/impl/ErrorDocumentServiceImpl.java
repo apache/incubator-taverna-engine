@@ -25,6 +25,7 @@ import java.util.Set;
 import net.sf.taverna.t2.reference.ErrorDocument;
 import net.sf.taverna.t2.reference.ErrorDocumentService;
 import net.sf.taverna.t2.reference.ErrorDocumentServiceException;
+import net.sf.taverna.t2.reference.ReferenceServiceException;
 import net.sf.taverna.t2.reference.T2Reference;
 
 /**
@@ -146,6 +147,13 @@ public class ErrorDocumentServiceImpl extends AbstractErrorDocumentServiceImpl
 		} catch (Throwable t) {
 			throw new ErrorDocumentServiceException(t);
 		}
+	}
+
+	public boolean delete(T2Reference reference)
+			throws ReferenceServiceException {
+		checkDao();
+		ErrorDocument doc = errorDao.get(reference);
+		return errorDao.delete(doc);
 	}
 
 }

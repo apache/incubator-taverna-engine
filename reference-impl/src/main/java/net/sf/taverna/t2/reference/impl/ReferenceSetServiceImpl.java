@@ -26,6 +26,7 @@ import java.util.Set;
 import net.sf.taverna.t2.reference.DaoException;
 import net.sf.taverna.t2.reference.ExternalReferenceSPI;
 import net.sf.taverna.t2.reference.ReferenceContext;
+import net.sf.taverna.t2.reference.ReferenceServiceException;
 import net.sf.taverna.t2.reference.ReferenceSet;
 import net.sf.taverna.t2.reference.ReferenceSetAugmentationException;
 import net.sf.taverna.t2.reference.ReferenceSetService;
@@ -120,5 +121,12 @@ public class ReferenceSetServiceImpl extends AbstractReferenceSetServiceImpl
 		} catch (DaoException de) {
 			throw new ReferenceSetServiceException(de);
 		}
+	}
+
+	public boolean delete(T2Reference reference)
+			throws ReferenceServiceException {
+		checkDao();
+		ReferenceSet set=referenceSetDao.get(reference);
+		return referenceSetDao.delete(set);
 	}
 }
