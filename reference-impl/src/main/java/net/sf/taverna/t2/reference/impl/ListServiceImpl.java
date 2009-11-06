@@ -118,6 +118,7 @@ public class ListServiceImpl extends AbstractListServiceImpl implements
 			throws ReferenceServiceException {
 		checkDao();
 		IdentifiedList<T2Reference> list=listDao.get(reference);
+		if (list==null) return false;
 		return listDao.delete(list);
 	}
 

@@ -153,6 +153,7 @@ public class ErrorDocumentServiceImpl extends AbstractErrorDocumentServiceImpl
 			throws ReferenceServiceException {
 		checkDao();
 		ErrorDocument doc = errorDao.get(reference);
+		if (doc==null) return false;
 		return errorDao.delete(doc);
 	}
 

@@ -127,6 +127,7 @@ public class ReferenceSetServiceImpl extends AbstractReferenceSetServiceImpl
 			throws ReferenceServiceException {
 		checkDao();
 		ReferenceSet set=referenceSetDao.get(reference);
+		if (set==null) return false;
 		return referenceSetDao.delete(set);
 	}
 }
