@@ -59,7 +59,9 @@ public class ErrorDocumentDaoTest {
 		doc.setTypedId(typedId);
 		
 		dao.store(doc);
-		dao.delete(doc);		
+		assertNotNull(dao.get(doc.getId()));
+		
+		assertTrue(dao.delete(doc));		
 		assertNull(dao.get(id));	
 	}
 

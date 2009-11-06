@@ -57,5 +57,10 @@ public interface ListDao {
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public IdentifiedList<T2Reference> get(T2Reference reference)
 			throws DaoException;
+	
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = false)
+	public boolean delete(IdentifiedList<T2Reference> theList)
+			throws DaoException;
+	
 
 }

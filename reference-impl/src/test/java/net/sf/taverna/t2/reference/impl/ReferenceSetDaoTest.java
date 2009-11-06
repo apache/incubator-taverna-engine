@@ -1,5 +1,7 @@
 package net.sf.taverna.t2.reference.impl;
 
+import static org.junit.Assert.*;
+
 import java.util.HashSet;
 
 import net.sf.taverna.t2.reference.ExternalReferenceSPI;
@@ -30,7 +32,7 @@ public class ReferenceSetDaoTest {
 		ReferenceSetImpl rs = new ReferenceSetImpl(
 				new HashSet<ExternalReferenceSPI>(), id);
 		dao.store(rs);
-		Assert.assertNotNull(dao.get(id));
+		assertNotNull(dao.get(id));
 	}
 	
 	@Test
@@ -42,7 +44,9 @@ public class ReferenceSetDaoTest {
 		ReferenceSetImpl rs = new ReferenceSetImpl(
 				new HashSet<ExternalReferenceSPI>(), id);		
 		dao.store(rs);
-		dao.delete(rs);
-		Assert.assertNull(dao.get(id));
+		assertNotNull(dao.get(id));
+		assertTrue(dao.delete(rs));
+		assertNull(dao.get(id));
 	}
+		
 }

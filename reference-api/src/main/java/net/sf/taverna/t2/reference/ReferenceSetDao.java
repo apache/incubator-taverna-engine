@@ -76,4 +76,5 @@ public interface ReferenceSetDao {
 	
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = false)
 	public boolean delete(ReferenceSet rs) throws DaoException;
+
 }

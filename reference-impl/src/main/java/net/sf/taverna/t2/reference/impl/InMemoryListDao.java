@@ -56,4 +56,9 @@ public class InMemoryListDao implements ListDao {
 		store.put(theList.getId(), theList);
 	}
 
+	public boolean delete(
+			IdentifiedList<T2Reference> theList) throws DaoException {
+		return (store.remove(theList.getId())!=null);
+	}
+
 }

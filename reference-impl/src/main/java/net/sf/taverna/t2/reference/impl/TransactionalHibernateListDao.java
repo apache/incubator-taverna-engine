@@ -111,4 +111,28 @@ public class TransactionalHibernateListDao implements ListDao {
 					"Supplied identifier list not an instance of T2ReferenceList");
 		}
 	}
+
+	public boolean delete(
+			IdentifiedList<T2Reference> theList) throws DaoException {
+		if (theList.getId() == null) {
+			throw new DaoException("Supplied list set has a null ID, allocate "
+					+ "an ID before calling the store method in the dao.");
+		} else if (theList.getId().getReferenceType().equals(
+				T2ReferenceType.IdentifiedList) == false) {
+			throw new DaoException("Strangely the list ID doesn't have type "
+					+ "T2ReferenceType.IdentifiedList, something has probably "
+					+ "gone badly wrong somewhere earlier!");
+		}
+		if (theList instanceof T2ReferenceListImpl) {
+			try {
+				sessionFactory.getCurrentSession().delete(theList);
+			} catch (Exception ex) {
+				throw new DaoException(ex);
+			}
+		} else {
+			throw new DaoException(
+					"Supplied identifier list not an instance of T2ReferenceList");
+		}
+		return true;
+	}
 }
