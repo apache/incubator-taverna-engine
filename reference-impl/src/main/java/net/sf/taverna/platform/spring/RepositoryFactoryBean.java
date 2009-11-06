@@ -20,6 +20,8 @@
  ******************************************************************************/
 package net.sf.taverna.platform.spring;
 
+import static net.sf.taverna.platform.spring.PropertyInterpolator.interpolate;
+
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -31,7 +33,6 @@ import net.sf.taverna.raven.repository.Artifact;
 import net.sf.taverna.raven.repository.BasicArtifact;
 import net.sf.taverna.raven.repository.Repository;
 import net.sf.taverna.raven.repository.impl.LocalRepository;
-import static net.sf.taverna.platform.spring.PropertyInterpolator.interpolate;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

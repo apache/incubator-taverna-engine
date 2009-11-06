@@ -20,19 +20,23 @@
  ******************************************************************************/
 package net.sf.taverna.platform.spring;
 
+import static net.sf.taverna.platform.spring.RavenConstants.ARTIFACT_BEAN_ATTRIBUTE_NAME;
+import static net.sf.taverna.platform.spring.RavenConstants.ARTIFACT_XML_ATTRIBUTE_NAME;
+import static net.sf.taverna.platform.spring.RavenConstants.REPOSITORY_BEAN_ATTRIBUTE_NAME;
+import static net.sf.taverna.platform.spring.RavenConstants.REPOSITORY_XML_ATTRIBUTE_NAME;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionDecorator;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Node;
-import static net.sf.taverna.platform.spring.RavenConstants.*;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Pulls artifact attributes out of beans and decorates the bean definitions

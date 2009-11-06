@@ -26,6 +26,7 @@ import net.sf.taverna.t2.reference.ErrorDocumentDao;
 import net.sf.taverna.t2.reference.ErrorDocumentService;
 import net.sf.taverna.t2.reference.ErrorDocumentServiceCallback;
 import net.sf.taverna.t2.reference.ErrorDocumentServiceException;
+import net.sf.taverna.t2.reference.ListServiceException;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.reference.T2ReferenceGenerator;
 

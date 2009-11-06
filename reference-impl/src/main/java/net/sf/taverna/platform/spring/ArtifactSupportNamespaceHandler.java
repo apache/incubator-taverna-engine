@@ -20,10 +20,12 @@
  ******************************************************************************/
 package net.sf.taverna.platform.spring;
 
+import static net.sf.taverna.platform.spring.RavenConstants.ARTIFACT_XML_ATTRIBUTE_NAME;
+import static net.sf.taverna.platform.spring.RavenConstants.REPOSITORY_XML_ATTRIBUTE_NAME;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
-import static net.sf.taverna.platform.spring.RavenConstants.*;
 
 /**
  * Namespace handler to associate the artifact definition decorator with the

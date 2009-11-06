@@ -21,9 +21,10 @@
 package net.sf.taverna.platform.spring;
 
 import static net.sf.taverna.platform.spring.PropertyInterpolator.interpolate;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Properties;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
 
 /**

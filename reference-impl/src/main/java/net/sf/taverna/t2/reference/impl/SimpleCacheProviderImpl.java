@@ -23,12 +23,12 @@ package net.sf.taverna.t2.reference.impl;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import net.sf.taverna.t2.reference.Identified;
 import net.sf.taverna.t2.reference.ReferenceServiceCacheProvider;
 import net.sf.taverna.t2.reference.T2Reference;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Completely naive cache provider that just stores everything in a map. This

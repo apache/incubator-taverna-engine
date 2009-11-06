@@ -20,7 +20,8 @@
  ******************************************************************************/
 package net.sf.taverna.platform.spring.jdbc;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 

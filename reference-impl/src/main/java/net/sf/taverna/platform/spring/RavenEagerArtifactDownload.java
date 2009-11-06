@@ -20,6 +20,9 @@
  ******************************************************************************/
 package net.sf.taverna.platform.spring;
 
+import static net.sf.taverna.platform.spring.RavenConstants.ARTIFACT_BEAN_ATTRIBUTE_NAME;
+import static net.sf.taverna.platform.spring.RavenConstants.REPOSITORY_BEAN_ATTRIBUTE_NAME;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -35,8 +38,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-
-import static net.sf.taverna.platform.spring.RavenConstants.*;
 
 /**
  * Include this bean in the application context to enumerate and force download

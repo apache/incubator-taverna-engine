@@ -20,6 +20,8 @@
  ******************************************************************************/
 package net.sf.taverna.platform.spring;
 
+import static net.sf.taverna.platform.spring.RavenConstants.ARTIFACT_BEAN_ATTRIBUTE_NAME;
+import static net.sf.taverna.platform.spring.RavenConstants.REPOSITORY_BEAN_ATTRIBUTE_NAME;
 import net.sf.taverna.raven.repository.Artifact;
 import net.sf.taverna.raven.repository.ArtifactNotFoundException;
 import net.sf.taverna.raven.repository.ArtifactStateException;
@@ -34,7 +36,6 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.DecoratingClassLoader;
 import org.springframework.util.ClassUtils;
-import static net.sf.taverna.platform.spring.RavenConstants.*;
 
 /**
  * A subclass of DefaultListableBeanFactory which is aware of raven. Overrides

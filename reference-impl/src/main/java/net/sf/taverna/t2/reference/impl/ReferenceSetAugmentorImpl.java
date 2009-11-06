@@ -31,9 +31,6 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import net.sf.taverna.raven.spi.InstanceRegistry;
 import net.sf.taverna.raven.spi.InstanceRegistryListener;
 import net.sf.taverna.t2.reference.ExternalReferenceBuilderSPI;
@@ -44,6 +41,9 @@ import net.sf.taverna.t2.reference.ReferenceSet;
 import net.sf.taverna.t2.reference.ReferenceSetAugmentationException;
 import net.sf.taverna.t2.reference.ReferenceSetAugmentor;
 import net.sf.taverna.t2.reference.ReferenceSetAugmentorCallback;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Implementation of ReferenceSetAugmentor using Dijkstra's shortest path
