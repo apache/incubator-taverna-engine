@@ -1267,8 +1267,8 @@ public abstract class ProvenanceQuery {
 
 		String q1 = "SELECT * FROM VarBinding VB join Var V " + 
 		"on (VB.varNameRef = V.varName and VB.PNameRef =  V.PNameRef and VB.wfNameRef=V.wfInstanceRef) " + 
-		"JOIN WfInstance W ON VB.wfInstanceRef = W.instanceID and VB.wfNameRef = W.wfnameRef " + 
-		"LEFT OUTER JOIN Data D ON D.wfInstanceID = VB.wfInstanceRef and D.dataReference = VB.value";
+		"JOIN WfInstance W ON VB.wfInstanceRef = W.instanceID and VB.wfNameRef = W.wfnameRef ";
+//		+ "LEFT OUTER JOIN Data D ON D.wfInstanceID = VB.wfInstanceRef and D.dataReference = VB.value";
 
 		// constraints:
 		Map<String, String> lineageQueryConstraints = new HashMap<String, String>();
@@ -1382,7 +1382,11 @@ public abstract class ProvenanceQuery {
 		Map<String, String> vbQueryConstraints = new HashMap<String, String>();
 
 		// base VarBinding query
-		String vbQuery = "SELECT * FROM VarBinding VB JOIN wfInstance W ON " + "VB.wfInstanceRef = W.instanceID " + "JOIN Var V on " + "V.wfInstanceRef = W.wfnameRef and VB.PNameRef = V.pnameRef and VB.varNameRef = V.varName " + "LEFT OUTER JOIN Data D ON D.wfInstanceID = VB.wfInstanceRef and D.dataReference = VB.value";
+		String vbQuery = "SELECT * FROM VarBinding VB JOIN wfInstance W ON " + 
+						 "VB.wfInstanceRef = W.instanceID " + 
+						 "JOIN Var V on " + 
+						 "V.wfInstanceRef = W.wfnameRef and VB.PNameRef = V.pnameRef and VB.varNameRef = V.varName "; 
+//						 "LEFT OUTER JOIN Data D ON D.wfInstanceID = VB.wfInstanceRef and D.dataReference = VB.value";
 
 		vbQueryConstraints.put("W.instanceID", wfInstance);
 		vbQueryConstraints.put("VB.PNameRef", proc);
@@ -1462,7 +1466,12 @@ public abstract class ProvenanceQuery {
 		Map<String, String> vbQueryConstraints = new HashMap<String, String>();
 
 		// base VarBinding query
-		String vbQuery = "SELECT * FROM VarBinding VB JOIN wfInstance W ON " + "VB.wfInstanceRef = W.instanceID " + "JOIN Var V on " + "V.wfInstanceRef = W.wfnameRef and VB.PNameRef = V.pnameRef and VB.varNameRef = V.varName " + "LEFT OUTER JOIN Data D ON D.wfInstanceID = VB.wfInstanceRef and D.dataReference = VB.value";
+//		String vbQuery = "SELECT * FROM VarBinding VB JOIN wfInstance W ON " + "VB.wfInstanceRef = W.instanceID " + "JOIN Var V on " + "V.wfInstanceRef = W.wfnameRef and VB.PNameRef = V.pnameRef and VB.varNameRef = V.varName " + "LEFT OUTER JOIN Data D ON D.wfInstanceID = VB.wfInstanceRef and D.dataReference = VB.value";
+
+		String vbQuery = "SELECT * FROM VarBinding VB JOIN wfInstance W ON " + 
+						 "VB.wfInstanceRef = W.instanceID " + 
+						 "JOIN Var V on " + 
+						 "V.wfInstanceRef = W.wfnameRef and VB.PNameRef = V.pnameRef and VB.varNameRef = V.varName "; 
 
 		vbQueryConstraints.put("W.instanceID", wfInstance);
 		vbQueryConstraints.put("VB.PNameRef", proc);
@@ -1577,19 +1586,20 @@ public abstract class ProvenanceQuery {
 
 					// FIXME there is no D and no VB - this is in generateSQL,
 					// not simpleLineageQuery
-					if (includeDataValue) {
-						String resolvedValue = rs.getString("D.data");
+					// commented out as D table no longer available. Need to replace this with deref from DataManager
+//					if (includeDataValue) {
+//						String resolvedValue = rs.getString("D.data");
 
 						// System.out.println("resolved value: "+resolvedValue);
-						lqr.addLineageQueryResultRecord(wfNameRef, proc, var, wfInstance,
-								it, coll, null, value, resolvedValue, type, isInput, false);  // false -> not a collection
-					} else {
+//						lqr.addLineageQueryResultRecord(wfNameRef, proc, var, wfInstance,
+//								it, coll, null, value, resolvedValue, type, isInput, false);  // false -> not a collection
+//					} else {
 
 						// FIXME if the data is required then the query needs
 						// fixing
 						lqr.addLineageQueryResultRecord(wfNameRef, proc, var, wfInstance,
 								it, coll, null, value, null, type, isInput, false);
-					}
+//					}
 				}
 				return lqr;
 			}
