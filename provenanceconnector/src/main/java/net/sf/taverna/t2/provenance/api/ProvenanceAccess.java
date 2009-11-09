@@ -42,89 +42,89 @@ import org.springframework.context.ApplicationContext;
  */
 public class ProvenanceAccess {
 
-    
-    private static Logger logger = Logger.getLogger(ProvenanceAccess.class);
-    ProvenanceConnector provenanceConnector = null;
-    ProvenanceAnalysis pa = null;
-    ProvenanceQuery pq;
-    ProvenanceWriter pw;
-    Query q = null;
-    private String connectorType;
 
-    public ProvenanceAccess(String connectorType) {
-        this.connectorType = connectorType;
-        init();
-    }
+	private static Logger logger = Logger.getLogger(ProvenanceAccess.class);
+	ProvenanceConnector provenanceConnector = null;
+	ProvenanceAnalysis pa = null;
+	ProvenanceQuery pq;
+	ProvenanceWriter pw;
+	Query q = null;
+	private String connectorType;
 
-    /**
-     * A simplified data source intitialisation method, where only a driver name and jdbc url is required.
-     * If the driver supports multiple connections, then a pool will be created of 10 min idle, 50 max idle, and 50 max active connections.
-     *
-     * @param driverClassName
-     * @param jdbcUrl
-     */
-    public static void initDataSource(String driverClassName,String jdbcUrl) {
-        initDataSource(driverClassName,jdbcUrl,null,null,10,50,50);
-    }
-   /**
-    * Initialises a named JNDI DataSource if not already set up externally.
-    * The DataSource is named jdbc/taverna
-    *
-    * @param driverClassName - the classname for the driver to be used.
-    * @param jdbcUrl - the jdbc connection url
-    * @param username - the username, if required (otherwise null)
-    * @param password - the password, if required (oteherwise null)
-    * @param minIdle - if the driver supports multiple connections, then the minumum number of idle connections in the pool
-    * @param maxIdle - if the driver supports multiple connections, then the maximum number of idle connections in the pool
-    * @param maxActive - if the driver supports multiple connections, then the minumum number of connections in the pool
-    */
-    public static void initDataSource(String driverClassName, String jdbcUrl, String username, String password, int minIdle, int maxIdle, int maxActive) {
-        System.setProperty(Context.INITIAL_CONTEXT_FACTORY,
-                    "org.osjava.sj.memory.MemoryContextFactory");
-            System.setProperty("org.osjava.sj.jndi.shared", "true");
-            
-        BasicDataSource ds = new BasicDataSource();
-        ds.setDriverClassName(driverClassName);
-        ds.setDefaultTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
-        ds.setMaxActive(maxActive);
-        ds.setMinIdle(minIdle);
-        ds.setMaxIdle(maxIdle);
-        ds.setDefaultAutoCommit(true);
-        if (username != null) {
-            ds.setUsername(username);
-        }
-        if (password != null) {
-            ds.setPassword(password);
-        }
+	public ProvenanceAccess(String connectorType) {
+		this.connectorType = connectorType;
+		init();
+	}
 
-        ds.setUrl(jdbcUrl);
+	/**
+	 * A simplified data source intitialisation method, where only a driver name and jdbc url is required.
+	 * If the driver supports multiple connections, then a pool will be created of 10 min idle, 50 max idle, and 50 max active connections.
+	 *
+	 * @param driverClassName
+	 * @param jdbcUrl
+	 */
+	public static void initDataSource(String driverClassName,String jdbcUrl) {
+		initDataSource(driverClassName,jdbcUrl,null,null,10,50,50);
+	}
+	/**
+	 * Initialises a named JNDI DataSource if not already set up externally.
+	 * The DataSource is named jdbc/taverna
+	 *
+	 * @param driverClassName - the classname for the driver to be used.
+	 * @param jdbcUrl - the jdbc connection url
+	 * @param username - the username, if required (otherwise null)
+	 * @param password - the password, if required (oteherwise null)
+	 * @param minIdle - if the driver supports multiple connections, then the minumum number of idle connections in the pool
+	 * @param maxIdle - if the driver supports multiple connections, then the maximum number of idle connections in the pool
+	 * @param maxActive - if the driver supports multiple connections, then the minumum number of connections in the pool
+	 */
+	public static void initDataSource(String driverClassName, String jdbcUrl, String username, String password, int minIdle, int maxIdle, int maxActive) {
+		System.setProperty(Context.INITIAL_CONTEXT_FACTORY,
+		"org.osjava.sj.memory.MemoryContextFactory");
+		System.setProperty("org.osjava.sj.jndi.shared", "true");
 
-        InitialContext context;
-        try {
-            context = new InitialContext();
-            context.rebind("jdbc/taverna", ds);
-        } catch (NamingException ex) {
-            java.util.logging.Logger.getLogger(ProvenanceAccess.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
+		BasicDataSource ds = new BasicDataSource();
+		ds.setDriverClassName(driverClassName);
+		ds.setDefaultTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+		ds.setMaxActive(maxActive);
+		ds.setMinIdle(minIdle);
+		ds.setMaxIdle(maxIdle);
+		ds.setDefaultAutoCommit(true);
+		if (username != null) {
+			ds.setUsername(username);
+		}
+		if (password != null) {
+			ds.setPassword(password);
+		}
 
-    /**
-     * Initialises a default Reference Service for storing data and their associated references.
-     * This creates a reference service using the named JNDI Data Source 'jdbc/taverna'.
-     * 
-     */
-    public void initDefaultReferenceService() {
-       initReferenceService("hibernateReferenceServiceContext.xml");
-    }
+		ds.setUrl(jdbcUrl);
 
-    /**
-     * Initialises the Reference Service for a given hibernate context definition.
-     * This mapping file must be available in the root of the classpath.
-     *
-     * @param hibernateContext
-     */
-    public void initReferenceService(String hibernateContext) {
-        ApplicationContext appContext = new RavenAwareClassPathXmlApplicationContext(hibernateContext);
+		InitialContext context;
+		try {
+			context = new InitialContext();
+			context.rebind("jdbc/taverna", ds);
+		} catch (NamingException ex) {
+			java.util.logging.Logger.getLogger(ProvenanceAccess.class.getName()).log(Level.SEVERE, null, ex);
+		}
+	}
+
+	/**
+	 * Initialises a default Reference Service for storing data and their associated references.
+	 * This creates a reference service using the named JNDI Data Source 'jdbc/taverna'.
+	 * 
+	 */
+	public void initDefaultReferenceService() {
+		initReferenceService("hibernateReferenceServiceContext.xml");
+	}
+
+	/**
+	 * Initialises the Reference Service for a given hibernate context definition.
+	 * This mapping file must be available in the root of the classpath.
+	 *
+	 * @param hibernateContext
+	 */
+	public void initReferenceService(String hibernateContext) {
+		ApplicationContext appContext = new RavenAwareClassPathXmlApplicationContext(hibernateContext);
 
 		final ReferenceService referenceService = (ReferenceService) appContext
 		.getBean("t2reference.service.referenceService");
@@ -147,27 +147,27 @@ public class ProvenanceAccess {
 		provenanceConnector.setReferenceService(context.getReferenceService()); // CHECK context.getReferenceService());
 		provenanceConnector.setInvocationContext(context);
 
-    }
+	}
 
-    
 
-    public void init() {
 
-        for (ProvenanceConnectorFactory factory : ProvenanceConnectorFactoryRegistry.getInstance().getInstances()) {
-            if (connectorType.equalsIgnoreCase(factory.getConnectorType())) {
-                provenanceConnector = factory.getProvenanceConnector();
-            }
-        }
-        logger.info("Provenance being captured using: " + provenanceConnector);
+	public void init() {
 
-        //slight change, the init is outside but it also means that the init call has to ensure that the dbURL
-        //is set correctly
-        provenanceConnector.init();
+		for (ProvenanceConnectorFactory factory : ProvenanceConnectorFactoryRegistry.getInstance().getInstances()) {
+			if (connectorType.equalsIgnoreCase(factory.getConnectorType())) {
+				provenanceConnector = factory.getProvenanceConnector();
+			}
+		}
+		logger.info("Provenance being captured using: " + provenanceConnector);
 
-        pa = provenanceConnector.getProvenanceAnalysis();
-        pq = provenanceConnector.getQuery();
-        pw = provenanceConnector.getWriter();
-    }
+		//slight change, the init is outside but it also means that the init call has to ensure that the dbURL
+		//is set correctly
+		provenanceConnector.init();
+
+		pa = provenanceConnector.getProvenanceAnalysis();
+		pq = provenanceConnector.getQuery();
+		pw = provenanceConnector.getWriter();
+	}
 
 
 /////////
@@ -204,10 +204,10 @@ public class ProvenanceAccess {
 			String iteration) {
 
 		logger.info("running fetchPortData on instance "+wfInstance+
-				    " workflow "+workflowId+
-			        " processor "+pname+
-			        " port "+port+
-			        " iteration "+iteration);
+				" workflow "+workflowId+
+				" processor "+pname+
+				" port "+port+
+				" iteration "+iteration);
 		// TODO add context workflowID to query
 		try {
 			return pa.fetchIntermediateResult(wfInstance, workflowId, pname, port, iteration);
@@ -247,24 +247,27 @@ public class ProvenanceAccess {
 	 *  
 	 * them for deletion by the DataManager
 	 * @param runID the internal ID of a run. This can be obtained using {@link #listRuns(String, Map)}
+	 * @return the set of data references that pertain to the deleted run. This can be used to propagate the deletion process
+	 * to the Data Manager
 	 */
-	public void removeRun(String runID, boolean removeWorkflows) {
+	public Set<String> removeRun(String runID) {
+
+		Set<String> danglingDataRefs = null;
 
 		// implement using clearDynamic() method or a variation. Collect references and forward
 		try {
-			Set<String> danglingDataRefs = pw.clearDBDynamic(runID);
-			
+			danglingDataRefs = pw.clearDBDynamic(runID);
+
 			logger.debug("references collected during removeRun:");
 			for (String s:danglingDataRefs) {
 				logger.debug(s);
 			}
-			
+
 			// TODO send the list of dangling refs to the Data manager for removal of the corresponding data values
 		} catch (SQLException e) {
-			logger.error("Problem with removing run : " + runID + " : "+ e);
+			logger.error("Problem while removing run : " + runID + " : "+ e.getMessage());
 		}
-		
-		return; // TODO do the static part
+		return danglingDataRefs; 
 	}
 
 
@@ -274,10 +277,15 @@ public class ProvenanceAccess {
 	 * @param wfName
 	 */
 	public void removeWorkflow(String wfName) {
-		// TODO
+
+		try {
+			pw.clearDBStatic(wfName);
+		} catch (SQLException e) {
+			logger.error("Problem with removing static workflow: " + wfName+ " : "+ e.getMessage());
+		}
 	}
-	
-	
+
+
 	/**
 	 * returns a set of workflowIDs for a given runID. The set is a singleton if the workflow has no nesting,
 	 * but in general it contains one workflowID for each nested workflow involved in the run
@@ -340,8 +348,8 @@ public class ProvenanceAccess {
 		return pq.getProcessorsDeep(null, workflowID);
 	}
 
-	
-	
+
+
 
 	/**
 	 * list all ports for a processor
@@ -511,10 +519,10 @@ public class ProvenanceAccess {
 	public String getWorkflowIDForExternalName(String workflowName) {
 		return pq.getWfNameForDataflow(workflowName);
 	}
-	
+
 	public String getProcessorNameForWorkflowID(String workflowID) {
 		return pq.getProcessorForWorkflow(workflowID);
 	}
-	
+
 
 }
