@@ -20,6 +20,7 @@
  ******************************************************************************/
 package net.sf.taverna.t2.security.credentialmanager;
 
+import java.awt.GraphicsEnvironment;
 import java.io.File;
 
 import javax.swing.JFrame;
@@ -40,10 +41,12 @@ public class UIMasterPasswordProvider implements MasterPasswordProviderSPI{
 
 	public String getPassword() {
 
-		// TODO Check if it Taverna run is headless (i.e. is this Taverna Server) 
-		// - do not do anything here if it is as we do not want any windows 
-		// popping up even if they could
-		// return null;
+		// Check if this Taverna run is headless (i.e. Taverna Server or Taverna 
+		// from command line) - do not do anything here if it is as we do not want 
+		// any windows popping up even if they could
+		if (GraphicsEnvironment.isHeadless()){
+			return null;
+		}
 
 		File secConfigDirectory = CMUtil.getSecurityConfigurationDirectory();
 		
