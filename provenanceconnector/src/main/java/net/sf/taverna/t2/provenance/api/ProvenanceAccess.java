@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -104,7 +103,7 @@ public class ProvenanceAccess {
 			context = new InitialContext();
 			context.rebind("jdbc/taverna", ds);
 		} catch (NamingException ex) {
-			java.util.logging.Logger.getLogger(ProvenanceAccess.class.getName()).log(Level.SEVERE, null, ex);
+			logger.error("Problem rebinding the jdbc context: " + ex);
 		}
 	}
 
