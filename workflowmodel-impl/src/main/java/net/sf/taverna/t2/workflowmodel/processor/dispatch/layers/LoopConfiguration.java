@@ -63,6 +63,7 @@ public class LoopConfiguration implements Cloneable {
 		LoopConfiguration clone;
 		try {
 			clone = (LoopConfiguration) super.clone();
+			clone.condition = null;
 		} catch (CloneNotSupportedException e) {
 			throw new RuntimeException("Unexpected CloneNotSupportedException",
 					e);
