@@ -104,5 +104,9 @@ public class StringConstantActivity extends AbstractAsynchronousActivity<StringC
 		}
 		outputPorts.add(port);
 	}
+	
+	public String getExtraDescription() {
+		return value;
+	}
 
 }
