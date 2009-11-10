@@ -75,7 +75,7 @@ public abstract class ProvenanceWriter {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-					"INSERT INTO Var (varname, pNameRef, inputOrOutput, nestingLevel, wfInstanceRef) VALUES(?,?,?,?,?)");
+			"INSERT INTO Var (varname, pNameRef, inputOrOutput, nestingLevel, wfInstanceRef) VALUES(?,?,?,?,?)");
 			String q;
 			for (Var v : vars) {
 
@@ -125,7 +125,7 @@ public abstract class ProvenanceWriter {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-					"INSERT INTO Arc (wfInstanceRef, sourcePNameRef, SourceVarNameRef, sinkPNameRef,sinkVarNameRef) VALUES(?,?,?,?,?)");
+			"INSERT INTO Arc (wfInstanceRef, sourcePNameRef, SourceVarNameRef, sinkPNameRef,sinkVarNameRef) VALUES(?,?,?,?,?)");
 			ps.setString(1, wfId);
 			ps.setString(2, sourceVar.getPName());
 			ps.setString(3, sourceVar.getVName());
@@ -155,7 +155,7 @@ public abstract class ProvenanceWriter {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-					"INSERT INTO Arc (wfInstanceRef, sourcePNameRef, sourceVarNameRef, sinkPNameRef, sinkVarNameRef) VALUES(?,?,?,?,?)");
+			"INSERT INTO Arc (wfInstanceRef, sourcePNameRef, sourceVarNameRef, sinkPNameRef, sinkVarNameRef) VALUES(?,?,?,?,?)");
 
 
 			ps.setString(1, wfId);
@@ -194,7 +194,7 @@ public abstract class ProvenanceWriter {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-					"INSERT INTO Workflow (wfName) VALUES (?)");
+			"INSERT INTO Workflow (wfName) VALUES (?)");
 			ps.setString(1, wfId);
 			ps.executeUpdate();
 
@@ -218,7 +218,7 @@ public abstract class ProvenanceWriter {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-					"INSERT INTO Workflow (wfname, parentWFname, externalName, dataflow) VALUES (?,?,?, ?)");
+			"INSERT INTO Workflow (wfname, parentWFname, externalName, dataflow) VALUES (?,?,?, ?)");
 			ps.setString(1, wfId);
 			ps.setString(2, parentWFname);
 			ps.setString(3, externalName);
@@ -247,7 +247,7 @@ public abstract class ProvenanceWriter {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-					"INSERT INTO WfInstance (instanceID, wfnameRef) VALUES (?,?)");
+			"INSERT INTO WfInstance (instanceID, wfnameRef) VALUES (?,?)");
 
 			ps.setString(1, wfInstanceId);
 			ps.setString(2, wfId);
@@ -293,7 +293,7 @@ public abstract class ProvenanceWriter {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-					"INSERT INTO Processor (pname, type, wfInstanceRef, isTopLevel) VALUES (?,?,?,?)");
+			"INSERT INTO Processor (pname, type, wfInstanceRef, isTopLevel) VALUES (?,?,?,?)");
 
 			ps.setString(1, name);
 			ps.setString(2, type);
@@ -323,7 +323,7 @@ public abstract class ProvenanceWriter {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-					"INSERT INTO ProcBinding (wfNameRef, pnameRef, execIDRef, iteration, actName) VALUES(?,?,?,?,?)");
+			"INSERT INTO ProcBinding (wfNameRef, pnameRef, execIDRef, iteration, actName) VALUES(?,?,?,?,?)");
 			ps.setString(1, pb.getWfNameRef());
 			ps.setString(2, pb.getPNameRef());
 			ps.setString(3, pb.getExecIDRef());
@@ -361,7 +361,7 @@ public abstract class ProvenanceWriter {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-					"INSERT INTO Collection (PNameRef, wfInstanceRef, varNameRef, iteration, parentCollIdRef, collId) VALUES(?,?,?,?,?,?)");
+			"INSERT INTO Collection (PNameRef, wfInstanceRef, varNameRef, iteration, parentCollIdRef, collId) VALUES(?,?,?,?,?,?)");
 
 			if (parentCollectionId == null) {
 				// this is a top-level list
@@ -407,7 +407,7 @@ public abstract class ProvenanceWriter {
 			connection = getConnection();
 			PreparedStatement ps = null;
 			ps = connection.prepareStatement(
-					"INSERT INTO Data (dataReference,wfInstanceID,data) VALUES (?,?,?)");
+			"INSERT INTO Data (dataReference,wfInstanceID,data) VALUES (?,?,?)");
 			ps.setString(1, dataRef);
 			ps.setString(2, wfInstanceId);
 			ps.setBytes(3, data);
@@ -449,7 +449,7 @@ public abstract class ProvenanceWriter {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-					"INSERT INTO VarBinding (wfNameRef, pnameRef, wfInstanceRef, varNameRef, valueType, value, ref, collIdRef, iteration,positionInColl) VALUES(?,?,?,?,?,?,?,?,?,?)");
+			"INSERT INTO VarBinding (wfNameRef, pnameRef, wfInstanceRef, varNameRef, valueType, value, ref, collIdRef, iteration,positionInColl) VALUES(?,?,?,?,?,?,?,?,?,?)");
 
 			ps.setString(1, vb.getWfNameRef());
 			ps.setString(2, vb.getPNameRef());
@@ -462,11 +462,11 @@ public abstract class ProvenanceWriter {
 			ps.setString(9, vb.getIteration());
 			ps.setInt(10, vb.getPositionInColl());
 
-//			logger.debug("addVarBinding query: \n"+ps.toString());
-ps.executeUpdate();
-//logger.debug("insert done");
+			logger.debug("addVarBinding query: \n"+ps.toString());
+			ps.executeUpdate();
+			logger.debug("insert done");
 
-cnt++;  // who uses this?
+			cnt++;  // who uses this?
 
 		} catch (InstantiationException e1) {
 			logger.warn("Error inserting record for a varBinding", e1);
@@ -671,19 +671,19 @@ cnt++;  // who uses this?
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-					"DELETE FROM Workflow WHERE wfname = ?");
+			"DELETE FROM Workflow WHERE wfname = ?");
 			ps.setString(1, wfID);
 			ps.executeUpdate();
 			ps = connection.prepareStatement(
-					"DELETE FROM Processor WHERE wfInstanceRef = ?");
+			"DELETE FROM Processor WHERE wfInstanceRef = ?");
 			ps.setString(1, wfID);
 			ps.executeUpdate();
 			ps = connection.prepareStatement(
-					"DELETE FROM Arc WHERE wfInstanceRef = ?");
+			"DELETE FROM Arc WHERE wfInstanceRef = ?");
 			ps.setString(1, wfID);
 			ps.executeUpdate();
 			ps = connection.prepareStatement(
-					"DELETE FROM Var WHERE wfInstanceRef = ?");
+			"DELETE FROM Var WHERE wfInstanceRef = ?");
 			ps.setString(1, wfID);
 			ps.executeUpdate();
 
@@ -714,7 +714,7 @@ cnt++;  // who uses this?
 	 */
 	public Set<String> clearDBDynamic(String runID) throws SQLException {
 		String q = null;
-  
+
 		Set<String>  refsToRemove = collectValueReferences(runID);  // collect all relevant refs from VarBinding and Collection
 
 		Connection connection = null;
@@ -774,7 +774,7 @@ cnt++;  // who uses this?
 	}
 
 
-	
+
 	private Set<String> collectValueReferences(String runID) throws SQLException {
 
 		Set<String> refs = new HashSet<String>();
@@ -799,7 +799,7 @@ cnt++;  // who uses this?
 					refs.add(rs.getString("value"));
 				}
 			}
-			
+
 			if (runID != null) {
 				ps = connection.prepareStatement("SELECT collId FROM Collection WHERE wfInstanceRef = ?");
 				ps.setString(1, runID);
@@ -814,7 +814,7 @@ cnt++;  // who uses this?
 					refs.add(rs.getString("collId"));
 				}
 			}
-			
+
 		} catch (InstantiationException e1) {
 			logger.warn("Error execting delete query for provenance records", e1);
 		} catch (IllegalAccessException e1) {
@@ -831,8 +831,8 @@ cnt++;  // who uses this?
 		return refs;
 	}
 
-	
-	
+
+
 	public void clearDD() {
 
 		Statement stmt = null;

@@ -24,22 +24,22 @@ public class Query {
 	public String toString() {
 
 		StringBuffer sb = new StringBuffer();
-		sb.append("QUERY SCOPE: ****\n").
+		sb.append("\n **** QUERY SCOPE: ****\n").
 		append("\tworkflow name: ").append(getWorkflowName()).
 
 		append("\n\truns: ");
 		for (String r:getRunIDList()) {
-			sb.append("\n"+r);
+			sb.append("\n\t"+r);
 		}
 
-		sb.append("\nTARGET PORTS: ***\n");
+		sb.append("\n**** TARGET PORTS: ****\n");
 		for (QueryVar v:getTargetVars()) {
-			sb.append("\n"+v.toString());
+			sb.append("\n\t"+v.toString());
 		}
 
-		sb.append("\nSELECTED PROCESSORS: ");
+		sb.append("\n\n**** SELECTED PROCESSORS: **** ");
 		for (ProvenanceProcessor pp:getSelectedProcessors()) {
-			sb.append("\n"+pp.toString());
+			sb.append("\n\t"+pp.toString());
 		}
 
 		return sb.toString();

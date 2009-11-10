@@ -13,8 +13,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 import net.sf.taverna.t2.provenance.lineageservice.utils.QueryVar;
@@ -36,8 +38,9 @@ public class ProvenanceQueryParser {
 
 	private static Logger logger = Logger.getLogger(ProvenanceQueryParser.class);
 
-	
-	private static final String QUERY_EL = "scope";
+
+	private static final String SCOPE_EL = "scope";
+	private static final String QUERY_SCOPE_ATTR = "workflow";
 	private static final String PQUERY_EL = "pquery";
 	private static final String RUNS_EL = "runs";
 	private static final String RUN_ID = "id";
@@ -47,7 +50,7 @@ public class ProvenanceQueryParser {
 	private static final String RANGE_TO = "to";
 
 	private static final String PORT_SELECTION_EL = "select";
-	private static final String WORKFLOW_NAME_ATTR = "workflow";
+	private static final String WORKFLOW_NAME_ATTR = "name";
 	private static final String PORT_EL = "outputPort";
 	private static final String WORKFLOW_EL = "workflow";
 	private static final String PROCESSOR_EL = "processor";
@@ -60,6 +63,8 @@ public class ProvenanceQueryParser {
 	private static final String INDEX_ATTR = "index";
 
 	private static final String PQUERY_NS = "http://taverna.org.uk/2009/provenance/pquery/";
+
+
 	private static Namespace ns = Namespace.getNamespace(PQUERY_NS);
 
 	private ProvenanceAccess pAccess;
@@ -81,18 +86,22 @@ public class ProvenanceQueryParser {
 
 		// parse the XML using JDOM
 		SAXBuilder  b = new SAXBuilder();
-		
+
 		try {
 			d = b.build (new FileReader((XMLQuerySpecFilename)));
 		} catch (FileNotFoundException e) {
 			logger.error("Problem parsing provenance query: " + e);
+			return null;
 		} catch (JDOMException e) {
 			logger.error("Problem parsing provenance query: " + e);
+			return null;
 		} catch (IOException e) {
 			logger.error("Problem parsing provenance query: " + e);
+			return null;
 		}
 
 		q.setRunIDList(parseWorkflowAndRuns(d));  // sets the set of runs 
+		q.setWorkflowName(mainWorkflowExternalName);
 		q.setTargetVars(parsePortSelection(d));
 		q.setSelectedProcessors(parseProcessorFocus(d));
 
@@ -111,7 +120,13 @@ public class ProvenanceQueryParser {
 		List<ProvenanceProcessor> selectedProcessors = new ArrayList<ProvenanceProcessor>();
 
 		Element root = d.getRootElement();
-		Element processorFocusEl = root.getChild(PROC_FOCUS_EL);
+
+		if (!root.getName().equals(PQUERY_EL)) {
+			logger.fatal("input XML query is invalid");
+			return null;
+		}
+
+		Element processorFocusEl = root.getChild(PROC_FOCUS_EL, ns);
 
 		if (processorFocusEl == null) {  // completely implicit: set to output ports of topLevelWorkflowID
 			return processProcessorFocus(mainWorkflowID, mainWorkflowExternalName, null);
@@ -226,34 +241,53 @@ public class ProvenanceQueryParser {
 		List<Var> ports = pAccess.getPortsForProcessor(workflowID, procName);
 
 		List<Element> children = childEl.getChildren();
-		boolean allPorts = false;
-		if (children.size() == 0) {  allPorts = true; }
-
-		Map<String, String> portToIndex = new HashMap<String, String>();
-		for (Element portEl:children) {
-			if (portEl.getName().equals(PORT_EL))  {
-				String portName = portEl.getAttributeValue(PORT_NAME_ATTR);
-				String index    = portEl.getAttributeValue(INDEX_ATTR);
-				portNames.add(portName);
-				if (index == null) portToIndex.put(portName, "ALL");
-				else portToIndex.put(portName, index);
+		if (children.size() == 0) {  
+			// add all output ports 
+			for (Var p:ports) {
+				if (!p.isInput()) {
+					QueryVar qv = new QueryVar();
+					qv.setWfName(p.getWfInstanceRef());
+					qv.setPname(p.getPName());
+					qv.setVname(p.getVName());
+					qv.setPath("ALL");
+					queryVars.add(qv);	
+				}
 			}
-		}
+		} else {
+			Map<String, String> portToIndex = new HashMap<String, String>();
+			for (Element portEl:children) {
+				if (portEl.getName().equals(PORT_EL))  {
+					String portName = portEl.getAttributeValue(PORT_NAME_ATTR);
+					String index    = portEl.getAttributeValue(INDEX_ATTR);
+					portNames.add(portName);
+					if (index == null) portToIndex.put(portName, "ALL");
+					else portToIndex.put(portName, index);
+				}
+			}
 
-		for (Var p:ports) {
-			if (p.isInput())  continue;
-			if (allPorts || portNames.contains(p.getVName())) {					
-				QueryVar qv = new QueryVar();
-				qv.setWfName(p.getWfInstanceRef());
-				qv.setPname(p.getPName());
-				qv.setVname(p.getVName());
-				String index = portToIndex.get(p.getVName());
-				if (index != null) qv.setPath(portToIndex.get(p.getVName()));
-				else qv.setPath("ALL");
-				queryVars.add(qv);
-				
-				logger.debug("adding port "+p.getPName()+":"+p.getVName()+" to targetVars");
-				
+			Set<String> availableOutPortNames = new HashSet<String>();
+			for (Var p:ports) if (!p.isInput()) { availableOutPortNames.add(p.getVName()); }
+
+			for (String portName:portNames) {
+
+				boolean found = false;
+				for (Var p1:ports) {				
+					if (portName.equals(p1.getVName())) {
+						QueryVar qv = new QueryVar();
+						qv.setWfName(p1.getWfInstanceRef());
+						qv.setPname(p1.getPName());
+						qv.setVname(p1.getVName());
+						String index = portToIndex.get(p1.getVName());
+						if (index != null) qv.setPath(portToIndex.get(p1.getVName()));
+						else qv.setPath("ALL");
+						queryVars.add(qv);	
+						found = true;
+						logger.debug("adding port "+p1.getPName()+":"+p1.getVName()+" to targetVars");
+						break;
+					}
+				} if (!found)  {
+					logger.warn("output port "+portNames+" not found while processing <select>");
+				}
 			}
 		}
 		return queryVars;
@@ -301,7 +335,13 @@ public class ProvenanceQueryParser {
 
 		List<QueryVar>  queryVars = new ArrayList<QueryVar>();
 		Element root = d.getRootElement();
-		Element portSelection = root.getChild(PORT_SELECTION_EL);
+
+		if (!root.getName().equals(PQUERY_EL)) {
+			logger.fatal("input XML query is invalid");
+			return null;
+		}
+
+		Element portSelection = root.getChild(PORT_SELECTION_EL, ns);
 
 		if (portSelection == null) {  // completely implicit: set to output ports of topLevelWorkflowID
 			return parsePorts(mainWorkflowID, mainWorkflowExternalName, null);
@@ -336,34 +376,34 @@ public class ProvenanceQueryParser {
 	 */	
 	@SuppressWarnings("unchecked")
 	private List<String> parseWorkflowAndRuns(Document d) {
-	
+
 		List<String> runsScope = new ArrayList<String>();  // list of run IDs
 		List<WorkflowInstance> feasibleWfInstances = new ArrayList<WorkflowInstance>();
 		List<String> feasibleRuns = new ArrayList<String>();
-	
+
 		Element root = d.getRootElement();  // this should be a <pquery>
-		
+
 		if (!root.getName().equals(PQUERY_EL)) {
 			logger.fatal("input XML query is invalid");
 			return null;
 		}
-		
-		Element queryScopeEl = root.getChild(QUERY_EL, ns);
-		
+
+		Element queryScopeEl = root.getChild(SCOPE_EL, ns);
+
 		// expect workflow ID 
-		
+
 		if (queryScopeEl != null) {
-			mainWorkflowExternalName = queryScopeEl.getAttributeValue(WORKFLOW_NAME_ATTR);
-	
+			mainWorkflowExternalName = queryScopeEl.getAttributeValue(QUERY_SCOPE_ATTR);
+
 			if (mainWorkflowExternalName == null) {
 				logger.debug("no external name specified in workflow - giving up");
 				return null;
 			}
-	
+
 			//  validate this workflowID
 			List<WorkflowInstance>  allWfInstances = pAccess.listRuns(null, null); // returns all available runs ordered by timestamp
 			// is this workflow in one of the instances?
-	
+
 			for (WorkflowInstance i:allWfInstances) {
 				if (mainWorkflowExternalName.equals(i.getWorkflowExternalName())) {
 					mainWorkflowID = i.getWorkflowIdentifier();
@@ -384,19 +424,19 @@ public class ProvenanceQueryParser {
 			logger.debug("workflow "+mainWorkflowExternalName+" not found -- giving up");
 			return null;
 		}
-	
+
 		// get into the element and set the runs scope.
 		Element runs = queryScopeEl.getChild(RUNS_EL, ns);
 		if (runs != null) {
 			logger.debug("setting explicit runs scope");
-	
+
 			// expect a sequence of run elements and/ or a single <range> element
 			List<Element> runElList = runs.getChildren();
 			for (Element runEl:runElList) {
-	
+
 				// explicit runID given
 				if (runEl.getName().equals(RUN_EL)) {
-					String runID = runEl.getAttributeValue(RUN_ID, ns);
+					String runID = runEl.getAttributeValue(RUN_ID);
 					if (runID!=null) {
 						if (feasibleRuns.contains(runID)) {
 							logger.debug("adding runID "+runID+" to runs scope");
@@ -407,21 +447,21 @@ public class ProvenanceQueryParser {
 					} else {
 						logger.warn("<run> element with no ID");
 					}					
-	
+
 					// time range given 
 				} else if (runEl.getName().equals(RANGE_EL)) {
 					String from = runEl.getAttributeValue(RANGE_FROM,ns);
 					String to   = runEl.getAttributeValue(RANGE_TO,ns);
-	
+
 					logger.debug("processing runs range from "+from+" to "+to);
-	
+
 					for (WorkflowInstance i:feasibleWfInstances) {
-	
+
 						Date fromInstanceDate = null;
 						Date toInstanceDate = null;
 						DateFormat f = new SimpleDateFormat();
 						Date fromDate=null, toDate=null;
-	
+
 						if (from != null) {
 							try {
 								fromDate = f.parse(from);
@@ -430,7 +470,7 @@ public class ProvenanceQueryParser {
 								logger.warn(from+" cannot be parsed as a date -- ignored");
 							}
 						}
-	
+
 						if (to != null) {
 							try {
 								toDate = f.parse(to);
@@ -451,10 +491,10 @@ public class ProvenanceQueryParser {
 			logger.debug("null runs scope: using latest run");
 			if (feasibleWfInstances != null) runsScope.add(feasibleWfInstances.get(0).getInstanceID());
 		}
-	
+
 		logger.debug("runs scope:");
 		for (String r:runsScope) logger.debug(r);
-	
+
 		return runsScope;
 	}
 
