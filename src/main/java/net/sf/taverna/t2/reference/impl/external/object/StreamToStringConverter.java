@@ -50,6 +50,7 @@ public class StreamToStringConverter implements
 		while ((character = reader.read(chunk)) != END_OF_FILE) {
 			buffer.append(chunk, 0, character);
 		}
+		reader.close();
 		return buffer.toString();
 	}
 
