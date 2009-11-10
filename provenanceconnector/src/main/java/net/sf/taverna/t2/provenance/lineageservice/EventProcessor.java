@@ -255,8 +255,7 @@ public class EventProcessor {
 				} catch (java.io.IOException e) {
 				    logger.error("Could not serialise dataflow: " + e);
 				}
-				
-				Blob blob = new SerialBlob(dataflowString.getBytes());
+				Blob blob = new SerialBlob(dataflowString.getBytes("UTF-8"));
 				// this is a top level dataflow description
 				pw.addWFId(dataflowID, null, externalName, blob); // set its dataflowID with no parent
 
@@ -273,7 +272,7 @@ public class EventProcessor {
 				    logger.error("Could not serialise dataflow: " + e);
 				}
 				
-				Blob blob = new SerialBlob(dataflowString.getBytes());
+				Blob blob = new SerialBlob(dataflowString.getBytes("UTF-8"));
 				// we are processing a nested workflow structure
 				logger.debug("dataflow "+dataflowID+" with external name "+externalName+" is nested within "+parentDataflow);
 
