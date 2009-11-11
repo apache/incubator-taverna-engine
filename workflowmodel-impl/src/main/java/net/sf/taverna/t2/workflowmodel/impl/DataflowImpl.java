@@ -598,7 +598,7 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 		boolean dataflowValid = unresolvedOutputs.isEmpty() && failed.isEmpty()
 				&& unresolved.isEmpty();
 
-		// Build and return a new validation report containing the overal state
+		// Build and return a new validation report containing the overall state
 		// along with lists of failed and unsatisfied processors and unsatisfied
 		// output ports
 		return new DataflowValidationReportImpl(dataflowValid, failed,
