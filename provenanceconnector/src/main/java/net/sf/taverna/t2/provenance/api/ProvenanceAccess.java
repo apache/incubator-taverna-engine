@@ -454,20 +454,6 @@ public class ProvenanceAccess {
 		return false; // TODO
 	}
 
-	/**
-	 * include actual values that appear on ports, rather than just the references<br>
-	 * default is FALSE
-	 * @param active
-	 */
-	public void toggleIncludeDataValues(boolean active) {
-		return; // TODO
-	}
-
-	public boolean isIncludeDataValues() {
-		return false; // TODO
-	}
-
-
 
 //	/ OPM management
 

@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import net.sf.taverna.t2.invocation.InvocationContext;
 import net.sf.taverna.t2.provenance.connector.JDBCConnector;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Arc;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DDRecord;
@@ -45,6 +46,9 @@ import net.sf.taverna.t2.provenance.lineageservice.utils.Var;
 import net.sf.taverna.t2.provenance.lineageservice.utils.VarBinding;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Workflow;
 import net.sf.taverna.t2.provenance.lineageservice.utils.WorkflowInstance;
+import net.sf.taverna.t2.reference.ReferenceService;
+import net.sf.taverna.t2.reference.T2Reference;
+import net.sf.taverna.t2.reference.impl.T2ReferenceImpl;
 
 import org.apache.log4j.Logger;
 import org.jdom.Document;
@@ -64,7 +68,7 @@ public abstract class ProvenanceQuery {
 
 	protected Logger logger = Logger.getLogger(ProvenanceQuery.class);
 	public static String DATAFLOW_TYPE = "net.sf.taverna.t2.activities.dataflow.DataflowActivity";
-
+	
 	public Connection getConnection() throws InstantiationException,
 	IllegalAccessException, ClassNotFoundException, SQLException {
 		return JDBCConnector.getConnection();
@@ -1558,6 +1562,14 @@ public abstract class ProvenanceQuery {
 		return lqr;
 	}
 
+	
+	/**
+	 * 
+	 * @param lq
+	 * @param includeDataValue  IGNORED. always false
+	 * @return
+	 * @throws SQLException
+	 */
 	public Dependencies runVBQuery(LineageSQLQuery lq, boolean includeDataValue) throws SQLException {
 
 		String q = lq.getVbQuery();
@@ -1590,6 +1602,7 @@ public abstract class ProvenanceQuery {
 					boolean isInput = (rs.getInt("inputOrOutput") == 1) ? true
 							: false;
 
+					
 					// FIXME there is no D and no VB - this is in generateSQL,
 					// not simpleLineageQuery
 					// commented out as D table no longer available. Need to replace this with deref from DataManager
@@ -2389,6 +2402,7 @@ public abstract class ProvenanceQuery {
 		return null;
 
 	}
+
 }
 
 

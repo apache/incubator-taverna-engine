@@ -396,6 +396,7 @@ public abstract class ProvenanceWriter {
 	}
 
 	/**
+	 * OBSOLETE<p/>
 	 * adds (dataRef, data) pairs to the Data table (only for string data)
 	 */
 	public void addData(String dataRef, String wfInstanceId, byte[] data)
