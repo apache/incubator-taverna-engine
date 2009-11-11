@@ -35,13 +35,23 @@ import java.util.Map;
 public interface DataflowValidationReport {
 
 	/**
-	 * Overal validity - if the workflow is valid it can be run, otherwise there
+	 * Overall validity - if the workflow is valid it can be run, otherwise there
 	 * are problems somewhere and a facade can't be created from it.
 	 * 
 	 * @return whether the workflow is valid (true) or not (false)
 	 */
 	public boolean isValid();
 
+	/**
+	 * Whether the workflow is incomplete, i.e. contains no processors and no connected output ports.
+	 * For example, it is empty or contains only input ports. Even though one can technically run such
+	 * a workflow it should be prohibited as it does not make any sense. If a workflow
+	 * is incomplete {@link DataflowValidationReport#isValid()} should return <code>false</code>.
+	 * 
+	 * @return whether the workflow is incomplete or not
+	 */
+	public boolean isWorkflowIncomplete();
+	
 	/**
 	 * The workflow will be marked as invalid if there are entities with
 	 * unlinked input ports or where there are cycles causing the type checking
