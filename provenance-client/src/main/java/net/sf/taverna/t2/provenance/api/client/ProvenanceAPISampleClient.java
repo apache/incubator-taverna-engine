@@ -29,26 +29,28 @@ import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.log4j.Logger;
 
 /**
- * @author paolo
+ * @author Paolo Missier<p/>
+ * Example provenance API client.
  *
  */
 public class ProvenanceAPISampleClient {
 
 	private static final String DEFAULT_OPM_FILENAME = "src/test/resources/provenance-testing/OPMGraph.rdf";
-	
+
 	ProvenanceAccess pAccess = null;
 
 	String DB_URL_LOCAL = PropertiesReader.getString("dbhost");  // URL of database server //$NON-NLS-1$
 	String DB_USER = PropertiesReader.getString("dbuser");                        // database user id //$NON-NLS-1$
 	String DB_PASSWD = PropertiesReader.getString("dbpassword"); //$NON-NLS-1$
 	static String OPMGraphFilename = null;
-	
+
 	List<String> wfNames = null;
 	Set<String> selectedProcessors = null;
 
 	private static Logger logger = Logger.getLogger(ProvenanceAPISampleClient.class);
 
 	/**
+	 * Creates an instance of the client, uses it to submit a pre-defined query, and displays the results on a console 
 	 * @param args
 	 */
 	public static void main(String[] args) throws Exception {
@@ -57,21 +59,21 @@ public class ProvenanceAPISampleClient {
 
 		client.setUp();
 		QueryAnswer answer = client.queryProvenance();
-		
+
 		client.reportAnswer(answer);
 		client.saveOPMGraph(answer, OPMGraphFilename);
 	}
 
-	
-	
-	public void setUp() throws Exception {
+
+
+	protected void setUp() throws Exception {
 		setDataSource();
 		System.setProperty("raven.eclipse","true");
 		pAccess = new ProvenanceAccess(ProvenanceConnectorType.MYSQL);  // creates and initializes the provenance API
 		configureInterface();              // sets user-defined preferences
 	}
 
-	public void setDataSource() {
+	protected  void setDataSource() {
 
 		System.setProperty(Context.INITIAL_CONTEXT_FACTORY,"org.osjava.sj.memory.MemoryContextFactory");
 		System.setProperty("org.osjava.sj.jndi.shared", "true");
@@ -100,7 +102,7 @@ public class ProvenanceAPISampleClient {
 	/**
 	 * set user-defined values for toggles on the API
 	 */
-	private void configureInterface() {
+	protected void configureInterface() {
 
 		// do we need to return output processor values in addition to inputs?
 		String returnOutputsPref = PropertiesReader.getString("query.returnOutputs");
@@ -112,33 +114,38 @@ public class ProvenanceAPISampleClient {
 		String recordArtifacValuesPref = PropertiesReader.getString("OPM.recordArtifactValues");
 		if (recordArtifacValuesPref != null) {			
 			pAccess.toggleAttachOPMArtifactValues(Boolean.parseBoolean(recordArtifacValuesPref));
-			System.out.println("OPM.recordArtifactValues: "+ pAccess.isAttachOPMArtifactValues());
+			logger.info("OPM.recordArtifactValues: "+ pAccess.isAttachOPMArtifactValues());
 		}
 
 		// are we recording the actual (de-referenced) values at all?!
 		String includeDataValuePref = PropertiesReader.getString("query.returnDataValues");
 		if (includeDataValuePref != null) {
 			pAccess.toggleIncludeDataValues(Boolean.parseBoolean(includeDataValuePref));
-			System.out.println("query.returnDataValues: "+pAccess.isIncludeDataValues());
+			logger.info("query.returnDataValues: "+pAccess.isIncludeDataValues());
 		}
 
 		String computeOPMGraph = PropertiesReader.getString("OPM.computeGraph");
 		if (computeOPMGraph != null) {
 			pAccess.toggleOPMGeneration(Boolean.parseBoolean(computeOPMGraph));
-			System.out.println("OPM.computeGraph: "+pAccess.isOPMGenerationActive());			
+			logger.info("OPM.computeGraph: "+pAccess.isOPMGenerationActive());			
 		}
-		
+
 		// user-selected file name for OPM graph?
 		OPMGraphFilename = PropertiesReader.getString("OPM.rdf.file");
 		if (OPMGraphFilename == null) {
 			OPMGraphFilename = DEFAULT_OPM_FILENAME;
-			System.out.println("OPM.filename: "+OPMGraphFilename);			
+			logger.info("OPM.filename: "+OPMGraphFilename);			
 		}
 	}
 
-	
-	
-	public QueryAnswer queryProvenance() {
+
+
+	/**
+	 * parses an XML provenance query into a Query object and invokes {@link ProvenanceAccess.executeQuery()} 
+	 * @return a bean representing the query answer
+	 * @see QueryAnswer
+	 */
+	protected  QueryAnswer queryProvenance() {
 
 		Query q = new Query();
 
@@ -150,13 +157,13 @@ public class ProvenanceAPISampleClient {
 		pqp.setPAccess(pAccess);
 
 		q = pqp.parseProvenanceQuery(querySpecFile);
-		
+
 		if (q == null) {
 			logger.fatal("query processing failed. So sorry.");
 			return null;
 		}
 		logger.info("YOUR QUERY: "+q.toString());
-		
+
 		QueryAnswer answer=null;
 		try {
 			answer = pAccess.executeQuery (q);
@@ -174,12 +181,12 @@ public class ProvenanceAPISampleClient {
 	 * @param opmFilename
 	 */
 	private void saveOPMGraph(QueryAnswer answer, String opmFilename) {
-		
+
 		if (answer.getOPMAnswer_AsRDF() == null) {
 			logger.info("save OPM graph: OPM graph was NOT generated.");
 			return;
 		}
-		
+
 		try {
 			FileWriter fw= new FileWriter(new File(opmFilename));
 			fw.write(answer.getOPMAnswer_AsRDF());
