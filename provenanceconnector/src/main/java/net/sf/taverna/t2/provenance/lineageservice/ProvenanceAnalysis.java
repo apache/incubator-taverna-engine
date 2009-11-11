@@ -85,9 +85,7 @@ public class ProvenanceAnalysis {
 	public ProvenanceAnalysis() { ; }
 
 	public ProvenanceAnalysis(ProvenanceQuery pq) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
-
 		this.pq = pq;
-
 		setReady(tryInit());
 	}
 
@@ -95,7 +93,7 @@ public class ProvenanceAnalysis {
 	private boolean tryInit() throws SQLException {
 
 		if (getWFInstanceIDs() != null && getWFInstanceIDs().size()>0) {
-			initGraph();
+			initGraph();  // init OPM provenance graph
 			return true;
 		} else 
 			return false;		
@@ -135,10 +133,10 @@ public class ProvenanceAnalysis {
 	 * @throws JAXBException
 	 */
 //	public String OPMRdf2Xml() throws OperatorException, IOException, JAXBException {
-//		if (isReady()) {
-//			return aOPMManager.Rdf2Xml();
-//		}  
-//		return null;
+//	if (isReady()) {
+//	return aOPMManager.Rdf2Xml();
+//	}  
+//	return null;
 //	}
 
 	/**
@@ -149,7 +147,7 @@ public class ProvenanceAnalysis {
 	 * @throws OperatorException 
 	 */
 	public String OPMRdf2Dot() throws OperatorException, IOException {
-		if (isReady()) {
+		if (aOPMManager != null && aOPMManager.isActive() && isReady()) {
 			return aOPMManager.Rdf2Dot();
 		}  
 		return null;		
@@ -240,6 +238,7 @@ public class ProvenanceAnalysis {
 			logger.info("************\n lineage query: [instance, workflow, proc, port, path] = ["+
 					wfInstance+","+qv.getWfName()+","+qv.getPname()+","+qv.getVname()+",["+qv.getPath()+"]]\n***********");
 
+			// the OPM manager builds an OPM graph behind the scenes as a side-effect
 			Map<String, List<Dependencies>> a = 
 				computeLineageSingleVar(wfInstance, qv.getWfName(), qv.getVname(), qv.getPname(), qv.getPath(), selectedProcessors);
 
@@ -249,8 +248,9 @@ public class ProvenanceAnalysis {
 		nativeAnswer.setAnswer(answerContent);
 		completeAnswer.setNativeAnswer(nativeAnswer);
 
-//		String _OPM_asXML_File;
-//		try {
+		if (aOPMManager != null && aOPMManager.isActive())  {
+//			String _OPM_asXML_File;
+//			try {
 
 //			_OPM_asXML_File = aOPMManager.Rdf2Xml();
 			String _OPM_asRDF_File = aOPMManager.writeGraph();
@@ -258,14 +258,14 @@ public class ProvenanceAnalysis {
 			completeAnswer.setOPMAnswer_AsRDF(_OPM_asRDF_File);
 //			completeAnswer.setOPMAnswer_AsXML(_OPM_asXML_File);
 
-//		} catch (OperatorException e) {
+//			} catch (OperatorException e) {
 //			logger.error("Problem running query: " + e);
-//		} catch (IOException e) {
+//			} catch (IOException e) {
 //			logger.error("Problem running query: " + e);
-//		} catch (JAXBException e) {
+//			} catch (JAXBException e) {
 //			logger.error("Problem running query: " + e);
-//		}
-
+//			}
+		}
 		return completeAnswer;
 	}
 
@@ -420,7 +420,7 @@ public class ProvenanceAnalysis {
 		varQueryConstraints.put("V.pnameRef", proc);  
 		varQueryConstraints.put("V.varName", var);  
 		varQueryConstraints.put("V.wfInstanceRef", wfNameRef);  
-		
+
 		List<Var> vars = getPq().getVars(varQueryConstraints);
 
 		if (vars.isEmpty())  {
@@ -445,725 +445,713 @@ public class ProvenanceAnalysis {
 
 		return lqList;
 
-		}  // end searchDataflowGraph
+	}  // end searchDataflowGraph
 
 
 
-		/**
-		 * accounts for an inverse transformation from one output to all inputs of a processor
-		 * @param wfID
-		 * @param var  the output var
-		 * @param proc  the processor
-		 * @param selectedProcessors  the processors for which we are interested in producing lineage 
-		 * @param path iteration vector within a VarBinding collection
-		 * @param lqList  partial list of spot lineage queries, to be added to
-		 * @throws SQLException 
-		 */
-		private void xformStep(
-				String wfID,
-				String wfNameRef, 				
-				Var outputVar, // we need the dnl from this output var
-				String proc,
-				String path,
-				List<ProvenanceProcessor> selectedProcessors, 
-				List<LineageSQLQuery> lqList 
-		) throws SQLException {
+	/**
+	 * accounts for an inverse transformation from one output to all inputs of a processor
+	 * @param wfID
+	 * @param var  the output var
+	 * @param proc  the processor
+	 * @param selectedProcessors  the processors for which we are interested in producing lineage 
+	 * @param path iteration vector within a VarBinding collection
+	 * @param lqList  partial list of spot lineage queries, to be added to
+	 * @throws SQLException 
+	 */
+	private void xformStep(
+			String wfID,
+			String wfNameRef, 				
+			Var outputVar, // we need the dnl from this output var
+			String proc,
+			String path,
+			List<ProvenanceProcessor> selectedProcessors, 
+			List<LineageSQLQuery> lqList 
+	) throws SQLException {
 
-			// retrieve input vars for current processor 
-			Map<String, String>  varsQueryConstraints = new HashMap<String, String>();
+		// retrieve input vars for current processor 
+		Map<String, String>  varsQueryConstraints = new HashMap<String, String>();
 
-			List<Var>  inputVars = null;
+		List<Var>  inputVars = null;
 
-			// here we fetch the input vars for the current proc.
-			// however, it may be the case that we are looking at a dataflow port (for the entire dataflow or
-			// for a subdataflow) rather than a real processor. in this case 
-			// we treat this as a 
-			// special processor that does nothing -- so we "input var" in this case 
-			// is a copy of the port, and we are ready to go for the next xfer step.
-			// in this way we can seamlessly traverse the graph over intermediate I/O that are part 
-			// of nested dataflows
+		// here we fetch the input vars for the current proc.
+		// however, it may be the case that we are looking at a dataflow port (for the entire dataflow or
+		// for a subdataflow) rather than a real processor. in this case 
+		// we treat this as a 
+		// special processor that does nothing -- so we "input var" in this case 
+		// is a copy of the port, and we are ready to go for the next xfer step.
+		// in this way we can seamlessly traverse the graph over intermediate I/O that are part 
+		// of nested dataflows
 
-			if (getPq().isDataflow(proc)) { // if we are looking at the output of an entire dataflow
+		if (getPq().isDataflow(proc)) { // if we are looking at the output of an entire dataflow
 
-				// force the "input vars" for this step to be the output var itself
-				// this causes the following xfer step to trace back to the next processor _within_ proc 
-				inputVars = new ArrayList<Var>();
-				inputVars.add(outputVar);
+			// force the "input vars" for this step to be the output var itself
+			// this causes the following xfer step to trace back to the next processor _within_ proc 
+			inputVars = new ArrayList<Var>();
+			inputVars.add(outputVar);
 
-			} else if (proc.equals(OUTPUT_CONTAINER_PROCESSOR)) {  // same action as prev case, but may change in the future
+		} else if (proc.equals(OUTPUT_CONTAINER_PROCESSOR)) {  // same action as prev case, but may change in the future
 
-				inputVars = new ArrayList<Var>();
-				inputVars.add(outputVar);
+			inputVars = new ArrayList<Var>();
+			inputVars.add(outputVar);
 
-			} else {
+		} else {
 
-				varsQueryConstraints.put("W.instanceID", wfID);
-				varsQueryConstraints.put("pnameRef", proc);  
-				varsQueryConstraints.put("inputOrOutput", "1");  
+			varsQueryConstraints.put("W.instanceID", wfID);
+			varsQueryConstraints.put("pnameRef", proc);  
+			varsQueryConstraints.put("inputOrOutput", "1");  
 
-				inputVars = getPq().getVars(varsQueryConstraints);
+			inputVars = getPq().getVars(varsQueryConstraints);
+		}
+
+		///////////
+		/// path projections
+		///////////
+		// maps each var to its projected path
+		Map<Var,String> var2Path = new HashMap<Var,String>();
+		Map<Var,Integer> var2delta = new HashMap<Var,Integer>();
+
+		if (path == null) {  // nothing to split
+			for (Var inputVar: inputVars)  var2Path.put(inputVar, null);
+		} else {
+
+			int minPathLength = 0;  // if input path is shorter than this we give up granularity altogether
+			for (Var inputVar: inputVars) {
+				int delta = inputVar.getActualNestingLevel() - inputVar.getTypeNestingLevel();
+				var2delta.put(inputVar, new Integer(delta));
+				minPathLength += delta;
+//				System.out.println("xform() from ["+proc+"] upwards to ["+inputVar.getPName()+":"+inputVar.getVName()+"]");
 			}
 
-			///////////
-			/// path projections
-			///////////
-			// maps each var to its projected path
-			Map<Var,String> var2Path = new HashMap<Var,String>();
-			Map<Var,Integer> var2delta = new HashMap<Var,Integer>();
+			String iterationVector[] = path.split(",");
 
-			if (path == null) {  // nothing to split
-				for (Var inputVar: inputVars)  var2Path.put(inputVar, null);
-			} else {
-
-				int minPathLength = 0;  // if input path is shorter than this we give up granularity altogether
+			if (iterationVector.length < minPathLength) {  // no path is propagated
 				for (Var inputVar: inputVars) {
-					int delta = inputVar.getActualNestingLevel() - inputVar.getTypeNestingLevel();
-					var2delta.put(inputVar, new Integer(delta));
-					minPathLength += delta;
-//					System.out.println("xform() from ["+proc+"] upwards to ["+inputVar.getPName()+":"+inputVar.getVName()+"]");
+					var2Path.put(inputVar, null);
 				}
+			} else { // compute projected paths
 
-				String iterationVector[] = path.split(",");
+				String[] projectedPath; 
 
-				if (iterationVector.length < minPathLength) {  // no path is propagated
-					for (Var inputVar: inputVars) {
+				int start = 0;
+				for (Var inputVar: inputVars) {
+
+					// 24/7/08 get DNL (declared nesting level) and ANL (actual nesting level) from VAR
+					// TODO account for empty paths
+					int projectedPathLength = var2delta.get(inputVar);  // this is delta			
+
+					if (projectedPathLength > 0) {  // this var is involved in iteration
+
+						projectedPath = new String[projectedPathLength];
+						for (int i=0; i<projectedPathLength; i++) {					
+							projectedPath[i] = iterationVector[start+i];
+						}		
+						start += projectedPathLength;
+
+						StringBuffer iterationFragment = new StringBuffer();
+						for (String s:projectedPath) { iterationFragment.append(s+","); }
+						iterationFragment.deleteCharAt(iterationFragment.length()-1);
+
+						var2Path.put(inputVar, iterationFragment.toString());
+					} else {  // associate empty path to this var
 						var2Path.put(inputVar, null);
 					}
-				} else { // compute projected paths
-
-					String[] projectedPath; 
-
-					int start = 0;
-					for (Var inputVar: inputVars) {
-
-						// 24/7/08 get DNL (declared nesting level) and ANL (actual nesting level) from VAR
-						// TODO account for empty paths
-						int projectedPathLength = var2delta.get(inputVar);  // this is delta			
-
-						if (projectedPathLength > 0) {  // this var is involved in iteration
-
-							projectedPath = new String[projectedPathLength];
-							for (int i=0; i<projectedPathLength; i++) {					
-								projectedPath[i] = iterationVector[start+i];
-							}		
-							start += projectedPathLength;
-
-							StringBuffer iterationFragment = new StringBuffer();
-							for (String s:projectedPath) { iterationFragment.append(s+","); }
-							iterationFragment.deleteCharAt(iterationFragment.length()-1);
-
-							var2Path.put(inputVar, iterationFragment.toString());
-						} else {  // associate empty path to this var
-							var2Path.put(inputVar, null);
-						}
-					}
 				}
 			}
+		}
 
-			// accumulate this proc to current path 
-			currentPath.add(proc);
+		// accumulate this proc to current path 
+		currentPath.add(proc);
 
-			// if this is a selected processor, add a copy of the current path to the list of paths for the processor
+		// if this is a selected processor, add a copy of the current path to the list of paths for the processor
 
-			// CHECK selectedProcessors are ProvenanceProcessor, proc is a processor /name/. 
-			// How can this have been wrong all along???
-			
-			// is <wfNameRef, proc>  in selectedProcessors?
-			boolean isSelected = false;
-			for (ProvenanceProcessor pp: selectedProcessors)  {
-				if (pp.getWfInstanceRef().equals(wfNameRef) && pp.getPname().equals(proc)) {
-					List<List<String>> paths = validPaths.get(pp);
+		// is <wfNameRef, proc>  in selectedProcessors?
+		boolean isSelected = false;
+		for (ProvenanceProcessor pp: selectedProcessors)  {
+			if (pp.getWfInstanceRef().equals(wfNameRef) && pp.getPname().equals(proc)) {
+				List<List<String>> paths = validPaths.get(pp);
 
-					// copy the path since the original will change
-					// also remove spurious dataflow processors at this point
-					List<String> pathCopy = new ArrayList<String>();
-					for (String s:currentPath) {
-						if (!getPq().isDataflow(s)) pathCopy.add(s);
-					}			
-					paths.add(pathCopy);
-					isSelected = true;
-					break;
-				}
+				// copy the path since the original will change
+				// also remove spurious dataflow processors at this point
+				List<String> pathCopy = new ArrayList<String>();
+				for (String s:currentPath) {
+					if (!getPq().isDataflow(s)) pathCopy.add(s);
+				}			
+				paths.add(pathCopy);
+				isSelected = true;
+				break;
 			}
+		}
 
-			////
-			///////////
-			/// generate SQL if necessary -- for all input vars, based on the current path
-			/// the projected paths are required to determine the level in the collection at which 
-			/// we look at the value assignment
-			///////////
+		///////////
+		/// generate SQL if necessary -- for all input vars, based on the current path
+		/// the projected paths are required to determine the level in the collection at which 
+		/// we look at the value assignment
+		///////////
 
-			Map<String, ProvenanceArtifact> var2Artifact = new HashMap<String, ProvenanceArtifact>();
-			Map<String, ProvenanceRole> var2ArtifactRole = new HashMap<String, ProvenanceRole>();
+		Map<String, ProvenanceArtifact> var2Artifact = new HashMap<String, ProvenanceArtifact>();
+		Map<String, ProvenanceRole> var2ArtifactRole = new HashMap<String, ProvenanceRole>();
 
-			// if this transformation is important to the user, produce an output and also an OPM graph fragment
-			if (selectedProcessors.isEmpty() || isSelected) {
+		// if this transformation is important to the user, produce an output and also an OPM graph fragment
+		if (selectedProcessors.isEmpty() || isSelected) {
 
-				List<LineageSQLQuery> newLqList = getPq().lineageQueryGen(wfID, proc, var2Path, outputVar, path, isReturnOutputs() || var2Path.isEmpty());
-				lqList.addAll(newLqList);
+			List<LineageSQLQuery> newLqList = getPq().lineageQueryGen(wfID, proc, var2Path, outputVar, path, isReturnOutputs() || var2Path.isEmpty());
+			lqList.addAll(newLqList);
 
-				// BEGIN OPM update section
-				//
-				// create OPM artifact and role for the output var of this xform
-				//
-				boolean doOPM = (aOPMManager != null);  // any problem below will set this to false
+			// BEGIN OPM update section
+			//
+			// create OPM artifact and role for the output var of this xform
+			//
+			boolean doOPM = (aOPMManager != null && aOPMManager.isActive());  // any problem below will set this to false
 
-				String role = null;
-				VarBinding vb = null;
-				String URIFriendlyIterationVector =null;
+			String role = null;
+			VarBinding vb = null;
+			String URIFriendlyIterationVector =null;
 
-				if (doOPM) {
-					// fetch value for this variable and assert it as an Artifact in the OPM graph
-					Map<String, String> vbConstraints = new HashMap<String, String>();
-					vbConstraints.put("VB.PNameRef", outputVar.getPName());
-					vbConstraints.put("VB.varNameRef", outputVar.getVName());
-					vbConstraints.put("VB.wfInstanceRef", wfID);
+			if (doOPM) {
+				// fetch value for this variable and assert it as an Artifact in the OPM graph
+				Map<String, String> vbConstraints = new HashMap<String, String>();
+				vbConstraints.put("VB.PNameRef", outputVar.getPName());
+				vbConstraints.put("VB.varNameRef", outputVar.getVName());
+				vbConstraints.put("VB.wfInstanceRef", wfID);
 
-					if (path != null) { 
+				if (path != null) { 
 
-						// account for x,y,.. format as well as [x,y,...]  depending on where the request is coming from
-						// TODO this is just irritating must be removed
-						if (path.startsWith("[")) 
-							vbConstraints.put("VB.iteration", path);
-						else
-							vbConstraints.put("VB.iteration", "["+path+"]");
+					// account for x,y,.. format as well as [x,y,...]  depending on where the request is coming from
+					// TODO this is just irritating must be removed
+					if (path.startsWith("[")) 
+						vbConstraints.put("VB.iteration", path);
+					else
+						vbConstraints.put("VB.iteration", "["+path+"]");
+				}
+
+				List<VarBinding> vbList = getPq().getVarBindings(vbConstraints); // DB
+
+				// use only the first result (expect only one) -- in this method we assume path is not null
+
+				// map the resulting varBinding to an Artifact
+				if (vbList == null || vbList.size()==0) {
+					logger.debug("no entry corresponding to conditions: proc="+
+							outputVar.getPName()+" var = "+outputVar.getVName()+" iteration = "+path);
+					doOPM = false;
+				}  else {
+					vb = vbList.get(0);
+
+					URIFriendlyIterationVector = vb.getIteration().
+					replace(',', '-').replace('[', ' ').replace(']', ' ').trim();
+
+					if (URIFriendlyIterationVector.length()>0) {
+						role = vb.getPNameRef()+"/"+vb.getVarNameRef()+"?it="+URIFriendlyIterationVector;
+					} else
+						role = vb.getPNameRef()+"/"+vb.getVarNameRef();
+
+					if (aOPMManager!=null && !pq.isDataflow(proc)) {
+						if (isRecordArtifactValues())
+							aOPMManager.addArtifact(vb.getValue(), vb.getResolvedValue());
+						else 
+							aOPMManager.addArtifact(vb.getValue());
+
+						aOPMManager.createRole(role);
 					}
 
-					List<VarBinding> vbList = getPq().getVarBindings(vbConstraints); // DB
+					// assert proc as Process -- include iteration vector to separate different activations of the same process					
+					aOPMManager.addProcess(proc, vb.getIteration(), URIFriendlyIterationVector);
 
-					// use only the first result (expect only one) -- in this method we assume path is not null
+					//
+					// create OPM generatedBy property between output value and this process node
+					// avoid the pathological case where a dataflow generates its own inputs
+					//
+					aOPMManager.assertGeneratedBy(
+							aOPMManager.getCurrentArtifact(), 
+							aOPMManager.getCurrentProcess(), 
+							aOPMManager.getCurrentRole(), 
+							aOPMManager.getCurrentAccount(),
+							true);   // true -> prevent duplicates CHECK
+				}
+			}
+			// 
+			// create OPM process for this xform
+			//
+			for (LineageSQLQuery lq: newLqList) {
+				// if OPM is on, execute the query so we get the value we need for the Artifact node
+				Dependencies inputs = getPq().runLineageQuery(lq, isIncludeDataValue());
 
-					// map the resulting varBinding to an Artifact
-					if (vbList == null || vbList.size()==0) {
-						logger.debug("no entry corresponding to conditions: proc="+
-								outputVar.getPName()+" var = "+outputVar.getVName()+" iteration = "+path);
-						doOPM = false;
-					}  else {
-						vb = vbList.get(0);
+				if (doOPM && inputs.getRecords().size()>0 && !pq.isDataflow(proc)) {
 
-						URIFriendlyIterationVector = vb.getIteration().
+					//	update OPM graph with inputs and used properties
+					for (LineageQueryResultRecord resultRecord: inputs.getRecords()) {
+
+						// process inputs only
+						if (!resultRecord.isInput()) continue;
+
+						URIFriendlyIterationVector = resultRecord.getIteration().
 						replace(',', '-').replace('[', ' ').replace(']', ' ').trim();
 
+						boolean found = false;  // used to avoid duplicate process resources
+
+						// map each input var in the resultRecord to an Artifact
+						// create new Resource for the resultRecord
+						//    use the value as URI for the Artifact, and resolvedValue as the actual value
+
+						//
+						// create OPM artifact and role for the input var obtained by path projection
+						//
+						if (isRecordArtifactValues())							
+							aOPMManager.addArtifact(resultRecord.getValue(), resultRecord.getResolvedValue());
+						else 
+							aOPMManager.addArtifact(resultRecord.getValue());
+						var2Artifact.put(resultRecord.getVname(), aOPMManager.getCurrentArtifact());
+
 						if (URIFriendlyIterationVector.length()>0) {
-							role = vb.getPNameRef()+"/"+vb.getVarNameRef()+"?it="+URIFriendlyIterationVector;
+							role = resultRecord.getPname()+"/"+resultRecord.getVname()+"?it="+URIFriendlyIterationVector;
 						} else
-							role = vb.getPNameRef()+"/"+vb.getVarNameRef();
+							role = resultRecord.getPname()+"/"+resultRecord.getVname();
 
-						if (aOPMManager!=null && !pq.isDataflow(proc)) {
-							if (isRecordArtifactValues())
-								aOPMManager.addArtifact(vb.getValue(), vb.getResolvedValue());
-							else 
-								aOPMManager.addArtifact(vb.getValue());
+						aOPMManager.createRole(role);	// this also sets currentRole to role				
+						var2ArtifactRole.put(resultRecord.getVname(), aOPMManager.getCurrentRole());
 
-							aOPMManager.createRole(role);
-						}
-
-						// assert proc as Process -- include iteration vector to separate different activations of the same process					
-						aOPMManager.addProcess(proc, vb.getIteration(), URIFriendlyIterationVector);
 
 						//
-						// create OPM generatedBy property between output value and this process node
-						// avoid the pathological case where a dataflow generates its own inputs
+						// create OPM used property between process and the input var obtained by path projection
 						//
-						aOPMManager.assertGeneratedBy(
+						// avoid output variables, it would assert that P used one of its outputs!
+
+						aOPMManager.assertUsed(
 								aOPMManager.getCurrentArtifact(), 
 								aOPMManager.getCurrentProcess(), 
 								aOPMManager.getCurrentRole(), 
 								aOPMManager.getCurrentAccount(),
-								true);   // true -> prevent duplicates CHECK
+								true);   // true -> prevent duplicates CHECK	
 					}
 				}
-				// 
-				// create OPM process for this xform
-				//
-				for (LineageSQLQuery lq: newLqList) {
-					// if OPM is on, execute the query so we get the value we need for the Artifact node
-					Dependencies inputs = getPq().runLineageQuery(lq, isIncludeDataValue());
-
-					if (doOPM && aOPMManager!=null && inputs.getRecords().size()>0 && !pq.isDataflow(proc)) {
-
-						//	update OPM graph with inputs and used properties
-						for (LineageQueryResultRecord resultRecord: inputs.getRecords()) {
-
-							// process inputs only
-							if (!resultRecord.isInput()) continue;
-
-							URIFriendlyIterationVector = resultRecord.getIteration().
-							replace(',', '-').replace('[', ' ').replace(']', ' ').trim();
-
-							boolean found = false;  // used to avoid duplicate process resources
-
-							// map each input var in the resultRecord to an Artifact
-							// create new Resource for the resultRecord
-							//    use the value as URI for the Artifact, and resolvedValue as the actual value
-
-							//
-							// create OPM artifact and role for the input var obtained by path projection
-							//
-							if (isRecordArtifactValues())							
-								aOPMManager.addArtifact(resultRecord.getValue(), resultRecord.getResolvedValue());
-							else 
-								aOPMManager.addArtifact(resultRecord.getValue());
-							var2Artifact.put(resultRecord.getVname(), aOPMManager.getCurrentArtifact());
-
-							if (URIFriendlyIterationVector.length()>0) {
-								role = resultRecord.getPname()+"/"+resultRecord.getVname()+"?it="+URIFriendlyIterationVector;
-							} else
-								role = resultRecord.getPname()+"/"+resultRecord.getVname();
-
-							aOPMManager.createRole(role);	// this also sets currentRole to role				
-							var2ArtifactRole.put(resultRecord.getVname(), aOPMManager.getCurrentRole());
-
-
-							//
-							// create OPM used property between process and the input var obtained by path projection
-							//
-							// avoid output variables, it would assert that P used one of its outputs!
-
-							aOPMManager.assertUsed(
-									aOPMManager.getCurrentArtifact(), 
-									aOPMManager.getCurrentProcess(), 
-									aOPMManager.getCurrentRole(), 
-									aOPMManager.getCurrentAccount(),
-									true);   // true -> prevent duplicates CHECK	
-						}
-					}
-				}
-//				END OPM update section
 			}
+//			END OPM update section
+		}
 
-			// recursion -- xfer path is next up
-			for (Var inputVar: inputVars) {
-				xferStep(wfID, wfNameRef, inputVar.getVName(), inputVar.getPName(), var2Path.get(inputVar), selectedProcessors, lqList);	
-			}
-			currentPath.remove(currentPath.size()-1);  // CHECK	
-		}  // end xformStep
+		// recursion -- xfer path is next up
+		for (Var inputVar: inputVars) {
+			xferStep(wfID, wfNameRef, inputVar.getVName(), inputVar.getPName(), var2Path.get(inputVar), selectedProcessors, lqList);	
+		}
+		currentPath.remove(currentPath.size()-1);  // CHECK	
+	}  // end xformStep
 
 
 
-		private void xferStep(
-				String wfInstanceID,
-				String wfNameRef, 
-				String var, 
-				String proc,
-				String path, 
-				List<ProvenanceProcessor> selectedProcessors,
-				List<LineageSQLQuery> lqList) throws SQLException {
+	private void xferStep(
+			String wfInstanceID,
+			String wfNameRef, 
+			String var, 
+			String proc,
+			String path, 
+			List<ProvenanceProcessor> selectedProcessors,
+			List<LineageSQLQuery> lqList) throws SQLException {
 
-			String sourceProcName = null;
-			String sourceVarName  = null;
+		String sourceProcName = null;
+		String sourceVarName  = null;
 
-			// retrieve all Arcs ending with (var,proc) -- ideally there is exactly one
-			// (because multiple incoming arcs are disallowed)
-			Map<String, String>  arcsQueryConstraints = new HashMap<String, String>();
+		// retrieve all Arcs ending with (var,proc) -- ideally there is exactly one
+		// (because multiple incoming arcs are disallowed)
+		Map<String, String>  arcsQueryConstraints = new HashMap<String, String>();
 
-			arcsQueryConstraints.put("W.instanceID", wfInstanceID);
-			arcsQueryConstraints.put("sinkVarNameRef", var);  
-			arcsQueryConstraints.put("sinkPNameRef", proc);  
+		arcsQueryConstraints.put("W.instanceID", wfInstanceID);
+		arcsQueryConstraints.put("sinkVarNameRef", var);  
+		arcsQueryConstraints.put("sinkPNameRef", proc);  
 
-			List<Arc> arcs = getPq().getArcs(arcsQueryConstraints);
+		List<Arc> arcs = getPq().getArcs(arcsQueryConstraints);
 
-			if (arcs.size() == 0) {
-//				System.out.println("no arcs going up from ["+proc+","+var+"] ... returning");
-				return; // CHECK
-			}
+		if (arcs.size() == 0) {
+//			System.out.println("no arcs going up from ["+proc+","+var+"] ... returning");
+			return; // CHECK
+		}
 
-			Arc a = arcs.get(0); 
+		Arc a = arcs.get(0); 
 
-			// get source node
-			sourceProcName = a.getSourcePnameRef();
-			sourceVarName  = a.getSourceVarNameRef();
+		// get source node
+		sourceProcName = a.getSourcePnameRef();
+		sourceVarName  = a.getSourceVarNameRef();
 
-			//System.out.println("xfer() from ["+proc+","+var+"] to ["+sourceProcName+","+sourceVarName+"]");
+		//System.out.println("xfer() from ["+proc+","+var+"] to ["+sourceProcName+","+sourceVarName+"]");
 
-			// CHECK transfer same path with only exception: when anl(sink) > anl(source)
-			// in this case set path to null
+		// CHECK transfer same path with only exception: when anl(sink) > anl(source)
+		// in this case set path to null
 
-			// retrieve full record for var:
-			// retrieve input vars for current processor 
-			Map<String, String>  varsQueryConstraints = new HashMap<String, String>();
+		// retrieve full record for var:
+		// retrieve input vars for current processor 
+		Map<String, String>  varsQueryConstraints = new HashMap<String, String>();
 
-			varsQueryConstraints.put("W.instanceID", wfInstanceID);
-			varsQueryConstraints.put("pnameRef", sourceProcName);  
-			varsQueryConstraints.put("varName", sourceVarName);  
-			List<Var>  varList  = getPq().getVars(varsQueryConstraints);
+		varsQueryConstraints.put("W.instanceID", wfInstanceID);
+		varsQueryConstraints.put("pnameRef", sourceProcName);  
+		varsQueryConstraints.put("varName", sourceVarName);  
+		List<Var>  varList  = getPq().getVars(varsQueryConstraints);
 
-			Var outputVar = varList.get(0);
+		Var outputVar = varList.get(0);
 
-			// recurse on xform
-			xformStep(wfInstanceID, wfNameRef, outputVar, sourceProcName, path, selectedProcessors, lqList);
+		// recurse on xform
+		xformStep(wfInstanceID, wfNameRef, outputVar, sourceProcName, path, selectedProcessors, lqList);
 
-		} // end xferStep2
+	} // end xferStep2
 
 
-		/**
-		 * this class represents the annotation (single or sequence, to be determined) 
-		 * that are produced upon visiting the graph structure and that drive the generation of 
-		 * a pinpoint lineage query<br/>
-		 * this is still a placeholder
-		 */
-		class LineageAnnotation {
+	/**
+	 * this class represents the annotation (single or sequence, to be determined) 
+	 * that are produced upon visiting the graph structure and that drive the generation of 
+	 * a pinpoint lineage query<br/>
+	 * this is still a placeholder
+	 */
+	class LineageAnnotation {
 
-			List<String> path = new ArrayList<String>();
+		List<String> path = new ArrayList<String>();
 
-			boolean isXform = true;
+		boolean isXform = true;
 
-			String iteration = "";  // this is the iteration projected on a single variable. Used for propagation upwards default is no iteration --
-			String iterationVector = ""; // iteration vector accounts for cross-products. Used to be matched exactly in queries. 
-			int iic = 0;  // index in collection -- default is 0 
-			int collectionNesting = 0;  // n indicates granularity is n levels from leaf. 
-			// This quantifies loss of lineage precision when working with collections
-			String collectionRef = null;
-			String proc;
-			String var;
-			String varType = null;   // dtring, XML,... see Taverna type system
+		String iteration = "";  // this is the iteration projected on a single variable. Used for propagation upwards default is no iteration --
+		String iterationVector = ""; // iteration vector accounts for cross-products. Used to be matched exactly in queries. 
+		int iic = 0;  // index in collection -- default is 0 
+		int collectionNesting = 0;  // n indicates granularity is n levels from leaf. 
+		// This quantifies loss of lineage precision when working with collections
+		String collectionRef = null;
+		String proc;
+		String var;
+		String varType = null;   // dtring, XML,... see Taverna type system
 
-			int DNL = 0; // declared nesting level -- copied from VAR
-			int ANL  = 0;  // actual nesting level -- copied from Var
+		int DNL = 0; // declared nesting level -- copied from VAR
+		int ANL  = 0;  // actual nesting level -- copied from Var
 
-			String wfInstance;  // TODO generalize to list / time interval?
+		String wfInstance;  // TODO generalize to list / time interval?
 
-			public String toString() {
+		public String toString() {
 
-				StringBuffer sb = new StringBuffer();
+			StringBuffer sb = new StringBuffer();
 
-				if (isXform)  sb.append(" xform: ");
-				else sb.append(" xfer: ");
+			if (isXform)  sb.append(" xform: ");
+			else sb.append(" xfer: ");
 
-				sb.append("<PROC/VAR/VARTYPE, IT, IIC, ITVECTOR, COLLNESTING> = "+
-						proc + "/" + var + "/" + varType +
-						"," + "["+iteration +"]"+
-						","+ iic + 
-						", ["+ iterationVector + "]"+
-						","+ collectionNesting);
-
-				return sb.toString();
-			}
-
-
-			public void addStep(String step) {
-				path.add(step);
-			}
-
-			public void removeLastStep() {
-				path.remove(path.size()-1);
-			}
-
-
-			/**
-			 * @return the path
-			 */
-			public List<String> getPath() {
-				return path;
-			}
-
-
-			/**
-			 * @param path the path to set
-			 */
-			public void setPath(List<String> path) {
-				this.path = path;
-			}
-
-
-			/**
-			 * @return the iteration
-			 */
-			public String getIteration() {
-				return iteration;
-			}
-
-
-			/**
-			 * @param iteration the iteration to set
-			 */
-			public void setIteration(String iteration) {
-				this.iteration = iteration;
-			}
-
-
-			/**
-			 * @return the iic
-			 */
-			public int getIic() {
-				return iic;
-			}
-
-
-			/**
-			 * @param iic the iic to set
-			 */
-			public void setIic(int iic) {
-				this.iic = iic;
-			}
-
-
-			/**
-			 * @return the collectionRef
-			 */
-			public String getCollectionRef() {
-				return collectionRef;
-			}
-
-
-			/**
-			 * @param collectionRef the collectionRef to set
-			 */
-			public void setCollectionRef(String collectionRef) {
-				this.collectionRef = collectionRef;
-			}
-
-
-			/**
-			 * @return the proc
-			 */
-			public String getProc() {
-				return proc;
-			}
-
-
-			/**
-			 * @param proc the proc to set
-			 */
-			public void setProc(String proc) {
-				this.proc = proc;
-			}
-
-
-			/**
-			 * @return the var
-			 */
-			public String getVar() {
-				return var;
-			}
-
-
-			/**
-			 * @param var the var to set
-			 */
-			public void setVar(String var) {
-				this.var = var;
-			}
-
-
-			/**
-			 * @return the varType
-			 */
-			public String getVarType() {
-				return varType;
-			}
-
-
-			/**
-			 * @param varType the varType to set
-			 */
-			public void setVarType(String varType) {
-				this.varType = varType;
-			}
-
-
-			/**
-			 * @return the wfInstance
-			 */
-			public String getWfInstance() {
-				return wfInstance;
-			}
-
-
-			/**
-			 * @param wfInstance the wfInstance to set
-			 */
-			public void setWfInstance(String wfInstance) {
-				this.wfInstance = wfInstance;
-			}
-
-
-			/**
-			 * @return the isXform
-			 */
-			public boolean isXform() {
-				return isXform;
-			}
-
-
-			/**
-			 * @param isXform the isXform to set
-			 */
-			public void setXform(boolean isXform) {
-				this.isXform = isXform;
-			}
-
-
-
-			/**
-			 * @return the collectionNesting
-			 */
-			public int getCollectionNesting() {
-				return collectionNesting;
-			}
-
-
-			/**
-			 * @param collectionNesting the collectionNesting to set
-			 */
-			public void setCollectionNesting(int collectionNesting) {
-				this.collectionNesting = collectionNesting;
-			}
-
-
-			/**
-			 * @return the iterationVector
-			 */
-			public String getIterationVector() {
-				return iterationVector;
-			}
-
-
-			/**
-			 * @param iterationVector the iterationVector to set
-			 */
-			public void setIterationVector(String iterationVector) {
-				this.iterationVector = iterationVector;
-			}
-
-
-			/**
-			 * @return the dNL
-			 */
-			public int getDNL() {
-				return DNL;
-			}
-
-
-			/**
-			 * @param dnl the dNL to set
-			 */
-			public void setDNL(int dnl) {
-				DNL = dnl;
-			}
-
-
-			/**
-			 * @return the aNL
-			 */
-			public int getANL() {
-				return ANL;
-			}
-
-
-			/**
-			 * @param anl the aNL to set
-			 */
-			public void setANL(int anl) {
-				ANL = anl;
-			}
+			sb.append("<PROC/VAR/VARTYPE, IT, IIC, ITVECTOR, COLLNESTING> = "+
+					proc + "/" + var + "/" + varType +
+					"," + "["+iteration +"]"+
+					","+ iic + 
+					", ["+ iterationVector + "]"+
+					","+ collectionNesting);
+
+			return sb.toString();
 		}
 
 
+		public void addStep(String step) {
+			path.add(step);
+		}
 
-
-
-
-
-
-
-
-
-		/**
-		 * @return the validPaths
-		 */
-		public Map<ProvenanceProcessor, List<List<String>>> getValidPaths() {
-			return validPaths;
+		public void removeLastStep() {
+			path.remove(path.size()-1);
 		}
 
 
 		/**
-		 * @param validPaths the validPaths to set
+		 * @return the path
 		 */
-		public void setValidPaths(Map<ProvenanceProcessor, List<List<String>>> validPaths) {
-			this.validPaths = validPaths;
+		public List<String> getPath() {
+			return path;
 		}
 
-
-		public void setPq(ProvenanceQuery pq) {
-			this.pq = pq;
-		}
-
-
-		public ProvenanceQuery getPq() {
-			return pq;
-		}
 
 		/**
-		 * @return the ready
+		 * @param path the path to set
 		 */
-		public boolean isReady() {
-			return ready;
+		public void setPath(List<String> path) {
+			this.path = path;
 		}
+
 
 		/**
-		 * @param ready the ready to set
+		 * @return the iteration
 		 */
-		public void setReady(boolean ready) {
-			this.ready = ready;
+		public String getIteration() {
+			return iteration;
 		}
+
 
 		/**
-		 * @return the returnOutputs
+		 * @param iteration the iteration to set
 		 */
-		public boolean isReturnOutputs() {
-			return returnOutputs;
+		public void setIteration(String iteration) {
+			this.iteration = iteration;
 		}
+
 
 		/**
-		 * @param returnOutputs the returnOutputs to set
+		 * @return the iic
 		 */
-		public void setReturnOutputs(boolean returnOutputs) {
-			this.returnOutputs = returnOutputs;
+		public int getIic() {
+			return iic;
 		}
+
 
 		/**
-		 * @return the recordArtifactValues
+		 * @param iic the iic to set
 		 */
-		public boolean isRecordArtifactValues() {
-			return recordArtifactValues;
+		public void setIic(int iic) {
+			this.iic = iic;
 		}
+
 
 		/**
-		 * @param recordArtifactValues the recordArtifactValues to set
+		 * @return the collectionRef
 		 */
-		public void setRecordArtifactValues(boolean recordArtifactValues) {
-			this.recordArtifactValues = recordArtifactValues;
-
+		public String getCollectionRef() {
+			return collectionRef;
 		}
+
 
 		/**
-		 * @return the includeDataValue
+		 * @param collectionRef the collectionRef to set
 		 */
-		public boolean isIncludeDataValue() {
-			return includeDataValue;
+		public void setCollectionRef(String collectionRef) {
+			this.collectionRef = collectionRef;
 		}
+
 
 		/**
-		 * @param includeDataValue the includeDataValue to set
+		 * @return the proc
 		 */
-		public void setIncludeDataValue(boolean includeDataValue) {
-			this.includeDataValue = includeDataValue;
+		public String getProc() {
+			return proc;
 		}
+
 
 		/**
-		 * @return the generateOPMGraph
+		 * @param proc the proc to set
 		 */
-		public boolean isGenerateOPMGraph() {
-			return generateOPMGraph;
+		public void setProc(String proc) {
+			this.proc = proc;
 		}
+
 
 		/**
-		 * @param generateOPMGraph the generateOPMGraph to set
+		 * @return the var
 		 */
-		public void setGenerateOPMGraph(boolean generateOPMGraph) {
-			this.generateOPMGraph = generateOPMGraph;
+		public String getVar() {
+			return var;
 		}
 
+
+		/**
+		 * @param var the var to set
+		 */
+		public void setVar(String var) {
+			this.var = var;
+		}
+
+
+		/**
+		 * @return the varType
+		 */
+		public String getVarType() {
+			return varType;
+		}
+
+
+		/**
+		 * @param varType the varType to set
+		 */
+		public void setVarType(String varType) {
+			this.varType = varType;
+		}
+
+
+		/**
+		 * @return the wfInstance
+		 */
+		public String getWfInstance() {
+			return wfInstance;
+		}
+
+
+		/**
+		 * @param wfInstance the wfInstance to set
+		 */
+		public void setWfInstance(String wfInstance) {
+			this.wfInstance = wfInstance;
+		}
+
+
+		/**
+		 * @return the isXform
+		 */
+		public boolean isXform() {
+			return isXform;
+		}
+
+
+		/**
+		 * @param isXform the isXform to set
+		 */
+		public void setXform(boolean isXform) {
+			this.isXform = isXform;
+		}
+
+
+
+		/**
+		 * @return the collectionNesting
+		 */
+		public int getCollectionNesting() {
+			return collectionNesting;
+		}
+
+
+		/**
+		 * @param collectionNesting the collectionNesting to set
+		 */
+		public void setCollectionNesting(int collectionNesting) {
+			this.collectionNesting = collectionNesting;
+		}
+
+
+		/**
+		 * @return the iterationVector
+		 */
+		public String getIterationVector() {
+			return iterationVector;
+		}
+
+
+		/**
+		 * @param iterationVector the iterationVector to set
+		 */
+		public void setIterationVector(String iterationVector) {
+			this.iterationVector = iterationVector;
+		}
+
+
+		/**
+		 * @return the dNL
+		 */
+		public int getDNL() {
+			return DNL;
+		}
+
+
+		/**
+		 * @param dnl the dNL to set
+		 */
+		public void setDNL(int dnl) {
+			DNL = dnl;
+		}
+
+
+		/**
+		 * @return the aNL
+		 */
+		public int getANL() {
+			return ANL;
+		}
+
+
+		/**
+		 * @param anl the aNL to set
+		 */
+		public void setANL(int anl) {
+			ANL = anl;
+		}
+	}
+
+
+	/**
+	 * @return the validPaths
+	 */
+	public Map<ProvenanceProcessor, List<List<String>>> getValidPaths() {
+		return validPaths;
+	}
+
+
+	/**
+	 * @param validPaths the validPaths to set
+	 */
+	public void setValidPaths(Map<ProvenanceProcessor, List<List<String>>> validPaths) {
+		this.validPaths = validPaths;
+	}
+
+
+	public void setPq(ProvenanceQuery pq) {
+		this.pq = pq;
+	}
+
+
+	public ProvenanceQuery getPq() {
+		return pq;
+	}
+
+	/**
+	 * @return the ready
+	 */
+	public boolean isReady() {
+		return ready;
+	}
+
+	/**
+	 * @param ready the ready to set
+	 */
+	public void setReady(boolean ready) {
+		this.ready = ready;
+	}
+
+	/**
+	 * @return the returnOutputs
+	 */
+	public boolean isReturnOutputs() {
+		return returnOutputs;
+	}
+
+	/**
+	 * @param returnOutputs the returnOutputs to set
+	 */
+	public void setReturnOutputs(boolean returnOutputs) {
+		this.returnOutputs = returnOutputs;
+	}
+
+	/**
+	 * @return the recordArtifactValues
+	 */
+	public boolean isRecordArtifactValues() {
+		return recordArtifactValues;
+	}
+
+	/**
+	 * @param recordArtifactValues the recordArtifactValues to set
+	 */
+	public void setRecordArtifactValues(boolean recordArtifactValues) {
+		this.recordArtifactValues = recordArtifactValues;
 
 	}
+
+	/**
+	 * @return the includeDataValue
+	 */
+	public boolean isIncludeDataValue() {
+		return includeDataValue;
+	}
+
+	/**
+	 * @param includeDataValue the includeDataValue to set
+	 */
+	public void setIncludeDataValue(boolean includeDataValue) {
+		this.includeDataValue = includeDataValue;
+	}
+
+	/**
+	 * @return the generateOPMGraph
+	 */
+	public boolean isGenerateOPMGraph() {
+		return generateOPMGraph;
+	}
+
+	/**
+	 * @param generateOPMGraph the generateOPMGraph to set
+	 */
+	public void setGenerateOPMGraph(boolean generateOPMGraph) {
+		this.generateOPMGraph = generateOPMGraph;
+		if (aOPMManager != null) { aOPMManager.setActive(generateOPMGraph); }
+	}
+
+
+}

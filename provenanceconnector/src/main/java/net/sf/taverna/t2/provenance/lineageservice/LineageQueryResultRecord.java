@@ -20,6 +20,13 @@
  ******************************************************************************/
 package net.sf.taverna.t2.provenance.lineageservice;
 
+/**
+ * 
+ * @author Paolo Missier<p/>
+ * Java bean, holds a single provenance record at the finest level of granularity as it comes from the provenance DB. 
+ * The content of such records is described elsewhere (see UML documentation) 
+ *
+ */
 public class LineageQueryResultRecord {
 
 	String wfName;
@@ -37,8 +44,6 @@ public class LineageQueryResultRecord {
 	boolean isCollection;
 
 	public String toString() {
-
-
 		if (isCollection) {
 			return "COLLECTION: proc "+getPname()+
 			" var "+getVname()+" " +

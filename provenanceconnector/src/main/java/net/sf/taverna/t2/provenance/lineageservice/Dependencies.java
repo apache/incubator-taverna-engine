@@ -25,8 +25,11 @@ import java.util.List;
 import java.util.ListIterator;
 
 /**
- * @author paolo
- * bean to hold results from an SQL query to VarBinding join Var
+ * @author Paolo Missier<p/>
+ * Java bean to hold a list of dependencies, all of them associated with a pair (&lt;port name>, &lt;path>), as described in {@link net.sf.taverna.t2.provenance.api.QueryAnswer}.
+ * <br/> Each element of the list is a record of type {@link LineageQueryResultRecord} in the provenance DB at the finest possible level of granularity, i.e., 
+ * a single value possibly within a collection, bound to a processor port and associated to a specific run of a specific workflow.
+ * @see LineageQueryResultRecord   
  */
 public class Dependencies {
 
@@ -39,6 +42,21 @@ public class Dependencies {
 
 	public ListIterator<LineageQueryResultRecord> iterator() { return getRecords().listIterator(); }
 
+	/**
+	 * adds a single record to the list of dependencies
+	 * @param wfNameRef
+	 * @param pname
+	 * @param vname
+	 * @param wfInstance
+	 * @param iteration
+	 * @param collIdRef
+	 * @param parentCollIDRef
+	 * @param value
+	 * @param resolvedValue
+	 * @param type
+	 * @param isInput
+	 * @param isCollection
+	 */
 	public void addLineageQueryResultRecord(
 			String wfNameRef,
 			String pname,
@@ -68,10 +86,17 @@ public class Dependencies {
 		getRecords().add(record);
 	}
 
+	/**
+	 * populates the bean with an entire list of {@link LineageQueryResultRecord} elements
+	 * @param records
+	 */
 	public void setRecords(List<LineageQueryResultRecord> records) {
 		this.records = records;
 	}
 
+	/**
+	 * @return the entire set of records
+	 */
 	public List<LineageQueryResultRecord> getRecords() {
 		return records;
 	}
@@ -89,14 +114,16 @@ public class Dependencies {
 	}
 
 	/**
-	 * @return the printResolvedValue
+	 * @return true is the records contain the actual values, in addition to the URI references to the values
+	 * <br/>NOT YET SUPPORTED. This switch is currently ignored and no values are returned in the current version 
 	 */
 	public boolean isPrintResolvedValue() {
 		return printResolvedValue;
 	}
 
 	/**
-	 * @param printResolvedValue the printResolvedValue to set
+	 * @param toggles insertion of values in addition to references to values in the records
+	 * <br/>NOT YET SUPPORTED. This switch is currently ignored and no values are returned in the current version 
 	 */
 	public void setPrintResolvedValue(boolean printResolvedValue) {
 		this.printResolvedValue = printResolvedValue;

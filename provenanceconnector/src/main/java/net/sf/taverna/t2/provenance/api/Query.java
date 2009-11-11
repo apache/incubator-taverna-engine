@@ -10,8 +10,15 @@ import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 import net.sf.taverna.t2.provenance.lineageservice.utils.QueryVar;
 
 /**
- * @author paolo
- *
+ * @author Paolo Missier</br>
+ * 
+ * Bean encapsulating one provenance query, consisting of the following elements:
+ * <ul>
+ * <li>static scope: the (single) name of the workflow whose run(s) are queried
+ * <li>dynamic scope: a list of workflow run IDs.
+ * <li>a list of &lt;select> variables, encoded as List&lt;{@link QueryVar}>
+ * <li>a list of &lt;target> processors, encoded as List&lt;{@link ProvenanceProcessor}> 
+ * </ul>
  */
 public class Query {
 

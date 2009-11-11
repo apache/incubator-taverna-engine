@@ -4,7 +4,7 @@
 package net.sf.taverna.t2.provenance.lineageservice.utils;
 
 /**
- * @author paolo
+ * @author Paolo Missier<p/>
  *
  */	
 public class QueryVar {

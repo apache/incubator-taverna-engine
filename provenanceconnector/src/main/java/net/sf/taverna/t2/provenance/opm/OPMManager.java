@@ -51,13 +51,9 @@ public class OPMManager {
 
 	public static final String OPM_TAVERNA_NAMESPACE = "http://taverna.opm.org/";
 	private static final String OPM_RDF_GRAPH_FILE = "src/test/resources/provenance-testing/OPM/OPMGraph.rdf";
-	private static final String OPM_XML_GRAPH_FILE = "src/test/resources/provenance-testing/OPM/OPMGraph.xml";
 	private static final String  OPM_DOT_FILE = "src/test/resources/provenance-testing/OPM/OPMGraph.dot";
-	private static final String DOT_CONFIG_FILE = "src/test/resources/provenance-testing/OPM/defaultConfig.xml";
-
 	private static final String VALUE_PROP = "value";
-	private static final String OPM_PDF_FILE = null;
-
+	
 	ProvenanceContextFacade graph = null;
 	Context context = null;
 
@@ -65,6 +61,8 @@ public class OPMManager {
 	ProvenanceArtifact currentArtifact = null;
 	ProvenanceRole     currentRole = null;
 	ProvenanceProcess  currentProcess = null;
+
+	private boolean isActive = true;
 
 	public OPMManager() {
 
@@ -266,82 +264,59 @@ public class OPMManager {
 	}
 
 
-	public ProvenanceContextFacade getGraph() {
-		return graph;
-	}
-
+	public ProvenanceContextFacade getGraph() { return graph; }
 
 
 	/**
 	 * @return the account
 	 */
-	public ProvenanceAccount getAccount() {
-		return currentAccount;
-	}
+	public ProvenanceAccount getAccount() { return currentAccount; }
 
 
 	/**
 	 * @param account the account to set
 	 */
-	public void setAccount(ProvenanceAccount account) {
-		this.currentAccount = account;
-	}
+	public void setAccount(ProvenanceAccount account) { this.currentAccount = account; }
 
 	/**
 	 * @return the currentRole
 	 */
-	public ProvenanceRole getCurrentRole() {
-		return currentRole;
-	}
+	public ProvenanceRole getCurrentRole() { return currentRole; }
 
 	/**
 	 * @param currentRole the currentRole to set
 	 */
-	public void setCurrentRole(ProvenanceRole currentRole) {
-		this.currentRole = currentRole;
-	}
+	public void setCurrentRole(ProvenanceRole currentRole) { this.currentRole = currentRole; }
 
 	/**
 	 * @return the currentArtifact
 	 */
-	public ProvenanceArtifact getCurrentArtifact() {
-		return currentArtifact;
-	}
+	public ProvenanceArtifact getCurrentArtifact() { return currentArtifact; }
 
 	/**
 	 * @param currentArtifact the currentArtifact to set
 	 */
-	public void setCurrentArtifact(ProvenanceArtifact currentArtifact) {
-		this.currentArtifact = currentArtifact;
-	}
+	public void setCurrentArtifact(ProvenanceArtifact currentArtifact) { this.currentArtifact = currentArtifact; }
 
 	/**
 	 * @return the currentAccount
 	 */
-	public ProvenanceAccount getCurrentAccount() {
-		return currentAccount;
-	}
+	public ProvenanceAccount getCurrentAccount() { return currentAccount; }
 
 	/**
 	 * @param currentAccount the currentAccount to set
 	 */
-	public void setCurrentAccount(ProvenanceAccount currentAccount) {
-		this.currentAccount = currentAccount;
-	}
+	public void setCurrentAccount(ProvenanceAccount currentAccount) { this.currentAccount = currentAccount; }
 
 	/**
 	 * @return the currentProcess
 	 */
-	public ProvenanceProcess getCurrentProcess() {
-		return currentProcess;
-	}
+	public ProvenanceProcess getCurrentProcess() { return currentProcess; }
 
 	/**
 	 * @param currentProcess the currentProcess to set
 	 */
-	public void setCurrentProcess(ProvenanceProcess currentProcess) {
-		this.currentProcess = currentProcess;
-	}
+	public void setCurrentProcess(ProvenanceProcess currentProcess) { this.currentProcess = currentProcess; }
 
 	public String writeGraph() {
 
@@ -410,9 +385,10 @@ public class OPMManager {
 	/**
 	 * @param graph the graph to set
 	 */
-	public void setGraph(ProvenanceContextFacade graph) {
-		this.graph = graph;
-	}
+	public void setGraph(ProvenanceContextFacade graph) { this.graph = graph; }
 
+	public void setActive(boolean active) { isActive = active; }
+
+	public boolean isActive()  { return isActive; }
 
 }
