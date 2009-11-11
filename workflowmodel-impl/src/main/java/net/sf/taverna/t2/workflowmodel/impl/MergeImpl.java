@@ -226,4 +226,9 @@ public class MergeImpl implements Merge {
 		// Just set the inputs to the already reordered list of ports
 		inputs = (List<MergeInputPortImpl>) reorderedInputPortList;	
 	}
+	
+	@Override
+	public String toString() {
+		return "Merge " + getLocalName();
+	}
 }

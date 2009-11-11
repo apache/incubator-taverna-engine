@@ -402,4 +402,9 @@ public final class ProcessorImpl extends AbstractAnnotatedThing<Processor>
 	public void removeObserver(Observer<ProcessorFinishedEvent> observer) {
 		processorFinishedMultiCaster.removeObserver(observer);
 	}
+	
+	@Override
+	public String toString() {
+		return "Processor " + getLocalName();
+	}
 }
