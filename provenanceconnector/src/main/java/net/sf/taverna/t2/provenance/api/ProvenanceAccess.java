@@ -455,6 +455,11 @@ public class ProvenanceAccess {
 	}
 
 
+	/**
+	 * @return an instance of {@link InvocationContext} that can be used by a client to deref a Taverna data reference
+	 */
+	public InvocationContext getInvocationContext() { return getProvenanceConnector().getInvocationContext(); }
+	
 //	/ OPM management
 
 
