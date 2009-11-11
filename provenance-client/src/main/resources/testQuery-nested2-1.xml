@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+	<!-- example of a fully specified provenance query -->
+	<!--  this is for nested1-list.t2flow -->
+<pquery xmlns="http://taverna.org.uk/2009/provenance/pquery/"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://taverna.org.uk/2009/provenance/pquery/ pquery.xsd">
+	<scope workflow="nested2"/>  <!--  most recent run -->
+
+	<select>
+		<outputPort name="O" /> <!--  output of main workflow -->
+	</select>
+
+	<focus>
+		<workflow name="nested2">
+					<processor name="P1" />
+		</workflow>
+	</focus>
+
+</pquery>

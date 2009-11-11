@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+	<!-- example of a fully specified provenance query -->
+	<!--  this is for nested1-list.t2flow -->
+<pquery xmlns="http://taverna.org.uk/2009/provenance/pquery/"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://taverna.org.uk/2009/provenance/pquery/ pquery.xsd">
+	<scope workflow="nested2">
+		<runs>
+			<!--
+				this defines the global scope. if omitted, it defaults to the latest
+				run of the declared workflow
+			-->
+			<run id="c6db47ba-026a-463b-b449-375aceb3b69b" />
+			<!--  <range from="2009-10-08" />  not yet supported -->
+		</runs>
+	</scope>
+	<select>
+		<workflow name="PNested2">
+			<processor name="P6">
+				<outputPort name="Y" index="[]" />  <!--  empty index is the default and can be omitted -->
+			</processor>
+			<outputPort name="O" />
+		</workflow>
+		<outputPort name="O" />
+		<!--
+			this is the out port of the top workflow
+		-->
+		<processor name="P2" />
+		<!--
+			all output ports of this processor
+		-->
+	</select>
+
+	<focus>
+		<workflow name="PNested">
+			<processor name="P2" />
+			<!--
+				a specific processor within a workflow scope
+			-->
+		</workflow>
+		<workflow name="nested2"/>
+		<!--
+			all processors within this workflow
+		-->
+	</focus>
+
+</pquery>

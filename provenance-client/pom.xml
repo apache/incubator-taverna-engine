@@ -1,0 +1,45 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>net.sf.taverna.t2.core</groupId>
+	<artifactId>provenance-client</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.5</source>
+					<target>1.5</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<dependencies>
+		<dependency>
+			<groupId>net.sf.taverna.t2.core</groupId>
+			<artifactId>provenanceconnector</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>net.sf.taverna.t2.core</groupId>
+			<artifactId>provenance-mysql</artifactId>
+			<version>0.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.5</version>
+		</dependency>
+
+		<dependency>
+			<groupId>net.sf.taverna.t2.core</groupId>
+			<artifactId>provenance-derby</artifactId>
+			<version>0.3-SNAPSHOT</version>
+		</dependency>
+	</dependencies>
+</project>
