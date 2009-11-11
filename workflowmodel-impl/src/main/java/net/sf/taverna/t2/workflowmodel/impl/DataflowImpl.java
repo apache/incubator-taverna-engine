@@ -594,14 +594,17 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 			}
 		}
 
-		// Must all be empty
-		boolean dataflowValid = unresolvedOutputs.isEmpty() && failed.isEmpty()
+		// Check if workflow is 'incomplete' - i.e. if it contains no processors and no output ports.
+		// This is to prevent empty workflows or ones that contain input ports from being run.
+		boolean dataflowIsIncomplete = getProcessors().isEmpty() && getOutputPorts().isEmpty();
+		// For a workflow to be valid - workflow must not be 'empty' and lists of problems must all be empty 
+		boolean dataflowValid = (!dataflowIsIncomplete) && unresolvedOutputs.isEmpty() && failed.isEmpty()
 				&& unresolved.isEmpty();
 
 		// Build and return a new validation report containing the overall state
 		// along with lists of failed and unsatisfied processors and unsatisfied
 		// output ports
-		return new DataflowValidationReportImpl(dataflowValid, failed,
+		return new DataflowValidationReportImpl(dataflowValid, dataflowIsIncomplete, failed,
 				unresolved, unresolvedOutputs, invalidDataflows);
 	}
 

@@ -56,4 +56,8 @@ public class DummyValidationReport implements DataflowValidationReport {
 	public Map<TokenProcessingEntity, DataflowValidationReport> getInvalidDataflows() {
 		return null;
 	}
+
+	public boolean isWorkflowIncomplete() {
+		return false;
+	}
 }

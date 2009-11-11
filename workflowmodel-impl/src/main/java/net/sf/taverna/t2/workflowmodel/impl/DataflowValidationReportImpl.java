@@ -41,12 +41,14 @@ public class DataflowValidationReportImpl implements DataflowValidationReport {
 	private final List<DataflowOutputPort> unresolvedOutputs;
 	private final List<TokenProcessingEntity> unsatisfied;
 	private boolean valid;
+	private boolean isWorkflowIncomplete; // whether a workflow is incomplete (contains no processors and no output ports), in which case it also must be invalid
 
-	DataflowValidationReportImpl(boolean isValid,
+	DataflowValidationReportImpl(boolean isValid, boolean isWorkflowIncomplete,
 			List<TokenProcessingEntity> failedProcessors,
 			List<TokenProcessingEntity> unsatisfiedProcessors,
 			List<DataflowOutputPort> unresolvedOutputs, Map<TokenProcessingEntity, DataflowValidationReport> invalidDataflows) {
 		this.valid = isValid;
+		this.isWorkflowIncomplete = isWorkflowIncomplete;
 		this.invalidDataflows = Collections.unmodifiableMap(invalidDataflows);
 		this.failed = Collections.unmodifiableList(failedProcessors);
 		this.unsatisfied = Collections.unmodifiableList(unsatisfiedProcessors);
@@ -71,6 +73,10 @@ public class DataflowValidationReportImpl implements DataflowValidationReport {
 
 	public boolean isValid() {
 		return valid;
+	}
+
+	public boolean isWorkflowIncomplete() {
+		return isWorkflowIncomplete;
 	}
 
 }
