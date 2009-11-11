@@ -511,7 +511,7 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 
 		/**
 		 * Is the dataflow valid? The flow is valid if and only if both
-		 * unresolved and failed lists are empty a the end. This doesn't
+		 * unresolved and failed lists are empty at the end. This doesn't
 		 * guarantee that the workflow will run, in particular it doesn't
 		 * actually check for issues such as unresolved output edges.
 		 */
