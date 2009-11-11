@@ -86,7 +86,7 @@ public class ProvenanceAccess {
 	 * @param driverClassName
 	 * @param jdbcUrl
 	 */
-	protected static void initDataSource(String driverClassName,String jdbcUrl) {
+	public static void initDataSource(String driverClassName,String jdbcUrl) {
 		initDataSource(driverClassName,jdbcUrl,null,null,10,50,50);
 	}
 
@@ -102,7 +102,7 @@ public class ProvenanceAccess {
 	 * @param maxIdle - if the driver supports multiple connections, then the maximum number of idle connections in the pool
 	 * @param maxActive - if the driver supports multiple connections, then the minumum number of connections in the pool
 	 */
-	protected static void initDataSource(String driverClassName, String jdbcUrl, String username, String password, int minIdle, int maxIdle, int maxActive) {
+	public static void initDataSource(String driverClassName, String jdbcUrl, String username, String password, int minIdle, int maxIdle, int maxActive) {
 		System.setProperty(Context.INITIAL_CONTEXT_FACTORY,
 		"org.osjava.sj.memory.MemoryContextFactory");
 		System.setProperty("org.osjava.sj.jndi.shared", "true");
@@ -138,7 +138,7 @@ public class ProvenanceAccess {
 	 * This creates a reference service using the named JNDI Data Source 'jdbc/taverna'.<br/>
 	 * the new Reference Service is associated to the {@link ProvenanceConnector}, enabling data references to be resolved
 	 */
-	protected InvocationContext initDefaultReferenceService() {
+	public InvocationContext initDefaultReferenceService() {
 		return initReferenceService("hibernateReferenceServiceContext.xml");
 	}
 
@@ -148,7 +148,7 @@ public class ProvenanceAccess {
 	 * @see #initDefaultReferenceService()
 	 * @param hibernateContext
 	 */
-	protected InvocationContext initReferenceService(String hibernateContext) {
+	public InvocationContext initReferenceService(String hibernateContext) {
 		ApplicationContext appContext = new RavenAwareClassPathXmlApplicationContext(hibernateContext);
 
 		final ReferenceService referenceService = (ReferenceService) appContext
@@ -175,7 +175,7 @@ public class ProvenanceAccess {
 	}
 
 
-	protected void init() {
+	public void init() {
 
 		for (ProvenanceConnectorFactory factory : ProvenanceConnectorFactoryRegistry.getInstance().getInstances()) {
 			if (connectorType.equalsIgnoreCase(factory.getConnectorType())) {
@@ -526,7 +526,7 @@ public class ProvenanceAccess {
 	/**
 	 * @return 
 	 */
-	protected ProvenanceAnalysis getPa() {
+	public ProvenanceAnalysis getPa() {
 		return pa;
 	}
 
@@ -534,7 +534,7 @@ public class ProvenanceAccess {
 	/**
 	 * @param pa the pa to set
 	 */
-	protected  void setPa(ProvenanceAnalysis pa) {
+	public void setPa(ProvenanceAnalysis pa) {
 		this.pa = pa;
 	}
 
@@ -542,7 +542,7 @@ public class ProvenanceAccess {
 	/**
 	 * @return the pq
 	 */
-	protected ProvenanceQuery getPq() {
+	public ProvenanceQuery getPq() {
 		return pq;
 	}
 
@@ -550,7 +550,7 @@ public class ProvenanceAccess {
 	/**
 	 * @param pq the pq to set
 	 */
-	protected void setPq(ProvenanceQuery pq) {
+	public void setPq(ProvenanceQuery pq) {
 		this.pq = pq;
 	}
 
