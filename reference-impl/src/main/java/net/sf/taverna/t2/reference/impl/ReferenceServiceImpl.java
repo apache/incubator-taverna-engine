@@ -58,6 +58,7 @@ import org.apache.commons.logging.LogFactory;
  * @author Tom Oinn
  * @author Alan R Williams
  * @author Stuart Owen
+ * @author Stian Soiland-Reyes
  */
 public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 		implements ReferenceService {
@@ -274,6 +275,12 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 			// already have a Throwable or an ExternalReferenceSPI instance
 			if (useConverterSPI && (o instanceof Throwable == false)
 					&& (o instanceof ExternalReferenceSPI == false)) {
+				if (currentDepth != 0) {
+					throw new ReferenceServiceException(
+							"Cannot register object " + o + " at depth "
+									+ currentDepth);
+				}
+				
 				for (ValueToReferenceConverterSPI converter : converterRegistry) {
 					if (converter.canConvert(o, context)) {
 						try {
@@ -296,9 +303,9 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 			if ((o instanceof Throwable == false)
 					&& (o instanceof ExternalReferenceSPI == false)) {
 				throw new ReferenceServiceException(
-						"Failed to register POJO, found a type '"
+						"Failed to register object " + o + ", found a type '"
 								+ o.getClass().getCanonicalName()
-								+ "' which cannot be registered with the reference manager");
+								+ "' which cannot currently be registered with the reference manager");
 			}
 			// Have either a Throwable or an ExternalReferenceSPI
 			else {
@@ -312,6 +319,9 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 						throw new ReferenceServiceException(edse);
 					}
 				} else if (o instanceof ExternalReferenceSPI) {
+					if (currentDepth != 0) {
+						throw new ReferenceServiceException("Cannot register external references at depth " + currentDepth);
+					}
 					try {
 						Set<ExternalReferenceSPI> references = new HashSet<ExternalReferenceSPI>();
 						references.add((ExternalReferenceSPI) o);
