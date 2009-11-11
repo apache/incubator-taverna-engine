@@ -12,7 +12,7 @@ public class QueryAnswer {
 
 	NativeAnswer nativeAnswer;
 	
-	String _OPMAnswer_AsXML, _OPMAnswer_AsRDF;
+	String _OPMAnswer_AsRDF;
 	
 	/**
 	 * @return the pathsToDependencies
@@ -24,19 +24,6 @@ public class QueryAnswer {
 	 */
 	public void setNativeAnswer(NativeAnswer a) { this.nativeAnswer= a; }
 
-	/**
-	 * @return the oPM_AsXML
-	 */
-	public String getOPMAnswer_AsXML() {
-		return _OPMAnswer_AsXML;
-	}
-
-	/**
-	 * @param asXML the oPM_AsXML to set
-	 */
-	public void setOPMAnswer_AsXML(String asXML) {
-		_OPMAnswer_AsXML = asXML;
-	}
 
 	/**
 	 * @return the oPM_AsRDF

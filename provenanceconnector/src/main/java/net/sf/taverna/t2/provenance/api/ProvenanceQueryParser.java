@@ -89,13 +89,7 @@ public class ProvenanceQueryParser {
 
 		try {
 			d = b.build (new FileReader((XMLQuerySpecFilename)));
-		} catch (FileNotFoundException e) {
-			logger.error("Problem parsing provenance query: " + e);
-			return null;
-		} catch (JDOMException e) {
-			logger.error("Problem parsing provenance query: " + e);
-			return null;
-		} catch (IOException e) {
+		} catch (Exception e) {
 			logger.error("Problem parsing provenance query: " + e);
 			return null;
 		}
