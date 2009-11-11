@@ -6,6 +6,7 @@ package net.sf.taverna.t2.provenance.opm;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
@@ -348,34 +349,35 @@ public class OPMManager {
 		try {
 			Set<Triple> allTriples = context.getTriples();
 
-			RdfXmlWriter writer = new RdfXmlWriter();				
-			writer.write(allTriples, new FileWriter(OPM_RDF_GRAPH_FILE));
-
-			logger.info("OPM graph written to "+OPM_RDF_GRAPH_FILE);
+			RdfXmlWriter writer = new RdfXmlWriter();	
+			StringWriter sw = new StringWriter();
+			writer.write(allTriples, sw);
+			return sw.toString();
 
 		} catch (OperatorException e) {
 			logger.error("Could not write graph: " + e);
 		} catch (IOException e) {
 			logger.error("Could not write graph: " + e);
-		}		
-		return OPM_RDF_GRAPH_FILE;
+		}	
+		return null;
 	}
 
 
 
 	/**
+	 * IN THE RELEASE WE DO NOT SUPPORT XML -- ONE CAN CONVERT THE RDF TO XML OUT-OF-BAND
 	 * simply invokes the org.openprovenance for converting an RDF OPM graph to an XML OPM graph
 	 * @return a hard-coded filename for the converted XML OPM graph
 	 * @throws OperatorException
 	 * @throws IOException
 	 * @throws JAXBException
 	 */
-	public String Rdf2Xml() throws OperatorException, IOException, JAXBException {
-
-		OPMRdf2Xml converter = new OPMRdf2Xml();
-		converter.convert(OPM_RDF_GRAPH_FILE, OPM_XML_GRAPH_FILE);		
-		return OPM_XML_GRAPH_FILE;
-	}
+//	public String Rdf2Xml() throws OperatorException, IOException, JAXBException {
+//
+//		OPMRdf2Xml converter = new OPMRdf2Xml();
+//		converter.convert(OPM_RDF_GRAPH_FILE, OPM_XML_GRAPH_FILE);		
+//		return OPM_XML_GRAPH_FILE;
+//	}
 
 
 	/**

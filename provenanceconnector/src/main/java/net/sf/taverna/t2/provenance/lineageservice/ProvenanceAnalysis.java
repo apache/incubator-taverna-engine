@@ -134,12 +134,12 @@ public class ProvenanceAnalysis {
 	 * @throws IOException
 	 * @throws JAXBException
 	 */
-	public String OPMRdf2Xml() throws OperatorException, IOException, JAXBException {
-		if (isReady()) {
-			return aOPMManager.Rdf2Xml();
-		}  
-		return null;
-	}
+//	public String OPMRdf2Xml() throws OperatorException, IOException, JAXBException {
+//		if (isReady()) {
+//			return aOPMManager.Rdf2Xml();
+//		}  
+//		return null;
+//	}
 
 	/**
 	 * asks the OPM manager to create a dot file representing its current RDF OPMGraph<br/>
@@ -249,22 +249,22 @@ public class ProvenanceAnalysis {
 		nativeAnswer.setAnswer(answerContent);
 		completeAnswer.setNativeAnswer(nativeAnswer);
 
-		String _OPM_asXML_File;
-		try {
+//		String _OPM_asXML_File;
+//		try {
 
-			_OPM_asXML_File = aOPMManager.Rdf2Xml();
+//			_OPM_asXML_File = aOPMManager.Rdf2Xml();
 			String _OPM_asRDF_File = aOPMManager.writeGraph();
 
 			completeAnswer.setOPMAnswer_AsRDF(_OPM_asRDF_File);
-			completeAnswer.setOPMAnswer_AsXML(_OPM_asXML_File);
+//			completeAnswer.setOPMAnswer_AsXML(_OPM_asXML_File);
 
-		} catch (OperatorException e) {
-			logger.error("Problem running query: " + e);
-		} catch (IOException e) {
-			logger.error("Problem running query: " + e);
-		} catch (JAXBException e) {
-			logger.error("Problem running query: " + e);
-		}
+//		} catch (OperatorException e) {
+//			logger.error("Problem running query: " + e);
+//		} catch (IOException e) {
+//			logger.error("Problem running query: " + e);
+//		} catch (JAXBException e) {
+//			logger.error("Problem running query: " + e);
+//		}
 
 		return completeAnswer;
 	}
