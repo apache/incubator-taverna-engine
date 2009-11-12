@@ -163,7 +163,8 @@ public abstract class AbstractErrorHandlerLayer<ConfigurationType> extends
 				return;
 			}
 		}
-		logger.error("Could not forget " + Arrays.asList(index));
+		// It could be due to pipelining activities like BioMart 
+		logger.debug("Could not forget " + owningProcess + " " + Arrays.toString(index));
 	}
 
 	protected void addJobToStateList(DispatchJobEvent jobEvent) {
