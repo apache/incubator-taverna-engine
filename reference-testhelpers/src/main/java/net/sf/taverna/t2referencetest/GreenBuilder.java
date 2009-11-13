@@ -29,6 +29,8 @@ import net.sf.taverna.t2.reference.ExternalReferenceBuilderSPI;
 import net.sf.taverna.t2.reference.ExternalReferenceConstructionException;
 import net.sf.taverna.t2.reference.ReferenceContext;
 
+import org.apache.log4j.Logger;
+
 /**
  * Trivially build a GreenReference from an InputStream, implementing the
  * ExternalReferenceBuilderSPI interface. Used in the augmentation test cases.
@@ -38,6 +40,9 @@ import net.sf.taverna.t2.reference.ReferenceContext;
  */
 public class GreenBuilder implements
 		ExternalReferenceBuilderSPI<GreenReference> {
+
+	private static Logger logger = Logger
+	.getLogger(GreenBuilder.class);
 
 	/**
 	 * Construct a new GreenReference from the given input stream, ignoring the
@@ -64,7 +69,7 @@ public class GreenBuilder implements
 				is.close();
 				in.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+				logger.error("Unable to close streams", e);
 			}
 		}
 		return newReference;
