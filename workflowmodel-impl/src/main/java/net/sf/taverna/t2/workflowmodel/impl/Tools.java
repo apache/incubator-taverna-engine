@@ -47,6 +47,7 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityConfigurationException;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayer;
 
+import org.apache.log4j.Logger;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
@@ -67,6 +68,9 @@ import org.jdom.output.XMLOutputter;
  * 
  */
 public class Tools {
+
+	private static Logger logger = Logger
+	.getLogger(Tools.class);
 
 	// XML element names
 	private static final String LAYER = "layer";
@@ -182,9 +186,7 @@ public class Tools {
 				try {
 					cl = getRavenLoader(ravenElement);
 				} catch (Exception ex) {
-					System.out.println("Exception loading raven "
-							+ "classloader for Activity instance");
-					ex.printStackTrace();
+					logger.error(ex);
 					// TODO - handle this properly, either by logging correctly
 					// or by going back to the repository and attempting to
 					// fetch the offending missing artifacts
@@ -196,8 +198,7 @@ public class Tools {
 				try {
 					annotated.getAddAnnotationEdit(newAnnotation).doEdit();
 				} catch (EditException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					logger.error(e1);
 				}
 			} else {
 				System.out.println("Found non annotation bean inside an"
@@ -261,12 +262,8 @@ public class Tools {
 			try {
 				cl = getRavenLoader(ravenElement);
 			} catch (Exception ex) {
-				System.out.println("Exception loading raven classloader "
-						+ "for Activity instance");
-				ex.printStackTrace();
-				// TODO - handle this properly, either by logging correctly or
-				// by going back to the repository and attempting to fetch the
-				// offending missing artifacts
+				logger.error("Exception loading raven classloader "
+						+ "for Activity instance", ex);
 			}
 		}
 		String className = element.getChild(CLASS).getTextTrim();
@@ -320,9 +317,8 @@ public class Tools {
 			try {
 				cl = getRavenLoader(ravenElement);
 			} catch (Exception ex) {
-				System.out.println("Exception loading raven classloader "
-						+ "for Activity instance");
-				ex.printStackTrace();
+				logger.error("Exception loading raven classloader "
+						+ "for Activity instance", ex);
 				// TODO - handle this properly, either by logging correctly or
 				// by going back to the repository and attempting to fetch the
 				// offending missing artifacts
@@ -339,8 +335,8 @@ public class Tools {
 		try {
 			layer.configure(configObject);
 		} catch (ConfigurationException e) {
+			logger.error("", e);
 			// TODO - handle this properly
-			e.printStackTrace();
 		}
 
 		return layer;
