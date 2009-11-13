@@ -8,6 +8,8 @@ import java.util.List;
 
 import javax.swing.SwingUtilities;
 
+import org.apache.log4j.Logger;
+
 /**
  * Static utility method to align alignable components within a container
  * 
@@ -15,6 +17,9 @@ import javax.swing.SwingUtilities;
  * 
  */
 public abstract class Alignment {
+
+	private static Logger logger = Logger
+	.getLogger(Alignment.class);
 
 	/**
 	 * Find all instances of BeanFieldTextArea in the specified container and
@@ -47,11 +52,9 @@ public abstract class Alignment {
 					}
 				});
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("", e);
 			} catch (InvocationTargetException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("", e);
 			}
 		} else {
 			for (AlignableComponent field : fields) {
