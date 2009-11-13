@@ -100,7 +100,6 @@ public abstract class AbstractXMLDeserializer implements
 			result = (Element) configElement.getChildren().get(0);
 		//} else if (encoding.equals(DATAFLOW_ENCODING)) {
 		//	// Oh noe
-		//	System.out.println(configElement);
 		} else {
 			throw new IllegalArgumentException("Unknown encoding " + encoding);
 		}
