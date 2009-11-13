@@ -117,7 +117,6 @@ public final class ProcessorImpl extends AbstractAnnotatedThing<Processor>
 		iterationStack = new IterationStrategyStackImpl() {
 			@Override
 			protected void receiveEventFromStrategy(IterationInternalEvent e) {
-				// System.out.println("Sending event to dispatch stack "+e);
 				dispatchStack.receiveEvent(e);
 			}
 		};
@@ -141,7 +140,6 @@ public final class ProcessorImpl extends AbstractAnnotatedThing<Processor>
 			 */
 			@Override
 			protected void pushEvent(IterationInternalEvent e) {
-				// System.out.println("Sending event to crystalizer : "+e);
 				crystalizer.receiveEvent(e);
 			}
 
