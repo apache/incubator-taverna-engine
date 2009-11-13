@@ -185,7 +185,7 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 			try {
 				solvers.put(type, new ShortestPathSolver(type));
 			} catch (Throwable t) {
-				t.printStackTrace();
+				log.error(t);
 				if (t instanceof RuntimeException) {
 					throw (RuntimeException) t;
 				}
