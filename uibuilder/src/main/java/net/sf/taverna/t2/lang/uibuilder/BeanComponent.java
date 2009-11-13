@@ -16,6 +16,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
+import org.apache.log4j.Logger;
+
 /**
  * Superclass of all bean component editors acting on a single (non collection)
  * property within a POJO. This handles bound properties, using reflection to
@@ -37,6 +39,9 @@ import javax.swing.event.AncestorListener;
  * @author Tom Oinn
  */
 public abstract class BeanComponent extends JPanel {
+
+	private static Logger logger = Logger
+	.getLogger(BeanComponent.class);
 
 	private static final long serialVersionUID = -6044009506938335937L;
 	protected Object target;
@@ -122,8 +127,7 @@ public abstract class BeanComponent extends JPanel {
 		try {
 			setMethod = findMethodWithPrefix("set");
 		} catch (NoSuchMethodException nsme) {
-			nsme.printStackTrace();
-			// No set method, mark UI as uneditable
+			logger.error("Unable to find set method", nsme);
 			editable = false;
 		}
 		propertyType = getPropertyType(target, propertyName);
@@ -160,24 +164,18 @@ public abstract class BeanComponent extends JPanel {
 									updateComponent();
 								}
 							});
-							// } catch (InterruptedException e) {
-							// e.printStackTrace();
-							// } catch (InvocationTargetException e) {
-							// e.printStackTrace();
-							// }
 						}
 					}
 				}
 			};
 			try {
-				// System.out.println(propertyName + " : " + propertyListener);
 				addListener.invoke(target, propertyName, propertyListener);
 			} catch (IllegalArgumentException e) {
-				e.printStackTrace();
+				logger.error("Unable to set up property listener", e);
 			} catch (IllegalAccessException e) {
-				e.printStackTrace();
+				logger.error("Unable to set up property listener", e);
 			} catch (InvocationTargetException e) {
-				e.printStackTrace();
+				logger.error("Unable to set up property listener", e);
 			}
 		}
 	}
@@ -209,11 +207,11 @@ public abstract class BeanComponent extends JPanel {
 				}
 			}
 		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
+			logger.error("Unable to remove property listener", e);
 		} catch (IllegalAccessException e) {
-			e.printStackTrace();
+			logger.error("Unable to remove property listener", e);
 		} catch (InvocationTargetException e) {
-			e.printStackTrace();
+			logger.error("Unable to remove property listener", e);
 		}
 		propertyListener = null;
 	}
@@ -345,7 +343,7 @@ public abstract class BeanComponent extends JPanel {
 			Object value = getMethod.invoke(target);
 			return value;
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			logger.error("Unable to get property", ex);
 			return null;
 		}
 	}
@@ -361,11 +359,11 @@ public abstract class BeanComponent extends JPanel {
 				try {
 					setMethod.invoke(target, currentObjectValue);
 				} catch (IllegalArgumentException e) {
-					e.printStackTrace();
+					logger.error("Unable to set property", e);
 				} catch (IllegalAccessException e) {
-					e.printStackTrace();
+					logger.error("Unable to set property", e);
 				} catch (InvocationTargetException e) {
-					e.printStackTrace();
+					logger.error("Unable to set property", e);
 				}
 			}
 		}
