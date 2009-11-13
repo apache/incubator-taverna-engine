@@ -204,7 +204,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 			catch (Exception ex) {
 				// No sign of the provider
 				String exMessage = "Failed to load the Bouncy Castle cryptographic provider";
-				ex.printStackTrace();
 				logger.error(ex);
 				// Return the old BC providers and remove the one we have added
 				restoreOldBCProviders(oldBCProviders);
@@ -293,7 +292,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 			// The requested keystore type is not available from the provider
 			String exMessage = "Failed to instantiate a Bouncy Castle 'UBER'-type keystore.";
 			logger.error(exMessage, ex);
-			ex.printStackTrace();
 			throw new CMException(exMessage);
 		} 
 
@@ -312,7 +310,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 			catch (Exception ex) {				
 				String exMessage = "Failed to load the keystore. Possible reason: incorrect password or corrupted file.";
 				logger.error(exMessage, ex);
-				ex.printStackTrace();
 				throw new CMException(exMessage);
 			} 
 			finally {
@@ -339,7 +336,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 			catch (Exception ex) {
 				String exMessage = "Failed to generate a new empty keystore.";
 				logger.error(exMessage, ex);
-				ex.printStackTrace();
 				throw new CMException(exMessage);
 			} 
 			finally {
@@ -373,7 +369,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 			// The requested keystore type is not available from the provider
 			String exMessage = "Failed to instantiate a 'JKS'-type keystore.";
 			logger.error(exMessage, ex);
-			ex.printStackTrace();
 			throw new CMException(exMessage);
 		} 
 		
@@ -389,7 +384,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 			catch (Exception ex) {				
 				String exMessage = "Failed to load the truststore. Possible reason: incorrect password or corrupted file.";
 				logger.error(exMessage, ex);
-				ex.printStackTrace();
 				throw new CMException(exMessage);
 			} 
 			finally {
@@ -414,7 +408,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 				// The requested keystore type is not available from the provider
 				String exMessage = "Failed to instantiate a 'JKS'-type keystore.";
 				logger.error(exMessage, ex);
-				ex.printStackTrace();
 				throw new CMException(exMessage);
 			}		
 			
@@ -457,7 +450,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 					} catch (Exception ex) {
 						String exMessage = "Failed to load the Java truststore to copy over certificates using user-provided password. Creating a new empty truststore for Taverna.";
 						logger.error(exMessage, ex);
-						ex.printStackTrace();
 						loadedJavaTruststore = false;
 					}
 					finally {
@@ -474,7 +466,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 			catch (Exception ex) {				
 				String exMessage = "Failed to load the Java truststore to copy over certificates. Creating a new empty truststore for Taverna.";
 				logger.error(exMessage, ex);
-				ex.printStackTrace();
 				loadedJavaTruststore = false;
 			} 
 			finally {
@@ -509,7 +500,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 			catch (Exception ex) {
 				String exMessage = "Failed to generate a new truststore.";
 				logger.error(exMessage, ex);
-				ex.printStackTrace();
 				throw new CMException(exMessage);
 			} 
 			finally {
@@ -569,7 +559,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 			catch (Exception ex) {
 				String exMessage = "Credential Manager: Failed to get private key aliases when loading service URLs.";
 				logger.error(exMessage, ex);
-				ex.printStackTrace();
 				throw (new CMException(exMessage));
 			}
 
@@ -607,7 +596,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 				catch (Exception ex) {
 					String exMessage = "Credential Manager: Failed to read the service URLs file.";
 					logger.error(exMessage, ex);
-					ex.printStackTrace();
 					throw (new CMException(exMessage));
 				} 
 				finally {
@@ -688,7 +676,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 			catch (IOException ex) {
 				String exMessage = "Credential Manager: Failed to create a new service URLs' file.";
 				logger.error(exMessage, ex);
-				ex.printStackTrace();
 				throw (new CMException(exMessage));
 			}
 
@@ -730,7 +717,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 			catch (IOException ex) {
 				String exMessage = "Credential Manager: Failed to save the service URLs to the file.";
 				logger.error(exMessage, ex);
-				ex.printStackTrace();
 				throw (new CMException(exMessage));
 			} 
 			finally {
@@ -780,7 +766,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 			catch (Exception ex) {
 				String exMessage = "Credential Manager: Failed to get the username and password pair for service "
 						+ serviceURL + " from the Keystore.";
-				ex.printStackTrace();
 				logger.error(exMessage, ex);
 				throw (new CMException(exMessage));
 			}
@@ -870,7 +855,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 			catch (Exception ex) {
 				String exMessage = "Credential Manager: Failed to insert username and password pair for service "+ serviceURL+ " in the Keystore.";
 				logger.error(exMessage, ex);
-				ex.printStackTrace();
 				throw (new CMException(exMessage));
 			}
 			finally{
@@ -957,7 +941,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 			} catch (Exception ex) {
 				String exMessage = "Credential Manager: Failed to insert the key pair entry in the Keystore.";
 				logger.error(exMessage, ex);
-				ex.printStackTrace();
 				throw (new CMException(exMessage));
 			}
 			finally{
@@ -1001,7 +984,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 				} catch (KeyStoreException ex) {
 					String exMessage = "Credential Manager: Failed to get aliases from the Keystore ti check if it contains the given key pair.";
 					logger.error(exMessage, ex);
-					ex.printStackTrace();
 					throw (new CMException(exMessage));
 				}
 				finally{
@@ -1143,7 +1125,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 			} catch (Exception ex) {
 				String exMessage = "Credential Manager: Failed to get the private key of the proxy key pair entry";
 				logger.error(exMessage);
-				ex.printStackTrace();
 				throw new CMException(exMessage);
 			}
 			finally{
@@ -1176,7 +1157,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 			} catch (Exception ex) {
 				String exMessage = "Credential Manager: Failed to get the certificate chain for the proxy entry";
 				logger.error(exMessage);
-				ex.printStackTrace();
 				throw new CMException(exMessage);
 			}
 			finally{
@@ -1210,7 +1190,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 			} catch (KeyStoreException ex) {
 				String exMessage = "Credential Manager: Failed to insert the proxy key pair in the keystore.";
 				logger.error(exMessage);
-				ex.printStackTrace();
 				throw (new CMException(exMessage));
 			}
 			finally{
@@ -1452,7 +1431,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 			catch (Exception ex) {
 				String exMessage = "Credential Manager: Failed to delete the entry with alias "+alias+"from the " + ksType + ".";
 				logger.error(exMessage, ex);
-				ex.printStackTrace();
 				throw (new CMException(exMessage));
 			}
 			finally{
@@ -1524,7 +1502,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 			catch (Exception ex) {
 				String exMessage = "Credential Manager: Failed to access the " + ksType + " to get the aliases.";
 				logger.error(exMessage, ex);
-				ex.printStackTrace();
 				throw new CMException(exMessage);
 			}
 			finally{
@@ -1564,7 +1541,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 			catch (Exception ex) {
 				String exMessage = "Credential Manager: Failed to get the creation date for the entry from the " + ksType + ".";
 				logger.error(exMessage);
-				ex.printStackTrace();
 				throw new CMException(exMessage);
 			}
 			finally{
@@ -1614,7 +1590,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 			} 
 			catch (Exception ex) {
 				String exMessage = "Credential Manager: Failed to save the " + ksType + ".";
-				ex.printStackTrace();
 				logger.error(exMessage, ex);
 				throw (new CMException(exMessage));
 			} 
@@ -1650,7 +1625,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 				return pkcs12;
 			} catch (Exception ex) {
 				String exMessage = "Credential Manager: Failed to open PKCS12 keystore";
-				ex.printStackTrace();
 				logger.error(exMessage, ex);
 				throw (new CMException(exMessage));
 			}
@@ -1827,16 +1801,16 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 		try {
 			sc = SSLContext.getInstance("SSL");
 		} catch (NoSuchAlgorithmException e1) {
-			e1.printStackTrace();
+			logger.error("", e1);
 		}
 
 		try {
 			sc.init(null, new TrustManager[] { new MyX509TrustManager() },
 					new SecureRandom());
 		} catch (KeyManagementException e) {
-			e.printStackTrace();
+			logger.error("", e);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("", e);
 		}
 		return sc.getSocketFactory();
 	}
