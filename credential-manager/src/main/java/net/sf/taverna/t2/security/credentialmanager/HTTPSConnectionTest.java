@@ -5,9 +5,14 @@ import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import org.apache.log4j.Logger;
+
 
 
 public class HTTPSConnectionTest {
+
+	// Log4J Logger
+	private static Logger logger = Logger.getLogger(HTTPSConnectionTest.class);
 
 	public static void main(String[] args){
 		
@@ -21,17 +26,14 @@ public class HTTPSConnectionTest {
 			httpsConnection.connect();
 			
 		} catch (CMException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("", e);
 		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("", e);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("", e);
 		}
 		catch(Exception ex){ // anything we did not expect
-			ex.printStackTrace();
+			logger.error("", ex);
 		}
 		
 	}
