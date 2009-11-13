@@ -125,7 +125,6 @@ public class Parallelize extends AbstractDispatchLayer<ParallelizeConfig>
 
 	@Override
 	public void receiveJobQueue(DispatchJobQueueEvent queueEvent) {
-		// System.out.println("Creating state for " + owningProcess);
 		StateModel model = new StateModel(queueEvent, config.getMaximumJobs());
 		synchronized(stateMap) {
 			stateMap.put(queueEvent.getOwningProcess(), model);
@@ -141,7 +140,6 @@ public class Parallelize extends AbstractDispatchLayer<ParallelizeConfig>
 
 	@Override
 	public void receiveError(DispatchErrorEvent errorEvent) {
-		// System.out.println(sentJobsCount);
 		StateModel model;
 		String owningProcess = errorEvent.getOwningProcess();
 		synchronized(stateMap) {
@@ -194,7 +192,6 @@ public class Parallelize extends AbstractDispatchLayer<ParallelizeConfig>
 
 	@Override
 	public void finishedWith(final String owningProcess) {
-		// System.out.println("Removing state map for " + owningProcess);
 		// Delay the removal of the state to give the monitor
 		// a chance to poll
 		cleanupTimer.schedule(new TimerTask() {
