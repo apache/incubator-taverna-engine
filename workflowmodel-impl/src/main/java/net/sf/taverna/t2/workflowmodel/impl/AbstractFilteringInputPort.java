@@ -60,7 +60,6 @@ public abstract class AbstractFilteringInputPort extends
 	public void pushToken(WorkflowDataToken dt, String owningProcess,
 			int desiredDepth) {
 		if (dt.getData().getDepth() == desiredDepth) {
-			// System.out.println("** Job : "+dt.getData());
 			pushData(getName(), owningProcess, dt.getIndex(), dt.getData(), dt
 					.getContext());
 		} else {
@@ -85,7 +84,6 @@ public abstract class AbstractFilteringInputPort extends
 						.getReference(), dt.getContext()), owningProcess,
 						desiredDepth);
 			}
-			// System.out.println("** Completion : "+dt.getData());
 			pushCompletion(getName(), owningProcess, dt.getIndex(), dt
 					.getContext());
 		}
