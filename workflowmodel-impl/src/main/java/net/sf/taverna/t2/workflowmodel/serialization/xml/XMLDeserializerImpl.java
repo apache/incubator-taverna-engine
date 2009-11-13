@@ -50,12 +50,12 @@ public class XMLDeserializerImpl implements XMLDeserializer, XMLSerializationCon
 	public Dataflow deserializeDataflow(Element element)
 			throws DeserializationException,EditException {
 		Element topDataflow = findTopDataflow(element);
-		if (topDataflow==null) throw new DeserializationException("No top level dataflow defined in the XML document");
+		if (topDataflow==null) throw new DeserializationException("No top level workflow defined in the XML document");
 		Map<String,Element> innerDataflowElements = gatherInnerDataflows(element);
 		try {
 			return DataflowXMLDeserializer.getInstance().deserializeDataflow(topDataflow,innerDataflowElements);
 		} catch (Exception e) {
-			throw new DeserializationException("An error occurred deserializing the dataflow:"+e.getMessage(),e);
+			throw new DeserializationException("An error occurred deserializing the workflow:"+e.getMessage(),e);
 		}
 	}
 
@@ -76,7 +76,7 @@ public class XMLDeserializerImpl implements XMLDeserializer, XMLSerializationCon
 			Element dataflowElement = (Element)elObj;
 			if (DATAFLOW_ROLE_NESTED.equals(dataflowElement.getAttribute(DATAFLOW_ROLE).getValue())) {
 				String id = dataflowElement.getAttributeValue(DATAFLOW_ID);
-				if (result.containsKey(id)) throw new DeserializationException("Duplicate dataflow id:"+id);
+				if (result.containsKey(id)) throw new DeserializationException("Duplicate workflow id:"+id);
 				result.put(id,dataflowElement);
 			}
 		}

@@ -75,11 +75,11 @@ public class DataflowXMLSerializer extends AbstractXMLSerializer {
 		// FIXME: improve error reporting
 		catch (JDOMException jdomException) {
 			throw new SerializationException(
-					"There was a problem generating the XML for the dataflow: " + jdomException.toString(),
+					"There was a problem generating the XML for the workflow: " + jdomException.toString(),
 					jdomException);
 		} catch (IOException ioException) {
 			throw new SerializationException(
-					"There was a problem generating the XML for the dataflow: " + ioException.toString(),
+					"There was a problem generating the XML for the workflow: " + ioException.toString(),
 					ioException);
 		}
 		return result;

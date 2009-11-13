@@ -149,8 +149,8 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 			int depth, int granularDepth) throws NamingException {
 		for (DataflowInputPort dip : inputs) {
 			if (dip.getName().equals(name)) {
-				throw new NamingException("Duplicate input port name '" + name
-						+ "' in dataflow already.");
+				throw new NamingException("Duplicate workflow input port name '" + name
+						+ "' in workflow already.");
 			}
 		}
 		DataflowInputPortImpl dipi = new DataflowInputPortImpl(name, depth,
@@ -175,7 +175,7 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 						+ inputPort.getName());
 		}
 		if (inputPort.getDataflow() != this) {
-			throw new EditException("Port specifies a different dataflow");
+			throw new EditException("Port specifies a different workflow");
 		}
 		inputs.add(inputPort);
 	}
@@ -201,7 +201,7 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 			removeDataflowInputPort(found);
 		} else {
 			throw new EditException("No such input port '" + name
-					+ "' in dataflow.");
+					+ "' in workflow.");
 		}
 	}
 
@@ -240,8 +240,8 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 			throws NamingException {
 		for (DataflowOutputPort dop : outputs) {
 			if (dop.getName().equals(name)) {
-				throw new NamingException("Duplicate output port name '" + name
-						+ "' in dataflow already.");
+				throw new NamingException("Duplicate workflow output port name '" + name
+						+ "' in workflow already.");
 			}
 		}
 		DataflowOutputPortImpl dopi = new DataflowOutputPortImpl(name, this);
@@ -261,11 +261,11 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 		for (DataflowOutputPort existingOutputPort : outputs
 				.toArray(new DataflowOutputPort[] {})) {
 			if (existingOutputPort.getName().equals(outputPort.getName()))
-				throw new NamingException("There already is a dataflow output port named:"
+				throw new NamingException("There already is a workflow output port named:"
 						+ outputPort.getName());
 		}
 		if (outputPort.getDataflow() != this) {
-			throw new EditException("Port specifies a different dataflow");
+			throw new EditException("Port specifies a different workflow");
 		}
 		outputs.add(outputPort);
 	}
@@ -291,7 +291,7 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 			removeDataflowOutputPort(found);
 		} else {
 			throw new EditException("No such output port '" + name
-					+ "' in dataflow.");
+					+ "' in workflow.");
 		}
 	}
 
@@ -310,7 +310,7 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 			outputs.remove(dop);
 		} else {
 			throw new EditException(
-					"Can't locate the specified output port in dataflow, output port has name '"
+					"Can't locate the specified output port in workflow, output port has name '"
 							+ dop.getName() + "'.");
 		}
 	}

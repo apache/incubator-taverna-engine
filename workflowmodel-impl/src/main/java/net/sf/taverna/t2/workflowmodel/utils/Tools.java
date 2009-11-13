@@ -103,7 +103,7 @@ public class Tools {
 				.getProcessorsWithActivityInputPort(dataflow, activityInput);
 		if (processors.isEmpty()) {
 			throw new IllegalArgumentException("Can't find ActivityInputPort "
-					+ activityInput.getName() + " in dataflow " + dataflow);
+					+ activityInput.getName() + " in workflow " + dataflow);
 		}
 		// FIXME: Assumes only one matching processor
 		Processor processor = processors.iterator().next();
@@ -170,7 +170,7 @@ public class Tools {
 				.getProcessorsWithActivityOutputPort(dataflow, activityOutput);
 		if (processors.isEmpty()) {
 			throw new IllegalArgumentException("Can't find ActivityOutputPort "
-					+ activityOutput.getName() + " in dataflow " + dataflow);
+					+ activityOutput.getName() + " in workflow " + dataflow);
 		}
 		// FIXME: Assumes only one matching processor
 		Processor processor = processors.iterator().next();
