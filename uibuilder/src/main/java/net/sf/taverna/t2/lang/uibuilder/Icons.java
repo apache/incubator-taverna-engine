@@ -6,6 +6,8 @@ import java.util.Map;
 
 import javax.swing.ImageIcon;
 
+import org.apache.log4j.Logger;
+
 /**
  * Manage icons for the UIBuilder
  * 
@@ -13,6 +15,9 @@ import javax.swing.ImageIcon;
  * 
  */
 public abstract class Icons {
+
+	private static Logger logger = Logger
+	.getLogger(Icons.class);
 
 	private static Map<String, ImageIcon> icons;
 
@@ -27,7 +32,7 @@ public abstract class Icons {
 				URL iconURL = Icons.class.getResource(iconName + ".png");
 				icons.put(iconNameLC, new ImageIcon(iconURL));
 			} catch (Exception ex) {
-				ex.printStackTrace();
+				logger.error("Unable to get icon resource", ex);
 			}
 		}
 		return icons.get(iconNameLC);
