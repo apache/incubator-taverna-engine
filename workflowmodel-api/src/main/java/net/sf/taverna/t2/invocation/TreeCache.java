@@ -73,7 +73,6 @@ public class TreeCache {
 		public List<NamedNode> children = new ArrayList<NamedNode>();
 
 		public void insertJob(Job j) {
-			//System.out.println("Store : "+j);
 			insertJobAt(j, j.getIndex());
 		}
 
