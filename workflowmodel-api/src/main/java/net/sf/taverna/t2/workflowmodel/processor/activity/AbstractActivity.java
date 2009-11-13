@@ -37,6 +37,8 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.config.ActivityInputPo
 import net.sf.taverna.t2.workflowmodel.processor.activity.config.ActivityOutputPortDefinitionBean;
 import net.sf.taverna.t2.workflowmodel.processor.activity.config.ActivityPortsDefinitionBean;
 
+import org.apache.log4j.Logger;
+
 /**
  * Convenience abstract superclass for generic Activity instances. Parameterised
  * on the configuration type used by the Activity implementation - when this
@@ -62,6 +64,9 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.config.ActivityPortsDe
  */
 public abstract class AbstractActivity<ConfigType> extends
 		AbstractAnnotatedThing<Activity<?>> implements Activity<ConfigType> {
+
+	private static Logger logger = Logger
+	.getLogger(AbstractActivity.class);
 
 	protected Map<String, String> inputPortMapping = new HashMap<String, String>();
 
@@ -213,8 +218,7 @@ public abstract class AbstractActivity<ConfigType> extends
 				try {
 					EditsRegistry.getEdits().getAddAnnotationChainEdit(createActivityOutputPort, mimeTypeAnnotation).doEdit();
 				} catch (EditException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.error(e);
 				}
 			}
 		}
