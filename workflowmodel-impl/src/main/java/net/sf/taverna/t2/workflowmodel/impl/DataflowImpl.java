@@ -171,7 +171,7 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 		for (DataflowInputPort existingInputPort : inputs
 				.toArray(new DataflowInputPort[] {})) {
 			if (existingInputPort.getName().equals(inputPort.getName()))
-				throw new NamingException("There already is a dataflow input port named:"
+				throw new NamingException("There already is a workflow input port named:"
 						+ inputPort.getName());
 		}
 		if (inputPort.getDataflow() != this) {
@@ -220,7 +220,7 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 			inputs.remove(dip);
 		} else {
 			throw new EditException(
-					"Can't locate the specified input port in dataflow. Input port has name '"
+					"Can't locate the specified input port in workflow. Input port has name '"
 							+ dip.getName() + "'.");
 		}
 	}
