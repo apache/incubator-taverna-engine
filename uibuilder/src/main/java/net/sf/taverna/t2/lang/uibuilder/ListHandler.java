@@ -3,6 +3,8 @@ package net.sf.taverna.t2.lang.uibuilder;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 /**
  * The list handler is used to allow the reflection based UI builder to handle
  * lists of non-bean value types such as String etc.
@@ -12,6 +14,9 @@ import java.util.List;
  */
 public class ListHandler extends
 		ArrayList<ListHandler.ListItem> {
+
+	private static Logger logger = Logger
+	.getLogger(ListHandler.class);
 
 	private static final long serialVersionUID = -1361470859975889856L;
 
@@ -50,7 +55,7 @@ public class ListHandler extends
 			this.value = o;
 			}
 			catch (Exception ex) {
-				ex.printStackTrace();
+				logger.error("Unable to set value", ex);
 			}
 		}
 				
