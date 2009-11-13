@@ -85,7 +85,7 @@ public class LoopConfiguration implements Cloneable {
 					this.condition = deserializer.deserializeActivity(
 							conditionElement, new HashMap<String, Element>());
 				} catch (Exception e) {
-					logger.warn("Can't deserialise conditional activity", e);
+					logger.warn("Can't deserialise condition service", e);
 				}
 			}
 		}

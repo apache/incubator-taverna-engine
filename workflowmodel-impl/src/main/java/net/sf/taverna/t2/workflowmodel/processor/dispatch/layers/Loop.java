@@ -185,7 +185,7 @@ public class Loop extends AbstractDispatchLayer<LoopConfiguration> {
 		if (condition == null) {
 			super.receiveError(new DispatchErrorEvent(event.getOwningProcess(),
 					event.getIndex(), event.getContext(),
-					"Can't invoke conditional activity: null", null,
+					"Can't invoke condition service: null", null,
 					DispatchErrorType.INVOCATION, condition));
 			return;
 		}
@@ -194,7 +194,7 @@ public class Loop extends AbstractDispatchLayer<LoopConfiguration> {
 					event.getOwningProcess(),
 					event.getIndex(),
 					event.getContext(),
-					"Can't invoke conditional activity "
+					"Can't invoke condition service "
 							+ condition
 							+ " is not an instance of AbstractAsynchronousActivity",
 					null, DispatchErrorType.INVOCATION, condition);
@@ -288,7 +288,7 @@ public class Loop extends AbstractDispatchLayer<LoopConfiguration> {
 
 		public void fail(String message, Throwable t,
 				DispatchErrorType errorType) {
-			logger.warn("Failed (" + errorType + ") invoking conditional "
+			logger.warn("Failed (" + errorType + ") invoking condition service "
 					+ jobIdentifier + ":" + message, t);
 
 			AbstractDispatchEvent originalEvent;
@@ -298,7 +298,7 @@ public class Loop extends AbstractDispatchLayer<LoopConfiguration> {
 			receiveError(new DispatchErrorEvent(originalEvent
 					.getOwningProcess(), originalEvent.getIndex(),
 					originalEvent.getContext(),
-					"Can't invoke conditional activity ", t,
+					"Can't invoke condition service ", t,
 					DispatchErrorType.INVOCATION, null));
 		}
 
@@ -321,15 +321,15 @@ public class Loop extends AbstractDispatchLayer<LoopConfiguration> {
 			}
 			T2Reference loopRef = data.get(LOOP_PORT);
 			if (loopRef == null) {
-				fail("Conditional activity didn't contain output port " + LOOP_PORT);
+				fail("Condition service didn't contain output port " + LOOP_PORT);
 				return;
 			}
 			if (loopRef.containsErrors()) {
-				fail("Conditional activity failed: " + loopRef);
+				fail("Condition service failed: " + loopRef);
 				return;
 			}
 			if (loopRef.getDepth() != 0) {
-				fail("Conditional activity output " + LOOP_PORT
+				fail("Condition service output " + LOOP_PORT
 						+ " depth is not 0, but " + loopRef.getDepth());
 			}
 			ReferenceService referenceService = context.getReferenceService();
@@ -399,7 +399,7 @@ public class Loop extends AbstractDispatchLayer<LoopConfiguration> {
 		}
 
 		public void requestRun(Runnable runMe) {
-			String newThreadName = "Conditional "
+			String newThreadName = "Condition service "
 					+ getParentProcessIdentifier();
 			Thread thread = new Thread(runMe, newThreadName);
 			thread.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
