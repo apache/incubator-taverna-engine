@@ -25,12 +25,13 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 
-import org.apache.commons.codec.binary.Base64;
-
 import net.sf.taverna.t2.reference.AbstractExternalReference;
 import net.sf.taverna.t2.reference.DereferenceException;
 import net.sf.taverna.t2.reference.ReferenceContext;
 import net.sf.taverna.t2.reference.ValueCarryingExternalReference;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.log4j.Logger;
 
 /**
  * A reference implementation that inlines an array of bytes. Rather
@@ -47,6 +48,9 @@ import net.sf.taverna.t2.reference.ValueCarryingExternalReference;
  */
 public class InlineByteArrayReference extends AbstractExternalReference
 		implements ValueCarryingExternalReference<byte[]> {
+
+			private static Logger logger = Logger
+			.getLogger(InlineByteArrayReference.class);
 
 	private byte[] bytes = new byte[0];
 
@@ -73,8 +77,7 @@ public class InlineByteArrayReference extends AbstractExternalReference
 		try {
 			return new String(Base64.encodeBase64(bytes), charset.toString());
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Could not encode bytes", e);
 		}
 		return null;
 	}
@@ -83,8 +86,7 @@ public class InlineByteArrayReference extends AbstractExternalReference
 		try {
 			this.bytes = Base64.decodeBase64(contentsAsString.getBytes(charset.toString()));
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Could not decode string", e);
 		}
 	}
 }
