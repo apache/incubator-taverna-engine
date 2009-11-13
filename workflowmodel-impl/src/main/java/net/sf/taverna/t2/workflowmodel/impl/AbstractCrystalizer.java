@@ -123,7 +123,6 @@ public abstract class AbstractCrystalizer implements Crystalizer {
 				// construct appropriate depth empty lists to fill in the
 				// gaps.
 				Job j = getEmptyJob(owningProcess, completionIndex, context);
-				// System.out.println("Inserting new empty collection "+j);
 				insertJob(j);
 				jobCreated(j);
 
@@ -136,16 +135,10 @@ public abstract class AbstractCrystalizer implements Crystalizer {
 			// for (int foo : index) {
 			// iString.append(foo+" ");
 			// }
-			// System.out.println("assignNamesTo "+iString.toString());
 			if (n.contents == null) {
 				Map<String, List<T2Reference>> listItems = new HashMap<String, List<T2Reference>>();
 				int pos = 0;
-				// System.out.println(" Unnamed node :
-				// ["+iString.toString()+"]");
-				// for (NamedNode child : n.children) {
-				// System.out.println(" ++ "+child);
-				// }
-				for (NamedNode child : n.children) {
+			for (NamedNode child : n.children) {
 
 					// If child doesn't have a defined name map yet then define
 					// it
