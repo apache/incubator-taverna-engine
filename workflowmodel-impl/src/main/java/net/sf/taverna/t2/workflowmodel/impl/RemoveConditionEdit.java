@@ -50,7 +50,7 @@ public class RemoveConditionEdit extends AbstractBinaryProcessorEdit {
 		}
 		if (this.condition == null) {
 			throw new EditException(
-					"Can't remove a condition as it doesn't exist");
+					"Can't remove a control link as it doesn't exist");
 		}
 
 		control.controlledConditions.remove(condition);

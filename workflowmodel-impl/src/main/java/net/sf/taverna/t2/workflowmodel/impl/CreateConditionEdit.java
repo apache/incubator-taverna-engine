@@ -38,7 +38,7 @@ public class CreateConditionEdit extends AbstractBinaryProcessorEdit {
 		// Check for duplicates
 		for (Condition c : control.controlledConditions) {
 			if (c.getTarget() == target) {
-				throw new EditException("Attempt to create duplicate condition");
+				throw new EditException("Attempt to create duplicate control link");
 			}
 		}
 		control.controlledConditions.add(condition);
