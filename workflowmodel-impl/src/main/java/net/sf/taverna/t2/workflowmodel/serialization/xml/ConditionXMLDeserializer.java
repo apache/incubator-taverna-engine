@@ -49,8 +49,8 @@ public class ConditionXMLDeserializer extends AbstractXMLDeserializer {
 			String target=conditionElement.getAttributeValue("target");
 			Processor controlProcessor=createdProcessors.get(control);
 			Processor targetProcessor=createdProcessors.get(target);
-			if (controlProcessor==null) throw new DeserializationException("Unable to find start processor for control link, named:"+control);
-			if (targetProcessor==null) throw new DeserializationException("Unable to find target processor for control link, named:"+target);
+			if (controlProcessor==null) throw new DeserializationException("Unable to find start service for control link, named:"+control);
+			if (targetProcessor==null) throw new DeserializationException("Unable to find target service for control link, named:"+target);
 			edits.getCreateConditionEdit(controlProcessor, targetProcessor).doEdit();
 		}		
 	}
