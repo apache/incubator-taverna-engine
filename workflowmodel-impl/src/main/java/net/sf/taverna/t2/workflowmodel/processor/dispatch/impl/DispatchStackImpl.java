@@ -287,15 +287,10 @@ public abstract class DispatchStackImpl extends
 		// this process
 		@Override
 		public void receiveError(DispatchErrorEvent errorEvent) {
-			System.out.println("Error : " + errorEvent.getOwningProcess() + " "
-					+ errorEvent.getMessage() + " "
-					+ Thread.currentThread().getName()
-					+ queues.get(errorEvent.getOwningProcess()).size());
 			logger.error("Error received in dispatch stack on owningProcess:"
 					+ errorEvent.getOwningProcess() + ", msg:"
 					+ errorEvent.getMessage(), errorEvent.getCause());
 			if (errorEvent.getIndex().length == 0) {
-				// System.out.println(" - sent purge");
 				sendCachePurge(errorEvent.getOwningProcess());
 			}
 		}
