@@ -419,10 +419,6 @@ public class Partition<ItemType extends Comparable, PartitionValueType, ChildPar
 	 * Return a TreePath object with this node as the final entry in the path
 	 */
 	protected final synchronized TreePath getTreePath() {
-		// System.out.println("Getting path..."+this.toString());
-		// for (Partition<?,?,?> p : getPartitionPath()) {
-		// System.out.println(p.toString());
-		// }
 		return new TreePath(getPartitionPath().toArray());
 	}
 
