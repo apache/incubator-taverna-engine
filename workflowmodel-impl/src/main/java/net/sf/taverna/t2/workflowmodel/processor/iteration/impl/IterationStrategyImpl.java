@@ -99,7 +99,6 @@ public class IterationStrategyImpl implements IterationStrategy {
 
 		private void pushEvent(
 				IterationInternalEvent<? extends IterationInternalEvent<?>> e) {
-			// System.out.println("Tnode : "+e);
 			if (stack != null) {
 				IterationStrategyImpl below = stack
 						.layerBelow(IterationStrategyImpl.this);
