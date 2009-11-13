@@ -31,6 +31,8 @@ import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.workflowmodel.processor.activity.AsynchronousActivityCallback;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchErrorType;
 
+import org.apache.log4j.Logger;
+
 /**
  * A DummyCallback to aid with testing Activities.
  * 
@@ -41,6 +43,9 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchErrorTy
  */
 public class DummyCallback implements AsynchronousActivityCallback {
 	
+	private static Logger logger = Logger
+	.getLogger(DummyCallback.class);
+
 	public InvocationContext invocationContext = new InvocationContext() {
 		public <T> List<? extends T> getEntities(Class<T> arg0) {
 			return new ArrayList<T>();
@@ -78,8 +83,7 @@ public class DummyCallback implements AsynchronousActivityCallback {
 	public void fail(String message, Throwable t, DispatchErrorType arg2) {
 		failed = true;
 		failures.add(new RuntimeException(arg2+message, t));
-		System.err.println("Failed: " + arg2 + " " + message);
-		t.printStackTrace();
+		logger.error("", t);
 	}
 	
 	/*public SecurityAgentManager getLocalSecurityManager() {
