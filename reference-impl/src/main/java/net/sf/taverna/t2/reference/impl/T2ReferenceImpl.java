@@ -28,6 +28,8 @@ import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.reference.T2ReferenceType;
 import net.sf.taverna.t2.reference.h3.HibernateComponentClass;
 
+import org.apache.log4j.Logger;
+
 /**
  * An implementation of T2Reference specific to the ReferenceSetImpl. This is
  * needed because ReferenceSetImpl uses a component based primary key driven
@@ -41,6 +43,9 @@ import net.sf.taverna.t2.reference.h3.HibernateComponentClass;
  */
 public class T2ReferenceImpl implements T2Reference, Serializable,
 		HibernateComponentClass {
+
+	private static Logger logger = Logger
+	.getLogger(T2ReferenceImpl.class);
 
 	private static final long serialVersionUID = 8363330461158750319L;
 	private URI cachedUri = null;
@@ -219,8 +224,7 @@ public class T2ReferenceImpl implements T2Reference, Serializable,
 				cachedUri = result;
 				return result;
 			} catch (URISyntaxException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Unable to create URI", e);
 				return null;
 			}
 		} else if (referenceType.equals(T2ReferenceType.IdentifiedList)) {
@@ -230,8 +234,7 @@ public class T2ReferenceImpl implements T2Reference, Serializable,
 				cachedUri = result;
 				return result;
 			} catch (URISyntaxException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Unable to create URI", e);
 				return null;
 			}
 		} else if (referenceType.equals(T2ReferenceType.ErrorDocument)) {
@@ -241,7 +244,7 @@ public class T2ReferenceImpl implements T2Reference, Serializable,
 				cachedUri = result;
 				return result;
 			} catch (URISyntaxException e) {
-				e.printStackTrace();
+				logger.error("Unable to create URI", e);
 				return null;
 			}
 		} else {
