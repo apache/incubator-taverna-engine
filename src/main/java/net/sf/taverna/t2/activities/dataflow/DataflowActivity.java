@@ -89,7 +89,7 @@ public class DataflowActivity extends
 									.getContext(), callback
 									.getParentProcessIdentifier());
 				} catch (InvalidDataflowException ex) {
-					callback.fail("Invalid dataflow", ex);
+					callback.fail("Invalid workflow", ex);
 					return;
 				}
 

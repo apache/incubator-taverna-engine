@@ -58,7 +58,7 @@ public class DataflowActivityHealthChecker implements HealthChecker<DataflowActi
 			}
 			
 		}
-		return new HealthReport("Dataflow Activity", message, status, subReports);
+		return new HealthReport("Workflow Activity", message, status, subReports);
 	}
 
 }
