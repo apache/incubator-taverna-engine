@@ -23,12 +23,17 @@ package net.sf.taverna.t2.lang.io;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import org.apache.log4j.Logger;
+
 /**
  * Copies an InputStream to an OutputStream.
  * 
  * @author Tom Oinn
  */
 public class StreamCopier extends Thread {
+
+	private static Logger logger = Logger
+	.getLogger(StreamCopier.class);
 
 	InputStream is;
 
@@ -57,7 +62,7 @@ public class StreamCopier extends Thread {
 			os.flush();
 			os.close();
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			logger.error("Could not copy stream", ex);
 		}
 	}
 
