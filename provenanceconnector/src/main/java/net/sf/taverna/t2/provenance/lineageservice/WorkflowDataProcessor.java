@@ -140,7 +140,7 @@ public class WorkflowDataProcessor {
 					}
 				}
 			} catch (SQLException e) {
-				logger.error("Problem processing trees for workflow: " +dataflowID + " instance: " + wfInstanceRef + " : " + e);
+				logger.error("Problem processing trees for workflow: " +dataflowID + " instance: " + wfInstanceRef + " : ", e);
 			}
 
 		}
