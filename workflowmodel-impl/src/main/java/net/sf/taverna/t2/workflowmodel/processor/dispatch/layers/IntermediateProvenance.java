@@ -26,6 +26,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -410,46 +411,52 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 	 */
 	@Override
 	public void receiveResult(DispatchResultEvent resultEvent) {
-		// FIXME use the connector from the result event context
-		IterationProvenanceItem iterationProvItem = getIterationProvItem(resultEvent);
-		
-		ReferenceService referenceService = resultEvent.getContext()
-				.getReferenceService();
-		
-
-		OutputDataProvenanceItem outputDataItem = new OutputDataProvenanceItem();
-		outputDataItem.setDataMap(resultEvent.getData());
-		outputDataItem.setReferenceService(referenceService);
-		outputDataItem.setIdentifier(UUID.randomUUID().toString());
-		outputDataItem.setProcessId(resultEvent.getOwningProcess());
-		outputDataItem.setParentId(iterationProvItem.getIdentifier());
-		iterationProvItem.setOutputDataItem(outputDataItem);
-
-		getReporter().addProvenanceItem(iterationProvItem);
-		// getConnector().addProvenanceItem(outputDataItem);
-
-		// PM -- testing
-		// add xencoding of data value here??
-//		Map<String, T2Reference> inputDataMap = iterationProvItem.getInputDataItem().getDataMap();
-//		for(Map.Entry<String, T2Reference> entry:inputDataMap.entrySet()) {
-//			
-//			// create a simpler bean that we can serialize?
-//			
-//			T2Reference ref = entry.getValue();
-//			
-//			SimplerT2Reference t2RefBean = new SimplerT2Reference();
-//			t2RefBean.setReferenceType(ref.getReferenceType());
-//			t2RefBean.setDepth(ref.getDepth());
-//			t2RefBean.setLocalPart(ref.getLocalPart());
-//			t2RefBean.setNamespacePart(ref.getNamespacePart());
-//						
-//			System.out.println("data ref: "+ref);
-//			String serializedInput = SerializeParam(t2RefBean);
-//			System.out.println("serialized reference:" + serializedInput);
-//			
-//			System.out.println(referenceService.renderIdentifier(entry.getValue(), String.class, resultEvent.getContext()));
+		try {
+			// FIXME use the connector from the result event context
+			IterationProvenanceItem iterationProvItem = getIterationProvItem(resultEvent);
+			
+			ReferenceService referenceService = resultEvent.getContext()
+					.getReferenceService();
+			
+	
+			OutputDataProvenanceItem outputDataItem = new OutputDataProvenanceItem();
+			outputDataItem.setDataMap(resultEvent.getData());
+			outputDataItem.setReferenceService(referenceService);
+			outputDataItem.setIdentifier(UUID.randomUUID().toString());
+			outputDataItem.setProcessId(resultEvent.getOwningProcess());
+			outputDataItem.setParentId(iterationProvItem.getIdentifier());
+			iterationProvItem.setOutputDataItem(outputDataItem);
+			
+			getReporter().addProvenanceItem(iterationProvItem);
+			// getConnector().addProvenanceItem(outputDataItem);
+	
+			// PM -- testing
+			// add xencoding of data value here??
+	//		Map<String, T2Reference> inputDataMap = iterationProvItem.getInputDataItem().getDataMap();
+	//		for(Map.Entry<String, T2Reference> entry:inputDataMap.entrySet()) {
+	//			
+	//			// create a simpler bean that we can serialize?
+	//			
+	//			T2Reference ref = entry.getValue();
+	//			
+	//			SimplerT2Reference t2RefBean = new SimplerT2Reference();
+	//			t2RefBean.setReferenceType(ref.getReferenceType());
+	//			t2RefBean.setDepth(ref.getDepth());
+	//			t2RefBean.setLocalPart(ref.getLocalPart());
+	//			t2RefBean.setNamespacePart(ref.getNamespacePart());
+	//						
+	//			System.out.println("data ref: "+ref);
+	//			String serializedInput = SerializeParam(t2RefBean);
+	//			System.out.println("serialized reference:" + serializedInput);
+	//			
+	//			System.out.println(referenceService.renderIdentifier(entry.getValue(), String.class, resultEvent.getContext()));
 //		}
-		
+		} catch (Exception ex) {
+			logger.error("Could not store provenance for "
+					+ resultEvent.getOwningProcess() + " "
+					+ Arrays.toString(resultEvent.getIndex()), ex);
+			// But don't break super.receiveResult() !!
+		}
 		super.receiveResult(resultEvent);
 	}
 
