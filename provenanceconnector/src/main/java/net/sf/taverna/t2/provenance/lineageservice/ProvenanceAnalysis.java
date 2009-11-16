@@ -109,18 +109,18 @@ public class ProvenanceAnalysis {
 		try {
 			aOPMManager  = (OPMManager) Class.forName(OPMManagerClass).newInstance();
 		} catch (InstantiationException e1) {
-			logger.error("Problem initialising opm graph: " + e1);
+			logger.error("Problem initialising opm graph: ",  e1);
 		} catch (IllegalAccessException e1) {
-			logger.error("Problem initialising opm graph: " + e1);
+			logger.error("Problem initialising opm graph: ", e1);
 		} catch (ClassNotFoundException e1) {
-			logger.warn("chosen OPMmanager: "+OPMManagerClass+" not available, reverting to default");
+			logger.info("chosen OPMmanager: "+OPMManagerClass+" not available, reverting to default");
 			aOPMManager  = new OPMManager();
 		}
 
 		try {
 			aOPMManager.createAccount(getWFInstanceIDs().get(0).getInstanceID());
 		} catch (SQLException e) {
-			logger.error("Could not initialise OPM Manager: " + e);
+			logger.error("Could not initialise OPM Manager: ", e);
 		}
 	}
 
