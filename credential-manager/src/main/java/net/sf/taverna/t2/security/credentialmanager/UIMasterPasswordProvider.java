@@ -32,7 +32,7 @@ import javax.swing.JFrame;
  *
  */
 public class UIMasterPasswordProvider implements MasterPasswordProviderSPI{
-
+	
 	public int canProvidePassword() {
 		// Low priority - if password was provided e.g. on the command line 
 		// then use that provider and do not pop up this one
@@ -51,12 +51,16 @@ public class UIMasterPasswordProvider implements MasterPasswordProviderSPI{
 		File secConfigDirectory = CMUtil.getSecurityConfigurationDirectory();
 		
 		// Get the Keystore file
-		File keystoreFile = new File(secConfigDirectory,"t2keystore.ubr"); 
+		File keystoreFile = new File(secConfigDirectory,CredentialManager.T2KEYSTORE_FILE); 
 
 		// Get the Truststore file
-		File truststoreFile = new File(secConfigDirectory,"t2truststore.ubr"); 
+		//File truststoreFile = new File(secConfigDirectory,CredentialManager.T2TRUSTSTORE_FILE); 
 		
-		if (keystoreFile.exists() || truststoreFile.exists()){
+		// Pop up a warning about Java Cryptography Extension (JCE) 
+		// Unlimited Strength Jurisdiction Policy 
+		CMUtil.warnUserAboutJCEPolicy();
+		
+		if (keystoreFile.exists() /*|| truststoreFile.exists()*/){
 			// Ask user to provide a master password for Credential Manager
 			GetMasterPasswordDialog getPasswordDialog = new GetMasterPasswordDialog("Enter master password for Credential Manager");
 			getPasswordDialog.setLocationRelativeTo(null);
@@ -71,5 +75,4 @@ public class UIMasterPasswordProvider implements MasterPasswordProviderSPI{
 			return setPasswordDialog.getPassword();
 		}
 	}
-
 }

@@ -80,9 +80,9 @@ import org.apache.log4j.Logger;
 
 public class CredentialManager implements Observable<KeystoreChangedEvent>{
 	
-	private static final String T2TRUSTSTORE_FILE = "t2truststore.jks";
-	private static final String SERVICE_URLS_FILE = "t2serviceURLs.txt";
-	private static final String T2KEYSTORE_FILE = "t2keystore.ubr";
+	public static final String T2TRUSTSTORE_FILE = "t2truststore.jks";
+	public static final String SERVICE_URLS_FILE = "t2serviceURLs.txt";
+	public static final String T2KEYSTORE_FILE = "t2keystore.ubr";
 	
 	public static final char USERNAME_AND_PASSWORD_SEPARATOR_CHARACTER = ';'; // seems like a good separator as it will highly unlikely feature in username
 
@@ -142,6 +142,30 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 		}
 		return INSTANCE;
 	}
+	
+	/**
+	 * Returns a CredentialManager singleton for a provided master password.
+	 * This should really only be used from CredentialManagerUI where we want to
+	 * allow user to cancel entering the password (which only results in the 
+	 * CredentialManagerUI dialog not being shown) so we have to manage obtaining 
+	 * the password ourselves. Otherwise, CredentialManager itself takes care of
+	 * getting the password from the user using password providers. If a user cancels 
+	 * inside a password provider that should cause an error.
+	 */
+	public static CredentialManager getInstance(String masterPassword) throws CMException {
+		synchronized (CredentialManager.class) {
+			if (INSTANCE == null){
+				INSTANCE = new CredentialManager(masterPassword);
+			}
+			else{
+				if (!confirmMasterPassword(masterPassword)){
+					String exMessage = "Incorrect password.";
+					throw new CMException(exMessage);
+				}
+			}
+		}
+		return INSTANCE;
+	}
 
 	/**
 	 * Overrides the Object’s clone method to prevent the singleton object to be
@@ -153,8 +177,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 	}
 
 	/**
-	 * Credential Manager constructor. The constructor is private
-	 * to suppress unauthorized calls to it.
+	 * Credential Manager constructor.
 	 */
 	private CredentialManager() throws CMException {
 		SPIRegistry<MasterPasswordProviderSPI> masterPasswordManager = new SPIRegistry<MasterPasswordProviderSPI>(MasterPasswordProviderSPI.class);
@@ -165,24 +188,39 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 				sortedProviders.put(new Integer(priority), spi);
 			}
 		}
+		String password = null;
 		if (!sortedProviders.isEmpty()){ // we have found at least one password provider
 			while (!sortedProviders.isEmpty()){
 				MasterPasswordProviderSPI provider = sortedProviders.get(sortedProviders.lastKey());
-				String password = provider.getPassword();
+				password = provider.getPassword();
 				if (password!= null){
-					masterPassword = password;
 					break;
 				}
 				sortedProviders.remove(sortedProviders.lastKey());
 			}
 		}
 		else{
-			// We are in big trouble - we do not have the master password
+			// We are in big trouble - we do not have a single master password provider
 			String exMessage = "Failed to obtain master password.";
 			logger.error(exMessage);
 			throw new CMException(exMessage);
 		}
-		
+		init(password);
+		masterPassword = password;
+	}
+
+	/**
+	 * Credential Manager constructor for a given master password. 
+	 */
+	private CredentialManager(String password) throws CMException {
+		init(password);
+		masterPassword = password;
+	}
+
+	/**
+	 * Initialises Credential Manager - loads the Keystore, Truststore and serviceURLsFile.
+	 */
+	private void init(String password) throws CMException{
 		// We do not want anyone to call Security.addProvider() and
 		// Security.removeProvider() synchronized methods until we
 		// execute this block to prevent someone interfering with
@@ -209,8 +247,36 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 				restoreOldBCProviders(oldBCProviders);
 				throw new CMException(exMessage);
 			}
+			
+			// Load the Keystore
+			try {
+				keystore = loadKeystore(password);
+				logger.info("Credential Manager: Loaded the Keystore.");
+			} 
+			catch (CMException cme) {
+				logger.error(cme.getMessage(), cme);
+				throw cme;
+			}
+			
+			// Load service URLs associated with private key aliases from a file
+			try {
+				loadServiceURLsForKeyPairs();
+				logger.info("Credential Manager: Loaded the Service URLs for private key pairs.");
+			} 
+			catch (CMException cme) {
+				logger.error(cme.getMessage(), cme);
+				throw cme;
+			}
 
-			init(masterPassword);
+			// Load the Truststore
+			try {
+				truststore = loadTruststore(TRUSTSTORE_PASSWORD);
+				logger.info("Credential Manager: Loaded the Truststore.");
+			} 
+			catch (CMException cme) {
+				logger.error(cme.getMessage(), cme);
+				throw cme;
+			}
 			
 			// Add the old BC providers back and remove the one we have added
 			restoreOldBCProviders(oldBCProviders);
@@ -238,44 +304,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 		// Remove (hopefully) all registered BC providers
 		Security.removeProvider("BC");
 		return oldBCProviders;
-	}
-
-	/**
-	 * Initialises Credential Manager - loads the Keystore, Truststore and serviceURLsFile.
-	 */
-	public void init(String mPassword) throws CMException {	
-
-	
-
-		// Load the Keystore
-		try {
-			keystore = loadKeystore(mPassword);
-			logger.info("Credential Manager: Loaded the Keystore.");
-		} 
-		catch (CMException cme) {
-			logger.error(cme.getMessage(), cme);
-			throw cme;
-		}
-		
-		// Load service URLs associated with private key aliases from a file
-		try {
-			loadServiceURLsForKeyPairs();
-			logger.info("Credential Manager: Loaded the Service URLs for private key pairs.");
-		} 
-		catch (CMException cme) {
-			logger.error(cme.getMessage(), cme);
-			throw cme;
-		}
-
-		// Load the Truststore
-		try {
-			truststore = loadTruststore(TRUSTSTORE_PASSWORD);
-			logger.info("Credential Manager: Loaded the Truststore.");
-		} 
-		catch (CMException cme) {
-			logger.error(cme.getMessage(), cme);
-			throw cme;
-		}
 	}
 
 	
@@ -1648,6 +1676,20 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 	}
 
 	/**
+	 * Check if Credential Manager has been initialised.
+	 */
+	public static boolean isInitialised(){
+		return (INSTANCE != null);
+	}
+	
+	/**
+	 * Check is Keystore master password is the same as the one provided. 
+	 */
+	public static boolean confirmMasterPassword(String password) {	
+		return ((masterPassword != null) && masterPassword.equals(password));
+	}
+	
+	/**
 	 * Change the Keystore master password. Truststore is using a different
 	 * pre-set password. 
 	 */
@@ -1661,8 +1703,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 	}
 
 	public static void initialiseSSL() throws CMException {	
-		
-
 		if (!sslInitialised ){
 			loadTruststore(TRUSTSTORE_PASSWORD);
 		}
