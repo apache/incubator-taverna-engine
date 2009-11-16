@@ -285,14 +285,18 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 					monitorManager.deregisterNode(
 							instanceOwningProcessId.split(":"));
 					if (provEnabled) {
-						DataflowRunComplete dataflowRunComplete = new DataflowRunComplete();
-						dataflowRunComplete.setParentId(workflowItem.getIdentifier());
-						dataflowRunComplete.setWorkflowId(workflowItem.getParentId());
-						dataflowRunComplete
-								.setProcessId(instanceOwningProcessId);
-						dataflowRunComplete.setIdentifier(UUID.randomUUID().toString());
-						context.getProvenanceReporter().addProvenanceItem(
-								dataflowRunComplete);
+						try {
+							DataflowRunComplete dataflowRunComplete = new DataflowRunComplete();
+							dataflowRunComplete.setParentId(workflowItem.getIdentifier());
+							dataflowRunComplete.setWorkflowId(workflowItem.getParentId());
+							dataflowRunComplete
+									.setProcessId(instanceOwningProcessId);
+							dataflowRunComplete.setIdentifier(UUID.randomUUID().toString());
+							context.getProvenanceReporter().addProvenanceItem(
+									dataflowRunComplete);
+						} catch (Exception ex) {
+							logger.error("Could not store provenance for " + instanceOwningProcessId, ex);
+						}
 					}
 				}
 			}
