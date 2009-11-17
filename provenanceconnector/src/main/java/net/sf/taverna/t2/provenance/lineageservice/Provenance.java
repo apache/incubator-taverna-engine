@@ -23,18 +23,18 @@ package net.sf.taverna.t2.provenance.lineageservice;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.log4j.Logger;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector;
-import net.sf.taverna.t2.provenance.item.IterationProvenanceItem;
 import net.sf.taverna.t2.provenance.item.ProvenanceItem;
 import net.sf.taverna.t2.provenance.item.WorkflowProvenanceItem;
 import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
+
+import org.apache.log4j.Logger;
 
 /**
  * Implemented by the database class that a {@link ProvenanceConnector}
@@ -48,6 +48,7 @@ import net.sf.taverna.t2.workflowmodel.Dataflow;
 //acceptRawProvanceEvent up into the ProvenanceConnector?
 public class Provenance {
 
+	@SuppressWarnings("unused")
 	private static Logger logger = Logger.getLogger(Provenance.class);
 
 	protected ProvenanceQuery pq;
@@ -56,11 +57,19 @@ public class Provenance {
 
 	private String saveEvents;
 	
-	private boolean isfirstWorkflowStructure = true;
+	private volatile boolean firstWorkflowStructure = true;
 
-	private List<String> workflowIDStack = new ArrayList<String>();
+	public boolean isFirstWorkflowStructure() {
+		return firstWorkflowStructure;
+	}
+
+	public void setFirstWorkflowStructure(boolean firstWorkflowStructure) {
+		this.firstWorkflowStructure = firstWorkflowStructure;
+	}
+
+	private List<String> workflowIDStack = Collections.synchronizedList(new ArrayList<String>());
 	
-	private Map<String, String> workflowIDMap = new HashMap<String, String>(); 
+	private Map<String, String> workflowIDMap = new ConcurrentHashMap<String, String>(); 
 
 	public Provenance() {	}
 
@@ -150,12 +159,9 @@ public class Provenance {
 		if (!eventType.equals(SharedVocabulary.WORKFLOW_EVENT_TYPE)) {
 
 			// saveEvent for debugging / testing
-			if (saveEvents != null && saveEvents.equals("all")) {
-
+			if ("all".equals(getSaveEvents())) {
 				getEp().saveEvent(provenanceItem, eventType);
-
-			} else if (saveEvents != null && saveEvents.equals("iteration")) {
-
+			} else if ("iteration".equals(getSaveEvents())) {
 				if (eventType.equals("iteration"))
 					getEp().saveEvent(provenanceItem, eventType);
 
@@ -165,18 +171,20 @@ public class Provenance {
 		if (eventType.equals(SharedVocabulary.WORKFLOW_EVENT_TYPE)) {
 			// process the workflow structure
 
-			if (isfirstWorkflowStructure) {
+			if (isFirstWorkflowStructure()) {
 
 				String dataflowId = ((WorkflowProvenanceItem) provenanceItem).getDataflow().getInternalIdentier();
 				String instanceId = provenanceItem.getIdentifier();
 				
 				workflowIDMap.put(instanceId, dataflowId);
 //				logger.debug("pushed workflowID "+dataflowId);
-				
-				isfirstWorkflowStructure = false;
+				setFirstWorkflowStructure(false);
 //				logger.debug("processing event of type "
 //						+ SharedVocabulary.WORKFLOW_EVENT_TYPE);
-				workflowIDStack.add(0,getEp().processWorkflowStructure(provenanceItem));
+				String processWorkflowStructure = getEp().processWorkflowStructure(provenanceItem);
+				synchronized(workflowIDStack) {
+					workflowIDStack.add(0,processWorkflowStructure);
+				}
 				
 //				logger.debug("pushed workflowID "+workflowIDStack.get(0));
 
@@ -190,7 +198,9 @@ public class Provenance {
 //				logger.debug("pushed workflowID "+dataflowId);
 
 				Dataflow df = ((WorkflowProvenanceItem)provenanceItem).getDataflow();
-				workflowIDStack.add(0,df.getInternalIdentier());
+				synchronized(workflowIDStack) {
+					workflowIDStack.add(0,df.getInternalIdentier());
+				}
 			}
 
 		} else if (provenanceItem.getEventType().equals(SharedVocabulary.END_WORKFLOW_EVENT_TYPE)) {

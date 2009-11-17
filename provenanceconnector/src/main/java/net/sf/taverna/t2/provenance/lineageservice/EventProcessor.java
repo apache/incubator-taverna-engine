@@ -31,11 +31,13 @@ import java.io.StringWriter;
 import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.sql.rowset.serial.SerialBlob;
 
@@ -47,7 +49,6 @@ import net.sf.taverna.t2.provenance.item.WorkflowProvenanceItem;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Arc;
 import net.sf.taverna.t2.provenance.lineageservice.utils.NestedListNode;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProcBinding;
-import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceUtils;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Var;
 import net.sf.taverna.t2.provenance.lineageservice.utils.VarBinding;
@@ -73,19 +74,19 @@ import org.jdom.input.SAXBuilder;
 import org.jdom.output.XMLOutputter;
 
 /**
- * @author paolo
+ * @author Paolo Missier
  */
 public class EventProcessor {
 	/**
 	 * A map of UUIDs of the originating processor to the ProcBinding object
 	 * that contains its parameters
 	 */
-	private Map<String, ProcBinding> procBindingMap = new HashMap<String, ProcBinding>();;
+	private Map<String, ProcBinding> procBindingMap = new ConcurrentHashMap<String, ProcBinding>();;
 
 	/** A map of child ids to their parents in the hierarchy of events:
 	 *  workflow -> process -> processor -> activity -> iteration
 	 */
-	private Map<String, String> parentChildMap= new HashMap<String, String>();
+	private Map<String, String> parentChildMap= new ConcurrentHashMap<String, String>();
 
 	private static Logger logger = Logger.getLogger(EventProcessor.class);
 
@@ -95,25 +96,23 @@ public class EventProcessor {
 
 	private static final String DATAFLOW_PROCESSOR_TYPE = "net.sf.taverna.t2.activities.dataflow.DataflowActivity";
 
-	static int eventCnt = 0; // for events logging
-	static boolean workflowStructureDone = false; // used to inhibit processing of multiple workflow events -- we only need the first
-	static int dataflowDepth = 0; // incremented when we recurse on a subflow, decremented on exit
-
-	private String wfInstanceID = null; // unique run ID. set when we see the first event of type "process"
+	private int eventCnt = 0; // for events logging
+	private volatile boolean workflowStructureDone = false; // used to inhibit processing of multiple workflow events -- we only need the first
+	private int dataflowDepth = 0; // incremented when we recurse on a subflow, decremented on exit
+	private volatile String wfInstanceID = null; // unique run ID. set when we see the first event of type "process"
 
 	String topLevelDataflowName = null;
 	String topLevelDataflowID   = null;
 
-	Map<String, String> wfNestingMap = new HashMap<String, String>(); 
+	Map<String, String> wfNestingMap = new ConcurrentHashMap<String, String>(); 
 	
 	// all input bindings are accumulated here so they can be "backpatched" (see backpatching() )
-	List<VarBinding> allInputVarBindings = new ArrayList<VarBinding>(); 
+	List<VarBinding> allInputVarBindings = Collections.synchronizedList(new ArrayList<VarBinding>()); 
 
 	// dedicated class for processing WorkflowData events which carry workflow output info 
 	private WorkflowDataProcessor  wfdp;
 	private ProvenanceWriter pw = null;
 	private ProvenanceQuery  pq = null;
-
 
 	public EventProcessor() { }
 
@@ -638,7 +637,7 @@ public class EventProcessor {
 			if (dataflowDepth == 0) {
 
 				// process the outputs accumulated by WorkflowDataProcessor
-				getWfdp().processTrees(provenanceItem.getWorkflowId(), wfInstanceID);
+				getWfdp().processTrees(provenanceItem.getWorkflowId(), getWfInstanceID());
 
 				patchTopLevelnputs();
 
@@ -804,7 +803,7 @@ public class EventProcessor {
 				queryConstraints.clear();
 				queryConstraints.put("varNameRef", sourceVname);
 				queryConstraints.put("V.pNameRef", sourcePname);
-				queryConstraints.put("VB.wfInstanceRef", wfInstanceID);
+				queryConstraints.put("VB.wfInstanceRef", getWfInstanceID());
 				queryConstraints.put("V.wfInstanceRef", topLevelDataflowID);
 
 				List<VarBinding> YValues = pq.getVarBindings(queryConstraints);
@@ -823,7 +822,7 @@ public class EventProcessor {
 					queryConstraints.clear();
 					queryConstraints.put("varNameRef", output.getVName());
 					queryConstraints.put("V.pNameRef", output.getPName());
-					queryConstraints.put("VB.wfInstanceRef", wfInstanceID);
+					queryConstraints.put("VB.wfInstanceRef", getWfInstanceID());
 					queryConstraints.put("V.wfInstanceRef", topLevelDataflowID);
 					queryConstraints.put("VB.iteration", yValue.getIteration());
 					if (yValue.getCollIDRef()!= null) {
@@ -866,7 +865,7 @@ public class EventProcessor {
 
 				// get all collections refs for O
 				queryConstraints.clear();
-				queryConstraints.put("wfInstanceRef", wfInstanceID);
+				queryConstraints.put("wfInstanceRef", getWfInstanceID());
 				queryConstraints.put("PNameRef", output.getPName());
 				queryConstraints.put("varNameRef", output.getVName());
 
@@ -1041,7 +1040,7 @@ public class EventProcessor {
 
 				List<VarBinding> newBindings = 
 					processVarBinding(valueEl, procBinding.getPNameRef(), portName, procBinding.getIterationVector(),
-						wfInstanceID, currentWorkflowID);
+							getWfInstanceID(), currentWorkflowID);
 				// this is a list whenever valueEl is of type list: in this case processVarBinding recursively
 				// processes all values within the collection, and generates one VarBinding record for each of them
 
@@ -1144,7 +1143,7 @@ public class EventProcessor {
 				getPw().addVarBinding(vb);
 
 			} catch (SQLException e) {
-				logger.warn("Process Var Binding problem with provenance" + e.getMessage());
+				logger.warn("Process Var Binding problem with provenance", e);
 			}
 
 		} else if (valueType.equals("referenceSet")) {
@@ -1157,7 +1156,7 @@ public class EventProcessor {
 //				logger.debug("calling addVarBinding on "+vb.getPNameRef()+" : "+vb.getVarNameRef()+" with it "+vb.getIteration()); 
 				getPw().addVarBinding(vb);
 			} catch (SQLException e) {
-				logger.warn("Problem processing var binding: " + e);
+				logger.warn("Problem processing var binding", e);
 			}
 
 		} else if (valueType.equals("list")) {
@@ -1205,7 +1204,7 @@ public class EventProcessor {
 				}
 
 			} catch (SQLException e) {
-				logger.warn("Problem processing var binding: " + e);
+				logger.warn("Problem processing var binding: ", e);
 			}
 		} else if (valueType.equals("error")) {
 			try {
@@ -1215,8 +1214,7 @@ public class EventProcessor {
 				getPw().addVarBinding(vb);
 
 			} catch (SQLException e) {
-				logger.warn("Process Var Binding problem with provenance"
-						+ e.getMessage());
+				logger.warn("Process Var Binding problem with provenance", e);
 			}
 		} else {
 			logger.warn("unrecognized value type element for "
@@ -1337,7 +1335,7 @@ public class EventProcessor {
 			Map<String, String> vbConstraints = new HashMap<String, String>();
 			vbConstraints.put("VB.PNameRef", aArc.getSinkPnameRef());
 			vbConstraints.put("VB.varNameRef", aArc.getSinkVarNameRef());
-			vbConstraints.put("VB.wfInstanceRef", wfInstanceID);
+			vbConstraints.put("VB.wfInstanceRef", getWfInstanceID());
 
 			List<VarBinding> vbList = getPq().getVarBindings(vbConstraints); // DB
 			// QUERY
