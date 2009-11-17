@@ -60,7 +60,7 @@ public class DataflowRunComplete implements ProvenanceItem {
 	}
 
 	public void setParentId(String parentId) {
-		processId = parentId;
+		this.parentId = parentId;
 	}
 
 	public String getProcessId() {
