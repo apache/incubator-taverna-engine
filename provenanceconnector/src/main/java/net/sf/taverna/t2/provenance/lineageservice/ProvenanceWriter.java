@@ -476,7 +476,7 @@ public abstract class ProvenanceWriter {
 		} catch (ClassNotFoundException e1) {
 			logger.warn("Error inserting record for a varBinding", e1);
 		} catch (SQLException e) {
-			logger.warn("Var binding insert failed due to [" + e.getMessage() + "]", e);
+			logger.warn("Var binding insert failed", e);
 		} finally {
 			if (connection != null) {
 				connection.close();
