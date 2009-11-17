@@ -168,7 +168,7 @@ public class EventProcessor {
 		try {
 			wfNames = pq.getAllWFnames();
 		} catch (SQLException e) { 
-			logger.warn("Problem processing workflow structure:" + e);
+			logger.warn("Problem processing workflow structure", e);
 		}
 
 		if (wfNames != null && wfNames.contains(topLevelDataflowID)) {  // already in the DB
@@ -180,7 +180,7 @@ public class EventProcessor {
 			try {
 				pw.clearDBStatic(topLevelDataflowID);
 			} catch (SQLException e) {
-				logger.warn(e);
+				logger.warn("Can't clear static database for " + topLevelDataflowID, e);
 			}
 
 		} else {
@@ -191,7 +191,7 @@ public class EventProcessor {
 		try {
 			pw.addProcessor(topLevelDataflowName, DATAFLOW_PROCESSOR_TYPE, topLevelDataflowID, true);  // true -> is top level
 		} catch (SQLException e) {
-			logger.warn(e);
+			logger.warn("Can't add processor " + topLevelDataflowID, e);
 		}
 
 //		logger.info("top level wf name: "+topLevelDataflowName);
@@ -222,7 +222,7 @@ public class EventProcessor {
 			try {
 				wfNames = pq.getAllWFnames();
 			} catch (SQLException e) {
-				logger.warn("Problem processing dataflow structure for " + dataflowID + " :" + e);
+				logger.warn("Problem processing dataflow structure for " + dataflowID, e);
 			}
 
 			if (wfNames != null && wfNames.contains(dataflowID)) {  // already in the DB
@@ -252,7 +252,7 @@ public class EventProcessor {
 				    dataflowString = stringWriter.toString();
 				    
 				} catch (java.io.IOException e) {
-				    logger.error("Could not serialise dataflow: " + e);
+				    logger.error("Could not serialise dataflow", e);
 				}
 				Blob blob = new SerialBlob(dataflowString.getBytes("UTF-8"));
 				// this is a top level dataflow description
@@ -268,7 +268,7 @@ public class EventProcessor {
 				    dataflowString = stringWriter.toString();
 				    
 				} catch (java.io.IOException e) {
-				    logger.error("Could not serialise dataflow: " + e);
+				    logger.error("Could not serialise dataflow", e);
 				}
 				
 				Blob blob = new SerialBlob(dataflowString.getBytes("UTF-8"));
@@ -521,8 +521,7 @@ public class EventProcessor {
 //			logger.info("completed processing dataflow " + dataflowID);
 
 		} catch (Exception e) {
-			logger.warn("Problem processing provenance for dataflow: " + e);
-			e.printStackTrace();
+			logger.error("Problem processing provenance for dataflow", e);
 		}
 
 //		logger.debug("wfInstanceID at the end of processDataflowStructure: "+getWfInstanceID());
@@ -552,9 +551,9 @@ public class EventProcessor {
 			return workflowEl;
 
 		} catch (JDOMException e) {
-			logger.warn("Problem stripping workflow instance header: " + e);
+			logger.warn("Problem stripping workflow instance header", e);
 		} catch (IOException e) {
-			logger.warn("Problem stripping workflow instance header: " + e);
+			logger.warn("Problem stripping workflow instance header", e);
 		}
 
 
@@ -626,8 +625,7 @@ public class EventProcessor {
 			try {
 				getPw().addProcessorBinding(procBinding);
 			} catch (SQLException e) {
-
-				logger.info("WARNING: provenance has duplicate processor binding -- due to workflow nesting");
+				logger.info("WARNING: provenance has duplicate processor binding -- due to workflow nesting?", e);
 			}
 		} else if (provenanceItem.getEventType().equals(SharedVocabulary.END_WORKFLOW_EVENT_TYPE)) {
 
@@ -726,9 +724,9 @@ public class EventProcessor {
 
 			}
 		} catch (SQLException e) {
-			logger.warn("Patch top level inputs problem for provenance: " + e);
+			logger.warn("Patch top level inputs problem for provenance", e);
 		} catch (IndexOutOfBoundsException e) {
-			logger.error(e);
+			logger.error("Could not patch top level", e);
 		}
 
 	}
@@ -884,7 +882,7 @@ public class EventProcessor {
 			} // for each output var
 
 		} catch (SQLException e) {
-			logger.warn("Problem reconciling top level outputs: " + e);
+			logger.warn("Problem reconciling top level outputs", e);
 		}
 
 	}
@@ -1020,11 +1018,10 @@ public class EventProcessor {
 					getPw().updateVar(v);
 				}
 				catch (IndexOutOfBoundsException e) {
-					logger.error(e);
+					logger.error("Could not process input " + portName, e);
 				}
 			} catch (SQLException e1) {
-				// TODO Auto-generated catch block
-				logger.error(e1);
+				logger.error("Could not process input " + portName, e1);
 			}
 
 			// value type may vary
@@ -1053,7 +1050,7 @@ public class EventProcessor {
 				try {
 					backpatchIterationResults(newBindings);
 				} catch (SQLException e) {
-					logger.warn("Problem with back patching iteration results: " + e);
+					logger.warn("Problem with back patching iteration results", e);
 
 				}
 
@@ -1204,7 +1201,7 @@ public class EventProcessor {
 				}
 
 			} catch (SQLException e) {
-				logger.warn("Problem processing var binding: ", e);
+				logger.warn("Problem processing var binding", e);
 			}
 		} else if (valueType.equals("error")) {
 			try {
@@ -1279,7 +1276,7 @@ public class EventProcessor {
 		{
 			public void exceptionThrown(Exception e)
 			{
-				logger.warn("XML encoding ERROR: " + e);
+				logger.warn("XML encoding ERROR", e);
 				return;
 			}
 		});
