@@ -287,8 +287,8 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 					if (provEnabled) {
 						try {
 							DataflowRunComplete dataflowRunComplete = new DataflowRunComplete();
-							dataflowRunComplete.setParentId(workflowItem.getIdentifier());
-							dataflowRunComplete.setWorkflowId(workflowItem.getParentId());
+							dataflowRunComplete.setParentId(workflowItem.getParentId());
+							dataflowRunComplete.setWorkflowId(workflowItem.getIdentifier());
 							dataflowRunComplete
 									.setProcessId(instanceOwningProcessId);
 							dataflowRunComplete.setIdentifier(UUID.randomUUID().toString());
