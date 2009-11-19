@@ -4,11 +4,10 @@
 	<parent>
 		<groupId>net.sf.taverna.t2</groupId>
 		<artifactId>security</artifactId>
-		<version>0.7-SNAPSHOT</version>
+		<version>0.7</version>
 	</parent>
 	<groupId>net.sf.taverna.t2.security</groupId>
 	<artifactId>credential-manager</artifactId>
-	<version>0.7-SNAPSHOT</version>
 	<name>Credential manager</name>
 	<dependencies>
 		<dependency>
