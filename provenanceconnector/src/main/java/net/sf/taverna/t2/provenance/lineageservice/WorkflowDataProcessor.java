@@ -21,10 +21,12 @@ import net.sf.taverna.t2.provenance.lineageservice.utils.VarBinding;
  * this class manages the outputs from a workflow, as they come along through WorkflowData events
  */
 public class WorkflowDataProcessor {
-	
+
 	private static Logger logger = Logger.getLogger(WorkflowDataProcessor.class);
 
 	// set of trees (impl as lists), one for each varname
+	// PM varname not enough must use the WFID as context as well, because the same output varname 
+	// may occur in multiple nested workflows 
 	Map<String, List<WorkflowDataNode>> workflowDataTrees = new HashMap<String, List<WorkflowDataNode>>();  
 
 	ProvenanceQuery pq=null;
@@ -43,6 +45,7 @@ public class WorkflowDataProcessor {
 		int[] index = ((WorkflowDataProvenanceItem)provenanceItem).getIndex();
 		String iterationToString = ProvenanceUtils.iterationToString(index);
 		wdn.setIndex(iterationToString);
+		wdn.setWorkflowID(((WorkflowDataProvenanceItem)provenanceItem).getWorkflowId());
 
 		if (wdn.getValue().contains("list")) wdn.setList(true);  // HACK
 		else wdn.setList(false);
@@ -58,7 +61,7 @@ public class WorkflowDataProcessor {
 			for (WorkflowDataNode aNode: aTree) {
 				if (isParent(wdn.getIndex(), aNode.getIndex())) {
 					aNode.setParent(wdn);
-					
+
 					// set position in collection as the last index in the vector
 					aNode.setRelativePosition(getPosition(aNode));
 				}
@@ -85,54 +88,60 @@ public class WorkflowDataProcessor {
 			String varName = entry.getKey();
 			List<WorkflowDataNode> tree = entry.getValue();
 
-			try {
+			VarBinding vb = null;
 
-				logger.debug("storing tree for var "+varName);
+			try {
+				logger.debug("storing tree for var "+varName+" in workflow with ID "+dataflowID+" and instance "+wfInstanceRef);
 				for (WorkflowDataNode node:tree) {
+
+					if (!node.getWorkflowID().equals(dataflowID)) continue;
+
 					if (node.isList) {
 
 						logger.debug("creating collection entry for "+
 								node.value+" with index "+
 								node.index);
-						
+
 						if (node.getParent()!=null) {
 							logger.debug(" and parent "+node.parent.index);
-						// write a collection record to DB
-						getPw().addCollection(dataflowID, 
-								              node.getValue(), 
-								              node.getParent().getValue(), 
-								              node.getIndex(), 
-								              varName, 
-								              wfInstanceRef);
+							// write a collection record to DB
+							getPw().addCollection(dataflowID, 
+									node.getValue(), 
+									node.getParent().getValue(), 
+									node.getIndex(), 
+									varName, 
+									wfInstanceRef);
 						} else {
 							getPw().addCollection(dataflowID, 
-						              node.getValue(), 
-						              null, 
-						              node.getIndex(), 
-						              varName, 
-						              wfInstanceRef);							
+									node.getValue(), 
+									null, 
+									node.getIndex(), 
+									varName, 
+									wfInstanceRef);							
 						}
 
 					} else {
 						logger.debug("creating VarBinding for "+node.value+" with index "+node.index);
-						
-						VarBinding vb = new VarBinding();
+
+						vb = new VarBinding();
 
 						vb.setWfNameRef(dataflowID);
 						vb.setWfInstanceRef(wfInstanceRef);
-						vb.setPNameRef(dataflowID);
+						
+						vb.setPNameRef(pq.getWorkflow(dataflowID).getExternalName());
+						
 						// vb.setValueType(); // TODO not sure what to set this to
 						vb.setVarNameRef(varName);
 						vb.setIterationVector(node.getIndex());
 						vb.setValue(node.getValue());
-						
+
 						if (node.getParent()!=null) {
 							logger.debug(" in collection "+node.getParent().value+
 									" with index "+node.getParent().getIndex());
-							
+
 							vb.setCollIDRef(node.getParent().getValue());
 							vb.setPositionInColl(node.getRelativePosition());
-							
+
 						} else {
 							vb.setPositionInColl(1);  // default							
 						}						
@@ -140,24 +149,26 @@ public class WorkflowDataProcessor {
 					}
 				}
 			} catch (SQLException e) {
-				logger.error("Problem processing trees for workflow: " +dataflowID + " instance: " + wfInstanceRef + " : ", e);
+				logger.debug("Problem processing trees for workflow: " +dataflowID + " instance: " + wfInstanceRef + " : "+
+						" updating instead of inserting");
+				getPw().updateVarBinding(vb);
 			}
 
 		}
 
 	}
 
-	
+
 
 	/**
 	 * @param node
 	 * @return the last digit in the index 
 	 */
 	private int getPosition(WorkflowDataNode node) {
-		
+
 		String[] vector = node.getIndex().substring(1, node.getIndex().length()-1).split(",");
 		//TODO need some logic  here to avoid trying to parse "" as integer, this is my try
-		
+
 		//logger.debug("Vector length is " + vector.length);
 		//logger.debug("get position is " + vector[vector.length-1]);
 		if ((vector[vector.length-1]).equals("")) {
@@ -196,6 +207,7 @@ public class WorkflowDataProcessor {
 		String varName;
 		String value;
 		String index;
+		String workflowID;
 		int  relativePosition;
 		boolean isList;
 		WorkflowDataNode parent;
@@ -272,6 +284,18 @@ public class WorkflowDataProcessor {
 		 */
 		public void setRelativePosition(int relativePosition) {
 			this.relativePosition = relativePosition;
+		}
+		/**
+		 * @return the workflowID
+		 */
+		public String getWorkflowID() {
+			return workflowID;
+		}
+		/**
+		 * @param workflowID the workflowID to set
+		 */
+		public void setWorkflowID(String workflowID) {
+			this.workflowID = workflowID;
 		}
 
 	}

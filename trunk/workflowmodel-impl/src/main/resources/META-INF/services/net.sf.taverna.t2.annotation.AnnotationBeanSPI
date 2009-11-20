@@ -1,8 +1,0 @@
-net.sf.taverna.t2.annotation.annotationbeans.Author
-net.sf.taverna.t2.annotation.annotationbeans.DescriptiveTitle
-net.sf.taverna.t2.annotation.annotationbeans.FreeTextDescription
-net.sf.taverna.t2.annotation.annotationbeans.HostInstitution
-#net.sf.taverna.t2.annotation.annotationbeans.MimeType
-net.sf.taverna.t2.annotation.annotationbeans.DocumentationUrl
-net.sf.taverna.t2.annotation.annotationbeans.Optional
-net.sf.taverna.t2.annotation.annotationbeans.ExampleValue

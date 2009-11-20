@@ -341,7 +341,11 @@ public abstract class ProvenanceWriter {
 			logger.warn("Error inserting record for Processor binding", e1);
 		} finally {
 			if (connection != null) {
-				connection.close();
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					logger.warn("Can't close connection", e);
+				}
 			}
 		}
 
@@ -475,8 +479,8 @@ public abstract class ProvenanceWriter {
 			logger.warn("Error inserting record for a varBinding", e1);
 		} catch (ClassNotFoundException e1) {
 			logger.warn("Error inserting record for a varBinding", e1);
-		} catch (SQLException e) {
-			logger.warn("Var binding insert failed", e);
+//		} catch (SQLException e) {
+//			logger.warn("Var binding insert failed", e);
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -552,13 +556,13 @@ public abstract class ProvenanceWriter {
 			cnt++;
 
 		} catch (SQLException e) {
-			logger.info("****  insert failed due to [" + e.getMessage() + "]");
+			logger.warn("****  insert failed for query ", e);
 		} catch (InstantiationException e) {
-			logger.info("****  insert failed due to [" + e.getMessage() + "]");
+			logger.warn("****  insert failed ", e);
 		} catch (IllegalAccessException e) {
-			logger.info("****  insert failed due to [" + e.getMessage() + "]");
+			logger.warn("****  insert failed ", e);
 		} catch (ClassNotFoundException e) {
-			logger.info("****  insert failed due to [" + e.getMessage() + "]");
+			logger.warn("****  insert failed ", e);
 		} finally {
 			if (connection != null) {
 				try {

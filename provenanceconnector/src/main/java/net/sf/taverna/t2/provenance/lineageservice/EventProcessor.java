@@ -625,7 +625,7 @@ public class EventProcessor {
 			try {
 				getPw().addProcessorBinding(procBinding);
 			} catch (SQLException e) {
-				logger.info("WARNING: provenance has duplicate processor binding -- due to workflow nesting?", e);
+				logger.debug("provenance has duplicate processor binding -- skipping the insertion"); //, e);
 			}
 		} else if (provenanceItem.getEventType().equals(SharedVocabulary.END_WORKFLOW_EVENT_TYPE)) {
 
@@ -1122,9 +1122,6 @@ public class EventProcessor {
 		vb.setCollIDRef(collIdRef);
 		vb.setPositionInColl(positionInCollection);
 
-		logger.debug("new input VB with wfNameRef="+currentWorkflowID+" processorId="+processorId+
-				" valueType="+valueType+" portName="+portName+" collIdRef="+collIdRef+" position="+positionInCollection+" itvector="+iterationVector);
-		
 		newBindings.add(vb);
 		
 		if (valueType.equals("literal")) {
@@ -1135,6 +1132,11 @@ public class EventProcessor {
 
 				vb.setIterationVector(iterationVector);
 				vb.setValue(valueEl.getAttributeValue("id"));
+
+				logger.debug("new input VB with wfNameRef="+currentWorkflowID+" processorId="+processorId+
+						" valueType="+valueType+" portName="+portName+" collIdRef="+collIdRef+
+						" position="+positionInCollection+" itvector="+iterationVector+
+						" value="+vb.getValue());
 
 //				logger.info("calling addVarBinding on "+vb.getPNameRef()+" : "+vb.getVarNameRef()); 
 				getPw().addVarBinding(vb);
@@ -1149,16 +1151,26 @@ public class EventProcessor {
 			vb.setValue(valueEl.getAttributeValue("id"));
 			vb.setRef(valueEl.getChildText("reference"));
 
+			logger.debug("new input VB with wfNameRef="+currentWorkflowID+" processorId="+processorId+
+					" valueType="+valueType+" portName="+portName+" collIdRef="+collIdRef+
+					" position="+positionInCollection+" itvector="+iterationVector+
+					" value="+vb.getValue());
+
 			try {
 //				logger.debug("calling addVarBinding on "+vb.getPNameRef()+" : "+vb.getVarNameRef()+" with it "+vb.getIteration()); 
 				getPw().addVarBinding(vb);
 			} catch (SQLException e) {
-				logger.warn("Problem processing var binding", e);
+				logger.debug("Problem processing var binding -- performing update instead of insert", e); //, e);
+				// try to update the existing record instead using the current collection info
+				
+				getPw().updateVarBinding(vb);
+//				logger.warn("VarBinding update successful");
+				
 			}
 
 		} else if (valueType.equals("list")) {
 
-//			logger.warn("input of type list");
+			logger.debug("input of type list");
 
 			// add entries to the Collection and to the VarBinding tables
 			// list id --> Collection.collId

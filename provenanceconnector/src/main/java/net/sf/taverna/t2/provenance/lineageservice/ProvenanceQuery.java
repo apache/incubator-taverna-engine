@@ -498,6 +498,8 @@ public abstract class ProvenanceQuery {
 			q = q + " and '"+conds.get(0)+"'"; 
 			conds.remove(0); 
 		}
+		
+		q = q + " ORDER BY timestamp desc ";
 
 		try {
 			connection = getConnection();
@@ -2355,7 +2357,11 @@ public abstract class ProvenanceQuery {
 
 
 
-
+/**
+ * returns a Workflow record from the DB given the workflow internal ID
+ * @param dataflowID
+ * @return
+ */
 	public Workflow getWorkflow(String dataflowID) {
 
 		PreparedStatement ps = null;
