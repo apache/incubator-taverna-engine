@@ -1,0 +1,43 @@
+<body>
+<p>Interfaces for the Taverna 2 reference manager. This replaces the
+(badly named) DataManager and is, in effect, a version 2 of that system.
+While these APIs are implementation neutral the intent is heavily
+towards the use of an object relational mapping (ORM) tool such as
+Hibernate backed by a relational database to hold the various
+collection, external reference and error documents managed by the
+reference manager.</p>
+<p>For those familiar with the previous DataManager code the table
+below shows the old class names and the equivalent (where appropriate)
+in the new code:
+<table>
+	<tr>
+		<td>DataDocument</td>
+		<td>{@link net.sf.taverna.t2.reference.ReferenceSet}</td>
+	</tr>
+	<tr>
+		<td>ReferenceScheme</td>
+		<td>{@link net.sf.taverna.t2.reference.ExternalReferenceSPI}</td>
+	</tr>
+	<tr>
+		<td>EntityIdentifier</td>
+		<td>{@link net.sf.taverna.t2.reference.T2Reference}</td>
+	</tr>
+	<tr>
+		<td colspan="2">...</td>
+	</tr>
+</table>
+</p>
+<p>One fundamental change is a move to runtime exceptions rather
+than checked exceptions. This follows the pattern used by Spring and
+Hibernate. The rationale is the same as in those systems - in general
+checked exceptions are not handled properly by client code. The loss of
+compiler level functionality from moving to runtime exceptions is
+countered by much higher readability of code which in itself leads to
+more robust and reliable systems.</p>
+<p>A second change is the availability of asynchronous versions of
+all the critical APIs. Reference construction or translation in
+particular can be a costly process taking substantial time to complete.
+Synchronous versions of the get methods still exist but in general the
+simple callback based asynchronous ones are recommended over them for
+most applications.</p>
+</body>

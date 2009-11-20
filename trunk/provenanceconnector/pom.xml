@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>net.sf.taverna.t2</groupId>
+        <artifactId>core</artifactId>
+        <version>0.9</version>
+    </parent>
+    <groupId>net.sf.taverna.t2.core</groupId>
+    <artifactId>provenanceconnector</artifactId>
+    <name>Database storage and analysis of provenance info</name>
+    <url>http://maven.apache.org</url>
+    <properties>
+        <t2.ui.components.version>0.10</t2.ui.components.version>
+    </properties>
+    <repositories>
+        <repository>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <id>tupelo2</id>
+            <name>tupelo2</name>
+            <url>http://dlt-dev.ncsa.uiuc.edu/m2</url>
+        </repository>
+        <repository>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <id>opm</id>
+            <name>opm</name>
+            <url>http://openprovenance.org/java/maven-releases</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+		
+        <dependency>
+            <groupId>net.sf.taverna.t2.core</groupId>
+            <artifactId>workflowmodel-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+                
+        <dependency>
+            <groupId>jdom</groupId>
+            <artifactId>jdom</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.sf.taverna.t2.infrastructure</groupId>
+            <artifactId>spi-discovery-api</artifactId>
+            <version>${t2.infrastructure.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>net.sf.taverna.t2.core</groupId>
+            <artifactId>reference-impl</artifactId>
+            <version>0.9</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.sf.taverna.t2.core</groupId>
+            <artifactId>reference-core-extensions</artifactId>
+            <version>0.7</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.tupeloproject</groupId>
+            <artifactId>tupelo-cet</artifactId>
+            <version>2.4.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.openprovenance</groupId>
+            <artifactId>opm</artifactId>
+            <version>1.0.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.openprovenance</groupId>
+            <artifactId>toolbox</artifactId>
+            <version>1.0.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>simple-jndi</groupId>
+            <artifactId>simple-jndi</artifactId>
+            <version>0.11.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-dbcp</groupId>
+                    <artifactId>commons-dbcp</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commons-pool</groupId>
+                    <artifactId>commons-pool</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+            <version>1.2.2</version>
+        </dependency>
+        
+        
+    </dependencies>
+    
+</project>
+

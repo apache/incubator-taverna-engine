@@ -1,0 +1,10 @@
+<body>
+Provides definitions for a single Activity to be contained within a
+Processor. Activity was previously called 'Service' but this was
+somewhat misleading as there wasn't always a service backing it. The
+Activity may be abstract, it may be synchronous or asynchronous in which
+case it uses a callback mechanism. It doesn't carry around annotation
+itself instead using an activity annotation container to handle this
+(this avoids third parties having to manage annotation containment
+themselves).
+</body>

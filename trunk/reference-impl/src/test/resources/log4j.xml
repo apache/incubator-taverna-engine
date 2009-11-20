@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<!-- Default Log4J configuration for integration test module -->
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+	<appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern"
+				value="%p - %C{1}.%M(%L) | %m%n" />
+		</layout>
+	</appender>
+
+	<logger name="net.sf.taverna.platform.spring.orm">
+		<level value="TRACE" />
+	</logger>
+
+	<logger name="net.sf.taverna.platform.spring">
+		<level value="INFO" />
+	</logger>
+
+	<logger name="org.hibernate">
+		<level value="ERROR" />
+	</logger>
+	
+	<!-- 
+		<logger name="org.hibernate.SQL">
+		<level value="TRACE" />
+		</logger>
+		<logger name="org.hibernate.type">
+		<level value="DEBUG" />
+		</logger>
+	-->
+	
+	<logger name="org.springframework">
+		<level value="WARN" />
+	</logger>
+
+	<root>
+		<level value="ERROR" />
+		<appender-ref ref="CONSOLE" />
+	</root>
+
+</log4j:configuration>
