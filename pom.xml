@@ -8,7 +8,7 @@
 	</parent>
 	<groupId>net.sf.taverna.t2.core</groupId>
 	<artifactId>reference-core-extensions</artifactId>
-	<version>0.7</version>
+	<version>0.8-SNAPSHOT</version>
 	<name>Implementation of core extension points</name>
 	<description>
 		Implementations of certain SPIs to provide a core set of
@@ -27,7 +27,7 @@
 		store that is not hibernate based)
 	</description>
 	<properties>
-		<t2.core.version>0.9</t2.core.version>
+		<t2.core.version>0.10-SNAPSHOT</t2.core.version>
 	</properties>
 	<repositories>
 		<repository>
