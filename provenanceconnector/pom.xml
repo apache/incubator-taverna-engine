@@ -6,14 +6,14 @@
     <parent>
         <groupId>net.sf.taverna.t2</groupId>
         <artifactId>core</artifactId>
-        <version>0.9</version>
+        <version>0.10-SNAPSHOT</version>
     </parent>
     <groupId>net.sf.taverna.t2.core</groupId>
     <artifactId>provenanceconnector</artifactId>
     <name>Database storage and analysis of provenance info</name>
     <url>http://maven.apache.org</url>
     <properties>
-        <t2.ui.components.version>0.10</t2.ui.components.version>
+        <t2.ui.components.version>0.11-SNAPSHOT</t2.ui.components.version>
     </properties>
     <repositories>
         <repository>
@@ -62,13 +62,7 @@
         <dependency>
             <groupId>net.sf.taverna.t2.core</groupId>
             <artifactId>reference-impl</artifactId>
-            <version>0.9</version>
-        </dependency>
-
-        <dependency>
-            <groupId>net.sf.taverna.t2.core</groupId>
-            <artifactId>reference-core-extensions</artifactId>
-            <version>0.7</version>
+            <version>0.10-SNAPSHOT</version>
         </dependency>
 
         <dependency>
