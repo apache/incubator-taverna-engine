@@ -9,7 +9,7 @@
 
 	<groupId>net.sf.taverna.t2</groupId>
 	<artifactId>security</artifactId>
-	<version>0.7</version>
+	<version>0.8-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Taverna 2 security</name>
@@ -18,9 +18,9 @@
 	</description>
 
 	<properties>
-		<t2.infrastructure.version>1.12</t2.infrastructure.version>
-		<t2.core.version>0.9</t2.core.version>
-		<t2.lang.version>0.6</t2.lang.version>
+		<t2.infrastructure.version>1.13-SNAPSHOT</t2.infrastructure.version>
+		<t2.core.version>0.10-SNAPSHOT</t2.core.version>
+		<t2.lang.version>0.7-SNAPSHOT</t2.lang.version>
 		<bouncycastle.version>136</bouncycastle.version>
 		<wss4j.version>1.5.4</wss4j.version>
 		<axis.version>1.4</axis.version>
