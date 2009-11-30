@@ -62,8 +62,9 @@ public class StreamDevourer extends Thread {
 			this.join();
 			return output.toString();
 		} catch (InterruptedException ie) {
-			logger.error(ie);
-			return "Interrupted";
+			logger.error("Interrupted", ie);
+			interrupt();
+			return "";
 		}
 	}
 
