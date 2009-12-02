@@ -34,6 +34,7 @@ import javax.naming.NamingException;
 
 import net.sf.taverna.platform.spring.RavenAwareClassPathXmlApplicationContext;
 import net.sf.taverna.t2.invocation.InvocationContext;
+import net.sf.taverna.t2.invocation.impl.InvocationContextImpl;
 import net.sf.taverna.t2.provenance.ProvenanceConnectorFactory;
 import net.sf.taverna.t2.provenance.ProvenanceConnectorFactoryRegistry;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector;
@@ -45,7 +46,6 @@ import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Var;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Workflow;
 import net.sf.taverna.t2.provenance.lineageservice.utils.WorkflowInstance;
-import net.sf.taverna.t2.provenance.reporter.ProvenanceReporter;
 import net.sf.taverna.t2.reference.ReferenceService;
 
 import org.apache.commons.dbcp.BasicDataSource;
@@ -154,22 +154,7 @@ public class ProvenanceAccess {
 		final ReferenceService referenceService = (ReferenceService) appContext
 		.getBean("t2reference.service.referenceService");
 
-		InvocationContext context =  new InvocationContext() {
-
-			public ReferenceService getReferenceService() {
-				return referenceService;
-			}
-
-			public ProvenanceReporter getProvenanceReporter() {
-				return provenanceConnector;
-			}
-
-			public <T> List<? extends T> getEntities(Class<T> entityType) {
-				// TODO Auto-generated method stub
-				return null;
-			}
-		};
-
+		InvocationContext context =  new InvocationContextImpl(referenceService, provenanceConnector);
 		return context;
 
 	}

@@ -49,6 +49,12 @@
         </dependency>
                 
         <dependency>
+            <groupId>net.sf.taverna.t2.core</groupId>
+            <artifactId>workflowmodel-impl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <dependency>
             <groupId>jdom</groupId>
             <artifactId>jdom</artifactId>
         </dependency>
