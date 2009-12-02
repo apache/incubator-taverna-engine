@@ -49,6 +49,9 @@ public interface ListService {
 	 * or through the ListIterator will fail with an IllegalStateException.
 	 * Implementations should copy the input list rather than keeping a
 	 * reference to it to preserve this property.
+	 * <p>
+	 * The created references will be related with a workflow run id passed 
+	 * through ReferenceContext so we can track all data referenced by a specific run. 
 	 * 
 	 * @param items
 	 *            the T2Reference instances to store as a list.
@@ -60,7 +63,7 @@ public interface ListService {
 	 *             references or with the storage subsystem.
 	 */
 	@Transactional(propagation=Propagation.REQUIRED, readOnly=false)
-	public IdentifiedList<T2Reference> registerList(List<T2Reference> items)
+	public IdentifiedList<T2Reference> registerList(List<T2Reference> items, ReferenceContext context)
 			throws ListServiceException;
 
 	/**
@@ -70,6 +73,9 @@ public interface ListService {
 	 * critical for the T2 iteration and collection management system in the
 	 * enactor - we need to know that this is an empty list that
 	 * <em>would have</em> contained lists, for example.
+	 * <p>
+	 * The created references will be related with a workflow run id passed 
+	 * through ReferenceContext so we can track all data referenced by a specific run. 
 	 * 
 	 * @param depth
 	 *            the depth of the empty list, must be >=1
@@ -80,7 +86,7 @@ public interface ListService {
 	 *             with an invalid depth argument
 	 */
 	@Transactional(propagation=Propagation.REQUIRED, readOnly=false)
-	public IdentifiedList<T2Reference> registerEmptyList(int depth)
+	public IdentifiedList<T2Reference> registerEmptyList(int depth, ReferenceContext context)
 			throws ListServiceException;
 
 	/**
@@ -126,4 +132,9 @@ public interface ListService {
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = false)
 	public boolean delete(T2Reference reference) throws ReferenceServiceException;
 
+	/**
+	 * Delete all {@link IdentifiedList}S used by the specific workflow run.
+	 */
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = false)
+	public void deleteIdentifiedListsForWorkflowRun(String workflowRunId) throws ReferenceServiceException;
 }

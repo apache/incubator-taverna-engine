@@ -62,5 +62,7 @@ public interface ListDao {
 	public boolean delete(IdentifiedList<T2Reference> theList)
 			throws DaoException;
 	
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = false)
+	public void deleteIdentifiedListsForWFRun(String workflowRunId) throws DaoException;
 
 }

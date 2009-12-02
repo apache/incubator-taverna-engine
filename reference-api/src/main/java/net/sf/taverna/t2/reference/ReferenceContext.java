@@ -55,10 +55,14 @@ public interface ReferenceContext {
 	 *            it can pick it up from the entityType parameter.
 	 * @param entityType
 	 *            Class of entity to return. Use Object.class to return all
-	 *            entities within the resolution context
-	 * @return a list of entities from the resolution context which can be cast
+	 *            entities within the reference context
+	 * @return a list of entities from the reference context which can be cast
 	 *         to the specified type.
 	 */
-	public <T extends Object> List<? extends T> getEntities(Class<T> entityType);
+	public <T extends Object> List<T> getEntities(Class<T> entityType);
 
+	/**
+	 * Add an entity to the context.
+	 */
+	public void addEntity(Object entity);
 }

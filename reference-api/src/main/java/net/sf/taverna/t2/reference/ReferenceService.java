@@ -241,6 +241,9 @@ public interface ReferenceService {
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = false)
 	public boolean delete(List<T2Reference> references) throws ReferenceServiceException;
 	
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = false)
+	public void deleteReferencesForWorkflowRun(String workflowRunId) throws ReferenceServiceException;
+	
 	/**
 	 * Returns the {@link ErrorDocumentService} this ReferenceService uses, use
 	 * this when you need functionality from that service explicitly.

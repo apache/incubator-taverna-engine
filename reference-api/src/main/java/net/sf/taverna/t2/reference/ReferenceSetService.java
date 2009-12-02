@@ -20,7 +20,6 @@
  ******************************************************************************/
 package net.sf.taverna.t2.reference;
 
-import java.util.List;
 import java.util.Set;
 
 import org.springframework.transaction.annotation.Propagation;
@@ -45,6 +44,9 @@ public interface ReferenceSetService {
 	 * should point to byte equivalent data, and return the newly created
 	 * {@link ReferenceSet}. This method blocks on the underlying store, but
 	 * guarantees that the returned value has been persisted.
+	 * <p>
+	 * The created references will be related with a workflow run id passed 
+	 * through ReferenceContext so we can track all data referenced by a specific run. 
 	 * 
 	 * @param references
 	 *            a set of {@link ExternalReferenceSPI} implementations to
@@ -53,7 +55,7 @@ public interface ReferenceSetService {
 	 */
 	@Transactional(propagation = Propagation.REQUIRED, readOnly = false)
 	public ReferenceSet registerReferenceSet(
-			Set<ExternalReferenceSPI> references)
+			Set<ExternalReferenceSPI> references, ReferenceContext context)
 			throws ReferenceSetServiceException;
 
 	/**
@@ -170,4 +172,9 @@ public interface ReferenceSetService {
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = false)
 	public boolean delete(T2Reference reference) throws ReferenceServiceException;
 	
+	/**
+	 * Delete all {@link ReferenceSet}S used by the specific workflow run.
+	 */
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = false)
+	public void deleteReferenceSetsForWorkflowRun(String workflowRunId) throws ReferenceServiceException;
 }

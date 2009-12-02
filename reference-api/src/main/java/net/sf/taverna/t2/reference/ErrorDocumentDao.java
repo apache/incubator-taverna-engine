@@ -58,4 +58,6 @@ public interface ErrorDocumentDao {
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = false)
 	public boolean delete(ErrorDocument errorDoc) throws DaoException;
 
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = false)
+	public void deleteErrorDocumentsForWFRun(String workflowRunId) throws DaoException;
 }
