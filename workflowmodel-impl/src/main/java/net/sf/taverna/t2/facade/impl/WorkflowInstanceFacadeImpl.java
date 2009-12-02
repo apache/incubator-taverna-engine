@@ -42,6 +42,7 @@ import net.sf.taverna.t2.provenance.item.DataflowRunComplete;
 import net.sf.taverna.t2.provenance.item.WorkflowDataProvenanceItem;
 import net.sf.taverna.t2.provenance.item.WorkflowProvenanceItem;
 import net.sf.taverna.t2.reference.T2Reference;
+import net.sf.taverna.t2.reference.WorkflowRunIdEntity;
 import net.sf.taverna.t2.utility.TypedTreeModel;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
 import net.sf.taverna.t2.workflowmodel.DataflowInputPort;
@@ -100,6 +101,9 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 	
 	private WeakHashMap<String, T2Reference> pushedDataMap = new WeakHashMap<String, T2Reference> ();
 
+	// Id of this run
+	private String workflowRunId;
+
 	public WorkflowInstanceFacadeImpl(final Dataflow dataflow,
 			InvocationContext context, String parentProcess)
 			throws InvalidDataflowException {
@@ -121,6 +125,10 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 			this.instanceOwningProcessId = parentProcess + ":" + localName;
 		}
 		
+		// Set the wf run id
+		workflowRunId = UUID.randomUUID().toString();
+		context.addEntity(new WorkflowRunIdEntity(workflowRunId));
+		
 		WorkflowProvenanceItem workflowItem = null;
 		
 		if (context.getProvenanceReporter() != null) {
@@ -129,11 +137,11 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 			workflowItem = new WorkflowProvenanceItem();
 			workflowItem.setDataflow(dataflow);
 			workflowItem.setProcessId(instanceOwningProcessId);
-			workflowItem.setIdentifier(UUID.randomUUID().toString());
+			workflowItem.setIdentifier(workflowRunId);
 			workflowItem.setParentId(dataflow.getInternalIdentier());
 
 			addProvenanceLayerToProcessors(dataflow, workflowItem);
-			context.getProvenanceReporter().setSessionID(workflowItem.getIdentifier());
+			context.getProvenanceReporter().setSessionID(workflowRunId);
 			context.getProvenanceReporter().addProvenanceItem(workflowItem);
 		}
 		facadeResultListener = new FacadeResultListener(dataflow, workflowItem);
@@ -375,6 +383,14 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 
 	public WeakHashMap<String, T2Reference> getPushedDataMap() {
 		return pushedDataMap;
+	}
+
+	public void setWorkflowRunId(String workflowRunId) {
+		this.workflowRunId = workflowRunId;
+	}
+
+	public String getWorkflowRunId() {
+		return workflowRunId;
 	}
 
 }

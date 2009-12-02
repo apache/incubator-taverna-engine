@@ -93,7 +93,7 @@ public class ProcessorCrystalizerImpl extends AbstractCrystalizer {
 		Map<String, T2Reference> emptyJobMap = new HashMap<String, T2Reference>();
 		for (OutputPort op : parent.getOutputPorts()) {
 			emptyJobMap.put(op.getName(), rs.getListService()
-					.registerEmptyList(depth + op.getDepth()).getId());
+					.registerEmptyList(depth + op.getDepth(), context).getId());
 		}
 		return new Job(owningProcess, index, emptyJobMap, context);
 	}

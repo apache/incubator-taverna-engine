@@ -166,7 +166,7 @@ public class MergeImpl implements Merge {
 					ListService listService = context.getReferenceService()
 							.getListService();
 					IdentifiedList<T2Reference> registeredList = listService
-							.registerList(outputList);
+							.registerList(outputList, context);
 					WorkflowDataToken workflowDataToken = new WorkflowDataToken(
 							owningProcess, new int[0], registeredList.getId(),
 							context);

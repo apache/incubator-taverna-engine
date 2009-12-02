@@ -142,7 +142,7 @@ public abstract class AbstractFilteringInputPort extends
 						// Wrap in a single item list
 						List<T2Reference> newList = new ArrayList<T2Reference>();
 						newList.add(ref);
-						ref = rs.getListService().registerList(newList).getId();
+						ref = rs.getListService().registerList(newList, token.getContext()).getId();
 						currentDepth++;
 					}
 					pushData(getName(), newOwner, new int[0], ref, token

@@ -102,4 +102,14 @@ public class DummyDataflow extends AbstractAnnotatedThing<Dataflow> implements
 		return "an id";
 	}
 
+	public boolean isRunning() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	public void setIsRunning(boolean isRunning) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

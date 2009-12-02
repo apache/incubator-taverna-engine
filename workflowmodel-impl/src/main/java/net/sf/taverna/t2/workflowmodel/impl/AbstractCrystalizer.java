@@ -183,7 +183,7 @@ public abstract class AbstractCrystalizer implements Crystalizer {
 				for (String outputName : listItems.keySet()) {
 					List<T2Reference> idlist = listItems.get(outputName);
 					newDataMap.put(outputName, context.getReferenceService()
-							.getListService().registerList(idlist).getId());
+							.getListService().registerList(idlist, context).getId());
 
 				}
 				Job newJob = new Job(owningProcess, index, newDataMap, context);

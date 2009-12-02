@@ -249,7 +249,7 @@ public class Invoke extends AbstractDispatchLayer<Object> {
 					String portName = op.getName();
 					int portDepth = op.getDepth();
 					emptyListMap.put(portName, refService.getListService()
-							.registerEmptyList(portDepth).getId());
+							.registerEmptyList(portDepth, jobEvent.getContext()).getId());
 				}
 				receiveResult(emptyListMap, new int[0]);
 			}

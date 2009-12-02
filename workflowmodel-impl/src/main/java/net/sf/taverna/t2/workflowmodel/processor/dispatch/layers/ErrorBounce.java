@@ -150,10 +150,10 @@ public class ErrorBounce extends AbstractDispatchLayer<Object> implements
 			}
 			if (cause != null) {
 				outputDataMap.put(op.getName(), rs.getErrorDocumentService()
-						.registerError(message, cause, op.getDepth()).getId());
+						.registerError(message, cause, op.getDepth(), event.getContext()).getId());
 			} else {
 				outputDataMap.put(op.getName(), rs.getErrorDocumentService()
-						.registerError(message, errorReferences, op.getDepth()).getId());
+						.registerError(message, errorReferences, op.getDepth(), event.getContext()).getId());
 			}
 		}
 		DispatchResultEvent dre = new DispatchResultEvent(event.getOwningProcess(),

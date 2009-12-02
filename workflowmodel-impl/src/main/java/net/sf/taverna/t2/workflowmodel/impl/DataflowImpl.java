@@ -637,6 +637,11 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 	 * received.
 	 */
 	private Map<String, Set<String>> activeProcessIdentifiers = new HashMap<String, Set<String>>();
+	
+	/**
+	 * Is workflow currently running
+	 */
+	private boolean isRunning = false;
 
 	/**
 	 * Called when a token is received or the dataflow is fired, checks to see
@@ -778,5 +783,14 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 	protected void setInternalIndentifier(String id) {
 		this.internalIdentifier=id;
 	}
+	
+	public boolean isRunning(){
+			return this.isRunning ;
+	}
+	
+	public void setIsRunning(boolean isRunning){
+		this.isRunning = isRunning;
+	}
+
 
 }
