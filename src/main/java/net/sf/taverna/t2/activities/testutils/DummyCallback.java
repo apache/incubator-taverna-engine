@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.sf.taverna.t2.invocation.InvocationContext;
-import net.sf.taverna.t2.provenance.reporter.ProvenanceReporter;
+import net.sf.taverna.t2.invocation.impl.InvocationContextImpl;
 import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.workflowmodel.processor.activity.AsynchronousActivityCallback;
@@ -46,21 +46,8 @@ public class DummyCallback implements AsynchronousActivityCallback {
 	private static Logger logger = Logger
 	.getLogger(DummyCallback.class);
 
-	public InvocationContext invocationContext = new InvocationContext() {
-		public <T> List<? extends T> getEntities(Class<T> arg0) {
-			return new ArrayList<T>();
-		}
-		
-		public ReferenceService getReferenceService() {
-			return referenceService;
-		}
-
-		public ProvenanceReporter getProvenanceReporter() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-	};
 	public ReferenceService referenceService;
+	public InvocationContext invocationContext;
 	public Map<String, T2Reference> data;
 	public Thread thread;
 
@@ -70,6 +57,7 @@ public class DummyCallback implements AsynchronousActivityCallback {
 	
 	public DummyCallback(ReferenceService referenceService) {
 		this.referenceService = referenceService;
+		this.invocationContext = new InvocationContextImpl(referenceService, null);
 	}
 
 	public void fail(String message, Throwable t) {
