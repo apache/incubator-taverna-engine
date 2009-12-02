@@ -105,7 +105,7 @@ public class ReferenceSetServiceImpl extends AbstractReferenceSetServiceImpl
 	 * {@inheritDoc}
 	 */
 	public ReferenceSet registerReferenceSet(
-			Set<ExternalReferenceSPI> references)
+			Set<ExternalReferenceSPI> references, ReferenceContext context)
 			throws ReferenceSetServiceException {
 		checkDao();
 		checkGenerator();
@@ -113,7 +113,7 @@ public class ReferenceSetServiceImpl extends AbstractReferenceSetServiceImpl
 		rsi
 				.setExternalReferences(new HashSet<ExternalReferenceSPI>(
 						references));
-		T2Reference id = t2ReferenceGenerator.nextReferenceSetReference();
+		T2Reference id = t2ReferenceGenerator.nextReferenceSetReference(context);
 		rsi.setTypedId(T2ReferenceImpl.getAsImpl(id));
 		try {
 			referenceSetDao.store(rsi);
@@ -129,5 +129,11 @@ public class ReferenceSetServiceImpl extends AbstractReferenceSetServiceImpl
 		ReferenceSet set=referenceSetDao.get(reference);
 		if (set==null) return false;
 		return referenceSetDao.delete(set);
+	}
+
+	public void deleteReferenceSetsForWorkflowRun(String workflowRunId)
+			throws ReferenceServiceException {
+		checkDao();
+		referenceSetDao.deleteReferenceSetsForWFRun(workflowRunId);
 	}
 }

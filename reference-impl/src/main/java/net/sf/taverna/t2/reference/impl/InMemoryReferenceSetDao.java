@@ -45,11 +45,7 @@ public class InMemoryReferenceSetDao implements ReferenceSetDao {
 
 	public synchronized ReferenceSet get(T2Reference reference)
 			throws DaoException {
-		if (store.containsKey(reference)) {
-			return store.get(reference);
-		} else {
-			throw new DaoException("Key " + reference + " not found in store");
-		}
+		return store.get(reference);		
 	}
 
 	public synchronized void store(ReferenceSet refSet) throws DaoException {
@@ -64,8 +60,12 @@ public class InMemoryReferenceSetDao implements ReferenceSetDao {
 		return store.remove(refSet.getId())!=null;
 	}
 
+	public synchronized void deleteReferenceSetsForWFRun(String workflowRunId) throws DaoException {	
+		for (T2Reference reference: store.keySet()){
+			if (reference.getNamespacePart().equals(workflowRunId)){
+				store.remove(reference);
+			}
+		}
+	}
 	
-	
-	
-
 }

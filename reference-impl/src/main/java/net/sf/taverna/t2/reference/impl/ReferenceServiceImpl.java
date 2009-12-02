@@ -144,6 +144,7 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 	private T2Reference getNameForObject(Object o, int currentDepth,
 			boolean useConverterSPI, ReferenceContext context)
 			throws ReferenceServiceException {
+	
 		if (currentDepth < 0) {
 			throw new ReferenceServiceException("Cannot register at depth " + currentDepth + ": " + o);
 		}
@@ -244,7 +245,7 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 			if (l.isEmpty()) {
 				try {
 					IdentifiedList<T2Reference> newList = listService
-							.registerEmptyList(currentDepth);
+							.registerEmptyList(currentDepth, context);
 					return newList.getId();
 				} catch (ListServiceException lse) {
 					throw new ReferenceServiceException(lse);
@@ -263,7 +264,7 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 				}
 				try {
 					IdentifiedList<T2Reference> newList = listService
-							.registerList(references);
+							.registerList(references, context);
 					return newList.getId();
 				} catch (ListServiceException lse) {
 					throw new ReferenceServiceException(lse);
@@ -313,7 +314,7 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 					// Wrap in an ErrorDocument and return the ID
 					try {
 						ErrorDocument doc = errorDocumentService.registerError(
-								(Throwable) o, currentDepth);
+								(Throwable) o, currentDepth, context);
 						return doc.getId();
 					} catch (ErrorDocumentServiceException edse) {
 						throw new ReferenceServiceException(edse);
@@ -326,7 +327,7 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 						Set<ExternalReferenceSPI> references = new HashSet<ExternalReferenceSPI>();
 						references.add((ExternalReferenceSPI) o);
 						ReferenceSet rs = referenceSetService
-								.registerReferenceSet(references);
+								.registerReferenceSet(references, context);
 						return rs.getId();
 					} catch (ReferenceSetServiceException rsse) {
 						throw new ReferenceServiceException(rsse);
@@ -684,13 +685,40 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 			result=referenceSetService.delete(reference);
 			break;
 		case ErrorDocument:
-			result=referenceSetService.delete(reference);
+			result=errorDocumentService.delete(reference);
 			break;
 		default:
 			throw new ReferenceServiceException(
 					"Unknown reference type!");
 		}
 		return result;
+	}
+
+	public void deleteReferencesForWorkflowRun(String workflowRunId)
+			throws ReferenceServiceException {
+		
+		String errorString = "";
+		try{
+			listService.deleteIdentifiedListsForWorkflowRun(workflowRunId);
+		}
+		catch(ReferenceServiceException resex){
+			errorString += "Failed to delete lists for workflow run: " + workflowRunId + ".";
+		}
+		try{
+			referenceSetService.deleteReferenceSetsForWorkflowRun(workflowRunId);
+		}
+		catch(ReferenceServiceException resex){
+			errorString += "Failed to delete reference sets for workflow run: " + workflowRunId + ".";
+		}
+		try{
+			errorDocumentService.deleteErrorDocumentsForWorkflowRun(workflowRunId);
+		}
+		catch(ReferenceServiceException resex){
+			errorString += "Failed to delete error documents for workflow run: " + workflowRunId +".";
+		}
+		if (!errorString.equals("")){
+			throw new ReferenceServiceException(errorString);
+		}
 	}
 
 }

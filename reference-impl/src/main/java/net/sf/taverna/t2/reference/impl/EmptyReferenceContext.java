@@ -37,8 +37,12 @@ public class EmptyReferenceContext implements ReferenceContext {
 	/**
 	 * Return an empty entity set for all queries.
 	 */
-	public <T> List<? extends T> getEntities(Class<T> arg0) {
+	public <T> List<T> getEntities(Class<T> arg0) {
 		return new ArrayList<T>();
+	}
+
+	public void addEntity(Object entity) {
+		// TODO Auto-generated method stub
 	}
 
 }

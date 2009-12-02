@@ -20,6 +20,8 @@
  ******************************************************************************/
 package net.sf.taverna.t2.reference.impl;
 
+import java.util.List;
+
 import net.sf.taverna.t2.reference.DaoException;
 import net.sf.taverna.t2.reference.ErrorDocument;
 import net.sf.taverna.t2.reference.ErrorDocumentDao;
@@ -29,6 +31,7 @@ import net.sf.taverna.t2.reference.annotations.DeleteIdentifiedOperation;
 import net.sf.taverna.t2.reference.annotations.GetIdentifiedOperation;
 import net.sf.taverna.t2.reference.annotations.PutIdentifiedOperation;
 
+import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 
 /**
@@ -136,5 +139,23 @@ public class TransactionalHibernateErrorDocumentDao implements ErrorDocumentDao 
 					"Supplied ErrorDocument not an instance of ErrorDocumentImpl");
 		}
 		return true;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@DeleteIdentifiedOperation
+	public synchronized void deleteErrorDocumentsForWFRun(String workflowRunId) throws DaoException {	
+		try{
+			// Select all ErrorDocuments for this wf run
+			Query selectQuery= sessionFactory.getCurrentSession().createQuery("FROM ErrorDocumentImpl WHERE namespacePart=:workflow_run_id");
+			selectQuery.setString("workflow_run_id", workflowRunId);
+			List<ErrorDocument> errorDocuments = selectQuery.list(); 
+			for (ErrorDocument errorDocument : errorDocuments){
+				delete(errorDocument);
+			}
+		}
+		catch(Exception ex){
+			throw new DaoException(ex);
+		}
+		
 	}
 }

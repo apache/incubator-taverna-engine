@@ -45,11 +45,7 @@ public class InMemoryListDao implements ListDao {
 
 	public synchronized IdentifiedList<T2Reference> get(T2Reference reference)
 			throws DaoException {
-		if (store.containsKey(reference)) {
-			return store.get(reference);
-		} else {
-			throw new DaoException("Key " + reference + " not found in store");
-		}
+		return store.get(reference);		
 	}
 
 	public synchronized void store(IdentifiedList<T2Reference> theList) throws DaoException {
@@ -61,4 +57,11 @@ public class InMemoryListDao implements ListDao {
 		return (store.remove(theList.getId())!=null);
 	}
 
+	public synchronized void deleteIdentifiedListsForWFRun(String workflowRunId) throws DaoException {
+		for (T2Reference reference: store.keySet()){
+			if (reference.getNamespacePart().equals(workflowRunId)){
+				store.remove(reference);
+			}
+		}
+	}
 }

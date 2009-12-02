@@ -27,6 +27,7 @@ import net.sf.taverna.t2.reference.ErrorDocumentService;
 import net.sf.taverna.t2.reference.ErrorDocumentServiceCallback;
 import net.sf.taverna.t2.reference.ErrorDocumentServiceException;
 import net.sf.taverna.t2.reference.ListServiceException;
+import net.sf.taverna.t2.reference.ReferenceContext;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.reference.T2ReferenceGenerator;
 
@@ -107,14 +108,14 @@ public abstract class AbstractErrorDocumentServiceImpl extends
 
 	}
 
-	public final ErrorDocument registerError(String message, int depth)
+	public final ErrorDocument registerError(String message, int depth, ReferenceContext context)
 			throws ErrorDocumentServiceException {
-		return registerError(message, (Throwable) null, depth);
+		return registerError(message, (Throwable) null, depth, context);
 	}
 
-	public final ErrorDocument registerError(Throwable t, int depth)
+	public final ErrorDocument registerError(Throwable t, int depth, ReferenceContext context)
 			throws ErrorDocumentServiceException {
-		return registerError("", t, depth);
+		return registerError("", t, depth, context);
 	}
 
 }

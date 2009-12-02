@@ -25,6 +25,7 @@ import java.util.Set;
 import net.sf.taverna.t2.reference.ErrorDocument;
 import net.sf.taverna.t2.reference.ErrorDocumentService;
 import net.sf.taverna.t2.reference.ErrorDocumentServiceException;
+import net.sf.taverna.t2.reference.ReferenceContext;
 import net.sf.taverna.t2.reference.ReferenceServiceException;
 import net.sf.taverna.t2.reference.T2Reference;
 
@@ -52,13 +53,13 @@ public class ErrorDocumentServiceImpl extends AbstractErrorDocumentServiceImpl
 	 * Register the specified error and any child errors (which have the same
 	 * namespace and local part but a lower depth, down to depth of zero
 	 */
-	public ErrorDocument registerError(String message, Throwable t, int depth)
+	public ErrorDocument registerError(String message, Throwable t, int depth, ReferenceContext context)
 			throws ErrorDocumentServiceException {
 		checkDao();
 		checkGenerator();
 
 		T2Reference ref = t2ReferenceGenerator
-				.nextErrorDocumentReference(depth);
+				.nextErrorDocumentReference(depth, context);
 		T2ReferenceImpl typedId = T2ReferenceImpl.getAsImpl(ref);
 
 		ErrorDocument docToReturn = null;
@@ -100,13 +101,13 @@ public class ErrorDocumentServiceImpl extends AbstractErrorDocumentServiceImpl
 
 	}
 
-	public ErrorDocument registerError(String message, Set<T2Reference> errors, int depth) 
+	public ErrorDocument registerError(String message, Set<T2Reference> errors, int depth, ReferenceContext context) 
 			throws ErrorDocumentServiceException {
 		checkDao();
 		checkGenerator();
 
 		T2Reference ref = t2ReferenceGenerator
-		.nextErrorDocumentReference(depth);
+		.nextErrorDocumentReference(depth, context);
 		T2ReferenceImpl typedId = T2ReferenceImpl.getAsImpl(ref);
 
 		ErrorDocument docToReturn = null;
@@ -155,6 +156,12 @@ public class ErrorDocumentServiceImpl extends AbstractErrorDocumentServiceImpl
 		ErrorDocument doc = errorDao.get(reference);
 		if (doc==null) return false;
 		return errorDao.delete(doc);
+	}
+
+	public void deleteErrorDocumentsForWorkflowRun(String workflowRunId)
+			throws ReferenceServiceException {
+		checkDao();
+		errorDao.deleteErrorDocumentsForWFRun(workflowRunId);
 	}
 
 }

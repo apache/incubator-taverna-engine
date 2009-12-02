@@ -20,9 +20,13 @@
  ******************************************************************************/
 package net.sf.taverna.t2.reference.impl;
 
+import java.util.List;
+
+import net.sf.taverna.t2.reference.ReferenceContext;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.reference.T2ReferenceGenerator;
 import net.sf.taverna.t2.reference.T2ReferenceType;
+import net.sf.taverna.t2.reference.WorkflowRunIdEntity;
 
 /**
  * An abstract class for implementing simple {@link T2ReferenceGenerator}s.
@@ -40,9 +44,22 @@ public abstract class AbstractT2ReferenceGenerator implements
 	/**
 	 * {@inheritDoc}
 	 */
-	public synchronized T2Reference nextReferenceSetReference() {
+	public synchronized T2Reference nextReferenceSetReference(ReferenceContext context) {
+		
 		T2ReferenceImpl r = new T2ReferenceImpl();
-		r.setNamespacePart(getNamespace());
+		if (context == null){
+			r.setNamespacePart(getNamespace()); // this is not good, just use the default namespace
+		}
+		else{
+			List<WorkflowRunIdEntity> workflowRunIdEntities = context.getEntities(WorkflowRunIdEntity.class);
+			if (workflowRunIdEntities.isEmpty()){ // this is not good, just use the default namespace
+				r.setNamespacePart(getNamespace());
+			}
+			else{ // there should be only one wf run id entity
+				String workflowRunId = ((WorkflowRunIdEntity)workflowRunIdEntities.get(0)).getWorkflowRunId();
+				r.setNamespacePart(workflowRunId);
+			}
+		}
 		r.setLocalPart(getNextLocalPart());
 		r.setReferenceType(T2ReferenceType.ReferenceSet);
 		r.setDepth(0);
@@ -62,9 +79,21 @@ public abstract class AbstractT2ReferenceGenerator implements
 	/**
 	 * {@inheritDoc}
 	 */
-	public T2Reference nextListReference(boolean containsErrors, int listDepth) {
+	public T2Reference nextListReference(boolean containsErrors, int listDepth, ReferenceContext context) {
 		T2ReferenceImpl r = new T2ReferenceImpl();
-		r.setNamespacePart(getNamespace());
+		if (context == null){
+			r.setNamespacePart(getNamespace()); // this is not good, just use the default namespace
+		}
+		else{
+			List<WorkflowRunIdEntity> workflowRunIdEntities = context.getEntities(WorkflowRunIdEntity.class);
+			if (workflowRunIdEntities.isEmpty()){ // this is not good, just use the default namespace
+				r.setNamespacePart(getNamespace());
+			}
+			else{ // there should be only one wf run id entity
+				String workflowRunId = ((WorkflowRunIdEntity)workflowRunIdEntities.get(0)).getWorkflowRunId();
+				r.setNamespacePart(workflowRunId);
+			}
+		}
 		r.setLocalPart(getNextLocalPart());
 		r.setReferenceType(T2ReferenceType.IdentifiedList);
 		r.setDepth(listDepth);
@@ -75,9 +104,21 @@ public abstract class AbstractT2ReferenceGenerator implements
 	/**
 	 * {@inheritDoc}
 	 */
-	public T2Reference nextErrorDocumentReference(int depth) {
+	public T2Reference nextErrorDocumentReference(int depth, ReferenceContext context) {
 		T2ReferenceImpl r = new T2ReferenceImpl();
-		r.setNamespacePart(getNamespace());
+		if (context == null){
+			r.setNamespacePart(getNamespace()); // this is not good, just use the default namespace
+		}
+		else{
+			List<WorkflowRunIdEntity> workflowRunIdEntities = context.getEntities(WorkflowRunIdEntity.class);
+			if (workflowRunIdEntities.isEmpty()){ // this is not good, just use the default namespace
+				r.setNamespacePart(getNamespace());
+			}
+			else{ // there should be only one wf run id entity
+				String workflowRunId = ((WorkflowRunIdEntity)workflowRunIdEntities.get(0)).getWorkflowRunId();
+				r.setNamespacePart(workflowRunId);
+			}
+		}
 		r.setLocalPart(getNextLocalPart());
 		r.setReferenceType(T2ReferenceType.ErrorDocument);
 		r.setDepth(depth);

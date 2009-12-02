@@ -20,14 +20,19 @@
  ******************************************************************************/
 package net.sf.taverna.t2.reference.impl;
 
+import java.util.List;
+
 import net.sf.taverna.t2.reference.DaoException;
 import net.sf.taverna.t2.reference.IdentifiedList;
 import net.sf.taverna.t2.reference.ListDao;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.reference.T2ReferenceType;
+import net.sf.taverna.t2.reference.annotations.DeleteIdentifiedOperation;
 import net.sf.taverna.t2.reference.annotations.GetIdentifiedOperation;
 import net.sf.taverna.t2.reference.annotations.PutIdentifiedOperation;
 
+import org.hibernate.Query;
+import org.hibernate.Session;
 import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 
 /**
@@ -124,5 +129,23 @@ public class HibernateListDao extends HibernateDaoSupport implements ListDao {
 					"Supplied identifier list not an instance of T2ReferenceList");
 		}
 		return true;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@DeleteIdentifiedOperation
+	public synchronized void deleteIdentifiedListsForWFRun(String workflowRunId) throws DaoException {	
+		try{
+			// Select all T2Reference lists for this wf run
+			Session session = getSession();
+			Query selectQuery= session.createQuery("FROM T2ReferenceListImpl WHERE namespacePart=:workflow_run_id");
+			selectQuery.setString("workflow_run_id", workflowRunId);
+			List<IdentifiedList<T2Reference>> identifiedLists = selectQuery.list();
+			session.close(); // need to close before we do delete otherwise hibernate complains that two sessions are accessing collection
+			getHibernateTemplate().deleteAll(identifiedLists);
+		}
+		catch(Exception ex){
+			throw new DaoException(ex);
+		}
+		
 	}
 }

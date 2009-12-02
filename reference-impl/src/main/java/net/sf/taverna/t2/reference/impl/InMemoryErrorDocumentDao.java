@@ -45,11 +45,7 @@ public class InMemoryErrorDocumentDao implements ErrorDocumentDao {
 
 	public synchronized ErrorDocument get(T2Reference reference)
 			throws DaoException {
-		if (store.containsKey(reference)) {
-			return store.get(reference);
-		} else {
-			throw new DaoException("Key " + reference + " not found in store");
-		}
+		return store.get(reference);		
 	}
 
 	public synchronized void store(ErrorDocument theDoc) throws DaoException {
@@ -58,6 +54,14 @@ public class InMemoryErrorDocumentDao implements ErrorDocumentDao {
 	
 	public synchronized boolean delete(ErrorDocument theDoc) throws DaoException {
 		return store.remove(theDoc.getId())!=null;
+	}
+	
+	public synchronized void deleteErrorDocumentsForWFRun(String workflowRunId) throws DaoException {
+		for (T2Reference reference: store.keySet()){
+			if (reference.getNamespacePart().equals(workflowRunId)){
+				store.remove(reference);
+			}
+		}
 	}
 
 }

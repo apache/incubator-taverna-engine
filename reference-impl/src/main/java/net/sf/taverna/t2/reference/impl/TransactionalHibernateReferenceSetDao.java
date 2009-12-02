@@ -20,6 +20,8 @@
  ******************************************************************************/
 package net.sf.taverna.t2.reference.impl;
 
+import java.util.List;
+
 import net.sf.taverna.t2.reference.DaoException;
 import net.sf.taverna.t2.reference.ReferenceSet;
 import net.sf.taverna.t2.reference.ReferenceSetDao;
@@ -29,6 +31,7 @@ import net.sf.taverna.t2.reference.annotations.DeleteIdentifiedOperation;
 import net.sf.taverna.t2.reference.annotations.GetIdentifiedOperation;
 import net.sf.taverna.t2.reference.annotations.PutIdentifiedOperation;
 
+import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 
 /**
@@ -183,4 +186,22 @@ public class TransactionalHibernateReferenceSetDao implements ReferenceSetDao {
 		return true;
 	}
 	
+	@SuppressWarnings("unchecked")
+	@DeleteIdentifiedOperation
+	public synchronized void deleteReferenceSetsForWFRun(String workflowRunId) throws DaoException {
+		try{
+			// Select all ReferenceSets for this wf run
+			Query selectQuery= sessionFactory.getCurrentSession().createQuery("FROM ReferenceSetImpl WHERE namespacePart=:workflow_run_id");
+			selectQuery.setString("workflow_run_id", workflowRunId);
+			List<ReferenceSet> referenceSets = selectQuery.list();
+			for (ReferenceSet referenceSet : referenceSets){
+				delete(referenceSet);
+			}
+		}
+		catch(Exception ex){
+			throw new DaoException(ex);
+		}
+		
+	}
+
 }

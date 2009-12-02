@@ -26,6 +26,7 @@ import net.sf.taverna.t2.reference.DaoException;
 import net.sf.taverna.t2.reference.IdentifiedList;
 import net.sf.taverna.t2.reference.ListService;
 import net.sf.taverna.t2.reference.ListServiceException;
+import net.sf.taverna.t2.reference.ReferenceContext;
 import net.sf.taverna.t2.reference.ReferenceServiceException;
 import net.sf.taverna.t2.reference.T2Reference;
 
@@ -49,7 +50,7 @@ public class ListServiceImpl extends AbstractListServiceImpl implements
 		}
 	}
 
-	public IdentifiedList<T2Reference> registerEmptyList(int depth)
+	public IdentifiedList<T2Reference> registerEmptyList(int depth, ReferenceContext context)
 			throws ListServiceException {
 		if (depth < 1) {
 			throw new ListServiceException("Can't register empty lists of depth " + depth);
@@ -57,7 +58,7 @@ public class ListServiceImpl extends AbstractListServiceImpl implements
 		checkDao();
 		checkGenerator();
 		T2ReferenceImpl newReference = T2ReferenceImpl
-				.getAsImpl(t2ReferenceGenerator.nextListReference(false, depth));
+				.getAsImpl(t2ReferenceGenerator.nextListReference(false, depth, context));
 		T2ReferenceListImpl newList = new T2ReferenceListImpl();
 		newList.setTypedId(newReference);
 		try {
@@ -68,7 +69,7 @@ public class ListServiceImpl extends AbstractListServiceImpl implements
 		}
 	}
 
-	public IdentifiedList<T2Reference> registerList(List<T2Reference> items)
+	public IdentifiedList<T2Reference> registerList(List<T2Reference> items, ReferenceContext context)
 			throws ListServiceException {
 		checkDao();
 		checkGenerator();
@@ -105,7 +106,7 @@ public class ListServiceImpl extends AbstractListServiceImpl implements
 		try {
 			T2ReferenceImpl newReference = T2ReferenceImpl
 					.getAsImpl(t2ReferenceGenerator.nextListReference(
-							containsErrors, depth + 1));
+							containsErrors, depth + 1, context));
 			newList.setTypedId(newReference);
 			listDao.store(newList);
 			return newList;
@@ -120,6 +121,12 @@ public class ListServiceImpl extends AbstractListServiceImpl implements
 		IdentifiedList<T2Reference> list=listDao.get(reference);
 		if (list==null) return false;
 		return listDao.delete(list);
+	}
+
+	public void deleteIdentifiedListsForWorkflowRun(String workflowRunId)
+			throws ReferenceServiceException {
+		checkDao();
+		listDao.deleteIdentifiedListsForWFRun(workflowRunId);
 	}
 
 }
