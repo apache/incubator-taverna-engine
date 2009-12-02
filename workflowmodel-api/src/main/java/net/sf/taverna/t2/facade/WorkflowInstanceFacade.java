@@ -162,4 +162,9 @@ public interface WorkflowInstanceFacade {
 	 */
 	public WeakHashMap<String, T2Reference> getPushedDataMap();
 
+	
+	/**
+	 * Get the unique id of the wf run inside the facede.
+	 */
+	public String getWorkflowRunId();
 }

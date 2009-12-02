@@ -141,5 +141,8 @@ public interface Dataflow extends Annotated<Dataflow>, TokenProcessingEntity {
 	 * @return a String representing a unique internal identifier.
 	 */
 	public String getInternalIdentier();
+	
+	public boolean isRunning();
+	public void setIsRunning(boolean isRunning);
 
 }
