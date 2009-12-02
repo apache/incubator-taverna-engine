@@ -39,6 +39,7 @@ import net.sf.taverna.t2.provenance.ProvenanceConnectorFactory;
 import net.sf.taverna.t2.provenance.ProvenanceConnectorFactoryRegistry;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector;
 import net.sf.taverna.t2.provenance.lineageservice.Dependencies;
+import net.sf.taverna.t2.provenance.lineageservice.LineageQueryResultRecord;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceAnalysis;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceQuery;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceWriter;
@@ -231,6 +232,15 @@ public class ProvenanceAccess {
 		return null;
 	}
 
+	
+	/**
+	 * @param record a record representing a single value -- possibly within a list hierarchy
+	 * @return the URI for topmost containing collection when the input record is within a list hierarchy, or null otherwise
+	 */
+	public String getContainingCollection(LineageQueryResultRecord record)  {
+		return pq.getContainingCollection(record);
+	}
+	
 //	/ manage instances
 
 
@@ -249,6 +259,11 @@ public class ProvenanceAccess {
 		}
 	}
 
+	
+	public boolean isTopLevelDataflow(String wfNameID)  {
+		return pq.isTopLevelDataflow(wfNameID);
+	}
+	
 
 	/**
 	 * Removes all records that pertain to a specific run (but not the static specification of the workflow run)

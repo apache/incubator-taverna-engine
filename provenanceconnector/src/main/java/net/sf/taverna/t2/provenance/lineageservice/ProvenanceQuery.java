@@ -174,11 +174,11 @@ public abstract class ProvenanceQuery {
 				}
 			}
 		} catch (InstantiationException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (IllegalAccessException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (ClassNotFoundException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -230,11 +230,11 @@ public abstract class ProvenanceQuery {
 				}
 			}
 		} catch (InstantiationException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (IllegalAccessException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (ClassNotFoundException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -273,11 +273,11 @@ public abstract class ProvenanceQuery {
 				}
 			}
 		} catch (InstantiationException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (IllegalAccessException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (ClassNotFoundException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -375,16 +375,18 @@ public abstract class ProvenanceQuery {
 				}
 			}
 		} catch (InstantiationException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (IllegalAccessException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (ClassNotFoundException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} finally {
 			if (connection != null) {
 				connection.close();
 			}
 		}
+		
+		q = q + " ORDER BY timestamp desc ";
 
 		return result;
 	}
@@ -525,11 +527,11 @@ public abstract class ProvenanceQuery {
 				}
 			}
 		} catch (InstantiationException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (IllegalAccessException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (ClassNotFoundException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -568,11 +570,11 @@ public abstract class ProvenanceQuery {
 				}
 			}
 		} catch (InstantiationException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (IllegalAccessException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (ClassNotFoundException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -621,11 +623,11 @@ public abstract class ProvenanceQuery {
 				}
 			}
 		} catch (InstantiationException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (IllegalAccessException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (ClassNotFoundException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -698,7 +700,7 @@ public abstract class ProvenanceQuery {
 
 			}
 		} catch (Exception e) {
-			logger.warn("Add VB failed:" + e.getMessage());
+			logger.warn("Add VB failed", e);
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -807,11 +809,11 @@ public abstract class ProvenanceQuery {
 				}
 			}
 		} catch (InstantiationException e1) {
-			logger.warn("Could not execute query: " + e1);
+			logger.warn("Could not execute query", e1);
 		} catch (IllegalAccessException e1) {
-			logger.warn("Could not execute query: " + e1);
+			logger.warn("Could not execute query", e1);
 		} catch (ClassNotFoundException e1) {
-			logger.warn("Could not execute query: " + e1);
+			logger.warn("Could not execute query", e1);
 		} catch (SQLException e) {
 			logger.error("Error executing query", e);
 		} finally {
@@ -866,13 +868,13 @@ public abstract class ProvenanceQuery {
 				}
 			}
 		} catch (InstantiationException e1) {
-			logger.warn("Could not execute query: " + e1);
+			logger.warn("Could not execute query", e1);
 		} catch (IllegalAccessException e1) {
-			logger.warn("Could not execute query: " + e1);
+			logger.warn("Could not execute query", e1);
 		} catch (ClassNotFoundException e1) {
-			logger.warn("Could not execute query: " + e1);
+			logger.warn("Could not execute query", e1);
 		} catch (SQLException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} finally {
 			if (connection != null) {
 				try {
@@ -932,11 +934,11 @@ public abstract class ProvenanceQuery {
 				}
 			}
 		} catch (InstantiationException e1) {
-			logger.warn("Could not execute query: " + e1);
+			logger.warn("Could not execute query", e1);
 		} catch (IllegalAccessException e1) {
-			logger.warn("Could not execute query: " + e1);
+			logger.warn("Could not execute query", e1);
 		} catch (ClassNotFoundException e1) {
-			logger.warn("Could not execute query: " + e1);
+			logger.warn("Could not execute query", e1);
 		} finally {
 			try {
 				connection.close();
@@ -1003,11 +1005,11 @@ public abstract class ProvenanceQuery {
 				result.put(currentWorkflowProcessor, 0);
 			}
 		} catch (InstantiationException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (IllegalAccessException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (ClassNotFoundException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} finally {
 			try {
 				connection.close();
@@ -1066,11 +1068,11 @@ public abstract class ProvenanceQuery {
 				}
 			}
 		} catch (InstantiationException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (IllegalAccessException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (ClassNotFoundException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -1106,11 +1108,11 @@ public abstract class ProvenanceQuery {
 				}
 			}
 		} catch (InstantiationException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (IllegalAccessException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (ClassNotFoundException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -1172,7 +1174,7 @@ public abstract class ProvenanceQuery {
 				}
 			}
 		} catch (SQLException e) {
-			logger.error("Problem getting nested workflow processors for: " + wfnameRef + " : " + e);
+			logger.error("Problem getting nested workflow processors for: " + wfnameRef, e);
 		}
 		return result;
 	}
@@ -1215,11 +1217,11 @@ public abstract class ProvenanceQuery {
 				}
 			}
 		} catch (InstantiationException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (IllegalAccessException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (ClassNotFoundException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -1245,19 +1247,19 @@ public abstract class ProvenanceQuery {
 				if (rs.next()) {  return rs.getString("pname"); }
 			}
 		} catch (SQLException e) {
-			logger.error("Problem getting processor for workflow: " + workflowID+ " : " + e);
+			logger.error("Problem getting processor for workflow: " + workflowID, e);
 		} catch (InstantiationException e) {
-			logger.error("Problem getting processor for workflow: " + workflowID+ " : " + e);
+			logger.error("Problem getting processor for workflow: " + workflowID, e);
 		} catch (IllegalAccessException e) {
-			logger.error("Problem getting processor for workflow: " + workflowID+ " : " + e);
+			logger.error("Problem getting processor for workflow: " + workflowID, e);
 		} catch (ClassNotFoundException e) {
-			logger.error("Problem getting processor for workflow: " + workflowID+ " : " + e);
+			logger.error("Problem getting processor for workflow: " + workflowID, e);
 		} finally {
 			if (connection != null) {
 				try {
 					connection.close();
 				} catch (SQLException e) {
-					logger.error("Problem getting processor for workflow: " + workflowID+ " : " + e);
+					logger.error("Problem getting processor for workflow: " + workflowID, e);
 				}
 			}
 		}
@@ -1551,11 +1553,11 @@ public abstract class ProvenanceQuery {
 				}
 			}
 		} catch (InstantiationException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (IllegalAccessException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (ClassNotFoundException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -1625,11 +1627,11 @@ public abstract class ProvenanceQuery {
 				return lqr;
 			}
 		} catch (InstantiationException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (IllegalAccessException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (ClassNotFoundException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -1780,13 +1782,13 @@ public abstract class ProvenanceQuery {
 				}
 			}
 		} catch (InstantiationException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (IllegalAccessException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (ClassNotFoundException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (SQLException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} finally {
 			try {
 				connection.close();
@@ -1818,13 +1820,13 @@ public abstract class ProvenanceQuery {
 				}
 			}
 		} catch (InstantiationException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (IllegalAccessException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (ClassNotFoundException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (SQLException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} finally {
 			try {
 				connection.close();
@@ -1864,13 +1866,13 @@ public abstract class ProvenanceQuery {
 				}
 			}
 		} catch (InstantiationException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (IllegalAccessException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (ClassNotFoundException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (SQLException e) {
-			logger.error("Could not execute query: " + e);
+			logger.error("Could not execute query", e);
 		} finally {
 			try {
 				if (connection != null) {
@@ -1907,11 +1909,11 @@ public abstract class ProvenanceQuery {
 				}
 			}
 		} catch (InstantiationException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (IllegalAccessException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (ClassNotFoundException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -1957,11 +1959,11 @@ public abstract class ProvenanceQuery {
 				}
 			}
 		} catch (InstantiationException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (IllegalAccessException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (ClassNotFoundException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -1990,11 +1992,11 @@ public abstract class ProvenanceQuery {
 				}
 			}
 		} catch (InstantiationException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (IllegalAccessException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (ClassNotFoundException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -2032,11 +2034,11 @@ public abstract class ProvenanceQuery {
 				}
 			}
 		} catch (InstantiationException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (IllegalAccessException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (ClassNotFoundException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -2046,6 +2048,49 @@ public abstract class ProvenanceQuery {
 		return false;
 	}
 
+	
+	public boolean isTopLevelDataflow(String wfNameID)  {
+		
+		PreparedStatement ps = null;
+		Connection connection = null;
+		try {
+			connection = getConnection();
+			ps = connection.prepareStatement(
+					"SELECT * FROM Workflow W " +
+					" where I.wfname = ? ");
+			
+			ps.setString(1, wfNameID);
+			boolean success = ps.execute();
+
+			if (success) {
+				ResultSet rs = ps.getResultSet();
+
+				if (rs.next()) {
+					if (rs.getString("parentWFname") == null) return true;
+					return false;
+				}
+			}
+		} catch (SQLException e) {
+			logger.warn("Could not execute query", e);
+		} catch (InstantiationException e) {
+			logger.warn("Could not execute query", e);
+		} catch (IllegalAccessException e) {
+			logger.warn("Could not execute query", e);
+		} catch (ClassNotFoundException e) {
+			logger.warn("Could not execute query", e);
+		} finally {
+			try {
+				if (connection != null) {
+					connection.close();
+				}
+			} catch (SQLException ex) {
+				logger.error("An error occurred closing the database connection", ex);
+			}
+		}
+		return false;
+	}
+	
+	
 	public String getTopDataflow(String wfInstanceID) {
 
 		PreparedStatement ps = null;
@@ -2067,13 +2112,13 @@ public abstract class ProvenanceQuery {
 				}
 			}
 		} catch (SQLException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (InstantiationException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (IllegalAccessException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (ClassNotFoundException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} finally {
 			try {
 				if (connection != null) {
@@ -2146,11 +2191,11 @@ public abstract class ProvenanceQuery {
 				return result;
 			}
 		} catch (InstantiationException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (IllegalAccessException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (ClassNotFoundException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -2197,11 +2242,11 @@ public abstract class ProvenanceQuery {
 				return result;
 			}
 		} catch (InstantiationException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (IllegalAccessException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (ClassNotFoundException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -2241,11 +2286,11 @@ public abstract class ProvenanceQuery {
 				return result;
 			}
 		} catch (InstantiationException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (IllegalAccessException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (ClassNotFoundException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -2286,13 +2331,13 @@ public abstract class ProvenanceQuery {
 				}
 			}
 		} catch (InstantiationException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (IllegalAccessException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (ClassNotFoundException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (SQLException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} finally {
 			if (connection != null) {
 				try {
@@ -2336,13 +2381,13 @@ public abstract class ProvenanceQuery {
 				}
 			}
 		} catch (InstantiationException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (IllegalAccessException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (ClassNotFoundException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (SQLException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} finally {
 			if (connection != null) {
 				try {
@@ -2389,13 +2434,13 @@ public abstract class ProvenanceQuery {
 				}
 			}
 		} catch (InstantiationException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (IllegalAccessException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (ClassNotFoundException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} catch (SQLException e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} finally {
 			if (connection != null) {
 				try {
@@ -2408,6 +2453,92 @@ public abstract class ProvenanceQuery {
 		return null;
 
 	}
+	
+	/**
+	 * @param record a record representing a single value -- possibly within a list hierarchy
+	 * @return the URI for topmost containing collection when the input record is within a list hierarchy, or null otherwise
+	 */
+	public String getContainingCollection(LineageQueryResultRecord record) {
+
+		if (record.getCollIdRef() == null) return null;
+		
+		String q = "SELECT * FROM Collection where collID = ? and wfInstanceRef = ? and PNameRef = ? and varNameRef = ?";
+
+		PreparedStatement stmt = null;
+		Connection connection = null;
+
+		String parentCollIDRef = null;
+		try {
+			connection = getConnection();
+			stmt = connection.prepareStatement(q);
+			
+			stmt.setString(1, record.getCollIdRef());
+			stmt.setString(2, record.getWfInstance());
+			stmt.setString(3, record.getPname());
+			stmt.setString(4, record.getVname());
+
+			String tmp = stmt.toString();
+			
+			boolean success = stmt.execute();
+
+			if (success) {
+				ResultSet rs = stmt.getResultSet();
+
+				if (rs.next()) {
+					parentCollIDRef = rs.getString("parentCollIDRef");
+				}
+			}
+		} catch (InstantiationException e) {
+			logger.warn("Could not execute query", e);
+		} catch (IllegalAccessException e) {
+			logger.warn("Could not execute query", e);
+		} catch (ClassNotFoundException e) {
+			logger.warn("Could not execute query", e);
+		} catch (SQLException e) {
+			logger.warn("Could not execute query", e);
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					logger.warn("Could not close connection", e);
+				}
+			}
+		}
+		
+		while (parentCollIDRef != null) {  // INITIALLY not null -- would be TOP if the initial had no parent
+			
+			String oldParentCollIDRef = parentCollIDRef;
+			
+			// query Collection again for parent collection
+			try {
+				connection = getConnection();
+				stmt = connection.prepareStatement(q);
+				
+				stmt.setString(1, oldParentCollIDRef);
+				stmt.setString(2, record.getWfInstance());
+				stmt.setString(3, record.getPname());
+				stmt.setString(4, record.getVname());
+
+				//String tmp = stmt.toString();
+
+				boolean success = stmt.execute();
+				if (success) {
+					ResultSet rs = stmt.getResultSet();
+					if (rs.next()) {
+						parentCollIDRef = rs.getString("parentCollIDRef");
+						if (parentCollIDRef.equals("TOP")) {
+							return oldParentCollIDRef;
+						}
+					}
+				}
+			} catch (Exception e) {
+				logger.warn("Could not execute query", e);
+			}
+		}
+		return null;
+	}
+
 
 }
 
