@@ -35,7 +35,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import net.sf.taverna.t2.invocation.InvocationContext;
 import net.sf.taverna.t2.provenance.connector.JDBCConnector;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Arc;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DDRecord;
@@ -46,9 +45,6 @@ import net.sf.taverna.t2.provenance.lineageservice.utils.Var;
 import net.sf.taverna.t2.provenance.lineageservice.utils.VarBinding;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Workflow;
 import net.sf.taverna.t2.provenance.lineageservice.utils.WorkflowInstance;
-import net.sf.taverna.t2.reference.ReferenceService;
-import net.sf.taverna.t2.reference.T2Reference;
-import net.sf.taverna.t2.reference.impl.T2ReferenceImpl;
 
 import org.apache.log4j.Logger;
 import org.jdom.Document;
@@ -2057,7 +2053,7 @@ public abstract class ProvenanceQuery {
 			connection = getConnection();
 			ps = connection.prepareStatement(
 					"SELECT * FROM Workflow W " +
-					" where I.wfname = ? ");
+					" where W.wfname = ? ");
 			
 			ps.setString(1, wfNameID);
 			boolean success = ps.execute();
