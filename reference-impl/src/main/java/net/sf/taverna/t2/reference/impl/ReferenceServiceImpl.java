@@ -620,6 +620,7 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 					.parseBoolean(parseRef.get("error")));
 			newRef.setDepth(Integer.parseInt(parseRef.get("depth")));
 		} else if (type.equals("error")) {
+			newRef.setContainsErrors(true);
 			newRef.setReferenceType(T2ReferenceType.ErrorDocument);
 			newRef.setDepth(Integer.parseInt(parseRef.get("depth")));
 		} else {
