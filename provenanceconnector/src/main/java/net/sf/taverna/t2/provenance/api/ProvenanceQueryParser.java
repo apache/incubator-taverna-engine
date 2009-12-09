@@ -3,9 +3,8 @@
  */
 package net.sf.taverna.t2.provenance.api;
 
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
+import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -26,7 +25,6 @@ import net.sf.taverna.t2.provenance.lineageservice.utils.WorkflowInstance;
 import org.apache.log4j.Logger;
 import org.jdom.Document;
 import org.jdom.Element;
-import org.jdom.JDOMException;
 import org.jdom.Namespace;
 import org.jdom.input.SAXBuilder;
 
@@ -56,7 +54,7 @@ public class ProvenanceQueryParser {
 	private static final String PROCESSOR_EL = "processor";
 	private static final String PORT_NAME_ATTR = "name";
 	private static final String PROC_NAME_ATTR = "name";
-	private static final String PORT_NAME_EL = "name";
+	//private static final String PORT_NAME_EL = "name";
 
 	private static final String PROC_FOCUS_EL = "focus";
 
@@ -74,10 +72,9 @@ public class ProvenanceQueryParser {
 
 	/**
 	 * 
-	 * @param XMLQuerySpec A string representation of the XML provenace query
+	 * @param XMLQuerySpec A string representation of the XML provenance query
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public Query parseProvenanceQuery(String XMLQuerySpecFilename) {
 
 		Query q = new Query();
@@ -101,7 +98,30 @@ public class ProvenanceQueryParser {
 
 		return q;
 	}
+	
+	public Query parseProvenanceQuery(InputStream stream) {
 
+		Query q = new Query();
+
+		Document d=null; 
+
+		// parse the XML using JDOM
+		SAXBuilder  b = new SAXBuilder();
+
+		try {
+			d = b.build(stream);
+		} catch (Exception e) {
+			logger.error("Problem parsing provenance query: " + e);
+			return null;
+		}
+
+		q.setRunIDList(parseWorkflowAndRuns(d));  // sets the set of runs 
+		q.setWorkflowName(mainWorkflowExternalName);
+		q.setTargetVars(parsePortSelection(d));
+		q.setSelectedProcessors(parseProcessorFocus(d));
+
+		return q;
+	}
 
 	/**
 	 * processor the <processorFocus> section of the query spec
@@ -234,8 +254,7 @@ public class ProvenanceQueryParser {
 
 		List<Var> ports = pAccess.getPortsForProcessor(workflowID, procName);
 
-		List<Element> children = childEl.getChildren();
-		if (children.size() == 0) {  
+		if (childEl == null || (childEl.getChildren().size()==0)) {  
 			// add all output ports 
 			for (Var p:ports) {
 				if (!p.isInput()) {
@@ -248,6 +267,7 @@ public class ProvenanceQueryParser {
 				}
 			}
 		} else {
+			List<Element> children = childEl.getChildren();
 			Map<String, String> portToIndex = new HashMap<String, String>();
 			for (Element portEl:children) {
 				if (portEl.getName().equals(PORT_EL))  {
