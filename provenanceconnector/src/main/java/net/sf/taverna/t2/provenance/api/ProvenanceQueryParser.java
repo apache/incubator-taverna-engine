@@ -99,7 +99,7 @@ public class ProvenanceQueryParser {
 		return q;
 	}
 	
-	public Query parseProvenanceQuery(InputStream stream) {
+	public Query parseProvenanceQuery(InputStream queryStream) {
 
 		Query q = new Query();
 
@@ -109,7 +109,7 @@ public class ProvenanceQueryParser {
 		SAXBuilder  b = new SAXBuilder();
 
 		try {
-			d = b.build(stream);
+			d = b.build(queryStream);
 		} catch (Exception e) {
 			logger.error("Problem parsing provenance query: " + e);
 			return null;
