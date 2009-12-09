@@ -27,8 +27,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.bind.JAXBException;
-
 import net.sf.taverna.t2.provenance.api.NativeAnswer;
 import net.sf.taverna.t2.provenance.api.QueryAnswer;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Arc;
