@@ -72,7 +72,7 @@ public class ProvenanceAccess {
 	ProvenanceWriter pw;
 	Query q = null;
 	private String connectorType;
-	private boolean computeOPMGraph;
+	//private boolean computeOPMGraph;
 
 	public ProvenanceAccess(String connectorType) {
 		this.connectorType = connectorType;
@@ -160,6 +160,15 @@ public class ProvenanceAccess {
 
 	}
 
+	/**
+	 * Set the Reference Service for the connector of this ProvenanceAccess
+	 * if you do not 'like' the default one created when ProvenanceAccess is created.
+	 */
+	public void setReferenceService(ReferenceService refService) {
+		if (provenanceConnector != null) {
+			provenanceConnector.setReferenceService(refService);
+		}
+	}
 
 	public void init() {
 
