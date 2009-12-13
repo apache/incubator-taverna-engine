@@ -8,7 +8,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<name>Taverna 2 language extensions</name>
 	<groupId>net.sf.taverna.t2</groupId>
-	<version>0.7-SNAPSHOT</version>
+	<version>1.0</version>
 	<artifactId>lang</artifactId>
 	<packaging>pom</packaging>
 	<properties>
