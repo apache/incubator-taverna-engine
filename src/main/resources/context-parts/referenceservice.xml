@@ -11,7 +11,7 @@
 
 	<!-- Reference service bean -->
 	<bean id="t2reference.service.referenceService"
-		raven:artifact="net.sf.taverna.t2.core:reference-impl:1.0"
+		raven:artifact="net.sf.taverna.t2.core:reference-impl:1.1-SNAPSHOT"
 		raven:repository="raven.repository"
 		class="net.sf.taverna.t2.reference.impl.ReferenceServiceImpl">
 		<property name="referenceSetService">

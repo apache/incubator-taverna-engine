@@ -10,19 +10,19 @@
 	http://taverna.sf.net/schema/artifact-support/artifact-support.xsd">
 
 	<bean id="t2reference.dao.referenceSetDao"
-		raven:artifact="net.sf.taverna.t2.core:reference-impl:1.0"
+		raven:artifact="net.sf.taverna.t2.core:reference-impl:1.1-SNAPSHOT"
 		raven:repository="raven.repository"
 		class="net.sf.taverna.t2.reference.impl.InMemoryReferenceSetDao">
 	</bean>
 
 	<bean id="t2reference.dao.errorDocumentDao"
-		raven:artifact="net.sf.taverna.t2.core:reference-impl:1.0"
+		raven:artifact="net.sf.taverna.t2.core:reference-impl:1.1-SNAPSHOT"
 		raven:repository="raven.repository"
 		class="net.sf.taverna.t2.reference.impl.InMemoryErrorDocumentDao">
 	</bean>
 
 	<bean id="t2reference.dao.listDao"
-		raven:artifact="net.sf.taverna.t2.core:reference-impl:1.0"
+		raven:artifact="net.sf.taverna.t2.core:reference-impl:1.1-SNAPSHOT"
 		raven:repository="raven.repository"
 		class="net.sf.taverna.t2.reference.impl.InMemoryListDao">
 	</bean>
