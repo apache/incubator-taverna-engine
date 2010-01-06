@@ -1,114 +1,113 @@
-/*******************************************************************************
- * Copyright (C) 2007 The University of Manchester   
- * 
- *  Modifications to the initial code base are copyright of their
- *  respective authors, or their employers as appropriate.
- * 
- *  This program is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public License
- *  as published by the Free Software Foundation; either version 2.1 of
- *  the License, or (at your option) any later version.
- *    
- *  This program is distributed in the hope that it will be useful, but
- *  WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
- *    
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- ******************************************************************************/
-package ${packageName};
+package com.example.myactivity;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.net.URI;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import net.sf.taverna.t2.activities.testutils.ActivityInvoker;
-import net.sf.taverna.t2.cloudone.refscheme.ReferenceScheme;
 import net.sf.taverna.t2.workflowmodel.OutputPort;
+import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityConfigurationException;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityInputPort;
-import net.sf.taverna.t2.workflowmodel.processor.activity.config.ActivityInputPortDefinitionBean;
-import net.sf.taverna.t2.workflowmodel.processor.activity.config.ActivityOutputPortDefinitionBean;
 
 import org.junit.Before;
 import org.junit.Test;
 
-/**
- * Unit tests for ${artifactId}Activity.
- * 
- */
-public class ${artifactId}ActivityTest {
+public class ExampleActivityTest {
 
-	private ${artifactId}Activity activity;
+	private ExampleActivityConfigurationBean configBean;
 
-	private ${artifactId}ActivityConfigurationBean configurationBean;
+	private ExampleActivity activity = new ExampleActivity();
 
 	@Before
-	public void setUp() throws Exception {
-		activity = new ${artifactId}Activity();
-		configurationBean = new ${artifactId}ActivityConfigurationBean();
+	public void makeConfigBean() throws Exception {
+		configBean = new ExampleActivityConfigurationBean();
+		configBean.setExampleString("something");
+		configBean
+				.setExampleUri(URI.create("http://localhost:8080/myEndPoint"));
+	}
 
-		ActivityInputPortDefinitionBean inputPortBean = new ActivityInputPortDefinitionBean();
-		inputPortBean.setDepth(0);
-		inputPortBean.setName("example_input");
-		inputPortBean.setHandledReferenceSchemes(new ArrayList<Class<? extends ReferenceScheme<?>>>());
-		inputPortBean.setTranslatedElementType(String.class);
-		inputPortBean.setAllowsLiteralValues(true);
-		configurationBean.setInputPortDefinitions(Collections.singletonList(inputPortBean));
-		
-		ActivityOutputPortDefinitionBean outputPortBean = new ActivityOutputPortDefinitionBean();
-		outputPortBean.setDepth(0);
-		outputPortBean.setName("example_output");
-		outputPortBean.setMimeTypes(new ArrayList<String>());
-		configurationBean.setOutputPortDefinitions(Collections.singletonList(outputPortBean));
+	@Test(expected = ActivityConfigurationException.class)
+	public void invalidConfiguration() throws ActivityConfigurationException {
+		ExampleActivityConfigurationBean invalidBean = new ExampleActivityConfigurationBean();
+		invalidBean.setExampleString("invalidExample");
+		// Should throw ActivityConfigurationException
+		activity.configure(invalidBean);
 	}
 
 	@Test
-	public void test${artifactId}Activity() {
-		assertNotNull(new ${artifactId}Activity());
-	}
+	public void executeAsynch() throws Exception {
+		activity.configure(configBean);
 
-	@Test
-	public void testExecuteAsynch() throws Exception {
 		Map<String, Object> inputs = new HashMap<String, Object>();
-		inputs.put("example_input", "hello");
-		List<String> expectedOutputs = new ArrayList<String>();
-		expectedOutputs.add("example_output");
+		inputs.put("firstInput", "hello");
 
-		activity.configure(configurationBean);
+		Map<String, Class<?>> expectedOutputTypes = new HashMap<String, Class<?>>();
+		expectedOutputTypes.put("simpleOutput", String.class);
+		expectedOutputTypes.put("moreOutputs", String.class);
 
 		Map<String, Object> outputs = ActivityInvoker.invokeAsyncActivity(
-				activity, inputs, expectedOutputs);
-		assertTrue(outputs.containsKey("example_output"));
-		assertEquals("hello_example", outputs.get("example_output"));
+				activity, inputs, expectedOutputTypes);
+
+		assertEquals("Unexpected outputs", 2, outputs.size());
+		assertEquals("simple", outputs.get("simpleOutput"));
+		assertEquals(Arrays.asList("Value 1", "Value 2"), outputs
+				.get("moreOutputs"));
+
 	}
 
 	@Test
-	public void testConfigure${artifactId}ActivityConfigurationBean()
-			throws Exception {
-		Set<String> expectedInputs = new HashSet<String>();
-		expectedInputs.add("example_input");
-		Set<String> expectedOutputs = new HashSet<String>();
-		expectedOutputs.add("example_output");
+	public void reConfiguredActivity() throws Exception {
+		assertEquals("Unexpected inputs", 0, activity.getInputPorts().size());
+		assertEquals("Unexpected outputs", 0, activity.getOutputPorts().size());
 
-		activity.configure(configurationBean);
-		
+		activity.configure(configBean);
+		assertEquals("Unexpected inputs", 1, activity.getInputPorts().size());
+		assertEquals("Unexpected outputs", 2, activity.getOutputPorts().size());
+
+		activity.configure(configBean);
+		// Should not change on reconfigure
+		assertEquals("Unexpected inputs", 1, activity.getInputPorts().size());
+		assertEquals("Unexpected outputs", 2, activity.getOutputPorts().size());
+	}
+
+	@Test
+	public void reConfiguredSpecialPorts() throws Exception {
+		activity.configure(configBean);
+
+		ExampleActivityConfigurationBean specialBean = new ExampleActivityConfigurationBean();
+		specialBean.setExampleString("specialCase");
+		specialBean.setExampleUri(URI
+				.create("http://localhost:8080/myEndPoint"));
+		activity.configure(specialBean);		
+		// Should now have added the optional ports
+		assertEquals("Unexpected inputs", 2, activity.getInputPorts().size());
+		assertEquals("Unexpected outputs", 3, activity.getOutputPorts().size());
+	}
+
+	@Test
+	public void configureActivity() throws Exception {
+		Set<String> expectedInputs = new HashSet<String>();
+		expectedInputs.add("firstInput");
+
+		Set<String> expectedOutputs = new HashSet<String>();
+		expectedOutputs.add("simpleOutput");
+		expectedOutputs.add("moreOutputs");
+
+		activity.configure(configBean);
+
 		Set<ActivityInputPort> inputPorts = activity.getInputPorts();
 		assertEquals(expectedInputs.size(), inputPorts.size());
 		for (ActivityInputPort inputPort : inputPorts) {
-			assertTrue("Wrong output : " + inputPort.getName(),
-					expectedInputs.remove(inputPort.getName()));
+			assertTrue("Wrong input : " + inputPort.getName(), expectedInputs
+					.remove(inputPort.getName()));
 		}
-		
+
 		Set<OutputPort> outputPorts = activity.getOutputPorts();
 		assertEquals(expectedOutputs.size(), outputPorts.size());
 		for (OutputPort outputPort : outputPorts) {
@@ -116,5 +115,4 @@ public class ${artifactId}ActivityTest {
 					expectedOutputs.remove(outputPort.getName()));
 		}
 	}
-
 }

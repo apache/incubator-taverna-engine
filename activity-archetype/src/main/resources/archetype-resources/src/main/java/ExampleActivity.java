@@ -1,91 +1,155 @@
-/*******************************************************************************
- * Copyright (C) 2007 The University of Manchester   
- * 
- *  Modifications to the initial code base are copyright of their
- *  respective authors, or their employers as appropriate.
- * 
- *  This program is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public License
- *  as published by the Free Software Foundation; either version 2.1 of
- *  the License, or (at your option) any later version.
- *    
- *  This program is distributed in the hope that it will be useful, but
- *  WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
- *    
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- ******************************************************************************/
-package ${packageName};
+package com.example.myactivity;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import net.sf.taverna.t2.cloudone.datamanager.DataFacade;
-import net.sf.taverna.t2.cloudone.datamanager.DataManagerException;
-import net.sf.taverna.t2.cloudone.datamanager.NotFoundException;
-import net.sf.taverna.t2.cloudone.identifier.EntityIdentifier;
+import net.sf.taverna.t2.invocation.InvocationContext;
+import net.sf.taverna.t2.reference.ReferenceService;
+import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.workflowmodel.processor.activity.AbstractAsynchronousActivity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityConfigurationException;
+import net.sf.taverna.t2.workflowmodel.processor.activity.AsynchronousActivity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.AsynchronousActivityCallback;
 
-/**
- * An Activity providing ${artifactId} functionality.
- * 
- */
-public class ${artifactId}Activity extends
-		AbstractAsynchronousActivity<${artifactId}ActivityConfigurationBean> {
+public class ExampleActivity extends
+		AbstractAsynchronousActivity<ExampleActivityConfigurationBean>
+		implements AsynchronousActivity<ExampleActivityConfigurationBean> {
 
-	private ${artifactId}ActivityConfigurationBean configurationBean;
-
-	public ${artifactId}Activity() {
-	}
+	/*
+	 * Best practice: Keep port names as constants to avoid misspelling. This
+	 * would not apply if port names are looked up dynamically from the service
+	 * operation, like done for WSDL services.
+	 */
+	private static final String IN_FIRST_INPUT = "firstInput";
+	private static final String IN_EXTRA_DATA = "extraData";
+	private static final String OUT_MORE_OUTPUTS = "moreOutputs";
+	private static final String OUT_SIMPE_OUTPUT = "simpleOutput";
+	private static final String OUT_REPORT = "report";
+	
+	private ExampleActivityConfigurationBean configBean;
 
 	@Override
-	public void configure(${artifactId}ActivityConfigurationBean configurationBean)
+	public void configure(ExampleActivityConfigurationBean configBean)
 			throws ActivityConfigurationException {
-		this.configurationBean = configurationBean;
-		configurePorts(configurationBean);
+
+		// Any pre-config sanity checks
+		if (configBean.getExampleString().equals("invalidExample")) {
+			throw new ActivityConfigurationException(
+					"Example string can't be 'invalidExample'");
+		}
+		// Store for getConfiguration(), but you could also make
+		// getConfiguration() return a new bean from other sources
+		this.configBean = configBean;
+
+		// OPTIONAL: 
+		// Do any server-side lookups and configuration, like resolving WSDLs
+
+		// myClient = new MyClient(configBean.getExampleUri());
+		// this.service = myClient.getService(configBean.getExampleString());
+
+		
+		// REQUIRED: (Re)create input/output ports depending on configuration
+		configurePorts();
 	}
 
-	@Override
-	public ${artifactId}ActivityConfigurationBean getConfiguration() {
-		return configurationBean;
+	protected void configurePorts() {
+		// In case we are being reconfigured - remove existing ports first
+		// to avoid duplicates
+		removeInputs();
+		removeOutputs();
+
+		// FIXME: Replace with your input and output port definitions
+		
+		// Hard coded input port, expecting a single String
+		addInput(IN_FIRST_INPUT, 0, true, null, String.class);
+
+		// Optional ports depending on configuration
+		if (configBean.getExampleString().equals("specialCase")) {
+			// depth 1, ie. list of binary byte[] arrays
+			addInput(IN_EXTRA_DATA, 1, true, null, byte[].class);
+			addOutput(OUT_REPORT, 0);
+		}
+		
+		// Single value output port (depth 0)
+		addOutput(OUT_SIMPE_OUTPUT, 0);
+		// Output port with list of values (depth 1)
+		addOutput(OUT_MORE_OUTPUTS, 1);
+
 	}
 	
+	@SuppressWarnings("unchecked")
+	@Override
+	public void executeAsynch(final Map<String, T2Reference> inputs,
+			final AsynchronousActivityCallback callback) {
+		// Don't execute service directly now, request to be run ask to be run
+		// from thread pool and return asynchronously
+		callback.requestRun(new Runnable() {
+			
+			public void run() {
+				InvocationContext context = callback
+						.getContext();
+				ReferenceService referenceService = context
+						.getReferenceService();
+				// Resolve inputs 				
+				String firstInput = (String) referenceService.renderIdentifier(inputs.get(IN_FIRST_INPUT), 
+						String.class, context);
+				
+				// Support our configuration-dependendent input
+				boolean optionalPorts = configBean.getExampleString().equals("specialCase"); 
+				
+				List<byte[]> special = null;
+				// We'll also allow IN_EXTRA_DATA to be optionally not provided
+				if (optionalPorts && inputs.containsKey(IN_EXTRA_DATA)) {
+					// Resolve as a list of byte[]
+					special = (List<byte[]>) referenceService.renderIdentifier(
+							inputs.get(IN_EXTRA_DATA), byte[].class, context);
+				}
+				
+
+				// TODO: Do the actual service invocation
+//				try {
+//					results = this.service.invoke(firstInput, special)
+//				} catch (ServiceException ex) {
+//					callback.fail("Could not invoke Example service " + configBean.getExampleUri(),
+//							ex);
+//					// Make sure we don't call callback.receiveResult later 
+//					return;
+//				}
+
+				// Register outputs
+				String simpleValue = "simple";
+				Map<String, T2Reference> outputs = new HashMap<String, T2Reference>();
+				T2Reference simpleRef = referenceService.register(simpleValue, 0, true, context);
+				outputs.put(OUT_SIMPE_OUTPUT, simpleRef);
+
+				// For list outputs, only need to register the top level list
+				List<String> moreValues = new ArrayList<String>();
+				moreValues.add("Value 1");
+				moreValues.add("Value 2");
+				T2Reference moreRef = referenceService.register(moreValues, 1, true, context);
+				outputs.put(OUT_MORE_OUTPUTS, moreRef);
+
+				if (optionalPorts) {
+					// Populate our optional output port					
+					// NOTE: Need to return output values for all defined output ports
+					String report = "Everything OK";
+					outputs.put(OUT_REPORT, referenceService.register(report,
+							0, true, context));
+				}
+				
+				// return map of output data, with empty index array as this is
+				// the only and final result (this index parameter is used if
+				// pipelining output)
+				callback.receiveResult(outputs, new int[0]);
+			}
+		});
+	}
 
 	@Override
-	public void executeAsynch(final Map<String, EntityIdentifier> data,
-			final AsynchronousActivityCallback callback) {
-		callback.requestRun(new Runnable() {
-
-			public void run() {
-				DataFacade dataFacade = new DataFacade(callback.getContext().getDataManager());
-
-				Map<String, EntityIdentifier> outputData = new HashMap<String, EntityIdentifier>();
-
-				try {
-					//resolve inputs
-					Object exampleInput = dataFacade.resolve(data.get("example_input"), String.class);
-					
-					//run the activity
-					String exampleOutput = exampleInput + "_example";
-					
-					//register outputs
-					outputData.put("example_output", dataFacade.register(exampleOutput));
-
-					//send result to the callback
-					callback.receiveResult(outputData, new int[0]);
-				} catch (DataManagerException e) {
-					callback.fail("Error accessing input/output data", e);
-				} catch (NotFoundException e) {
-					callback.fail("Error accessing input/output data", e);
-				}
-			}
-			
-		});
-
+	public ExampleActivityConfigurationBean getConfiguration() {
+		return this.configBean;
 	}
+
 }

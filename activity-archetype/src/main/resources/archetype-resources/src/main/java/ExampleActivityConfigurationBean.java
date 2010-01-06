@@ -1,32 +1,50 @@
-/*******************************************************************************
- * Copyright (C) 2007 The University of Manchester   
- * 
- *  Modifications to the initial code base are copyright of their
- *  respective authors, or their employers as appropriate.
- * 
- *  This program is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public License
- *  as published by the Free Software Foundation; either version 2.1 of
- *  the License, or (at your option) any later version.
- *    
- *  This program is distributed in the hope that it will be useful, but
- *  WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
- *    
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- ******************************************************************************/
-package ${packageName};
+package com.example.myactivity;
 
-import net.sf.taverna.t2.workflowmodel.processor.activity.config.ActivityPortsDefinitionBean;
+import java.net.URI;
 
 /**
- * A configuration bean specific to the ${artifactId} activity.
+ * Example activity configuration bean.
  * 
  */
-public class ${artifactId}ActivityConfigurationBean extends ActivityPortsDefinitionBean {
+public class ExampleActivityConfigurationBean {
 
+	/*
+	 * TODO: Remove this comment.
+	 * 
+	 * The configuration specifies the variable options and configurations for
+	 * an activity that has been added to a workflow. For instance for a WSDL
+	 * activity, the configuration contains the URL for the WSDL together with
+	 * the method name. String constant configurations contain the string that
+	 * is to be returned, while Beanshell script configurations contain both the
+	 * scripts and the input/output ports (by subclassing
+	 * ActivityPortsDefinitionBean).
+	 * 
+	 * Configuration beans are serialised as XML (currently by using XMLBeans)
+	 * when Taverna is saving the workflow definitions. Therefore the
+	 * configuration beans need to follow the JavaBeans style and only have
+	 * fields of 'simple' types such as Strings, integers, etc. Other beans can
+	 * be referenced as well, as long as they are part of the same plugin.
+	 */
+	
+	// TODO: Remove the example fields and getters/setters and add your own	
+	private String exampleString;
+
+	private URI exampleUri;
+
+	public String getExampleString() {
+		return exampleString;
+	}
+
+	public void setExampleString(String exampleString) {
+		this.exampleString = exampleString;
+	}
+
+	public URI getExampleUri() {
+		return exampleUri;
+	}
+
+	public void setExampleUri(URI exampleUri) {
+		this.exampleUri = exampleUri;
+	}
 
 }

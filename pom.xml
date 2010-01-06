@@ -1,17 +1,37 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project>
-  <parent>
-    <groupId>net.sf.taverna.t2</groupId>
-    <artifactId>activities</artifactId>
-    <version>0.5-SNAPSHOT</version>
-  </parent>
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>net.sf.taverna.t2.activities</groupId>
-  <artifactId>archetypes</artifactId>
-  <name>Archetypes</name>
-  <packaging>pom</packaging>
-  <modules>
-    <module>activity-archetype</module>
-    <module>activity-translator-archetype</module>
-  </modules>
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>parent</artifactId>
+		<groupId>net.sf.taverna</groupId>
+		<version>0.1.2009-02-12</version>
+	</parent>
+	<groupId>net.sf.taverna.t2.archetypes</groupId>
+	<artifactId>archetypes</artifactId>
+	<name>Archetypes</name>
+	<packaging>pom</packaging>
+
+	<version>1.0-SNAPSHOT</version>
+	<scm>
+		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/dev/archetypes/trunk/</connection>
+		<developerConnection>scm:svn:https://taverna.googlecode.com/svn/taverna/dev/archetypes/trunk/</developerConnection>
+		<url>http://code.google.com/p/taverna/source/browse/#svn/taverna/dev/archetypes/trunk/</url>
+	</scm>
+
+	<repositories>
+		<repository>
+			<releases />
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>mygrid-repository</id>
+			<name>myGrid Repository</name>
+			<url>http://www.mygrid.org.uk/maven/repository</url>
+		</repository>
+	</repositories>
+	<modules>
+		<module>activity-archetype</module>
+		<module>activity-translator-archetype</module>
+	</modules>
 </project>
