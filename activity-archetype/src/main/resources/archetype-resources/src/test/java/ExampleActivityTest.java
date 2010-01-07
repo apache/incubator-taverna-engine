@@ -1,4 +1,7 @@
-package com.example.myactivity;
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+package ${package};
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
