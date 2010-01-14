@@ -1,12 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?><archetype>
-  <id>taverna-activity-archetype</id>
-  <sources>
-    <source>src/main/java/ExampleActivity.java</source>
-    <source>src/main/java/ExampleActivityConfigurationBean.java</source>
-  </sources>
-  <testSources>
-    <source>src/test/java/ExampleActivityTest.java</source>
-  </testSources>
+  <id>taverna-activity-archetype</id>  
   <resources>
+  	<!--
+  	This file is only provided for backward compatibility - use archetype-metadata.xml 
+  	 -->
+   
+    <resource>example-activity/pom.xml</resource>
+    <resource>example-activity/src/main/java/com/example/ExampleActivity.java</resource>
+    <resource>example-activity/src/main/java/com/example/ExampleActivityConfigurationBean.java</resource>
+    <resource>example-activity/src/test/java/ExampleActivityTest.java</resource>
+    <resource>example-activity-ui/pom.xml</resource>
+    <resource>example-activity-ui/src/main/java/com/example/com/example/ui/config/ExampleConfigurationPanel.java</resource>
+    <resource>example-activity-ui/src/main/java/com/example/ui/config/ExampleConfigureAction.java</resource>
+    <resource>example-activity-ui/src/main/java/com/example/ui/serviceprovider/ExampleServiceDesc.java</resource>
+    <resource>example-activity-ui/src/main/java/com/example/ui/serviceprovider/ExampleServiceProvider.java</resource>
+    <resource>example-activity-ui/src/main/java/com/example/ui/view/ExampleActivityContextViewFactory.java</resource>
+    <resource>example-activity-ui/src/main/java/com/example/ui/view/ExampleContextualView.java</resource>
+    <resource>example-activity-ui/src/main/resources/META-INF/services/net.sf.taverna.t2.servicedescriptions.ServiceDescriptionProvider</resource>
+    <resource>example-activity-ui/src/main/resources/META-INF/services/net.sf.taverna.t2.workbench.ui.views.contextualviews.activity.ContextualViewFactory</resource>
+    <resource>example-activity-ui/src/test/java/ui/TavernaWorkbenchWithExamplePlugin.java</resource>
   </resources>
 </archetype>

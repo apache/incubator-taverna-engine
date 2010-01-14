@@ -1,0 +1,46 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>${groupId}</groupId>
+		<artifactId>${artifactId}</artifactId>
+		<version>${version}</version>
+	</parent>
+	<artifactId>example-activity-ui</artifactId>
+	<name>Example activity UI bindings</name>
+
+	<dependencies>
+		<dependency>
+			<groupId>${symbol_dollar}{project.groupId}</groupId>
+			<artifactId>example-activity</artifactId>
+			<version>${symbol_dollar}{project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.taverna.t2.ui-api</groupId>
+			<artifactId>activity-palette-api</artifactId>
+			<version>${symbol_dollar}{t2.ui.api.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.taverna.t2.ui-api</groupId>
+			<artifactId>menu-api</artifactId>
+			<version>${symbol_dollar}{t2.ui.api.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.taverna.t2.ui-api</groupId>
+			<artifactId>contextual-views-api</artifactId>
+			<version>${symbol_dollar}{t2.ui.api.version}</version>
+		</dependency>
+		
+		<!--  Remove if not using TavernaWorkbenchWithExamplePlugin.main() -->
+		<dependency>
+			<groupId>net.sf.taverna.t2.taverna-workbench</groupId>
+			<artifactId>workbench-dev</artifactId>
+			<version>${symbol_dollar}{t2.workbench.version}</version>
+			<scope>test</scope>
+		</dependency>
+	
+	</dependencies>
+</project>

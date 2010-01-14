@@ -8,9 +8,9 @@
 		<version>1.0-SNAPSHOT</version>
 	</parent>
 	<groupId>net.sf.taverna.t2.archetypes</groupId>
-	<artifactId>activity-archetype</artifactId>
-	<name>Archetype - activity</name>
+	<artifactId>taverna-activity-archetype</artifactId>
 	<packaging>maven-archetype</packaging>
+	<name>Taverna activity archetype</name>
 	<build>
 		<extensions>
 			<extension>

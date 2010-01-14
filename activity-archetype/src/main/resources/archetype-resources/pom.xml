@@ -1,4 +1,3 @@
-#set($dollar = '$')
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
@@ -6,13 +5,16 @@
 	<groupId>${groupId}</groupId>
 	<artifactId>${artifactId}</artifactId>
 	<version>${version}</version>
+	<packaging>pom</packaging>
 	<name>Example activity</name>
-	
+
 	<properties>
 		<t2.core.version>1.0</t2.core.version>
 		<t2.activities.version>1.0</t2.activities.version>
+		<t2.ui.api.version>1.0</t2.ui.api.version>
+		<t2.workbench.version>2.1.0</t2.workbench.version>
 	</properties>
-	
+
 	<build>
 		<plugins>
 			<plugin>
@@ -58,18 +60,8 @@
 			</plugin>
 		</plugins>
 	</build>
+
 	<dependencies>
-		<dependency>
-			<groupId>net.sf.taverna.t2.core</groupId>
-			<artifactId>workflowmodel-api</artifactId>
-			<version>${dollar}{t2.core.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.taverna.t2.activities</groupId>
-			<artifactId>activity-test-utils</artifactId>
-			<version>&#36;{t2.activities.version}</version>
-			<scope>test</scope>
-		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -77,6 +69,7 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
 	<repositories>
 		<repository>
 			<releases />
@@ -88,5 +81,8 @@
 			<url>http://www.mygrid.org.uk/maven/repository</url>
 		</repository>
 	</repositories>
-
+	<modules>
+		<module>example-activity</module>
+		<module>example-activity-ui</module>
+	</modules>
 </project>
