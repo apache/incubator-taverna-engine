@@ -49,13 +49,11 @@ public abstract class AbstractT2ReferenceGenerator implements
 		T2ReferenceImpl r = new T2ReferenceImpl();
 		if (context == null){
 			r.setNamespacePart(getNamespace()); // this is not good, just use the default namespace
-		}
-		else{
+		} else {
 			List<WorkflowRunIdEntity> workflowRunIdEntities = context.getEntities(WorkflowRunIdEntity.class);
-			if (workflowRunIdEntities.isEmpty()){ // this is not good, just use the default namespace
+			if (workflowRunIdEntities == null || workflowRunIdEntities.isEmpty()){ // this is not good, just use the default namespace
 				r.setNamespacePart(getNamespace());
-			}
-			else{ // there should be only one wf run id entity
+			} else { // there should be only one wf run id entity
 				String workflowRunId = ((WorkflowRunIdEntity)workflowRunIdEntities.get(0)).getWorkflowRunId();
 				r.setNamespacePart(workflowRunId);
 			}
@@ -83,13 +81,11 @@ public abstract class AbstractT2ReferenceGenerator implements
 		T2ReferenceImpl r = new T2ReferenceImpl();
 		if (context == null){
 			r.setNamespacePart(getNamespace()); // this is not good, just use the default namespace
-		}
-		else{
+		} else {
 			List<WorkflowRunIdEntity> workflowRunIdEntities = context.getEntities(WorkflowRunIdEntity.class);
-			if (workflowRunIdEntities.isEmpty()){ // this is not good, just use the default namespace
+			if (workflowRunIdEntities == null || workflowRunIdEntities.isEmpty()){ // this is not good, just use the default namespace
 				r.setNamespacePart(getNamespace());
-			}
-			else{ // there should be only one wf run id entity
+			} else { // there should be only one wf run id entity
 				String workflowRunId = ((WorkflowRunIdEntity)workflowRunIdEntities.get(0)).getWorkflowRunId();
 				r.setNamespacePart(workflowRunId);
 			}
@@ -108,13 +104,11 @@ public abstract class AbstractT2ReferenceGenerator implements
 		T2ReferenceImpl r = new T2ReferenceImpl();
 		if (context == null){
 			r.setNamespacePart(getNamespace()); // this is not good, just use the default namespace
-		}
-		else{
+		} else {
 			List<WorkflowRunIdEntity> workflowRunIdEntities = context.getEntities(WorkflowRunIdEntity.class);
-			if (workflowRunIdEntities.isEmpty()){ // this is not good, just use the default namespace
+			if (workflowRunIdEntities == null || workflowRunIdEntities.isEmpty()){ // this is not good, just use the default namespace
 				r.setNamespacePart(getNamespace());
-			}
-			else{ // there should be only one wf run id entity
+			} else { // there should be only one wf run id entity
 				String workflowRunId = ((WorkflowRunIdEntity)workflowRunIdEntities.get(0)).getWorkflowRunId();
 				r.setNamespacePart(workflowRunId);
 			}
