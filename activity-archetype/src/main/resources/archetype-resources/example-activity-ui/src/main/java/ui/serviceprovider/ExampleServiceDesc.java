@@ -65,7 +65,7 @@ public class ExampleServiceDesc extends ServiceDescription<ExampleActivityConfig
 	@Override
 	public List<String> getPath() {
 		// For deeper paths you may return several strings
-		return Arrays.asList("Example " + exampleUri);
+		return Arrays.asList("Examples " + exampleUri);
 	}
 
 	/**

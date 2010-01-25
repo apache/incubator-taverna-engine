@@ -3,13 +3,14 @@
 #set( $symbol_escape = '\' )
 package ${package};
 
+import java.io.Serializable;
 import java.net.URI;
 
 /**
  * Example activity configuration bean.
  * 
  */
-public class ExampleActivityConfigurationBean {
+public class ExampleActivityConfigurationBean implements Serializable {
 
 	/*
 	 * TODO: Remove this comment.

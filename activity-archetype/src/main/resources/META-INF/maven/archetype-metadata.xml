@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <archetype-descriptor name="taverna-activity-archetype">
+	<!-- If Maven seems to suddently fall back to using archetype.xml and ignore all settings
+		in here - triple check XML syntax as no error message is reported by the archetype plugin! 
+	 -->
 	<modules>
 		<module id="example=activity" dir="example-activity" name="example-activity">
 			<fileSets>

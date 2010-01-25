@@ -28,7 +28,7 @@ public class ExampleActivity extends
 	private static final String IN_FIRST_INPUT = "firstInput";
 	private static final String IN_EXTRA_DATA = "extraData";
 	private static final String OUT_MORE_OUTPUTS = "moreOutputs";
-	private static final String OUT_SIMPE_OUTPUT = "simpleOutput";
+	private static final String OUT_SIMPLE_OUTPUT = "simpleOutput";
 	private static final String OUT_REPORT = "report";
 	
 	private ExampleActivityConfigurationBean configBean;
@@ -76,7 +76,7 @@ public class ExampleActivity extends
 		}
 		
 		// Single value output port (depth 0)
-		addOutput(OUT_SIMPE_OUTPUT, 0);
+		addOutput(OUT_SIMPLE_OUTPUT, 0);
 		// Output port with list of values (depth 1)
 		addOutput(OUT_MORE_OUTPUTS, 1);
 
@@ -122,10 +122,10 @@ public class ExampleActivity extends
 //				}
 
 				// Register outputs
-				String simpleValue = "simple";
 				Map<String, T2Reference> outputs = new HashMap<String, T2Reference>();
+				String simpleValue = "simple";
 				T2Reference simpleRef = referenceService.register(simpleValue, 0, true, context);
-				outputs.put(OUT_SIMPE_OUTPUT, simpleRef);
+				outputs.put(OUT_SIMPLE_OUTPUT, simpleRef);
 
 				// For list outputs, only need to register the top level list
 				List<String> moreValues = new ArrayList<String>();

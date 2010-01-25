@@ -30,7 +30,7 @@ public class ExampleServiceProvider implements ServiceDescriptionProvider {
 		for (int i = 1; i <= 5; i++) {
 			ExampleServiceDesc service = new ExampleServiceDesc();
 			// Populate the service description bean
-			service.setExampleString("Examples " + i);
+			service.setExampleString("Example " + i);
 			service.setExampleUri(URI.create("http://localhost:8192/service"));
 
 			// Optional: set description
@@ -59,6 +59,11 @@ public class ExampleServiceProvider implements ServiceDescriptionProvider {
 	 */
 	public String getName() {
 		return "My example service";
+	}
+	
+	@Override
+	public String toString() {
+		return getName();
 	}
 
 }
