@@ -21,6 +21,7 @@
 package net.sf.taverna.t2.invocation.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import net.sf.taverna.t2.invocation.InvocationContext;
@@ -39,7 +40,7 @@ public class InvocationContextImpl implements InvocationContext {
 			ProvenanceReporter provenanceReporter) {
 		this.referenceService = referenceService;
 		this.provenanceReporter = provenanceReporter;
-		entities = new ArrayList<Object>();
+		entities = Collections.synchronizedList(new ArrayList<Object>());
 	}
 
 	public ReferenceService getReferenceService() {
@@ -52,9 +53,11 @@ public class InvocationContextImpl implements InvocationContext {
 
 	public <T extends Object> List<T> getEntities(Class<T> entityType){
 		List<T> entitiesOfType = new ArrayList<T>();
-		for (Object entity : entities){
-			if (entityType.isInstance(entity)){
-				entitiesOfType.add(entityType.cast(entity));
+		synchronized(entities) {
+			for (Object entity : entities){
+				if (entityType.isInstance(entity)){
+					entitiesOfType.add(entityType.cast(entity));
+				}
 			}
 		}
 		return entitiesOfType;
