@@ -21,6 +21,7 @@
 package net.sf.taverna.t2.security.credentialmanager;
 
 import java.awt.Frame;
+import java.awt.GraphicsEnvironment;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -34,7 +35,6 @@ import java.math.BigInteger;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.Key;
-import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -46,12 +46,13 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
-import java.util.TreeMap;
 
 import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.HttpsURLConnection;
@@ -80,25 +81,18 @@ import org.apache.log4j.Logger;
 
 public class CredentialManager implements Observable<KeystoreChangedEvent> {
 
+	private static final String PROPERTY_TRUSTSTOREPASSWORD = "javax.net.ssl.trustStorePassword";
+
+	/** Various passwords to try for the trust store password */
+	public static List<String> defaultTrustStorePasswords = Arrays.asList(System.getProperty(PROPERTY_TRUSTSTOREPASSWORD, ""), "changeit", "changeme", "");
+	
 	public static final String T2TRUSTSTORE_FILE = "t2truststore.jks";
 	public static final String SERVICE_URLS_FILE = "t2serviceURLs.txt";
 	public static final String T2KEYSTORE_FILE = "t2keystore.ubr";
-
-	public static final char USERNAME_AND_PASSWORD_SEPARATOR_CHARACTER = ';'; // seems
-																				// like
-																				// a
-																				// good
-																				// separator
-																				// as
-																				// it
-																				// will
-																				// highly
-																				// unlikely
-																				// feature
-																				// in
-																				// username
-
-	// Log4J Logger
+	
+	/* seems like a good separator as it will highly unlikely feature in username */ 
+	public static final char USERNAME_AND_PASSWORD_SEPARATOR_CHARACTER = ';'; 
+	
 	private static Logger logger = Logger.getLogger(CredentialManager.class);
 
 	// Multicaster of KeystoreChangedEventS
@@ -159,8 +153,9 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	 */
 	public static CredentialManager getInstance() throws CMException {
 		synchronized (CredentialManager.class) {
-			if (INSTANCE == null)
-				INSTANCE = new CredentialManager();
+			if (INSTANCE == null) {
+				INSTANCE = new CredentialManager(masterPassword);
+			}
 		}
 		return INSTANCE;
 	}
@@ -191,7 +186,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	}
 
 	/**
-	 * Overrides the Object’s clone method to prevent the singleton object to be
+	 * Overrides the Object's clone method to prevent the singleton object to be
 	 * cloned.
 	 */
 	@Override
@@ -203,37 +198,37 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	 * Credential Manager constructor.
 	 */
 	private CredentialManager() throws CMException {
-		SPIRegistry<MasterPasswordProviderSPI> masterPasswordManager = new SPIRegistry<MasterPasswordProviderSPI>(
-				MasterPasswordProviderSPI.class);
-		TreeMap<Integer, MasterPasswordProviderSPI> sortedProviders = new TreeMap<Integer, MasterPasswordProviderSPI>();
-		for (MasterPasswordProviderSPI spi : masterPasswordManager
-				.getInstances()) {
-			int priority = spi.canProvidePassword();
-			if (priority >= 0) {
-				sortedProviders.put(new Integer(priority), spi);
-			}
-		}
-		String password = null;
-		if (!sortedProviders.isEmpty()) { // we have found at least one password
-											// provider
-			while (!sortedProviders.isEmpty()) {
-				MasterPasswordProviderSPI provider = sortedProviders
-						.get(sortedProviders.lastKey());
-				password = provider.getPassword();
-				if (password != null) {
-					break;
-				}
-				sortedProviders.remove(sortedProviders.lastKey());
-			}
-		} else {
-			// We are in big trouble - we do not have a single master password
-			// provider
-			String exMessage = "Failed to obtain master password.";
-			logger.error(exMessage);
-			throw new CMException(exMessage);
-		}
+		String password = getMasterPassword();
 		init(password);
 		masterPassword = password;
+	}
+
+	private String getMasterPassword() throws CMException {
+		SPIRegistry<MasterPasswordProviderSPI> masterPasswordProviderSPI = new SPIRegistry<MasterPasswordProviderSPI>(
+				MasterPasswordProviderSPI.class);
+		List<MasterPasswordProviderSPI> masterPasswordProviders = masterPasswordProviderSPI
+				.getInstances();
+		Collections.sort(masterPasswordProviders,
+				new Comparator<MasterPasswordProviderSPI>() {
+					public int compare(MasterPasswordProviderSPI o1,
+							MasterPasswordProviderSPI o2) {
+						// Reverse sort - highest provider first
+						return o2.canProvidePassword()
+								- o1.canProvidePassword();
+					}
+				});
+		for (MasterPasswordProviderSPI provider : masterPasswordProviders) {
+			String password = provider.getPassword();
+			if (password != null) {
+				return password;
+			}
+		}
+		// We are in big trouble - we do not have a single master password
+		// provider
+		String exMessage = "Failed to obtain master password from providers: "
+				+ masterPasswordProviders;
+		logger.error(exMessage);
+		throw new CMException(exMessage);
 	}
 
 	/**
@@ -290,8 +285,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 			// Load service URLs associated with private key aliases from a file
 			try {
 				loadServiceURLsForKeyPairs();
-				logger
-						.info("Credential Manager: Loaded the Service URLs for private key pairs.");
+				logger.info("Credential Manager: Loaded the Service URLs for private key pairs.");
 			} catch (CMException cme) {
 				logger.error(cme.getMessage(), cme);
 				throw cme;
@@ -440,6 +434,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 				if (fis != null) {
 					try {
 						fis.close();
+						fis = null;
 					} catch (IOException e) {
 						// ignore
 					}
@@ -462,79 +457,58 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 				throw new CMException(exMessage);
 			}
 
-			FileInputStream fis = null;
+			FileInputStream fis = null;			
 			boolean loadedJavaTruststore = false;
-			try {
-				// Get the file
-				fis = new FileInputStream(javaTruststoreFile);
-				// Load the Java keystore from the file
-				javaTruststore.load(fis, "changeit".toCharArray()); // try with
-																	// the
-																	// default
-																	// Java
-																	// truststore
-																	// password
-																	// first
-				loadedJavaTruststore = true;
-			} catch (IOException ioex) {
-				// If there is an I/O or format problem with the keystore data,
-				// or if the given password was incorrect
-				logger
-						.error("Failed to load the Java truststore to copy over certificates using default password 'changeit'. Trying with user-provided password.");
-
-				// Close the input stream and reopen it to rewind it (resetting
-				// it did not work for some reason)
-				if (fis != null) {
-					try {
-						fis.close();
-						fis = new FileInputStream(javaTruststoreFile);
-					} catch (IOException e) {
-						// ignore
-					}
-				}
-				// Hopefully it was the password problem - ask user to provide
-				// their password for the Java truststore
-				GetMasterPasswordDialog getPasswordDialog = new GetMasterPasswordDialog(
-						"Credential Manager needs to copy certificates from Java truststore. Please enter your password.");
-				getPasswordDialog.setLocationRelativeTo(null);
-				getPasswordDialog.setVisible(true);
-				String javaTruststorePassword = getPasswordDialog.getPassword();
-				if (javaTruststorePassword == null) { // user cancelled - do not
-														// try to load Java
-														// truststore
-					loadedJavaTruststore = false;
-				} else {
-					try {
-						javaTruststore.load(fis, javaTruststorePassword
-								.toCharArray());
-						loadedJavaTruststore = true;
-					} catch (Exception ex) {
-						String exMessage = "Failed to load the Java truststore to copy over certificates using user-provided password. Creating a new empty truststore for Taverna.";
-						logger.error(exMessage, ex);
-						loadedJavaTruststore = false;
-					} finally {
-						if (fis != null) {
-							try {
-								fis.close();
-							} catch (IOException e) {
-								// ignore
-							}
+			
+			for (String password : defaultTrustStorePasswords) {
+				try {				
+					// Get the file
+					fis = new FileInputStream(javaTruststoreFile);
+					// Load the Java keystore from the file
+					// try with the default Java truststore password first
+					javaTruststore.load(fis, password.toCharArray()); 
+					loadedJavaTruststore = true;
+					break;
+				} catch (IOException ioex) {
+					// If there is an I/O or format problem with the keystore data, 
+					// or if the given password was incorrect 
+					// (Thank you Sun, now I can't know if it is the file or the password..)					
+					logger.warn("Failed to load the Java truststore to copy over certificates using default password: " + password + " from " + javaTruststoreFile);
+				} catch (NoSuchAlgorithmException e) {
+					logger.error("Unknown encryption algorithm while loading Java truststore from " + javaTruststoreFile, e);
+					break;
+				} catch (CertificateException e) {
+					logger.error("Certificate error while loading Java truststore from " + javaTruststoreFile, e);
+					break;
+				} finally {
+					if (fis != null) {
+						try {
+							fis.close();							
+						} catch (IOException e) {
+							// ignore
 						}
 					}
 				}
-			} catch (Exception ex) {
-				String exMessage = "Failed to load the Java truststore to copy over certificates. Creating a new empty truststore for Taverna.";
-				logger.error(exMessage, ex);
-				loadedJavaTruststore = false;
-			} finally {
-				if (fis != null) {
-					try {
-						fis.close();
-					} catch (IOException e) {
-						// ignore
-					}
+			}
+			
+			if (! loadedJavaTruststore) {
+				if (GraphicsEnvironment.isHeadless()){
+					String error = "Credential manager failed to load certificates from the Java truststore.";
+					String help = "Try using the system property -D" + PROPERTY_TRUSTSTOREPASSWORD + "=TheTrustStorePassword";
+					logger.error(error + " " + help);
+					System.err.println(error);
+					System.err.println(help);
+					// FIXME: Should also use SPIs for commandline/grid use
+				} else {
+					// Try using the GUI.. 
+
+					// Hopefully it was the password problem - ask user to provide
+					// their password for the Java truststore
+					copyPasswordFromGUI(javaTruststore, javaTruststoreFile);					
 				}
 			}
+			
+
 			FileOutputStream fos = null;
 			// Create a new empty truststore for Taverna
 			try {
@@ -600,6 +574,40 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 
 		return truststore;
 	}
+
+	private static boolean copyPasswordFromGUI(KeyStore javaTruststore,
+			File javaTruststoreFile) {
+		// FIXME: Move this class to the workbench and use the SPI
+		GetMasterPasswordDialog getPasswordDialog = new GetMasterPasswordDialog(
+				"Credential Manager needs to copy certificates from Java truststore. " +
+				"Please enter your password.");
+		getPasswordDialog.setLocationRelativeTo(null);
+		getPasswordDialog.setVisible(true);
+		String javaTruststorePassword = getPasswordDialog.getPassword();
+		if (javaTruststorePassword == null) { // user cancelled - do not
+			// try to load Java truststore
+			return false;
+		}
+		FileInputStream fis = null;
+		try {
+			fis = new FileInputStream(javaTruststoreFile);
+			javaTruststore.load(fis, javaTruststorePassword.toCharArray());
+			return true;
+		} catch (Exception ex) {
+			String exMessage = "Failed to load the Java truststore to copy over certificates" +
+					" using user-provided password. Creating a new empty truststore for Taverna.";
+			logger.error(exMessage, ex);
+			return false;
+		} finally {
+			if (fis != null) {
+				try {
+					fis.close();
+				} catch (IOException e) {
+					// ignore
+				}
+			}
+		}
+	}	
 
 	/**
 	 * Load lists of service URLs associated with private key aliases from a
@@ -1802,7 +1810,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	 * want to trust it.
 	 * 
 	 */
-	private static class MyX509TrustManager implements X509TrustManager {
+	public static class MyX509TrustManager implements X509TrustManager {
 
 		/*
 		 * The default X509TrustManager returned by SunX509. We'll delegate
@@ -1927,16 +1935,15 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 		try {
 			sc = SSLContext.getInstance("SSL");
 		} catch (NoSuchAlgorithmException e1) {
-			logger.error("", e1);
+			logger.error("No algorithm SSL", e1);
+			return null;
 		}
 
 		try {
 			sc.init(null, new TrustManager[] { new MyX509TrustManager() },
 					new SecureRandom());
-		} catch (KeyManagementException e) {
-			logger.error("", e);
 		} catch (Exception e) {
-			logger.error("", e);
+			logger.error("Can't initiate trust manager", e);
 		}
 		return sc.getSocketFactory();
 	}
