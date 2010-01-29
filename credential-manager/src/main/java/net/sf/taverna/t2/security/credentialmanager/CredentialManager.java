@@ -72,19 +72,31 @@ import org.apache.log4j.Logger;
 
 /**
  * Provides a wrapper for the user's Keystore and Truststore and implements
- * methods for managing user's credentials (passwords, private key pairs and 
+ * methods for managing user's credentials (passwords, private key pairs and
  * proxies) and trusted services' public key certificates.
  * 
  * @author Alex Nenadic
  */
 
-public class CredentialManager implements Observable<KeystoreChangedEvent>{
-	
+public class CredentialManager implements Observable<KeystoreChangedEvent> {
+
 	public static final String T2TRUSTSTORE_FILE = "t2truststore.jks";
 	public static final String SERVICE_URLS_FILE = "t2serviceURLs.txt";
 	public static final String T2KEYSTORE_FILE = "t2keystore.ubr";
-	
-	public static final char USERNAME_AND_PASSWORD_SEPARATOR_CHARACTER = ';'; // seems like a good separator as it will highly unlikely feature in username
+
+	public static final char USERNAME_AND_PASSWORD_SEPARATOR_CHARACTER = ';'; // seems
+																				// like
+																				// a
+																				// good
+																				// separator
+																				// as
+																				// it
+																				// will
+																				// highly
+																				// unlikely
+																				// feature
+																				// in
+																				// username
 
 	// Log4J Logger
 	private static Logger logger = Logger.getLogger(CredentialManager.class);
@@ -92,46 +104,56 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 	// Multicaster of KeystoreChangedEventS
 	private MultiCaster<KeystoreChangedEvent> multiCaster = new MultiCaster<KeystoreChangedEvent>(
 			this);
-	
+
 	// Security config directory
-	private static File secConfigDirectory = CMUtil.getSecurityConfigurationDirectory();	
-	// Keystore file. 
-	private static File keystoreFile = new File(secConfigDirectory,T2KEYSTORE_FILE);
+	private static File secConfigDirectory = CMUtil
+			.getSecurityConfigurationDirectory();
+	// Keystore file.
+	private static File keystoreFile = new File(secConfigDirectory,
+			T2KEYSTORE_FILE);
 	// Truststore file.
-	private static File truststoreFile = new File(secConfigDirectory,T2TRUSTSTORE_FILE); 
-	// Service URLs file containing lists of service URLs associated with private key aliases.
-	// The alias points to the key pair entry to be used for a particular service.
-	private static File serviceURLsFile = new File(secConfigDirectory,SERVICE_URLS_FILE); 
-	
-	// Master password the Keystore and Truststore are created/accessed with. 
+	private static File truststoreFile = new File(secConfigDirectory,
+			T2TRUSTSTORE_FILE);
+	// Service URLs file containing lists of service URLs associated with
+	// private key aliases.
+	// The alias points to the key pair entry to be used for a particular
+	// service.
+	private static File serviceURLsFile = new File(secConfigDirectory,
+			SERVICE_URLS_FILE);
+
+	// Master password the Keystore and Truststore are created/accessed with.
 	private static String masterPassword;
-	
-	// Keystore containing user's passwords, private keys and public key certificate chains.
+
+	// Keystore containing user's passwords, private keys and public key
+	// certificate chains.
 	private static KeyStore keystore;
-	// Truststore containing trusted certificates of CA authorities and services.
+	// Truststore containing trusted certificates of CA authorities and
+	// services.
 	private static KeyStore truststore;
 
 	// A map of service URLs associated with private key aliases, i.e. aliases
 	// are keys in the hashmap and lists of URLs are hashmap values.
-	private static HashMap<String,ArrayList<String>> serviceURLsForKeyPairs;
+	private static HashMap<String, ArrayList<String>> serviceURLsForKeyPairs;
 
-	// Constants denoting which of the two keystores we are currently 
+	// Constants denoting which of the two keystores we are currently
 	// performing operations on.
 	public static final String KEYSTORE = "Keystore";
-	
+
 	public static final String TRUSTSTORE = "Truststore";
-	// Default password for Truststore - needed as the Truststore needs to be populated
-	// sometimes before the Workbench starts up - e.g. in case of caGrid when trusted CAs
+	// Default password for Truststore - needed as the Truststore needs to be
+	// populated
+	// sometimes before the Workbench starts up - e.g. in case of caGrid when
+	// trusted CAs
 	// need to be inserted there at startup.
-	private static final String TRUSTSTORE_PASSWORD = "Tu/Ap%2_$dJt6*+Rca9v";//"raehiekooshe0eghiPhi";
+	private static final String TRUSTSTORE_PASSWORD = "Tu/Ap%2_$dJt6*+Rca9v";// "raehiekooshe0eghiPhi";
 
 	// Credential Manager singleton
 	private static CredentialManager INSTANCE;
-	
+
 	// Bouncy Castle provider
 	private static Provider bcProvider;
 	private static boolean sslInitialised = false;
-	
+
 	/**
 	 * Returns a CredentialManager singleton.
 	 */
@@ -142,23 +164,24 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 		}
 		return INSTANCE;
 	}
-	
+
 	/**
 	 * Returns a CredentialManager singleton for a provided master password.
 	 * This should really only be used from CredentialManagerUI where we want to
-	 * allow user to cancel entering the password (which only results in the 
-	 * CredentialManagerUI dialog not being shown) so we have to manage obtaining 
-	 * the password ourselves. Otherwise, CredentialManager itself takes care of
-	 * getting the password from the user using password providers. If a user cancels 
-	 * inside a password provider that should cause an error.
+	 * allow user to cancel entering the password (which only results in the
+	 * CredentialManagerUI dialog not being shown) so we have to manage
+	 * obtaining the password ourselves. Otherwise, CredentialManager itself
+	 * takes care of getting the password from the user using password
+	 * providers. If a user cancels inside a password provider that should cause
+	 * an error.
 	 */
-	public static CredentialManager getInstance(String masterPassword) throws CMException {
+	public static CredentialManager getInstance(String masterPassword)
+			throws CMException {
 		synchronized (CredentialManager.class) {
-			if (INSTANCE == null){
+			if (INSTANCE == null) {
 				INSTANCE = new CredentialManager(masterPassword);
-			}
-			else{
-				if (!confirmMasterPassword(masterPassword)){
+			} else {
+				if (!confirmMasterPassword(masterPassword)) {
 					String exMessage = "Incorrect password.";
 					throw new CMException(exMessage);
 				}
@@ -180,27 +203,31 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 	 * Credential Manager constructor.
 	 */
 	private CredentialManager() throws CMException {
-		SPIRegistry<MasterPasswordProviderSPI> masterPasswordManager = new SPIRegistry<MasterPasswordProviderSPI>(MasterPasswordProviderSPI.class);
+		SPIRegistry<MasterPasswordProviderSPI> masterPasswordManager = new SPIRegistry<MasterPasswordProviderSPI>(
+				MasterPasswordProviderSPI.class);
 		TreeMap<Integer, MasterPasswordProviderSPI> sortedProviders = new TreeMap<Integer, MasterPasswordProviderSPI>();
-		for (MasterPasswordProviderSPI spi : masterPasswordManager.getInstances()) {
+		for (MasterPasswordProviderSPI spi : masterPasswordManager
+				.getInstances()) {
 			int priority = spi.canProvidePassword();
-			if (priority >= 0){
+			if (priority >= 0) {
 				sortedProviders.put(new Integer(priority), spi);
 			}
 		}
 		String password = null;
-		if (!sortedProviders.isEmpty()){ // we have found at least one password provider
-			while (!sortedProviders.isEmpty()){
-				MasterPasswordProviderSPI provider = sortedProviders.get(sortedProviders.lastKey());
+		if (!sortedProviders.isEmpty()) { // we have found at least one password
+											// provider
+			while (!sortedProviders.isEmpty()) {
+				MasterPasswordProviderSPI provider = sortedProviders
+						.get(sortedProviders.lastKey());
 				password = provider.getPassword();
-				if (password!= null){
+				if (password != null) {
 					break;
 				}
 				sortedProviders.remove(sortedProviders.lastKey());
 			}
-		}
-		else{
-			// We are in big trouble - we do not have a single master password provider
+		} else {
+			// We are in big trouble - we do not have a single master password
+			// provider
 			String exMessage = "Failed to obtain master password.";
 			logger.error(exMessage);
 			throw new CMException(exMessage);
@@ -210,7 +237,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 	}
 
 	/**
-	 * Credential Manager constructor for a given master password. 
+	 * Credential Manager constructor for a given master password.
 	 */
 	private CredentialManager(String password) throws CMException {
 		init(password);
@@ -218,28 +245,31 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 	}
 
 	/**
-	 * Initialises Credential Manager - loads the Keystore, Truststore and serviceURLsFile.
+	 * Initialises Credential Manager - loads the Keystore, Truststore and
+	 * serviceURLsFile.
 	 */
-	private void init(String password) throws CMException{
+	private void init(String password) throws CMException {
 		// We do not want anyone to call Security.addProvider() and
 		// Security.removeProvider() synchronized methods until we
 		// execute this block to prevent someone interfering with
 		// our adding and removing of BC security provider
 		synchronized (Security.class) {
-			
+
 			ArrayList<Provider> oldBCProviders = unregisterOldBCProviders();
-			
+
 			// Get the new Bouncy Castle provider
 			try {
 				ClassLoader ourCL = getClass().getClassLoader();
-				Class<?> bcProvClass = ourCL.loadClass("org.bouncycastle.jce.provider.BouncyCastleProvider");
+				Class<?> bcProvClass = ourCL
+						.loadClass("org.bouncycastle.jce.provider.BouncyCastleProvider");
 				bcProvider = (Provider) bcProvClass.newInstance();
 				// Add our BC provider as a security provider
 				// while doing the crypto operations
 				Security.addProvider(bcProvider);
-				logger.info("Credential Manager: Adding Bouncy Castle security provider version " + bcProvider.getVersion());
-			} 
-			catch (Exception ex) {
+				logger
+						.info("Credential Manager: Adding Bouncy Castle security provider version "
+								+ bcProvider.getVersion());
+			} catch (Exception ex) {
 				// No sign of the provider
 				String exMessage = "Failed to load the Bouncy Castle cryptographic provider";
 				logger.error(ex);
@@ -247,23 +277,22 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 				restoreOldBCProviders(oldBCProviders);
 				throw new CMException(exMessage);
 			}
-			
+
 			// Load the Keystore
 			try {
 				keystore = loadKeystore(password);
 				logger.info("Credential Manager: Loaded the Keystore.");
-			} 
-			catch (CMException cme) {
+			} catch (CMException cme) {
 				logger.error(cme.getMessage(), cme);
 				throw cme;
 			}
-			
+
 			// Load service URLs associated with private key aliases from a file
 			try {
 				loadServiceURLsForKeyPairs();
-				logger.info("Credential Manager: Loaded the Service URLs for private key pairs.");
-			} 
-			catch (CMException cme) {
+				logger
+						.info("Credential Manager: Loaded the Service URLs for private key pairs.");
+			} catch (CMException cme) {
 				logger.error(cme.getMessage(), cme);
 				throw cme;
 			}
@@ -272,12 +301,11 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 			try {
 				truststore = loadTruststore(TRUSTSTORE_PASSWORD);
 				logger.info("Credential Manager: Loaded the Truststore.");
-			} 
-			catch (CMException cme) {
+			} catch (CMException cme) {
 				logger.error(cme.getMessage(), cme);
 				throw cme;
 			}
-			
+
 			// Add the old BC providers back and remove the one we have added
 			restoreOldBCProviders(oldBCProviders);
 		}
@@ -285,7 +313,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 
 	private static void restoreOldBCProviders(ArrayList<Provider> oldBCProviders) {
 		Security.removeProvider("BC");
-		for (Provider prov : oldBCProviders){
+		for (Provider prov : oldBCProviders) {
 			Security.addProvider(prov);
 		}
 	}
@@ -296,8 +324,8 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 		// E.g. an old 1.25 version of Bouncy Castle provider
 		// is added by caGrid package and others may be as well by
 		// third party providers
-		for (int i=0; i<Security.getProviders().length; i++){
-			if(Security.getProviders()[i].getName().equals("BC")){
+		for (int i = 0; i < Security.getProviders().length; i++) {
+			if (Security.getProviders()[i].getName().equals("BC")) {
 				oldBCProviders.add(Security.getProviders()[i]);
 			}
 		}
@@ -306,41 +334,37 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 		return oldBCProviders;
 	}
 
-	
 	/**
-	 * Loads Taverna's Bouncy Castle "UBER"-type keystore from a file on the disk and
-	 * returns it.
+	 * Loads Taverna's Bouncy Castle "UBER"-type keystore from a file on the
+	 * disk and returns it.
 	 */
-	public static KeyStore loadKeystore(String masterPassword) throws CMException {
+	public static KeyStore loadKeystore(String masterPassword)
+			throws CMException {
 		KeyStore keystore = null;
 		try {
 			keystore = KeyStore.getInstance("UBER", "BC");
-		} 
-		catch (Exception ex) {
+		} catch (Exception ex) {
 			// The requested keystore type is not available from the provider
 			String exMessage = "Failed to instantiate a Bouncy Castle 'UBER'-type keystore.";
 			logger.error(exMessage, ex);
 			throw new CMException(exMessage);
-		} 
-
+		}
 
 		if (keystoreFile.exists()) { // If the file exists, open it
 			// Try to load the keystore as Bouncy Castle "UBER"-type
 			// keystore
 			FileInputStream fis = null;
 
-			try {				
+			try {
 				// Get the file
 				fis = new FileInputStream(keystoreFile);
 				// Load the keystore from the file
 				keystore.load(fis, masterPassword.toCharArray());
-			} 
-			catch (Exception ex) {				
+			} catch (Exception ex) {
 				String exMessage = "Failed to load the keystore. Possible reason: incorrect password or corrupted file.";
 				logger.error(exMessage, ex);
 				throw new CMException(exMessage);
-			} 
-			finally {
+			} finally {
 				if (fis != null) {
 					try {
 						fis.close();
@@ -349,8 +373,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 					}
 				}
 			}
-		} 
-		else { // Otherwise create a new empty keystore
+		} else { // Otherwise create a new empty keystore
 
 			FileOutputStream fos = null;
 			try {
@@ -360,13 +383,11 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 				// Immediately save the new (empty) keystore to the file
 				fos = new FileOutputStream(keystoreFile);
 				keystore.store(fos, masterPassword.toCharArray());
-			} 
-			catch (Exception ex) {
+			} catch (Exception ex) {
 				String exMessage = "Failed to generate a new empty keystore.";
 				logger.error(exMessage, ex);
 				throw new CMException(exMessage);
-			} 
-			finally {
+			} finally {
 				if (fos != null) {
 					try {
 						fos.close();
@@ -378,43 +399,44 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 		}
 		return keystore;
 	}
-	
+
 	/**
-	 * Load Taverna's truststore from a file on a disk. If the truststore 
-	 * does not already exist, a new empty one will be created and contents 
-	 * of Java's truststore located in <JAVA_HOME>/lib/security/cacerts will 
-	 * be copied over to this truststore.
+	 * Load Taverna's truststore from a file on a disk. If the truststore does
+	 * not already exist, a new empty one will be created and contents of Java's
+	 * truststore located in <JAVA_HOME>/lib/security/cacerts will be copied
+	 * over to this truststore.
 	 */
-	private static KeyStore loadTruststore(String masterPassword) throws CMException{
-		
+	private static KeyStore loadTruststore(String masterPassword)
+			throws CMException {
+
 		KeyStore truststore = null;
-		// Try to create the Taverna's Truststore - has to be "JKS"-type keystore 
-		// because we use it to set the system property "javax.net.ssl.trustStore"
+		// Try to create the Taverna's Truststore - has to be "JKS"-type
+		// keystore
+		// because we use it to set the system property
+		// "javax.net.ssl.trustStore"
 		try {
 			truststore = KeyStore.getInstance("JKS");
-		} 
-		catch (Exception ex) {
+		} catch (Exception ex) {
 			// The requested keystore type is not available from the provider
 			String exMessage = "Failed to instantiate a 'JKS'-type keystore.";
 			logger.error(exMessage, ex);
 			throw new CMException(exMessage);
-		} 
-		
-		if (truststoreFile.exists()) { // If the Truststore file already exists, open it and load the Truststore
-			
+		}
+
+		if (truststoreFile.exists()) { // If the Truststore file already exists,
+										// open it and load the Truststore
+
 			FileInputStream fis = null;
-			try {				
+			try {
 				// Get the file
 				fis = new FileInputStream(truststoreFile);
 				// Load the Truststore from the file
 				truststore.load(fis, masterPassword.toCharArray());
-			} 
-			catch (Exception ex) {				
+			} catch (Exception ex) {
 				String exMessage = "Failed to load the truststore. Possible reason: incorrect password or corrupted file.";
 				logger.error(exMessage, ex);
 				throw new CMException(exMessage);
-			} 
-			finally {
+			} finally {
 				if (fis != null) {
 					try {
 						fis.close();
@@ -423,37 +445,45 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 					}
 				}
 			}
-		} 
-		else { // Otherwise create a new empty truststore and load it with certs from Java's truststore		
+		} else { // Otherwise create a new empty truststore and load it with
+					// certs from Java's truststore
 
-			File javaTruststoreFile = new File(System.getProperty("java.home") + "/lib/security/cacerts"); 
+			File javaTruststoreFile = new File(System.getProperty("java.home")
+					+ "/lib/security/cacerts");
 			KeyStore javaTruststore = null;
 			// Java's truststore is of type "JKS" - try to load it
 			try {
 				javaTruststore = KeyStore.getInstance("JKS");
-			} 
-			catch (Exception ex) {
-				// The requested keystore type is not available from the provider
+			} catch (Exception ex) {
+				// The requested keystore type is not available from the
+				// provider
 				String exMessage = "Failed to instantiate a 'JKS'-type keystore.";
 				logger.error(exMessage, ex);
 				throw new CMException(exMessage);
-			}		
-			
+			}
+
 			FileInputStream fis = null;
 			boolean loadedJavaTruststore = false;
-			try {				
+			try {
 				// Get the file
 				fis = new FileInputStream(javaTruststoreFile);
 				// Load the Java keystore from the file
-				javaTruststore.load(fis, "changeit".toCharArray()); // try with the default Java truststore password first
+				javaTruststore.load(fis, "changeit".toCharArray()); // try with
+																	// the
+																	// default
+																	// Java
+																	// truststore
+																	// password
+																	// first
 				loadedJavaTruststore = true;
-			} 
-			catch(IOException ioex){
-				// If there is an I/O or format problem with the keystore data, 
+			} catch (IOException ioex) {
+				// If there is an I/O or format problem with the keystore data,
 				// or if the given password was incorrect
-				logger.error("Failed to load the Java truststore to copy over certificates using default password 'changeit'. Trying with user-provided password.");
-				
-				// Close the input stream and reopen it to rewind it (resetting it did not work for some reason)
+				logger
+						.error("Failed to load the Java truststore to copy over certificates using default password 'changeit'. Trying with user-provided password.");
+
+				// Close the input stream and reopen it to rewind it (resetting
+				// it did not work for some reason)
 				if (fis != null) {
 					try {
 						fis.close();
@@ -462,25 +492,27 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 						// ignore
 					}
 				}
-				// Hopefully it was the password problem - ask user to provide 
+				// Hopefully it was the password problem - ask user to provide
 				// their password for the Java truststore
-				GetMasterPasswordDialog getPasswordDialog = new GetMasterPasswordDialog("Credential Manager needs to copy certificates from Java truststore. Please enter your password.");
+				GetMasterPasswordDialog getPasswordDialog = new GetMasterPasswordDialog(
+						"Credential Manager needs to copy certificates from Java truststore. Please enter your password.");
 				getPasswordDialog.setLocationRelativeTo(null);
 				getPasswordDialog.setVisible(true);
 				String javaTruststorePassword = getPasswordDialog.getPassword();
-				if (javaTruststorePassword == null){ // user cancelled - do not try to load Java truststore
+				if (javaTruststorePassword == null) { // user cancelled - do not
+														// try to load Java
+														// truststore
 					loadedJavaTruststore = false;
-				}
-				else{
+				} else {
 					try {
-						javaTruststore.load(fis, javaTruststorePassword.toCharArray());
+						javaTruststore.load(fis, javaTruststorePassword
+								.toCharArray());
 						loadedJavaTruststore = true;
 					} catch (Exception ex) {
 						String exMessage = "Failed to load the Java truststore to copy over certificates using user-provided password. Creating a new empty truststore for Taverna.";
 						logger.error(exMessage, ex);
 						loadedJavaTruststore = false;
-					}
-					finally {
+					} finally {
 						if (fis != null) {
 							try {
 								fis.close();
@@ -490,13 +522,11 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 						}
 					}
 				}
-			}
-			catch (Exception ex) {				
+			} catch (Exception ex) {
 				String exMessage = "Failed to load the Java truststore to copy over certificates. Creating a new empty truststore for Taverna.";
 				logger.error(exMessage, ex);
 				loadedJavaTruststore = false;
-			} 
-			finally {
+			} finally {
 				if (fis != null) {
 					try {
 						fis.close();
@@ -504,33 +534,34 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 						// ignore
 					}
 				}
-			}			
+			}
 			FileOutputStream fos = null;
 			// Create a new empty truststore for Taverna
 			try {
-				truststore.load(null, null);		
-				if (loadedJavaTruststore){
-					// Copy certificates into Taverna's truststore from Java truststore
+				truststore.load(null, null);
+				if (loadedJavaTruststore) {
+					// Copy certificates into Taverna's truststore from Java
+					// truststore
 					Enumeration<String> aliases = javaTruststore.aliases();
-					while (aliases.hasMoreElements()){
+					while (aliases.hasMoreElements()) {
 						String alias = aliases.nextElement();
-						Certificate certificate = javaTruststore.getCertificate(alias);
-						if (certificate instanceof X509Certificate){
-							String trustedCertAlias = createX509CertificateAlias((X509Certificate)certificate);
-							truststore.setCertificateEntry(trustedCertAlias, certificate);
+						Certificate certificate = javaTruststore
+								.getCertificate(alias);
+						if (certificate instanceof X509Certificate) {
+							String trustedCertAlias = createX509CertificateAlias((X509Certificate) certificate);
+							truststore.setCertificateEntry(trustedCertAlias,
+									certificate);
 						}
-					}		
-				}		
+					}
+				}
 				// Immediately save the new truststore to the file
 				fos = new FileOutputStream(truststoreFile);
 				truststore.store(fos, masterPassword.toCharArray());
-			} 
-			catch (Exception ex) {
+			} catch (Exception ex) {
 				String exMessage = "Failed to generate a new truststore.";
 				logger.error(exMessage, ex);
 				throw new CMException(exMessage);
-			} 
-			finally {
+			} finally {
 				if (fos != null) {
 					try {
 						fos.close();
@@ -538,53 +569,62 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 						// ignore
 					}
 				}
-			}			
+			}
 		}
-		
-		
-		// Taverna distro for MAC contains info.plist file with some Java system properties set to
-		// use the Keychain which clashes with what we are setting here so we need to clear them
+
+		// Taverna distro for MAC contains info.plist file with some Java system
+		// properties set to
+		// use the Keychain which clashes with what we are setting here so we
+		// need to clear them
 		System.clearProperty("javax.net.ssl.trustStoreType");
 		System.clearProperty("javax.net.ssl.trustStoreProvider");
-		
-		// Not quite sure why we still need to set these two properties since we are creating our own
-		// SSLSocketFactory with our own TrustManager that uses Taverna's Truststore, but seem like
-		// after Taverna starts up and the first time it needs SSLSocketFactory for HTTPS connection 
-		// it is still using the default Java's keystore unless these properties are set.
-		// Set the system property "javax.net.ssl.Truststore" to use Taverna's truststore 
-		System.setProperty("javax.net.ssl.trustStore", truststoreFile.getAbsolutePath());
-		System.setProperty("javax.net.ssl.trustStorePassword", TRUSTSTORE_PASSWORD);
-		HttpsURLConnection.setDefaultSSLSocketFactory(createTavernaSSLSocketFactory());
+
+		// Not quite sure why we still need to set these two properties since we
+		// are creating our own
+		// SSLSocketFactory with our own TrustManager that uses Taverna's
+		// Truststore, but seem like
+		// after Taverna starts up and the first time it needs SSLSocketFactory
+		// for HTTPS connection
+		// it is still using the default Java's keystore unless these properties
+		// are set.
+		// Set the system property "javax.net.ssl.Truststore" to use Taverna's
+		// truststore
+		System.setProperty("javax.net.ssl.trustStore", truststoreFile
+				.getAbsolutePath());
+		System.setProperty("javax.net.ssl.trustStorePassword",
+				TRUSTSTORE_PASSWORD);
+		HttpsURLConnection
+				.setDefaultSSLSocketFactory(createTavernaSSLSocketFactory());
 
 		sslInitialised = true;
 
 		return truststore;
 	}
-	
-	
+
 	/**
 	 * Load lists of service URLs associated with private key aliases from a
 	 * file and populate the serviceURLs hashmap.
 	 */
 	public void loadServiceURLsForKeyPairs() throws CMException {
-		
+
 		serviceURLsForKeyPairs = new HashMap<String, ArrayList<String>>();
-		
+
 		synchronized (Security.class) {
 			ArrayList<Provider> oldBCProviders = unregisterOldBCProviders();
 			Security.addProvider(bcProvider);
-			
+
 			try {
 				// Create an empty map with aliases as keys
 				for (Enumeration<String> e = keystore.aliases(); e
 						.hasMoreElements();) {
 					String element = (String) e.nextElement();
-					// We want only key pair entry aliases (and not password entry aliases)
-					if (element.startsWith("keypair#")) 
-						serviceURLsForKeyPairs.put(element, new ArrayList<String>());
+					// We want only key pair entry aliases (and not password
+					// entry aliases)
+					if (element.startsWith("keypair#"))
+						serviceURLsForKeyPairs.put(element,
+								new ArrayList<String>());
 				}
-			} 
-			catch (Exception ex) {
+			} catch (Exception ex) {
 				String exMessage = "Credential Manager: Failed to get private key aliases when loading service URLs.";
 				logger.error(exMessage, ex);
 				throw (new CMException(exMessage));
@@ -595,7 +635,8 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 				BufferedReader serviceURLsReader = null;
 
 				try {
-					serviceURLsReader = new BufferedReader(new FileReader(serviceURLsFile));
+					serviceURLsReader = new BufferedReader(new FileReader(
+							serviceURLsFile));
 
 					String line = serviceURLsReader.readLine();
 					while (line != null) {
@@ -603,30 +644,38 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 						// Line consists of an URL-encoded URL and alias
 						// separated by a blank character,
 						// i.e. line=<ENCODED_URL>" "<ALIAS>
-						// One alias can have more than one URL associated with it
+						// One alias can have more than one URL associated with
+						// it
 						// (i.e. more
-						// than one line in the file can exist for the same alias).
+						// than one line in the file can exist for the same
+						// alias).
 						String alias = line.substring(line.indexOf(' ') + 1);
 						String url = line.substring(0, line.indexOf(' '));
 						// URLs were encoded before storing them in a file
 						url = URLDecoder.decode(url, "UTF-8");
 
 						ArrayList<String> urlsList = (ArrayList<String>) serviceURLsForKeyPairs
-								.get(alias); // get URL list for the current alias (it can be empty)
+								.get(alias); // get URL list for the current
+												// alias (it can be empty)
 						if (urlsList == null) {
 							urlsList = new ArrayList<String>();
 						}
-						urlsList.add(url); // add the new URL to the list of URLs for this alias
-						serviceURLsForKeyPairs.put(alias, urlsList); // put the updated list back to the map
+						urlsList.add(url); // add the new URL to the list of
+											// URLs for this alias
+						serviceURLsForKeyPairs.put(alias, urlsList); // put the
+																		// updated
+																		// list
+																		// back
+																		// to
+																		// the
+																		// map
 						line = serviceURLsReader.readLine();
 					}
-				} 
-				catch (Exception ex) {
+				} catch (Exception ex) {
 					String exMessage = "Credential Manager: Failed to read the service URLs file.";
 					logger.error(exMessage, ex);
 					throw (new CMException(exMessage));
-				} 
-				finally {
+				} finally {
 					if (serviceURLsReader != null) {
 						try {
 							serviceURLsReader.close();
@@ -634,21 +683,22 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 							// ignore
 						}
 					}
-					
-					// Add the old BC providers back and remove the one we have added
+
+					// Add the old BC providers back and remove the one we have
+					// added
 					restoreOldBCProviders(oldBCProviders);
 				}
-			}			
+			}
 		}
 	}
-	
+
 	/**
-	 * Add the service URLs list associated with a private key entry to the serviceURLs
-	 * hashmap and save/update the service URLs file.       
+	 * Add the service URLs list associated with a private key entry to the
+	 * serviceURLs hashmap and save/update the service URLs file.
 	 */
-	public void saveServiceURLsForKeyPair(String alias, ArrayList<String> serviceURLsList)
-			throws CMException {
-		
+	public void saveServiceURLsForKeyPair(String alias,
+			ArrayList<String> serviceURLsList) throws CMException {
+
 		// Add service url list to the serviceURLs hashmap (overwrites previous
 		// value, if any)
 		serviceURLsForKeyPairs.put(alias, serviceURLsList);
@@ -656,33 +706,33 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 		// Save the updated hashmap to the file
 		saveServiceURLsForKeyPairs();
 	}
-	
+
 	/**
-	 * Get the service URLs list associated with a private key entry.       
+	 * Get the service URLs list associated with a private key entry.
 	 */
-	public ArrayList<String> getServiceURLsForKeyPair(String alias){
+	public ArrayList<String> getServiceURLsForKeyPair(String alias) {
 		return serviceURLsForKeyPairs.get(alias);
 	}
-	
+
 	/**
-	 * Get a map of service URL lists for each of the private key entries in the Keystore.         
+	 * Get a map of service URL lists for each of the private key entries in the
+	 * Keystore.
 	 */
 	public HashMap<String, ArrayList<String>> getServiceURLsforKeyPairs() {
 		return serviceURLsForKeyPairs;
-	}	
+	}
 
 	/**
 	 * Delete the service URLs list associated with a private key entry.
-     */
-	public void deleteServiceURLsForKeyPair(String alias) throws CMException
-	{
+	 */
+	public void deleteServiceURLsForKeyPair(String alias) throws CMException {
 		// Remove service URL list from the serviceURLs hashmap
 		serviceURLsForKeyPairs.remove(alias);
 
 		// Save the updated serviceURLs hashmap to the file
 		saveServiceURLsForKeyPairs();
 	}
-	
+
 	/**
 	 * Saves the content of serviceURLs map to a file. Overwrites previous
 	 * content of the file.
@@ -690,7 +740,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 	public void saveServiceURLsForKeyPairs() throws CMException {
 
 		synchronized (serviceURLsFile) {
-			
+
 			// If file already exists
 			if (serviceURLsFile.exists()) {
 				// Delete the previous contents of the file
@@ -700,8 +750,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 			// Create a new empty file
 			try {
 				serviceURLsFile.createNewFile();
-			} 
-			catch (IOException ex) {
+			} catch (IOException ex) {
 				String exMessage = "Credential Manager: Failed to create a new service URLs' file.";
 				logger.error(exMessage, ex);
 				throw (new CMException(exMessage));
@@ -716,38 +765,37 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 						serviceURLsFile, false)));
 
 				// Write the serviceURLs hashmap to the file
-				for (String alias : serviceURLsForKeyPairs.keySet()) { // for all aliases
-					
+				for (String alias : serviceURLsForKeyPairs.keySet()) { // for
+																		// all
+																		// aliases
+
 					// For all urls associated with the alias
 					ArrayList<String> serviceURLsForKeyPair = (ArrayList<String>) serviceURLsForKeyPairs
-					.get(alias);
+							.get(alias);
 					for (String serviceURL : serviceURLsForKeyPair) {
-						
+
 						// Each line of the file contains an encoded service URL
 						// with its associated alias appended and separated from
-						// the URL by a blank character ' ', 
+						// the URL by a blank character ' ',
 						// i.e. line=<ENCODED_URL>" "<ALIAS>
 						// Service URLs are encoded before saving to make sure
 						// they do not contain blank characters
 						// that are used as delimiters.
-						String encodedURL = URLEncoder.encode((String) serviceURL,
-								"UTF-8");
+						String encodedURL = URLEncoder.encode(
+								(String) serviceURL, "UTF-8");
 						StringBuffer line = new StringBuffer(encodedURL + " "
 								+ alias);
 						serviceURLsWriter.append(line);
 						serviceURLsWriter.newLine();
 					}
 				}
-			} 
-			catch (FileNotFoundException ex) {
+			} catch (FileNotFoundException ex) {
 				// Should not happen
-			} 
-			catch (IOException ex) {
+			} catch (IOException ex) {
 				String exMessage = "Credential Manager: Failed to save the service URLs to the file.";
 				logger.error(exMessage, ex);
 				throw (new CMException(exMessage));
-			} 
-			finally {
+			} finally {
 				if (serviceURLsWriter != null) {
 					try {
 						serviceURLsWriter.close();
@@ -761,15 +809,15 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 
 	/**
 	 * Get a username and password pair for the given service, or null if it
-	 * does not exit. The returned array contains username as the first element and
-	 * password as the second.
+	 * does not exit. The returned array contains username as the first element
+	 * and password as the second.
 	 */
-	public String[] getUsernameAndPasswordForService(String serviceURL) throws CMException
-	{
+	public String[] getUsernameAndPasswordForService(String serviceURL)
+			throws CMException {
 		synchronized (Security.class) {
 			ArrayList<Provider> oldBCProviders = unregisterOldBCProviders();
 			Security.addProvider(bcProvider);
-			
+
 			// Alias for the username and password entry
 			String alias = "password#" + serviceURL;
 			SecretKeySpec passwordKey = null;
@@ -778,80 +826,91 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 					passwordKey = (((SecretKeySpec) keystore
 							.getKey(alias, null)));
 				}
-				if (passwordKey != null){
-					String unpasspair = new String(passwordKey.getEncoded()); // the decoded key contains string <USERNAME><SEPARATOR_CHARACTER><PASSWORD>
-					String username = unpasspair.substring(0, unpasspair.indexOf(CredentialManager.USERNAME_AND_PASSWORD_SEPARATOR_CHARACTER));
-	            	String password = unpasspair.substring(unpasspair.indexOf(CredentialManager.USERNAME_AND_PASSWORD_SEPARATOR_CHARACTER)+1);
-	            	String[] toReturn = new String[2];
+				if (passwordKey != null) {
+					String unpasspair = new String(passwordKey.getEncoded()); // the
+																				// decoded
+																				// key
+																				// contains
+																				// string
+																				// <USERNAME><SEPARATOR_CHARACTER><PASSWORD>
+					String username = unpasspair
+							.substring(
+									0,
+									unpasspair
+											.indexOf(CredentialManager.USERNAME_AND_PASSWORD_SEPARATOR_CHARACTER));
+					String password = unpasspair
+							.substring(unpasspair
+									.indexOf(CredentialManager.USERNAME_AND_PASSWORD_SEPARATOR_CHARACTER) + 1);
+					String[] toReturn = new String[2];
 					toReturn[0] = username;
 					toReturn[1] = password;
 					return toReturn;
-				}
-				else{
+				} else {
 					return null;
 				}
-			} 
-			catch (Exception ex) {
+			} catch (Exception ex) {
 				String exMessage = "Credential Manager: Failed to get the username and password pair for service "
 						+ serviceURL + " from the Keystore.";
 				logger.error(exMessage, ex);
 				throw (new CMException(exMessage));
-			}
-			finally{
-				// Add the old BC providers back and remove the one we have added
+			} finally {
+				// Add the old BC providers back and remove the one we have
+				// added
 				restoreOldBCProviders(oldBCProviders);
 			}
 		}
 	}
-	
+
 	/**
-	 * Get service URLs associated with all username/password pairs currently in the Keystore.
+	 * Get service URLs associated with all username/password pairs currently in
+	 * the Keystore.
 	 */
-	public ArrayList<String> getServiceURLsforUsernameAndPasswords() throws CMException{
-		
+	public ArrayList<String> getServiceURLsforUsernameAndPasswords()
+			throws CMException {
+
 		ArrayList<String> serviceURLs = new ArrayList<String>();
-        ArrayList<String> aliases;
-		try{
+		ArrayList<String> aliases;
+		try {
 			aliases = getAliases(KEYSTORE);
-		}
-		catch(CMException cme){
+		} catch (CMException cme) {
 			String exMessage = "Credential Manager: Failed to access the Keystore to get the service URLs for passwords.";
 			logger.error(exMessage);
 			throw new CMException(exMessage);
 		}
-		
-       	for (String alias: aliases){
-       		if (alias.startsWith("password#")){
-       			serviceURLs.add(alias.substring(alias.indexOf('#')+1));
-       		}
-       	}
-		return serviceURLs;		
+
+		for (String alias : aliases) {
+			if (alias.startsWith("password#")) {
+				serviceURLs.add(alias.substring(alias.indexOf('#') + 1));
+			}
+		}
+		return serviceURLs;
 	}
 
 	/**
-	 * Insert a new username and password pair in the keystore for the given service URL.
+	 * Insert a new username and password pair in the keystore for the given
+	 * service URL.
 	 * 
-	 * Effectively, this method inserts a new secret key entry in the keystore, where 
-	 * key contains <USERNAME>" "<PASSWORD> string, i.e. password is prepended with the 
-	 * username and separated by a blank character (which hopefully will not appear in
-	 * the username).
+	 * Effectively, this method inserts a new secret key entry in the keystore,
+	 * where key contains <USERNAME>" "<PASSWORD> string, i.e. password is
+	 * prepended with the username and separated by a blank character (which
+	 * hopefully will not appear in the username).
 	 * 
-	 * Username and password string is saved in the Keystore as byte array using 
-	 * SecretKeySpec (which constructs a secret key from the given byte array but
-	 * does not check if the given bytes indeed specify a secret key of the
+	 * Username and password string is saved in the Keystore as byte array using
+	 * SecretKeySpec (which constructs a secret key from the given byte array
+	 * but does not check if the given bytes indeed specify a secret key of the
 	 * specified algorithm).
 	 * 
-	 * An alias used to identify the username and password entry is constructed as 
-	 * "password#"<SERVICE_URL> using the service URL 
-	 * this username/password pair is to be used for.
+	 * An alias used to identify the username and password entry is constructed
+	 * as "password#"<SERVICE_URL> using the service URL this username/password
+	 * pair is to be used for.
 	 */
-	public void saveUsernameAndPasswordForService(String username, String password,
-			String serviceURL) throws CMException {
+	public void saveUsernameAndPasswordForService(String username,
+			String password, String serviceURL) throws CMException {
 
 		synchronized (Security.class) {
 			ArrayList<Provider> oldBCProviders = unregisterOldBCProviders();
 			Security.addProvider(bcProvider);
-			
+
 			// Alias for the username and password entry
 			String alias = "password#" + serviceURL;
 			/*
@@ -860,152 +919,168 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 			 * key from the given password as a byte array. The reason for this
 			 * is that we can only save instances of Key objects in the
 			 * Keystore, and SecretKeySpec class is useful for raw secret keys
-			 * (i.e. username and passwords concats) that can be represented as 
-			 * a byte array and have no key or algorithm parameters associated 
-			 * with them, e.g., DES or Triple DES. That is why we create it with 
-			 * the name "DUMMY" for algorithm name, as this is not checked for 
+			 * (i.e. username and passwords concats) that can be represented as
+			 * a byte array and have no key or algorithm parameters associated
+			 * with them, e.g., DES or Triple DES. That is why we create it with
+			 * the name "DUMMY" for algorithm name, as this is not checked for
 			 * anyway.
 			 * 
-			 * Use a separator character that will
-			 * not appear in the username or password.
+			 * Use a separator character that will not appear in the username or
+			 * password.
 			 */
-			String keyToSave = username + USERNAME_AND_PASSWORD_SEPARATOR_CHARACTER + password; 
-			
+			String keyToSave = username
+					+ USERNAME_AND_PASSWORD_SEPARATOR_CHARACTER + password;
+
 			SecretKeySpec passwordKey = new SecretKeySpec(keyToSave.getBytes(),
-					"DUMMY");		
+					"DUMMY");
 			try {
 				synchronized (keystore) {
 					keystore.setKeyEntry(alias, passwordKey, null, null);
 					saveKeystore(KEYSTORE);
-					multiCaster.notify(new KeystoreChangedEvent(CredentialManager.KEYSTORE));
+					multiCaster.notify(new KeystoreChangedEvent(
+							CredentialManager.KEYSTORE));
 				}
-			} 
-			catch (Exception ex) {
-				String exMessage = "Credential Manager: Failed to insert username and password pair for service "+ serviceURL+ " in the Keystore.";
+			} catch (Exception ex) {
+				String exMessage = "Credential Manager: Failed to insert username and password pair for service "
+						+ serviceURL + " in the Keystore.";
 				logger.error(exMessage, ex);
 				throw (new CMException(exMessage));
-			}
-			finally{
-				// Add the old BC providers back and remove the one we have added
+			} finally {
+				// Add the old BC providers back and remove the one we have
+				// added
 				restoreOldBCProviders(oldBCProviders);
 			}
 		}
 	}
-	
+
 	/**
-	 * Delete username and password pair for the given service URL from the Keystore.
+	 * Delete username and password pair for the given service URL from the
+	 * Keystore.
 	 */
-	public void deleteUsernameAndPasswordForService(String serviceURL) throws CMException{
-		deleteEntry(KEYSTORE, "password#"+serviceURL);
+	public void deleteUsernameAndPasswordForService(String serviceURL)
+			throws CMException {
+		deleteEntry(KEYSTORE, "password#" + serviceURL);
 		saveKeystore(KEYSTORE);
-		multiCaster.notify(new KeystoreChangedEvent(CredentialManager.KEYSTORE));
+		multiCaster
+				.notify(new KeystoreChangedEvent(CredentialManager.KEYSTORE));
 	}
-	
-	/** 
+
+	/**
 	 * Get key pair entry's private key for the given service URL.
 	 */
-	public PrivateKey getPrivateKey(String serviceURL){
-		//TODO
+	public PrivateKey getPrivateKey(String serviceURL) {
+		// TODO
 		return null;
 	}
-	
-	/** 
-	 * Get key pair entry's public key certificate chain for the given service URL.
+
+	/**
+	 * Get key pair entry's public key certificate chain for the given service
+	 * URL.
 	 */
-	public Certificate[] getPublicKeyCertificateChain(String serviceURL){
-		//TODO
+	public Certificate[] getPublicKeyCertificateChain(String serviceURL) {
+		// TODO
 		return null;
 	}
-	
+
 	/**
 	 * Insert a new key entry containing private key and public key certificate
-	 * (chain) in the Keystore and save the list of service URLs this key pair 
+	 * (chain) in the Keystore and save the list of service URLs this key pair
 	 * is associated to.
 	 * 
-	 * An alias used to identify the keypair entry is constructed as: 
-	 * "keypair#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<CERT_SERIAL_NUMBER>
+	 * An alias used to identify the keypair entry is constructed as:
+	 * "keypair#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<
+	 * CERT_SERIAL_NUMBER>
 	 */
-	public void saveKeyPair(Key privateKey,
-			Certificate[] certs, ArrayList<String> serviceURLs) throws CMException {
+	public void saveKeyPair(Key privateKey, Certificate[] certs,
+			ArrayList<String> serviceURLs) throws CMException {
 
 		synchronized (Security.class) {
 			ArrayList<Provider> oldBCProviders = unregisterOldBCProviders();
 			Security.addProvider(bcProvider);
-			
+
 			// Create an alias for the new key pair entry in the Keystore
-			// as "keypair#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<CERT_SERIAL_NUMBER>
-			String ownerDN = ((X509Certificate) certs[0]).getSubjectX500Principal()
-					.getName(X500Principal.RFC2253);
+			// as
+			// "keypair#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<CERT_SERIAL_NUMBER>
+			String ownerDN = ((X509Certificate) certs[0])
+					.getSubjectX500Principal().getName(X500Principal.RFC2253);
 			CMX509Util util = new CMX509Util();
 			util.parseDN(ownerDN);
 			String ownerCN = util.getCN(); // owner's common name
 
-			// Get the hexadecimal representation of the certificate's serial number
-			String serialNumber = new BigInteger(1, ((X509Certificate) certs[0])
-					.getSerialNumber().toByteArray()).toString(16)
-					.toUpperCase();
+			// Get the hexadecimal representation of the certificate's serial
+			// number
+			String serialNumber = new BigInteger(1,
+					((X509Certificate) certs[0]).getSerialNumber()
+							.toByteArray()).toString(16).toUpperCase();
 
-			String issuerDN = ((X509Certificate) certs[0]).getIssuerX500Principal()
-			.getName(X500Principal.RFC2253);
+			String issuerDN = ((X509Certificate) certs[0])
+					.getIssuerX500Principal().getName(X500Principal.RFC2253);
 			util.parseDN(issuerDN);
 			String issuerCN = util.getCN(); // issuer's common name
-			
-			String alias = "keypair#" + ownerCN + "#" + issuerCN + "#" + serialNumber;
-			
+
+			String alias = "keypair#" + ownerCN + "#" + issuerCN + "#"
+					+ serialNumber;
+
 			try {
 				synchronized (keystore) {
 					keystore.setKeyEntry(alias, privateKey, null, certs);
 					saveKeystore(KEYSTORE);
-					
-					// Add service url list to the serviceURLs hashmap (overwrites previous
+
+					// Add service url list to the serviceURLs hashmap
+					// (overwrites previous
 					// value, if any)
 					if (serviceURLs == null)
 						serviceURLs = new ArrayList<String>();
 					serviceURLsForKeyPairs.put(alias, serviceURLs);
 					// Save the updated hashmap to the file
 					saveServiceURLsForKeyPairs();
-					multiCaster.notify(new KeystoreChangedEvent(CredentialManager.KEYSTORE));
+					multiCaster.notify(new KeystoreChangedEvent(
+							CredentialManager.KEYSTORE));
 				}
 			} catch (Exception ex) {
 				String exMessage = "Credential Manager: Failed to insert the key pair entry in the Keystore.";
 				logger.error(exMessage, ex);
 				throw (new CMException(exMessage));
-			}
-			finally{
-				// Add the old BC providers back and remove the one we have added
+			} finally {
+				// Add the old BC providers back and remove the one we have
+				// added
 				restoreOldBCProviders(oldBCProviders);
 			}
 		}
 	}
-	
+
 	/**
 	 * Check if the Keystore contains the key pair entry.
 	 */
-	public boolean containsKeyPair(Key privateKey, Certificate[] certs) throws CMException {
+	public boolean containsKeyPair(Key privateKey, Certificate[] certs)
+			throws CMException {
 		synchronized (Security.class) {
 			ArrayList<Provider> oldBCProviders = unregisterOldBCProviders();
 			Security.addProvider(bcProvider);
-			
+
 			// Create an alias for the new key pair entry in the Keystore
-			// as "keypair#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<CERT_SERIAL_NUMBER>
-			String ownerDN = ((X509Certificate) certs[0]).getSubjectX500Principal()
-					.getName(X500Principal.RFC2253);
+			// as
+			// "keypair#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<CERT_SERIAL_NUMBER>
+			String ownerDN = ((X509Certificate) certs[0])
+					.getSubjectX500Principal().getName(X500Principal.RFC2253);
 			CMX509Util util = new CMX509Util();
 			util.parseDN(ownerDN);
 			String ownerCN = util.getCN(); // owner's common name
 
-			// Get the hexadecimal representation of the certificate's serial number
-			String serialNumber = new BigInteger(1, ((X509Certificate) certs[0])
-					.getSerialNumber().toByteArray()).toString(16)
-					.toUpperCase();
+			// Get the hexadecimal representation of the certificate's serial
+			// number
+			String serialNumber = new BigInteger(1,
+					((X509Certificate) certs[0]).getSerialNumber()
+							.toByteArray()).toString(16).toUpperCase();
 
-			String issuerDN = ((X509Certificate) certs[0]).getIssuerX500Principal()
-			.getName(X500Principal.RFC2253);
+			String issuerDN = ((X509Certificate) certs[0])
+					.getIssuerX500Principal().getName(X500Principal.RFC2253);
 			util.parseDN(issuerDN);
 			String issuerCN = util.getCN(); // issuer's common name
-			
-			String alias = "keypair#" + ownerCN + "#" + issuerCN + "#" + serialNumber;
-			
+
+			String alias = "keypair#" + ownerCN + "#" + issuerCN + "#"
+					+ serialNumber;
+
 			synchronized (keystore) {
 				try {
 					return keystore.containsAlias(alias);
@@ -1013,9 +1088,9 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 					String exMessage = "Credential Manager: Failed to get aliases from the Keystore ti check if it contains the given key pair.";
 					logger.error(exMessage, ex);
 					throw (new CMException(exMessage));
-				}
-				finally{
-					// Add the old BC providers back and remove the one we have added
+				} finally {
+					// Add the old BC providers back and remove the one we have
+					// added
 					restoreOldBCProviders(oldBCProviders);
 				}
 			}
@@ -1025,38 +1100,43 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 	/**
 	 * Delete key pair entry from the Keystore.
 	 */
-	public void deleteKeyPair(String alias) throws CMException{
-		
+	public void deleteKeyPair(String alias) throws CMException {
+
 		// TODO: We are passing alias for now but we want to be passing
 		// the private key and its public key certificate
-		
-//		// Create an alias for the new key pair entry in the Keystore
-//		// as "keypair#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<CERT_SERIAL_NUMBER>
-//		String ownerDN = ((X509Certificate) certs[0]).getSubjectX500Principal()
-//				.getName(X500Principal.RFC2253);
-//		CMX509Util util = new CMX509Util();
-//		util.parseDN(ownerDN);
-//		String ownerCN = util.getCN(); // owner's common name
-//
-//		// Get the hexadecimal representation of the certificate's serial number
-//		String serialNumber = new BigInteger(1, ((X509Certificate) certs[0])
-//				.getSerialNumber().toByteArray()).toString(16)
-//				.toUpperCase();
-//
-//		String issuerDN = ((X509Certificate) certs[0]).getIssuerX500Principal()
-//		.getName(X500Principal.RFC2253);
-//		util.parseDN(issuerDN);
-//		String issuerCN = util.getCN(); // issuer's common name
-//		
-//		String alias = "keypair#" + ownerCN + "#" + issuerCN + "#" + serialNumber;
-		
+
+		// // Create an alias for the new key pair entry in the Keystore
+		// // as
+		// "keypair#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<CERT_SERIAL_NUMBER>
+		// String ownerDN = ((X509Certificate)
+		// certs[0]).getSubjectX500Principal()
+		// .getName(X500Principal.RFC2253);
+		// CMX509Util util = new CMX509Util();
+		// util.parseDN(ownerDN);
+		// String ownerCN = util.getCN(); // owner's common name
+		//
+		// // Get the hexadecimal representation of the certificate's serial
+		// number
+		// String serialNumber = new BigInteger(1, ((X509Certificate) certs[0])
+		// .getSerialNumber().toByteArray()).toString(16)
+		// .toUpperCase();
+		//
+		// String issuerDN = ((X509Certificate)
+		// certs[0]).getIssuerX500Principal()
+		// .getName(X500Principal.RFC2253);
+		// util.parseDN(issuerDN);
+		// String issuerCN = util.getCN(); // issuer's common name
+		//		
+		// String alias = "keypair#" + ownerCN + "#" + issuerCN + "#" +
+		// serialNumber;
+
 		deleteEntry(KEYSTORE, alias);
 		saveKeystore(KEYSTORE);
 		deleteServiceURLsForKeyPair(alias);
-		multiCaster.notify(new KeystoreChangedEvent(CredentialManager.KEYSTORE));
+		multiCaster
+				.notify(new KeystoreChangedEvent(CredentialManager.KEYSTORE));
 	}
-	
-	
+
 	/**
 	 * Exports a key entry containing private key and public key certificate
 	 * (chain) from the Keystore to a PKCS #12 file.
@@ -1068,12 +1148,13 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 
 		synchronized (Security.class) {
 			ArrayList<Provider> oldBCProviders = unregisterOldBCProviders();
-			Security.addProvider(bcProvider);		
+			Security.addProvider(bcProvider);
 			// Export the key pair
 			try {
 
 				// Get the private key for the alias
-				PrivateKey privateKey = (PrivateKey) keystore.getKey(alias, null);
+				PrivateKey privateKey = (PrivateKey) keystore.getKey(alias,
+						null);
 
 				// Get the related public key's certificate chain
 				Certificate[] certChain = getCertificateChain(alias);
@@ -1084,16 +1165,19 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 
 				// Place the private key and certificate chain into the PKCS #12
 				// keystore.
-				// Construct a new alias as "<SUBJECT_COMMON_NAME>'s <ISSUER_ORGANISATION> ID"
+				// Construct a new alias as
+				// "<SUBJECT_COMMON_NAME>'s <ISSUER_ORGANISATION> ID"
 
 				String sDN = ((X509Certificate) certChain[0])
-						.getSubjectX500Principal().getName(X500Principal.RFC2253);
+						.getSubjectX500Principal().getName(
+								X500Principal.RFC2253);
 				CMX509Util util = new CMX509Util();
 				util.parseDN(sDN);
 				String sCN = util.getCN();
 
 				String iDN = ((X509Certificate) certChain[0])
-						.getIssuerX500Principal().getName(X500Principal.RFC2253);
+						.getIssuerX500Principal()
+						.getName(X500Principal.RFC2253);
 				util.parseDN(iDN);
 				String iCN = util.getCN();
 
@@ -1105,13 +1189,11 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 				fos = new FileOutputStream(exportFile);
 				newPkcs12.store(fos, pkcs12Password.toCharArray());
 				fos.close();
-			} 
-			catch (Exception ex) {
+			} catch (Exception ex) {
 				String exMessage = "Credential Manager: Failed to export the key pair from the Keystore.";
 				logger.error(exMessage, ex);
 				throw (new CMException(exMessage));
-			} 
-			finally {
+			} finally {
 				if (fos != null) {
 					try {
 						fos.close();
@@ -1119,34 +1201,37 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 						// ignore
 					}
 				}
-				// Add the old BC providers back and remove the one we have added
+				// Add the old BC providers back and remove the one we have
+				// added
 				restoreOldBCProviders(oldBCProviders);
 			}
 		}
 	}
 
 	/**
-	 * Returns caGrid proxy's private key entry for the given Authentication and Dorian services.
-	 *  
-	 * Since caGrid v1.3, caGrid proxies are just normal key pairs where the 
-	 * validity of the key is 12 hours by default. 
-	 * Before v1.3 these were actual proxies. Still we differentiate between 
-	 * these and normal 'key pair' entries and form their keystore aliases as:
+	 * Returns caGrid proxy's private key entry for the given Authentication and
+	 * Dorian services.
+	 * 
+	 * Since caGrid v1.3, caGrid proxies are just normal key pairs where the
+	 * validity of the key is 12 hours by default. Before v1.3 these were actual
+	 * proxies. Still we differentiate between these and normal 'key pair'
+	 * entries and form their keystore aliases as:
 	 * 
 	 * "cagridproxy#"<AuthNServiceURL>" "<DorianServiceURL>
 	 * 
-	 * This basically means that AuthN Service URL and Dorian Service URL define 
+	 * This basically means that AuthN Service URL and Dorian Service URL define
 	 * a single caGrid proxy entry in the keystore.
 	 * 
 	 */
-	public synchronized PrivateKey getCaGridProxyPrivateKey(String authNServiceURL,
-			String dorianServiceURL) throws CMException{
-		
+	public synchronized PrivateKey getCaGridProxyPrivateKey(
+			String authNServiceURL, String dorianServiceURL) throws CMException {
+
 		synchronized (Security.class) {
 			ArrayList<Provider> oldBCProviders = unregisterOldBCProviders();
 			Security.addProvider(bcProvider);
-			
-			String proxyAlias = "cagridproxy#" + authNServiceURL + " " + dorianServiceURL;
+
+			String proxyAlias = "cagridproxy#" + authNServiceURL + " "
+					+ dorianServiceURL;
 			PrivateKey privateKey = null;
 			try {
 				privateKey = (PrivateKey) keystore.getKey(proxyAlias, null);
@@ -1154,31 +1239,32 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 				String exMessage = "Credential Manager: Failed to get the private key of the proxy key pair entry";
 				logger.error(exMessage);
 				throw new CMException(exMessage);
-			}
-			finally{
-				// Add the old BC providers back and remove the one we have added
+			} finally {
+				// Add the old BC providers back and remove the one we have
+				// added
 				restoreOldBCProviders(oldBCProviders);
 			}
 			return privateKey;
 		}
 	}
-	
+
 	/**
-	 * Returns caGrid proxy's cerificate chain for the given Authentication and Dorian services.
-	 * The alias used to get the chain is constructed as:
+	 * Returns caGrid proxy's cerificate chain for the given Authentication and
+	 * Dorian services. The alias used to get the chain is constructed as:
 	 * 
 	 * "cagridproxy#"<AuthNServiceURL>" "<DorianServiceURL>
 	 */
-	public synchronized Certificate[] getCaGridProxyCertificateChain(String authNServiceURL,
-			String dorianServiceURL) throws CMException{
-		
+	public synchronized Certificate[] getCaGridProxyCertificateChain(
+			String authNServiceURL, String dorianServiceURL) throws CMException {
+
 		synchronized (Security.class) {
 			ArrayList<Provider> oldBCProviders = unregisterOldBCProviders();
 			Security.addProvider(bcProvider);
-		
-			String proxyAlias = "cagridproxy#" + authNServiceURL + " " + dorianServiceURL;
 
-	        // Get the proxy key pair entry's certificate chain
+			String proxyAlias = "cagridproxy#" + authNServiceURL + " "
+					+ dorianServiceURL;
+
+			// Get the proxy key pair entry's certificate chain
 			Certificate[] certChain = null;
 			try {
 				certChain = getCertificateChain(proxyAlias);
@@ -1186,9 +1272,9 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 				String exMessage = "Credential Manager: Failed to get the certificate chain for the proxy entry";
 				logger.error(exMessage);
 				throw new CMException(exMessage);
-			}
-			finally{
-				// Add the old BC providers back and remove the one we have added
+			} finally {
+				// Add the old BC providers back and remove the one we have
+				// added
 				restoreOldBCProviders(oldBCProviders);
 			}
 			return certChain;
@@ -1200,57 +1286,62 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 	 * 
 	 * "cagridproxy#"<AuthNServiceURL>" "<DorianServiceURL>
 	 */
-	public synchronized void saveCaGridProxy(PrivateKey privateKey, X509Certificate[] x509CertChain,
-			String authNServiceURL, String dorianServiceURL) throws CMException {
+	public synchronized void saveCaGridProxy(PrivateKey privateKey,
+			X509Certificate[] x509CertChain, String authNServiceURL,
+			String dorianServiceURL) throws CMException {
 
 		synchronized (Security.class) {
 			ArrayList<Provider> oldBCProviders = unregisterOldBCProviders();
 			Security.addProvider(bcProvider);
-		
-			String proxyAlias = "cagridproxy#" + authNServiceURL + " " + dorianServiceURL;
-			
+
+			String proxyAlias = "cagridproxy#" + authNServiceURL + " "
+					+ dorianServiceURL;
+
 			try {
 				synchronized (keystore) {
-					keystore.setKeyEntry(proxyAlias, privateKey, null, x509CertChain);
+					keystore.setKeyEntry(proxyAlias, privateKey, null,
+							x509CertChain);
 					saveKeystore(KEYSTORE);
-					multiCaster.notify(new KeystoreChangedEvent(CredentialManager.KEYSTORE));
+					multiCaster.notify(new KeystoreChangedEvent(
+							CredentialManager.KEYSTORE));
 				}
 			} catch (KeyStoreException ex) {
 				String exMessage = "Credential Manager: Failed to insert the proxy key pair in the keystore.";
 				logger.error(exMessage);
 				throw (new CMException(exMessage));
-			}
-			finally{
-				// Add the old BC providers back and remove the one we have added
+			} finally {
+				// Add the old BC providers back and remove the one we have
+				// added
 				restoreOldBCProviders(oldBCProviders);
 			}
 		}
 	}
-	
+
 	/**
 	 * Delete caGrid proxy entry from the Keystore.
 	 */
-	public void deleteCaGridProxy(String alias) throws CMException{
-		
+	public void deleteCaGridProxy(String alias) throws CMException {
+
 		deleteEntry(KEYSTORE, alias);
 		saveKeystore(KEYSTORE);
-		multiCaster.notify(new KeystoreChangedEvent(CredentialManager.KEYSTORE));
+		multiCaster
+				.notify(new KeystoreChangedEvent(CredentialManager.KEYSTORE));
 	}
-	
+
 	/**
-	 * Get certificate entry from the Keystore or Truststore.
-	 * If the given alias name identifies a trusted certificate entry, the
-	 * certificate associated with that entry is returned from the Truststore.
-	 * If the given alias name identifies a key pair entry, the first element of
-	 * the certificate chain of that entry is returned from the Keystore.
+	 * Get certificate entry from the Keystore or Truststore. If the given alias
+	 * name identifies a trusted certificate entry, the certificate associated
+	 * with that entry is returned from the Truststore. If the given alias name
+	 * identifies a key pair entry, the first element of the certificate chain
+	 * of that entry is returned from the Keystore.
 	 */
 	public Certificate getCertificate(String ksType, String alias)
 			throws CMException {
-		
+
 		synchronized (Security.class) {
 			ArrayList<Provider> oldBCProviders = unregisterOldBCProviders();
 			Security.addProvider(bcProvider);
-		
+
 			try {
 				if (ksType.equals(KEYSTORE)) {
 					synchronized (keystore) {
@@ -1260,30 +1351,28 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 					synchronized (truststore) {
 						return truststore.getCertificate(alias);
 					}
-				}
-				else{
+				} else {
 					return null;
 				}
-			} 
-			catch (Exception ex) {
-				String exMessage = "Credential Manager: Failed to fetch certificate from the " + ksType + ".";
+			} catch (Exception ex) {
+				String exMessage = "Credential Manager: Failed to fetch certificate from the "
+						+ ksType + ".";
 				logger.error(exMessage, ex);
 				throw (new CMException(exMessage));
-			}
-			finally{
-				// Add the old BC providers back and remove the one we have added
+			} finally {
+				// Add the old BC providers back and remove the one we have
+				// added
 				restoreOldBCProviders(oldBCProviders);
 			}
 		}
 	}
 
-	
 	/**
 	 * Gets certificate chain for the key pair entry from the Keystore. This
 	 * method works for Keystore only as Truststore does not contain key pair
 	 * entries, but trusted certificate entries only.
 	 */
-	public Certificate[] getCertificateChain(String alias) throws CMException{
+	public Certificate[] getCertificateChain(String alias) throws CMException {
 		synchronized (Security.class) {
 			ArrayList<Provider> oldBCProviders = unregisterOldBCProviders();
 			Security.addProvider(bcProvider);
@@ -1292,84 +1381,84 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 				synchronized (keystore) {
 					return keystore.getCertificateChain(alias);
 				}
-			} 
-			catch (Exception ex) {
+			} catch (Exception ex) {
 				String exMessage = "Credential Manager: Failed to fetch certificate chain for the keypair from the Keystore";
 				logger.error(exMessage, ex);
 				throw (new CMException(exMessage));
-			}
-			finally{
-				// Add the old BC providers back and remove the one we have added
+			} finally {
+				// Add the old BC providers back and remove the one we have
+				// added
 				restoreOldBCProviders(oldBCProviders);
 			}
 		}
 	}
 
-	
 	/**
-	 * Insert a trusted certificate entry in the Truststore with an 
-	 * alias constructed as:
+	 * Insert a trusted certificate entry in the Truststore with an alias
+	 * constructed as:
 	 * 
-	 * "trustedcert#<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<CERT_SERIAL_NUMBER>
+	 * "trustedcert#<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#
+	 * "<CERT_SERIAL_NUMBER>
 	 */
-	public void saveTrustedCertificate(X509Certificate cert)
-			throws CMException {
+	public void saveTrustedCertificate(X509Certificate cert) throws CMException {
 
 		synchronized (Security.class) {
 			ArrayList<Provider> oldBCProviders = unregisterOldBCProviders();
 			Security.addProvider(bcProvider);
-			
-			// Create an alias for the new trusted certificate entry in the Truststore
-			// as "trustedcert#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<CERT_SERIAL_NUMBER>
+
+			// Create an alias for the new trusted certificate entry in the
+			// Truststore
+			// as
+			// "trustedcert#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<CERT_SERIAL_NUMBER>
 			String alias = createX509CertificateAlias(cert);
-			
+
 			try {
 				synchronized (truststore) {
 					truststore.setCertificateEntry(alias, cert);
 					saveKeystore(TRUSTSTORE);
-					multiCaster.notify(new KeystoreChangedEvent(CredentialManager.TRUSTSTORE));
+					multiCaster.notify(new KeystoreChangedEvent(
+							CredentialManager.TRUSTSTORE));
 				}
-			} 
-			catch (Exception ex) {
+			} catch (Exception ex) {
 				String exMessage = "Credential Manager: Failed to insert trusted certificate entry in the Truststore.";
 				logger.error(exMessage, ex);
 				throw (new CMException(exMessage));
-			}
-			finally{
+			} finally {
 				// Set the new SSLSocketFactory to use the updated Truststore
-				HttpsURLConnection.setDefaultSSLSocketFactory(createTavernaSSLSocketFactory());		
-				logger.info("Credential Manager: Updating SSLSocketFactory after inserting a trusted certificate.");
-				// Add the old BC providers back and remove the one we have added
+				HttpsURLConnection
+						.setDefaultSSLSocketFactory(createTavernaSSLSocketFactory());
+				logger
+						.info("Credential Manager: Updating SSLSocketFactory after inserting a trusted certificate.");
+				// Add the old BC providers back and remove the one we have
+				// added
 				restoreOldBCProviders(oldBCProviders);
 			}
 		}
 	}
 
-	
 	/**
 	 * Create a Truststore alias for the trusted certificate as
 	 * 
-	 * "trustedcert#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<CERT_SERIAL_NUMBER>
+	 * "trustedcert#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<
+	 * CERT_SERIAL_NUMBER>
 	 */
 	private static String createX509CertificateAlias(X509Certificate cert) {
-		String ownerDN = cert.getSubjectX500Principal()
-				.getName(X500Principal.RFC2253);
+		String ownerDN = cert.getSubjectX500Principal().getName(
+				X500Principal.RFC2253);
 		CMX509Util util = new CMX509Util();
 		util.parseDN(ownerDN);
 		String owner;
 		String ownerCN = util.getCN(); // owner's common name
 		String ownerOU = util.getOU();
 		String ownerO = util.getO();
-		if (!ownerCN.equals("none")){ // try owner's CN first
+		if (!ownerCN.equals("none")) { // try owner's CN first
 			owner = ownerCN;
 		} // try owner's OU
-		else if (!ownerOU.equals("none")){
+		else if (!ownerOU.equals("none")) {
 			owner = ownerOU;
-		}
-		else if (!ownerO.equals("none")){ // finally use owner's Organisation
-			owner= ownerO;
-		}
-		else{
+		} else if (!ownerO.equals("none")) { // finally use owner's Organisation
+			owner = ownerO;
+		} else {
 			owner = "<Not Part of Certificate>";
 		}
 
@@ -1377,43 +1466,46 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 		String serialNumber = new BigInteger(1, cert.getSerialNumber()
 				.toByteArray()).toString(16).toUpperCase();
 
-		String issuerDN = cert.getIssuerX500Principal()
-		.getName(X500Principal.RFC2253);
+		String issuerDN = cert.getIssuerX500Principal().getName(
+				X500Principal.RFC2253);
 		util.parseDN(issuerDN);
 		String issuer;
 		String issuerCN = util.getCN(); // issuer's common name
 		String issuerOU = util.getOU();
 		String issuerO = util.getO();
-		if (!issuerCN.equals("none")){ // try issuer's CN first
+		if (!issuerCN.equals("none")) { // try issuer's CN first
 			issuer = issuerCN;
 		} // try issuer's OU
-		else if (!issuerOU.equals("none")){
+		else if (!issuerOU.equals("none")) {
 			issuer = issuerOU;
-		}
-		else if (!issuerO.equals("none")){ // finally use issuer's Organisation
-			issuer= issuerO;
-		}
-		else{
+		} else if (!issuerO.equals("none")) { // finally use issuer's
+												// Organisation
+			issuer = issuerO;
+		} else {
 			issuer = "<Not Part of Certificate>";
 		}
-		
-		String alias = "trustedcert#" + owner + "#" + issuer + "#" + serialNumber;
+
+		String alias = "trustedcert#" + owner + "#" + issuer + "#"
+				+ serialNumber;
 		return alias;
 	}
 
 	/**
 	 * Delete trusted certificate entry from the Truststore.
 	 */
-	public void deleteTrustedCertificate(String alias) throws CMException{
-		
+	public void deleteTrustedCertificate(String alias) throws CMException {
+
 		deleteEntry(TRUSTSTORE, alias);
 		saveKeystore(TRUSTSTORE);
-		multiCaster.notify(new KeystoreChangedEvent(CredentialManager.TRUSTSTORE));
+		multiCaster.notify(new KeystoreChangedEvent(
+				CredentialManager.TRUSTSTORE));
 		// Set the new SSLSocketFactory to use the updated Truststore
-		HttpsURLConnection.setDefaultSSLSocketFactory(createTavernaSSLSocketFactory());
-		logger.info("Credential Manager: Updating SSLSocketFactory after deleting a trusted certificate.");
+		HttpsURLConnection
+				.setDefaultSSLSocketFactory(createTavernaSSLSocketFactory());
+		logger
+				.info("Credential Manager: Updating SSLSocketFactory after deleting a trusted certificate.");
 	}
-	
+
 	/**
 	 * Checks if the given entry is a key entry in the Keystore.
 	 */
@@ -1430,7 +1522,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 		}
 	}
 
-	
 	/**
 	 * Deletes an entry from a keystore.
 	 */
@@ -1439,65 +1530,65 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 		synchronized (Security.class) {
 			ArrayList<Provider> oldBCProviders = unregisterOldBCProviders();
 			Security.addProvider(bcProvider);
-			
+
 			try {
 				if (ksType.equals(KEYSTORE)) {
 					synchronized (keystore) {
 						keystore.deleteEntry(alias);
 					}
-					// If this was key pair rather than password entry - remove the
+					// If this was key pair rather than password entry - remove
+					// the
 					// associated URLs from the serviceURLsFile as well
 					if (alias.startsWith("keypair#"))
 						deleteServiceURLsForKeyPair(alias);
-				} 
-				else if (ksType.equals(TRUSTSTORE)) {
+				} else if (ksType.equals(TRUSTSTORE)) {
 					synchronized (truststore) {
 						truststore.deleteEntry(alias);
 					}
 				}
-			} 
-			catch (Exception ex) {
-				String exMessage = "Credential Manager: Failed to delete the entry with alias "+alias+"from the " + ksType + ".";
+			} catch (Exception ex) {
+				String exMessage = "Credential Manager: Failed to delete the entry with alias "
+						+ alias + "from the " + ksType + ".";
 				logger.error(exMessage, ex);
 				throw (new CMException(exMessage));
-			}
-			finally{
-				// Add the old BC providers back and remove the one we have added
+			} finally {
+				// Add the old BC providers back and remove the one we have
+				// added
 				restoreOldBCProviders(oldBCProviders);
 			}
 		}
 	}
 
 	/**
-	 * Check if a keystore contains an entry with the given alias.  
+	 * Check if a keystore contains an entry with the given alias.
 	 */
 	public boolean containsAlias(String ksType, String alias)
 			throws CMException {
-	
+
 		synchronized (Security.class) {
 			ArrayList<Provider> oldBCProviders = unregisterOldBCProviders();
 			Security.addProvider(bcProvider);
-			
+
 			try {
 				if (ksType.equals(KEYSTORE))
 					synchronized (keystore) {
 						return keystore.containsAlias(alias);
-				}
+					}
 				else if (ksType.equals(TRUSTSTORE))
 					synchronized (truststore) {
 						return truststore.containsAlias(alias);
-				}
-				else{
+					}
+				else {
 					return false;
 				}
-			} 
-			catch (Exception ex) {
-				String exMessage = "Credential Manager: Failed to access the " + ksType + " to check if an alias exists.";
+			} catch (Exception ex) {
+				String exMessage = "Credential Manager: Failed to access the "
+						+ ksType + " to check if an alias exists.";
 				logger.error(exMessage, ex);
 				throw (new CMException(exMessage));
-			}
-			finally{
-				// Add the old BC providers back and remove the one we have added
+			} finally {
+				// Add the old BC providers back and remove the one we have
+				// added
 				restoreOldBCProviders(oldBCProviders);
 			}
 		}
@@ -1508,71 +1599,67 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 	 * while accessing the keystore.
 	 */
 	public ArrayList<String> getAliases(String ksType) throws CMException {
-		
+
 		synchronized (Security.class) {
 			ArrayList<Provider> oldBCProviders = unregisterOldBCProviders();
 			Security.addProvider(bcProvider);
 			try {
-				if (ksType.equals(KEYSTORE)){
+				if (ksType.equals(KEYSTORE)) {
 					synchronized (keystore) {
 						return Collections.list(keystore.aliases());
 					}
-				}
-				else if (ksType.equals(TRUSTSTORE)) {
+				} else if (ksType.equals(TRUSTSTORE)) {
 					synchronized (truststore) {
 						return Collections.list(truststore.aliases());
 					}
-				}
-				else{
+				} else {
 					return null;
 				}
-			} 
-			catch (Exception ex) {
-				String exMessage = "Credential Manager: Failed to access the " + ksType + " to get the aliases.";
+			} catch (Exception ex) {
+				String exMessage = "Credential Manager: Failed to access the "
+						+ ksType + " to get the aliases.";
 				logger.error(exMessage, ex);
 				throw new CMException(exMessage);
-			}
-			finally{
-				// Add the old BC providers back and remove the one we have added
+			} finally {
+				// Add the old BC providers back and remove the one we have
+				// added
 				restoreOldBCProviders(oldBCProviders);
 			}
 		}
 	}
 
-	
 	/**
 	 * Gets the creation date of an entry in the specified keystore.
 	 * 
 	 * Note that not all keystores support 'creation date' property, but Bouncy
 	 * Castle 'UBER'-type keystores do.
 	 */
-	public Date getEntryCreationDate(String ksType, String alias) throws CMException{
-		
+	public Date getEntryCreationDate(String ksType, String alias)
+			throws CMException {
+
 		synchronized (Security.class) {
 			ArrayList<Provider> oldBCProviders = unregisterOldBCProviders();
 			Security.addProvider(bcProvider);
 			try {
-				if (ksType.equals(KEYSTORE)){
+				if (ksType.equals(KEYSTORE)) {
 					synchronized (keystore) {
 						return keystore.getCreationDate(alias);
 					}
-				}
-				else if (ksType.equals(TRUSTSTORE)){
+				} else if (ksType.equals(TRUSTSTORE)) {
 					synchronized (truststore) {
 						return truststore.getCreationDate(alias);
 					}
-				}
-				else{
+				} else {
 					return null;
 				}
-			} 
-			catch (Exception ex) {
-				String exMessage = "Credential Manager: Failed to get the creation date for the entry from the " + ksType + ".";
+			} catch (Exception ex) {
+				String exMessage = "Credential Manager: Failed to get the creation date for the entry from the "
+						+ ksType + ".";
 				logger.error(exMessage);
 				throw new CMException(exMessage);
-			}
-			finally{
-				// Add the old BC providers back and remove the one we have added
+			} finally {
+				// Add the old BC providers back and remove the one we have
+				// added
 				restoreOldBCProviders(oldBCProviders);
 			}
 		}
@@ -1591,7 +1678,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 			return false;
 	}
 
-	
 	/**
 	 * Save the Keystore back to the file it was originally loaded from.
 	 */
@@ -1607,21 +1693,20 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 						fos = new FileOutputStream(keystoreFile);
 						keystore.store(fos, masterPassword.toCharArray());
 					}
-				} 
-				else if (ksType.equals(TRUSTSTORE)) {
+				} else if (ksType.equals(TRUSTSTORE)) {
 					synchronized (truststore) {
 						fos = new FileOutputStream(truststoreFile);
 						// Hard-coded trust store password
-						truststore.store(fos, TRUSTSTORE_PASSWORD.toCharArray());
+						truststore
+								.store(fos, TRUSTSTORE_PASSWORD.toCharArray());
 					}
 				}
-			} 
-			catch (Exception ex) {
-				String exMessage = "Credential Manager: Failed to save the " + ksType + ".";
+			} catch (Exception ex) {
+				String exMessage = "Credential Manager: Failed to save the "
+						+ ksType + ".";
 				logger.error(exMessage, ex);
 				throw (new CMException(exMessage));
-			} 
-			finally {
+			} finally {
 				if (fos != null) {
 					try {
 						fos.close();
@@ -1629,7 +1714,8 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 						// ignore
 					}
 				}
-				// Add the old BC providers back and remove the one we have added
+				// Add the old BC providers back and remove the one we have
+				// added
 				restoreOldBCProviders(oldBCProviders);
 			}
 		}
@@ -1638,12 +1724,13 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 	/**
 	 * Load PKCS12 keystore from the given file using the suppied password.
 	 */
-	public KeyStore loadPKCS12Keystore(File importFile, String pkcs12Password) throws CMException{
-		
+	public KeyStore loadPKCS12Keystore(File importFile, String pkcs12Password)
+			throws CMException {
+
 		synchronized (Security.class) {
 			ArrayList<Provider> oldBCProviders = unregisterOldBCProviders();
 			Security.addProvider(bcProvider);
-			
+
 			// Load the PKCS #12 keystore from the file using BC provider
 			KeyStore pkcs12;
 			try {
@@ -1655,16 +1742,16 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 				String exMessage = "Credential Manager: Failed to open PKCS12 keystore";
 				logger.error(exMessage, ex);
 				throw (new CMException(exMessage));
-			}
-			finally{
-				// Add the old BC providers back and remove the one we have added
+			} finally {
+				// Add the old BC providers back and remove the one we have
+				// added
 				restoreOldBCProviders(oldBCProviders);
 			}
 		}
 	}
 
 	public void addObserver(Observer<KeystoreChangedEvent> observer) {
-		multiCaster.addObserver(observer);		
+		multiCaster.addObserver(observer);
 	}
 
 	public List<Observer<KeystoreChangedEvent>> getObservers() {
@@ -1672,51 +1759,50 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 	}
 
 	public void removeObserver(Observer<KeystoreChangedEvent> observer) {
-		multiCaster.removeObserver(observer);		
+		multiCaster.removeObserver(observer);
 	}
 
 	/**
 	 * Check if Credential Manager has been initialised.
 	 */
-	public static boolean isInitialised(){
+	public static boolean isInitialised() {
 		return (INSTANCE != null);
 	}
-	
+
 	/**
-	 * Check is Keystore master password is the same as the one provided. 
+	 * Check is Keystore master password is the same as the one provided.
 	 */
-	public static boolean confirmMasterPassword(String password) {	
+	public static boolean confirmMasterPassword(String password) {
 		return ((masterPassword != null) && masterPassword.equals(password));
 	}
-	
+
 	/**
 	 * Change the Keystore master password. Truststore is using a different
-	 * pre-set password. 
+	 * pre-set password.
 	 */
-	public void changeMasterPassword(String newPassword) throws CMException{	
+	public void changeMasterPassword(String newPassword) throws CMException {
 		masterPassword = newPassword;
 		saveKeystore(KEYSTORE);
-		// We are using a different pre-set password for Truststore because 
-		// we need to initialise it earlier (for setting SSL system properties) 
+		// We are using a different pre-set password for Truststore because
+		// we need to initialise it earlier (for setting SSL system properties)
 		// when we still do not know user's master password.
-		//saveKeystore(TRUSTSTORE);
+		// saveKeystore(TRUSTSTORE);
 	}
 
-	public static void initialiseSSL() throws CMException {	
-		if (!sslInitialised ){
+	public static void initialiseSSL() throws CMException {
+		if (!sslInitialised) {
 			loadTruststore(TRUSTSTORE_PASSWORD);
 		}
 	}
 
-	
 	/**
-	 * Customised X509TrustManager that uses Credential Manager's
-	 * Truststore for trust management. If HTTPS connection to an
-	 * untrusted service is attempted it will also pop up a dialog
-	 * asking the user to confirm if they want to trust it.
-	 *
+	 * Customised X509TrustManager that uses Credential Manager's Truststore for
+	 * trust management. If HTTPS connection to an untrusted service is
+	 * attempted it will also pop up a dialog asking the user to confirm if they
+	 * want to trust it.
+	 * 
 	 */
-	private static class MyX509TrustManager implements X509TrustManager {  
+	private static class MyX509TrustManager implements X509TrustManager {
 
 		/*
 		 * The default X509TrustManager returned by SunX509. We'll delegate
@@ -1776,10 +1862,10 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 				sunJSSEX509TrustManager.checkServerTrusted(chain, authType);
 			} catch (CertificateException excep) {
 				/*
-				 * Pop up a dialog box asking whether to trust the 
-				 * server's certificate chain.
+				 * Pop up a dialog box asking whether to trust the server's
+				 * certificate chain.
 				 */
-				if (!shouldTrust(chain)){
+				if (!shouldTrust(chain)) {
 					throw excep;
 				}
 			}
@@ -1794,9 +1880,10 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 	}
 
 	/**
-	 * Checks if a service is trusted and if not - asks user if they want to trust it.
+	 * Checks if a service is trusted and if not - asks user if they want to
+	 * trust it.
 	 */
-	public static boolean shouldTrust(final X509Certificate[] chain){
+	public static boolean shouldTrust(final X509Certificate[] chain) {
 
 		logger.info("Asking the user if they want to trust certificate.");
 		// Ask user if they want to trust this service
@@ -1805,8 +1892,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 				(X509Certificate) chain[0]);
 		confirmCertTrustDialog.setLocationRelativeTo(null);
 		confirmCertTrustDialog.setVisible(true);
-		boolean shouldTrust = confirmCertTrustDialog
-				.shouldTrust();
+		boolean shouldTrust = confirmCertTrustDialog.shouldTrust();
 		if (shouldTrust) {
 			try {
 				CredentialManager credManager = CredentialManager.getInstance();
@@ -1827,16 +1913,16 @@ public class CredentialManager implements Observable<KeystoreChangedEvent>{
 			return (false);
 		}
 
-	}	
-	
+	}
+
 	/**
-	 * SSL Socket factory used by Taverna that uses special 
-	 * {@link MyX509TrustManager} that gets initialised every time
-	 * Credential Manager Truststore is updated.
+	 * SSL Socket factory used by Taverna that uses special
+	 * {@link MyX509TrustManager} that gets initialised every time Credential
+	 * Manager Truststore is updated.
 	 * 
 	 * Inspired by Tom Oinn's ThreadLocalSSLSoketFactory.
 	 */
-	public static SSLSocketFactory createTavernaSSLSocketFactory(){
+	public static SSLSocketFactory createTavernaSSLSocketFactory() {
 		SSLContext sc = null;
 		try {
 			sc = SSLContext.getInstance("SSL");
