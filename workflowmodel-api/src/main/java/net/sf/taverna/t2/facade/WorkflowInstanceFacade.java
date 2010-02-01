@@ -20,6 +20,7 @@
  ******************************************************************************/
 package net.sf.taverna.t2.facade;
 
+import java.lang.ref.WeakReference;
 import java.util.WeakHashMap;
 
 import net.sf.taverna.t2.invocation.InvocationContext;
@@ -50,6 +51,8 @@ import net.sf.taverna.t2.workflowmodel.Dataflow;
  * the workflow level?
  * 
  * @author Tom Oinn
+ * @author Alex Nenadic
+ * @author Stian Soiland-Reyes
  * 
  */
 @ControlBoundary
@@ -60,7 +63,7 @@ public interface WorkflowInstanceFacade {
 	 * This is needed for activities with dependencies (such as beanshell and API consumer) to gain access
 	 * to the current workflow via the WorkflowInstanceFacade.
 	 */
-	public static final WeakHashMap<String, WorkflowInstanceFacade> workflowRunFacades = new WeakHashMap<String, WorkflowInstanceFacade>();
+	public static final WeakHashMap<String, WeakReference<WorkflowInstanceFacade>> workflowRunFacades = new WeakHashMap<String, WeakReference<WorkflowInstanceFacade>>();
 	
 	/**
 	 * Push a data token into the specified port. If the token is part of a
