@@ -22,13 +22,17 @@ package net.sf.taverna.t2.activities.dataflow;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import net.sf.taverna.t2.facade.ResultListener;
 import net.sf.taverna.t2.facade.WorkflowInstanceFacade;
+import net.sf.taverna.t2.invocation.InvocationContext;
 import net.sf.taverna.t2.invocation.TokenOrderException;
 import net.sf.taverna.t2.invocation.WorkflowDataToken;
+import net.sf.taverna.t2.provenance.reporter.ProvenanceReporter;
 import net.sf.taverna.t2.reference.ExternalReferenceSPI;
+import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
 import net.sf.taverna.t2.workflowmodel.DataflowInputPort;
@@ -85,8 +89,8 @@ public class DataflowActivity extends
 				final WorkflowInstanceFacade facade;
 				try {
 					facade = edits
-							.createWorkflowInstanceFacade(dataflow, callback
-									.getContext(), callback
+							.createWorkflowInstanceFacade(dataflow, new WrappedContext(callback
+									.getContext()), callback
 									.getParentProcessIdentifier());
 				} catch (InvalidDataflowException ex) {
 					callback.fail("Invalid workflow", ex);
@@ -104,8 +108,13 @@ public class DataflowActivity extends
 							outputData.put(port, dataToken.getData());
 							synchronized (this) {
 								if (--outputPortCount == 0) {
+									// remove listener FIRST as a T2-1137 work around
+									// before DataflowOutputPortImpl is made thread safe
+									
+									// Accept memory leak to avoid non-thread-safe access
+									// to DataflowOutputPortImpl
+									//facade.removeResultListener(this);
 									callback.receiveResult(outputData, dataToken.getIndex());
-									facade.removeResultListener(this);
 								}
 							}
 						}
@@ -153,6 +162,25 @@ public class DataflowActivity extends
 
 	public Dataflow getNestedDataflow() {
 		return getConfiguration();
+	}
+
+	public class WrappedContext implements InvocationContext {
+		private final InvocationContext innerContext;
+		public void addEntity(Object entity) {
+			// Ignoring addEntity due to T2-1124
+		}
+		public <T> List<T> getEntities(Class<T> entityType) {
+			return innerContext.getEntities(entityType);
+		}
+		public ProvenanceReporter getProvenanceReporter() {
+			return innerContext.getProvenanceReporter();
+		}
+		public ReferenceService getReferenceService() {
+			return innerContext.getReferenceService();
+		}
+		public WrappedContext(InvocationContext context) {
+			this.innerContext = context;
+		}
 	}
 
 }
