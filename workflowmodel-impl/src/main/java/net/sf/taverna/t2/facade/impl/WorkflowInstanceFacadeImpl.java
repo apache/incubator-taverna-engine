@@ -20,7 +20,9 @@
  ******************************************************************************/
 package net.sf.taverna.t2.facade.impl;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
@@ -94,8 +96,8 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 	private String localName;
 	private MonitorManager monitorManager = MonitorManager.getInstance();
 	private boolean pushDataCalled = false;
-	protected List<FailureListener> failureListeners = new ArrayList<FailureListener>();
-	protected List<ResultListener> resultListeners = new ArrayList<ResultListener>();
+	protected List<FailureListener> failureListeners = Collections.synchronizedList(new ArrayList<FailureListener>());
+	protected List<ResultListener> resultListeners = Collections.synchronizedList(new ArrayList<ResultListener>());
 
 	private boolean provEnabled = false;
 	
@@ -115,19 +117,27 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 		this.dataflow = dataflow;
 		this.context = context;
 		this.localName = "facade" + owningProcessId.getAndIncrement();
+		// Set the wf run id
+		workflowRunId = UUID.randomUUID().toString();
 		if (parentProcess.equals("")) {
+			// Top-level workflow
+			
+			// add top level workflow run so that reference service can generate
+			// identifiers linked to our run
+			context.addEntity(new WorkflowRunIdEntity(workflowRunId));
 			this.instanceOwningProcessId = localName;
+			
 			// Add this WorkflowInstanceFacade to the map of all workflow run IDs 
-			// against the corresponding WorkflowInstanceFacadeS/ 
-			WorkflowInstanceFacade.workflowRunFacades.put(localName, this);
+			// against the corresponding WorkflowInstanceFacadeS/ - to be used
+			// by DependencyActivity's such as API consumer and Beanshell
+			workflowRunFacades.put(localName, new WeakReference<WorkflowInstanceFacade>(this));
 			// Note that we do not put the IDs for nested workflows, just for the main ones!
 		} else {
+			// Nested workflow
 			this.instanceOwningProcessId = parentProcess + ":" + localName;
 		}
 		
-		// Set the wf run id
-		workflowRunId = UUID.randomUUID().toString();
-		context.addEntity(new WorkflowRunIdEntity(workflowRunId));
+		
 		
 		WorkflowProvenanceItem workflowItem = null;
 		
@@ -201,13 +211,15 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 		failureListeners.add(listener);
 	}
 
-	public synchronized void addResultListener(ResultListener listener) {
-		if (resultListeners.isEmpty()) {
-			for (DataflowOutputPort port : dataflow.getOutputPorts()) {
-				port.addResultListener(facadeResultListener);
+	public void addResultListener(ResultListener listener) {
+		synchronized (resultListeners) {
+			if (resultListeners.isEmpty()) {
+				for (DataflowOutputPort port : dataflow.getOutputPorts()) {
+					port.addResultListener(facadeResultListener);
+				}
 			}
-		}
-		resultListeners.add(listener);
+			resultListeners.add(listener); 
+		}		
 	}
 
 	public void fire() throws IllegalStateException {
@@ -245,11 +257,13 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 		failureListeners.remove(listener);
 	}
 
-	public synchronized void removeResultListener(ResultListener listener) {
-		resultListeners.remove(listener);
-		if (resultListeners.isEmpty()) {
-			for (DataflowOutputPort port : dataflow.getOutputPorts()) {
-				port.removeResultListener(facadeResultListener);
+	public void removeResultListener(ResultListener listener) {
+		synchronized (resultListeners) {
+			resultListeners.remove(listener);
+			if (resultListeners.isEmpty()) {
+				for (DataflowOutputPort port : dataflow.getOutputPorts()) {
+					port.removeResultListener(facadeResultListener);
+				}
 			}
 		}
 	}
@@ -308,8 +322,10 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 					}
 				}
 			}
-			ArrayList<ResultListener> copyOfListeners = new ArrayList<ResultListener>(
-					resultListeners);
+			ArrayList<ResultListener> copyOfListeners;
+			synchronized (resultListeners) {
+				copyOfListeners = new ArrayList<ResultListener>(resultListeners);
+			}			
 			for (ResultListener resultListener : copyOfListeners) {
 				try {
 					resultListener.resultTokenProduced(
