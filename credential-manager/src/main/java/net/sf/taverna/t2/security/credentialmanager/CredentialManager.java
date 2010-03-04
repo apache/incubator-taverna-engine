@@ -154,7 +154,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	public static CredentialManager getInstance() throws CMException {
 		synchronized (CredentialManager.class) {
 			if (INSTANCE == null) {
-				INSTANCE = new CredentialManager(masterPassword);
+				INSTANCE = new CredentialManager();
 			}
 		}
 		return INSTANCE;
