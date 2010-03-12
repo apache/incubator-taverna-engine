@@ -123,6 +123,10 @@ public class CrossProduct extends
 
 	public synchronized int getIterationDepth(Map<String, Integer> inputDepths)
 			throws IterationTypeMismatchException {
+		if (isLeaf()) {
+			// No children!
+			throw new IterationTypeMismatchException("Cross product with no children");			
+		}
 		int temp = 0;
 		for (IterationStrategyNode child : getChildren()) {
 			temp += child.getIterationDepth(inputDepths);
