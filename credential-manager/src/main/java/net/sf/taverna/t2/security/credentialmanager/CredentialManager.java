@@ -177,7 +177,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 				INSTANCE = new CredentialManager(masterPassword);
 			} else {
 				if (!confirmMasterPassword(masterPassword)) {
-					String exMessage = "Incorrect password.";
+					String exMessage = "Incorrect master password for Credential Manager.";
 					throw new CMException(exMessage);
 				}
 			}
@@ -1824,7 +1824,11 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 
 			TrustManagerFactory tmf = TrustManagerFactory.getInstance(
 					"SunX509", "SunJSSE");
-			tmf.init(truststore);
+			
+			// Wait until everyone has finished updating the truststore (adding or deleting trusted certs)
+			synchronized (truststore) {
+				tmf.init(truststore);
+			}
 
 			TrustManager tms[] = tmf.getTrustManagers();
 
