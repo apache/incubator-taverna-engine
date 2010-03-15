@@ -1935,7 +1935,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 		try {
 			sc = SSLContext.getInstance("SSL");
 		} catch (NoSuchAlgorithmException e1) {
-			logger.error("No algorithm SSL", e1);
+			logger.error("Failed to create SSL socket factory: the 'SSL' algorithm was not available from any crypto provider.", e1);
 			return null;
 		}
 
@@ -1943,7 +1943,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 			sc.init(null, new TrustManager[] { new MyX509TrustManager() },
 					new SecureRandom());
 		} catch (Exception e) {
-			logger.error("Can't initiate trust manager", e);
+			logger.error("Failed to create SSL socket factory: could not initiate Taverna's trust manager", e);
 		}
 		return sc.getSocketFactory();
 	}
