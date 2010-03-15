@@ -51,8 +51,8 @@ import org.apache.log4j.Logger;
 import edu.stanford.ejalbert.BrowserLauncher;
 
 /**
- * Dialog that lets user know that there are updates available.
- * 
+ * Dialog that warns user that they need to install unlimited cryptography strength policy for Java.
+ *  
  * @author Alex Nenadic
  *
  */
