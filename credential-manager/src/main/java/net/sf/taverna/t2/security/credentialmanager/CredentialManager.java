@@ -31,7 +31,9 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.Key;
@@ -52,6 +54,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import javax.crypto.spec.SecretKeySpec;
@@ -81,18 +84,25 @@ import org.apache.log4j.Logger;
 
 public class CredentialManager implements Observable<KeystoreChangedEvent> {
 
+	private static final String UTF_8 = "UTF-8";
+
 	private static final String PROPERTY_TRUSTSTOREPASSWORD = "javax.net.ssl.trustStorePassword";
 
 	/** Various passwords to try for the trust store password */
-	public static List<String> defaultTrustStorePasswords = Arrays.asList(System.getProperty(PROPERTY_TRUSTSTOREPASSWORD, ""), "changeit", "changeme", "");
-	
+	public static List<String> defaultTrustStorePasswords = Arrays.asList(
+			System.getProperty(PROPERTY_TRUSTSTOREPASSWORD, ""), "changeit",
+			"changeme", "");
+
 	public static final String T2TRUSTSTORE_FILE = "t2truststore.jks";
 	public static final String SERVICE_URLS_FILE = "t2serviceURLs.txt";
 	public static final String T2KEYSTORE_FILE = "t2keystore.ubr";
-	
-	/* seems like a good separator as it will highly unlikely feature in username */ 
-	public static final char USERNAME_AND_PASSWORD_SEPARATOR_CHARACTER = ';'; 
-	
+
+	/*
+	 * seems like a good separator as it will highly unlikely feature in
+	 * username
+	 */
+	public static final char USERNAME_AND_PASSWORD_SEPARATOR_CHARACTER = '\u0000';
+
 	private static Logger logger = Logger.getLogger(CredentialManager.class);
 
 	// Multicaster of KeystoreChangedEventS
@@ -203,9 +213,10 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 		masterPassword = password;
 	}
 
+	SPIRegistry<MasterPasswordProviderSPI> masterPasswordProviderSPI = new SPIRegistry<MasterPasswordProviderSPI>(
+			MasterPasswordProviderSPI.class);
+
 	private String getMasterPassword() throws CMException {
-		SPIRegistry<MasterPasswordProviderSPI> masterPasswordProviderSPI = new SPIRegistry<MasterPasswordProviderSPI>(
-				MasterPasswordProviderSPI.class);
 		List<MasterPasswordProviderSPI> masterPasswordProviders = masterPasswordProviderSPI
 				.getInstances();
 		Collections.sort(masterPasswordProviders,
@@ -218,6 +229,9 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 					}
 				});
 		for (MasterPasswordProviderSPI provider : masterPasswordProviders) {
+			if (provider.canProvidePassword() < 0) {
+				continue;
+			}
 			String password = provider.getPassword();
 			if (password != null) {
 				return password;
@@ -416,7 +430,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 		}
 
 		if (truststoreFile.exists()) { // If the Truststore file already exists,
-										// open it and load the Truststore
+			// open it and load the Truststore
 
 			FileInputStream fis = null;
 			try {
@@ -439,7 +453,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 				}
 			}
 		} else { // Otherwise create a new empty truststore and load it with
-					// certs from Java's truststore
+			// certs from Java's truststore
 
 			File javaTruststoreFile = new File(System.getProperty("java.home")
 					+ "/lib/security/cacerts");
@@ -455,57 +469,67 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 				throw new CMException(exMessage);
 			}
 
-			FileInputStream fis = null;			
+			FileInputStream fis = null;
 			boolean loadedJavaTruststore = false;
-			
+
 			for (String password : defaultTrustStorePasswords) {
-				try {				
+				try {
 					// Get the file
 					fis = new FileInputStream(javaTruststoreFile);
 					// Load the Java keystore from the file
 					// try with the default Java truststore password first
-					javaTruststore.load(fis, password.toCharArray()); 
+					javaTruststore.load(fis, password.toCharArray());
 					loadedJavaTruststore = true;
 					break;
 				} catch (IOException ioex) {
-					// If there is an I/O or format problem with the keystore data, 
-					// or if the given password was incorrect 
-					// (Thank you Sun, now I can't know if it is the file or the password..)					
-					logger.warn("Failed to load the Java truststore to copy over certificates using default password: " + password + " from " + javaTruststoreFile);
+					// If there is an I/O or format problem with the keystore
+					// data,
+					// or if the given password was incorrect
+					// (Thank you Sun, now I can't know if it is the file or the
+					// password..)
+					logger
+							.warn("Failed to load the Java truststore to copy over certificates using default password: "
+									+ password + " from " + javaTruststoreFile);
 				} catch (NoSuchAlgorithmException e) {
-					logger.error("Unknown encryption algorithm while loading Java truststore from " + javaTruststoreFile, e);
+					logger.error(
+							"Unknown encryption algorithm while loading Java truststore from "
+									+ javaTruststoreFile, e);
 					break;
 				} catch (CertificateException e) {
-					logger.error("Certificate error while loading Java truststore from " + javaTruststoreFile, e);
+					logger.error(
+							"Certificate error while loading Java truststore from "
+									+ javaTruststoreFile, e);
 					break;
 				} finally {
 					if (fis != null) {
 						try {
-							fis.close();							
+							fis.close();
 						} catch (IOException e) {
 							// ignore
 						}
 					}
 				}
 			}
-			
-			if (! loadedJavaTruststore) {
-				if (GraphicsEnvironment.isHeadless()){
+
+			if (!loadedJavaTruststore) {
+				if (GraphicsEnvironment.isHeadless()) {
 					String error = "Credential manager failed to load certificates from the Java truststore.";
-					String help = "Try using the system property -D" + PROPERTY_TRUSTSTOREPASSWORD + "=TheTrustStorePassword";
+					String help = "Try using the system property -D"
+							+ PROPERTY_TRUSTSTOREPASSWORD
+							+ "=TheTrustStorePassword";
 					logger.error(error + " " + help);
 					System.err.println(error);
 					System.err.println(help);
 					// FIXME: Should also use SPIs for commandline/grid use
 				} else {
-					// Try using the GUI.. 
+					// Try using the GUI..
 
-					// Hopefully it was the password problem - ask user to provide
+					// Hopefully it was the password problem - ask user to
+					// provide
 					// their password for the Java truststore
-					copyPasswordFromGUI(javaTruststore, javaTruststoreFile);					
+					copyPasswordFromGUI(javaTruststore, javaTruststoreFile);
 				}
 			}
-			
 
 			FileOutputStream fos = null;
 			// Create a new empty truststore for Taverna
@@ -575,8 +599,8 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 			File javaTruststoreFile) {
 		// FIXME: Move this class to the workbench and use the SPI
 		GetMasterPasswordDialog getPasswordDialog = new GetMasterPasswordDialog(
-				"Credential Manager needs to copy certificates from Java truststore. " +
-				"Please enter your password.");
+				"Credential Manager needs to copy certificates from Java truststore. "
+						+ "Please enter your password.");
 		getPasswordDialog.setLocationRelativeTo(null);
 		getPasswordDialog.setVisible(true);
 		String javaTruststorePassword = getPasswordDialog.getPassword();
@@ -590,8 +614,8 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 			javaTruststore.load(fis, javaTruststorePassword.toCharArray());
 			return true;
 		} catch (Exception ex) {
-			String exMessage = "Failed to load the Java truststore to copy over certificates" +
-					" using user-provided password. Creating a new empty truststore for Taverna.";
+			String exMessage = "Failed to load the Java truststore to copy over certificates"
+					+ " using user-provided password. Creating a new empty truststore for Taverna.";
 			logger.error(exMessage, ex);
 			return false;
 		} finally {
@@ -603,7 +627,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 				}
 			}
 		}
-	}	
+	}
 
 	/**
 	 * Load lists of service URLs associated with private key aliases from a
@@ -656,23 +680,23 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 						String alias = line.substring(line.indexOf(' ') + 1);
 						String url = line.substring(0, line.indexOf(' '));
 						// URLs were encoded before storing them in a file
-						url = URLDecoder.decode(url, "UTF-8");
+						url = URLDecoder.decode(url, UTF_8);
 
 						ArrayList<String> urlsList = (ArrayList<String>) serviceURLsForKeyPairs
 								.get(alias); // get URL list for the current
-												// alias (it can be empty)
+						// alias (it can be empty)
 						if (urlsList == null) {
 							urlsList = new ArrayList<String>();
 						}
 						urlsList.add(url); // add the new URL to the list of
-											// URLs for this alias
+						// URLs for this alias
 						serviceURLsForKeyPairs.put(alias, urlsList); // put the
-																		// updated
-																		// list
-																		// back
-																		// to
-																		// the
-																		// map
+						// updated
+						// list
+						// back
+						// to
+						// the
+						// map
 						line = serviceURLsReader.readLine();
 					}
 				} catch (Exception ex) {
@@ -770,8 +794,8 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 
 				// Write the serviceURLs hashmap to the file
 				for (String alias : serviceURLsForKeyPairs.keySet()) { // for
-																		// all
-																		// aliases
+					// all
+					// aliases
 
 					// For all urls associated with the alias
 					ArrayList<String> serviceURLsForKeyPair = (ArrayList<String>) serviceURLsForKeyPairs
@@ -786,7 +810,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 						// they do not contain blank characters
 						// that are used as delimiters.
 						String encodedURL = URLEncoder.encode(
-								(String) serviceURL, "UTF-8");
+								(String) serviceURL, UTF_8);
 						StringBuffer line = new StringBuffer(encodedURL + " "
 								+ alias);
 						serviceURLsWriter.append(line);
@@ -818,51 +842,154 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	 */
 	public String[] getUsernameAndPasswordForService(String serviceURL)
 			throws CMException {
+		UsernamePassword usernamePassword = getUsernameAndPasswordForService(
+				URI.create(serviceURL), false, null);
+		if (usernamePassword == null) {
+			return null;
+		}
+		String[] pair = new String[2];
+		pair[0] = usernamePassword.getUsername();
+		pair[1] = String.valueOf(usernamePassword.getPassword());
+		usernamePassword.resetPassword();
+		return pair;
+	}
+
+	public UsernamePassword getUsernameAndPasswordForService(URI serviceURI,
+			boolean usePathRecursion, String requestingPrompt)
+			throws CMException {
 		synchronized (Security.class) {
 			ArrayList<Provider> oldBCProviders = unregisterOldBCProviders();
 			Security.addProvider(bcProvider);
 
-			// Alias for the username and password entry
-			String alias = "password#" + serviceURL;
+			/* Alias for the username and password entry */
 			SecretKeySpec passwordKey = null;
+			LinkedHashSet<URI> possibles = possibleLookups(serviceURI,
+					usePathRecursion);
 			try {
-				synchronized (keystore) {
-					passwordKey = (((SecretKeySpec) keystore
-							.getKey(alias, null)));
+				for (URI lookupURI : possibles) {
+					synchronized (keystore) {
+						String alias = "password#" + lookupURI.toASCIIString();
+						passwordKey = (((SecretKeySpec) keystore.getKey(alias,
+								null)));
+					}
+					if (passwordKey == null) {
+						continue;
+					}
+					String unpasspair = new String(passwordKey.getEncoded(),
+							UTF_8);
+					/*
+					 * decoded key contains string
+					 * <USERNAME><SEPARATOR_CHARACTER><PASSWORD>
+					 */
+
+					int separatorAt = unpasspair
+							.indexOf(CredentialManager.USERNAME_AND_PASSWORD_SEPARATOR_CHARACTER);
+					if (separatorAt < 0) {
+						throw new CMException("Invalid credentials stored for "
+								+ lookupURI);
+					}
+					String username = unpasspair.substring(0, separatorAt);
+					String password = unpasspair.substring(separatorAt + 1);
+
+					UsernamePassword usernamePassword = new UsernamePassword();
+					usernamePassword.setUsername(username);
+					usernamePassword.setPassword(password.toCharArray());
+					return usernamePassword;
 				}
-				if (passwordKey != null) {
-					String unpasspair = new String(passwordKey.getEncoded()); // the
-																				// decoded
-																				// key
-																				// contains
-																				// string
-																				// <USERNAME><SEPARATOR_CHARACTER><PASSWORD>
-					String username = unpasspair
-							.substring(
-									0,
-									unpasspair
-											.indexOf(CredentialManager.USERNAME_AND_PASSWORD_SEPARATOR_CHARACTER));
-					String password = unpasspair
-							.substring(unpasspair
-									.indexOf(CredentialManager.USERNAME_AND_PASSWORD_SEPARATOR_CHARACTER) + 1);
-					String[] toReturn = new String[2];
-					toReturn[0] = username;
-					toReturn[1] = password;
-					return toReturn;
-				} else {
-					return null;
+
+				/*
+				 * Nothing found in store, let's lookup using SPIs
+				 */
+
+				for (UsernamePasswordProviderSPI credProvider : findCredentialProviders()) {
+					if (credProvider.canProvideCredentialFor(serviceURI)) {
+						UsernamePassword usernamePassword = credProvider
+								.getUsernamePassword(serviceURI,
+										requestingPrompt);
+						if (usernamePassword == null) {
+							continue;
+						}
+						if (usernamePassword.isShouldSave()) {
+							URI uri = serviceURI;
+							if (usePathRecursion) {
+								uri = normalizeServiceURI(serviceURI);
+							}
+							saveUsernameAndPasswordForService(usernamePassword,
+									uri);
+						}
+						return usernamePassword;
+					}
 				}
+				// Giving up
+				return null;
 			} catch (Exception ex) {
 				String exMessage = "Credential Manager: Failed to get the username and password pair for service "
-						+ serviceURL + " from the Keystore.";
+						+ serviceURI + " from the Keystore.";
 				logger.error(exMessage, ex);
 				throw (new CMException(exMessage));
 			} finally {
-				// Add the old BC providers back and remove the one we have
-				// added
+				/*
+				 * Add the old BC providers back and remove the one we have
+				 * added
+				 */
 				restoreOldBCProviders(oldBCProviders);
 			}
 		}
+	}
+
+	SPIRegistry<UsernamePasswordProviderSPI> credentialProviderSPI = new SPIRegistry<UsernamePasswordProviderSPI>(
+			UsernamePasswordProviderSPI.class);
+
+	private List<UsernamePasswordProviderSPI> findCredentialProviders() {
+
+		List<UsernamePasswordProviderSPI> credentialProviders = credentialProviderSPI
+				.getInstances();
+		Collections.sort(credentialProviders,
+				new Comparator<UsernamePasswordProviderSPI>() {
+					public int compare(UsernamePasswordProviderSPI o1,
+							UsernamePasswordProviderSPI o2) {
+						// Reverse sort - highest provider first
+						return o2.providerPriority() - o1.providerPriority();
+					}
+				});		
+		return credentialProviders;
+	}
+
+	protected static LinkedHashSet<URI> possibleLookups(URI serviceURI,
+			boolean usePathRecursion) {
+		serviceURI = serviceURI.normalize();
+
+		/*
+		 * We'll use a LinkedHashSet to avoid checking for duplicates, like if
+		 * serviceURI.equals(withoutQuery) Only the first hit should be added to
+		 * the set.
+		 */
+		LinkedHashSet<URI> possibles = new LinkedHashSet<URI>();
+		possibles.add(serviceURI);
+		if (!usePathRecursion || !serviceURI.isAbsolute()) {
+			return possibles;
+		}
+		URI withoutQuery = serviceURI.resolve(serviceURI.getPath());
+
+		possibles.add(withoutQuery);
+
+		// Immediate parent
+		URI parent = withoutQuery.resolve(".");
+		possibles.add(parent);
+		URI oldParent = null;
+		// Top parent (to be added later)
+		URI root = parent.resolve("/");
+		while (!parent.equals(oldParent) && !parent.equals(root)
+				&& parent.getPath().length() > 0) {
+			// Intermediate parents, but not for "http://bla.org" as we would
+			// find "http://bla.org.."
+			oldParent = parent;
+			parent = parent.resolve("..");
+			possibles.add(parent);
+		}
+		// In case while-loop did not do so, also include root
+		possibles.add(root);
+		return possibles;
 	}
 
 	/**
@@ -935,8 +1062,13 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 			String keyToSave = username
 					+ USERNAME_AND_PASSWORD_SEPARATOR_CHARACTER + password;
 
-			SecretKeySpec passwordKey = new SecretKeySpec(keyToSave.getBytes(),
-					"DUMMY");
+			SecretKeySpec passwordKey;
+			try {
+				passwordKey = new SecretKeySpec(keyToSave.getBytes(UTF_8),
+						"DUMMY");
+			} catch (UnsupportedEncodingException e) {
+				throw new RuntimeException("Could not find encoding " + UTF_8);
+			}
 			try {
 				synchronized (keystore) {
 					keystore.setKeyEntry(alias, passwordKey, null, null);
@@ -1483,7 +1615,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 		else if (!issuerOU.equals("none")) {
 			issuer = issuerOU;
 		} else if (!issuerO.equals("none")) { // finally use issuer's
-												// Organisation
+			// Organisation
 			issuer = issuerO;
 		} else {
 			issuer = "<Not Part of Certificate>";
@@ -1950,4 +2082,20 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 		}
 		return sc.getSocketFactory();
 	}
+
+	public void saveUsernameAndPasswordForService(
+			UsernamePassword usernamePassword, URI serviceURI)
+			throws CMException {
+		String uri = serviceURI.toASCIIString();
+		saveUsernameAndPasswordForService(usernamePassword.getUsername(),
+				String.valueOf(usernamePassword.getPassword()), uri);
+	}
+
+	protected URI normalizeServiceURI(URI serviceURI) {
+		URI normalized = serviceURI.normalize();
+		URI pathOnly = normalized.resolve(normalized.getPath());
+		URI parent = pathOnly.resolve(".");
+		return parent;
+	}
+
 }
