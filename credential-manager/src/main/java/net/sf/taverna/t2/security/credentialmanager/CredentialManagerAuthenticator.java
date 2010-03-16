@@ -4,7 +4,6 @@ import java.net.Authenticator;
 import java.net.PasswordAuthentication;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 
 import org.apache.log4j.Logger;
 
@@ -82,24 +81,37 @@ public class CredentialManagerAuthenticator extends Authenticator {
 			}
 			int port = getRequestingPort();
 			if (host == null || port < 0) {
-				logger.warn("Unsupported request for " + getRequestingScheme() + " " + getRequestingSite());
+				logger.warn("Unsupported request for " + getRequestingScheme()
+						+ " " + getRequestingSite());
 				return null;
 			}
 			uri = URI.create("socket://" + host + ":" + port);
 		}
-		
+
 		CredentialManager cm = getCredManager();
 		if (cm == null) {
 			logger.warn("No credential manager");
 			return null;
 		}
 		boolean usePathRecursion = false;
-		if (getRequestingScheme().equals("basic") || getRequestingScheme().equals("digest")) {
-			usePathRecursion  = true;
-		}		
+		String realm = getRequestingPrompt();
+		if (getRequestingScheme().equals("basic")
+				|| getRequestingScheme().equals("digest")) {
+			usePathRecursion = true;
+			if (realm != null && realm.length() > 0) {
+				try {
+					uri = CMUtil.resolveUriFragment(uri, realm);
+				} catch (URISyntaxException e) {
+					logger.warn("Could not URI-encode fragment for realm: "
+							+ realm);
+				}
+			}
+		}
+
 		UsernamePassword usernameAndPassword;
 		try {
-			usernameAndPassword = cm.getUsernameAndPasswordForService(uri, usePathRecursion, getRequestingPrompt());		
+			usernameAndPassword = cm.getUsernameAndPasswordForService(uri,
+					usePathRecursion, realm);
 		} catch (CMException e) {
 			logger.warn("Could not get username and password for " + uri, e);
 			return null;
@@ -108,9 +120,13 @@ public class CredentialManagerAuthenticator extends Authenticator {
 			logger.warn("No username/password found for " + uri);
 			return null;
 		}
-		PasswordAuthentication pwAuth = new PasswordAuthentication(usernameAndPassword.getUsername(),
-				usernameAndPassword.getPassword());
+		PasswordAuthentication pwAuth = new PasswordAuthentication(
+				usernameAndPassword.getUsername(), usernameAndPassword
+						.getPassword());
 		usernameAndPassword.resetPassword();
 		return pwAuth;
 	}
+
+	
+	
 }

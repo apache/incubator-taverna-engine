@@ -36,7 +36,7 @@ public class FixedPasswordProvider implements UsernamePasswordProviderSPI {
 		FixedPasswordProvider.serviceURI = serviceURI;
 		FixedPasswordProvider.requestingPrompt = requestingPrompt;
 		calls++;
-		return usernamePassword;
+		return usernamePassword.clone();
 	}
 
 	public int providerPriority() {

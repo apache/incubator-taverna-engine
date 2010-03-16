@@ -25,6 +25,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchProviderException;
@@ -159,6 +161,19 @@ public class CMUtil {
 		warnDialog.setVisible(true);
 		warnedUser = true;
 		
+	}
+	
+	public static URI resolveUriFragment(URI uri, String realm) throws URISyntaxException {
+		URI fragment;
+		/*
+		 * Little hack to encode the fragment correctly - why does
+		 * not java.net.URI expose this quoting or have setFragment()?
+		 */
+		fragment = new URI("http", "localhost", "/", realm);
+		fragment = (fragment.resolve(fragment
+				.getPath())).relativize(fragment);
+		uri = uri.resolve(fragment);
+		return uri;
 	}
 	
 }

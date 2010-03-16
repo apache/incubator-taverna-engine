@@ -7,6 +7,15 @@ public class UsernamePassword {
 	private boolean shouldSave = false;
 	private String username;
 
+	@Override
+	protected UsernamePassword clone() {
+		UsernamePassword up = new UsernamePassword();
+		up.setUsername(getUsername());
+		up.setPassword(getPassword().clone());
+		up.setShouldSave(isShouldSave());
+		return up;
+	}
+	
 	public UsernamePassword() {
 	}
 	

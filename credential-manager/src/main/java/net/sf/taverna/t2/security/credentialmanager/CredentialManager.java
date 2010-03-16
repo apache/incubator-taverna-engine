@@ -987,17 +987,26 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 		 * the set.
 		 */
 		LinkedHashSet<URI> possibles = new LinkedHashSet<URI>();
+		
+		
 		possibles.add(serviceURI);
 		if (!usePathRecursion || !serviceURI.isAbsolute()) {
 			return possibles;
 		}
-		URI withoutQuery = serviceURI.resolve(serviceURI.getPath());
-
-		possibles.add(withoutQuery);
+		
+		/*
+		 * We'll preserve the fragment, as it is used to indicate the realm 
+		 */
+		String rawFragment = serviceURI.getRawFragment();
+		if (rawFragment == null) {
+			rawFragment = "";
+		}
+		URI withoutQuery = serviceURI.resolve(serviceURI.getRawPath());
+		addFragmentedURI(possibles, withoutQuery, rawFragment);
 		
 		// Immediate parent
 		URI parent = withoutQuery.resolve(".");
-		possibles.add(parent);
+		addFragmentedURI(possibles, parent, rawFragment);
 		URI oldParent = null;
 		// Top parent (to be added later)
 		URI root = parent.resolve("/");
@@ -1007,11 +1016,19 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 			// find "http://bla.org.."
 			oldParent = parent;
 			parent = parent.resolve("..");
-			possibles.add(parent);
+			addFragmentedURI(possibles, parent, rawFragment);
 		}
 		// In case while-loop did not do so, also include root
-		possibles.add(root);
+		addFragmentedURI(possibles, root, rawFragment);
 		return possibles;
+	}
+
+	private static void addFragmentedURI(LinkedHashSet<URI> possibles,
+			URI uri, String rawFragment) {
+		if (rawFragment != null && rawFragment.length() > 0) {
+			uri = uri.resolve("#" + rawFragment);
+		}
+		possibles.add(uri);
 	}
 
 	/**
@@ -2153,26 +2170,34 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 		return sc.getSocketFactory();
 	}
 
-	
-	
 	/**
-	 * Normalize an URI for insertion as the basis for path-recursive lookups, ie. strip query and filename. For example:
-	 * <code>
+	 * Normalize an URI for insertion as the basis for path-recursive lookups,
+	 * ie. strip query and filename. For example: <code>
 	 * URI uri = URI.create("http://foo.org/dir1/dirX/../dir2/filename.html?q=x")
 	 * System.out.println(CredentialManager.normalizeServiceURI(uri));
 	 * >>> http://foo.org/dir1/dir2/
 	 * uri = URI.create("http://foo.org/dir1/dir2/");
 	 * System.out.println(CredentialManager.normalizeServiceURI(uri));
 	 * >>> http://foo.org/dir1/dir2/
-	 * </code> 
+	 * </code>
+	 * <p>
+	 * Note that #fragments are preserved, as these are used to indicate HTTP
+	 * Basic Auth realms
 	 * 
-	 * @param serviceURI URI for a service that is to be normalized
-	 * @return A normalized URI without query or filename, ie. where uri.resolve(".").equals(uri).
+	 * @param serviceURI
+	 *            URI for a service that is to be normalized
+	 * @return A normalized URI without query or filename, ie. where
+	 *         uri.resolve(".").equals(uri).
 	 */
 	protected static URI normalizeServiceURI(URI serviceURI) {
+		String rawFragment = serviceURI.getRawFragment();
 		URI normalized = serviceURI.normalize();
 		URI parent = normalized.resolve(".");
-		return parent;
+		if (rawFragment != null) {
+			return parent.resolve("#" + rawFragment);
+		} else {
+			return parent;
+		}
 	}
 
 	/**
