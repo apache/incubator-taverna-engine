@@ -275,7 +275,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 
 			// Load the Keystore
 			try {
-				keystore = loadKeystore(password);
+				loadKeystore(password);
 				logger.info("Credential Manager: Loaded the Keystore.");
 			} catch (CMException cme) {
 				logger.error(cme.getMessage(), cme);
@@ -293,7 +293,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 
 			// Load the Truststore
 			try {
-				truststore = loadTruststore(TRUSTSTORE_PASSWORD);
+				loadTruststore(TRUSTSTORE_PASSWORD);
 				logger.info("Credential Manager: Loaded the Truststore.");
 			} catch (CMException cme) {
 				logger.error(cme.getMessage(), cme);
@@ -332,9 +332,9 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	 * Loads Taverna's Bouncy Castle "UBER"-type keystore from a file on the
 	 * disk and returns it.
 	 */
-	public static KeyStore loadKeystore(String masterPassword)
+	public static void loadKeystore(String masterPassword)
 			throws CMException {
-		KeyStore keystore = null;
+
 		try {
 			keystore = KeyStore.getInstance("UBER", "BC");
 		} catch (Exception ex) {
@@ -391,7 +391,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 				}
 			}
 		}
-		return keystore;
 	}
 
 	/**
@@ -400,10 +399,9 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	 * truststore located in <JAVA_HOME>/lib/security/cacerts will be copied
 	 * over to this truststore.
 	 */
-	private static KeyStore loadTruststore(String masterPassword)
+	private static void loadTruststore(String masterPassword)
 			throws CMException {
 
-		KeyStore truststore = null;
 		// Try to create the Taverna's Truststore - has to be "JKS"-type
 		// keystore
 		// because we use it to set the system property
@@ -571,8 +569,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 				.setDefaultSSLSocketFactory(createTavernaSSLSocketFactory());
 
 		sslInitialised = true;
-
-		return truststore;
 	}
 
 	private static boolean copyPasswordFromGUI(KeyStore javaTruststore,
@@ -1826,6 +1822,9 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 					"SunX509", "SunJSSE");
 			
 			// Wait until everyone has finished updating the truststore (adding or deleting trusted certs)
+			if (truststore == null){
+				loadTruststore(TRUSTSTORE_PASSWORD);
+			}
 			synchronized (truststore) {
 				tmf.init(truststore);
 			}
