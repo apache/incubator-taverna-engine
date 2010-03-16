@@ -7,6 +7,14 @@ public class UsernamePassword {
 	private boolean shouldSave = false;
 	private String username;
 
+	public UsernamePassword() {
+	}
+	
+	public UsernamePassword(String username, String password) {
+		this.username = username;
+		this.password = password.toCharArray();
+	}
+
 	public char[] getPassword() {
 		return password;
 	}

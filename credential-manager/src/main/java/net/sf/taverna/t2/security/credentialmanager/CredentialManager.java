@@ -32,6 +32,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.net.URI;
 import java.net.URLDecoder;
@@ -72,6 +74,7 @@ import net.sf.taverna.t2.lang.observer.Observable;
 import net.sf.taverna.t2.lang.observer.Observer;
 import net.sf.taverna.t2.spi.SPIRegistry;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.log4j.Logger;
 
 /**
@@ -299,7 +302,8 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 			// Load service URLs associated with private key aliases from a file
 			try {
 				loadServiceURLsForKeyPairs();
-				logger.info("Credential Manager: Loaded the Service URLs for private key pairs.");
+				logger
+						.info("Credential Manager: Loaded the Service URLs for private key pairs.");
 			} catch (CMException cme) {
 				logger.error(cme.getMessage(), cme);
 				throw cme;
@@ -346,8 +350,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	 * Loads Taverna's Bouncy Castle "UBER"-type keystore from a file on the
 	 * disk and returns it.
 	 */
-	public static void loadKeystore(String masterPassword)
-			throws CMException {
+	public static void loadKeystore(String masterPassword) throws CMException {
 
 		try {
 			keystore = KeyStore.getInstance("UBER", "BC");
@@ -394,7 +397,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 			} catch (Exception ex) {
 				String exMessage = "Failed to generate a new empty keystore.";
 				logger.error(exMessage, ex);
-				throw new CMException(exMessage);
+				throw new CMException(exMessage, ex);
 			} finally {
 				if (fos != null) {
 					try {
@@ -839,7 +842,10 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	 * Get a username and password pair for the given service, or null if it
 	 * does not exit. The returned array contains username as the first element
 	 * and password as the second.
+	 * 
+	 * @deprecated Use {@link #getUsernameAndPasswordForService(URI, boolean, String)} instead
 	 */
+	@Deprecated
 	public String[] getUsernameAndPasswordForService(String serviceURL)
 			throws CMException {
 		UsernamePassword usernamePassword = getUsernameAndPasswordForService(
@@ -854,6 +860,24 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 		return pair;
 	}
 
+	/**
+	 * Get a username and password pair for the given service, or null if it
+	 * does not exit.
+	 * <p>
+	 * If the credentials are not available in the credential manager, it will
+	 * invoke SPI implementations of the {@link UsernamePasswordProviderSPI}
+	 * interface for asking the user (typically through the UI) or resolving
+	 * hard-coded credentials.
+	 * <p>
+	 * If the parameter <code>usePathRecursion</code> is true, then the
+	 * credential manager will also attempt to look for stored credentials for each of the parents in the URI, for instance  
+	 * 
+	 * @param serviceURI
+	 * @param usePathRecursion
+	 * @param requestingPrompt
+	 * @return
+	 * @throws CMException
+	 */
 	public UsernamePassword getUsernameAndPasswordForService(URI serviceURI,
 			boolean usePathRecursion, String requestingPrompt)
 			throws CMException {
@@ -951,7 +975,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 						// Reverse sort - highest provider first
 						return o2.providerPriority() - o1.providerPriority();
 					}
-				});		
+				});
 		return credentialProviders;
 	}
 
@@ -972,7 +996,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 		URI withoutQuery = serviceURI.resolve(serviceURI.getPath());
 
 		possibles.add(withoutQuery);
-
+		
 		// Immediate parent
 		URI parent = withoutQuery.resolve(".");
 		possibles.add(parent);
@@ -1017,24 +1041,65 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 		return serviceURLs;
 	}
 
+	
+
+	
 	/**
 	 * Insert a new username and password pair in the keystore for the given
-	 * service URL.
-	 * 
+	 * service URI.
+	 * <p>
 	 * Effectively, this method inserts a new secret key entry in the keystore,
-	 * where key contains <USERNAME>" "<PASSWORD> string, i.e. password is
-	 * prepended with the username and separated by a blank character (which
+	 * where key contains <USERNAME>"\000"<PASSWORD> string, i.e. password is
+	 * prepended with the username and separated by a \000 character (which
 	 * hopefully will not appear in the username).
-	 * 
+	 * <p>
 	 * Username and password string is saved in the Keystore as byte array using
 	 * SecretKeySpec (which constructs a secret key from the given byte array
 	 * but does not check if the given bytes indeed specify a secret key of the
 	 * specified algorithm).
-	 * 
+	 * <p>
 	 * An alias used to identify the username and password entry is constructed
 	 * as "password#"<SERVICE_URL> using the service URL this username/password
 	 * pair is to be used for.
+	 * <p>
+	 * @param usernamePassword The {@link UsernamePassword} to store
+	 * @param serviceURI The (possibly normalized) URI to store the credentials under
+	 * @throws CMException If the credentials could not be stored
+ 	 */
+	public void saveUsernameAndPasswordForService(
+			UsernamePassword usernamePassword, URI serviceURI)
+			throws CMException {
+		String uri = serviceURI.toASCIIString();
+		saveUsernameAndPasswordForService(usernamePassword.getUsername(),
+				String.valueOf(usernamePassword.getPassword()), uri);
+	}
+	
+
+	/**
+	 * Insert a new username and password pair in the keystore for the given
+	 * service URL.
+	 * <p>
+	 * Effectively, this method inserts a new secret key entry in the keystore,
+	 * where key contains <USERNAME>"\000"<PASSWORD> string, i.e. password is
+	 * prepended with the username and separated by a \000 character (which
+	 * hopefully will not appear in the username).
+	 * <p>
+	 * Username and password string is saved in the Keystore as byte array using
+	 * SecretKeySpec (which constructs a secret key from the given byte array
+	 * but does not check if the given bytes indeed specify a secret key of the
+	 * specified algorithm).
+	 * <p>
+	 * An alias used to identify the username and password entry is constructed
+	 * as "password#"<SERVICE_URL> using the service URL this username/password
+	 * pair is to be used for.
+	 * <p>
+	 * @deprecated Use {@link #saveUsernameAndPasswordForService(UsernamePassword, URI)} instead
+	 * @param username Username to store
+	 * @param password Password to store
+	 * @param serviceURL serviceURI The (possibly normalized) URI to store the credentials under
+	 * @throws CMException If the credentials could not be stored
 	 */
+	@Deprecated
 	public void saveUsernameAndPasswordForService(String username,
 			String password, String serviceURL) throws CMException {
 
@@ -1952,9 +2017,10 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 
 			TrustManagerFactory tmf = TrustManagerFactory.getInstance(
 					"SunX509", "SunJSSE");
-			
-			// Wait until everyone has finished updating the truststore (adding or deleting trusted certs)
-			if (truststore == null){
+
+			// Wait until everyone has finished updating the truststore (adding
+			// or deleting trusted certs)
+			if (truststore == null) {
 				loadTruststore(TRUSTSTORE_PASSWORD);
 			}
 			synchronized (truststore) {
@@ -2070,7 +2136,10 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 		try {
 			sc = SSLContext.getInstance("SSL");
 		} catch (NoSuchAlgorithmException e1) {
-			logger.error("Failed to create SSL socket factory: the 'SSL' algorithm was not available from any crypto provider.", e1);
+			logger
+					.error(
+							"Failed to create SSL socket factory: the 'SSL' algorithm was not available from any crypto provider.",
+							e1);
 			return null;
 		}
 
@@ -2078,24 +2147,67 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 			sc.init(null, new TrustManager[] { new MyX509TrustManager() },
 					new SecureRandom());
 		} catch (Exception e) {
-			logger.error("Failed to create SSL socket factory: could not initiate Taverna's trust manager", e);
+			logger
+					.error(
+							"Failed to create SSL socket factory: could not initiate Taverna's trust manager",
+							e);
 		}
 		return sc.getSocketFactory();
 	}
 
-	public void saveUsernameAndPasswordForService(
-			UsernamePassword usernamePassword, URI serviceURI)
-			throws CMException {
-		String uri = serviceURI.toASCIIString();
-		saveUsernameAndPasswordForService(usernamePassword.getUsername(),
-				String.valueOf(usernamePassword.getPassword()), uri);
-	}
-
-	protected URI normalizeServiceURI(URI serviceURI) {
+	
+	
+	/**
+	 * Normalize an URI for insertion as the basis for path-recursive lookups, ie. strip query and filename. For example:
+	 * <code>
+	 * URI uri = URI.create("http://foo.org/dir1/dirX/../dir2/filename.html?q=x")
+	 * System.out.println(CredentialManager.normalizeServiceURI(uri));
+	 * >>> http://foo.org/dir1/dir2/
+	 * uri = URI.create("http://foo.org/dir1/dir2/");
+	 * System.out.println(CredentialManager.normalizeServiceURI(uri));
+	 * >>> http://foo.org/dir1/dir2/
+	 * </code> 
+	 * 
+	 * @param serviceURI URI for a service that is to be normalized
+	 * @return A normalized URI without query or filename, ie. where uri.resolve(".").equals(uri).
+	 */
+	protected static URI normalizeServiceURI(URI serviceURI) {
 		URI normalized = serviceURI.normalize();
-		URI pathOnly = normalized.resolve(normalized.getPath());
-		URI parent = pathOnly.resolve(".");
+		URI parent = normalized.resolve(".");
 		return parent;
 	}
 
+	/**
+	 * Reset the VMs cache for authentication like HTTP Basic Auth.
+	 * <p>
+	 * Note that this method uses undocumented calls to
+	 * <code>sun.net.www.protocol.http.AuthCacheValue</code> which might not be
+	 * valid in virtual machines other than Sun Java 6. If these calls fail,
+	 * this method will log the error and return <code>false</code>.
+	 * 
+	 * @return <code>true</code> if the VMs cache could be reset, or
+	 *         <code>false</code> otherwise.
+	 */
+	public boolean resetAuthCache() {
+
+		// Sun should expose an official API to do this
+		try {
+			Class<?> AuthCacheValue = getClass().forName(
+					"sun.net.www.protocol.http.AuthCacheValue");
+			Class<?> AuthCacheImpl = getClass().forName(
+					"sun.net.www.protocol.http.AuthCacheImpl");
+			Class<?> AuthCache = getClass().forName(
+					"sun.net.www.protocol.http.AuthCache");
+			Method setAuthCache = AuthCacheValue.getMethod("setAuthCache",
+					AuthCache);
+			setAuthCache.invoke(null, AuthCacheImpl.newInstance());
+			return true;
+		} catch (Exception ex) {
+			logger
+					.warn(
+							"Could not reset authcache, non-Sun VM or internal Sun classes changed",
+							ex);
+			return false;
+		}
+	}
 }

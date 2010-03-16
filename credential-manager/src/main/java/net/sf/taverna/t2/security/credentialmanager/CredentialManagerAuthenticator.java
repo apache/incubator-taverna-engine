@@ -29,7 +29,6 @@ public class CredentialManagerAuthenticator extends Authenticator {
 
 	public CredentialManagerAuthenticator() {
 		this.setCredManager(null); // Discover when first needed
-
 	}
 
 	public CredentialManagerAuthenticator(CredentialManager credManager) {
