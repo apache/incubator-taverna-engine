@@ -39,7 +39,7 @@ public class BasicAuthTest {
 	protected static final String REALM2 = "realm2";
 	protected final static String USERNAME = "basicUser";
 
-	protected static final int PORT = 9637;
+	protected static final int PORT = 9638;
 
 	private final class CountingAuthenticator extends
 			CredentialManagerAuthenticator {
@@ -157,7 +157,6 @@ public class BasicAuthTest {
 			c.getContent();
 		} catch (Exception ex) {
 		}
-
 		assertEquals("HTTP/1.1 200 OK", c.getHeaderField(0));
 
 		assertEquals("Did not invoke authenticator", 1, authenticator.calls);

@@ -1,8 +1,9 @@
 package net.sf.taverna.t2.security.credentialmanager;
 
 import java.net.URI;
+import java.security.cert.X509Certificate;
 
-public class FixedPasswordProvider implements UsernamePasswordProviderSPI {
+public class FixedPasswordProvider implements CredentialProviderSPI {
 
 	private static UsernamePassword usernamePassword;
 	private static URI serviceURI;
@@ -19,7 +20,7 @@ public class FixedPasswordProvider implements UsernamePasswordProviderSPI {
 	}
 
 
-	public boolean canProvideCredentialFor(URI serviceURI) {
+	public boolean canProvideUsernamePassword(URI serviceURI) {
 		return true;
 	}
 
@@ -39,7 +40,7 @@ public class FixedPasswordProvider implements UsernamePasswordProviderSPI {
 		return usernamePassword.clone();
 	}
 
-	public int providerPriority() {
+	public int getProviderPriority() {
 		// Well, only for testing
 		return -1;
 	}
@@ -50,5 +51,35 @@ public class FixedPasswordProvider implements UsernamePasswordProviderSPI {
 
 	public static UsernamePassword getUsernamePassword() {
 		return usernamePassword;
+	}
+
+
+	public boolean canHandleTrustConfirmation(X509Certificate[] chain) {
+		return false;
+	}
+
+
+	public boolean canProvideMasterPassword() {
+		return false;
+	}
+
+
+	public boolean canProvideJavaTruststorePassword() {
+		return false;
+	}
+
+
+	public String getJavaTruststorePassword() {
+		return null;
+	}
+
+
+	public String getMasterPassword(boolean firstTime) {
+		return null;
+	}
+
+
+	public TrustConfirmation shouldTrust(X509Certificate[] chain) {
+		return null;
 	}
 }

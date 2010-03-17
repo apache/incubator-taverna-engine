@@ -20,7 +20,6 @@
  ******************************************************************************/
 package net.sf.taverna.t2.security.credentialmanager;
 
-import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -141,27 +140,6 @@ public class CMUtil {
 		return secConfigDirectory;
 	}
 
-	private static final String DO_NOT_WARN_ABOUT_JCE_POLICY = "do_not_warn_about_JCE_policy";
-	public static File doNotWarnUserAboutJCEPolicyFile = new File(getSecurityConfigurationDirectory(),DO_NOT_WARN_ABOUT_JCE_POLICY);
-	public static boolean warnedUser = false; // have we already warned user for this run
-	/**
-	 * Warn user that they need to install Java Cryptography 
-	 * Extension (JCE) Unlimited Strength Jurisdiction Policy 
-	 * if they want Credential Manager to function properly. 
-	 */
-	public static void warnUserAboutJCEPolicy(){
-		
-		// Do not pop up a dialog if we are running headlessly.
-		// If we have warned the user and they do not want us to remind them again - exit.
-		if (warnedUser || GraphicsEnvironment.isHeadless() || doNotWarnUserAboutJCEPolicyFile.exists()){
-			return;
-		}
-
-		WarnUserAboutJCEPolicyDialog warnDialog = new WarnUserAboutJCEPolicyDialog();
-		warnDialog.setVisible(true);
-		warnedUser = true;
-		
-	}
 	
 	public static URI resolveUriFragment(URI uri, String realm) throws URISyntaxException {
 		URI fragment;

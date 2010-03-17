@@ -20,8 +20,6 @@
  ******************************************************************************/
 package net.sf.taverna.t2.security.credentialmanager;
 
-import java.awt.Frame;
-import java.awt.GraphicsEnvironment;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -35,6 +33,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.Key;
@@ -66,7 +65,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import javax.security.auth.x500.X500Principal;
-import javax.swing.JOptionPane;
 
 import net.sf.taverna.t2.lang.observer.MultiCaster;
 import net.sf.taverna.t2.lang.observer.Observable;
@@ -214,26 +212,29 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 		masterPassword = password;
 	}
 
-	SPIRegistry<MasterPasswordProviderSPI> masterPasswordProviderSPI = new SPIRegistry<MasterPasswordProviderSPI>(
-			MasterPasswordProviderSPI.class);
+	static SPIRegistry<CredentialProviderSPI> masterPasswordProviderSPI = new SPIRegistry<CredentialProviderSPI>(
+			CredentialProviderSPI.class);
 
 	private String getMasterPassword() throws CMException {
-		List<MasterPasswordProviderSPI> masterPasswordProviders = masterPasswordProviderSPI
-				.getInstances();
-		Collections.sort(masterPasswordProviders,
-				new Comparator<MasterPasswordProviderSPI>() {
-					public int compare(MasterPasswordProviderSPI o1,
-							MasterPasswordProviderSPI o2) {
-						// Reverse sort - highest provider first
-						return o2.canProvidePassword()
-								- o1.canProvidePassword();
-					}
-				});
-		for (MasterPasswordProviderSPI provider : masterPasswordProviders) {
-			if (provider.canProvidePassword() < 0) {
+		
+
+		File secConfigDirectory = CMUtil.getSecurityConfigurationDirectory();
+
+		// Get the Keystore file
+		File keystoreFile = new File(secConfigDirectory,
+				CredentialManager.T2KEYSTORE_FILE);
+
+		// Get the Truststore file
+		// File truststoreFile = new
+		// File(secConfigDirectory,CredentialManager.T2TRUSTSTORE_FILE);
+		boolean firstTime = ! keystoreFile.exists();
+		
+		List<CredentialProviderSPI> masterPasswordProviders = findMasterPasswordProviders();
+		for (CredentialProviderSPI provider : masterPasswordProviders) {
+			if (! provider.canProvideMasterPassword()) {
 				continue;
 			}
-			String password = provider.getPassword();
+			String password = provider.getMasterPassword(firstTime);
 			if (password != null) {
 				return password;
 			}
@@ -244,6 +245,21 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 				+ masterPasswordProviders;
 		logger.error(exMessage);
 		throw new CMException(exMessage);
+	}
+
+	private static List<CredentialProviderSPI> findMasterPasswordProviders() {
+		List<CredentialProviderSPI> masterPasswordProviders = masterPasswordProviderSPI
+				.getInstances();
+		Collections.sort(masterPasswordProviders,
+				new Comparator<CredentialProviderSPI>() {
+					public int compare(CredentialProviderSPI o1,
+							CredentialProviderSPI o2) {
+						// Reverse sort - highest provider first
+						return o2.getProviderPriority()
+								- o1.getProviderPriority();
+					}
+				});
+		return masterPasswordProviders;
 	}
 
 	/**
@@ -513,7 +529,8 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 			}
 
 			if (!loadedJavaTruststore) {
-				if (GraphicsEnvironment.isHeadless()) {
+				// Try using SPIs (typically pop up GUI)
+				if (! (copyPasswordFromGUI(javaTruststore, javaTruststoreFile))) {
 					String error = "Credential manager failed to load certificates from the Java truststore.";
 					String help = "Try using the system property -D"
 							+ PROPERTY_TRUSTSTOREPASSWORD
@@ -521,14 +538,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 					logger.error(error + " " + help);
 					System.err.println(error);
 					System.err.println(help);
-					// FIXME: Should also use SPIs for commandline/grid use
-				} else {
-					// Try using the GUI..
-
-					// Hopefully it was the password problem - ask user to
-					// provide
-					// their password for the Java truststore
-					copyPasswordFromGUI(javaTruststore, javaTruststoreFile);
 				}
 			}
 
@@ -597,37 +606,42 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	}
 
 	private static boolean copyPasswordFromGUI(KeyStore javaTruststore,
-			File javaTruststoreFile) {
-		// FIXME: Move this class to the workbench and use the SPI
-		GetMasterPasswordDialog getPasswordDialog = new GetMasterPasswordDialog(
-				"Credential Manager needs to copy certificates from Java truststore. "
-						+ "Please enter your password.");
-		getPasswordDialog.setLocationRelativeTo(null);
-		getPasswordDialog.setVisible(true);
-		String javaTruststorePassword = getPasswordDialog.getPassword();
-		if (javaTruststorePassword == null) { // user cancelled - do not
-			// try to load Java truststore
-			return false;
-		}
-		FileInputStream fis = null;
-		try {
-			fis = new FileInputStream(javaTruststoreFile);
-			javaTruststore.load(fis, javaTruststorePassword.toCharArray());
-			return true;
-		} catch (Exception ex) {
-			String exMessage = "Failed to load the Java truststore to copy over certificates"
-					+ " using user-provided password. Creating a new empty truststore for Taverna.";
-			logger.error(exMessage, ex);
-			return false;
-		} finally {
-			if (fis != null) {
-				try {
-					fis.close();
-				} catch (IOException e) {
-					// ignore
+			File javaTruststoreFile) {		
+		List<CredentialProviderSPI> masterPasswordProviders = findMasterPasswordProviders();
+		String javaTruststorePassword = null;
+		for (CredentialProviderSPI provider : masterPasswordProviders) {
+			if (! provider.canProvideJavaTruststorePassword()) {
+				continue;
+			}
+			javaTruststorePassword = provider.getJavaTruststorePassword();
+			if (javaTruststorePassword == null) {
+				continue;
+			}
+			FileInputStream fis = null;
+			try {
+				fis = new FileInputStream(javaTruststoreFile);
+				javaTruststore.load(fis, javaTruststorePassword.toCharArray());
+				return true;
+			} catch (Exception ex) {
+				String exMessage = "Failed to load the Java truststore to copy over certificates"
+						+ " using user-provided password from spi " + provider;
+				logger.warn(exMessage, ex);
+				return false;
+			} finally {
+				if (fis != null) {
+					try {
+						fis.close();
+					} catch (IOException e) {
+						// ignore
+					}
 				}
 			}
 		}
+		String exMessage = "None (if any) MasterPasswordProviderSPI could unlock " +
+				"Java's trust store. Creating a new empty " +
+				"truststore for Taverna.";
+		logger.error(exMessage);
+		return false;
 	}
 
 	/**
@@ -923,8 +937,8 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 				 * Nothing found in store, let's lookup using SPIs
 				 */
 
-				for (UsernamePasswordProviderSPI credProvider : findCredentialProviders()) {
-					if (credProvider.canProvideCredentialFor(serviceURI)) {
+				for (CredentialProviderSPI credProvider : findMasterPasswordProviders()) {
+					if (credProvider.canProvideUsernamePassword(serviceURI)) {
 						UsernamePassword usernamePassword = credProvider
 								.getUsernamePassword(serviceURI,
 										requestingPrompt);
@@ -958,29 +972,17 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 			}
 		}
 	}
-
-	SPIRegistry<UsernamePasswordProviderSPI> credentialProviderSPI = new SPIRegistry<UsernamePasswordProviderSPI>(
-			UsernamePasswordProviderSPI.class);
-
-	private List<UsernamePasswordProviderSPI> findCredentialProviders() {
-
-		List<UsernamePasswordProviderSPI> credentialProviders = credentialProviderSPI
-				.getInstances();
-		Collections.sort(credentialProviders,
-				new Comparator<UsernamePasswordProviderSPI>() {
-					public int compare(UsernamePasswordProviderSPI o1,
-							UsernamePasswordProviderSPI o2) {
-						// Reverse sort - highest provider first
-						return o2.providerPriority() - o1.providerPriority();
-					}
-				});
-		return credentialProviders;
-	}
+	
 
 	protected static LinkedHashSet<URI> possibleLookups(URI serviceURI,
 			boolean usePathRecursion) {
 		serviceURI = serviceURI.normalize();
-
+		try {
+			serviceURI = setUserInfoForURI(serviceURI, null);
+		} catch (URISyntaxException ex) {
+			logger.warn("Could not strip userinfo from " + serviceURI, ex);
+		}
+		
 		/*
 		 * We'll use a LinkedHashSet to avoid checking for duplicates, like if
 		 * serviceURI.equals(withoutQuery) Only the first hit should be added to
@@ -1627,7 +1629,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 			// as
 			// "trustedcert#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<CERT_SERIAL_NUMBER>
 			String alias = createX509CertificateAlias(cert);
-
 			try {
 				synchronized (truststore) {
 					truststore.setCertificateEntry(alias, cert);
@@ -2108,35 +2109,41 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	 * trust it.
 	 */
 	public static boolean shouldTrust(final X509Certificate[] chain) {
-
-		logger.info("Asking the user if they want to trust certificate.");
-		// Ask user if they want to trust this service
-		ConfirmTrustedCertificateDialog confirmCertTrustDialog = new ConfirmTrustedCertificateDialog(
-				(Frame) null, "Untrusted HTTPS connection", true,
-				(X509Certificate) chain[0]);
-		confirmCertTrustDialog.setLocationRelativeTo(null);
-		confirmCertTrustDialog.setVisible(true);
-		boolean shouldTrust = confirmCertTrustDialog.shouldTrust();
-		if (shouldTrust) {
-			try {
-				CredentialManager credManager = CredentialManager.getInstance();
-				credManager.saveTrustedCertificate((X509Certificate) chain[0]);
-				return (true);
-			} catch (CMException cme) {
-				logger.error("Credential Manager: Failed to "
-						+ "save trusted certificate.", cme);
-				return (false);
+		if (chain.length < 1) {
+			throw new IllegalArgumentException("At least one certificate needed in chain");
+		}		
+		String name = chain[0].getSubjectX500Principal().getName();
+		for (CredentialProviderSPI confirm : findMasterPasswordProviders()) {
+			if (! confirm.canHandleTrustConfirmation(chain)) {
+				continue;
 			}
-		} else {
-			JOptionPane
-					.showMessageDialog(
-							null,
-							"As you refused to trust this host, you will not be able to its services from a workflow.",
-							"Untrusted HTTPS connection",
-							JOptionPane.INFORMATION_MESSAGE);
-			return (false);
+			TrustConfirmation confirmation = confirm.shouldTrust(chain);
+			if (confirmation == null) {
+				// SPI can't say yes or no, try next one
+				continue;
+			}
+			if (confirmation.isShouldTrust() && confirmation.isShouldSave()) {
+				try {
+					CredentialManager credManager = CredentialManager.getInstance();
+					credManager.saveTrustedCertificate((X509Certificate) chain[0]);
+					logger.info("Stored trusted certificate " + name);
+				} catch (CMException ex) {
+					logger.error("Credential Manager failed to "
+							+ "save trusted certificate " + name, ex);
+				}
+			}
+			if (logger.isDebugEnabled()) {
+				if (confirmation.isShouldTrust()) {
+					logger.debug("Trusting " + name + " according to " + confirm);
+				} else {
+					logger.debug("Not trusting " + name + " according to " + confirm);
+				}
+			}
+			return confirmation.isShouldTrust();		
 		}
-
+		logger.warn("No ConfirmTrustedCertificateSPI instances could could confirm or deny trusting of " + name);
+		// None of the SPIs (if any) could confirm
+		return false;
 	}
 
 	/**
@@ -2186,18 +2193,28 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	 * 
 	 * @param serviceURI
 	 *            URI for a service that is to be normalized
-	 * @return A normalized URI without query or filename, ie. where
+	 * @return A normalized URI without query, userinfo or filename, ie. where
 	 *         uri.resolve(".").equals(uri).
 	 */
-	protected static URI normalizeServiceURI(URI serviceURI) {
-		String rawFragment = serviceURI.getRawFragment();
-		URI normalized = serviceURI.normalize();
-		URI parent = normalized.resolve(".");
-		if (rawFragment != null) {
-			return parent.resolve("#" + rawFragment);
-		} else {
-			return parent;
+	public static URI normalizeServiceURI(URI serviceURI) {
+		try {
+			URI noUserInfo = setUserInfoForURI(serviceURI, null);
+			URI normalized = noUserInfo.normalize();
+			URI parent = normalized.resolve(".");
+			// Strip userinfo, keep fragment
+			URI withFragment = setFragmentForURI(parent, serviceURI.getFragment());
+			return withFragment;
+		} catch (URISyntaxException ex) {
+			return serviceURI;
 		}
+	}
+
+	public static URI setFragmentForURI(URI uri, String fragment) throws URISyntaxException {
+		return new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost(), uri.getPort(), uri.getPath(), uri.getQuery(), fragment);
+	}
+
+	public static URI setUserInfoForURI(URI uri, String userinfo) throws URISyntaxException {
+		return new URI(uri.getScheme(), userinfo, uri.getHost(), uri.getPort(), uri.getPath(), uri.getQuery(), uri.getFragment());
 	}
 
 	/**
@@ -2215,11 +2232,11 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 
 		// Sun should expose an official API to do this
 		try {
-			Class<?> AuthCacheValue = getClass().forName(
+			Class<?> AuthCacheValue = Class.forName(
 					"sun.net.www.protocol.http.AuthCacheValue");
-			Class<?> AuthCacheImpl = getClass().forName(
+			Class<?> AuthCacheImpl = Class.forName(
 					"sun.net.www.protocol.http.AuthCacheImpl");
-			Class<?> AuthCache = getClass().forName(
+			Class<?> AuthCache = Class.forName(
 					"sun.net.www.protocol.http.AuthCache");
 			Method setAuthCache = AuthCacheValue.getMethod("setAuthCache",
 					AuthCache);
