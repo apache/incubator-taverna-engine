@@ -79,7 +79,16 @@ public class PossibleLookupsTest {
 						URI.create("http://www.taverna.org.uk/path1/path2/path3/#frag1337"),
 						URI.create("http://www.taverna.org.uk/path1/path2/#frag1337"),
 						URI.create("http://www.taverna.org.uk/path1/#frag1337"), URI
-								.create("http://www.taverna.org.uk/#frag1337"));
+								.create("http://www.taverna.org.uk/#frag1337"),
+				// And then again without fragment
+						URI.create("http://www.taverna.org.uk/path1/path2/path3/filename.html?query=1&query2=2"),
+						URI.create("http://www.taverna.org.uk/path1/path2/path3/filename.html"),
+						URI.create("http://www.taverna.org.uk/path1/path2/path3/"),
+						URI.create("http://www.taverna.org.uk/path1/path2/"),
+						URI.create("http://www.taverna.org.uk/path1/"), URI
+								.create("http://www.taverna.org.uk/")
+				
+				);
 
 		ArrayList<URI> lookups = new ArrayList<URI>(CredentialManager
 				.possibleLookups(uri, true));

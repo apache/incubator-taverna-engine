@@ -27,6 +27,10 @@ public class UsernamePassword {
 	public char[] getPassword() {
 		return password;
 	}
+	
+	public String getPasswordAsString() {
+		return String.valueOf(password);
+	}
 
 	public String getUsername() {
 		return username;
