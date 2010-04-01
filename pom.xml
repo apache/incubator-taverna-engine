@@ -32,6 +32,8 @@
 	</repositories>
 	<modules>
 		<module>activity-archetype</module>
-		<module>activity-translator-archetype</module>
+		<!-- 
+		 <module>activity-translator-archetype</module>
+		 -->
 	</modules>
 </project>
