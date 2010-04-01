@@ -12,7 +12,7 @@
 	<name>Archetypes</name>
 	<packaging>pom</packaging>
 
-	<version>1.0-SNAPSHOT</version>
+	<version>1.0</version>
 	<scm>
 		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/dev/archetypes/trunk/</connection>
 		<developerConnection>scm:svn:https://taverna.googlecode.com/svn/taverna/dev/archetypes/trunk/</developerConnection>
