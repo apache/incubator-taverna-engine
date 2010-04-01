@@ -11,11 +11,11 @@
 	<name>Archetypes</name>
 	<packaging>pom</packaging>
 
-	<version>1.0</version>
+	<version>1.1-SNAPSHOT</version>
 	<scm>
-		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/dev/archetypes/tags/archetypes-1.0</connection>
-		<developerConnection>scm:svn:https://taverna.googlecode.com/svn/taverna/dev/archetypes/tags/archetypes-1.0</developerConnection>
-		<url>http://code.google.com/p/taverna/source/browse/#svn/taverna/dev/archetypes/tags/archetypes-1.0</url>
+		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/dev/archetypes/trunk/</connection>
+		<developerConnection>scm:svn:https://taverna.googlecode.com/svn/taverna/dev/archetypes/trunk/</developerConnection>
+		<url>http://code.google.com/p/taverna/source/browse/#svn/taverna/dev/archetypes/trunk/</url>
 	</scm>
     <build>
         <pluginManagement>
