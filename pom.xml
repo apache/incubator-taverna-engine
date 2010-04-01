@@ -18,6 +18,24 @@
 		<developerConnection>scm:svn:https://taverna.googlecode.com/svn/taverna/dev/archetypes/trunk/</developerConnection>
 		<url>http://code.google.com/p/taverna/source/browse/#svn/taverna/dev/archetypes/trunk/</url>
 	</scm>
+    <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-release-plugin</artifactId>
+              <version>2.0</version>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-release-plugin</artifactId>
+              <version>2.0</version>
+            </plugin>
+          </plugins>
+    </build>
 
 	<repositories>
 		<repository>
