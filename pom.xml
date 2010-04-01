@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<artifactId>parent</artifactId>
@@ -13,9 +14,9 @@
 
 	<version>1.0</version>
 	<scm>
-		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/dev/archetypes/tags/archetypes-1.0</connection>
-		<developerConnection>scm:svn:https://taverna.googlecode.com/svn/taverna/dev/archetypes/tags/archetypes-1.0</developerConnection>
-		<url>http://code.google.com/p/taverna/source/browse/#svn/taverna/dev/archetypes/tags/archetypes-1.0</url>
+		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/dev/archetypes/trunk/</connection>
+		<developerConnection>scm:svn:https://taverna.googlecode.com/svn/taverna/dev/archetypes/trunk/</developerConnection>
+		<url>http://code.google.com/p/taverna/source/browse/#svn/taverna/dev/archetypes/trunk/</url>
 	</scm>
 
 	<repositories>
