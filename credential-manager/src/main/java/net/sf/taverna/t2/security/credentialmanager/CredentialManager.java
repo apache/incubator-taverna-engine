@@ -592,7 +592,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 								+ "truststore to copy "
 								+ "over certificates using default password: "
 								+ password + " from " + javaTruststoreFile;
-						logger.warn(message);
+						logger.info(message, ioex);
 					} catch (NoSuchAlgorithmException e) {
 						logger.error("Unknown encryption algorithm "
 								+ "while loading Java truststore from "
@@ -608,7 +608,8 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 							try {
 								fis.close();
 							} catch (IOException e) {
-								// ignore
+								logger.warn("Could not close input stream to "
+										+ javaTruststoreFile, e);
 							}
 						}
 					}
