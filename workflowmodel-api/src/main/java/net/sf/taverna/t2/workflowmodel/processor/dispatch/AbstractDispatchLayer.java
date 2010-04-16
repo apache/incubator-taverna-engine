@@ -22,6 +22,7 @@ package net.sf.taverna.t2.workflowmodel.processor.dispatch;
 
 import java.util.Timer;
 
+import net.sf.taverna.t2.workflowmodel.Processor;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchCompletionEvent;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchErrorEvent;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchJobEvent;
@@ -95,6 +96,13 @@ public abstract class AbstractDispatchLayer<ConfigurationType> implements
 
 	public void finishedWith(String owningProcess) {
 		// Do nothing by default
+	}
+	
+	public Processor getProcessor() {
+		if (dispatchStack == null) {
+			return null;
+		}
+		return dispatchStack.getProcessor();
 	}
 
 }
