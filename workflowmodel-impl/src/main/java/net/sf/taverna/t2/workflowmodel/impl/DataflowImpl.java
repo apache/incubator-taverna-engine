@@ -792,5 +792,16 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 		this.isRunning = isRunning;
 	}
 
+	public boolean isInputPortConnected(DataflowInputPort inputPort) {
+
+		List<? extends Datalink> links = getLinks();
+		for (Datalink link : links) {
+			if (link.getSource().equals(inputPort.getInternalOutputPort())) {
+				return true;
+			}
+		}
+		return false;	
+	}
+
 
 }

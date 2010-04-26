@@ -112,4 +112,8 @@ public class DummyDataflow extends AbstractAnnotatedThing<Dataflow> implements
 		
 	}
 
+	public boolean isInputPortConnected(DataflowInputPort inputPort) {
+		return false;
+	}
+
 }

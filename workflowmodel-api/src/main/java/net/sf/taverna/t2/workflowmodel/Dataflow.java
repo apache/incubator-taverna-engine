@@ -144,5 +144,14 @@ public interface Dataflow extends Annotated<Dataflow>, TokenProcessingEntity {
 	
 	public boolean isRunning();
 	public void setIsRunning(boolean isRunning);
+	
+	/**
+	 * Check if the given input port is connected to anything 
+	 * in the workflow.
+	 * 
+	 * @param inputPort
+	 * @return true if the given workflow input port is connected, false otherwise.
+	 */
+	public boolean isInputPortConnected(DataflowInputPort inputPort);
 
 }
