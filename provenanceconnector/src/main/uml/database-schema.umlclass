@@ -531,6 +531,10 @@
             <element xmi:type="uml:Property" href="database-schema.uml#_udhIQFE1Ed-nO4bXYmJbIQ"/>
             <layoutConstraint xmi:type="notation:Location" xmi:id="_udxm8VE1Ed-nO4bXYmJbIQ"/>
           </children>
+          <children xmi:type="notation:Node" xmi:id="_hCi0EFE5Ed-nO4bXYmJbIQ" type="3001">
+            <element xmi:type="uml:Property" href="database-schema.uml#_hCNc4FE5Ed-nO4bXYmJbIQ"/>
+            <layoutConstraint xmi:type="notation:Location" xmi:id="_hCi0EVE5Ed-nO4bXYmJbIQ"/>
+          </children>
           <styles xmi:type="notation:TitleStyle" xmi:id="_fiURElExEd-nO4bXYmJbIQ" showTitle="true"/>
           <styles xmi:type="notation:SortingStyle" xmi:id="_fiURE1ExEd-nO4bXYmJbIQ"/>
           <styles xmi:type="notation:FilteringStyle" xmi:id="_fiURFFExEd-nO4bXYmJbIQ"/>

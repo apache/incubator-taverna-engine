@@ -253,7 +253,8 @@
       <ownedAttribute xmi:id="_QqKfIFEzEd-nO4bXYmJbIQ" name="outputs" aggregation="composite"/>
       <ownedAttribute xmi:id="_ReuvoFEzEd-nO4bXYmJbIQ" name="failureT2Reference" aggregation="composite"/>
       <ownedAttribute xmi:id="_S-tUoFEzEd-nO4bXYmJbIQ" name="activityId" aggregation="composite"/>
-      <ownedAttribute xmi:id="_udhIQFE1Ed-nO4bXYmJbIQ" name="property" aggregation="composite"/>
+      <ownedAttribute xmi:id="_udhIQFE1Ed-nO4bXYmJbIQ" name="initiatingDispatchLayer" aggregation="composite"/>
+      <ownedAttribute xmi:id="_hCNc4FE5Ed-nO4bXYmJbIQ" name="finalDispatchLayer" aggregation="composite"/>
     </packagedElement>
     <packagedElement xmi:type="uml:Association" xmi:id="_hmw1EFExEd-nO4bXYmJbIQ" memberEnd="_hmyqQFExEd-nO4bXYmJbIQ _hmz4YVExEd-nO4bXYmJbIQ">
       <ownedEnd xmi:id="_hmyqQFExEd-nO4bXYmJbIQ" name="processorId" type="_eoBMAFExEd-nO4bXYmJbIQ" association="_hmw1EFExEd-nO4bXYmJbIQ">
