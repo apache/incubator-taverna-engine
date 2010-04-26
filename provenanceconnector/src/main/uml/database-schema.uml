@@ -112,6 +112,7 @@
     <ownedAttribute xmi:id="_f2J2EFEQEd-nO4bXYmJbIQ" name="collectionPosition" aggregation="composite"/>
     <ownedAttribute xmi:id="_kEh7AFEQEd-nO4bXYmJbIQ" name="valueType" aggregation="composite"/>
     <ownedAttribute xmi:id="_bUoJoFEmEd-nO4bXYmJbIQ" name="processorId" aggregation="composite"/>
+    <ownedAttribute xmi:id="_OCA-4FE4Ed-nO4bXYmJbIQ" name="processorEnactmentId" aggregation="composite"/>
   </packagedElement>
   <packagedElement xmi:type="uml:Association" xmi:id="_nKV8wFENEd-nO4bXYmJbIQ" memberEnd="_nKWj0FENEd-nO4bXYmJbIQ _nKXx8VENEd-nO4bXYmJbIQ">
     <ownedEnd xmi:id="_nKWj0FENEd-nO4bXYmJbIQ" name="workflowRunId" type="_VA7gUFENEd-nO4bXYmJbIQ" association="_nKV8wFENEd-nO4bXYmJbIQ">
@@ -131,6 +132,7 @@
     <ownedAttribute xmi:id="_Yi3zsFEmEd-nO4bXYmJbIQ" name="processorId" aggregation="composite"/>
     <ownedAttribute xmi:id="_dDQOoFEmEd-nO4bXYmJbIQ" name="portName" aggregation="composite"/>
     <ownedAttribute xmi:id="_j0l_kFEmEd-nO4bXYmJbIQ" name="parentCollectionT2Reference" aggregation="composite"/>
+    <ownedAttribute xmi:id="_cYxCAFE4Ed-nO4bXYmJbIQ" name="processEnactmentId" aggregation="composite"/>
   </packagedElement>
   <packagedElement xmi:type="uml:Association" xmi:id="_ZzvSkFEOEd-nO4bXYmJbIQ" memberEnd="_ZzvSkVEOEd-nO4bXYmJbIQ _ZzwgsVEOEd-nO4bXYmJbIQ">
     <ownedEnd xmi:id="_ZzvSkVEOEd-nO4bXYmJbIQ" name="workflowId" type="_BFzOoFENEd-nO4bXYmJbIQ" association="_ZzvSkFEOEd-nO4bXYmJbIQ">
@@ -332,5 +334,15 @@
         <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_o-48YlE1Ed-nO4bXYmJbIQ" value="1"/>
       </ownedEnd>
     </packagedElement>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Association" xmi:id="_LGTbsFE4Ed-nO4bXYmJbIQ" memberEnd="_LGUp0FE4Ed-nO4bXYmJbIQ _LGVQ4FE4Ed-nO4bXYmJbIQ">
+    <ownedEnd xmi:id="_LGUp0FE4Ed-nO4bXYmJbIQ" name="processorEnactmentId" type="_VA7gUFENEd-nO4bXYmJbIQ" association="_LGTbsFE4Ed-nO4bXYmJbIQ">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_LGUp0lE4Ed-nO4bXYmJbIQ" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_LGUp0VE4Ed-nO4bXYmJbIQ" value="1"/>
+    </ownedEnd>
+    <ownedEnd xmi:id="_LGVQ4FE4Ed-nO4bXYmJbIQ" name="dst" type="_eoBMAFExEd-nO4bXYmJbIQ" association="_LGTbsFE4Ed-nO4bXYmJbIQ">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_LGVQ4lE4Ed-nO4bXYmJbIQ" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_LGVQ4VE4Ed-nO4bXYmJbIQ" value="1"/>
+    </ownedEnd>
   </packagedElement>
 </uml:Package>
