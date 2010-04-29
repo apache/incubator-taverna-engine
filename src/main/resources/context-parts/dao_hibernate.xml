@@ -73,7 +73,7 @@
 	</bean>
 
 	<bean id="t2reference.dao.referenceSetDao"
-		raven:artifact="net.sf.taverna.t2.core:reference-impl:1.1-SNAPSHOT"
+		raven:artifact="net.sf.taverna.t2.core:reference-impl:1.1"
 		raven:repository="raven.repository"
 		class="net.sf.taverna.t2.reference.impl.HibernateReferenceSetDao">
 		<property name="sessionFactory">
@@ -82,7 +82,7 @@
 	</bean>
 
 	<bean id="t2reference.dao.errorDocumentDao"
-		raven:artifact="net.sf.taverna.t2.core:reference-impl:1.1-SNAPSHOT"
+		raven:artifact="net.sf.taverna.t2.core:reference-impl:1.1"
 		raven:repository="raven.repository"
 		class="net.sf.taverna.t2.reference.impl.HibernateErrorDocumentDao">
 		<property name="sessionFactory">
@@ -91,7 +91,7 @@
 	</bean>
 
 	<bean id="t2reference.dao.listDao"
-		raven:artifact="net.sf.taverna.t2.core:reference-impl:1.1-SNAPSHOT"
+		raven:artifact="net.sf.taverna.t2.core:reference-impl:1.1"
 		raven:repository="raven.repository"
 		class="net.sf.taverna.t2.reference.impl.HibernateListDao">
 		<property name="sessionFactory">
