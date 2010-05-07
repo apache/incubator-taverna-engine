@@ -116,4 +116,8 @@ public class YellowReference extends AbstractExternalReference implements
 		return "yellow{" + contents + "}";
 	}
 
+	public Long getApproximateSizeInBytes() {
+		return new Long(contents.getBytes().length);
+	}
+
 }

@@ -115,8 +115,8 @@ public class RedReference extends AbstractExternalReference implements
 		return "red{" + contents + "}";
 	}
 	
-	public long getApproximateSizeInBytes() {
-		return contents.getBytes().length;
+	public Long getApproximateSizeInBytes() {
+		return new Long(contents.getBytes().length);
 	}
 
 }

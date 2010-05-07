@@ -115,8 +115,8 @@ public class GreenReference extends AbstractExternalReference implements
 		return "green{" + contents + "}";
 	}
 
-	public long getApproximateSizeInBytes() {
-		return contents.getBytes().length;
+	public Long getApproximateSizeInBytes() {
+		return new Long(contents.getBytes().length);
 	}
 
 }
