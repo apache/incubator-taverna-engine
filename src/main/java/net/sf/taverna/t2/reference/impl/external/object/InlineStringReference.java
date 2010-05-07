@@ -114,4 +114,8 @@ public class InlineStringReference extends AbstractExternalReference implements
 		return String.class;
 	}
 
+	public Long getApproximateSizeInBytes() {
+		return new Long(contents.getBytes().length);
+	}
+
 }

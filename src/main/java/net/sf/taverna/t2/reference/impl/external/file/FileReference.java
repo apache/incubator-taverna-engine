@@ -141,4 +141,8 @@ public class FileReference extends AbstractExternalReference implements
 		return true;
 	}
 
+	public Long getApproximateSizeInBytes() {
+		return new Long(file.length());
+	}
+
 }

@@ -89,4 +89,8 @@ public class InlineByteArrayReference extends AbstractExternalReference
 			logger.error("Could not decode string", e);
 		}
 	}
+
+	public Long getApproximateSizeInBytes() {
+		return new Long(bytes.length);
+	}
 }

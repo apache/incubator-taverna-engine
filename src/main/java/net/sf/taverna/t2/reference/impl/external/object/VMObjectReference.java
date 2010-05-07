@@ -103,5 +103,10 @@ public class VMObjectReference extends AbstractExternalReference implements
 		return uuidToObject.get(UUID.fromString(uuid));
 	}
 
+	public Long getApproximateSizeInBytes() {
+		// We do not know the object size
+		return new Long(-1);
+	}
+
 }
 

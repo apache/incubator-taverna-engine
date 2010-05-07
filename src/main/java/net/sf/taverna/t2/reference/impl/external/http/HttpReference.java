@@ -151,4 +151,16 @@ public class HttpReference extends AbstractExternalReference implements
 		return true;
 	}
 
+	public Long getApproximateSizeInBytes() {
+		try {
+			String lenString = httpUrl.openConnection().getHeaderField("Content-Length");
+			if (lenString == null || lenString.equals("")){ // there is no Content-Length field so we cannot know the size
+				return new Long(-1);
+			}
+			return new Long(lenString);
+		} catch (Exception e) {
+			return new Long(-1);
+		}
+	}
+
 }
