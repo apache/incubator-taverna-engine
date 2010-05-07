@@ -43,6 +43,8 @@ public class ReferenceSetImpl extends AbstractEntityImpl implements
 
 	private Set<ExternalReferenceSPI> externalReferences;
 	
+	private Long approximateSizeInBytes = new Long(-1);
+	
 	/**
 	 * Construct a new ReferenceSetImpl with the given set of external
 	 * references and identifier.
@@ -59,6 +61,14 @@ public class ReferenceSetImpl extends AbstractEntityImpl implements
 			T2ReferenceImpl id) {
 		setTypedId(id);
 		this.externalReferences = references;
+		
+		//  Should be at least one - otherwise we cannot calculate the data size
+		if (externalReferences != null && externalReferences.size() > 0){		
+			// Just take the first ExternalReferenceSPI returned
+			ExternalReferenceSPI externalReferenceSPI = externalReferences.toArray(new ExternalReferenceSPI[0])[0];
+			approximateSizeInBytes = externalReferenceSPI.getApproximateSizeInBytes();
+		}
+	
 	}
 
 	/**
@@ -105,6 +115,14 @@ public class ReferenceSetImpl extends AbstractEntityImpl implements
 	 */
 	public void setExternalReferences(Set<ExternalReferenceSPI> newReferences) {
 		this.externalReferences = newReferences;
+	}
+
+	public void setApproximateSizeInBytes(Long sizeInBytes) {
+		this.approximateSizeInBytes = sizeInBytes;
+	}
+
+	public Long getApproximateSizeInBytes() {
+		return approximateSizeInBytes;
 	}
 
 }

@@ -107,6 +107,12 @@ public interface ExternalReferenceSPI {
 	public InputStream openStream(ReferenceContext context)
 			throws DereferenceException;
 
+	
+	/**
+	 * Approximate size of the stored data or -1 if we do not know.
+	 */
+	public Long getApproximateSizeInBytes();
+	
 	/**
 	 * Resolution cost is an informal guide to how costly the process of
 	 * de-referencing this reference would be. It's used when assessing which

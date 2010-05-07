@@ -114,5 +114,9 @@ public class RedReference extends AbstractExternalReference implements
 	public String toString() {
 		return "red{" + contents + "}";
 	}
+	
+	public long getApproximateSizeInBytes() {
+		return contents.getBytes().length;
+	}
 
 }

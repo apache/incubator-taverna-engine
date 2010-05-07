@@ -24,7 +24,7 @@
 			<list-index column="i" base="0" />
 			<composite-element
 				class="net.sf.taverna.t2.reference.impl.T2ReferenceImpl">
-				<!-- Explicit column mapping otherwise we colide with the implict -->
+				<!-- Explicit column mapping otherwise we collide with the implicit -->
 				<!-- mapping used in the key columns. Oh the joys of composites.. -->
 				<property name="namespacePart" column="c_namespace" />
 				<property name="localPart" column="c_local" />

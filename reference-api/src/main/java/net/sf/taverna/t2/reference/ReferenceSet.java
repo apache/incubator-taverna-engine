@@ -47,5 +47,10 @@ public interface ReferenceSet extends Identified {
 	 * @return the set of references to external data
 	 */
 	public Set<ExternalReferenceSPI> getExternalReferences();
+	
+	/**
+	 * Get approximate size of the data pointed to by this ReferenceSet.
+	 */
+	public Long getApproximateSizeInBytes();
 
 }

@@ -109,12 +109,24 @@ public class ReferenceSetServiceImpl extends AbstractReferenceSetServiceImpl
 			throws ReferenceSetServiceException {
 		checkDao();
 		checkGenerator();
-		ReferenceSetImpl rsi = new ReferenceSetImpl();
+		/*ReferenceSetImpl rsi = new ReferenceSetImpl();
 		rsi
 				.setExternalReferences(new HashSet<ExternalReferenceSPI>(
 						references));
 		T2Reference id = t2ReferenceGenerator.nextReferenceSetReference(context);
 		rsi.setTypedId(T2ReferenceImpl.getAsImpl(id));
+		
+		//  Should be at least one external reference - otherwise we cannot calculate the data size
+		if (references != null && references.size() > 0){		
+			// Just take the first ExternalReferenceSPI returned
+			ExternalReferenceSPI externalReferenceSPI = references.toArray(new ExternalReferenceSPI[0])[0];
+			rsi.setApproximateSizeInBytes(externalReferenceSPI.getApproximateSizeInBytes());
+		}*/
+		
+		T2Reference id = t2ReferenceGenerator.nextReferenceSetReference(context);
+		ReferenceSetImpl rsi = new ReferenceSetImpl(new HashSet<ExternalReferenceSPI>(
+				references), T2ReferenceImpl.getAsImpl(id));	
+		
 		try {
 			referenceSetDao.store(rsi);
 			return rsi;

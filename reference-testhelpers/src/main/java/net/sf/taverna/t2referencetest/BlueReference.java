@@ -115,4 +115,8 @@ public class BlueReference extends AbstractExternalReference implements
 		return "blue{" + contents + "}";
 	}
 
+	public long getApproximateSizeInBytes() {
+		return contents.getBytes().length;
+	}
+
 }
