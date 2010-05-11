@@ -58,7 +58,7 @@
     <ownedAttribute xmi:id="_cb-ngFELEd-nO4bXYmJbIQ" name="workflowId" aggregation="composite"/>
     <ownedAttribute xmi:id="_eQtUgFELEd-nO4bXYmJbIQ" name="depth" aggregation="composite"/>
     <ownedAttribute xmi:id="_fij98FELEd-nO4bXYmJbIQ" name="resolvedDepth" aggregation="composite"/>
-    <ownedAttribute xmi:id="_g184cFELEd-nO4bXYmJbIQ" name="reorder" aggregation="composite"/>
+    <ownedAttribute xmi:id="_g184cFELEd-nO4bXYmJbIQ" name="iterationStrategyOrder" aggregation="composite"/>
     <ownedAttribute xmi:id="_hYIYcFELEd-nO4bXYmJbIQ" name="anlSet" aggregation="composite"/>
     <ownedAttribute xmi:id="_L2VjkFEOEd-nO4bXYmJbIQ" name="isInputPort" aggregation="composite"/>
   </packagedElement>
@@ -334,6 +334,16 @@
       <ownedEnd xmi:id="_o-48YVE1Ed-nO4bXYmJbIQ" name="sdsd" type="_9Oi-gFEzEd-nO4bXYmJbIQ" association="_o-4VUFE1Ed-nO4bXYmJbIQ">
         <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_o-48Y1E1Ed-nO4bXYmJbIQ" value="1"/>
         <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_o-48YlE1Ed-nO4bXYmJbIQ" value="1"/>
+      </ownedEnd>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="_OEG1IFOfEd-hLNKmmSoTlQ" memberEnd="_OEM7wFOfEd-hLNKmmSoTlQ _OEOw8VOfEd-hLNKmmSoTlQ">
+      <ownedEnd xmi:id="_OEM7wFOfEd-hLNKmmSoTlQ" name="parentProcessEnactmentId" type="_eoBMAFExEd-nO4bXYmJbIQ" association="_OEG1IFOfEd-hLNKmmSoTlQ">
+        <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_OEOw8FOfEd-hLNKmmSoTlQ" value="1"/>
+        <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_OEOJ4FOfEd-hLNKmmSoTlQ" value="1"/>
+      </ownedEnd>
+      <ownedEnd xmi:id="_OEOw8VOfEd-hLNKmmSoTlQ" name="dst" type="_eoBMAFExEd-nO4bXYmJbIQ" association="_OEG1IFOfEd-hLNKmmSoTlQ">
+        <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_OEPYAVOfEd-hLNKmmSoTlQ" value="1"/>
+        <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_OEPYAFOfEd-hLNKmmSoTlQ" value="1"/>
       </ownedEnd>
     </packagedElement>
   </packagedElement>
