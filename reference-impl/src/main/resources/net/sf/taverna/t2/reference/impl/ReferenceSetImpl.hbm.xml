@@ -22,7 +22,7 @@
 			<property name="depth" />
 			<property name="referenceType" />
 		</component>
-		<set name="externalReferences" cascade="all" lazy="true">
+		<set name="externalReferences" cascade="all" lazy="false">
 			<key column="id" />
 			<one-to-many
 				class="net.sf.taverna.t2.reference.AbstractExternalReference" />
