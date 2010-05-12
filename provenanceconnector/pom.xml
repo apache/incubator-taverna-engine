@@ -11,7 +11,6 @@
     <groupId>net.sf.taverna.t2.core</groupId>
     <artifactId>provenanceconnector</artifactId>
     <name>Database storage and analysis of provenance info</name>
-    <url>http://maven.apache.org</url>
     <properties>
         <t2.ui.components.version>1.1-SNAPSHOT</t2.ui.components.version>
     </properties>
