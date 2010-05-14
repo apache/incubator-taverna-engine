@@ -37,22 +37,29 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.sql.rowset.serial.SerialBlob;
 
+import net.sf.taverna.t2.provenance.item.DataProvenanceItem;
 import net.sf.taverna.t2.provenance.item.InputDataProvenanceItem;
 import net.sf.taverna.t2.provenance.item.IterationProvenanceItem;
 import net.sf.taverna.t2.provenance.item.OutputDataProvenanceItem;
 import net.sf.taverna.t2.provenance.item.ProvenanceItem;
 import net.sf.taverna.t2.provenance.item.WorkflowProvenanceItem;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Arc;
+import net.sf.taverna.t2.provenance.lineageservice.utils.DataBinding;
 import net.sf.taverna.t2.provenance.lineageservice.utils.NestedListNode;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProcBinding;
+import net.sf.taverna.t2.provenance.lineageservice.utils.ProcessorEnactment;
+import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceUtils;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Var;
 import net.sf.taverna.t2.provenance.lineageservice.utils.VarBinding;
 import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
+import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
 import net.sf.taverna.t2.workflowmodel.DataflowInputPort;
 import net.sf.taverna.t2.workflowmodel.DataflowOutputPort;
@@ -187,9 +194,16 @@ public class EventProcessor {
 //			logger.info("new workflow structure with ID "+topLevelDataflowID);
 		}
 
+		ProvenanceProcessor provProc = new ProvenanceProcessor();
+		provProc.setIdentifier(UUID.randomUUID().toString());
+		provProc.setPname(topLevelDataflowName);
+		provProc.setType(DATAFLOW_PROCESSOR_TYPE);
+		provProc.setWfInstanceRef(topLevelDataflowID);
+		provProc.setTopLevelProcessor(true);
 		// record the top level dataflow as a processor in the DB
 		try {
-			pw.addProcessor(topLevelDataflowName, DATAFLOW_PROCESSOR_TYPE, topLevelDataflowID, true);  // true -> is top level
+			pw.addProcessor(provProc);
+//			pw.addProcessor(topLevelDataflowName, DATAFLOW_PROCESSOR_TYPE, topLevelDataflowID, true);  // true -> is top level
 		} catch (SQLException e) {
 			logger.warn("Can't add processor " + topLevelDataflowID, e);
 		}
@@ -303,7 +317,16 @@ public class EventProcessor {
 				if (activities != null && !activities.isEmpty()) {
 					pType = activities.get(0).getClass().getCanonicalName();
 				}
-				pw.addProcessor(pName, pType, dataflowID, false);  // false: not a top level processor
+				ProvenanceProcessor provProc = new ProvenanceProcessor();
+				provProc.setIdentifier(UUID.randomUUID().toString());
+				provProc.setPname(pName);
+				provProc.setType(pType);
+				provProc.setWfInstanceRef(dataflowID);
+				provProc.setTopLevelProcessor(false);
+				
+				pw.addProcessor(provProc);
+				
+				//pw.addProcessor(pName, pType, dataflowID, false);  // false: not a top level processor
 
 				// ///
 				// add all input ports for this processor as input variables
@@ -313,7 +336,7 @@ public class EventProcessor {
 				for (ProcessorInputPort ip : inputs) {
 
 					Var inputVar = new Var();
-
+					inputVar.setIdentifier(UUID.randomUUID().toString());
 					inputVar.setPName(pName);
 					inputVar.setWfInstanceRef(dataflowID);
 					inputVar.setVName(ip.getName());
@@ -334,7 +357,7 @@ public class EventProcessor {
 				for (ProcessorOutputPort op : outputs) {
 
 					Var outputVar = new Var();
-
+					outputVar.setIdentifier(UUID.randomUUID().toString());
 					outputVar.setPName(pName);
 					outputVar.setWfInstanceRef(dataflowID);
 					outputVar.setVName(op.getName());
@@ -391,7 +414,7 @@ public class EventProcessor {
 			for (DataflowInputPort ip : inputPorts) {
 
 				Var inputVar = new Var();
-
+				inputVar.setIdentifier(UUID.randomUUID().toString());
 				inputVar.setPName(pName);
 				inputVar.setWfInstanceRef(dataflowID);
 				inputVar.setVName(ip.getName());
@@ -419,7 +442,7 @@ public class EventProcessor {
 			for (DataflowOutputPort op : outputPorts) {
 
 				Var outputVar = new Var();
-
+				outputVar.setIdentifier(UUID.randomUUID().toString());
 				outputVar.setPName(pName);
 				outputVar.setWfInstanceRef(dataflowID);
 				outputVar.setVName(op.getName());
@@ -613,12 +636,17 @@ public class EventProcessor {
 			String processID = parentChildMap.get(processorID);
 			parentChildMap.put(iterationID, activityID);
 			parentChildMap.put(iterationID, activityID);
+			
+			
 			ProcBinding procBinding = procBindingMap.get(processID);
 
-			String itVector = extractIterationVector(ProvenanceUtils.iterationToString(((IterationProvenanceItem)provenanceItem).getIteration()));
+			IterationProvenanceItem iterationProvenanceItem = (IterationProvenanceItem)provenanceItem;
+			String itVector = extractIterationVector(ProvenanceUtils.iterationToString(iterationProvenanceItem.getIteration()));
 			procBinding.setIterationVector(itVector);
-			InputDataProvenanceItem   inputDataEl = ((IterationProvenanceItem)provenanceItem).getInputDataItem();
-						OutputDataProvenanceItem outputDataEl = ((IterationProvenanceItem)provenanceItem).getOutputDataItem();
+			InputDataProvenanceItem inputDataEl = iterationProvenanceItem
+					.getInputDataItem();
+			OutputDataProvenanceItem outputDataEl = iterationProvenanceItem
+					.getOutputDataItem();
 			processInput(inputDataEl, procBinding, currentWorkflowID);
 			processOutput(outputDataEl, procBinding, currentWorkflowID);
 
@@ -627,6 +655,37 @@ public class EventProcessor {
 			} catch (SQLException e) {
 				logger.debug("provenance has duplicate processor binding -- skipping the insertion"); //, e);
 			}
+			
+			ProcessorEnactment processorEnactment = new ProcessorEnactment();
+			processorEnactment.setEnactmentStarted(iterationProvenanceItem.getEnactmentStarted());
+			processorEnactment.setEnactmentEnded(iterationProvenanceItem.getEnactmentEnded());
+			// TODO: Register inputs/outputs
+			
+			
+			processorEnactment.setIteration(itVector);
+			// TODO: Find parent
+			processorEnactment.setParentProcessEnactmentId(null);
+			processorEnactment.setProcessEnactmentId(iterationProvenanceItem.getIdentifier());
+			processorEnactment.setProcessIdentifier(iterationProvenanceItem.getProcessId());
+
+			ProvenanceProcessor provenanceProcessor = pq.getProvenanceProcessor(currentWorkflowID, procBinding.getPNameRef());
+			if (provenanceProcessor == null) {
+				// already logged warning
+				return;
+			}
+			processorEnactment.setProcessorId(provenanceProcessor.getIdentifier());						
+
+			processorEnactment.setInitialInputsDataBindingId(processDataBindings(inputDataEl, provenanceProcessor));
+			processorEnactment.setFinalOutputsDataBindingId(processDataBindings(outputDataEl, provenanceProcessor));
+			
+			processorEnactment.setWorkflowRunId(wfInstanceID);
+			try {
+				getPw().addProcessorEnactment(processorEnactment);
+			} catch (SQLException e) {
+				logger.warn("Could not store processor enactment", e);
+			}
+			
+			
 		} else if (provenanceItem.getEventType().equals(SharedVocabulary.END_WORKFLOW_EVENT_TYPE)) {
 
 			// use this event to do housekeeping on the input/output varbindings 
@@ -665,6 +724,58 @@ public class EventProcessor {
 		}
 
 	}
+
+	private String processDataBindings(
+			DataProvenanceItem provenanceItem, ProvenanceProcessor provenanceProcessor) {
+		// TODO: Cache known provenaneItems and avoid registering again
+		String dataBindingId = UUID.randomUUID().toString();
+		boolean isInput = provenanceItem instanceof InputDataProvenanceItem;
+		
+		for (Entry<String, T2Reference> entry : provenanceItem.getDataMap().entrySet()) {				
+			DataBinding dataBinding = new DataBinding();
+			dataBinding.setDataBindingId(dataBindingId);
+			Var port = findPort(provenanceProcessor, entry.getKey(), isInput); // findPort
+			if (port == null) {
+				logger.warn("Could not find port for " + entry.getKey());
+				continue;
+			}
+			dataBinding.setPort(port);
+			dataBinding.setT2Reference(entry.getValue().toUri().toASCIIString());
+			dataBinding.setWorkflowRunId(wfInstanceID);
+			try {
+				getPw().addDataBinding(dataBinding);
+			} catch (SQLException e) {
+				logger.warn("Could not register data binding for " + port, e);
+			}
+		}
+		return dataBindingId;
+	}
+
+	private Var findPort(ProvenanceProcessor provenanceProcessor, String portName, boolean isInput) {
+		// TODO: Query pr dataflow and cache
+		Map<String, String> queryConstraints = new HashMap<String, String>();
+		queryConstraints.put("wfInstanceRef", provenanceProcessor.getWfInstanceRef());
+		String processorName = provenanceProcessor.getPname();
+		queryConstraints.put("pNameRef", processorName);
+		queryConstraints.put("varName", portName);
+		queryConstraints.put("inputOrOutput", isInput ? "1" : "0");
+		try {
+			List<Var> vars = pq.getVars(queryConstraints);
+			if (vars.isEmpty()) {
+				logger.warn("Can't find port " + portName + " in " + processorName);
+				return null;				
+			}
+			if (vars.size() > 1) {
+				logger.warn("Multiple matches for port " + portName + " in " + processorName);
+				return null;				
+			}
+			return vars.get(0);
+		} catch (SQLException e) {
+			logger.error("Problem getting ports for processor: " + processorName + " worflow: " + provenanceProcessor.getWfInstanceRef(), e);
+			return null;
+		}
+	}
+
 
 	/**
 	 * fills in the VBs for the global inputs -- this removes the need for explicit events
@@ -1026,9 +1137,7 @@ public class EventProcessor {
 
 			// value type may vary
 			List<Element> valueElements = inputport.getChildren(); // hopefully
-			// in the
-			// right
-			// order...
+			// in the right order...
 			if (valueElements != null && valueElements.size() > 0) {
 
 				Element valueEl = valueElements.get(0); // expect only 1 child

@@ -7,6 +7,7 @@ package net.sf.taverna.t2.provenance.connector;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
@@ -33,8 +34,7 @@ public class JDBCConnector {
      * @throws ClassNotFoundException
      * @throws SQLException
      */
-    public static Connection getConnection() throws InstantiationException,
-            IllegalAccessException, ClassNotFoundException, SQLException {
+    public static Connection getConnection() throws SQLException {
         InitialContext context;
         Connection connection = null;
         try {
@@ -42,9 +42,8 @@ public class JDBCConnector {
             DataSource ds = (DataSource) context.lookup("jdbc/taverna");
             connection = ds.getConnection(); 
         } catch (NamingException ex) {
-            throw new SQLException("Unable to retrieve database connection for name jdbc/taverna");
-        }
-
+            throw new SQLException("Unable to retrieve database connection for name jdbc/taverna", ex);        
+		}
         return connection;
     }
 

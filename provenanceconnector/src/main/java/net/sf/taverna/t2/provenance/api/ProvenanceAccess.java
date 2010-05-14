@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -38,6 +39,7 @@ import net.sf.taverna.t2.invocation.impl.InvocationContextImpl;
 import net.sf.taverna.t2.provenance.ProvenanceConnectorFactory;
 import net.sf.taverna.t2.provenance.ProvenanceConnectorFactoryRegistry;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector;
+import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.ProcessorEnactment;
 import net.sf.taverna.t2.provenance.lineageservice.Dependencies;
 import net.sf.taverna.t2.provenance.lineageservice.LineageQueryResultRecord;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceAnalysis;
@@ -48,6 +50,8 @@ import net.sf.taverna.t2.provenance.lineageservice.utils.Var;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Workflow;
 import net.sf.taverna.t2.provenance.lineageservice.utils.WorkflowInstance;
 import net.sf.taverna.t2.reference.ReferenceService;
+import net.sf.taverna.t2.reference.T2Reference;
+import net.sf.taverna.t2.reference.impl.T2ReferenceImpl;
 
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.log4j.Logger;
@@ -563,5 +567,29 @@ public class ProvenanceAccess {
 		this.pq = pq;
 	}
 
+	public List<net.sf.taverna.t2.provenance.lineageservice.utils.ProcessorEnactment> getProcessorEnactments(
+			String workflowRunId, String... processorPath) {
+		return pq.getProcessorEnactments(workflowRunId, processorPath);
+	}
+
+	public ProvenanceProcessor getProvenanceProcessor(String workflowId, String pNameRef) {
+		return pq.getProvenanceProcessor(workflowId, pNameRef);		
+	}
+	public ProvenanceProcessor getProvenanceProcessor(String processorId) {
+		return pq.getProvenanceProcessor(processorId);		
+	}
+
+	public Map<Var, T2Reference> getDataBindings(String dataBindingId) {
+		Map<Var, String> dataBindings = pq.getDataBindings(dataBindingId);
+		
+		HashMap<Var, T2Reference> references = new HashMap<Var, T2Reference>();
+		for (Entry<Var,String> entry : dataBindings.entrySet()) {
+			T2Reference t2Ref = getProvenanceConnector().getReferenceService().referenceFromString(entry.getValue());
+			references.put(entry.getKey(), t2Ref);
+		}
+		return references;
+	}
+
+	
 
 }

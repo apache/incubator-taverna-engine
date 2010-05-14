@@ -32,6 +32,11 @@ public class ProvenanceProcessor {
 	String wfInstanceRef;
 	String workflowExternalName;
 	String type;
+	private boolean isTopLevelProcessor;
+	
+	public ProvenanceProcessor() {
+		
+	}
 	
 	
 	public String toString() {
@@ -104,6 +109,15 @@ public class ProvenanceProcessor {
 	 */
 	public void setWorkflowExternalName(String workflowExternalName) {
 		this.workflowExternalName = workflowExternalName;
+	}
+
+	public void setTopLevelProcessor(boolean isTopLevelProcessor) {
+		this.isTopLevelProcessor = isTopLevelProcessor;
+	}
+
+
+	public boolean isTopLevelProcessor() {
+		return isTopLevelProcessor;
 	}
 
 

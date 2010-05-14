@@ -25,8 +25,10 @@ import java.beans.XMLEncoder;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -160,7 +162,6 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 										.getKey().getIdentifier());
 							}
 						}
-
 						for (Entry<InputDataProvenanceItem, List<Object>> entrySet : inputDataProvenanceItemMap
 								.entrySet()) {
 							List<Object> value = entrySet.getValue();
@@ -349,9 +350,11 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 
 		IterationProvenanceItem iterationProvItem = null;
 		iterationProvItem = new IterationProvenanceItem();
-		iterationProvItem.setWorklfowId(parentDataflowId);
+		iterationProvItem.setWorkflowId(parentDataflowId);
 		iterationProvItem.setIteration(jobEvent.getIndex());
 		iterationProvItem.setIdentifier(UUID.randomUUID().toString());
+		
+		
 		ReferenceService referenceService = jobEvent.getContext()
 				.getReferenceService();
 
@@ -395,6 +398,7 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 		}
 		getIndexesByProcess(jobEvent.getOwningProcess()).put(
 				indexStr(jobEvent.getIndex()), iterationProvItem);
+		iterationProvItem.setEnactmentStarted(new Timestamp(System.currentTimeMillis()));
 		super.receiveJob(jobEvent);
 	}
 
@@ -414,6 +418,7 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 		try {
 			// FIXME use the connector from the result event context
 			IterationProvenanceItem iterationProvItem = getIterationProvItem(resultEvent);
+			iterationProvItem.setEnactmentEnded(new Timestamp(System.currentTimeMillis()));
 			
 			ReferenceService referenceService = resultEvent.getContext()
 					.getReferenceService();

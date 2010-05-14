@@ -26,6 +26,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -36,10 +37,13 @@ import java.util.Set;
 import java.util.Map.Entry;
 
 import net.sf.taverna.t2.provenance.connector.JDBCConnector;
+import net.sf.taverna.t2.provenance.connector.ProvenanceConnector;
+import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataBinding;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Arc;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DDRecord;
 import net.sf.taverna.t2.provenance.lineageservice.utils.NestedListNode;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProcBinding;
+import net.sf.taverna.t2.provenance.lineageservice.utils.ProcessorEnactment;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Var;
 import net.sf.taverna.t2.provenance.lineageservice.utils.VarBinding;
@@ -159,6 +163,7 @@ public abstract class ProvenanceQuery {
 					} else {
 						aVar.setInput(false);
 					}
+					aVar.setIdentifier(rs.getString("portId"));
 					aVar.setPName(rs.getString("pnameRef"));
 					aVar.setVName(rs.getString("varName"));
 					aVar.setType(rs.getString("type"));
@@ -166,6 +171,7 @@ public abstract class ProvenanceQuery {
 					aVar.setActualNestingLevel(rs.getInt("actualNestingLevel"));
 					aVar.setANLset((rs.getInt("anlSet") == 1 ? true : false));
 					result.add(aVar);
+					
 
 				}
 			}
@@ -215,6 +221,7 @@ public abstract class ProvenanceQuery {
 					} else {
 						aVar.setInput(false);
 					}
+					aVar.setIdentifier(rs.getString("portId"));
 					aVar.setPName(rs.getString("pnameRef"));
 					aVar.setVName(rs.getString("varName"));
 					aVar.setType(rs.getString("type"));
@@ -1052,6 +1059,7 @@ public abstract class ProvenanceQuery {
 					} else {
 						aVar.setInput(false);
 					}
+					aVar.setIdentifier(rs.getString("portId"));
 					aVar.setPName(rs.getString("pnameRef"));
 					aVar.setVName(rs.getString("varName"));
 					aVar.setType(rs.getString("type"));
@@ -1138,6 +1146,44 @@ public abstract class ProvenanceQuery {
 		}
 		return getProcessors(constraints);
 	}
+	
+
+	public ProvenanceProcessor getProvenanceProcessor(
+			String workflowId, String pNameRef) {
+		
+		Map<String, String> constraints = new HashMap<String, String>();
+		constraints.put("P.wfInstanceRef", workflowId);			
+		constraints.put("P.pName", pNameRef);
+		List<ProvenanceProcessor> processors;
+		try {
+			processors = getProcessors(constraints);
+		} catch (SQLException e1) {
+			logger.warn("Could not find processor for " + constraints, e1);
+			return null;
+		}
+		if (processors.size() != 1) {
+			logger.warn("Could not uniquely find processor for " + constraints + ", got: " + processors);
+			return null;
+		}
+		return processors.get(0);
+	}
+	
+	public ProvenanceProcessor getProvenanceProcessor(String processorId) {
+		Map<String, String> constraints = new HashMap<String, String>();
+		constraints.put("P.processorId", processorId);
+		List<ProvenanceProcessor> processors;
+		try {
+			processors = getProcessors(constraints);
+		} catch (SQLException e1) {
+			logger.warn("Could not find processor for " + constraints, e1);
+			return null;
+		}
+		if (processors.size() != 1) {
+			logger.warn("Could not uniquely find processor for " + constraints + ", got: " + processors);
+			return null;
+		}
+		return processors.get(0);
+	}
 
 
 	/**
@@ -1202,7 +1248,7 @@ public abstract class ProvenanceQuery {
 
 				while (rs.next()) {
 					ProvenanceProcessor proc = new ProvenanceProcessor();
-
+					proc.setIdentifier(rs.getString("processorId"));
 					proc.setPname(rs.getString("pname"));
 					proc.setType(rs.getString("type"));
 					proc.setWfInstanceRef(rs.getString("wfInstanceRef"));
@@ -2533,6 +2579,155 @@ public abstract class ProvenanceQuery {
 			}
 		}
 		return null;
+	}
+
+	public List<ProcessorEnactment> getProcessorEnactments(
+			String workflowRunId, String... processorPath) {
+		ProvenanceConnector.ProcessorEnactment ProcEnact = ProvenanceConnector.ProcessorEnactment.ProcessorEnactment;
+		
+		String query  = 
+				"SELECT " + ProcEnact.enactmentStarted + ","
+						+ ProcEnact.enactmentEnded + ","
+						+ ProcEnact.finalOutputsDataBindingId + ","
+						+ ProcEnact.initialInputsDataBindingId + ","
+						+ ProcEnact.ProcessorEnactment + "." + ProcEnact.processorId + " AS procId,"
+						+ ProcEnact.processIdentifier + ","
+						+ ProcEnact.processEnactmentId + ","
+						+ ProcEnact.parentProcessEnactmentId + ","						
+						+ ProcEnact.iteration + ","
+						+ "Processor.pName" + " FROM "
+						+ ProcEnact.ProcessorEnactment
+						+ " INNER JOIN " + "Processor" + " ON "
+						+ ProcEnact.ProcessorEnactment + "."+ ProcEnact.processorId 
+						+ " = " + "Processor.processorId" + " WHERE "
+						+ ProcEnact.workflowRunId + "=?";
+		
+		if (processorPath.length > 1) {
+			throw new UnsupportedOperationException("Support for processor paths not yet implemented");
+		}
+		if (processorPath.length == 1) {
+			query = query + " AND Processor.pName=?";
+		}
+		
+		ArrayList<ProcessorEnactment> procEnacts = new ArrayList<ProcessorEnactment>();
+
+		PreparedStatement statement;
+		Connection connection = null;
+		try {
+			connection = getConnection();
+			statement = connection.prepareStatement(query);
+			statement.setString(1, workflowRunId);
+			if (processorPath.length == 1) {
+				statement.setString(2, processorPath[0]);
+			}
+			ResultSet resultSet = statement.executeQuery();
+			while (resultSet.next()) {
+				Timestamp enactmentStarted = resultSet.getTimestamp(ProcEnact.enactmentStarted.name());
+				Timestamp enactmentEnded = resultSet.getTimestamp(ProcEnact.enactmentEnded.name());
+				String pName = resultSet.getString("pName");
+				String finalOutputsDataBindingId = resultSet.getString(ProcEnact.finalOutputsDataBindingId.name());
+				String initialInputsDataBindingId = resultSet.getString(ProcEnact.initialInputsDataBindingId.name());
+			
+				String iteration = resultSet.getString(ProcEnact.iteration.name());
+				String processorId = resultSet.getString("procId");
+				String processIdentifier = resultSet.getString(ProcEnact.processIdentifier.name());
+				String processEnactmentId = resultSet.getString(ProcEnact.processEnactmentId.name());
+				String parentProcessEnactmentId = resultSet.getString(ProcEnact.parentProcessEnactmentId.name());
+				
+				ProcessorEnactment procEnact = new ProcessorEnactment();
+				procEnact.setEnactmentEnded(enactmentEnded);
+				procEnact.setEnactmentStarted(enactmentStarted);
+				procEnact.setFinalOutputsDataBindingId(finalOutputsDataBindingId);
+				procEnact.setInitialInputsDataBindingId(initialInputsDataBindingId);
+				procEnact.setIteration(iteration);
+				procEnact.setParentProcessEnactmentId(parentProcessEnactmentId);
+				procEnact.setProcessEnactmentId(processEnactmentId);
+				procEnact.setProcessIdentifier(processIdentifier);
+				procEnact.setProcessorId(processorId);
+				procEnact.setWorkflowRunId(workflowRunId);
+				procEnacts.add(procEnact);
+				
+			}
+			
+		} catch (SQLException e) {
+			logger.warn("Could not execute query " + query, e);
+		} catch (InstantiationException e) {
+			logger.warn("Could not get database connection", e);
+		} catch (IllegalAccessException e) {
+			logger.warn("Could not get database connection", e);
+		} catch (ClassNotFoundException e) {
+			logger.warn("Could not get database connection", e);
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					logger.warn("Could not close connection", e);
+				}
+			}
+		}
+		
+		return procEnacts;
+	}
+
+	public Map<Var, String> getDataBindings(String dataBindingId) {
+		HashMap<Var, String> dataBindings = new HashMap<Var, String>();
+		String query = "SELECT " 
+				+ DataBinding.t2Reference + ","
+				+ "Var.portId AS portId," 
+				+ "Var.pNameRef,"
+				+ "Var.inputOrOutput,"
+				+ "Var.varName," 
+				+ "Var.type," 
+				+ "Var.nestingLevel,"
+				+ "Var.actualNestingLevel," 
+				+ "Var.anlSet," 
+				+ "Var.WfInstanceRef"
+				+ " FROM " + DataBinding.DataBinding
+				+ " INNER JOIN " + "Var" + " ON " 
+				+ " Var.portId=" + DataBinding.DataBinding + "." + DataBinding.portId
+				+ " WHERE " + DataBinding.dataBindingId + "=?";
+		PreparedStatement statement;
+		Connection connection = null;
+		try {
+			connection = getConnection();
+			statement = connection.prepareStatement(query);
+			statement.setString(1, dataBindingId);
+			ResultSet rs = statement.executeQuery();
+			while (rs.next()) {
+				String t2Ref = rs.getString(DataBinding.t2Reference.name());
+				
+				Var aVar = new Var();
+				aVar.setWfInstanceRef(rs.getString("WfInstanceRef"));
+				aVar.setInput(rs.getBoolean("inputOrOutput"));				
+				aVar.setIdentifier(rs.getString("portId"));
+				aVar.setPName(rs.getString("pNameRef"));
+				aVar.setVName(rs.getString("varName"));
+				aVar.setType(rs.getString("type"));
+				aVar.setTypeNestingLevel(rs.getInt("nestingLevel"));
+				aVar.setActualNestingLevel(rs.getInt("actualNestingLevel"));
+				aVar.setANLset(rs.getBoolean("anlSet"));
+
+				dataBindings.put(aVar, t2Ref);
+			}
+		} catch (SQLException e) {
+			logger.warn("Could not execute query " + query, e);
+		} catch (InstantiationException e) {
+			logger.warn("Could not get database connection", e);
+		} catch (IllegalAccessException e) {
+			logger.warn("Could not get database connection", e);
+		} catch (ClassNotFoundException e) {
+			logger.warn("Could not get database connection", e);			
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					logger.warn("Could not close connection", e);
+				}
+			}
+		}
+		return dataBindings;		
 	}
 
 

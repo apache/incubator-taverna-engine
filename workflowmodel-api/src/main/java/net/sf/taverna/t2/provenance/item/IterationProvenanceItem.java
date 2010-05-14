@@ -20,6 +20,8 @@
  ******************************************************************************/
 package net.sf.taverna.t2.provenance.item;
 
+import java.sql.Timestamp;
+
 import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
 
 /**
@@ -34,49 +36,31 @@ import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
  * 
  */
 public class IterationProvenanceItem implements ProvenanceItem {
-	private int[] iteration;
-	private InputDataProvenanceItem inputDataItem;
-	private OutputDataProvenanceItem outputDataItem;
+	private Timestamp enactmentEnded;
+	private Timestamp enactmentStarted;
 	private ErrorProvenanceItem errorItem;
-	private String processId;
-	private String parentId;
-	private String identifier;
 	private SharedVocabulary eventType = SharedVocabulary.ITERATION_EVENT_TYPE;
+	private String identifier;
+	private InputDataProvenanceItem inputDataItem;
+	private int[] iteration;
+	private OutputDataProvenanceItem outputDataItem;
+	private String parentId;
+	private String processId;
 	private String workflowId;
 
 	public IterationProvenanceItem() {
 	}
 
-	public void setInputDataItem(InputDataProvenanceItem inputDataItem) {
-		this.inputDataItem = inputDataItem;
+	public Timestamp getEnactmentEnded() {
+		return enactmentEnded;
 	}
 
-	public void setOutputDataItem(OutputDataProvenanceItem outputDataItem) {
-		this.outputDataItem = outputDataItem;
-	}
-
-	public void setErrorItem(ErrorProvenanceItem errorItem) {
-		this.errorItem = errorItem;
+	public Timestamp getEnactmentStarted() {
+		return enactmentStarted;
 	}
 
 	public ErrorProvenanceItem getErrorItem() {
 		return errorItem;
-	}
-
-	public int[] getIteration() {
-		return iteration;
-	}
-
-	public void setIteration(int[] iteration) {
-		this.iteration = iteration;
-	}
-	
-	public InputDataProvenanceItem getInputDataItem() {
-		return inputDataItem;
-	}
-
-	public OutputDataProvenanceItem getOutputDataItem() {
-		return outputDataItem;
 	}
 
 	public SharedVocabulary getEventType() {
@@ -87,36 +71,68 @@ public class IterationProvenanceItem implements ProvenanceItem {
 		return identifier;
 	}
 
-	public void setIdentifier(String identifier) {
-		this.identifier = identifier;
-	}
-	
-	public void setProcessId(String processId) {
-		this.processId = processId;
+	public InputDataProvenanceItem getInputDataItem() {
+		return inputDataItem;
 	}
 
+	public int[] getIteration() {
+		return iteration;
+	}
+
+	public OutputDataProvenanceItem getOutputDataItem() {
+		return outputDataItem;
+	}
+
+	public String getParentId() {
+		return parentId;
+	}
+	
 	public String getProcessId() {
 		return processId;
 	}
+
+	public String getWorkflowId() {
+		return workflowId;
+	}
+
+	public void setEnactmentEnded(Timestamp enactmentEnded) {
+		this.enactmentEnded = enactmentEnded;
+	}
+
+	public void setEnactmentStarted(Timestamp enactmentStarted) {
+		this.enactmentStarted = enactmentStarted;
+	}
+
+	public void setErrorItem(ErrorProvenanceItem errorItem) {
+		this.errorItem = errorItem;
+	}
 	
-	public String getParentId() {
-		return parentId;
+	public void setIdentifier(String identifier) {
+		this.identifier = identifier;
+	}
+
+	public void setInputDataItem(InputDataProvenanceItem inputDataItem) {
+		this.inputDataItem = inputDataItem;
+	}
+	
+	public void setIteration(int[] iteration) {
+		this.iteration = iteration;
+	}
+
+	public void setOutputDataItem(OutputDataProvenanceItem outputDataItem) {
+		this.outputDataItem = outputDataItem;
 	}
 
 	public void setParentId(String parentId) {
 		this.parentId = parentId;
 	}
 
-	public void setWorklfowId(String workflowId) {
-		this.setWorkflowId(workflowId);
-	}
+	public void setProcessId(String processId) {
+		this.processId = processId;
+	}	
 
 	public void setWorkflowId(String workflowId) {
 		this.workflowId = workflowId;
-	}
-
-	public String getWorkflowId() {
-		return workflowId;
 	}
 	
 

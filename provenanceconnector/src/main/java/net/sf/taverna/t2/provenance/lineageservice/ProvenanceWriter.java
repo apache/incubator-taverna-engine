@@ -26,19 +26,23 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import net.sf.taverna.t2.provenance.connector.JDBCConnector;
-import org.apache.log4j.Logger;
-
+import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.Activity;
+import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataBinding;
+import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.ProcessorEnactment;
+import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.ServiceInvocation;
 import net.sf.taverna.t2.provenance.lineageservice.utils.NestedListNode;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProcBinding;
+import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Var;
 import net.sf.taverna.t2.provenance.lineageservice.utils.VarBinding;
+
+import org.apache.log4j.Logger;
 
 /**
  * Handles all the writing out of provenance items to the database layer. Uses
@@ -55,8 +59,7 @@ public abstract class ProvenanceWriter {
 	protected static Logger logger = Logger.getLogger(ProvenanceWriter.class);    
 	protected int cnt; // counts number of calls to VarBinding
 
-	public Connection getConnection() throws InstantiationException,
-	IllegalAccessException, ClassNotFoundException, SQLException {
+	public Connection getConnection() throws SQLException {
 		return JDBCConnector.getConnection();
 	}
 
@@ -75,7 +78,7 @@ public abstract class ProvenanceWriter {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-			"INSERT INTO Var (varname, pNameRef, inputOrOutput, nestingLevel, wfInstanceRef) VALUES(?,?,?,?,?)");
+			"INSERT INTO Var (varname, pNameRef, inputOrOutput, nestingLevel, wfInstanceRef, portId) VALUES(?,?,?,?,?,?)");
 			String q;
 			for (Var v : vars) {
 
@@ -87,22 +90,15 @@ public abstract class ProvenanceWriter {
 				ps.setInt(3, isInput);
 				ps.setInt(4, i);
 				ps.setString(5, wfId);
+				ps.setString(6, v.getIdentifier());
 
 				try {
 					ps.executeUpdate();
-
 				} catch (Exception e) {
-					continue;
+					logger.warn("Could not insert var " + v.getVName(), e);
 				}
 
 			}
-
-		} catch (InstantiationException e1) {
-			logger.warn("Could not execute insert to add variables", e1);
-		} catch (IllegalAccessException e1) {
-			logger.warn("Could not execute insert to add variables", e1);
-		} catch (ClassNotFoundException e1) {
-			logger.warn("Could not execute insert to add variables", e1);
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -134,12 +130,6 @@ public abstract class ProvenanceWriter {
 
 			int result = ps.executeUpdate();
 
-		} catch (InstantiationException e1) {
-			logger.warn("Could not execute insert for Arc", e1);
-		} catch (IllegalAccessException e1) {
-			logger.warn("Could not execute insert for Arc", e1);
-		} catch (ClassNotFoundException e1) {
-			logger.warn("Could not execute insert for Arc", e1);
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -167,12 +157,7 @@ public abstract class ProvenanceWriter {
 			int result = ps.executeUpdate();
 
 
-		} catch (InstantiationException e1) {
-			logger.warn("Could not execute insert to add Arc", e1);
-		} catch (IllegalAccessException e1) {
-			logger.warn("Could not execute insert to add Arc", e1);
-		} catch (ClassNotFoundException e1) {
-			logger.warn("Could not execute insert to add Arc", e1);
+		
 		} catch (SQLException e) {
 			logger.warn("Could not execute insert to add Arc", e);
 		} finally {
@@ -186,6 +171,42 @@ public abstract class ProvenanceWriter {
 		}
 
 	}
+	
+
+	public void addDataBinding(net.sf.taverna.t2.provenance.lineageservice.utils.DataBinding dataBinding) throws SQLException {
+		
+		PreparedStatement ps = null;
+		Connection connection = null;
+		try {
+			connection = getConnection();
+			ps = connection.prepareStatement("INSERT INTO "
+					+ DataBinding.DataBinding + "("
+					+ DataBinding.dataBindingId + ","
+					+ DataBinding.portId + ","
+					+ DataBinding.t2Reference + ","
+					+ DataBinding.workflowRunId 
+					+ ") VALUES(?,?,?,?)");
+			
+			ps.setString(1, dataBinding.getDataBindingId());
+			ps.setString(2, dataBinding.getPort().getIdentifier());
+			ps.setString(3, dataBinding.getT2Reference());
+			ps.setString(4, dataBinding.getWorkflowRunId());
+			ps.executeUpdate();			
+			if (logger.isDebugEnabled()) {
+				logger.debug("adding DataBinding:\n "+dataBinding);
+			}
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					logger.warn("Can't close connection", e);
+				}
+			}
+		}
+		
+	}
+
 
 	public void addWFId(String wfId) throws SQLException {
 
@@ -198,12 +219,6 @@ public abstract class ProvenanceWriter {
 			ps.setString(1, wfId);
 			ps.executeUpdate();
 
-		} catch (InstantiationException e1) {
-			logger.warn(e1);
-		} catch (IllegalAccessException e1) {
-			logger.warn(e1);
-		} catch (ClassNotFoundException e1) {
-			logger.warn(e1);
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -226,12 +241,7 @@ public abstract class ProvenanceWriter {
 
 			ps.executeUpdate();
 
-		} catch (InstantiationException e1) {
-			logger.warn(e1);
-		} catch (IllegalAccessException e1) {
-			logger.warn(e1);
-		} catch (ClassNotFoundException e1) {
-			logger.warn(e1);
+	
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -253,12 +263,7 @@ public abstract class ProvenanceWriter {
 			ps.setString(2, wfId);
 
 			ps.executeUpdate();
-		} catch (InstantiationException e1) {
-			logger.warn(e1);
-		} catch (IllegalAccessException e1) {
-			logger.warn(e1);
-		} catch (ClassNotFoundException e1) {
-			logger.warn(e1);
+	
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -273,7 +278,13 @@ public abstract class ProvenanceWriter {
 	 * @throws SQLException
 	 */
 	public void addProcessor(String name, String wfID, boolean isTopLevel) throws SQLException {
-		addProcessor(name, null, wfID, isTopLevel);
+		ProvenanceProcessor provProc = new ProvenanceProcessor();
+		provProc.setIdentifier(UUID.randomUUID().toString());
+		provProc.setPname(name);
+		provProc.setWfInstanceRef(wfID);
+		provProc.setTopLevelProcessor(isTopLevel);
+		// pType is unknown
+		addProcessor(provProc);
 	}
 
 	/**
@@ -285,37 +296,32 @@ public abstract class ProvenanceWriter {
 	 * @param wfNameRef
 	 * @throws SQLException
 	 */
-	public void addProcessor(String name, String type, String wfNameRef, boolean isTopLevel)
-	throws SQLException {
+	
+
+	public void addProcessor(ProvenanceProcessor provProc) 	throws SQLException {
 
 		PreparedStatement ps = null;
 		Connection connection = null;
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-			"INSERT INTO Processor (pname, type, wfInstanceRef, isTopLevel) VALUES (?,?,?,?)");
+			"INSERT INTO Processor (pname, type, wfInstanceRef, isTopLevel, processorId) VALUES (?,?,?,?,?)");
 
-			ps.setString(1, name);
-			ps.setString(2, type);
-			ps.setString(3, wfNameRef);
-			ps.setBoolean(4, isTopLevel);
+			ps.setString(1, provProc.getPname());
+			ps.setString(2, provProc.getType());
+			ps.setString(3, provProc.getWfInstanceRef());
+			ps.setBoolean(4, provProc.isTopLevelProcessor());
+			ps.setString(5, provProc.getIdentifier());
 
 			ps.executeUpdate();
-		} catch (InstantiationException e1) {
-			logger.warn("Error inserting record for Processor", e1);
-		} catch (IllegalAccessException e1) {
-			logger.warn("Error inserting record for Processor", e1);
-		} catch (ClassNotFoundException e1) {
-			logger.warn("Error inserting record for Processor", e1);
+	
 		} finally {
 			if (connection != null) {
 				connection.close();
 			}
 		}
-
-
 	}
-
+	
 	public void addProcessorBinding(ProcBinding pb) throws SQLException {
 
 		PreparedStatement ps = null;
@@ -333,12 +339,7 @@ public abstract class ProvenanceWriter {
 			ps.executeUpdate();
 			logger.debug("adding proc binding:\n "+ps.toString());
 
-		} catch (InstantiationException e1) {
-			logger.warn("Error inserting record for Processor binding", e1);
-		} catch (IllegalAccessException e1) {
-			logger.warn("Error inserting record for Processor binding", e1);
-		} catch (ClassNotFoundException e1) {
-			logger.warn("Error inserting record for Processor binding", e1);
+	
 		} finally {
 			if (connection != null) {
 				try {
@@ -353,6 +354,51 @@ public abstract class ProvenanceWriter {
 
 
 
+	}
+
+	public void addProcessorEnactment(net.sf.taverna.t2.provenance.lineageservice.utils.ProcessorEnactment enactment) throws SQLException {
+	
+		PreparedStatement ps = null;
+		Connection connection = null;
+		try {
+			connection = getConnection();
+			ps = connection.prepareStatement("INSERT INTO "
+					+ ProcessorEnactment.ProcessorEnactment + "("
+					+ ProcessorEnactment.processEnactmentId + ","
+					+ ProcessorEnactment.workflowRunId + ","
+					+ ProcessorEnactment.processorId + ","
+					+ ProcessorEnactment.processIdentifier + ","
+					+ ProcessorEnactment.iteration + ","
+					+ ProcessorEnactment.parentProcessEnactmentId + "," 
+					+ ProcessorEnactment.enactmentStarted + ","
+					+ ProcessorEnactment.enactmentEnded + ","
+					+ ProcessorEnactment.initialInputsDataBindingId + ","
+					+ ProcessorEnactment.finalOutputsDataBindingId
+					+ ") VALUES(?,?,?,?,?,?,?,?,?,?)");
+			ps.setString(1, enactment.getProcessEnactmentId());
+			ps.setString(2, enactment.getWorkflowRunId());
+			ps.setString(3, enactment.getProcessorId());
+			ps.setString(4, enactment.getProcessIdentifier());
+			ps.setString(5, enactment.getIteration());
+			ps.setString(6, enactment.getParentProcessEnactmentId());
+			ps.setTimestamp(7, enactment.getEnactmentStarted());
+			ps.setTimestamp(8, enactment.getEnactmentEnded());
+			ps.setString(9, enactment.getInitialInputsDataBindingId());
+			ps.setString(10, enactment.getFinalOutputsDataBindingId());
+			ps.executeUpdate();
+			
+			if (logger.isDebugEnabled()) {
+				logger.debug("adding ProcessorEnactment binding:\n "+enactment);
+			}
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					logger.warn("Can't close connection", e);
+				}
+			}
+		}
 	}
 
 	public String addCollection(String processorId, String collId,
@@ -383,12 +429,7 @@ public abstract class ProvenanceWriter {
 
 			ps.executeUpdate();
 
-		} catch (InstantiationException e1) {
-			logger.warn("Error inserting record for a collection", e1);
-		} catch (IllegalAccessException e1) {
-			logger.warn("Error inserting record for a collection", e1);
-		} catch (ClassNotFoundException e1) {
-			logger.warn("Error inserting record for a collection", e1);
+		
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -424,12 +465,7 @@ public abstract class ProvenanceWriter {
 		} catch (SQLException e) {
 			// the same ID will come in several times -- duplications are
 			// expected, don't panic
-		} catch (InstantiationException e) {
-			logger.warn("Error inserting record for a data", e);
-		} catch (IllegalAccessException e) {
-			logger.warn("Error inserting record for a data", e);
-		} catch (ClassNotFoundException e) {
-			logger.warn("Error inserting record for a data", e);
+	
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -473,12 +509,6 @@ public abstract class ProvenanceWriter {
 
 			cnt++;  // who uses this?
 
-		} catch (InstantiationException e1) {
-			logger.warn("Error inserting record for a varBinding", e1);
-		} catch (IllegalAccessException e1) {
-			logger.warn("Error inserting record for a varBinding", e1);
-		} catch (ClassNotFoundException e1) {
-			logger.warn("Error inserting record for a varBinding", e1);
 //		} catch (SQLException e) {
 //			logger.warn("Var binding insert failed", e);
 		} finally {
@@ -517,12 +547,7 @@ public abstract class ProvenanceWriter {
 
 
 			ps.execute();
-		} catch (InstantiationException e) {
-			logger.warn("Could not execute query: " + e);
-		} catch (IllegalAccessException e) {
-			logger.warn("Could not execute query: " + e);
-		} catch (ClassNotFoundException e) {
-			logger.warn("Could not execute query: " + e);
+	
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -531,6 +556,35 @@ public abstract class ProvenanceWriter {
 
 	}
 
+	public void updateProcessorEnactment(net.sf.taverna.t2.provenance.lineageservice.utils.ProcessorEnactment enactment) {
+		PreparedStatement ps = null;
+		Connection connection = null;
+		try {
+			connection = getConnection();
+			ps = connection.prepareStatement("UPDATE "
+					+ ProcessorEnactment.ProcessorEnactment + " SET "
+					+ ProcessorEnactment.finalOutputsDataBindingId + "=?"
+					+ " WHERE " + ProcessorEnactment.processEnactmentId + "=?");
+
+			ps.setString(1, enactment.getFinalOutputsDataBindingId());				
+			ps.setString(2, enactment.getProcessEnactmentId());
+			ps.executeUpdate();
+
+
+		} catch (SQLException e) {
+			logger.warn("****  insert failed for query ", e);
+		
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (SQLException ex) {
+					logger.error("There was an error closing the database connection", ex);
+				}
+			}
+		}
+	}
+	
 	public void updateVarBinding(VarBinding vb) {
 
 		PreparedStatement ps = null;
@@ -557,12 +611,7 @@ public abstract class ProvenanceWriter {
 
 		} catch (SQLException e) {
 			logger.warn("****  insert failed for query ", e);
-		} catch (InstantiationException e) {
-			logger.warn("****  insert failed ", e);
-		} catch (IllegalAccessException e) {
-			logger.warn("****  insert failed ", e);
-		} catch (ClassNotFoundException e) {
-			logger.warn("****  insert failed ", e);
+		
 		} finally {
 			if (connection != null) {
 				try {
@@ -594,12 +643,7 @@ public abstract class ProvenanceWriter {
 
 		} catch (SQLException e) {
 			logger.warn("Error replacing collection record", e);
-		} catch (InstantiationException e) {
-			logger.warn("Error replacing collection record", e);
-		} catch (IllegalAccessException e) {
-			logger.warn("Error replacing collection record", e);
-		} catch (ClassNotFoundException e) {
-			logger.warn("Error replacing collection record", e);
+	
 		} finally {
 			if (connection != null) {
 				try {
@@ -631,14 +675,6 @@ public abstract class ProvenanceWriter {
 		try {
 			connection = getConnection();
 			stmt = connection.createStatement();
-		} catch (InstantiationException e1) {
-			logger.error("Problem clearing static DB: " + e1);
-		} catch (IllegalAccessException e1) {
-			logger.error("Problem clearing static DB: " + e1);
-		} catch (ClassNotFoundException e1) {
-			logger.error("Problem clearing static DB: " + e1);
-		}
-		try {
 			q = "DELETE FROM Workflow";
 
 			stmt.executeUpdate(q);
@@ -650,9 +686,14 @@ public abstract class ProvenanceWriter {
 			stmt.executeUpdate(q);
 
 			q = "DELETE FROM Var";
-
 			stmt.executeUpdate(q);
+			
+			q = "DELETE FROM " + Activity.Activity;
+			stmt.executeUpdate(q);
+			
+			
 		} catch (SQLException e) {
+			logger.warn("Could not clear static database", e);
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -691,13 +732,12 @@ public abstract class ProvenanceWriter {
 			"DELETE FROM Var WHERE wfInstanceRef = ?");
 			ps.setString(1, wfID);
 			ps.executeUpdate();
+			
+			q = "DELETE FROM " + Activity.Activity + " WHERE " + Activity.workflowId + "=?";
+			ps.setString(1, wfID);
+			ps.executeUpdate(q);
 
-		} catch (InstantiationException e1) {
-			logger.warn("Error deleting provenance records", e1);
-		} catch (IllegalAccessException e1) {
-			logger.warn("Error deleting provenance records", e1);
-		} catch (ClassNotFoundException e1) {
-			logger.warn("Error deleting provenance records", e1);
+	
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -761,14 +801,41 @@ public abstract class ProvenanceWriter {
 			} else 
 				ps = connection.prepareStatement("DELETE FROM Collection");
 			ps.executeUpdate();
+			
+			if (runID != null) {
+				ps = connection.prepareStatement("DELETE FROM "
+						+ ProcessorEnactment.ProcessorEnactment + " WHERE "
+						+ ProcessorEnactment.workflowRunId + "=?");
+				ps.setString(1, runID);
+			} else
+				ps = connection
+						.prepareStatement("DELETE FROM "
+								+ ProcessorEnactment.ProcessorEnactment);
+			ps.executeUpdate();
+			
+			if (runID != null) {
+				ps = connection.prepareStatement("DELETE FROM "
+						+ ServiceInvocation.ServiceInvocation + " WHERE "
+						+ ServiceInvocation.workflowRunId + "=?");
+				ps.setString(1, runID);
+			} else
+				ps = connection.prepareStatement("DELETE FROM "
+						+ ServiceInvocation.ServiceInvocation);
+			ps.executeUpdate();
+
+			if (runID != null) {
+				ps = connection.prepareStatement("DELETE FROM "
+						+ DataBinding.DataBinding + " WHERE "
+						+ DataBinding.workflowRunId + "=?");
+				ps.setString(1, runID);
+			} else
+				ps = connection.prepareStatement("DELETE FROM "
+						+ DataBinding.DataBinding);
+			ps.executeUpdate();
+			
 
 
-		} catch (InstantiationException e1) {
-			logger.warn("Error execting delete query for provenance records", e1);
-		} catch (IllegalAccessException e1) {
-			logger.warn("Error execting delete query for provenance records", e1);
-		} catch (ClassNotFoundException e1) {
-			logger.warn("Error execting delete query for provenance records", e1);
+		
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -820,12 +887,7 @@ public abstract class ProvenanceWriter {
 				}
 			}
 
-		} catch (InstantiationException e1) {
-			logger.warn("Error execting delete query for provenance records", e1);
-		} catch (IllegalAccessException e1) {
-			logger.warn("Error execting delete query for provenance records", e1);
-		} catch (ClassNotFoundException e1) {
-			logger.warn("Error execting delete query for provenance records", e1);
+	
 		} catch (SQLException e) {
 			logger.error("Problem collecting value references for: " + runID + " : " + e);  
 		} finally {
@@ -848,12 +910,6 @@ public abstract class ProvenanceWriter {
 			stmt = connection.createStatement();
 			String q = "DELETE FROM DD";
 			stmt.executeUpdate(q);
-		} catch (InstantiationException e1) {
-			logger.warn("Error execting delete query for provenance records", e1);
-		} catch (IllegalAccessException e1) {
-			logger.warn("Error execting delete query for provenance records", e1);
-		} catch (ClassNotFoundException e1) {
-			logger.warn("Error execting delete query for provenance records", e1);
 		} catch (SQLException e) {
 			logger.warn("Error execting delete query for provenance records", e);
 		} finally {
@@ -892,12 +948,7 @@ public abstract class ProvenanceWriter {
 			String q = "INSERT INTO DD (PFrom,VFrom,valFrom,PTo,VTo,valTo,iteration,wfInstance) VALUES (" + "\'" + pFrom + "\'," + "\'" + vFrom + "\",  " + "valFrom = \"" + valFrom + "\", " + "PTo = \"" + pTo + "\", " + "VTo = \"" + vTo + "\", " + "valTo  = \"" + valTo + "\", " + "iteration = \"" + iteration + "\", " + "wfInstance = \"" + wfInstanceID + "\"; ";
 
 			stmt.executeUpdate(q);
-		} catch (InstantiationException e1) {
-			logger.warn("Error inserting record into DD", e1);
-		} catch (IllegalAccessException e1) {
-			logger.warn("Error inserting record into DD", e1);
-		} catch (ClassNotFoundException e1) {
-			logger.warn("Error inserting record into DD", e1);
+		
 		} catch (SQLException e) {
 			logger.warn("Error inserting record into DD", e);
 		} finally {
@@ -910,5 +961,6 @@ public abstract class ProvenanceWriter {
 			}
 		}
 	}
+
 
 }
