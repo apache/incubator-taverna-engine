@@ -643,6 +643,7 @@ public class EventProcessor {
 			IterationProvenanceItem iterationProvenanceItem = (IterationProvenanceItem)provenanceItem;
 			String itVector = extractIterationVector(ProvenanceUtils.iterationToString(iterationProvenanceItem.getIteration()));
 			procBinding.setIterationVector(itVector);
+
 			InputDataProvenanceItem inputDataEl = iterationProvenanceItem
 					.getInputDataItem();
 			OutputDataProvenanceItem outputDataEl = iterationProvenanceItem
@@ -659,8 +660,6 @@ public class EventProcessor {
 			ProcessorEnactment processorEnactment = new ProcessorEnactment();
 			processorEnactment.setEnactmentStarted(iterationProvenanceItem.getEnactmentStarted());
 			processorEnactment.setEnactmentEnded(iterationProvenanceItem.getEnactmentEnded());
-			// TODO: Register inputs/outputs
-			
 			
 			processorEnactment.setIteration(itVector);
 			// TODO: Find parent
@@ -677,7 +676,6 @@ public class EventProcessor {
 
 			processorEnactment.setInitialInputsDataBindingId(processDataBindings(inputDataEl, provenanceProcessor));
 			processorEnactment.setFinalOutputsDataBindingId(processDataBindings(outputDataEl, provenanceProcessor));
-			
 			processorEnactment.setWorkflowRunId(wfInstanceID);
 			try {
 				getPw().addProcessorEnactment(processorEnactment);
