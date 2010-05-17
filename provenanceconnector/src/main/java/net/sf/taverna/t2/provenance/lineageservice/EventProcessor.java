@@ -385,7 +385,7 @@ public class EventProcessor {
 						/// RECURSIVE CALL 
 						//////////////
 						processDataflowStructure(nested, nested.getInternalIdentier(), p.getLocalName());
-
+						dataflowDepth--;
 						//List<? extends Processor> procs = nested.getProcessors();						
 //						for (Processor nestedP:procs) {
 //						System.out.println("recursion on nested processor: "+nestedP.getLocalName());
