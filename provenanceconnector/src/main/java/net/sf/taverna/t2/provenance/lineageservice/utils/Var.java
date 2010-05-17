@@ -37,6 +37,33 @@ public class Var {
 	private boolean isANLset = false;  // set to true when the ANL has been set 
 	private int portNameOrder = 0;
 	
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("Var [");
+		builder.append("identifier=");
+		builder.append(identifier);
+		builder.append(", pName=");
+		builder.append(pName);
+		builder.append(", vName=");
+		builder.append(vName);
+		builder.append(", wfInstanceRef=");
+		builder.append(wfInstanceRef);
+		builder.append(", actualNestingLevel=");
+		builder.append(actualNestingLevel);
+		builder.append(", isANLset=");
+		builder.append(isANLset);
+		builder.append(", isInput=");
+		builder.append(isInput);
+		builder.append(", portNameOrder=");
+		builder.append(portNameOrder);
+		builder.append(", type=");
+		builder.append(type);
+		builder.append(", typeNestingLevel=");
+		builder.append(typeNestingLevel);
+		builder.append("]");
+		return builder.toString();
+	}
 	/**
 	 * @return the wfInstanceRef
 	 */

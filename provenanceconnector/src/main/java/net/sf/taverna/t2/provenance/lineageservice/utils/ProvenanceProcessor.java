@@ -30,7 +30,6 @@ public class ProvenanceProcessor {
 	String identifier;
 	String pname;
 	String wfInstanceRef;
-	String workflowExternalName;
 	String type;
 	private boolean isTopLevelProcessor;
 	
@@ -44,7 +43,6 @@ public class ProvenanceProcessor {
 		StringBuffer sb = new StringBuffer();
 		sb.append("PROCESSOR: ****").
 		append("\nworkflow: "+getWfInstanceRef()).
-		append("\nworkflow name "+getWorkflowExternalName()).
 		append("\nprocessor name: "+getPname()).
 		append("\ntype: "+getType());
 
@@ -93,22 +91,6 @@ public class ProvenanceProcessor {
 	}
 	public String getIdentifier() {
 		return identifier;
-	}
-
-
-	/**
-	 * @return the workflowExternalName
-	 */
-	public String getWorkflowExternalName() {
-		return workflowExternalName;
-	}
-
-
-	/**
-	 * @param workflowExternalName the workflowExternalName to set
-	 */
-	public void setWorkflowExternalName(String workflowExternalName) {
-		this.workflowExternalName = workflowExternalName;
 	}
 
 	public void setTopLevelProcessor(boolean isTopLevelProcessor) {

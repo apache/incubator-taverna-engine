@@ -1231,8 +1231,9 @@ public abstract class ProvenanceQuery {
 			Map<String, String> constraints) throws SQLException {
 		List<ProvenanceProcessor> result = new ArrayList<ProvenanceProcessor>();
 
-		String q = "SELECT * FROM Processor P JOIN WfInstance W ON P.wfInstanceRef = W.wfnameRef "+
-		           "JOIN Workflow WF on W.wfnameRef = WF.wfname";
+		String q = "SELECT P.* FROM Processor P";
+				//" JOIN WfInstance W ON P.wfInstanceRef = W.wfnameRef "+
+		         //  "JOIN Workflow WF on W.wfnameRef = WF.wfname";
 
 		q = addWhereClauseToQuery(q, constraints, true);
 
@@ -1252,8 +1253,6 @@ public abstract class ProvenanceQuery {
 					proc.setPname(rs.getString("pname"));
 					proc.setType(rs.getString("type"));
 					proc.setWfInstanceRef(rs.getString("wfInstanceRef"));
-					proc.setWorkflowExternalName(rs.getString("externalName"));
-
 					result.add(proc);
 
 				}

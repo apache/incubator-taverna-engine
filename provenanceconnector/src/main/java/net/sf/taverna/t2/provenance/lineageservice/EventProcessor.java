@@ -763,7 +763,8 @@ public class EventProcessor {
 				return null;				
 			}
 			if (vars.size() > 1) {
-				logger.warn("Multiple matches for port " + portName + " in " + processorName);
+				logger.warn("Multiple matches for port " + portName + " in " + 
+						processorName +", got:" + vars);
 				return null;				
 			}
 			return vars.get(0);
