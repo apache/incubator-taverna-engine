@@ -733,8 +733,9 @@ public abstract class ProvenanceWriter {
 			ps.executeUpdate();
 			
 			q = "DELETE FROM " + Activity.Activity + " WHERE " + Activity.workflowId + "=?";
+			ps = connection.prepareStatement(q);
 			ps.setString(1, wfID);
-			ps.executeUpdate(q);
+			ps.executeUpdate();
 
 	
 		} finally {
