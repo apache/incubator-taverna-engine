@@ -385,10 +385,7 @@ public abstract class ProvenanceWriter {
 			ps.setTimestamp(8, enactment.getEnactmentEnded());
 			ps.setString(9, enactment.getInitialInputsDataBindingId());
 			ps.setString(10, enactment.getFinalOutputsDataBindingId());
-<<<<<<<
-=======
 
->>>>>>>
 			ps.executeUpdate();
 			
 			if (logger.isDebugEnabled()) {

@@ -643,6 +643,7 @@ public class EventProcessor {
 			IterationProvenanceItem iterationProvenanceItem = (IterationProvenanceItem)provenanceItem;
 			String itVector = extractIterationVector(ProvenanceUtils.iterationToString(iterationProvenanceItem.getIteration()));
 			procBinding.setIterationVector(itVector);
+
 			InputDataProvenanceItem inputDataEl = iterationProvenanceItem
 					.getInputDataItem();
 			OutputDataProvenanceItem outputDataEl = iterationProvenanceItem
@@ -773,10 +774,6 @@ public class EventProcessor {
 		}
 	}
 
-<<<<<<< HEAD
-
-=======
->>>>>>> query interface for processorenactment
 
 	/**
 	 * fills in the VBs for the global inputs -- this removes the need for explicit events
