@@ -643,7 +643,6 @@ public class EventProcessor {
 			IterationProvenanceItem iterationProvenanceItem = (IterationProvenanceItem)provenanceItem;
 			String itVector = extractIterationVector(ProvenanceUtils.iterationToString(iterationProvenanceItem.getIteration()));
 			procBinding.setIterationVector(itVector);
-
 			InputDataProvenanceItem inputDataEl = iterationProvenanceItem
 					.getInputDataItem();
 			OutputDataProvenanceItem outputDataEl = iterationProvenanceItem
