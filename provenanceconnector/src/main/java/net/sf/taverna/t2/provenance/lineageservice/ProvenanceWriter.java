@@ -691,7 +691,6 @@ public abstract class ProvenanceWriter {
 			q = "DELETE FROM " + Activity.Activity;
 			stmt.executeUpdate(q);
 			
-			
 		} catch (SQLException e) {
 			logger.warn("Could not clear static database", e);
 		} finally {
@@ -832,10 +831,6 @@ public abstract class ProvenanceWriter {
 				ps = connection.prepareStatement("DELETE FROM "
 						+ DataBinding.DataBinding);
 			ps.executeUpdate();
-			
-
-
-		
 		} finally {
 			if (connection != null) {
 				connection.close();
