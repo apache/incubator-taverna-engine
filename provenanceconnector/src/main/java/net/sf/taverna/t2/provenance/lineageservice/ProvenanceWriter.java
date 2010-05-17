@@ -32,10 +32,12 @@ import java.util.Set;
 import java.util.UUID;
 
 import net.sf.taverna.t2.provenance.connector.JDBCConnector;
+import net.sf.taverna.t2.provenance.connector.ProvenanceConnector;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.Activity;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataBinding;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.ProcessorEnactment;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.ServiceInvocation;
+
 import net.sf.taverna.t2.provenance.lineageservice.utils.NestedListNode;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProcBinding;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
@@ -64,7 +66,7 @@ public abstract class ProvenanceWriter {
 	}
 
 	/**
-	 * add each Var as a row into the VAR DB table<br/>
+	 * add each Var as a row into the VAR DB table
 	 * <strong>note: no static var type available as part of the
 	 * dataflow...</strong>
 	 *
@@ -821,7 +823,6 @@ public abstract class ProvenanceWriter {
 				ps = connection.prepareStatement("DELETE FROM "
 						+ ServiceInvocation.ServiceInvocation);
 			ps.executeUpdate();
-
 			if (runID != null) {
 				ps = connection.prepareStatement("DELETE FROM "
 						+ DataBinding.DataBinding + " WHERE "
