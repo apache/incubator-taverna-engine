@@ -150,5 +150,4 @@ public class ProcessorEnactment {
 		builder.append("]");
 		return builder.toString();
 	}
-
 }
