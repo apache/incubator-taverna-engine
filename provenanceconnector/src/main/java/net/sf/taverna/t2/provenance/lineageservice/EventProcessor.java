@@ -773,7 +773,10 @@ public class EventProcessor {
 		}
 	}
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> query interface for processorenactment
 
 	/**
 	 * fills in the VBs for the global inputs -- this removes the need for explicit events
