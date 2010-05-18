@@ -12,6 +12,8 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+import org.apache.log4j.Logger;
+
 /**
  * A shared factory class for retrieving a connection to the database.
  * The client is responsible for closing the connection once its finished with.
@@ -23,15 +25,14 @@ import javax.sql.DataSource;
 
 public class JDBCConnector {
 
+	private static Logger logger = Logger.getLogger(JDBCConnector.class);
+	
     /**
      * Provides a connection to a database, that has been defined externally as a JNDI DataSource with the name 'jdbc/taverna'
      *
      * The client is responsible for closing the connection once finished with.
      *
      * @return a connection to the database
-     * @throws InstantiationException
-     * @throws IllegalAccessException
-     * @throws ClassNotFoundException
      * @throws SQLException
      */
     public static Connection getConnection() throws SQLException {
@@ -42,7 +43,8 @@ public class JDBCConnector {
             DataSource ds = (DataSource) context.lookup("jdbc/taverna");
             connection = ds.getConnection(); 
         } catch (NamingException ex) {
-            throw new SQLException("Unable to retrieve database connection for name jdbc/taverna", ex);        
+        	logger.error("Could not lookup DataSource jdbc/taverna", ex);
+            throw new SQLException("Unable to retrieve database connection for name jdbc/taverna");        
 		}
         return connection;
     }
