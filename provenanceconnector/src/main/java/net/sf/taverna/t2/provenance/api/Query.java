@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
-import net.sf.taverna.t2.provenance.lineageservice.utils.QueryVar;
+import net.sf.taverna.t2.provenance.lineageservice.utils.QueryPort;
 
 /**
  * @author Paolo Missier</br>
@@ -16,14 +16,14 @@ import net.sf.taverna.t2.provenance.lineageservice.utils.QueryVar;
  * <ul>
  * <li>static scope: the (single) name of the workflow whose run(s) are queried
  * <li>dynamic scope: a list of workflow run IDs.
- * <li>a list of &lt;select> variables, encoded as List&lt;{@link QueryVar}>
+ * <li>a list of &lt;select> variables, encoded as List&lt;{@link QueryPort}>
  * <li>a list of &lt;target> processors, encoded as List&lt;{@link ProvenanceProcessor}> 
  * </ul>
  */
 public class Query {
 
 	String workflowName;
-	List<QueryVar> targetVars;
+	List<QueryPort> targetPorts;
 	List<String> runIDList;
 	List<ProvenanceProcessor> selectedProcessors;
 
@@ -40,7 +40,7 @@ public class Query {
 		}
 
 		sb.append("\n**** TARGET PORTS: ****\n");
-		for (QueryVar v:getTargetVars()) {
+		for (QueryPort v:getTargetPorts()) {
 			sb.append("\n\t"+v.toString());
 		}
 
@@ -55,14 +55,14 @@ public class Query {
 	/**
 	 * @return the targetVars
 	 */
-	public List<QueryVar> getTargetVars() {
-		return targetVars;
+	public List<QueryPort> getTargetPorts() {
+		return targetPorts;
 	}
 	/**
 	 * @param targetVars the targetVars to set
 	 */
-	public void setTargetVars(List<QueryVar> targetVars) {
-		this.targetVars = targetVars;
+	public void setTargetPorts(List<QueryPort> targetVars) {
+		this.targetPorts = targetVars;
 	}
 	/**
 	 * @return the selectedProcessors

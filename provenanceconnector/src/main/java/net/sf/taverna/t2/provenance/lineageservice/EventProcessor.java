@@ -49,21 +49,23 @@ import net.sf.taverna.t2.provenance.item.IterationProvenanceItem;
 import net.sf.taverna.t2.provenance.item.OutputDataProvenanceItem;
 import net.sf.taverna.t2.provenance.item.ProvenanceItem;
 import net.sf.taverna.t2.provenance.item.WorkflowProvenanceItem;
-import net.sf.taverna.t2.provenance.lineageservice.utils.Arc;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DataBinding;
+import net.sf.taverna.t2.provenance.lineageservice.utils.DataLink;
 import net.sf.taverna.t2.provenance.lineageservice.utils.NestedListNode;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProcBinding;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProcessorEnactment;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceUtils;
-import net.sf.taverna.t2.provenance.lineageservice.utils.Var;
-import net.sf.taverna.t2.provenance.lineageservice.utils.VarBinding;
+import net.sf.taverna.t2.provenance.lineageservice.utils.Port;
+import net.sf.taverna.t2.provenance.lineageservice.utils.PortBinding;
 import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
 import net.sf.taverna.t2.workflowmodel.DataflowInputPort;
 import net.sf.taverna.t2.workflowmodel.DataflowOutputPort;
 import net.sf.taverna.t2.workflowmodel.Datalink;
+import net.sf.taverna.t2.workflowmodel.MergeInputPort;
+import net.sf.taverna.t2.workflowmodel.MergeOutputPort;
 import net.sf.taverna.t2.workflowmodel.Processor;
 import net.sf.taverna.t2.workflowmodel.ProcessorInputPort;
 import net.sf.taverna.t2.workflowmodel.ProcessorOutputPort;
@@ -105,7 +107,6 @@ public class EventProcessor {
 
 	private int eventCnt = 0; // for events logging
 	private volatile boolean workflowStructureDone = false; // used to inhibit processing of multiple workflow events -- we only need the first
-	private int dataflowDepth = 0; // incremented when we recurse on a subflow, decremented on exit
 	private volatile String wfInstanceID = null; // unique run ID. set when we see the first event of type "process"
 
 	String topLevelDataflowName = null;
@@ -114,12 +115,14 @@ public class EventProcessor {
 	Map<String, String> wfNestingMap = new ConcurrentHashMap<String, String>(); 
 	
 	// all input bindings are accumulated here so they can be "backpatched" (see backpatching() )
-	List<VarBinding> allInputVarBindings = Collections.synchronizedList(new ArrayList<VarBinding>()); 
+	List<PortBinding> allInputVarBindings = Collections.synchronizedList(new ArrayList<PortBinding>()); 
 
 	// dedicated class for processing WorkflowData events which carry workflow output info 
 	private WorkflowDataProcessor  wfdp;
 	private ProvenanceWriter pw = null;
 	private ProvenanceQuery  pq = null;
+
+	private HashMap<String, Port> mapping;
 
 	public EventProcessor() { }
 
@@ -225,11 +228,11 @@ public class EventProcessor {
 
 		String localWfInstanceID = getWfInstanceID();
 
-		dataflowDepth++;
+		//dataflowDepth++;
 
 		try {
 
-			List<Var> vars = new ArrayList<Var>();
+			List<Port> vars = new ArrayList<Port>();
 
 			// check whether we already have this WF in the DB
 			List<String> wfNames = null;
@@ -335,7 +338,7 @@ public class EventProcessor {
 
 				for (ProcessorInputPort ip : inputs) {
 
-					Var inputVar = new Var();
+					Port inputVar = new Port();
 					inputVar.setIdentifier(UUID.randomUUID().toString());
 					inputVar.setPName(pName);
 					inputVar.setWfInstanceRef(dataflowID);
@@ -356,7 +359,7 @@ public class EventProcessor {
 
 				for (ProcessorOutputPort op : outputs) {
 
-					Var outputVar = new Var();
+					Port outputVar = new Port();
 					outputVar.setIdentifier(UUID.randomUUID().toString());
 					outputVar.setPName(pName);
 					outputVar.setWfInstanceRef(dataflowID);
@@ -385,7 +388,7 @@ public class EventProcessor {
 						/// RECURSIVE CALL 
 						//////////////
 						processDataflowStructure(nested, nested.getInternalIdentier(), p.getLocalName());
-						dataflowDepth--;
+						
 						//List<? extends Processor> procs = nested.getProcessors();						
 //						for (Processor nestedP:procs) {
 //						System.out.println("recursion on nested processor: "+nestedP.getLocalName());
@@ -413,7 +416,7 @@ public class EventProcessor {
 
 			for (DataflowInputPort ip : inputPorts) {
 
-				Var inputVar = new Var();
+				Port inputVar = new Port();
 				inputVar.setIdentifier(UUID.randomUUID().toString());
 				inputVar.setPName(pName);
 				inputVar.setWfInstanceRef(dataflowID);
@@ -441,7 +444,7 @@ public class EventProcessor {
 
 			for (DataflowOutputPort op : outputPorts) {
 
-				Var outputVar = new Var();
+				Port outputVar = new Port();
 				outputVar.setIdentifier(UUID.randomUUID().toString());
 				outputVar.setPName(pName);
 				outputVar.setWfInstanceRef(dataflowID);
@@ -452,9 +455,10 @@ public class EventProcessor {
 			}
 
 			pw.addVariables(vars, dataflowID);
+			makePortMapping(vars);
 
 			// ////
-			// add arc records using the dataflow links
+			// add datalink records using the dataflow links
 			// retrieving the processor names requires navigating from links to
 			// source/sink and from there to the processors
 			// ////
@@ -462,83 +466,38 @@ public class EventProcessor {
 
 			for (Datalink l : links) {
 
-				// TODO cover the case of arcs from an input and to an output to
+				// TODO cover the case of datalinks from an input and to an output to
 				// the entire dataflow
 
-				String sourcePname = null;
-				String sinkPname = null;
-
+				Port sourcePort = null;
+				Port destinationPort = null;
+				
 				if (l.getSource() instanceof ProcessorOutputPort) {
-					sourcePname = ((ProcessorOutputPort) l.getSource())
+					String sourcePname = ((ProcessorOutputPort) l.getSource())
 					.getProcessor().getLocalName();
-				} else {
-//					System.out.println("found link from dataflow input");
+					sourcePort = lookupPort(sourcePname, l.getSource().getName(), false);
+				} else if (l.getSource() instanceof MergeOutputPort) {
+					// TODO: Handle merge output ports
+				}  else {
+					// Assume it is internal port from DataflowInputPort
+					sourcePort = lookupPort(externalName, l.getSource().getName(), true);
 				}
-
+				
 				if (l.getSink() instanceof ProcessorInputPort) {
-					sinkPname = ((ProcessorInputPort) l.getSink())
+					String sinkPname = ((ProcessorInputPort) l.getSink())
 					.getProcessor().getLocalName();
+					destinationPort = lookupPort(sinkPname, l.getSink().getName(), true);
+				} else if (l.getSink() instanceof MergeInputPort) {
+					// TODO: Handle merge input ports
 				} else {
-//					System.out.println("found link to dataflow output");
+					// Assume it is internal port from DataflowOutputPort
+					destinationPort = lookupPort(externalName, l.getSink().getName(), false);
 				}
 
-				if (sourcePname != null && sinkPname != null) {
-//					System.out.println("adding regular internal arc");
-
-					pw.addArc(l.getSource().getName(), sourcePname, l.getSink()
-							.getName(), sinkPname, dataflowID);
-
-				} else if (sourcePname == null) {
-					// link is from dataflow input or subflow input
-					if (externalName != null) {  // link from subflow input
-						sourcePname = externalName;
-					} else {
-						sourcePname = INPUT_CONTAINER_PROCESSOR;
-					}
-
-					//Ian added this logic since there were some null sinkPnameRefs with merge ports
-
-					if (sinkPname == null) {
-						// link is to dataflow output
-
-						if (externalName != null) {  // link from subflow input
-							sinkPname = externalName;
-						} else {
-							sinkPname = OUTPUT_CONTAINER_PROCESSOR;
-						}
-					}
-
-//					System.out.println("adding arc from dataflow input");
-
-					pw.addArc(l.getSource().getName(),
-							sourcePname, l.getSink().getName(),
-							sinkPname, dataflowID);
-
-				} else if (sinkPname == null) {
-					// link is to dataflow output
-
-					if (externalName != null) {  // link from subflow input
-						sinkPname = externalName;
-					} else {
-						sinkPname = OUTPUT_CONTAINER_PROCESSOR;
-					}
-
-					//Ian added this bit at the same time as the null sinkPnameRef logic above - hope it is correct
-
-					if (sourcePname == null) {
-						// link is from dataflow input or subflow input
-						if (externalName != null) {  // link from subflow input
-							sourcePname = externalName;
-						} else {
-							sourcePname = INPUT_CONTAINER_PROCESSOR;
-						}
-					}
-
-					//					System.out.println("adding arc to dataflow output");
-
-					pw.addArc(l.getSource().getName(), sourcePname, l.getSink()
-							.getName(), sinkPname,
-							dataflowID);
+				if (sourcePort != null && destinationPort != null) {
+					pw.addDataLink(sourcePort, destinationPort, dataflowID);
+				} else {
+					logger.info("Can't record datalink " + l);
 				}
 			}
 //			logger.info("completed processing dataflow " + dataflowID);
@@ -548,11 +507,23 @@ public class EventProcessor {
 		}
 
 //		logger.debug("wfInstanceID at the end of processDataflowStructure: "+getWfInstanceID());
-
 		return dataflowID;
 	}
 
 
+
+	private void makePortMapping(List<Port> ports) {		
+		mapping = new HashMap<String, Port>();
+		for (Port port: ports) {
+			String key = port.getPName() + (port.isInput() ? "/i:" : "/o:") + port.getVName();
+			mapping.put(key, port);
+		}
+	}
+	
+	private Port lookupPort(String processorName, String portName, boolean isInputPort) {
+		String key = processorName + (isInputPort ? "/i:" : "/o:") + portName;
+		return mapping.get(key);
+	}
 
 	private Element stripWfInstanceHeader(String content) {
 
@@ -687,9 +658,9 @@ public class EventProcessor {
 
 			// use this event to do housekeeping on the input/output varbindings 
 
-			dataflowDepth--;
-			if (dataflowDepth == 0) {
-
+			if (! provenanceItem.getProcessId().contains(":")) {
+				// Top-level workflow finished
+				
 				// process the outputs accumulated by WorkflowDataProcessor
 				getWfdp().processTrees(provenanceItem.getWorkflowId(), getWfInstanceID());
 
@@ -731,7 +702,7 @@ public class EventProcessor {
 		for (Entry<String, T2Reference> entry : provenanceItem.getDataMap().entrySet()) {				
 			DataBinding dataBinding = new DataBinding();
 			dataBinding.setDataBindingId(dataBindingId);
-			Var port = findPort(provenanceProcessor, entry.getKey(), isInput); // findPort
+			Port port = findPort(provenanceProcessor, entry.getKey(), isInput); // findPort
 			if (port == null) {
 				logger.warn("Could not find port for " + entry.getKey());
 				continue;
@@ -748,7 +719,7 @@ public class EventProcessor {
 		return dataBindingId;
 	}
 
-	private Var findPort(ProvenanceProcessor provenanceProcessor, String portName, boolean isInput) {
+	private Port findPort(ProvenanceProcessor provenanceProcessor, String portName, boolean isInput) {
 		// TODO: Query pr dataflow and cache
 		Map<String, String> queryConstraints = new HashMap<String, String>();
 		queryConstraints.put("wfInstanceRef", provenanceProcessor.getWfInstanceRef());
@@ -757,7 +728,7 @@ public class EventProcessor {
 		queryConstraints.put("varName", portName);
 		queryConstraints.put("inputOrOutput", isInput ? "1" : "0");
 		try {
-			List<Var> vars = pq.getVars(queryConstraints);
+			List<Port> vars = pq.getPorts(queryConstraints);
 			if (vars.isEmpty()) {
 				logger.warn("Can't find port " + portName + " in " + processorName);
 				return null;				
@@ -783,31 +754,32 @@ public class EventProcessor {
 	public void patchTopLevelnputs() {
 
 		// for each input I to topLevelDataflow:
-		// pick first outgoing arc with sink P:X
+		// pick first outgoing datalink with sink P:X
 		// copy value X to I -- this can be a collection, so copy everything
 
 		// get all global input vars
 
 //		logger.info("\n\n BACKPATCHING GLOBAL INPUTS with dataflowDepth = "+dataflowDepth+"*******\n");
 
-		List<Var> inputs=null;
+		List<Port> inputs=null;
 		try {
 			inputs = getPq().getInputVars(topLevelDataflowName, topLevelDataflowID, getWfInstanceID());
 
-			for (Var input:inputs)  {
+			for (Port input:inputs)  {
 
 //				logger.info("global input: "+input.getVName());
 
 				Map<String,String> queryConstraints = new HashMap<String,String>();
 
-				queryConstraints.put("sourceVarNameRef", input.getVName());
-				queryConstraints.put("sourcePNameRef", input.getPName());
+//				queryConstraints.put("sourcePortName", input.getVName());
+//				queryConstraints.put("sourceProcessorName", input.getPName());
+				queryConstraints.put("sourcePortId", input.getIdentifier());
+				queryConstraints.put("workflowId", input.getWfInstanceRef());
+				List<DataLink> outgoingDataLinks = getPq().getDataLinks(queryConstraints);
 
-				List<Arc> outgoingArcs = getPq().getArcs(queryConstraints);
-
-				// any arc will do, use the first
-				String targetPname = outgoingArcs.get(0).getSinkPnameRef();
-				String targetVname = outgoingArcs.get(0).getSinkVarNameRef();
+				// any datalink will do, use the first
+				String targetPname = outgoingDataLinks.get(0).getDestinationProcessorName();
+				String targetVname = outgoingDataLinks.get(0).getDestinationPortName();
 
 //				logger.info("copying values from ["+targetPname+":"+targetVname+"] for instance ID: ["+wfInstanceID+"]");
 
@@ -817,16 +789,16 @@ public class EventProcessor {
 				queryConstraints.put("VB.wfInstanceRef", getWfInstanceID());
 				queryConstraints.put("V.wfInstanceRef", topLevelDataflowID);
 
-				List<VarBinding> VBs = getPq().getVarBindings(queryConstraints);
+				List<PortBinding> VBs = getPq().getPortBindings(queryConstraints);
 
 //				logger.info("found the following VBs:");
-				for (VarBinding vb:VBs) {
+				for (PortBinding vb:VBs) {
 //					logger.info(vb.getValue());
 
-					// insert VarBinding back into VB with the global input varname
+					// insert PortBinding back into VB with the global input varname
 					vb.setPNameRef(input.getPName());
 					vb.setVarNameRef(input.getVName());
-					getPw().addVarBinding(vb);
+					getPw().addPortBinding(vb);
 
 //					logger.info("added");
 
@@ -877,13 +849,13 @@ public class EventProcessor {
 
 		Map<String,String> queryConstraints = new HashMap<String,String>();
 
-		List<Var> outputs=null;
+		List<Port> outputs=null;
 		try {
 
 			outputs = pq.getOutputVars(topLevelDataflowName, topLevelDataflowID, null);  // null InstanceID 
 
 			// for each output O
-			for (Var output:outputs)  {
+			for (Port output:outputs)  {
 
 				// collect all VBs for O
 //				String oPName = output.getPName();
@@ -893,20 +865,21 @@ public class EventProcessor {
 //				queryConstraints.put("VB.wfInstanceRef", wfInstanceID);
 //				queryConstraints.put("V.wfInstanceRef", topLevelDataflowID);
 
-//				List<VarBinding> OValues = pq.getVarBindings(queryConstraints);
+//				List<PortBinding> OValues = pq.getPortBindings(queryConstraints);
 
 				// find all records for the immediate precedessor Y of O
 				queryConstraints.clear();
-				queryConstraints.put("sinkVarNameRef", output.getVName());
-				queryConstraints.put("sinkPNameRef", output.getPName());
-
-				List<Arc> incomingArcs = pq.getArcs(queryConstraints);
+//				queryConstraints.put("destinationPortName", output.getVName());
+//				queryConstraints.put("destinationProcessorName", output.getPName());
+				queryConstraints.put("destinationPortId", output.getIdentifier());
+				queryConstraints.put("workflowId", output.getWfInstanceRef());
+				List<DataLink> incomingDataLinks = pq.getDataLinks(queryConstraints);
 
 				// there can be only one -- but check that there is one!
-				if (incomingArcs.size()==0)  continue;
+				if (incomingDataLinks.size()==0)  continue;
 
-				String sourcePname = incomingArcs.get(0).getSourcePnameRef();
-				String sourceVname = incomingArcs.get(0).getSourceVarNameRef();
+				String sourcePname = incomingDataLinks.get(0).getSourceProcessorName();
+				String sourceVname = incomingDataLinks.get(0).getSourcePortName();
 
 				queryConstraints.clear();
 				queryConstraints.put("varNameRef", sourceVname);
@@ -914,19 +887,19 @@ public class EventProcessor {
 				queryConstraints.put("VB.wfInstanceRef", getWfInstanceID());
 				queryConstraints.put("V.wfInstanceRef", topLevelDataflowID);
 
-				List<VarBinding> YValues = pq.getVarBindings(queryConstraints);
+				List<PortBinding> YValues = pq.getPortBindings(queryConstraints);
 
 				// for each YValue look for a match in OValues
 				// (assume the YValues values are a superset of OValues)!)
 
-				for (VarBinding yValue:YValues) {
+				for (PortBinding yValue:YValues) {
 
 
 //					System.out.println("reconcileTopLevelOutputs:: processing "+
 //					yValue.getPNameRef()+"/"+yValue.getVarNameRef()+"/"+yValue.getValue()+
 //					" with collid "+yValue.getCollIDRef());
 
-					// look for a matching record in VarBinding for output O
+					// look for a matching record in PortBinding for output O
 					queryConstraints.clear();
 					queryConstraints.put("varNameRef", output.getVName());
 					queryConstraints.put("V.pNameRef", output.getPName());
@@ -937,14 +910,14 @@ public class EventProcessor {
 						queryConstraints.put("VB.collIDRef", yValue.getCollIDRef());
 						queryConstraints.put("VB.positionInColl", Integer.toString(yValue.getPositionInColl()));
 					}
-					List<VarBinding> matchingOValues = pq.getVarBindings(queryConstraints);
+					List<PortBinding> matchingOValues = pq.getPortBindings(queryConstraints);
 
 //					System.out.println("querying for matching oValues: ");
 
 					// result at most size 1
 					if (matchingOValues.size() > 0) {
 
-						VarBinding oValue = matchingOValues.get(0);
+						PortBinding oValue = matchingOValues.get(0);
 
 //						System.out.println("found "+oValue.getPNameRef()+"/"+oValue.getVarNameRef()+"/"+oValue.getValue()+
 //						" with collid "+oValue.getCollIDRef());
@@ -953,7 +926,7 @@ public class EventProcessor {
 						yValue.setCollIDRef(oValue.getCollIDRef());
 						yValue.setPositionInColl(oValue.getPositionInColl());
 
-						pw.updateVarBinding(yValue);
+						pw.updatePortBinding(yValue);
 
 //						System.out.println("oValue copied to yValue");
 					} else {
@@ -961,10 +934,10 @@ public class EventProcessor {
 //						System.out.println("no match found");
 
 						// copy the yValue to O 
-						// insert VarBinding back into VB with the global output varname
+						// insert PortBinding back into VB with the global output varname
 						yValue.setPNameRef(output.getPName());
 						yValue.setVarNameRef(output.getVName());
-						pw.addVarBinding(yValue);
+						pw.addPortBinding(yValue);
 					}
 
 				} // for each yValue in YValues
@@ -1015,7 +988,7 @@ public class EventProcessor {
 
 				Element valueEl = valueElements.get(0); // only really 1 child
 
-				processVarBinding(valueEl,  procBinding.getPNameRef(), portName, procBinding.getIterationVector(),
+				processPortBinding(valueEl,  procBinding.getPNameRef(), portName, procBinding.getIterationVector(),
 						getWfInstanceID(), currentWorkflowID);
 			}
 		}
@@ -1024,7 +997,7 @@ public class EventProcessor {
 
 
 	/**
-	 * this method reconciles values in varBindings across an arc: Firstly, if vb's value is within a collection,
+	 * this method reconciles values in varBindings across an datalink: Firstly, if vb's value is within a collection,
 	 *  _and_ it is copied from a value generated during a previous iteration,
 	 * then this method propagates the list reference to that iteration value, which wouldn't have it.
 	 * Conversely, if vb is going to be input to an iteration, then it's lost its containing list node, and we
@@ -1032,10 +1005,10 @@ public class EventProcessor {
 	 * @param vb
 	 * @throws SQLException 
 	 */
-	private void backpatchIterationResults(List<VarBinding> newBindings) throws SQLException {
+	private void backpatchIterationResults(List<PortBinding> newBindings) throws SQLException {
 
 		logger.debug("backpatchIterationResults: start");
-		for (VarBinding vb:newBindings) {
+		for (PortBinding vb:newBindings) {
 
 			logger.debug("backpatchIterationResults: processing vb "+vb.getPNameRef()+"/"+vb.getVarNameRef()+"="+vb.getValue());
 
@@ -1045,18 +1018,16 @@ public class EventProcessor {
 
 			// look for its antecedent
 			Map<String,String> queryConstraints = new HashMap<String,String>();
-
-			queryConstraints.put("sinkVarNameRef", vb.getVarNameRef());
-			queryConstraints.put("sinkPNameRef", vb.getPNameRef());				
-			queryConstraints.put("wfInstanceRef", pq.getWfNames(vb.getWfInstanceRef()).get(0));  // CHECK picking first element in list...
-
-			List<Arc> incomingArcs = pq.getArcs(queryConstraints);
+			queryConstraints.put("destinationPortName", vb.getVarNameRef());
+			queryConstraints.put("destinationProcessorName", vb.getPNameRef());				
+			queryConstraints.put("workflowId", pq.getWfNames(vb.getWfInstanceRef()).get(0));  // CHECK picking first element in list...
+			List<DataLink> incomingDataLinks = pq.getDataLinks(queryConstraints);
 
 			// there can be only one -- but check that there is one!
-			if (incomingArcs.size()==0)  return;
+			if (incomingDataLinks.size()==0)  return;
 
-			String sourcePname = incomingArcs.get(0).getSourcePnameRef();
-			String sourceVname = incomingArcs.get(0).getSourceVarNameRef();
+			String sourcePname = incomingDataLinks.get(0).getSourceProcessorName();
+			String sourceVname = incomingDataLinks.get(0).getSourcePortName();
 
 			logger.debug("antecedent: "+sourcePname+":"+sourceVname);
 
@@ -1067,12 +1038,12 @@ public class EventProcessor {
 			queryConstraints.put("VB.value", vb.getValue());
 			queryConstraints.put("VB.wfInstanceRef", vb.getWfInstanceRef());
 
-			List<VarBinding> VBs = pq.getVarBindings(queryConstraints);
+			List<PortBinding> VBs = pq.getPortBindings(queryConstraints);
 
 			if (VBs.size() == 0) { logger.debug("nothing to reconcile"); }
 			
 			// reconcile
-			for (VarBinding b:VBs) {
+			for (PortBinding b:VBs) {
 
 				logger.debug("backpatching "+sourceVname+" "+sourcePname);
 
@@ -1082,7 +1053,7 @@ public class EventProcessor {
 					logger.debug("putting "+b.getVarNameRef()+" in collection "+vb.getCollIDRef()+" at pos "+vb.getPositionInColl());
 					b.setCollIDRef(vb.getCollIDRef());
 					b.setPositionInColl(vb.getPositionInColl());
-					getPw().updateVarBinding(b);
+					getPw().updatePortBinding(b);
 					
 				} else if (vb.getCollIDRef() == null && b.getCollIDRef() != null) {
 					
@@ -1090,7 +1061,7 @@ public class EventProcessor {
 					logger.debug("putting "+vb.getVarNameRef()+" in collection "+b.getCollIDRef()+" at pos "+b.getPositionInColl());
 					vb.setCollIDRef(b.getCollIDRef());
 					vb.setPositionInColl(b.getPositionInColl());
-					getPw().updateVarBinding(vb);						
+					getPw().updatePortBinding(vb);						
 				}
 			}
 		}
@@ -1098,7 +1069,7 @@ public class EventProcessor {
 
 
 	/**
-	 * create one new VarBinding record for each input port binding
+	 * create one new PortBinding record for each input port binding
 	 * @param currentWorkflowID 
 	 */
 	@SuppressWarnings("unchecked")
@@ -1110,10 +1081,10 @@ public class EventProcessor {
 		for (Element inputport : inputPorts) {
 
 			String portName = inputport.getAttributeValue("name");
-//			logger.info("processInput: processing VarBinding for "+procBinding.getPNameRef()+"  "+portName);
+//			logger.info("processInput: processing PortBinding for "+procBinding.getPNameRef()+"  "+portName);
 
 			try {
-				// add process order sequence to Var for this portName
+				// add process order sequence to Port for this portName
 
 				Map<String, String> queryConstraints = new HashMap<String, String>();
 				queryConstraints.put("wfInstanceRef", currentWorkflowID);
@@ -1121,11 +1092,11 @@ public class EventProcessor {
 				queryConstraints.put("varName", portName);
 				queryConstraints.put("inputOrOutput", "1");
 
-				List<Var> vars = getPq().getVars(queryConstraints);
+				List<Port> vars = getPq().getPorts(queryConstraints);
 				try {
-					Var v = vars.get(0);
+					Port v = vars.get(0);
 					v.setPortNameOrder(order++);
-					getPw().updateVar(v);
+					getPw().updatePort(v);
 				}
 				catch (IndexOutOfBoundsException e) {
 					logger.error("Could not process input " + portName, e);
@@ -1143,11 +1114,11 @@ public class EventProcessor {
 //				processVarBinding(valueEl, processor, portName, iterationVector,
 //				dataflow);
 
-				List<VarBinding> newBindings = 
-					processVarBinding(valueEl, procBinding.getPNameRef(), portName, procBinding.getIterationVector(),
+				List<PortBinding> newBindings = 
+					processPortBinding(valueEl, procBinding.getPNameRef(), portName, procBinding.getIterationVector(),
 							getWfInstanceID(), currentWorkflowID);
 				// this is a list whenever valueEl is of type list: in this case processVarBinding recursively
-				// processes all values within the collection, and generates one VarBinding record for each of them
+				// processes all values within the collection, and generates one PortBinding record for each of them
 
 				allInputVarBindings.addAll(newBindings);
 				
@@ -1180,14 +1151,14 @@ public class EventProcessor {
 	 * @param wfInstanceRef
 	 * @param currentWorkflowID 
 	 */
-	private List<VarBinding> processVarBinding(Element valueEl, String processorId,
+	private List<PortBinding> processPortBinding(Element valueEl, String processorId,
 			String portName, String iterationId, String wfInstanceRef, String currentWorkflowID) {
 
 		// uses the defaults:
 		// collIdRef = null
 		// parentcollectionRef = null
 		// positionInCollection = 1
-		return processVarBinding(valueEl, processorId, portName, null, 1, null,
+		return processPortBinding(valueEl, processorId, portName, null, 1, null,
 				iterationId, wfInstanceRef, null, currentWorkflowID);
 	}
 
@@ -1204,11 +1175,11 @@ public class EventProcessor {
 	 * @param currentWorkflowID 
 	 */
 	@SuppressWarnings("unchecked")
-	private List<VarBinding>  processVarBinding(Element valueEl, String processorId,
+	private List<PortBinding>  processPortBinding(Element valueEl, String processorId,
 			String portName, String collIdRef, int positionInCollection,
 			String parentCollectionRef, String iterationId, String wfInstanceRef, String itVector, String currentWorkflowID) {
 
-		List<VarBinding> newBindings = new ArrayList<VarBinding>();
+		List<PortBinding> newBindings = new ArrayList<PortBinding>();
 
 		String valueType = valueEl.getName();
 //		logger.info("value element for " + processorId + ": "
@@ -1220,7 +1191,7 @@ public class EventProcessor {
 			iterationVector = extractIterationVector(iterationId);
 		else iterationVector = itVector;
 
-		VarBinding vb = new VarBinding();
+		PortBinding vb = new PortBinding();
 
 		vb.setWfNameRef(currentWorkflowID);
 		vb.setWfInstanceRef(wfInstanceRef);
@@ -1247,10 +1218,10 @@ public class EventProcessor {
 						" value="+vb.getValue());
 
 //				logger.info("calling addVarBinding on "+vb.getPNameRef()+" : "+vb.getVarNameRef()); 
-				getPw().addVarBinding(vb);
+				getPw().addPortBinding(vb);
 
 			} catch (SQLException e) {
-				logger.warn("Process Var Binding problem with provenance", e);
+				logger.warn("Process Port Binding problem with provenance", e);
 			}
 
 		} else if (valueType.equals("referenceSet")) {
@@ -1266,13 +1237,13 @@ public class EventProcessor {
 
 			try {
 //				logger.debug("calling addVarBinding on "+vb.getPNameRef()+" : "+vb.getVarNameRef()+" with it "+vb.getIteration()); 
-				getPw().addVarBinding(vb);
+				getPw().addPortBinding(vb);
 			} catch (SQLException e) {
 				logger.debug("Problem processing var binding -- performing update instead of insert", e); //, e);
 				// try to update the existing record instead using the current collection info
 				
-				getPw().updateVarBinding(vb);
-//				logger.warn("VarBinding update successful");
+				getPw().updatePortBinding(vb);
+//				logger.warn("PortBinding update successful");
 				
 			}
 
@@ -1280,7 +1251,7 @@ public class EventProcessor {
 
 			logger.debug("input of type list");
 
-			// add entries to the Collection and to the VarBinding tables
+			// add entries to the Collection and to the PortBinding tables
 			// list id --> Collection.collId
 
 			String collId = valueEl.getAttributeValue("id");
@@ -1311,7 +1282,7 @@ public class EventProcessor {
 						iterationVector = "["+ Integer.toString(positionInCollection-1) + "]";
 					}
 
-					List<VarBinding> bindings = processVarBinding(el, processorId, portName, collId,
+					List<PortBinding> bindings = processPortBinding(el, processorId, portName, collId,
 							positionInCollection, parentCollectionRef,
 							iterationId, wfInstanceRef, iterationVector, currentWorkflowID);
 
@@ -1328,10 +1299,10 @@ public class EventProcessor {
 				vb.setIterationVector(iterationVector);
 				vb.setValue(valueEl.getAttributeValue("id"));
 
-				getPw().addVarBinding(vb);
+				getPw().addPortBinding(vb);
 
 			} catch (SQLException e) {
-				logger.warn("Process Var Binding problem with provenance", e);
+				logger.warn("Process Port Binding problem with provenance", e);
 			}
 		} else {
 			logger.warn("unrecognized value type element for "
@@ -1425,95 +1396,7 @@ public class EventProcessor {
 	}
 
 	/**
-	 * for each arc of the form (_INPUT_/I, P/V): propagate VarBinding for P/V
-	 * to var _INPUT_/I <br/>
-	 * 
-	 * @throws SQLException
-	 */
-	public void fillInputVarBindings(Object context) throws SQLException {
-
-		// System.out.println("*** fillInputVarBindings: ***");
-
-		// retrieve appropriate arcs
-		Map<String, String> constraints = new HashMap<String, String>();
-		constraints.put("sourcePnameRef", "_INPUT_");
-		constraints.put("W.instanceID", getWfInstanceID());
-		List<Arc> arcs = getPq().getArcs(constraints);
-
-		// backpropagate VarBinding from the target var of the arc to the source
-		for (Arc aArc : arcs) {
-
-//			logger.info("propagating VarBinding from ["
-//			+ aArc.getSinkPnameRef() + "/" + aArc.getSinkVarNameRef()
-//			+ "] to input [" + aArc.getSourcePnameRef() + "/"
-//			+ aArc.getSourceVarNameRef() + "]");
-
-			// get the varBinding for the arc sinks
-			Map<String, String> vbConstraints = new HashMap<String, String>();
-			vbConstraints.put("VB.PNameRef", aArc.getSinkPnameRef());
-			vbConstraints.put("VB.varNameRef", aArc.getSinkVarNameRef());
-			vbConstraints.put("VB.wfInstanceRef", getWfInstanceID());
-
-			List<VarBinding> vbList = getPq().getVarBindings(vbConstraints); // DB
-			// QUERY
-
-			for (VarBinding vb : vbList) {
-				// add a new VarBinding for the input
-
-				vb.setPNameRef(aArc.getSourcePnameRef());
-				vb.setVarNameRef(aArc.getSourceVarNameRef());
-				// all other attributes are the same --> CHECK!!
-
-				getPw().addVarBinding(vb);
-			}
-		}
-	}
-
-	/**
-	 * for each arc of the form (P/V, _OUTPUT_/O): propagate VarBinding for P/V
-	 * to var _OUTPUT_/O <br/>
-	 * 
-	 * @throws SQLException
-	 */
-	public void fillOutputVarBindings(Object context) throws SQLException {
-
-		//System.out.println("*** fillOutputVarBindings: ***");
-
-		// retrieve appropriate arcs
-		Map<String, String> constraints = new HashMap<String, String>();
-		constraints.put("sinkPnameRef", "_OUTPUT_");
-		constraints.put("wfInstanceRef", getWfInstanceID());
-		List<Arc> arcs = getPq().getArcs(constraints);
-
-		// fowd propagate VarBinding from the source var of the arc to the
-		// output
-		for (Arc aArc : arcs) {
-
-//			logger.info("fwd propagating VarBinding from ["
-//			+ aArc.getSourcePnameRef() + "/"
-//			+ aArc.getSourceVarNameRef() + "] to input ["
-//			+ aArc.getSinkPnameRef() + "/" + aArc.getSinkVarNameRef()
-//			+ "]");
-
-			// get the varBinding for the arc sinks
-			Map<String, String> vbConstraints = new HashMap<String, String>();
-			vbConstraints.put("VB.PNameRef", aArc.getSourcePnameRef());
-			vbConstraints.put("VB.varNameRef", aArc.getSourceVarNameRef());
-			vbConstraints.put("VB.wfInstanceRef", getWfInstanceID());
-
-			List<VarBinding> vbList = getPq().getVarBindings(vbConstraints); // DB
-			// QUERY
-
-			for (VarBinding vb : vbList) {
-				// add a new VarBinding for the input
-				getPw().addVarBinding(vb); // DB UPDATE
-			}
-
-		}
-	}
-
-
-	/**
+>>>>>>> Stashed changes
 	 * silly class to hold pairs of strings. any better way??
 	 * @author paolo
 	 *
@@ -1655,7 +1538,7 @@ public class EventProcessor {
 			if (successors == null) continue;
 
 			// reduce the number of predecessors to each of the successors by one
-			// NB we must traverse an additional arc through a nested workflow input if the successor is a dataflow!!
+			// NB we must traverse an additional datalink through a nested workflow input if the successor is a dataflow!!
 			for (String succ : successors) {
 
 //				logger.debug(succ);
@@ -1706,17 +1589,17 @@ public class EventProcessor {
 
 //			logger.debug("processor "+pname);
 
-			List<Var> inputs = getPq().getInputVars(pname, wfNameRef, wfInstanceId); // null -> do not use instance (??) CHECK
+			List<Port> inputs = getPq().getInputVars(pname, wfNameRef, wfInstanceId); // null -> do not use instance (??) CHECK
 
 //			logger.debug(inputs.size()+" inputs for "+pnameInContext.getV1());
 
 			int totalANL = 0;
-			for (Var iv : inputs) {
+			for (Port iv : inputs) {
 
 				if (iv.isANLset() == false) {
 					iv.setActualNestingLevel(iv.getTypeNestingLevel());
 					iv.setANLset(true);
-					getPw().updateVar(iv);
+					getPw().updatePort(iv);
 
 //					logger.debug("var: "+iv.getVName()+" set at nominal level "+iv.getActualNestingLevel());					
 				}
@@ -1731,11 +1614,11 @@ public class EventProcessor {
 
 				// this should take care of the special case of the top level dataflow with inputs that have successors in the graph
 				// propagate this through all the links from this var
-//				List<Var> successors = getPq().getSuccVars(pname, iv.getVName(), wfInstanceId);
+//				List<Port> successors = getPq().getSuccVars(pname, iv.getVName(), wfInstanceId);
 
 //				logger.debug(successors.size()+ " successors for var "+iv.getVName());
 
-//				for (Var v : successors) {
+//				for (Port v : successors) {
 //				v.setActualNestingLevel(iv.getActualNestingLevel());
 //				v.setANLset(true);
 //				getPw().updateVar(v);
@@ -1747,30 +1630,30 @@ public class EventProcessor {
 
 			// process pname's outputs -- set ANL based on the sum formula (see
 			// paper)
-			List<Var> outputs = getPq().getOutputVars(pname, wfNameRef, wfInstanceId);
-			for (Var ov : outputs) {
+			List<Port> outputs = getPq().getOutputVars(pname, wfNameRef, wfInstanceId);
+			for (Port ov : outputs) {
 
 				ov.setActualNestingLevel(ov.getTypeNestingLevel() + totalANL);
 
 				logger.debug("anl for "+pname+":"+ov.getVName()+" = "+(ov.getTypeNestingLevel() + totalANL));
 				ov.setANLset(true);
-				getPw().updateVar(ov);
+				getPw().updatePort(ov);
 
 				// propagate this through all the links from this var
-				List<Var> successors = getPq().getSuccVars(pname, ov.getVName(), wfNameRef);
+				List<Port> successors = getPq().getSuccPorts(pname, ov.getVName(), wfNameRef);
 
 //				logger.debug(successors.size()+ " successors for var "+ov.getVName());
 
-				for (Var v : successors) {
+				for (Port v : successors) {
 
-					List<Var> toBeProcessed = new ArrayList<Var>();
+					List<Port> toBeProcessed = new ArrayList<Port>();
 					toBeProcessed.add(v);
 
 					if (pq.isDataflow(v.getPName()) && v.isInput()) {  // this is the input to a nested workflow
 
 //						String tempWfNameRef = pq.getWfNameForDataflow(v.getPName(), wfInstanceId);
 						String tempWfNameRef = pq.getWfNameForDataflow(v.getPName());
-						List<Var> realSuccessors = getPq().getSuccVars(v.getPName(), v.getVName(), tempWfNameRef);	
+						List<Port> realSuccessors = getPq().getSuccPorts(v.getPName(), v.getVName(), tempWfNameRef);	
 
 //						logger.debug("realSuccessors size = "+realSuccessors.size());
 
@@ -1781,7 +1664,7 @@ public class EventProcessor {
 
 //						String tempWfNameRef = pq.getWfNameForDataflow(v.getPName(), wfInstanceId);
 						String tempWfNameRef = pq.getWfNameForDataflow(v.getPName());
-						List<Var> realSuccessors = getPq().getSuccVars(v.getPName(), v.getVName(), null);	
+						List<Port> realSuccessors = getPq().getSuccPorts(v.getPName(), v.getVName(), null);	
 
 //						logger.debug("realSuccessors size = "+realSuccessors.size());
 
@@ -1790,12 +1673,12 @@ public class EventProcessor {
 
 					}
 
-					for (Var v1:toBeProcessed) {
+					for (Port v1:toBeProcessed) {
 						v1.setActualNestingLevel(ov.getActualNestingLevel());
 						logger.debug("anl for "+v1.getPName()+":"+v1.getVName()+" = "+ov.getActualNestingLevel());
 
 						v1.setANLset(true);
-						getPw().updateVar(v1);
+						getPw().updatePort(v1);
 					}
 				}
 			}

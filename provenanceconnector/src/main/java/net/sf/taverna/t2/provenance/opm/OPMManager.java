@@ -230,8 +230,8 @@ public class OPMManager {
 		if (noDuplicates && artifact != null) {
 			Collection<ProvenanceGeneratedArc> generatedBy = graph.getGeneratedBy(artifact);
 
-			for (ProvenanceGeneratedArc arc:generatedBy) {						
-				ProvenanceProcess pp = arc.getProcess();
+			for (ProvenanceGeneratedArc datalink:generatedBy) {						
+				ProvenanceProcess pp = datalink.getProcess();
 				if (pp.getName().equals(process.getName())) { found = true; break; }						
 			}
 		}
@@ -253,8 +253,8 @@ public class OPMManager {
 		if (noDuplicates) {
 			Collection<ProvenanceUsedArc> used = graph.getUsed(process);
 
-			for (ProvenanceUsedArc arc:used) {						
-				ProvenanceArtifact pa = arc.getArtifact();
+			for (ProvenanceUsedArc datalink:used) {						
+				ProvenanceArtifact pa = datalink.getArtifact();
 				if (pa.getName().equals(artifact.getName())) { found = true; break; }						
 			}
 		}

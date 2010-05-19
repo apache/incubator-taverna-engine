@@ -18,8 +18,8 @@ import java.util.Map;
 import java.util.Set;
 
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
-import net.sf.taverna.t2.provenance.lineageservice.utils.QueryVar;
-import net.sf.taverna.t2.provenance.lineageservice.utils.Var;
+import net.sf.taverna.t2.provenance.lineageservice.utils.QueryPort;
+import net.sf.taverna.t2.provenance.lineageservice.utils.Port;
 import net.sf.taverna.t2.provenance.lineageservice.utils.WorkflowInstance;
 
 import org.apache.log4j.Logger;
@@ -93,7 +93,7 @@ public class ProvenanceQueryParser {
 
 		q.setRunIDList(parseWorkflowAndRuns(d));  // sets the set of runs 
 		q.setWorkflowName(mainWorkflowExternalName);
-		q.setTargetVars(parsePortSelection(d));
+		q.setTargetPorts(parsePortSelection(d));
 		q.setSelectedProcessors(parseProcessorFocus(d));
 
 		return q;
@@ -117,7 +117,7 @@ public class ProvenanceQueryParser {
 
 		q.setRunIDList(parseWorkflowAndRuns(d));  // sets the set of runs 
 		q.setWorkflowName(mainWorkflowExternalName);
-		q.setTargetVars(parsePortSelection(d));
+		q.setTargetPorts(parsePortSelection(d));
 		q.setSelectedProcessors(parseProcessorFocus(d));
 
 		return q;
@@ -247,18 +247,18 @@ public class ProvenanceQueryParser {
 
 
 	@SuppressWarnings("unchecked")
-	private List<QueryVar> parsePorts(String workflowID, String procName, Element childEl) {
+	private List<QueryPort> parsePorts(String workflowID, String procName, Element childEl) {
 
-		List<QueryVar>  queryVars = new ArrayList<QueryVar>();
+		List<QueryPort>  queryVars = new ArrayList<QueryPort>();
 		List<String> portNames = new ArrayList<String>();
 
-		List<Var> ports = pAccess.getPortsForProcessor(workflowID, procName);
+		List<Port> ports = pAccess.getPortsForProcessor(workflowID, procName);
 
 		if (childEl == null || (childEl.getChildren().size()==0)) {  
 			// add all output ports 
-			for (Var p:ports) {
+			for (Port p:ports) {
 				if (!p.isInput()) {
-					QueryVar qv = new QueryVar();
+					QueryPort qv = new QueryPort();
 					qv.setWfName(p.getWfInstanceRef());
 					qv.setPname(p.getPName());
 					qv.setVname(p.getVName());
@@ -280,14 +280,14 @@ public class ProvenanceQueryParser {
 			}
 
 			Set<String> availableOutPortNames = new HashSet<String>();
-			for (Var p:ports) if (!p.isInput()) { availableOutPortNames.add(p.getVName()); }
+			for (Port p:ports) if (!p.isInput()) { availableOutPortNames.add(p.getVName()); }
 
 			for (String portName:portNames) {
 
 				boolean found = false;
-				for (Var p1:ports) {				
+				for (Port p1:ports) {				
 					if (portName.equals(p1.getVName())) {
-						QueryVar qv = new QueryVar();
+						QueryPort qv = new QueryPort();
 						qv.setWfName(p1.getWfInstanceRef());
 						qv.setPname(p1.getPName());
 						qv.setVname(p1.getVName());
@@ -308,7 +308,7 @@ public class ProvenanceQueryParser {
 	}
 
 
-	private List<QueryVar> parseProcessor(String workflowID, Element childEl) {
+	private List<QueryPort> parseProcessor(String workflowID, Element childEl) {
 		String procName = childEl.getAttributeValue(PROC_NAME_ATTR);
 		logger.debug("portSelection>processor");
 
@@ -317,9 +317,9 @@ public class ProvenanceQueryParser {
 
 
 	@SuppressWarnings("unchecked")
-	private List<QueryVar> parseWorkflow(Element workflowEl) {
+	private List<QueryPort> parseWorkflow(Element workflowEl) {
 
-		List<QueryVar>  queryVars = new ArrayList<QueryVar>();
+		List<QueryPort>  queryVars = new ArrayList<QueryPort>();
 
 		String workflowNameScope = workflowEl.getAttributeValue(WORKFLOW_NAME_ATTR);
 		String workflowIDScope = pAccess.getWorkflowIDForExternalName(workflowNameScope);
@@ -345,9 +345,9 @@ public class ProvenanceQueryParser {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	private List<QueryVar> parsePortSelection(Document d) {
+	private List<QueryPort> parsePortSelection(Document d) {
 
-		List<QueryVar>  queryVars = new ArrayList<QueryVar>();
+		List<QueryPort>  queryVars = new ArrayList<QueryPort>();
 		Element root = d.getRootElement();
 
 		if (!root.getName().equals(PQUERY_EL)) {

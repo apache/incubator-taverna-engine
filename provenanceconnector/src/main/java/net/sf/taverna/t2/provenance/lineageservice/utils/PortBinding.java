@@ -24,7 +24,7 @@ package net.sf.taverna.t2.provenance.lineageservice.utils;
  * @author Paolo Missier
  *
  */
-public class VarBinding {
+public class PortBinding {
 
 	String wfNameRef;
 	String varNameRef;
@@ -43,7 +43,7 @@ public class VarBinding {
 	
 		StringBuffer sb = new StringBuffer();
 		
-		sb.append("**** VarBinding: \n").
+		sb.append("**** PortBinding: \n").
 			append("wfInstanceRef = "+wfInstanceRef+"\n").
 			append("wfNameRef = "+wfNameRef+"\n").
 			append("PNameRef = "+PNameRef+"\n").

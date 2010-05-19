@@ -2,7 +2,7 @@ package net.sf.taverna.t2.provenance.lineageservice.utils;
 
 public class DataBinding {
 	private String dataBindingId;
-	private Var port;
+	private Port port;
 	private String t2Reference;
 	private String workflowRunId;
 	public String getDataBindingId() {
@@ -11,10 +11,10 @@ public class DataBinding {
 	public void setDataBindingId(String dataBindingId) {
 		this.dataBindingId = dataBindingId;
 	}
-	public Var getPort() {
+	public Port getPort() {
 		return port;
 	}
-	public void setPort(Var port) {
+	public void setPort(Port port) {
 		this.port = port;
 	}
 	@Override

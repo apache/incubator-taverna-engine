@@ -46,7 +46,7 @@ import net.sf.taverna.t2.provenance.lineageservice.ProvenanceAnalysis;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceQuery;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceWriter;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
-import net.sf.taverna.t2.provenance.lineageservice.utils.Var;
+import net.sf.taverna.t2.provenance.lineageservice.utils.Port;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Workflow;
 import net.sf.taverna.t2.provenance.lineageservice.utils.WorkflowInstance;
 import net.sf.taverna.t2.reference.ReferenceService;
@@ -208,7 +208,7 @@ public class ProvenanceAccess {
 	 */
 	public QueryAnswer executeQuery (Query pq) throws SQLException {
 
-		return pa.lineageQuery(pq.getTargetVars(), pq.getRunIDList().get(0), pq.getSelectedProcessors());
+		return pa.lineageQuery(pq.getTargetPorts(), pq.getRunIDList().get(0), pq.getSelectedProcessors());
 	}
 
 
@@ -398,9 +398,9 @@ public class ProvenanceAccess {
 	/**
 	 * lists all ports for a processor
 	 * @param workflowID
-	 * @return a list of {@link Var} beans, each representing an input or output port for the workflow 
+	 * @return a list of {@link Port} beans, each representing an input or output port for the workflow 
 	 */
-	public List<Var> getPortsForDataflow(String workflowID) {
+	public List<Port> getPortsForDataflow(String workflowID) {
 
 		Workflow w = pq.getWorkflow(workflowID);
 
@@ -409,7 +409,7 @@ public class ProvenanceAccess {
 		queryConstraints.put("pnameRef", w.getExternalName());
 
 		try {
-			return pq.getVars(queryConstraints);
+			return pq.getPorts(queryConstraints);
 		} catch (SQLException e) {
 			logger.error("Problem getting ports for dataflow: " + workflowID + " : " + e);
 		}
@@ -422,16 +422,16 @@ public class ProvenanceAccess {
 	 * list all ports for a specific processor within a workflow 
 	 * @param workflowID
 	 * @param processorName
-	 * @return a list of {@link Var} beans, each representing an input or output port for the input processor
+	 * @return a list of {@link Port} beans, each representing an input or output port for the input processor
 	 */
-	public List<Var> getPortsForProcessor(String workflowID, String processorName) {
+	public List<Port> getPortsForProcessor(String workflowID, String processorName) {
 
 		Map<String, String> queryConstraints = new HashMap<String, String>();
 		queryConstraints.put("wfInstanceRef", workflowID);
 		queryConstraints.put("pnameRef", processorName);
 
 		try {
-			return pq.getVars(queryConstraints);
+			return pq.getPorts(queryConstraints);
 		} catch (SQLException e) {
 			logger.error("Problem getting ports for processor: " + processorName + " worflow: " + workflowID + " : " + e);
 		}
@@ -579,11 +579,11 @@ public class ProvenanceAccess {
 		return pq.getProvenanceProcessor(processorId);		
 	}
 
-	public Map<Var, T2Reference> getDataBindings(String dataBindingId) {
-		Map<Var, String> dataBindings = pq.getDataBindings(dataBindingId);
+	public Map<Port, T2Reference> getDataBindings(String dataBindingId) {
+		Map<Port, String> dataBindings = pq.getDataBindings(dataBindingId);
 		
-		HashMap<Var, T2Reference> references = new HashMap<Var, T2Reference>();
-		for (Entry<Var,String> entry : dataBindings.entrySet()) {
+		Map<Port, T2Reference> references = new HashMap<Port, T2Reference>();
+		for (Entry<Port,String> entry : dataBindings.entrySet()) {
 			T2Reference t2Ref = getProvenanceConnector().getReferenceService().referenceFromString(entry.getValue());
 			references.put(entry.getKey(), t2Ref);
 		}

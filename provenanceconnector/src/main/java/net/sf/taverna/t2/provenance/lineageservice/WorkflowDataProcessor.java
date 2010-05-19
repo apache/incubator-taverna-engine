@@ -14,7 +14,7 @@ import org.apache.log4j.Logger;
 import net.sf.taverna.t2.provenance.item.ProvenanceItem;
 import net.sf.taverna.t2.provenance.item.WorkflowDataProvenanceItem;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceUtils;
-import net.sf.taverna.t2.provenance.lineageservice.utils.VarBinding;
+import net.sf.taverna.t2.provenance.lineageservice.utils.PortBinding;
 
 /**
  * @author paolo
@@ -74,7 +74,7 @@ public class WorkflowDataProcessor {
 
 
 	/**
-	 * writes records to VarBinding or Collection by traversing the trees<br/>
+	 * writes records to PortBinding or Collection by traversing the trees<br/>
 	 * expect this to be invoked after workflow completion
 	 * @param wfInstanceRef  the runID
 	 * @param dataflowID the external name of the dataflow (not the UUID)
@@ -88,7 +88,7 @@ public class WorkflowDataProcessor {
 			String varName = entry.getKey();
 			List<WorkflowDataNode> tree = entry.getValue();
 
-			VarBinding vb = null;
+			PortBinding vb = null;
 
 			try {
 				logger.debug("storing tree for var "+varName+" in workflow with ID "+dataflowID+" and instance "+wfInstanceRef);
@@ -121,9 +121,9 @@ public class WorkflowDataProcessor {
 						}
 
 					} else {
-						logger.debug("creating VarBinding for "+node.value+" with index "+node.index);
+						logger.debug("creating PortBinding for "+node.value+" with index "+node.index);
 
-						vb = new VarBinding();
+						vb = new PortBinding();
 
 						vb.setWfNameRef(dataflowID);
 						vb.setWfInstanceRef(wfInstanceRef);
@@ -145,13 +145,13 @@ public class WorkflowDataProcessor {
 						} else {
 							vb.setPositionInColl(1);  // default							
 						}						
-						getPw().addVarBinding(vb);
+						getPw().addPortBinding(vb);
 					}
 				}
 			} catch (SQLException e) {
 				logger.debug("Problem processing trees for workflow: " +dataflowID + " instance: " + wfInstanceRef + " : "+
 						" updating instead of inserting");
-				getPw().updateVarBinding(vb);
+				getPw().updatePortBinding(vb);
 			}
 
 		}

@@ -7,7 +7,7 @@ package net.sf.taverna.t2.provenance.lineageservice.utils;
  * @author Paolo Missier<p/>
  *
  */	
-public class QueryVar {
+public class QueryPort {
 
 	String wfInstanceId;
 	String wfName;

@@ -29,11 +29,11 @@ import java.util.Map;
 
 import net.sf.taverna.t2.provenance.api.NativeAnswer;
 import net.sf.taverna.t2.provenance.api.QueryAnswer;
-import net.sf.taverna.t2.provenance.lineageservice.utils.Arc;
+import net.sf.taverna.t2.provenance.lineageservice.utils.DataLink;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
-import net.sf.taverna.t2.provenance.lineageservice.utils.QueryVar;
-import net.sf.taverna.t2.provenance.lineageservice.utils.Var;
-import net.sf.taverna.t2.provenance.lineageservice.utils.VarBinding;
+import net.sf.taverna.t2.provenance.lineageservice.utils.QueryPort;
+import net.sf.taverna.t2.provenance.lineageservice.utils.Port;
+import net.sf.taverna.t2.provenance.lineageservice.utils.PortBinding;
 import net.sf.taverna.t2.provenance.lineageservice.utils.WorkflowInstance;
 import net.sf.taverna.t2.provenance.opm.OPMManager;
 
@@ -221,16 +221,16 @@ public class ProvenanceAnalysis {
 
 
 
-	public QueryAnswer lineageQuery(List<QueryVar> qvList,
+	public QueryAnswer lineageQuery(List<QueryPort> qvList,
 			String wfInstance, List<ProvenanceProcessor> selectedProcessors) throws SQLException {
 
 		QueryAnswer  completeAnswer = new QueryAnswer();
 		NativeAnswer nativeAnswer   = new NativeAnswer();
 
-		Map<QueryVar, Map<String, List<Dependencies>>> answerContent = new HashMap<QueryVar, Map<String, List<Dependencies>>>();
+		Map<QueryPort, Map<String, List<Dependencies>>> answerContent = new HashMap<QueryPort, Map<String, List<Dependencies>>>();
 
 		// launch a lineage query for each target variable
-		for (QueryVar qv:qvList) {
+		for (QueryPort qv:qvList) {
 
 			// full lineage query			
 			logger.info("************\n lineage query: [instance, workflow, proc, port, path] = ["+
@@ -308,13 +308,13 @@ public class ProvenanceAnalysis {
 			vbConstraints.put("VB.varNameRef", var);
 			vbConstraints.put("VB.wfInstanceRef", wfInstance);
 
-			List<VarBinding> vbList = getPq().getVarBindings(vbConstraints); // DB
+			List<PortBinding> vbList = getPq().getPortBindings(vbConstraints); // DB
 
 			if (vbList.isEmpty()) {
 				logger.warn(ALL_PATHS_KEYWORD+" specified for paths but no varBindings found. nothing to compute");
 			}
 
-			for (VarBinding vb:vbList) {
+			for (PortBinding vb:vbList) {
 
 				// path is of the form [x,y..]  we need it as x,y... 
 				path = vb.getIteration().substring(1, vb.getIteration().length()-1);
@@ -412,28 +412,28 @@ public class ProvenanceAnalysis {
 
 		// start with xfer or xform depending on whether initial var is output or input
 
-		// get (var, proc) from Var  to see if it's input/output
+		// get (var, proc) from Port  to see if it's input/output
 		Map<String, String>  varQueryConstraints = new HashMap<String, String>();
 		varQueryConstraints.put("W.instanceID", wfID);
 		varQueryConstraints.put("V.pnameRef", proc);  
 		varQueryConstraints.put("V.varName", var);  
 		varQueryConstraints.put("V.wfInstanceRef", wfNameRef);  
 
-		List<Var> vars = getPq().getVars(varQueryConstraints);
+		List<Port> vars = getPq().getPorts(varQueryConstraints);
 
 		if (vars.isEmpty())  {
 			logger.info("variable ("+var+","+proc+") not found, lineage query terminated");
 			return null;
 		}
 
-		Var v = vars.get(0); 		// expect exactly one record
+		Port v = vars.get(0); 		// expect exactly one record
 		// CHECK there can be multiple (pname, varname) pairs, i.e., in case of nested workflows
 		// here we pick the first that turns up -- we would need to let users choose, or process all of them...
 
 		if (v.isInput() || getPq().isDataflow(proc)) { // if vName is input, then do a xfer() step
 
 			// rec. accumulates SQL queries into lqList
-			xferStep(wfID, wfNameRef, var, proc, path, selectedProcessors, lqList);
+			xferStep(wfID, wfNameRef, v, path, selectedProcessors, lqList);
 
 		} else { // start with xform
 
@@ -453,14 +453,14 @@ public class ProvenanceAnalysis {
 	 * @param var  the output var
 	 * @param proc  the processor
 	 * @param selectedProcessors  the processors for which we are interested in producing lineage 
-	 * @param path iteration vector within a VarBinding collection
+	 * @param path iteration vector within a PortBinding collection
 	 * @param lqList  partial list of spot lineage queries, to be added to
 	 * @throws SQLException 
 	 */
 	private void xformStep(
 			String wfID,
 			String wfNameRef, 				
-			Var outputVar, // we need the dnl from this output var
+			Port outputVar, // we need the dnl from this output var
 			String proc,
 			String path,
 			List<ProvenanceProcessor> selectedProcessors, 
@@ -470,7 +470,7 @@ public class ProvenanceAnalysis {
 		// retrieve input vars for current processor 
 		Map<String, String>  varsQueryConstraints = new HashMap<String, String>();
 
-		List<Var>  inputVars = null;
+		List<Port>  inputVars = null;
 
 		// here we fetch the input vars for the current proc.
 		// however, it may be the case that we are looking at a dataflow port (for the entire dataflow or
@@ -485,12 +485,12 @@ public class ProvenanceAnalysis {
 
 			// force the "input vars" for this step to be the output var itself
 			// this causes the following xfer step to trace back to the next processor _within_ proc 
-			inputVars = new ArrayList<Var>();
+			inputVars = new ArrayList<Port>();
 			inputVars.add(outputVar);
 
 		} else if (proc.equals(OUTPUT_CONTAINER_PROCESSOR)) {  // same action as prev case, but may change in the future
 
-			inputVars = new ArrayList<Var>();
+			inputVars = new ArrayList<Port>();
 			inputVars.add(outputVar);
 
 		} else {
@@ -499,22 +499,22 @@ public class ProvenanceAnalysis {
 			varsQueryConstraints.put("pnameRef", proc);  
 			varsQueryConstraints.put("inputOrOutput", "1");  
 
-			inputVars = getPq().getVars(varsQueryConstraints);
+			inputVars = getPq().getPorts(varsQueryConstraints);
 		}
 
 		///////////
 		/// path projections
 		///////////
 		// maps each var to its projected path
-		Map<Var,String> var2Path = new HashMap<Var,String>();
-		Map<Var,Integer> var2delta = new HashMap<Var,Integer>();
+		Map<Port,String> var2Path = new HashMap<Port,String>();
+		Map<Port,Integer> var2delta = new HashMap<Port,Integer>();
 
 		if (path == null) {  // nothing to split
-			for (Var inputVar: inputVars)  var2Path.put(inputVar, null);
+			for (Port inputVar: inputVars)  var2Path.put(inputVar, null);
 		} else {
 
 			int minPathLength = 0;  // if input path is shorter than this we give up granularity altogether
-			for (Var inputVar: inputVars) {
+			for (Port inputVar: inputVars) {
 				int delta = inputVar.getActualNestingLevel() - inputVar.getTypeNestingLevel();
 				var2delta.put(inputVar, new Integer(delta));
 				minPathLength += delta;
@@ -524,7 +524,7 @@ public class ProvenanceAnalysis {
 			String iterationVector[] = path.split(",");
 
 			if (iterationVector.length < minPathLength) {  // no path is propagated
-				for (Var inputVar: inputVars) {
+				for (Port inputVar: inputVars) {
 					var2Path.put(inputVar, null);
 				}
 			} else { // compute projected paths
@@ -532,7 +532,7 @@ public class ProvenanceAnalysis {
 				String[] projectedPath; 
 
 				int start = 0;
-				for (Var inputVar: inputVars) {
+				for (Port inputVar: inputVars) {
 
 					// 24/7/08 get DNL (declared nesting level) and ANL (actual nesting level) from VAR
 					// TODO account for empty paths
@@ -603,7 +603,7 @@ public class ProvenanceAnalysis {
 			boolean doOPM = (aOPMManager != null && aOPMManager.isActive());  // any problem below will set this to false
 
 			String role = null;
-			VarBinding vb = null;
+			PortBinding vb = null;
 			String URIFriendlyIterationVector =null;
 
 			if (doOPM) {
@@ -623,7 +623,7 @@ public class ProvenanceAnalysis {
 						vbConstraints.put("VB.iteration", "["+path+"]");
 				}
 
-				List<VarBinding> vbList = getPq().getVarBindings(vbConstraints); // DB
+				List<PortBinding> vbList = getPq().getPortBindings(vbConstraints); // DB
 
 				// use only the first result (expect only one) -- in this method we assume path is not null
 
@@ -727,8 +727,8 @@ public class ProvenanceAnalysis {
 		}
 
 		// recursion -- xfer path is next up
-		for (Var inputVar: inputVars) {
-			xferStep(wfID, wfNameRef, inputVar.getVName(), inputVar.getPName(), var2Path.get(inputVar), selectedProcessors, lqList);	
+		for (Port inputVar: inputVars) {
+			xferStep(wfID, wfNameRef, inputVar, var2Path.get(inputVar), selectedProcessors, lqList);	
 		}
 		currentPath.remove(currentPath.size()-1);  // CHECK	
 	}  // end xformStep
@@ -738,8 +738,7 @@ public class ProvenanceAnalysis {
 	private void xferStep(
 			String wfInstanceID,
 			String wfNameRef, 
-			String var, 
-			String proc,
+			Port port,
 			String path, 
 			List<ProvenanceProcessor> selectedProcessors,
 			List<LineageSQLQuery> lqList) throws SQLException {
@@ -747,26 +746,24 @@ public class ProvenanceAnalysis {
 		String sourceProcName = null;
 		String sourceVarName  = null;
 
-		// retrieve all Arcs ending with (var,proc) -- ideally there is exactly one
-		// (because multiple incoming arcs are disallowed)
-		Map<String, String>  arcsQueryConstraints = new HashMap<String, String>();
+		// retrieve all Datalinks ending with (var,proc) -- ideally there is exactly one
+		// (because multiple incoming datalinks are disallowed)
+		Map<String, String>  datalinksQueryConstraints = new HashMap<String, String>();
 
-		arcsQueryConstraints.put("W.instanceID", wfInstanceID);
-		arcsQueryConstraints.put("sinkVarNameRef", var);  
-		arcsQueryConstraints.put("sinkPNameRef", proc);  
+		datalinksQueryConstraints.put("W.instanceID", wfInstanceID);
+		datalinksQueryConstraints.put("destinationPortId", port.getIdentifier());
+		List<DataLink> datalinks = getPq().getDataLinks(datalinksQueryConstraints);
 
-		List<Arc> arcs = getPq().getArcs(arcsQueryConstraints);
-
-		if (arcs.size() == 0) {
-//			System.out.println("no arcs going up from ["+proc+","+var+"] ... returning");
+		if (datalinks.size() == 0) {
+//			System.out.println("no datalinks going up from ["+proc+","+var+"] ... returning");
 			return; // CHECK
 		}
 
-		Arc a = arcs.get(0); 
+		DataLink a = datalinks.get(0); 
 
 		// get source node
-		sourceProcName = a.getSourcePnameRef();
-		sourceVarName  = a.getSourceVarNameRef();
+		sourceProcName = a.getSourceProcessorName();
+		sourceVarName  = a.getSourcePortName();
 
 		//System.out.println("xfer() from ["+proc+","+var+"] to ["+sourceProcName+","+sourceVarName+"]");
 
@@ -777,12 +774,13 @@ public class ProvenanceAnalysis {
 		// retrieve input vars for current processor 
 		Map<String, String>  varsQueryConstraints = new HashMap<String, String>();
 
-		varsQueryConstraints.put("W.instanceID", wfInstanceID);
-		varsQueryConstraints.put("pnameRef", sourceProcName);  
-		varsQueryConstraints.put("varName", sourceVarName);  
-		List<Var>  varList  = getPq().getVars(varsQueryConstraints);
+//		varsQueryConstraints.put("W.instanceID", wfInstanceID);
+		varsQueryConstraints.put("portId", a.getSourcePortId());
+//		varsQueryConstraints.put("pnameRef", sourceProcName);  
+//		varsQueryConstraints.put("varName", sourceVarName);  
+		List<Port>  varList  = getPq().getPorts(varsQueryConstraints);
 
-		Var outputVar = varList.get(0);
+		Port outputVar = varList.get(0);
 
 		// recurse on xform
 		xformStep(wfInstanceID, wfNameRef, outputVar, sourceProcName, path, selectedProcessors, lqList);
@@ -813,7 +811,7 @@ public class ProvenanceAnalysis {
 		String varType = null;   // dtring, XML,... see Taverna type system
 
 		int DNL = 0; // declared nesting level -- copied from VAR
-		int ANL  = 0;  // actual nesting level -- copied from Var
+		int ANL  = 0;  // actual nesting level -- copied from Port
 
 		String wfInstance;  // TODO generalize to list / time interval?
 

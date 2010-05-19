@@ -32,15 +32,19 @@ import java.util.Set;
 import java.util.UUID;
 
 import net.sf.taverna.t2.provenance.connector.JDBCConnector;
+import net.sf.taverna.t2.provenance.connector.ProvenanceConnector;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.Activity;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataBinding;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.ProcessorEnactment;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.ServiceInvocation;
+
+import org.apache.log4j.Logger;
+
 import net.sf.taverna.t2.provenance.lineageservice.utils.NestedListNode;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProcBinding;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
-import net.sf.taverna.t2.provenance.lineageservice.utils.Var;
-import net.sf.taverna.t2.provenance.lineageservice.utils.VarBinding;
+import net.sf.taverna.t2.provenance.lineageservice.utils.Port;
+import net.sf.taverna.t2.provenance.lineageservice.utils.PortBinding;
 
 import org.apache.log4j.Logger;
 
@@ -57,14 +61,14 @@ import org.apache.log4j.Logger;
 public abstract class ProvenanceWriter {
 
 	protected static Logger logger = Logger.getLogger(ProvenanceWriter.class);    
-	protected int cnt; // counts number of calls to VarBinding
+	protected int cnt; // counts number of calls to PortBinding
 
 	public Connection getConnection() throws SQLException {
 		return JDBCConnector.getConnection();
 	}
 
 	/**
-	 * add each Var as a row into the VAR DB table
+	 * add each Port as a row into the VAR DB table
 	 * <strong>note: no static var type available as part of the
 	 * dataflow...</strong>
 	 *
@@ -72,15 +76,15 @@ public abstract class ProvenanceWriter {
 	 * @param wfId
 	 * @throws SQLException
 	 */
-	public void addVariables(List<Var> vars, String wfId) throws SQLException {
+	public void addVariables(List<Port> vars, String wfId) throws SQLException {
 		PreparedStatement ps = null;
 		Connection connection = null;
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-			"INSERT INTO Var (varname, pNameRef, inputOrOutput, nestingLevel, wfInstanceRef, portId) VALUES(?,?,?,?,?,?)");
+			 "INSERT INTO Port (varname, pNameRef, inputOrOutput, nestingLevel, wfInstanceRef, portId) VALUES(?,?,?,?,?,?)");
 			String q;
-			for (Var v : vars) {
+			for (Port v : vars) {
 
 				int isInput = v.isInput() ? 1 : 0;
 
@@ -108,26 +112,31 @@ public abstract class ProvenanceWriter {
 	}
 
 	/**
-	 * inserts one row into the ARC DB table -- OBSOLETE, see instead
+	 * inserts one row into the ARC DB table
 	 *
-	 * @param sourceVar
-	 * @param sinkVar
-	 * @param wfId
+	 * @param sourcePort
+	 * @param destinationPort
+	 * @param workflowId
 	 */
-	public void addArc(Var sourceVar, Var sinkVar, String wfId)
+	public void addDataLink(Port sourcePort, Port destinationPort, String workflowId)
 	throws SQLException {
 		PreparedStatement ps = null;
 		Connection connection = null;
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-			"INSERT INTO Arc (wfInstanceRef, sourcePNameRef, SourceVarNameRef, sinkPNameRef,sinkVarNameRef) VALUES(?,?,?,?,?)");
-			ps.setString(1, wfId);
-			ps.setString(2, sourceVar.getPName());
-			ps.setString(3, sourceVar.getVName());
-			ps.setString(4, sinkVar.getPName());
-			ps.setString(5, sinkVar.getVName());
-
+			"INSERT INTO Datalink (workflowId, sourceProcessorName, " +
+			" sourcePortName, destinationProcessorName, destinationPortName," +
+			" sourcePortId, destinationPortId) " +
+			"VALUES(?,?,?,?,?,?,?)");
+			ps.setString(1, workflowId);
+			ps.setString(2, sourcePort.getPName());
+			ps.setString(3, sourcePort.getVName());
+			ps.setString(4, destinationPort.getPName());
+			ps.setString(5, destinationPort.getVName());
+			ps.setString(6, sourcePort.getIdentifier());
+			ps.setString(7, destinationPort.getIdentifier());
+			
 			int result = ps.executeUpdate();
 
 		} finally {
@@ -137,41 +146,6 @@ public abstract class ProvenanceWriter {
 		}
 
 	}
-
-	public void addArc(String sourceVarName, String sourceProcName,
-			String sinkVarName, String sinkProcName, String wfId) {
-		PreparedStatement ps = null;
-		Connection connection = null;
-		try {
-			connection = getConnection();
-			ps = connection.prepareStatement(
-			"INSERT INTO Arc (wfInstanceRef, sourcePNameRef, sourceVarNameRef, sinkPNameRef, sinkVarNameRef) VALUES(?,?,?,?,?)");
-
-
-			ps.setString(1, wfId);
-			ps.setString(2, sourceProcName);
-			ps.setString(3, sourceVarName);
-			ps.setString(4, sinkProcName);
-			ps.setString(5, sinkVarName);
-
-			int result = ps.executeUpdate();
-
-
-		
-		} catch (SQLException e) {
-			logger.warn("Could not execute insert to add Arc", e);
-		} finally {
-			if (connection != null) {
-				try {
-					connection.close();
-				} catch (SQLException ex) {
-					logger.error("There was an error closing the database connection", ex);
-				}
-			}
-		}
-
-	}
-	
 
 	public void addDataBinding(net.sf.taverna.t2.provenance.lineageservice.utils.DataBinding dataBinding) throws SQLException {
 		
@@ -440,57 +414,14 @@ public abstract class ProvenanceWriter {
 		return newParentCollectionId;
 	}
 
-	/**
-	 * OBSOLETE<p/>
-	 * adds (dataRef, data) pairs to the Data table (only for string data)
-	 */
-	public void addData(String dataRef, String wfInstanceId, byte[] data)
-	throws SQLException {
-
-		Connection connection = null;
-
-		try {
-			connection = getConnection();
-			PreparedStatement ps = null;
-			ps = connection.prepareStatement(
-			"INSERT INTO Data (dataReference,wfInstanceID,data) VALUES (?,?,?)");
-			ps.setString(1, dataRef);
-			ps.setString(2, wfInstanceId);
-			ps.setBytes(3, data);
-
-			ps.executeUpdate();
-
-			cnt++;
-
-		} catch (SQLException e) {
-			// the same ID will come in several times -- duplications are
-			// expected, don't panic
-	
-		} finally {
-			if (connection != null) {
-				connection.close();
-			}
-		}
-	}
-
-	/**
-	 *
-	 * @param dataRef
-	 * @param wfInstanceId
-	 * @param data  the data in bytearray form, untyped
-	 * @param dve  an instance of a DataExtractor. This maps the data bytearray to a string according to the
-	 * semantics of the data prior to inserting the data into the DB. It's a bit of a hack used in this impl. to extract significant parts of an XMLEncoded bean
-	 * that can be then used in other contexts (mainly, in OPM graphs, where a raw byte array would not be interpreted).
-	 * @throws SQLException
-	 */
-	public void addVarBinding(VarBinding vb) throws SQLException {
+	public void addPortBinding(PortBinding vb) throws SQLException {
 		PreparedStatement ps = null;
 		Connection connection = null;
 
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-			"INSERT INTO VarBinding (wfNameRef, pnameRef, wfInstanceRef, varNameRef, valueType, value, ref, collIdRef, iteration,positionInColl) VALUES(?,?,?,?,?,?,?,?,?,?)");
+			"INSERT INTO PortBinding (wfNameRef, pnameRef, wfInstanceRef, varNameRef, valueType, value, ref, collIdRef, iteration,positionInColl) VALUES(?,?,?,?,?,?,?,?,?,?)");
 
 			ps.setString(1, vb.getWfNameRef());
 			ps.setString(2, vb.getPNameRef());
@@ -510,7 +441,7 @@ public abstract class ProvenanceWriter {
 			cnt++;  // who uses this?
 
 //		} catch (SQLException e) {
-//			logger.warn("Var binding insert failed", e);
+//			logger.warn("Port binding insert failed", e);
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -524,7 +455,7 @@ public abstract class ProvenanceWriter {
 	 * @param v
 	 * @throws SQLException
 	 */
-	public void updateVar(Var v) throws SQLException {
+	public void updatePort(Port v) throws SQLException {
 		// Statement stmt;
 		PreparedStatement ps = null;
 
@@ -532,7 +463,7 @@ public abstract class ProvenanceWriter {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-					"UPDATE Var SET type = ?, inputOrOutput=?, nestingLevel = ?," + "actualNestingLevel = ?, anlSet = ? , Var.order = ? WHERE varName = ? AND pnameRef = ? AND wfInstanceRef = ?");
+					"UPDATE Port SET type = ?, inputOrOutput=?, nestingLevel = ?," + "actualNestingLevel = ?, anlSet = ? , Port.order = ? WHERE varName = ? AND pnameRef = ? AND wfInstanceRef = ?");
 			ps.setString(1, v.getType());
 			int i = v.isInput() ? 1 : 0;
 			ps.setInt(2, i);
@@ -585,14 +516,14 @@ public abstract class ProvenanceWriter {
 		}
 	}
 	
-	public void updateVarBinding(VarBinding vb) {
+	public void updatePortBinding(PortBinding vb) {
 
 		PreparedStatement ps = null;
 		Connection connection = null;
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-					"UPDATE VarBinding SET valueType = ?, value = ?, ref = ?, collIdRef = ?, positionInColl = ? "+
+					"UPDATE PortBinding SET valueType = ?, value = ?, ref = ?, collIdRef = ?, positionInColl = ? "+
 			"WHERE varNameRef = ? AND wfInstanceRef = ? AND pnameRef = ? AND iteration = ?");
 
 			ps.setString(1, vb.getValueType());
@@ -682,10 +613,10 @@ public abstract class ProvenanceWriter {
 			q = "DELETE FROM Processor";
 			stmt.executeUpdate(q);
 
-			q = "DELETE FROM Arc";
+			q = "DELETE FROM Datalink";
 			stmt.executeUpdate(q);
 
-			q = "DELETE FROM Var";
+			q = "DELETE FROM Port";
 			stmt.executeUpdate(q);
 			
 			q = "DELETE FROM " + Activity.Activity;
@@ -724,11 +655,11 @@ public abstract class ProvenanceWriter {
 			ps.setString(1, wfID);
 			ps.executeUpdate();
 			ps = connection.prepareStatement(
-			"DELETE FROM Arc WHERE wfInstanceRef = ?");
+			"DELETE FROM Datalink WHERE workflowId = ?");
 			ps.setString(1, wfID);
 			ps.executeUpdate();
 			ps = connection.prepareStatement(
-			"DELETE FROM Var WHERE wfInstanceRef = ?");
+			"DELETE FROM Port WHERE wfInstanceRef = ?");
 			ps.setString(1, wfID);
 			ps.executeUpdate();
 			
@@ -760,7 +691,7 @@ public abstract class ProvenanceWriter {
 	public Set<String> clearDBDynamic(String runID) throws SQLException {
 		String q = null;
 
-		Set<String>  refsToRemove = collectValueReferences(runID);  // collect all relevant refs from VarBinding and Collection
+		Set<String>  refsToRemove = collectValueReferences(runID);  // collect all relevant refs from PortBinding and Collection
 
 		Connection connection = null;
 		PreparedStatement ps = null;
@@ -782,17 +713,10 @@ public abstract class ProvenanceWriter {
 			ps.executeUpdate();
 
 			if (runID != null) {
-				ps = connection.prepareStatement("DELETE FROM Data WHERE wfInstanceID = ?");
+				ps = connection.prepareStatement("DELETE FROM PortBinding WHERE wfInstanceRef = ?");
 				ps.setString(1, runID);
 			} else 
-				ps = connection.prepareStatement("DELETE FROM Data");
-			ps.executeUpdate();
-
-			if (runID != null) {
-				ps = connection.prepareStatement("DELETE FROM VarBinding WHERE wfInstanceRef = ?");
-				ps.setString(1, runID);
-			} else 
-				ps = connection.prepareStatement("DELETE FROM VarBinding");
+				ps = connection.prepareStatement("DELETE FROM PortBinding");
 			ps.executeUpdate();
 
 			if (runID != null) {
@@ -853,10 +777,10 @@ public abstract class ProvenanceWriter {
 			connection = getConnection();
 
 			if (runID != null) {
-				ps = connection.prepareStatement("SELECT value FROM VarBinding WHERE wfInstanceRef = ?");
+				ps = connection.prepareStatement("SELECT value FROM PortBinding WHERE wfInstanceRef = ?");
 				ps.setString(1, runID);
 			} else {
-				ps = connection.prepareStatement("SELECT value FROM VarBinding");
+				ps = connection.prepareStatement("SELECT value FROM PortBinding");
 			}
 			boolean success = ps.execute();
 

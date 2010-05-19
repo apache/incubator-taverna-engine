@@ -16,8 +16,8 @@ import java.util.UUID;
 import javax.xml.bind.JAXBException;
 
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceWriter;
-import net.sf.taverna.t2.provenance.lineageservice.utils.Var;
-import net.sf.taverna.t2.provenance.lineageservice.utils.VarBinding;
+import net.sf.taverna.t2.provenance.lineageservice.utils.Port;
+import net.sf.taverna.t2.provenance.lineageservice.utils.PortBinding;
 
 import org.apache.log4j.Logger;
 import org.openprovenance.model.Account;
@@ -56,9 +56,9 @@ public class OPMImporter {
 	Map<String, String> accountToWorkflow  = new HashMap<String, String>();
 	Map<String, String> workflowToInstance = new HashMap<String, String>();
 
-	// maps wfName --> (wfName --> List(Var))
-	private Map<String, Map<String, List<Var>>> usedVarsByAccount = new HashMap<String, Map<String, List<Var>>>();
-	private Map<String, Map<String, List<Var>>> wgbVarsByAccount = new HashMap<String, Map<String, List<Var>>>();
+	// maps wfName --> (wfName --> List(Port))
+	private Map<String, Map<String, List<Port>>> usedVarsByAccount = new HashMap<String, Map<String, List<Port>>>();
+	private Map<String, Map<String, List<Port>>> wgbVarsByAccount = new HashMap<String, Map<String, List<Port>>>();
 
 	// maps accountname --> (artifact -> List(Process))
 	private Map<String, Map<String,List<String>>> wgbArtifactsByAccount = new HashMap<String, Map<String,List<String>>>(); 
@@ -198,7 +198,7 @@ public class OPMImporter {
 		// we actually ignore the others... 
 
 		// *********
-		// complete the induced graph by building arcs using the Artifact -> [Var] maps
+		// complete the induced graph by building datalinks using the Artifact -> [Port] maps
 		// *********
 
 		List<String>  accountNames = new ArrayList<String>();
@@ -212,25 +212,25 @@ public class OPMImporter {
 
 			String wfName = accountToWorkflow.get(acc);
 
-			Map<String, List<Var>> usedVars = usedVarsByAccount.get(wfName);
-			Map<String, List<Var>> wgbVars =  wgbVarsByAccount.get(wfName);
+			Map<String, List<Port>> usedVars = usedVarsByAccount.get(wfName);
+			Map<String, List<Port>> wgbVars =  wgbVarsByAccount.get(wfName);
 
 			if (usedVars == null || wgbVars == null) continue;
 
-			// install an Arc from each wgb var to each used var when the artifact is the same
-			for (Map.Entry<String, List<Var>> entry:wgbVars.entrySet()) {
+			// install an Datalink from each wgb var to each used var when the artifact is the same
+			for (Map.Entry<String, List<Port>> entry:wgbVars.entrySet()) {
 
-				// all Vars for this artifact get connected to all corresponding Vars in used
-				List<Var> sourceVars = entry.getValue();				
-				List<Var> targetVars = usedVars.get(entry.getKey());
+				// all Ports for this artifact get connected to all corresponding Ports in used
+				List<Port> sourceVars = entry.getValue();				
+				List<Port> targetVars = usedVars.get(entry.getKey());
 
 				if (sourceVars == null || targetVars == null) continue;
 
-				// create an arc from each sourceVar to each targetVar
+				// create an datalink from each sourceVar to each targetVar
 				// note that we expect a single targetVar, but this is not guaranteed
-				for (Var sourceVar:sourceVars) {
-					for (Var targetVar:targetVars) {
-						pw.addArc(sourceVar.getVName(), sourceVar.getPName(), targetVar.getVName(), targetVar.getPName(), wfName);
+				for (Port sourceVar:sourceVars) {
+					for (Port targetVar:targetVars) {
+						pw.addDataLink(sourceVar, targetVar, wfName);
 					}
 				}
 			}
@@ -251,7 +251,7 @@ public class OPMImporter {
 	}
 
 
-	private Var processProcessArtifactDep(String procName, String value, String varName,
+	private Port processProcessArtifactDep(String procName, String value, String varName,
 			String wfName, String wfInstance, boolean artifactIsInput) {
 
 		// generate Process
@@ -262,8 +262,8 @@ public class OPMImporter {
 			logger.warn(e.getMessage());
 		}
 
-		// generate Var
-		Var outputVar = new Var();
+		// generate Port
+		Port outputVar = new Port();
 
 		outputVar.setPName(procName);
 		outputVar.setWfInstanceRef(wfName);
@@ -271,7 +271,7 @@ public class OPMImporter {
 		outputVar.setTypeNestingLevel(0);
 		outputVar.setInput(artifactIsInput);  // wgby is an output var   
 
-		List<Var> vars = new ArrayList<Var>(); // only one Var in the list
+		List<Port> vars = new ArrayList<Port>(); // only one Port in the list
 		vars.add(outputVar);
 
 		try {
@@ -281,8 +281,8 @@ public class OPMImporter {
 			logger.warn(e.getMessage());
 		}
 
-		// generate VarBindings (wfInstance, procName, varname, value)			
-		VarBinding vb = new VarBinding();
+		// generate PortBindings (wfInstance, procName, varname, value)			
+		PortBinding vb = new PortBinding();
 
 		vb.setWfInstanceRef(wfInstance);
 		vb.setPNameRef(procName);
@@ -291,7 +291,7 @@ public class OPMImporter {
 		vb.setIterationVector("[]");
 
 		try {
-			pw.addVarBinding(vb);
+			pw.addPortBinding(vb);
 			logger.debug("added var binding with value "+value+" to workflow instance "+wfInstance);
 		} catch (SQLException e) {  // no panic -- just catch duplicates
 			logger.error("Failed to add var binding: " + e.getMessage());
@@ -310,7 +310,7 @@ public class OPMImporter {
 	 * @param wfInstance
 	 * @param artifactIsInput
 	 */
-	private Var processProcessArtifactDep(ProcessId procID, ArtifactId artId, Role role, 
+	private Port processProcessArtifactDep(ProcessId procID, ArtifactId artId, Role role, 
 			String wfName, String wfInstance, boolean artifactIsInput) {
 
 		String procName = ((org.openprovenance.model.Process) procID.getId()).getId();
@@ -330,7 +330,7 @@ public class OPMImporter {
 
 
 	/**
-	 * used(A,R,P,acc): generates a process for P, a Var for (P,R) an <em>input</em> VarBinding for (P,R,A)
+	 * used(A,R,P,acc): generates a process for P, a Port for (P,R) an <em>input</em> PortBinding for (P,R,A)
 	 * <br/> this is very similar to {@link #processWGBy(WasGeneratedBy)}
 	 * @param dep
 	 */
@@ -354,18 +354,18 @@ public class OPMImporter {
 			String wfName = accountToWorkflow.get(accName);
 			String wfInstance = workflowToInstance.get(wfName);
 
-			Var v  = processProcessArtifactDep(procID, artId, role, wfName, wfInstance, true);  // true -> input var
+			Port v  = processProcessArtifactDep(procID, artId, role, wfName, wfInstance, true);  // true -> input var
 
 			// save the mapping from artifact to var for this account
-			Map<String, List<Var>> usedVars = usedVarsByAccount.get(wfName);
+			Map<String, List<Port>> usedVars = usedVarsByAccount.get(wfName);
 			if (usedVars == null) {
-				usedVars = new HashMap<String, List<Var>>();
+				usedVars = new HashMap<String, List<Port>>();
 				usedVarsByAccount.put(wfName, usedVars);
 			}
-			List<Var> vars = usedVars.get(((Artifact) artId.getId()).getId());
+			List<Port> vars = usedVars.get(((Artifact) artId.getId()).getId());
 
 			if (vars == null) {
-				vars = new ArrayList<Var>();
+				vars = new ArrayList<Port>();
 				usedVars.put(((Artifact) artId.getId()).getId(), vars);
 			}
 			vars.add(v);
@@ -390,7 +390,7 @@ public class OPMImporter {
 
 
 	/**
-	 * wgb(A,R,P,Acc): generates a Process for P, a Var for (P,R), an <em>output</em> VarBinding for (P,R,A) 
+	 * wgb(A,R,P,Acc): generates a Process for P, a Port for (P,R), an <em>output</em> PortBinding for (P,R,A) 
 	 * This is all relative to the workflow corresponding to account Acc. <br/>
 	 * 
 	 * @param dep 
@@ -417,17 +417,17 @@ public class OPMImporter {
 			String wfName = accountToWorkflow.get(accName);
 			String wfInstance = workflowToInstance.get(wfName);
 
-			Var v = processProcessArtifactDep(procID, artId, role, wfName, wfInstance, false);  // false -> output var
+			Port v = processProcessArtifactDep(procID, artId, role, wfName, wfInstance, false);  // false -> output var
 
-			Map<String, List<Var>> wgbVars = wgbVarsByAccount.get(wfName);
+			Map<String, List<Port>> wgbVars = wgbVarsByAccount.get(wfName);
 			if (wgbVars == null) {
-				wgbVars = new HashMap<String, List<Var>>();
+				wgbVars = new HashMap<String, List<Port>>();
 				wgbVarsByAccount.put(wfName, wgbVars);
 			}
 
-			List<Var> vars = wgbVars.get(((Artifact) artId.getId()).getId());
+			List<Port> vars = wgbVars.get(((Artifact) artId.getId()).getId());
 			if (vars == null) {
-				vars = new ArrayList<Var>();
+				vars = new ArrayList<Port>();
 				wgbVars.put(((Artifact) artId.getId()).getId(), vars);
 			}
 			vars.add(v);

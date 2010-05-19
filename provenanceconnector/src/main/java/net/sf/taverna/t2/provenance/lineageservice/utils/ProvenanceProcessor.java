@@ -22,7 +22,7 @@ package net.sf.taverna.t2.provenance.lineageservice.utils;
 
 
 /**
- * a Var that has no pName is either a WF input or output, depending on isInput
+ * a Port that has no pName is either a WF input or output, depending on isInput
  * @author Paolo Missier
  */
 public class ProvenanceProcessor {

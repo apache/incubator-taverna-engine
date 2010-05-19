@@ -47,7 +47,7 @@ import org.apache.log4j.Logger;
 /**
  * Collects {@link ProvenanceItem}s as it travels up and down the dispatch stack
  * inside the InvocationContext
- * 
+ *  
  * @author Ian Dunlop
  * @author Stuart Owen
  * 
@@ -304,14 +304,14 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 //		logger.warn("Could not execute statement " + q + " :" + e);
 //		}
 
-//		q = "DELETE FROM Arc";
+//		q = "DELETE FROM Datalink";
 //		try {
 //		stmt.executeUpdate(q);
 //		} catch (SQLException e) {
 //		logger.warn("Could not execute statement " + q + " :" + e);
 //		}
 
-//		q = "DELETE FROM Var";
+//		q = "DELETE FROM Port";
 //		try {
 //		stmt.executeUpdate(q);
 //		} catch (SQLException e) {
@@ -332,7 +332,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 //		logger.warn("Could not execute statement " + q + " :" + e);
 //		}
 
-//		q = "DELETE FROM VarBinding";
+//		q = "DELETE FROM PortBinding";
 //		try {
 //		stmt.executeUpdate(q);
 //		} catch (SQLException e) {
@@ -346,12 +346,6 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 //		logger.warn("Could not execute statement " + q + " :" + e);
 //		}
 
-//		q = "DELETE FROM Data";
-//		try {
-//		stmt.executeUpdate(q);
-//		} catch (SQLException e) {
-//		logger.warn("Could not execute statement " + q + " :" + e);
-//		}
 
 //		if (connection!=null) try {
 //		connection.close();
@@ -389,7 +383,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 
 
 	public List<LineageQueryResultRecord> computeLineage(String wfInstance,
-			String var, String proc, String path, Set<String> selectedProcessors) {
+			String port, String proc, String path, Set<String> selectedProcessors) {
 		return null;
 	}
 
