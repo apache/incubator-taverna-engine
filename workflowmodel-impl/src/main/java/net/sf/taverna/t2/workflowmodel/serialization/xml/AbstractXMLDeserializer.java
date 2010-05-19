@@ -152,7 +152,7 @@ public abstract class AbstractXMLDeserializer implements
 			if (! (artifact.getVersion().equals(version))) {
 				String desired = groupId + ":" + artifactId + ":" + version;
 				String actual = artifact.getGroupId() + ":" + artifact.getArtifactId() + ":" + artifact.getVersion();	
-				logger.warn("XML specified " + desired + " instead using from profile " + actual);
+				logger.info("XML specified " + desired + " instead using from profile " + actual);
 				// TODO: pop up an actual warning box
 			}
 				
