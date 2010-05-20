@@ -1601,7 +1601,7 @@ public class EventProcessor {
 //					logger.debug("var: "+iv.getVName()+" set at nominal level "+iv.getresolvedDepth());					
 				}
 
-				int delta_nl = iv.getGranularDepth() - iv.getDepth();
+				int delta_nl = iv.getResolvedDepth() - iv.getDepth();
 
 				// if delta_nl < 0 then Taverna wraps the value into a list --> use dnl(X) in this case
 				if (delta_nl < 0 ) delta_nl = 0;// CHECK iv.getTypedepth();
