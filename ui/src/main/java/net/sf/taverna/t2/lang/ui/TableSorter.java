@@ -294,6 +294,11 @@ public class TableSorter extends TableMap {
 				int viewColumn = columnModel.getColumnIndexAtX(e.getX());
 				int column = tableView.convertColumnIndexToModel(viewColumn);
 				if (e.getClickCount() == 1 && column != -1) {
+					int currentlySelectedRow = tableView.getSelectedRow();
+					int underlyingSelectedRow = -1;
+					if (currentlySelectedRow != -1) {
+						underlyingSelectedRow = transposeRow(currentlySelectedRow);
+					}
 					// System.out.println("Sorting ...");
 					boolean ascendingColumn = true;
 					if (lastClickedColumn == column) {
@@ -302,6 +307,13 @@ public class TableSorter extends TableMap {
 					lastClickedColumn = column;
 					lastAscending = ascendingColumn;
 					sorter.sortByColumn(column, ascendingColumn);
+					if (underlyingSelectedRow != -1) {
+						for (int row = 0; row < indexes.length; row++) {
+							if (transposeRow(row) == underlyingSelectedRow) {
+								tableView.setRowSelectionInterval(row, row);
+							}
+						}
+					}
 				}
 			}
 		};
