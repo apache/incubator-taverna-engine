@@ -66,16 +66,24 @@ public class JTreeTable extends JTable {
 		super();
 	}
 
+	public JTreeTable(TreeTableModel treeTableModel) {
+		super();
+		setModel(treeTableModel);
+	}
+
 	public void setModel(TreeTableModel model) {
 		tree = new TreeTableCellRenderer(model);
 		super.setModel(new TreeTableModelAdapter(model, tree));
+		
 		ListToTreeSelectionModelWrapper selectionWrapper = new ListToTreeSelectionModelWrapper();
 		tree.setSelectionModel(selectionWrapper);
 		setSelectionModel(selectionWrapper.getListSelectionModel());
+		
 		// Install the tree editor renderer and editor.
 		setDefaultRenderer(TreeTableModel.class, tree);
 		setDefaultRenderer(Date.class, new DateCellRenderer());
 		setDefaultEditor(TreeTableModel.class, new TreeTableCellEditor());
+		
 		// No grid.
 		setShowGrid(true);
 
@@ -86,6 +94,7 @@ public class JTreeTable extends JTable {
 		// We need this as on MAC only double clicks seem to expand the tree.
 		addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
+
 				for (int counter = getColumnCount() - 1; counter >= 0; counter--) {
 					if (getColumnClass(counter) == TreeTableModel.class) {
 						MouseEvent me = (MouseEvent) e;
@@ -93,11 +102,12 @@ public class JTreeTable extends JTable {
 								.getWhen(), me.getModifiers(), me.getX()
 								- getCellRect(0, counter, true).x, me.getY(),
 								me.getClickCount(), me.isPopupTrigger());
-						// System.out.println(newME);
 						if (me.getClickCount() == 1) {
 							tree.dispatchEvent(newME);
 						}
-						// break;
+					}
+					else{
+						
 					}
 				}
 			}
@@ -111,11 +121,6 @@ public class JTreeTable extends JTable {
 			setRowHeight(18);
 		}
 
-	}
-
-	public JTreeTable(TreeTableModel treeTableModel) {
-		super();
-		setModel(treeTableModel);
 	}
 
 	/**
@@ -325,19 +330,20 @@ public class JTreeTable extends JTable {
 	}
 
 	/**
-	 * A TreeCellRenderer that displays a date in a "yyyy-MM-dd HH:mm:ss" format.
+	 * A TreeCellRenderer that displays a date in a "yyyy-MM-dd HH:mm:ss"
+	 * format.
 	 */
-	public class DateCellRenderer extends JLabel implements TableCellRenderer{
+	public class DateCellRenderer extends JLabel implements TableCellRenderer {
 		/** Last table/tree row asked to renderer. */
 		protected int visibleRow;
 		protected Border highlightBorder;
 
-	    Border selectedBorder = null;
-	    Border unselectedBorder = null;
+		Border selectedBorder = null;
+		Border unselectedBorder = null;
 
 		public DateCellRenderer() {
-	        setOpaque(true);
-	    }
+			setOpaque(true);
+		}
 
 		public Component getTableCellRendererComponent(JTable table,
 				Object value, boolean isSelected, boolean hasFocus, int row,
@@ -349,7 +355,7 @@ public class JTreeTable extends JTable {
 							5, table.getSelectionBackground());
 				}
 				setBorder(selectedBorder);
-				this.setBackground(table.getSelectionBackground());			
+				this.setBackground(table.getSelectionBackground());
 				this.setForeground(table.getSelectionForeground());
 			} else {
 				if (unselectedBorder == null) {
@@ -361,13 +367,13 @@ public class JTreeTable extends JTable {
 				this.setForeground(table.getForeground());
 			}
 
-			Date date = (Date)((TreeTableModelAdapter) getModel()).getValueAt(row, column);
+			Date date = (Date) ((TreeTableModelAdapter) getModel()).getValueAt(
+					row, column);
 			if (date != null) {
 				SimpleDateFormat sdf = new SimpleDateFormat(
 						"yyyy-MM-dd HH:mm:ss");
 				this.setText(sdf.format(date));
-			}
-			else{
+			} else {
 				this.setText(null);
 			}
 			return this;
@@ -375,7 +381,6 @@ public class JTreeTable extends JTable {
 
 	}
 
-	
 	/**
 	 * TreeTableCellEditor implementation. Component returned is the JTree.
 	 */
@@ -416,33 +421,34 @@ public class JTreeTable extends JTable {
 			return component;
 		}
 
-//		/**
-//		 * This is overridden to forward the event to the tree. This will return
-//		 * true if the click count >= 3, or the event is null.
-//		 */
-//		public boolean isCellEditable(EventObject e) {
-//			/**
-//			 * if (e instanceof MouseEvent) { for (int counter =
-//			 * getColumnCount() - 1; counter >= 0; counter--) { if
-//			 * (getColumnClass(counter) == TreeTableModel.class) { MouseEvent me
-//			 * = (MouseEvent)e; MouseEvent newME = new MouseEvent(tree,
-//			 * me.getID(), me.getWhen(), me.getModifiers(), me.getX() -
-//			 * getCellRect(0, counter, true).x, me.getY(), me.getClickCount(),
-//			 * me.isPopupTrigger()); System.out.println(newME);
-//			 * tree.dispatchEvent(newME); break; } } }
-//			 */
-//			if (e instanceof MouseEvent) {
-//				MouseEvent me = (MouseEvent) e;
-//				if (me.getClickCount() >= 3) {
-//					return true;
-//				}
-//			}
-//			if (e == null) {
-//				return true;
-//			}
-//			return false;
-//		}
-		
+		// /**
+		// * This is overridden to forward the event to the tree. This will
+		// return
+		// * true if the click count >= 3, or the event is null.
+		// */
+		// public boolean isCellEditable(EventObject e) {
+		// /**
+		// * if (e instanceof MouseEvent) { for (int counter =
+		// * getColumnCount() - 1; counter >= 0; counter--) { if
+		// * (getColumnClass(counter) == TreeTableModel.class) { MouseEvent me
+		// * = (MouseEvent)e; MouseEvent newME = new MouseEvent(tree,
+		// * me.getID(), me.getWhen(), me.getModifiers(), me.getX() -
+		// * getCellRect(0, counter, true).x, me.getY(), me.getClickCount(),
+		// * me.isPopupTrigger()); System.out.println(newME);
+		// * tree.dispatchEvent(newME); break; } } }
+		// */
+		// if (e instanceof MouseEvent) {
+		// MouseEvent me = (MouseEvent) e;
+		// if (me.getClickCount() >= 3) {
+		// return true;
+		// }
+		// }
+		// if (e == null) {
+		// return true;
+		// }
+		// return false;
+		// }
+
 		/**
 		 * This is overridden to forward the event to the tree. This will return
 		 * true if the click count >= 3, or the event is null.
@@ -450,10 +456,12 @@ public class JTreeTable extends JTable {
 		public boolean isCellEditable(EventObject e) {
 			// Edit on double click rather than the default triple
 			if (e instanceof MouseEvent) {
+				
 				MouseEvent me = (MouseEvent) e;
 				if (me.getClickCount() == 1
 						&& System.getProperty("os.name").equals("Mac OS X")) {
-					// Workaround for buggy tree table on OS X. Open/close the path
+					// Workaround for buggy tree table on OS X. Open/close the
+					// path
 					// on any click on the column (not just on the > icon)
 					for (int counter = getColumnCount() - 1; counter >= 0; counter--) {
 						if (getColumnClass(counter) == TreeTableModel.class) {
@@ -482,9 +490,9 @@ public class JTreeTable extends JTable {
 					}
 
 				}
-				/*if (me.getClickCount() >= 3) {
-					return true;
-				}*/ // tree is no editable
+				/*
+				 * if (me.getClickCount() >= 3) { return true; }
+				 */// tree is no editable
 			}
 			if (e == null) {
 				return true;
@@ -494,7 +502,6 @@ public class JTreeTable extends JTable {
 
 	}
 
-		
 	/**
 	 * Component used by TreeTableCellEditor. The only thing this does is to
 	 * override the <code>reshape</code> method, and to ALWAYS make the x
@@ -597,7 +604,7 @@ public class JTreeTable extends JTable {
 
 		/**
 		 * Class responsible for calling updateSelectedPathsFromSelectedRows
-		 * when the selection of the list changse.
+		 * when the selection of the list change.
 		 */
 		class ListSelectionHandler implements ListSelectionListener {
 			public void valueChanged(ListSelectionEvent e) {
