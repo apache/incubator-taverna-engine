@@ -8,7 +8,7 @@ import java.awt.Graphics;
 import javax.swing.JSplitPane;
 
 /**
- * @author alanrw
+ * Copied from code found on http://www.jguru.com
  *
  */
 public class JSplitPaneExt extends JSplitPane {
