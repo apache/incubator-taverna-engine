@@ -12,7 +12,7 @@ public class NestedListNode {
 	String collId;
 	String parentCollIdRef;
 	String wfInstanceRef;
-	String PNameRef;
+	String processorNameRef;
 	String varNameRef;
 	String iteration;
 	/**
@@ -52,16 +52,16 @@ public class NestedListNode {
 		this.wfInstanceRef = wfInstanceRef;
 	}
 	/**
-	 * @return the pNameRef
+	 * @return the processorNameRef
 	 */
-	public String getPNameRef() {
-		return PNameRef;
+	public String getprocessorNameRef() {
+		return processorNameRef;
 	}
 	/**
-	 * @param nameRef the pNameRef to set
+	 * @param nameRef the processorNameRef to set
 	 */
-	public void setPNameRef(String nameRef) {
-		PNameRef = nameRef;
+	public void setprocessorNameRef(String nameRef) {
+		processorNameRef = nameRef;
 	}
 	/**
 	 * @return the varNameRef

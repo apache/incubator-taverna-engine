@@ -287,7 +287,7 @@ public class OPMImporter {
 		PortBinding vb = new PortBinding();
 
 		vb.setWfInstanceRef(wfInstance);
-		vb.setPNameRef(procName);
+		vb.setprocessorNameRef(procName);
 		vb.setVarNameRef(varName);
 		vb.setValue(value);
 		vb.setIterationVector("[]");

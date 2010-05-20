@@ -248,8 +248,8 @@ public class ProvenanceWriter {
 	public ProvenanceProcessor addProcessor(String name, String wfID, boolean isTopLevel) throws SQLException {
 		ProvenanceProcessor provProc = new ProvenanceProcessor();
 		provProc.setIdentifier(UUID.randomUUID().toString());
-		provProc.setPname(name);
-		provProc.setWfInstanceRef(wfID);
+		provProc.setProcessorName(name);
+		provProc.setWorkflowId(wfID);
 		provProc.setTopLevelProcessor(isTopLevel);
 		// pType is unknown
 		addProcessor(provProc);
@@ -274,11 +274,11 @@ public class ProvenanceWriter {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-			"INSERT INTO Processor (pname, type, wfInstanceRef, isTopLevel, processorId) VALUES (?,?,?,?,?)");
+			"INSERT INTO Processor (processorName, firstActivityClass, workflowId, isTopLevel, processorId) VALUES (?,?,?,?,?)");
 
-			ps.setString(1, provProc.getPname());
-			ps.setString(2, provProc.getType());
-			ps.setString(3, provProc.getWfInstanceRef());
+			ps.setString(1, provProc.getProcessorName());
+			ps.setString(2, provProc.getFirstActivityClassName());
+			ps.setString(3, provProc.getWorkflowId());
 			ps.setBoolean(4, provProc.isTopLevelProcessor());
 			ps.setString(5, provProc.getIdentifier());
 
@@ -346,7 +346,7 @@ public class ProvenanceWriter {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-			"INSERT INTO Collection (PNameRef, wfInstanceRef, varNameRef, iteration, parentCollIdRef, collId) VALUES(?,?,?,?,?,?)");
+			"INSERT INTO Collection (processorNameRef, wfInstanceRef, varNameRef, iteration, parentCollIdRef, collId) VALUES(?,?,?,?,?,?)");
 
 			if (parentCollectionId == null) {
 				// this is a top-level list
@@ -382,10 +382,10 @@ public class ProvenanceWriter {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-			"INSERT INTO PortBinding (wfNameRef, pnameRef, wfInstanceRef, varNameRef, valueType, value, ref, collIdRef, iteration,positionInColl) VALUES(?,?,?,?,?,?,?,?,?,?)");
+			"INSERT INTO PortBinding (wfNameRef, processorNameRef, wfInstanceRef, varNameRef, valueType, value, ref, collIdRef, iteration,positionInColl) VALUES(?,?,?,?,?,?,?,?,?,?)");
 
 			ps.setString(1, vb.getWfNameRef());
-			ps.setString(2, vb.getPNameRef());
+			ps.setString(2, vb.getprocessorNameRef());
 			ps.setString(3, vb.getWfInstanceRef());
 			ps.setString(4, vb.getVarNameRef());
 			ps.setString(5, vb.getValueType());
@@ -424,7 +424,7 @@ public class ProvenanceWriter {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-					"UPDATE Port SET isInputPort=?, depth = ?," + "resolvedDepth = ?, iterationStrategyOrder = ? WHERE varName = ? AND pnameRef = ? AND wfInstanceRef = ?");
+					"UPDATE Port SET isInputPort=?, depth = ?," + "resolvedDepth = ?, iterationStrategyOrder = ? WHERE varName = ? AND processorNameRef = ? AND wfInstanceRef = ?");
 			int i = v.isInputPort() ? 1 : 0;
 			ps.setInt(1, i);
 			ps.setInt(2, v.getDepth());
@@ -484,7 +484,7 @@ public class ProvenanceWriter {
 			connection = getConnection();
 			ps = connection.prepareStatement(
 					"UPDATE PortBinding SET valueType = ?, value = ?, ref = ?, collIdRef = ?, positionInColl = ? "+
-			"WHERE varNameRef = ? AND wfInstanceRef = ? AND pnameRef = ? AND iteration = ?");
+			"WHERE varNameRef = ? AND wfInstanceRef = ? AND processorNameRef = ? AND iteration = ?");
 
 			ps.setString(1, vb.getValueType());
 			ps.setString(2, vb.getValue());
@@ -493,7 +493,7 @@ public class ProvenanceWriter {
 			ps.setInt(5, vb.getPositionInColl());
 			ps.setString(6, vb.getVarNameRef());
 			ps.setString(7, vb.getWfInstanceRef());
-			ps.setString(8, vb.getPNameRef());
+			ps.setString(8, vb.getprocessorNameRef());
 			ps.setString(9, vb.getIteration());
 
 			ps.executeUpdate();
@@ -523,7 +523,7 @@ public class ProvenanceWriter {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-					"DELETE FROM Collection WHERE collId = ? and wfInstanceRef = ?" + " and varNameRef = ? and pnameRef = ? and iteration = ?");
+					"DELETE FROM Collection WHERE collId = ? and wfInstanceRef = ?" + " and varNameRef = ? and processorNameRef = ? and iteration = ?");
 			ps.setString(1, nln.getCollId());
 			ps.setString(2, nln.getWfInstanceRef());
 			ps.setString(3, prevVarName);

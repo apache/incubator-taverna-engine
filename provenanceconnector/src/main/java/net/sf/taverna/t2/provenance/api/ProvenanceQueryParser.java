@@ -194,7 +194,7 @@ public class ProvenanceQueryParser {
 
 		List<ProvenanceProcessor> myProcs = allProcessors.get(workflowID);  // processors for this specific workflow
 		for (ProvenanceProcessor pp:myProcs) {
-			if (procScope.equals(pp.getPname())) {
+			if (procScope.equals(pp.getProcessorName())) {
 				List<ProvenanceProcessor> ppList = new ArrayList<ProvenanceProcessor>();
 				ppList.add(pp);
 				return ppList;

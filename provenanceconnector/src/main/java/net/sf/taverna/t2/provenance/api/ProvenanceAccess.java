@@ -372,11 +372,14 @@ public class ProvenanceAccess {
 
 
 	/**
+	 * @deprecated This method is not workflowID aware and should not be used
+	 * 
 	 * @param a workflow processor name
 	 * @return the IDs of all workflows that contain a processor named pname
 	 */
-	public List<Workflow> getContainingWorkflowsForProcessor(String pname) {
-		return pq.getContainingWorkflowsForProcessor(pname);
+	@Deprecated
+	public List<Workflow> getContainingWorkflowsForProcessor(String processorName) {
+		return pq.getContainingWorkflowsForProcessor(processorName);
 	}
 
 
@@ -572,8 +575,8 @@ public class ProvenanceAccess {
 		return pq.getProcessorEnactments(workflowRunId, processorPath);
 	}
 
-	public ProvenanceProcessor getProvenanceProcessor(String workflowId, String pNameRef) {
-		return pq.getProvenanceProcessor(workflowId, pNameRef);		
+	public ProvenanceProcessor getProvenanceProcessor(String workflowId, String processorNameRef) {
+		return pq.getProvenanceProcessor(workflowId, processorNameRef);		
 	}
 	public ProvenanceProcessor getProvenanceProcessor(String processorId) {
 		return pq.getProvenanceProcessor(processorId);		

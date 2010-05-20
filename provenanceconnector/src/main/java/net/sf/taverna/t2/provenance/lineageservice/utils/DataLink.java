@@ -100,15 +100,15 @@ public class DataLink {
 	}
 
 	/**
-	 * @return the sourcePNameRef
+	 * @return the sourceprocessorNameRef
 	 */
 	public String getDestinationProcessorName() {
 		return destinationProcessorName;
 	}
 
 	/**
-	 * @param sourcePNameRef
-	 *            the sourcePNameRef to set
+	 * @param sourceprocessorNameRef
+	 *            the sourceprocessorNameRef to set
 	 */
 	public void setDestinationProcessorName(String destinationProcessorName) {
 		this.destinationProcessorName = destinationProcessorName;

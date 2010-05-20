@@ -304,7 +304,7 @@ public class ProvenanceAnalysis {
 		if (path.equals(ALL_PATHS_KEYWORD)) {
 
 			Map<String, String> vbConstraints = new HashMap<String, String>();
-			vbConstraints.put("VB.PNameRef", proc);
+			vbConstraints.put("VB.processorNameRef", proc);
 			vbConstraints.put("VB.varNameRef", var);
 			vbConstraints.put("VB.wfInstanceRef", wfInstance);
 
@@ -570,7 +570,7 @@ public class ProvenanceAnalysis {
 		// is <wfNameRef, proc>  in selectedProcessors?
 		boolean isSelected = false;
 		for (ProvenanceProcessor pp: selectedProcessors)  {
-			if (pp.getWfInstanceRef().equals(wfNameRef) && pp.getPname().equals(proc)) {
+			if (pp.getWorkflowId().equals(wfNameRef) && pp.getProcessorName().equals(proc)) {
 				List<List<String>> paths = validPaths.get(pp);
 
 				// copy the path since the original will change
@@ -613,7 +613,7 @@ public class ProvenanceAnalysis {
 			if (doOPM) {
 				// fetch value for this variable and assert it as an Artifact in the OPM graph
 				Map<String, String> vbConstraints = new HashMap<String, String>();
-				vbConstraints.put("VB.PNameRef", outputVar.getProcessorName());
+				vbConstraints.put("VB.processorNameRef", outputVar.getProcessorName());
 				vbConstraints.put("VB.varNameRef", outputVar.getPortName());
 				vbConstraints.put("VB.wfInstanceRef", wfID);
 
@@ -643,9 +643,9 @@ public class ProvenanceAnalysis {
 					replace(',', '-').replace('[', ' ').replace(']', ' ').trim();
 
 					if (URIFriendlyIterationVector.length()>0) {
-						role = vb.getPNameRef()+"/"+vb.getVarNameRef()+"?it="+URIFriendlyIterationVector;
+						role = vb.getprocessorNameRef()+"/"+vb.getVarNameRef()+"?it="+URIFriendlyIterationVector;
 					} else
-						role = vb.getPNameRef()+"/"+vb.getVarNameRef();
+						role = vb.getprocessorNameRef()+"/"+vb.getVarNameRef();
 
 					if (aOPMManager!=null && !pq.isDataflow(proc)) {
 						if (isRecordArtifactValues())
@@ -780,7 +780,7 @@ public class ProvenanceAnalysis {
 
 //		varsQueryConstraints.put("W.instanceID", wfInstanceID);
 		varsQueryConstraints.put("portId", a.getSourcePortId());
-//		varsQueryConstraints.put("pnameRef", sourceProcName);  
+//		varsQueryConstraints.put("processorNameRef", sourceProcName);  
 //		varsQueryConstraints.put("varName", sourceVarName);  
 		List<Port>  varList  = getPq().getPorts(varsQueryConstraints);
 

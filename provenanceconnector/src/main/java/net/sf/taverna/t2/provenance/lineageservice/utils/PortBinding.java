@@ -32,7 +32,7 @@ public class PortBinding {
 	String value;
 	String collIDRef;
 	int positionInColl;
-	String PNameRef;
+	String processorNameRef;
 	String valueType;
 	String ref;
 	String    iterationVector;
@@ -46,7 +46,7 @@ public class PortBinding {
 		sb.append("**** PortBinding: \n").
 			append("wfInstanceRef = "+wfInstanceRef+"\n").
 			append("wfNameRef = "+wfNameRef+"\n").
-			append("PNameRef = "+PNameRef+"\n").
+			append("processorNameRef = "+processorNameRef+"\n").
 			append("varNameRef = "+varNameRef+"\n").
 			append("iteration = "+iterationVector+"\n").
 			append("collIdef  " +collIDRef+"\n").
@@ -109,16 +109,16 @@ public class PortBinding {
 		this.wfInstanceRef = wfInstanceRef;
 	}
 	/**
-	 * @return the pNameRef
+	 * @return the processorNameRef
 	 */
-	public String getPNameRef() {
-		return PNameRef;
+	public String getprocessorNameRef() {
+		return processorNameRef;
 	}
 	/**
-	 * @param nameRef the pNameRef to set
+	 * @param nameRef the processorNameRef to set
 	 */
-	public void setPNameRef(String nameRef) {
-		PNameRef = nameRef;
+	public void setprocessorNameRef(String nameRef) {
+		processorNameRef = nameRef;
 	}
 	/**
 	 * @return the collIDRef

@@ -27,14 +27,15 @@ package net.sf.taverna.t2.provenance.lineageservice.utils;
  */
 public class ProvenanceProcessor {
 	
-	String identifier;
-	String pname;
-	String wfInstanceRef;
-	String type;
+	public static final String DATAFLOW_ACTIVITY = "net.sf.taverna.t2.activities.dataflow.DataflowActivity";
+	
+	private String identifier;
+	private String processorName;
+	private String workflowId;
+	private String firstActivityClassName;
 	private boolean isTopLevelProcessor;
 	
-	public ProvenanceProcessor() {
-		
+	public ProvenanceProcessor() {		
 	}
 	
 	
@@ -42,50 +43,57 @@ public class ProvenanceProcessor {
 
 		StringBuffer sb = new StringBuffer();
 		sb.append("PROCESSOR: ****").
-		append("\nworkflow: "+getWfInstanceRef()).
-		append("\nprocessor name: "+getPname()).
-		append("\ntype: "+getType());
+		append("\nworkflow: "+getWorkflowId()).
+		append("\nprocessor name: "+getProcessorName()).
+		append("\ntype: "+getFirstActivityClassName());
 
 		return sb.toString();
 	}
 
 	
 	/**
-	 * @return the wfInstanceRef
+	 * @return the workflowId
 	 */
-	public String getWfInstanceRef() {
-		return wfInstanceRef;
+	public String getWorkflowId() {
+		return workflowId;
 	}
 	/**
-	 * @param wfInstanceRef the wfInstanceRef to set
+	 * @param workflowId the workflowId to set
 	 */
-	public void setWfInstanceRef(String wfInstanceRef) {
-		this.wfInstanceRef = wfInstanceRef;
+	public void setWorkflowId(String workflowId) {
+		this.workflowId = workflowId;
 	}
 	/**
-	 * @return the type
+	 * @return    The fully qualified classname for the first activity in this
+	 *            processor, or {@link #DATAFLOW_ACTIVITY} if this is a virtual
+	 *            processor representing the workflow itself.
 	 */
-	public String getType() {
-		return type;
+	public String getFirstActivityClassName() {
+		return firstActivityClassName;
+	}
+
+	/**
+	 * @param firstActivityClassName
+	 *            The fully qualified classname for the first activity in this
+	 *            processor, or {@link #DATAFLOW_ACTIVITY} if this is a virtual
+	 *            processor representing the workflow itself.
+	 */
+	public void setFirstActivityClassName(String firstActivityClassName) {
+		this.firstActivityClassName = firstActivityClassName;
 	}
 	/**
-	 * @param type the type to set
+	 * @return the processorName
 	 */
-	public void setType(String type) {
-		this.type = type;
+	public String getProcessorName() {
+		return processorName;
 	}
 	/**
-	 * @return the pname
+	 * @param processorName the processorName to set
 	 */
-	public String getPname() {
-		return pname;
+	public void setProcessorName(String processorName) {
+		this.processorName = processorName;
 	}
-	/**
-	 * @param pname the pname to set
-	 */
-	public void setPname(String pname) {
-		this.pname = pname;
-	}
+	
 	public void setIdentifier(String identifier) {
 		this.identifier = identifier;
 	}

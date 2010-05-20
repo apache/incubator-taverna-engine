@@ -29,7 +29,7 @@ package net.sf.taverna.t2.provenance.lineageservice.utils;
 public class ProcBinding {
 	private String identifier;
 
-	private String pNameRef;
+	private String processorNameRef;
 	private String execIDRef;
 	private String wfNameRef;
 	private String actName;
@@ -43,7 +43,7 @@ public class ProcBinding {
 		sb.append("**** ProcBinding: \n").
 			append("execIDRef = "+execIDRef+"\n").
 			append("wfNameRef = "+wfNameRef+"\n").
-			append("PNameRef = "+pNameRef+"\n").
+			append("processorNameRef = "+processorNameRef+"\n").
 			append("actName = "+actName+"\n").
 			append("iteration = "+iterationVector+"\n");
 
@@ -51,16 +51,16 @@ public class ProcBinding {
 	}
 	
 	/**
-	 * @return the pNameRef
+	 * @return the processorNameRef
 	 */
-	public String getPNameRef() {
-		return pNameRef;
+	public String getprocessorNameRef() {
+		return processorNameRef;
 	}
 	/**
-	 * @param nameRef the pNameRef to set
+	 * @param nameRef the processorNameRef to set
 	 */
-	public void setPNameRef(String nameRef) {
-		pNameRef = nameRef;
+	public void setprocessorNameRef(String nameRef) {
+		processorNameRef = nameRef;
 	}
 	/**
 	 * @return the execIDRef

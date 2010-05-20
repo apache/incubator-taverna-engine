@@ -128,7 +128,7 @@ public class WorkflowDataProcessor {
 						vb.setWfNameRef(dataflowID);
 						vb.setWfInstanceRef(wfInstanceRef);
 						
-						vb.setPNameRef(pq.getWorkflow(dataflowID).getExternalName());
+						vb.setprocessorNameRef(pq.getWorkflow(dataflowID).getExternalName());
 						
 						// vb.setValueType(); // TODO not sure what to set this to
 						vb.setVarNameRef(varName);
