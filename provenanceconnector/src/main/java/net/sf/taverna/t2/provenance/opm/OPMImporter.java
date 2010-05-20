@@ -18,6 +18,7 @@ import javax.xml.bind.JAXBException;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceWriter;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Port;
 import net.sf.taverna.t2.provenance.lineageservice.utils.PortBinding;
+import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 
 import org.apache.log4j.Logger;
 import org.openprovenance.model.Account;
@@ -255,8 +256,9 @@ public class OPMImporter {
 			String wfName, String wfInstance, boolean artifactIsInput) {
 
 		// generate Process
+		ProvenanceProcessor proc = null;
 		try {
-			pw.addProcessor(procName, wfName, false);
+			proc = pw.addProcessor(procName, wfName, false);
 			logger.debug("added processor "+procName+" to workflow "+wfName);
 		} catch (SQLException e) {  // no panic -- just catch duplicates
 			logger.warn(e.getMessage());
@@ -264,7 +266,7 @@ public class OPMImporter {
 
 		// generate Port
 		Port outputVar = new Port();
-
+		outputVar.setProcessorId(proc.getIdentifier());
 		outputVar.setProcessorName(procName);
 		outputVar.setWorkflowId(wfName);
 		outputVar.setPortName(varName);

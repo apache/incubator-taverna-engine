@@ -87,7 +87,7 @@ public class ProvenanceQueryParser {
 		try {
 			d = b.build (new FileReader((XMLQuerySpecFilename)));
 		} catch (Exception e) {
-			logger.error("Problem parsing provenance query: " + e);
+			logger.error("Problem parsing provenance query", e);
 			return null;
 		}
 
@@ -111,7 +111,7 @@ public class ProvenanceQueryParser {
 		try {
 			d = b.build(queryStream);
 		} catch (Exception e) {
-			logger.error("Problem parsing provenance query: " + e);
+			logger.error("Problem parsing provenance query", e);
 			return null;
 		}
 

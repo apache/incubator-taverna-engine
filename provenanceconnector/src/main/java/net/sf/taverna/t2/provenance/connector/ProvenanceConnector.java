@@ -267,7 +267,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 				}
 				
 			} catch (SQLException e) {
-				logger.error("Problem clearing database: " + e);
+				logger.error("Problem clearing database", e);
 			}
 		} else {
 			System.out.println("clearDB is FALSE: not clearing");

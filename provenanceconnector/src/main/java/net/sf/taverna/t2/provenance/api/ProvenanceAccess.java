@@ -133,7 +133,7 @@ public class ProvenanceAccess {
 			context = new InitialContext();
 			context.rebind("jdbc/taverna", ds);
 		} catch (NamingException ex) {
-			logger.error("Problem rebinding the jdbc context: " + ex);
+			logger.error("Problem rebinding the jdbc context", ex);
 		}
 
 	}
@@ -240,7 +240,7 @@ public class ProvenanceAccess {
 		try {
 			return pa.fetchIntermediateResult(wfInstance, workflowId, pname, port, iteration);
 		} catch (SQLException e) {
-			logger.error("Problem with fetching intermediate results: " + e);
+			logger.error("Problem with fetching intermediate results", e);
 		}
 		return null;
 	}
@@ -267,7 +267,7 @@ public class ProvenanceAccess {
 		try {
 			return pq.getRuns(workflowId, conditions);
 		} catch (SQLException e) {
-			logger.error("Problem with listing runs: " + e);
+			logger.error("Problem with listing runs", e);
 			return null;
 		}
 	}
@@ -299,7 +299,7 @@ public class ProvenanceAccess {
 
 			// TODO send the list of dangling refs to the Data manager for removal of the corresponding data values
 		} catch (SQLException e) {
-			logger.error("Problem while removing run : " + runID + " : "+ e.getMessage());
+			logger.error("Problem while removing run : " + runID, e);
 		}
 		return danglingDataRefs; 
 	}
@@ -315,7 +315,7 @@ public class ProvenanceAccess {
 		try {
 			pw.clearDBStatic(wfName);
 		} catch (SQLException e) {
-			logger.error("Problem with removing static workflow: " + wfName+ " : "+ e.getMessage());
+			logger.error("Problem with removing static workflow: " + wfName, e);
 		}
 	}
 
@@ -331,7 +331,7 @@ public class ProvenanceAccess {
 		try {
 			return pq.getWfNames(runID);
 		} catch (SQLException e) {
-			logger.error("Problem getting workflow ID: " + runID + " : " + e);
+			logger.error("Problem getting workflow ID: " + runID, e);
 		}
 		return null;
 	}
@@ -346,7 +346,7 @@ public class ProvenanceAccess {
 		try {
 			return pq.getTopLevelWfName(runID);
 		} catch (SQLException e) {
-			logger.error("Problem getting top level workflow: " + runID + " : " + e);
+			logger.error("Problem getting top level workflow: " + runID, e);
 		}
 		return null;
 	}
@@ -361,7 +361,7 @@ public class ProvenanceAccess {
 		try {
 			return pq.getRuns(null, null);
 		} catch (SQLException e) {
-			logger.error("Problem getting all workflow IDs: " + e);
+			logger.error("Problem getting all workflow IDs", e);
 			return null;
 		}
 
@@ -405,13 +405,13 @@ public class ProvenanceAccess {
 		Workflow w = pq.getWorkflow(workflowID);
 
 		Map<String, String> queryConstraints = new HashMap<String, String>();
-		queryConstraints.put("wfInstanceRef", workflowID);
-		queryConstraints.put("pnameRef", w.getExternalName());
+		queryConstraints.put("workflowId", workflowID);
+		queryConstraints.put("processorName", w.getExternalName());
 
 		try {
 			return pq.getPorts(queryConstraints);
 		} catch (SQLException e) {
-			logger.error("Problem getting ports for dataflow: " + workflowID + " : " + e);
+			logger.error("Problem getting ports for dataflow: " + workflowID, e);
 		}
 		return null;
 	}
@@ -427,13 +427,13 @@ public class ProvenanceAccess {
 	public List<Port> getPortsForProcessor(String workflowID, String processorName) {
 
 		Map<String, String> queryConstraints = new HashMap<String, String>();
-		queryConstraints.put("wfInstanceRef", workflowID);
-		queryConstraints.put("pnameRef", processorName);
+		queryConstraints.put("workflowId", workflowID);
+		queryConstraints.put("processorName", processorName);
 
 		try {
 			return pq.getPorts(queryConstraints);
 		} catch (SQLException e) {
-			logger.error("Problem getting ports for processor: " + processorName + " worflow: " + workflowID + " : " + e);
+			logger.error("Problem getting ports for processor: " + processorName + " worflow: " + workflowID, e);
 		}
 		return null;
 	}

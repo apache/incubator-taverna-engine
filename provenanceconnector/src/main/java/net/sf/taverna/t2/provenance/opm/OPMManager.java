@@ -154,7 +154,7 @@ public class OPMManager {
 				Literal lValue = Resource.literal(extractedValue);
 				context.addTriple(r, Resource.uriRef(OPM_TAVERNA_NAMESPACE+VALUE_PROP), lValue);
 			} catch (OperatorException e) {
-				logger.warn("OPM iteration triple creation exception: "+e.getMessage());
+				logger.warn("OPM iteration triple creation exception", e);
 			}
 		}  else {
 //			System.out.println("OPMManager::addArtifact: aValue for ["+aName+"] is NULL");
@@ -214,7 +214,7 @@ public class OPMManager {
 			try {
 				context.addTriple(processResource, Resource.uriRef(OPM_TAVERNA_NAMESPACE+"iteration"), iterationVector);
 			} catch (OperatorException e) {
-				logger.warn("OPM iteration triple creation exception: "+e.getMessage());
+				logger.warn("OPM iteration triple creation exception", e);
 			}
 		}
 	}
@@ -330,9 +330,9 @@ public class OPMManager {
 			return sw.toString();
 
 		} catch (OperatorException e) {
-			logger.error("Could not write graph: " + e);
+			logger.error("Could not write graph", e);
 		} catch (IOException e) {
-			logger.error("Could not write graph: " + e);
+			logger.error("Could not write graph", e);
 		}	
 		return null;
 	}

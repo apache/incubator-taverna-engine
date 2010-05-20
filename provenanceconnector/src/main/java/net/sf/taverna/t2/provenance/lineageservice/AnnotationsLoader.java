@@ -94,9 +94,9 @@ public class AnnotationsLoader {
 			
 
 		} catch (JDOMException e) {
-			logger.error("Problem getting annotations from: " + annotationFile + " : " + e);
+			logger.error("Problem getting annotations from: " + annotationFile, e);
 		} catch (IOException e) {
-			logger.error("Problem getting annotations from: " + annotationFile + " : " + e);
+			logger.error("Problem getting annotations from: " + annotationFile, e);
 		} 
 		return procAnnotations;
 

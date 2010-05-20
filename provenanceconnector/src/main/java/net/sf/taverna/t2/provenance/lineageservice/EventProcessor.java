@@ -340,6 +340,7 @@ public class EventProcessor {
 
 					Port inputVar = new Port();
 					inputVar.setIdentifier(UUID.randomUUID().toString());
+					inputVar.setProcessorId(provProc.getIdentifier());
 					inputVar.setProcessorName(pName);
 					inputVar.setWorkflowId(dataflowID);
 					inputVar.setPortName(ip.getName());
@@ -362,6 +363,7 @@ public class EventProcessor {
 					Port outputVar = new Port();
 					outputVar.setIdentifier(UUID.randomUUID().toString());
 					outputVar.setProcessorName(pName);
+					outputVar.setProcessorId(provProc.getIdentifier());
 					outputVar.setWorkflowId(dataflowID);
 					outputVar.setPortName(op.getName());
 					outputVar.setDepth(op.getDepth());
@@ -418,6 +420,7 @@ public class EventProcessor {
 
 				Port inputVar = new Port();
 				inputVar.setIdentifier(UUID.randomUUID().toString());
+				inputVar.setProcessorId(null); // meaning workflow port
 				inputVar.setProcessorName(pName);
 				inputVar.setWorkflowId(dataflowID);
 				inputVar.setPortName(ip.getName());
@@ -446,6 +449,7 @@ public class EventProcessor {
 
 				Port outputVar = new Port();
 				outputVar.setIdentifier(UUID.randomUUID().toString());
+				outputVar.setProcessorId(null); // meaning workflow port
 				outputVar.setProcessorName(pName);
 				outputVar.setWorkflowId(dataflowID);
 				outputVar.setPortName(op.getName());
@@ -620,12 +624,6 @@ public class EventProcessor {
 					.getOutputDataItem();
 			processInput(inputDataEl, procBinding, currentWorkflowID);
 			processOutput(outputDataEl, procBinding, currentWorkflowID);
-
-			try {
-				getPw().addProcessorBinding(procBinding);
-			} catch (SQLException e) {
-				logger.debug("provenance has duplicate processor binding -- skipping the insertion"); //, e);
-			}
 			
 			ProcessorEnactment processorEnactment = new ProcessorEnactment();
 			processorEnactment.setEnactmentStarted(iterationProvenanceItem.getEnactmentStarted());
@@ -722,11 +720,11 @@ public class EventProcessor {
 	private Port findPort(ProvenanceProcessor provenanceProcessor, String portName, boolean isInput) {
 		// TODO: Query pr dataflow and cache
 		Map<String, String> queryConstraints = new HashMap<String, String>();
-		queryConstraints.put("wfInstanceRef", provenanceProcessor.getWfInstanceRef());
+		queryConstraints.put("workflowId", provenanceProcessor.getWfInstanceRef());
 		String processorName = provenanceProcessor.getPname();
-		queryConstraints.put("pNameRef", processorName);
-		queryConstraints.put("varName", portName);
-		queryConstraints.put("inputOrOutput", isInput ? "1" : "0");
+		queryConstraints.put("processorName", processorName);
+		queryConstraints.put("portName", portName);
+		queryConstraints.put("isInputPort", isInput ? "1" : "0");
 		try {
 			List<Port> vars = pq.getPorts(queryConstraints);
 			if (vars.isEmpty()) {
@@ -763,7 +761,7 @@ public class EventProcessor {
 
 		List<Port> inputs=null;
 		try {
-			inputs = getPq().getInputVars(topLevelDataflowName, topLevelDataflowID, getWfInstanceID());
+			inputs = getPq().getInputPorts(topLevelDataflowName, topLevelDataflowID, getWfInstanceID());
 
 			for (Port input:inputs)  {
 
@@ -784,10 +782,10 @@ public class EventProcessor {
 //				logger.info("copying values from ["+targetPname+":"+targetVname+"] for instance ID: ["+wfInstanceID+"]");
 
 				queryConstraints.clear();
-				queryConstraints.put("varNameRef", targetVname);
-				queryConstraints.put("V.pNameRef", targetPname);
+				queryConstraints.put("V.portName", targetVname);
+				queryConstraints.put("V.processorName", targetPname);
 				queryConstraints.put("VB.wfInstanceRef", getWfInstanceID());
-				queryConstraints.put("V.wfInstanceRef", topLevelDataflowID);
+				queryConstraints.put("V.workflowId", topLevelDataflowID);
 
 				List<PortBinding> VBs = getPq().getPortBindings(queryConstraints);
 
@@ -852,7 +850,7 @@ public class EventProcessor {
 		List<Port> outputs=null;
 		try {
 
-			outputs = pq.getOutputVars(topLevelDataflowName, topLevelDataflowID, null);  // null InstanceID 
+			outputs = pq.getOutputPorts(topLevelDataflowName, topLevelDataflowID, null);  // null InstanceID 
 
 			// for each output O
 			for (Port output:outputs)  {
@@ -882,10 +880,10 @@ public class EventProcessor {
 				String sourceVname = incomingDataLinks.get(0).getSourcePortName();
 
 				queryConstraints.clear();
-				queryConstraints.put("varNameRef", sourceVname);
-				queryConstraints.put("V.pNameRef", sourcePname);
+				queryConstraints.put("V.portName", sourceVname);
+				queryConstraints.put("V.processorName", sourcePname);
 				queryConstraints.put("VB.wfInstanceRef", getWfInstanceID());
-				queryConstraints.put("V.wfInstanceRef", topLevelDataflowID);
+				queryConstraints.put("V.workflowId", topLevelDataflowID);
 
 				List<PortBinding> YValues = pq.getPortBindings(queryConstraints);
 
@@ -901,10 +899,10 @@ public class EventProcessor {
 
 					// look for a matching record in PortBinding for output O
 					queryConstraints.clear();
-					queryConstraints.put("varNameRef", output.getPortName());
-					queryConstraints.put("V.pNameRef", output.getProcessorName());
+					queryConstraints.put("V.portName", output.getPortName());
+					queryConstraints.put("V.processorName", output.getProcessorName());
 					queryConstraints.put("VB.wfInstanceRef", getWfInstanceID());
-					queryConstraints.put("V.wfInstanceRef", topLevelDataflowID);
+					queryConstraints.put("V.workflowid", topLevelDataflowID);
 					queryConstraints.put("VB.iteration", yValue.getIteration());
 					if (yValue.getCollIDRef()!= null) {
 						queryConstraints.put("VB.collIDRef", yValue.getCollIDRef());
@@ -1033,8 +1031,8 @@ public class EventProcessor {
 
 			// get the varbindings for this port and select the one with the same iteration vector as its successor
 			queryConstraints.clear();
-			queryConstraints.put("varNameRef", sourceVname);
-			queryConstraints.put("V.pNameRef", sourcePname);
+			queryConstraints.put("VB.varNameRef", sourceVname);
+			queryConstraints.put("V.processorName", sourcePname);
 			queryConstraints.put("VB.value", vb.getValue());
 			queryConstraints.put("VB.wfInstanceRef", vb.getWfInstanceRef());
 
@@ -1087,10 +1085,10 @@ public class EventProcessor {
 				// add process order sequence to Port for this portName
 
 				Map<String, String> queryConstraints = new HashMap<String, String>();
-				queryConstraints.put("wfInstanceRef", currentWorkflowID);
-				queryConstraints.put("pnameRef", procBinding.getPNameRef());
-				queryConstraints.put("varName", portName);
-				queryConstraints.put("inputOrOutput", "1");
+				queryConstraints.put("workflowId", currentWorkflowID);
+				queryConstraints.put("processorName", procBinding.getPNameRef());
+				queryConstraints.put("portName", portName);
+				queryConstraints.put("isInputPort", "1");
 
 				List<Port> vars = getPq().getPorts(queryConstraints);
 				try {
@@ -1589,25 +1587,24 @@ public class EventProcessor {
 
 //			logger.debug("processor "+pname);
 
-			List<Port> inputs = getPq().getInputVars(pname, wfNameRef, wfInstanceId); // null -> do not use instance (??) CHECK
+			List<Port> inputs = getPq().getInputPorts(pname, wfNameRef, wfInstanceId); // null -> do not use instance (??) CHECK
 
 //			logger.debug(inputs.size()+" inputs for "+pnameInContext.getV1());
 
 			int totalANL = 0;
 			for (Port iv : inputs) {
 
-				if (iv.isGranularDepthSet() == false) {
-					iv.setGranularDepth(iv.getDepth());
-					iv.setGranularDepthSet(true);
+				if (! iv.isResolvedDepthSet()) {
+					iv.setResolvedDepth(iv.getDepth());
 					getPw().updatePort(iv);
 
-//					logger.debug("var: "+iv.getVName()+" set at nominal level "+iv.getActualNestingLevel());					
+//					logger.debug("var: "+iv.getVName()+" set at nominal level "+iv.getresolvedDepth());					
 				}
 
 				int delta_nl = iv.getGranularDepth() - iv.getDepth();
 
 				// if delta_nl < 0 then Taverna wraps the value into a list --> use dnl(X) in this case
-				if (delta_nl < 0 ) delta_nl = 0;// CHECK iv.getTypeNestingLevel();
+				if (delta_nl < 0 ) delta_nl = 0;// CHECK iv.getTypedepth();
 //				logger.debug("delta for "+iv.getVName()+" "+delta_nl);
 
 				totalANL += delta_nl;
@@ -1619,8 +1616,7 @@ public class EventProcessor {
 //				logger.debug(successors.size()+ " successors for var "+iv.getVName());
 
 //				for (Port v : successors) {
-//				v.setActualNestingLevel(iv.getActualNestingLevel());
-//				v.setANLset(true);
+//				v.setresolvedDepth(iv.getresolvedDepth());
 //				getPw().updateVar(v);
 //				}
 			}
@@ -1630,13 +1626,12 @@ public class EventProcessor {
 
 			// process pname's outputs -- set ANL based on the sum formula (see
 			// paper)
-			List<Port> outputs = getPq().getOutputVars(pname, wfNameRef, wfInstanceId);
+			List<Port> outputs = getPq().getOutputPorts(pname, wfNameRef, wfInstanceId);
 			for (Port ov : outputs) {
 
-				ov.setGranularDepth(ov.getDepth() + totalANL);
+				ov.setResolvedDepth(ov.getDepth() + totalANL);
 
 				logger.debug("anl for "+pname+":"+ov.getPortName()+" = "+(ov.getDepth() + totalANL));
-				ov.setGranularDepthSet(true);
 				getPw().updatePort(ov);
 
 				// propagate this through all the links from this var
@@ -1649,7 +1644,7 @@ public class EventProcessor {
 					List<Port> toBeProcessed = new ArrayList<Port>();
 					toBeProcessed.add(v);
 
-					if (pq.isDataflow(v.getProcessorName()) && v.isInputPort()) {  // this is the input to a nested workflow
+					if (v.getProcessorId() == null && v.isInputPort()) {  // this is the input to a nested workflow
 
 //						String tempWfNameRef = pq.getWfNameForDataflow(v.getPName(), wfInstanceId);
 						String tempWfNameRef = pq.getWfNameForDataflow(v.getProcessorName());
@@ -1660,7 +1655,7 @@ public class EventProcessor {
 						toBeProcessed.remove(0);
 						toBeProcessed.addAll(realSuccessors);
 
-					}  else if (pq.isDataflow(v.getProcessorName()) && !v.isInputPort()) {  // this is the output to a nested workflow
+					}  else if (v.getProcessorId() == null && !v.isInputPort()) {  // this is the output to a nested workflow
 
 //						String tempWfNameRef = pq.getWfNameForDataflow(v.getPName(), wfInstanceId);
 						String tempWfNameRef = pq.getWfNameForDataflow(v.getProcessorName());
@@ -1674,10 +1669,8 @@ public class EventProcessor {
 					}
 
 					for (Port v1:toBeProcessed) {
-						v1.setGranularDepth(ov.getGranularDepth());
-						logger.debug("anl for "+v1.getProcessorName()+":"+v1.getPortName()+" = "+ov.getGranularDepth());
-
-						v1.setGranularDepthSet(true);
+						v1.setResolvedDepth(ov.getResolvedDepth());
+						logger.debug("anl for "+v1.getProcessorName()+":"+v1.getPortName()+" = "+ov.getResolvedDepth());
 						getPw().updatePort(v1);
 					}
 				}

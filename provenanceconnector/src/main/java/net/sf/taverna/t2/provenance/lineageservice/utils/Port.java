@@ -29,22 +29,22 @@ public class Port {
 	
 	private String identifier;
 	private String portName;
-	String processorName;
+	private String processorName;
 	private boolean isInputPort;
 	private String workflowId;
 	private int depth = 0;
-	private int granularDepth = 0;
-	private boolean isGranularDepthSet = false;
+	private Integer resolvedDepth = null;
 	private int iterationStrategyOrder = 0;
+	private String processorId;
 	
 	/**
-	 * @return the wfInstanceRef
+	 * @return the workflowId
 	 */
 	public String getWorkflowId() {
 		return workflowId;
 	}
 	/**
-	 * @param wfInstanceRef the wfInstanceRef to set
+	 * @param workflowId the workflowId to set
 	 */
 	public void setWorkflowId(String workflowId) {
 		this.workflowId = workflowId;
@@ -56,19 +56,19 @@ public class Port {
 		return portName;
 	}
 	/**
-	 * @param name the vName to set
+	 * @param name the portName to set
 	 */
 	public void setPortName(String portName) {
 		this.portName = portName;
 	}
 	/**
-	 * @return the pName
+	 * @return the processorName
 	 */
 	public String getProcessorName() {
 		return processorName;
 	}
 	/**
-	 * @param name the pName to set
+	 * @param name the processorName to set
 	 */
 	public void setProcessorName(String processorName) {
 		this.processorName = processorName;
@@ -103,33 +103,28 @@ public class Port {
 		this.depth = depth;
 	}
 	/**
-	 * @return the granularDepth
+	 * @return the resolvedDepth
 	 */
-	public int getGranularDepth() {
-		return granularDepth;
+	public Integer getResolvedDepth() {
+		return resolvedDepth;
 	}
 	/**
-	 * @param granularDepth the granularDepth to set
+	 * @param resolvedDepth the resolvedDepth to set
 	 */
-	public void setGranularDepth(int granularDepth) {
-		this.granularDepth = granularDepth;
+	public void setResolvedDepth(Integer resolvedDepth) {
+		this.resolvedDepth = resolvedDepth;
 	}
 	/**
-	 * @return <code>true</code> if the {@link #granularDepth} has been set 
+	 * @return <code>true</code> if the {@link #resolvedDepth} has been set 
 	 */
-	public boolean isGranularDepthSet() {
-		return isGranularDepthSet;
-	}
-	/**
-	 * @param <code>true</code> if the {@link #granularDepth} has been set 
-	 */
-	public void setGranularDepthSet(boolean isGranularDepthSet) {
-		this.isGranularDepthSet = isGranularDepthSet;
+	public boolean isResolvedDepthSet() {
+		return resolvedDepth != null;
 	}
 	
 	public void setIdentifier(String identifier) {
 		this.identifier = identifier;
 	}
+	
 	public String getIdentifier() {
 		return identifier;
 	}
@@ -144,6 +139,15 @@ public class Port {
 	 */
 	public void setIterationStrategyOrder(int iterationStrategyOrder) {
 		this.iterationStrategyOrder = iterationStrategyOrder;
+	}
+	
+	public String getProcessorId() {
+		return processorId;
+	}
+	
+	public void setProcessorId(String processorId) {
+		this.processorId = processorId;
+		
 	}
 
 

@@ -32,19 +32,14 @@ import java.util.Set;
 import java.util.UUID;
 
 import net.sf.taverna.t2.provenance.connector.JDBCConnector;
-import net.sf.taverna.t2.provenance.connector.ProvenanceConnector;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.Activity;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataBinding;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.ProcessorEnactment;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.ServiceInvocation;
-
-import org.apache.log4j.Logger;
-
 import net.sf.taverna.t2.provenance.lineageservice.utils.NestedListNode;
-import net.sf.taverna.t2.provenance.lineageservice.utils.ProcBinding;
-import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Port;
 import net.sf.taverna.t2.provenance.lineageservice.utils.PortBinding;
+import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 
 import org.apache.log4j.Logger;
 
@@ -58,7 +53,7 @@ import org.apache.log4j.Logger;
  * @author Stuart Owen
  * 
  */
-public abstract class ProvenanceWriter {
+public class ProvenanceWriter {
 
 	protected static Logger logger = Logger.getLogger(ProvenanceWriter.class);    
 	protected int cnt; // counts number of calls to PortBinding
@@ -82,7 +77,7 @@ public abstract class ProvenanceWriter {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-			 "INSERT INTO Port (varname, pNameRef, inputOrOutput, nestingLevel, wfInstanceRef, portId) VALUES(?,?,?,?,?,?)");
+			 "INSERT INTO Port (portName, processorName, isInputPort, depth, workflowId, portId, processorId) VALUES(?,?,?,?,?,?,?)");
 			for (Port v : ports) {
 
 
@@ -93,6 +88,7 @@ public abstract class ProvenanceWriter {
 				ps.setInt(4, depth);
 				ps.setString(5, wfId);
 				ps.setString(6, v.getIdentifier());
+				ps.setString(7, v.getProcessorId());
 
 				try {
 					ps.executeUpdate();
@@ -249,7 +245,7 @@ public abstract class ProvenanceWriter {
 	 * @param name
 	 * @throws SQLException
 	 */
-	public void addProcessor(String name, String wfID, boolean isTopLevel) throws SQLException {
+	public ProvenanceProcessor addProcessor(String name, String wfID, boolean isTopLevel) throws SQLException {
 		ProvenanceProcessor provProc = new ProvenanceProcessor();
 		provProc.setIdentifier(UUID.randomUUID().toString());
 		provProc.setPname(name);
@@ -257,6 +253,7 @@ public abstract class ProvenanceWriter {
 		provProc.setTopLevelProcessor(isTopLevel);
 		// pType is unknown
 		addProcessor(provProc);
+		return provProc;
 	}
 
 	/**
@@ -294,40 +291,6 @@ public abstract class ProvenanceWriter {
 		}
 	}
 	
-	public void addProcessorBinding(ProcBinding pb) throws SQLException {
-
-		PreparedStatement ps = null;
-		Connection connection = null;
-		try {
-			connection = getConnection();
-			ps = connection.prepareStatement(
-			"INSERT INTO ProcBinding (wfNameRef, pnameRef, execIDRef, iteration, actName) VALUES(?,?,?,?,?)");
-			ps.setString(1, pb.getWfNameRef());
-			ps.setString(2, pb.getPNameRef());
-			ps.setString(3, pb.getExecIDRef());
-			ps.setString(4, pb.getIterationVector());
-			ps.setString(5, pb.getActName());
-
-			ps.executeUpdate();
-			logger.debug("adding proc binding:\n "+ps.toString());
-
-	
-		} finally {
-			if (connection != null) {
-				try {
-					connection.close();
-				} catch (SQLException e) {
-					logger.warn("Can't close connection", e);
-				}
-			}
-		}
-
-
-
-
-
-	}
-
 	public void addProcessorEnactment(net.sf.taverna.t2.provenance.lineageservice.utils.ProcessorEnactment enactment) throws SQLException {
 	
 		PreparedStatement ps = null;
@@ -461,19 +424,19 @@ public abstract class ProvenanceWriter {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-					"UPDATE Port SET inputOrOutput=?, nestingLevel = ?," + "actualNestingLevel = ?, anlSet = ? , Port.order = ? WHERE varName = ? AND pnameRef = ? AND wfInstanceRef = ?");
+					"UPDATE Port SET isInputPort=?, depth = ?," + "resolvedDepth = ?, iterationStrategyOrder = ? WHERE varName = ? AND pnameRef = ? AND wfInstanceRef = ?");
 			int i = v.isInputPort() ? 1 : 0;
 			ps.setInt(1, i);
 			ps.setInt(2, v.getDepth());
-			ps.setInt(3, v.getGranularDepth());
-			int j = v.isGranularDepthSet() ? 1 : 0;
-			ps.setInt(4, j);
-			ps.setInt(5, v.getIterationStrategyOrder());
-			ps.setString(6, v.getPortName());
-			ps.setString(7, v.getProcessorName());
-			ps.setString(8, v.getWorkflowId());
-
-
+			if (v.isResolvedDepthSet()) {
+				ps.setInt(3, v.getResolvedDepth()); 
+			} else {
+				ps.setString(3, null);
+			}
+			ps.setInt(4, v.getIterationStrategyOrder());
+			ps.setString(5, v.getPortName());
+			ps.setString(6, v.getProcessorName());
+			ps.setString(7, v.getWorkflowId());
 			ps.execute();
 	
 		} finally {
@@ -586,7 +549,7 @@ public abstract class ProvenanceWriter {
 			addCollection(prevPName, nln.getCollId(), nln.getParentCollIdRef(),
 					nln.getIteration(), prevVarName, nln.getWfInstanceRef());
 		} catch (SQLException e) {
-			logger.warn("insert failed due to [" + e.getMessage() + "]");
+			logger.warn("Collection insert failed", e);
 		}
 	}
 
@@ -700,13 +663,6 @@ public abstract class ProvenanceWriter {
 				ps.setString(1, runID);
 			} else 
 				ps = connection.prepareStatement("DELETE FROM WfInstance");
-			ps.executeUpdate();
-
-			if (runID != null) {
-				ps = connection.prepareStatement("DELETE FROM ProcBinding WHERE execIDRef = ?");
-				ps.setString(1, runID);
-			} else 
-				ps = connection.prepareStatement("DELETE FROM ProcBinding");
 			ps.executeUpdate();
 
 			if (runID != null) {

@@ -32,21 +32,21 @@ public class LineageSQLQuery {
 	String vbQuery = null;
 	String collQuery = null;
 	
-	int nestingLevel = 0;  // =0 => use var values, >0 => use enclosing collection
+	int depth = 0;  // =0 => use var values, >0 => use enclosing collection
 
 
 	/**
-	 * @return the nestingLevel
+	 * @return the depth
 	 */
-	public int getNestingLevel() {
-		return nestingLevel;
+	public int getdepth() {
+		return depth;
 	}
 
 	/**
-	 * @param nestingLevel the nestingLevel to set
+	 * @param depth the depth to set
 	 */
-	public void setNestingLevel(int nestingLevel) {
-		this.nestingLevel = nestingLevel;
+	public void setdepth(int depth) {
+		this.depth = depth;
 	}
 
 	/**

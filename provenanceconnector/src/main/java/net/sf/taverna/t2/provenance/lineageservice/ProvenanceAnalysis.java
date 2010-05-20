@@ -415,9 +415,9 @@ public class ProvenanceAnalysis {
 		// get (var, proc) from Port  to see if it's input/output
 		Map<String, String>  varQueryConstraints = new HashMap<String, String>();
 		varQueryConstraints.put("W.instanceID", wfID);
-		varQueryConstraints.put("V.pnameRef", proc);  
-		varQueryConstraints.put("V.varName", var);  
-		varQueryConstraints.put("V.wfInstanceRef", wfNameRef);  
+		varQueryConstraints.put("V.processorName", proc);  
+		varQueryConstraints.put("V.portName", var);  
+		varQueryConstraints.put("V.workflowId", wfNameRef);  
 
 		List<Port> vars = getPq().getPorts(varQueryConstraints);
 
@@ -430,7 +430,7 @@ public class ProvenanceAnalysis {
 		// CHECK there can be multiple (pname, varname) pairs, i.e., in case of nested workflows
 		// here we pick the first that turns up -- we would need to let users choose, or process all of them...
 
-		if (v.isInputPort() || getPq().isDataflow(proc)) { // if vName is input, then do a xfer() step
+		if (v.isInputPort() || v.getProcessorId()==null) { // if vName is input, then do a xfer() step
 
 			// rec. accumulates SQL queries into lqList
 			xferStep(wfID, wfNameRef, v, path, selectedProcessors, lqList);
@@ -496,8 +496,8 @@ public class ProvenanceAnalysis {
 		} else {
 
 			varsQueryConstraints.put("W.instanceID", wfID);
-			varsQueryConstraints.put("pnameRef", proc);  
-			varsQueryConstraints.put("inputOrOutput", "1");  
+			varsQueryConstraints.put("processorName", proc);  
+			varsQueryConstraints.put("isInputPort", "1");  
 
 			inputVars = getPq().getPorts(varsQueryConstraints);
 		}
@@ -515,8 +515,12 @@ public class ProvenanceAnalysis {
 
 			int minPathLength = 0;  // if input path is shorter than this we give up granularity altogether
 			for (Port inputVar: inputVars) {
-				int delta = inputVar.getGranularDepth() - inputVar.getDepth();
-				var2delta.put(inputVar, new Integer(delta));
+				int resolvedDepth = 0;
+				if (inputVar.getResolvedDepth() != null) {
+					resolvedDepth = inputVar.getResolvedDepth();
+				}
+				int delta = resolvedDepth - inputVar.getDepth();
+				var2delta.put(inputVar, delta);
 				minPathLength += delta;
 //				System.out.println("xform() from ["+proc+"] upwards to ["+inputVar.getPName()+":"+inputVar.getVName()+"]");
 			}

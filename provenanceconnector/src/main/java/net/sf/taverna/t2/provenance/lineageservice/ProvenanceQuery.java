@@ -39,14 +39,13 @@ import java.util.Map.Entry;
 import net.sf.taverna.t2.provenance.connector.JDBCConnector;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataBinding;
-import net.sf.taverna.t2.provenance.lineageservice.utils.DataLink;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DDRecord;
+import net.sf.taverna.t2.provenance.lineageservice.utils.DataLink;
 import net.sf.taverna.t2.provenance.lineageservice.utils.NestedListNode;
-import net.sf.taverna.t2.provenance.lineageservice.utils.ProcBinding;
-import net.sf.taverna.t2.provenance.lineageservice.utils.ProcessorEnactment;
-import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Port;
 import net.sf.taverna.t2.provenance.lineageservice.utils.PortBinding;
+import net.sf.taverna.t2.provenance.lineageservice.utils.ProcessorEnactment;
+import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Workflow;
 import net.sf.taverna.t2.provenance.lineageservice.utils.WorkflowInstance;
 
@@ -133,12 +132,12 @@ public abstract class ProvenanceQuery {
 	throws SQLException {
 		List<Port> result = new ArrayList<Port>();
 
-		String q0 = "SELECT  * FROM Port V JOIN WfInstance W ON W.wfnameRef = V.wfInstanceRef";
+		String q0 = "SELECT  * FROM Port V JOIN WfInstance W ON W.wfnameRef = V.workflowId";
 
 		String q = addWhereClauseToQuery(q0, queryConstraints, true);
 
 		List<String> orderAttr = new ArrayList<String>();
-		orderAttr.add("V.order");
+		orderAttr.add("V.iterationStrategyOrder");
 
 		String q1 = addOrderByToQuery(q, orderAttr, true);
 
@@ -153,25 +152,19 @@ public abstract class ProvenanceQuery {
 				ResultSet rs = stmt.getResultSet();
 
 				while (rs.next()) {
+					Port aPort = new Port();
 
-					Port aVar = new Port();
-
-					aVar.setWorkflowId(rs.getString("WfInstanceRef"));
-
-					if (rs.getInt("inputOrOutput") == 1) {
-						aVar.setInputPort(true);
-					} else {
-						aVar.setInputPort(false);
+					aPort.setWorkflowId(rs.getString("workflowId"));
+                    aPort.setInputPort(rs.getBoolean("isInputPort"));
+					aPort.setIdentifier(rs.getString("portId"));
+                    aPort.setProcessorName(rs.getString("processorName"));
+                    aPort.setProcessorId(rs.getString("processorId"));
+                    aPort.setPortName(rs.getString("portName"));
+                    aPort.setDepth(rs.getInt("depth"));
+                    if (rs.getString("resolvedDepth") != null) {
+						aPort.setResolvedDepth(rs.getInt("resolvedDepth"));
 					}
-					aVar.setIdentifier(rs.getString("portId"));
-					aVar.setProcessorName(rs.getString("pnameRef"));
-					aVar.setPortName(rs.getString("varName"));
-					aVar.setDepth(rs.getInt("nestingLevel"));
-					aVar.setGranularDepth(rs.getInt("actualNestingLevel"));
-					aVar.setGranularDepthSet((rs.getInt("anlSet") == 1 ? true : false));
-					result.add(aVar);
-					
-
+					result.add(aPort);
 				}
 			}
 		} catch (InstantiationException e) {
@@ -190,7 +183,7 @@ public abstract class ProvenanceQuery {
 		return result;
 	}
 
-	private List<Port> getVarsNoInstance(Map<String, String> queryConstraints)
+	private List<Port> getPortsNoInstance(Map<String, String> queryConstraints)
 	throws SQLException {
 
 		List<Port> result = new ArrayList<Port>();
@@ -213,21 +206,17 @@ public abstract class ProvenanceQuery {
 
 					Port aVar = new Port();
 
-					aVar.setWorkflowId(rs.getString("WfInstanceRef"));
-
-					if (rs.getInt("inputOrOutput") == 1) {
-						aVar.setInputPort(true);
-					} else {
-						aVar.setInputPort(false);
-					}
+					aVar.setWorkflowId(rs.getString("workflowId"));
+					aVar.setInputPort(rs.getBoolean("isInputPort"));
 					aVar.setIdentifier(rs.getString("portId"));
-					aVar.setProcessorName(rs.getString("pnameRef"));
-					aVar.setPortName(rs.getString("varName"));
-					aVar.setDepth(rs.getInt("nestingLevel"));
-					aVar.setGranularDepth(rs.getInt("actualNestingLevel"));
-					aVar.setGranularDepthSet((rs.getInt("anlSet") == 1 ? true : false));
+					aVar.setProcessorName(rs.getString("processorName"));
+					aVar.setProcessorId(rs.getString("processorId"));
+					aVar.setPortName(rs.getString("portName"));
+					aVar.setDepth(rs.getInt("depth"));
+					if (rs.getString("resolvedDepth") != null) {
+						aVar.setResolvedDepth(rs.getInt("resolvedDepth"));
+					}
 					result.add(aVar);
-
 				}
 			}
 		} catch (InstantiationException e) {
@@ -297,19 +286,19 @@ public abstract class ProvenanceQuery {
 	 * @return list of input variables
 	 * @throws SQLException
 	 */
-	public List<Port> getInputVars(String pname, String wfID, String wfInstanceID)
+	public List<Port> getInputPorts(String pname, String wfID, String wfInstanceID)
 	throws SQLException {
 		// get (var, proc) from Port to see if it's input/output
 		Map<String, String> varQueryConstraints = new HashMap<String, String>();
 
-		varQueryConstraints.put("V.wfInstanceRef", wfID);
-		varQueryConstraints.put("V.pnameRef", pname);
-		varQueryConstraints.put("V.inputOrOutput", "1");
+		varQueryConstraints.put("V.workflowId", wfID);
+		varQueryConstraints.put("V.processorName", pname);
+		varQueryConstraints.put("V.isInputPort", "1");
 		if (wfInstanceID != null) {
 			varQueryConstraints.put("W.instanceID", wfInstanceID);
 			return getPorts(varQueryConstraints);
 		} else {
-			return getVarsNoInstance(varQueryConstraints);
+			return getPortsNoInstance(varQueryConstraints);
 		}
 	}
 
@@ -321,14 +310,14 @@ public abstract class ProvenanceQuery {
 	 * @return list of output variables
 	 * @throws SQLException
 	 */
-	public List<Port> getOutputVars(String pname, String wfID, String wfInstanceID)
+	public List<Port> getOutputPorts(String pname, String wfID, String wfInstanceID)
 	throws SQLException {
 		// get (var, proc) from Port to see if it's input/output
 		Map<String, String> varQueryConstraints = new HashMap<String, String>();
 
-		varQueryConstraints.put("V.wfInstanceRef", wfID);
-		varQueryConstraints.put("V.pnameRef", pname);
-		varQueryConstraints.put("V.inputOrOutput", "0");
+		varQueryConstraints.put("V.workflowId", wfID);
+		varQueryConstraints.put("V.processorName", pname);
+		varQueryConstraints.put("V.isInputPort", "0");
 		if (wfInstanceID != null) {
 			varQueryConstraints.put("W.instanceID", wfInstanceID);
 		}
@@ -553,7 +542,7 @@ public abstract class ProvenanceQuery {
 
 		List<String> result = new ArrayList<String>();
 
-		String q = "SELECT instanceID, wfnameRef FROM WfInstance order by timestamp desc";
+		String q = "SELECT instanceID, wfnameRef FROM WfInstance ORDER by timestamp desc";
 
 		Statement stmt = null;
 		Connection connection = null;
@@ -587,60 +576,6 @@ public abstract class ProvenanceQuery {
 	}
 
 	/**
-	 * all ProCBinding records that satisfy the input constraints
-	 *
-	 * @param constraints
-	 * @return
-	 * @throws SQLException
-	 */
-	public List<ProcBinding> getProcBindings(Map<String, String> constraints)
-	throws SQLException {
-		List<ProcBinding> result = new ArrayList<ProcBinding>();
-
-		String q = "SELECT * FROM ProcBinding PB ";
-
-		q = addWhereClauseToQuery(q, constraints, true);
-
-		Statement stmt = null;
-		Connection connection = null;
-		try {
-			connection = getConnection();
-			stmt = connection.createStatement();
-
-			boolean success = stmt.execute(q);
-
-			if (success) {
-				ResultSet rs = stmt.getResultSet();
-
-				while (rs.next()) {
-					ProcBinding pb = new ProcBinding();
-
-					pb.setActName(rs.getString("actName"));
-					pb.setExecIDRef(rs.getString("execIDRef"));
-					pb.setIterationVector(rs.getString("iteration"));
-					pb.setPNameRef(rs.getString("pnameRef"));
-					pb.setWfNameRef(rs.getString("wfNameRef"));
-
-					result.add(pb);
-				}
-			}
-		} catch (InstantiationException e) {
-			logger.warn("Could not execute query", e);
-		} catch (IllegalAccessException e) {
-			logger.warn("Could not execute query", e);
-		} catch (ClassNotFoundException e) {
-			logger.warn("Could not execute query", e);
-		} finally {
-			if (connection != null) {
-				connection.close();
-			}
-		}
-
-		return result;
-
-	}
-
-	/**
 	 * TODO this currently returns the data value as a string, which is
 	 * incorrect as it is an untyped byte array
 	 *
@@ -656,9 +591,14 @@ public abstract class ProvenanceQuery {
 	throws SQLException {
 		List<PortBinding> result = new ArrayList<PortBinding>();
 
-		String q = "SELECT * FROM PortBinding VB join Port V " + 
-		"on (VB.varNameRef = V.varName and VB.PNameRef =  V.PNameRef and VB.wfNameRef = V.wfInstanceRef) " + 
-		"JOIN WfInstance W ON VB.wfInstanceRef = W.instanceID and VB.wfNameRef = W.wfnameRef";
+		String q = "SELECT * FROM PortBinding VB " +
+		"JOIN Port V ON " +
+		"  VB.varNameRef = V.portName " +
+		"  AND VB.PNameRef = V.processorName " +
+		"  AND VB.wfNameRef = V.workflowId " + 
+		"JOIN WfInstance W ON " +
+		"  VB.wfInstanceRef = W.instanceID " +
+		"  AND VB.wfNameRef = W.wfnameRef";
 
 		q = addWhereClauseToQuery(q, constraints, true);
 
@@ -1016,8 +956,8 @@ public abstract class ProvenanceQuery {
 		return result;
 	}
 
-	public List<Port> getSuccPorts(String pName, String vName,
-			String wfInstanceRef) throws SQLException {
+	public List<Port> getSuccPorts(String processorName, String portName,
+			String workflowId) throws SQLException {
 
 		List<Port> result = new ArrayList<Port>();
 		PreparedStatement ps = null;
@@ -1025,41 +965,37 @@ public abstract class ProvenanceQuery {
 
 		try {
 			connection = getConnection();
-			ps = connection.prepareStatement(
-					"SELECT v.* " + "FROM Datalink a JOIN Port v ON a.destinationProcessorName = v.pnameRef " + "AND  a.destinationPortName = v.varName " + "AND a.workflowId = v.wfInstanceRef " + "WHERE sourcePortName = ? AND sourceProcessorName = ?");
+			String sql = "SELECT v.* " + "FROM Datalink a JOIN Port v ON a.destinationProcessorName = v.processorName " + "AND  a.destinationPortName = v.portName " + "AND a.workflowId = v.workflowId " + "WHERE sourcePortName=? AND sourceProcessorName=?";
+			if (workflowId != null) {
+				sql = sql + 
+				" AND a.workflowId=?";
+			}
+			ps = connection.prepareStatement(sql);
 
-			ps.setString(1, vName);
-			ps.setString(2, pName);
-
+			ps.setString(1, portName);
+			ps.setString(2, processorName);
+			if (workflowId != null) {
+				ps.setString(3, workflowId);
+			}
+			
 			boolean success = ps.execute();
 
 			if (success) {
 				ResultSet rs = ps.getResultSet();
-
 				while (rs.next()) {
+                    Port aPort = new Port();
 
-					if (wfInstanceRef != null && !rs.getString("v.wfInstanceRef").equals(wfInstanceRef)) {
-						continue;
-					}
-
-					Port aVar = new Port();
-
-					aVar.setWorkflowId(rs.getString("WfInstanceRef"));
-
-					if (rs.getInt("inputOrOutput") == 1) {
-						aVar.setInputPort(true);
-					} else {
-						aVar.setInputPort(false);
-					}
-					aVar.setIdentifier(rs.getString("portId"));
-					aVar.setProcessorName(rs.getString("pnameRef"));
-					aVar.setPortName(rs.getString("varName"));
-					aVar.setDepth(rs.getInt("nestingLevel"));
-					aVar.setGranularDepth(rs.getInt("actualNestingLevel"));
-					aVar.setGranularDepthSet((rs.getInt("anlSet") == 1 ? true : false));
-
-					result.add(aVar);
-
+                    aPort.setWorkflowId(rs.getString("workflowId"));
+                    aPort.setInputPort(rs.getBoolean("isInputPort"));
+					aPort.setIdentifier(rs.getString("portId"));
+                    aPort.setProcessorName(rs.getString("processorName"));
+                    aPort.setProcessorId(rs.getString("processorId"));
+                    aPort.setPortName(rs.getString("portName"));
+                    aPort.setDepth(rs.getInt("depth"));
+                    if (rs.getString("resolvedDepth") != null) {
+						aPort.setResolvedDepth(rs.getInt("resolvedDepth"));
+					}                    
+                    result.add(aPort);
 				}
 			}
 		} catch (InstantiationException e) {
@@ -1312,7 +1248,7 @@ public abstract class ProvenanceQuery {
 		LineageSQLQuery lq = new LineageSQLQuery();
 
 		String q1 = "SELECT * FROM PortBinding VB join Port V " + 
-		"on (VB.varNameRef = V.varName and VB.PNameRef =  V.PNameRef and VB.wfNameRef=V.wfInstanceRef) " + 
+		"on (VB.varNameRef = V.portName and VB.PNameRef =  V.processorName and VB.wfNameRef=V.workflowId) " + 
 		"JOIN WfInstance W ON VB.wfInstanceRef = W.instanceID and VB.wfNameRef = W.wfnameRef ";
 
 		// constraints:
@@ -1413,9 +1349,9 @@ public abstract class ProvenanceQuery {
 
 		// inputs or outputs?
 		if (returnInput) {
-			collQueryConstraints.put("V.inputOrOutput", "1");
+			collQueryConstraints.put("V.isInputPort", "1");
 		} else {
-			collQueryConstraints.put("V.inputOrOutput", "0");
+			collQueryConstraints.put("V.isInputPort", "0");
 		}
 
 		collQuery = addWhereClauseToQuery(collQuery, collQueryConstraints, false);
@@ -1442,9 +1378,9 @@ public abstract class ProvenanceQuery {
 
 		// limit to inputs?
 		if (returnInput) {
-			vbQueryConstraints.put("V.inputOrOutput", "1");
+			vbQueryConstraints.put("V.isInputPort", "1");
 		} else {
-			vbQueryConstraints.put("V.inputOrOutput", "0");
+			vbQueryConstraints.put("V.isInputPort", "0");
 		}
 
 		vbQuery = addWhereClauseToQuery(vbQuery, vbQueryConstraints, false);
@@ -1497,7 +1433,7 @@ public abstract class ProvenanceQuery {
 
 		// limit to inputs?
 		if (returnOutputs) {
-			collQueryConstraints.put("V.inputOrOutput", "1");
+			collQueryConstraints.put("V.isInputPort", "1");
 		}
 
 		collQuery = addWhereClauseToQuery(collQuery, collQueryConstraints, false);
@@ -1523,7 +1459,7 @@ public abstract class ProvenanceQuery {
 
 		// limit to inputs?
 		if (!returnOutputs) {
-			vbQueryConstraints.put("V.inputOrOutput", "1");
+			vbQueryConstraints.put("V.isInputPort", "1");
 		}
 
 		vbQuery = addWhereClauseToQuery(vbQuery, vbQueryConstraints, false);
@@ -1630,7 +1566,7 @@ public abstract class ProvenanceQuery {
 					String it = rs.getString("iteration");
 					String coll = rs.getString("collIDRef");
 					String value = rs.getString("value");
-					boolean isInput = (rs.getInt("inputOrOutput") == 1) ? true
+					boolean isInput = (rs.getInt("isInputPort") == 1) ? true
 							: false;
 
 					
@@ -2034,7 +1970,7 @@ public abstract class ProvenanceQuery {
 	}
 
 	/**
-	 *
+	 * @deprecated This method is not workflowId aware and should not be used
 	 * @param procName
 	 * @return true if procName is the external name of a dataflow, false
 	 *         otherwise
@@ -2660,14 +2596,13 @@ public abstract class ProvenanceQuery {
 		String query = "SELECT " 
 				+ DataBinding.t2Reference + ","
 				+ "Port.portId AS portId," 
-				+ "Port.pNameRef,"
-				+ "Port.inputOrOutput,"
-				+ "Port.varName," 
-				+ "Port.type," 
-				+ "Port.nestingLevel,"
-				+ "Port.actualNestingLevel," 
-				+ "Port.anlSet," 
-				+ "Port.WfInstanceRef"
+				+ "Port.processorName,"
+				+ "Port.processorId,"
+				+ "Port.isInputPort,"
+				+ "Port.portName," 
+				+ "Port.depth,"
+				+ "Port.resolvedDepth," 
+				+ "Port.workflowId"
 				+ " FROM " + DataBinding.DataBinding
 				+ " INNER JOIN " + "Port" + " ON " 
 				+ " Port.portId=" + DataBinding.DataBinding + "." + DataBinding.portId
@@ -2683,15 +2618,16 @@ public abstract class ProvenanceQuery {
 				String t2Ref = rs.getString(DataBinding.t2Reference.name());
 				
 				Port port = new Port();
-				port.setWorkflowId(rs.getString("WfInstanceRef"));
-				port.setInputPort(rs.getBoolean("inputOrOutput"));				
+				port.setWorkflowId(rs.getString("workflowId"));
+				port.setInputPort(rs.getBoolean("isInputPort"));				
 				port.setIdentifier(rs.getString("portId"));
-				port.setProcessorName(rs.getString("pNameRef"));
-				port.setPortName(rs.getString("varName"));
-				port.setDepth(rs.getInt("nestingLevel"));
-				port.setGranularDepth(rs.getInt("actualNestingLevel"));
-				port.setGranularDepthSet(rs.getBoolean("anlSet"));
-
+				port.setProcessorName(rs.getString("processorName"));
+				port.setProcessorId(rs.getString("processorId"));
+				port.setPortName(rs.getString("portName"));
+				port.setDepth(rs.getInt("depth"));
+				if (rs.getString("resolvedDepth") != null) {
+					port.setResolvedDepth(rs.getInt("resolvedDepth"));
+				}
 				dataBindings.put(port, t2Ref);
 			}
 		} catch (SQLException e) {
