@@ -68,38 +68,36 @@ public abstract class ProvenanceWriter {
 	}
 
 	/**
-	 * add each Port as a row into the VAR DB table
-	 * <strong>note: no static var type available as part of the
+	 * add each Port as a row into the Port DB table
+	 * <strong>note: no static port type available as part of the
 	 * dataflow...</strong>
 	 *
-	 * @param vars
+	 * @param ports
 	 * @param wfId
 	 * @throws SQLException
 	 */
-	public void addVariables(List<Port> vars, String wfId) throws SQLException {
+	public void addPorts(List<Port> ports, String wfId) throws SQLException {
 		PreparedStatement ps = null;
 		Connection connection = null;
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
 			 "INSERT INTO Port (varname, pNameRef, inputOrOutput, nestingLevel, wfInstanceRef, portId) VALUES(?,?,?,?,?,?)");
-			String q;
-			for (Port v : vars) {
+			for (Port v : ports) {
 
-				int isInput = v.isInput() ? 1 : 0;
 
-				int i = v.getTypeNestingLevel() >= 0 ? v.getTypeNestingLevel() : 0;
-				ps.setString(1, v.getVName());
-				ps.setString(2, v.getPName());
-				ps.setInt(3, isInput);
-				ps.setInt(4, i);
+				ps.setString(1, v.getPortName());
+				ps.setString(2, v.getProcessorName());
+				ps.setBoolean(3, v.isInputPort());
+				int depth = v.getDepth() >= 0 ? v.getDepth() : 0;
+				ps.setInt(4, depth);
 				ps.setString(5, wfId);
 				ps.setString(6, v.getIdentifier());
 
 				try {
 					ps.executeUpdate();
 				} catch (Exception e) {
-					logger.warn("Could not insert var " + v.getVName(), e);
+					logger.warn("Could not insert var " + v.getPortName(), e);
 				}
 
 			}
@@ -130,10 +128,10 @@ public abstract class ProvenanceWriter {
 			" sourcePortId, destinationPortId) " +
 			"VALUES(?,?,?,?,?,?,?)");
 			ps.setString(1, workflowId);
-			ps.setString(2, sourcePort.getPName());
-			ps.setString(3, sourcePort.getVName());
-			ps.setString(4, destinationPort.getPName());
-			ps.setString(5, destinationPort.getVName());
+			ps.setString(2, sourcePort.getProcessorName());
+			ps.setString(3, sourcePort.getPortName());
+			ps.setString(4, destinationPort.getProcessorName());
+			ps.setString(5, destinationPort.getPortName());
 			ps.setString(6, sourcePort.getIdentifier());
 			ps.setString(7, destinationPort.getIdentifier());
 			
@@ -463,18 +461,17 @@ public abstract class ProvenanceWriter {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-					"UPDATE Port SET type = ?, inputOrOutput=?, nestingLevel = ?," + "actualNestingLevel = ?, anlSet = ? , Port.order = ? WHERE varName = ? AND pnameRef = ? AND wfInstanceRef = ?");
-			ps.setString(1, v.getType());
-			int i = v.isInput() ? 1 : 0;
-			ps.setInt(2, i);
-			ps.setInt(3, v.getTypeNestingLevel());
-			ps.setInt(4, v.getActualNestingLevel());
-			int j = v.isANLset() ? 1 : 0;
-			ps.setInt(5, j);
-			ps.setInt(6, v.getPortNameOrder());
-			ps.setString(7, v.getVName());
-			ps.setString(8, v.getPName());
-			ps.setString(9, v.getWfInstanceRef());
+					"UPDATE Port SET inputOrOutput=?, nestingLevel = ?," + "actualNestingLevel = ?, anlSet = ? , Port.order = ? WHERE varName = ? AND pnameRef = ? AND wfInstanceRef = ?");
+			int i = v.isInputPort() ? 1 : 0;
+			ps.setInt(1, i);
+			ps.setInt(2, v.getDepth());
+			ps.setInt(3, v.getGranularDepth());
+			int j = v.isGranularDepthSet() ? 1 : 0;
+			ps.setInt(4, j);
+			ps.setInt(5, v.getIterationStrategyOrder());
+			ps.setString(6, v.getPortName());
+			ps.setString(7, v.getProcessorName());
+			ps.setString(8, v.getWorkflowId());
 
 
 			ps.execute();

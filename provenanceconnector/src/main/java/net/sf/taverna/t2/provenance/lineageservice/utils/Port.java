@@ -28,111 +28,105 @@ package net.sf.taverna.t2.provenance.lineageservice.utils;
 public class Port {
 	
 	private String identifier;
-	private String vName, pName;
-	private boolean isInput;
-	private String wfInstanceRef;
-	private String type;
-	private int typeNestingLevel = 0;
-	private int actualNestingLevel = 0;
-	private boolean isANLset = false;  // set to true when the ANL has been set 
-	private int portNameOrder = 0;
+	private String portName;
+	String processorName;
+	private boolean isInputPort;
+	private String workflowId;
+	private int depth = 0;
+	private int granularDepth = 0;
+	private boolean isGranularDepthSet = false;
+	private int iterationStrategyOrder = 0;
 	
 	/**
 	 * @return the wfInstanceRef
 	 */
-	public String getWfInstanceRef() {
-		return wfInstanceRef;
+	public String getWorkflowId() {
+		return workflowId;
 	}
 	/**
 	 * @param wfInstanceRef the wfInstanceRef to set
 	 */
-	public void setWfInstanceRef(String wfInstanceRef) {
-		this.wfInstanceRef = wfInstanceRef;
+	public void setWorkflowId(String workflowId) {
+		this.workflowId = workflowId;
 	}
 	/**
 	 * @return the vName
 	 */
-	public String getVName() {
-		return vName;
+	public String getPortName() {
+		return portName;
 	}
 	/**
 	 * @param name the vName to set
 	 */
-	public void setVName(String name) {
-		vName = name;
+	public void setPortName(String portName) {
+		this.portName = portName;
 	}
 	/**
 	 * @return the pName
 	 */
-	public String getPName() {
-		return pName;
+	public String getProcessorName() {
+		return processorName;
 	}
 	/**
 	 * @param name the pName to set
 	 */
-	public void setPName(String name) {
-		pName = name;
+	public void setProcessorName(String processorName) {
+		this.processorName = processorName;
+	}
+
+	/**
+	 * @return <code>true</code> if the port is an input port,
+	 *         <code>false</code> if it is an output port
+	 */
+	public boolean isInputPort() {
+		return isInputPort;
+	}
+	
+	/**
+	 * @param isInputPort <code>true</code> if the port is an input port,
+	 *         <code>false</code> if it is an output port
+	 */
+	public void setInputPort(boolean isInputPort) {
+		this.isInputPort = isInputPort;
+	}
+	
+	/**
+	 * @return the depth
+	 */
+	public int getDepth() {
+		return depth;
 	}
 	/**
-	 * @return the isInput
+	 * @param depth the depth to set
 	 */
-	public boolean isInput() {
-		return isInput;
+	public void setDepth(int depth) {
+		this.depth = depth;
 	}
 	/**
-	 * @param isInput the isInput to set
+	 * @return the granularDepth
 	 */
-	public void setInput(boolean isInput) {
-		this.isInput = isInput;
+	public int getGranularDepth() {
+		return granularDepth;
 	}
 	/**
-	 * @return the type
+	 * @param granularDepth the granularDepth to set
 	 */
-	public String getType() {
-		return type;
+	public void setGranularDepth(int granularDepth) {
+		this.granularDepth = granularDepth;
 	}
 	/**
-	 * @param type the type to set
+	 * @return <code>true</code> if the {@link #granularDepth} has been set 
 	 */
-	public void setType(String type) {
-		this.type = type;
+	public boolean isGranularDepthSet() {
+		return isGranularDepthSet;
 	}
 	/**
-	 * @return the typeNestingLevel
+	 * @param <code>true</code> if the {@link #granularDepth} has been set 
 	 */
-	public int getTypeNestingLevel() {
-		return typeNestingLevel;
+	public void setGranularDepthSet(boolean isGranularDepthSet) {
+		this.isGranularDepthSet = isGranularDepthSet;
 	}
-	/**
-	 * @param typeNestingLevel the typeNestingLevel to set
-	 */
-	public void setTypeNestingLevel(int typeNestingLevel) {
-		this.typeNestingLevel = typeNestingLevel;
-	}
-	/**
-	 * @return the actualNestingLevel
-	 */
-	public int getActualNestingLevel() {
-		return actualNestingLevel;
-	}
-	/**
-	 * @param actualNestingLevel the actualNestingLevel to set
-	 */
-	public void setActualNestingLevel(int actualNestingLevel) {
-		this.actualNestingLevel = actualNestingLevel;
-	}
-	/**
-	 * @return the isANLset
-	 */
-	public boolean isANLset() {
-		return isANLset;
-	}
-	/**
-	 * @param isANLset the isANLset to set
-	 */
-	public void setANLset(boolean isANLset) {
-		this.isANLset = isANLset;
-	}
+	
 	public void setIdentifier(String identifier) {
 		this.identifier = identifier;
 	}
@@ -140,16 +134,16 @@ public class Port {
 		return identifier;
 	}
 	/**
-	 * @return the portNameOrder
+	 * @return the iterationStrategyOrder
 	 */
-	public int getPortNameOrder() {
-		return portNameOrder;
+	public int getIterationStrategyOrder() {
+		return iterationStrategyOrder;
 	}
 	/**
-	 * @param portNameOrder the portNameOrder to set
+	 * @param iterationStrategyOrder the iterationStrategyOrder to set
 	 */
-	public void setPortNameOrder(int portNameOrder) {
-		this.portNameOrder = portNameOrder;
+	public void setIterationStrategyOrder(int iterationStrategyOrder) {
+		this.iterationStrategyOrder = iterationStrategyOrder;
 	}
 
 

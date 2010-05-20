@@ -156,20 +156,19 @@ public abstract class ProvenanceQuery {
 
 					Port aVar = new Port();
 
-					aVar.setWfInstanceRef(rs.getString("WfInstanceRef"));
+					aVar.setWorkflowId(rs.getString("WfInstanceRef"));
 
 					if (rs.getInt("inputOrOutput") == 1) {
-						aVar.setInput(true);
+						aVar.setInputPort(true);
 					} else {
-						aVar.setInput(false);
+						aVar.setInputPort(false);
 					}
 					aVar.setIdentifier(rs.getString("portId"));
-					aVar.setPName(rs.getString("pnameRef"));
-					aVar.setVName(rs.getString("varName"));
-					aVar.setType(rs.getString("type"));
-					aVar.setTypeNestingLevel(rs.getInt("nestingLevel"));
-					aVar.setActualNestingLevel(rs.getInt("actualNestingLevel"));
-					aVar.setANLset((rs.getInt("anlSet") == 1 ? true : false));
+					aVar.setProcessorName(rs.getString("pnameRef"));
+					aVar.setPortName(rs.getString("varName"));
+					aVar.setDepth(rs.getInt("nestingLevel"));
+					aVar.setGranularDepth(rs.getInt("actualNestingLevel"));
+					aVar.setGranularDepthSet((rs.getInt("anlSet") == 1 ? true : false));
 					result.add(aVar);
 					
 
@@ -214,20 +213,19 @@ public abstract class ProvenanceQuery {
 
 					Port aVar = new Port();
 
-					aVar.setWfInstanceRef(rs.getString("WfInstanceRef"));
+					aVar.setWorkflowId(rs.getString("WfInstanceRef"));
 
 					if (rs.getInt("inputOrOutput") == 1) {
-						aVar.setInput(true);
+						aVar.setInputPort(true);
 					} else {
-						aVar.setInput(false);
+						aVar.setInputPort(false);
 					}
 					aVar.setIdentifier(rs.getString("portId"));
-					aVar.setPName(rs.getString("pnameRef"));
-					aVar.setVName(rs.getString("varName"));
-					aVar.setType(rs.getString("type"));
-					aVar.setTypeNestingLevel(rs.getInt("nestingLevel"));
-					aVar.setActualNestingLevel(rs.getInt("actualNestingLevel"));
-					aVar.setANLset((rs.getInt("anlSet") == 1 ? true : false));
+					aVar.setProcessorName(rs.getString("pnameRef"));
+					aVar.setPortName(rs.getString("varName"));
+					aVar.setDepth(rs.getInt("nestingLevel"));
+					aVar.setGranularDepth(rs.getInt("actualNestingLevel"));
+					aVar.setGranularDepthSet((rs.getInt("anlSet") == 1 ? true : false));
 					result.add(aVar);
 
 				}
@@ -1046,20 +1044,19 @@ public abstract class ProvenanceQuery {
 
 					Port aVar = new Port();
 
-					aVar.setWfInstanceRef(rs.getString("WfInstanceRef"));
+					aVar.setWorkflowId(rs.getString("WfInstanceRef"));
 
 					if (rs.getInt("inputOrOutput") == 1) {
-						aVar.setInput(true);
+						aVar.setInputPort(true);
 					} else {
-						aVar.setInput(false);
+						aVar.setInputPort(false);
 					}
 					aVar.setIdentifier(rs.getString("portId"));
-					aVar.setPName(rs.getString("pnameRef"));
-					aVar.setVName(rs.getString("varName"));
-					aVar.setType(rs.getString("type"));
-					aVar.setTypeNestingLevel(rs.getInt("nestingLevel"));
-					aVar.setActualNestingLevel(rs.getInt("actualNestingLevel"));
-					aVar.setANLset((rs.getInt("anlSet") == 1 ? true : false));
+					aVar.setProcessorName(rs.getString("pnameRef"));
+					aVar.setPortName(rs.getString("varName"));
+					aVar.setDepth(rs.getInt("nestingLevel"));
+					aVar.setGranularDepth(rs.getInt("actualNestingLevel"));
+					aVar.setGranularDepthSet((rs.getInt("anlSet") == 1 ? true : false));
 
 					result.add(aVar);
 
@@ -1375,7 +1372,7 @@ public abstract class ProvenanceQuery {
 		// use the calculated path for each input var
 		boolean isInput = true;
 		for (Port v : var2Path.keySet()) {
-			LineageSQLQuery q = generateSQL2(wfInstanceID, proc, v.getVName(), var2Path.get(v), isInput);
+			LineageSQLQuery q = generateSQL2(wfInstanceID, proc, v.getPortName(), var2Path.get(v), isInput);
 			if (q != null) {
 				newQueries.add(q);
 			}
@@ -1386,7 +1383,7 @@ public abstract class ProvenanceQuery {
 
 			isInput = false;
 
-			LineageSQLQuery q = generateSQL2(wfInstanceID, proc, outputVar.getVName(), path, isInput);  // && !var2Path.isEmpty());
+			LineageSQLQuery q = generateSQL2(wfInstanceID, proc, outputVar.getPortName(), path, isInput);  // && !var2Path.isEmpty());
 			if (q != null) {
 				newQueries.add(q);
 			}
@@ -2686,15 +2683,14 @@ public abstract class ProvenanceQuery {
 				String t2Ref = rs.getString(DataBinding.t2Reference.name());
 				
 				Port port = new Port();
-				port.setWfInstanceRef(rs.getString("WfInstanceRef"));
-				port.setInput(rs.getBoolean("inputOrOutput"));				
+				port.setWorkflowId(rs.getString("WfInstanceRef"));
+				port.setInputPort(rs.getBoolean("inputOrOutput"));				
 				port.setIdentifier(rs.getString("portId"));
-				port.setPName(rs.getString("pNameRef"));
-				port.setVName(rs.getString("varName"));
-				port.setType(rs.getString("type"));
-				port.setTypeNestingLevel(rs.getInt("nestingLevel"));
-				port.setActualNestingLevel(rs.getInt("actualNestingLevel"));
-				port.setANLset(rs.getBoolean("anlSet"));
+				port.setProcessorName(rs.getString("pNameRef"));
+				port.setPortName(rs.getString("varName"));
+				port.setDepth(rs.getInt("nestingLevel"));
+				port.setGranularDepth(rs.getInt("actualNestingLevel"));
+				port.setGranularDepthSet(rs.getBoolean("anlSet"));
 
 				dataBindings.put(port, t2Ref);
 			}

@@ -430,7 +430,7 @@ public class ProvenanceAnalysis {
 		// CHECK there can be multiple (pname, varname) pairs, i.e., in case of nested workflows
 		// here we pick the first that turns up -- we would need to let users choose, or process all of them...
 
-		if (v.isInput() || getPq().isDataflow(proc)) { // if vName is input, then do a xfer() step
+		if (v.isInputPort() || getPq().isDataflow(proc)) { // if vName is input, then do a xfer() step
 
 			// rec. accumulates SQL queries into lqList
 			xferStep(wfID, wfNameRef, v, path, selectedProcessors, lqList);
@@ -515,7 +515,7 @@ public class ProvenanceAnalysis {
 
 			int minPathLength = 0;  // if input path is shorter than this we give up granularity altogether
 			for (Port inputVar: inputVars) {
-				int delta = inputVar.getActualNestingLevel() - inputVar.getTypeNestingLevel();
+				int delta = inputVar.getGranularDepth() - inputVar.getDepth();
 				var2delta.put(inputVar, new Integer(delta));
 				minPathLength += delta;
 //				System.out.println("xform() from ["+proc+"] upwards to ["+inputVar.getPName()+":"+inputVar.getVName()+"]");
@@ -609,8 +609,8 @@ public class ProvenanceAnalysis {
 			if (doOPM) {
 				// fetch value for this variable and assert it as an Artifact in the OPM graph
 				Map<String, String> vbConstraints = new HashMap<String, String>();
-				vbConstraints.put("VB.PNameRef", outputVar.getPName());
-				vbConstraints.put("VB.varNameRef", outputVar.getVName());
+				vbConstraints.put("VB.PNameRef", outputVar.getProcessorName());
+				vbConstraints.put("VB.varNameRef", outputVar.getPortName());
 				vbConstraints.put("VB.wfInstanceRef", wfID);
 
 				if (path != null) { 
@@ -630,7 +630,7 @@ public class ProvenanceAnalysis {
 				// map the resulting varBinding to an Artifact
 				if (vbList == null || vbList.size()==0) {
 					logger.debug("no entry corresponding to conditions: proc="+
-							outputVar.getPName()+" var = "+outputVar.getVName()+" iteration = "+path);
+							outputVar.getProcessorName()+" var = "+outputVar.getPortName()+" iteration = "+path);
 					doOPM = false;
 				}  else {
 					vb = vbList.get(0);

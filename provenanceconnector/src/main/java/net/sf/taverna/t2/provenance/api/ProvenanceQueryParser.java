@@ -257,11 +257,11 @@ public class ProvenanceQueryParser {
 		if (childEl == null || (childEl.getChildren().size()==0)) {  
 			// add all output ports 
 			for (Port p:ports) {
-				if (!p.isInput()) {
+				if (!p.isInputPort()) {
 					QueryPort qv = new QueryPort();
-					qv.setWfName(p.getWfInstanceRef());
-					qv.setPname(p.getPName());
-					qv.setVname(p.getVName());
+					qv.setWfName(p.getWorkflowId());
+					qv.setPname(p.getProcessorName());
+					qv.setVname(p.getPortName());
 					qv.setPath("ALL");
 					queryVars.add(qv);	
 				}
@@ -280,23 +280,23 @@ public class ProvenanceQueryParser {
 			}
 
 			Set<String> availableOutPortNames = new HashSet<String>();
-			for (Port p:ports) if (!p.isInput()) { availableOutPortNames.add(p.getVName()); }
+			for (Port p:ports) if (!p.isInputPort()) { availableOutPortNames.add(p.getPortName()); }
 
 			for (String portName:portNames) {
 
 				boolean found = false;
 				for (Port p1:ports) {				
-					if (portName.equals(p1.getVName())) {
+					if (portName.equals(p1.getPortName())) {
 						QueryPort qv = new QueryPort();
-						qv.setWfName(p1.getWfInstanceRef());
-						qv.setPname(p1.getPName());
-						qv.setVname(p1.getVName());
-						String index = portToIndex.get(p1.getVName());
-						if (index != null) qv.setPath(portToIndex.get(p1.getVName()));
+						qv.setWfName(p1.getWorkflowId());
+						qv.setPname(p1.getProcessorName());
+						qv.setVname(p1.getPortName());
+						String index = portToIndex.get(p1.getPortName());
+						if (index != null) qv.setPath(portToIndex.get(p1.getPortName()));
 						else qv.setPath("ALL");
 						queryVars.add(qv);	
 						found = true;
-						logger.debug("adding port "+p1.getPName()+":"+p1.getVName()+" to targetVars");
+						logger.debug("adding port "+p1.getProcessorName()+":"+p1.getPortName()+" to targetVars");
 						break;
 					}
 				} if (!found)  {

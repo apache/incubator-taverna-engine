@@ -265,17 +265,17 @@ public class OPMImporter {
 		// generate Port
 		Port outputVar = new Port();
 
-		outputVar.setPName(procName);
-		outputVar.setWfInstanceRef(wfName);
-		outputVar.setVName(varName);
-		outputVar.setTypeNestingLevel(0);
-		outputVar.setInput(artifactIsInput);  // wgby is an output var   
+		outputVar.setProcessorName(procName);
+		outputVar.setWorkflowId(wfName);
+		outputVar.setPortName(varName);
+		outputVar.setDepth(0);
+		outputVar.setInputPort(artifactIsInput);  // wgby is an output var   
 
 		List<Port> vars = new ArrayList<Port>(); // only one Port in the list
 		vars.add(outputVar);
 
 		try {
-			pw.addVariables(vars, wfName);
+			pw.addPorts(vars, wfName);
 			logger.debug("added var "+varName+" to workflow "+wfName);
 		} catch (SQLException e) {  // no panic -- just catch duplicates
 			logger.warn(e.getMessage());

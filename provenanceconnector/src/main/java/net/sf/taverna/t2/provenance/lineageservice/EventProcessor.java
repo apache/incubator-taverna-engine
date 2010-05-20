@@ -340,11 +340,11 @@ public class EventProcessor {
 
 					Port inputVar = new Port();
 					inputVar.setIdentifier(UUID.randomUUID().toString());
-					inputVar.setPName(pName);
-					inputVar.setWfInstanceRef(dataflowID);
-					inputVar.setVName(ip.getName());
-					inputVar.setTypeNestingLevel(ip.getDepth());
-					inputVar.setInput(true);
+					inputVar.setProcessorName(pName);
+					inputVar.setWorkflowId(dataflowID);
+					inputVar.setPortName(ip.getName());
+					inputVar.setDepth(ip.getDepth());
+					inputVar.setInputPort(true);
 
 //					logger.info("processDataflowStructure: adding input var "+pName+":"+ip.getName());
 
@@ -361,11 +361,11 @@ public class EventProcessor {
 
 					Port outputVar = new Port();
 					outputVar.setIdentifier(UUID.randomUUID().toString());
-					outputVar.setPName(pName);
-					outputVar.setWfInstanceRef(dataflowID);
-					outputVar.setVName(op.getName());
-					outputVar.setTypeNestingLevel(op.getDepth());
-					outputVar.setInput(false);
+					outputVar.setProcessorName(pName);
+					outputVar.setWorkflowId(dataflowID);
+					outputVar.setPortName(op.getName());
+					outputVar.setDepth(op.getDepth());
+					outputVar.setInputPort(false);
 
 					vars.add(outputVar);
 				}
@@ -418,11 +418,11 @@ public class EventProcessor {
 
 				Port inputVar = new Port();
 				inputVar.setIdentifier(UUID.randomUUID().toString());
-				inputVar.setPName(pName);
-				inputVar.setWfInstanceRef(dataflowID);
-				inputVar.setVName(ip.getName());
-				inputVar.setTypeNestingLevel(ip.getDepth());
-				inputVar.setInput(true);  // CHECK PM modified 11/08 -- input vars are actually outputs of input processors...
+				inputVar.setProcessorName(pName);
+				inputVar.setWorkflowId(dataflowID);
+				inputVar.setPortName(ip.getName());
+				inputVar.setDepth(ip.getDepth());
+				inputVar.setInputPort(true);  // CHECK PM modified 11/08 -- input vars are actually outputs of input processors...
 
 				vars.add(inputVar);
 			}
@@ -446,15 +446,15 @@ public class EventProcessor {
 
 				Port outputVar = new Port();
 				outputVar.setIdentifier(UUID.randomUUID().toString());
-				outputVar.setPName(pName);
-				outputVar.setWfInstanceRef(dataflowID);
-				outputVar.setVName(op.getName());
-				outputVar.setTypeNestingLevel(op.getDepth());
-				outputVar.setInput(false);  // CHECK PM modified 11/08 -- output vars are actually outputs of output processors... 
+				outputVar.setProcessorName(pName);
+				outputVar.setWorkflowId(dataflowID);
+				outputVar.setPortName(op.getName());
+				outputVar.setDepth(op.getDepth());
+				outputVar.setInputPort(false);  // CHECK PM modified 11/08 -- output vars are actually outputs of output processors... 
 				vars.add(outputVar);
 			}
 
-			pw.addVariables(vars, dataflowID);
+			pw.addPorts(vars, dataflowID);
 			makePortMapping(vars);
 
 			// ////
@@ -515,7 +515,7 @@ public class EventProcessor {
 	private void makePortMapping(List<Port> ports) {		
 		mapping = new HashMap<String, Port>();
 		for (Port port: ports) {
-			String key = port.getPName() + (port.isInput() ? "/i:" : "/o:") + port.getVName();
+			String key = port.getProcessorName() + (port.isInputPort() ? "/i:" : "/o:") + port.getPortName();
 			mapping.put(key, port);
 		}
 	}
@@ -774,7 +774,7 @@ public class EventProcessor {
 //				queryConstraints.put("sourcePortName", input.getVName());
 //				queryConstraints.put("sourceProcessorName", input.getPName());
 				queryConstraints.put("sourcePortId", input.getIdentifier());
-				queryConstraints.put("workflowId", input.getWfInstanceRef());
+				queryConstraints.put("workflowId", input.getWorkflowId());
 				List<DataLink> outgoingDataLinks = getPq().getDataLinks(queryConstraints);
 
 				// any datalink will do, use the first
@@ -796,8 +796,8 @@ public class EventProcessor {
 //					logger.info(vb.getValue());
 
 					// insert PortBinding back into VB with the global input varname
-					vb.setPNameRef(input.getPName());
-					vb.setVarNameRef(input.getVName());
+					vb.setPNameRef(input.getProcessorName());
+					vb.setVarNameRef(input.getPortName());
 					getPw().addPortBinding(vb);
 
 //					logger.info("added");
@@ -872,7 +872,7 @@ public class EventProcessor {
 //				queryConstraints.put("destinationPortName", output.getVName());
 //				queryConstraints.put("destinationProcessorName", output.getPName());
 				queryConstraints.put("destinationPortId", output.getIdentifier());
-				queryConstraints.put("workflowId", output.getWfInstanceRef());
+				queryConstraints.put("workflowId", output.getWorkflowId());
 				List<DataLink> incomingDataLinks = pq.getDataLinks(queryConstraints);
 
 				// there can be only one -- but check that there is one!
@@ -901,8 +901,8 @@ public class EventProcessor {
 
 					// look for a matching record in PortBinding for output O
 					queryConstraints.clear();
-					queryConstraints.put("varNameRef", output.getVName());
-					queryConstraints.put("V.pNameRef", output.getPName());
+					queryConstraints.put("varNameRef", output.getPortName());
+					queryConstraints.put("V.pNameRef", output.getProcessorName());
 					queryConstraints.put("VB.wfInstanceRef", getWfInstanceID());
 					queryConstraints.put("V.wfInstanceRef", topLevelDataflowID);
 					queryConstraints.put("VB.iteration", yValue.getIteration());
@@ -935,8 +935,8 @@ public class EventProcessor {
 
 						// copy the yValue to O 
 						// insert PortBinding back into VB with the global output varname
-						yValue.setPNameRef(output.getPName());
-						yValue.setVarNameRef(output.getVName());
+						yValue.setPNameRef(output.getProcessorName());
+						yValue.setVarNameRef(output.getPortName());
 						pw.addPortBinding(yValue);
 					}
 
@@ -947,8 +947,8 @@ public class EventProcessor {
 				// get all collections refs for O
 				queryConstraints.clear();
 				queryConstraints.put("wfInstanceRef", getWfInstanceID());
-				queryConstraints.put("PNameRef", output.getPName());
-				queryConstraints.put("varNameRef", output.getVName());
+				queryConstraints.put("PNameRef", output.getProcessorName());
+				queryConstraints.put("varNameRef", output.getPortName());
 
 				List<NestedListNode> oCollections = pq.getNestedListNodes(queryConstraints);
 
@@ -1095,7 +1095,7 @@ public class EventProcessor {
 				List<Port> vars = getPq().getPorts(queryConstraints);
 				try {
 					Port v = vars.get(0);
-					v.setPortNameOrder(order++);
+					v.setIterationStrategyOrder(order++);
 					getPw().updatePort(v);
 				}
 				catch (IndexOutOfBoundsException e) {
@@ -1596,15 +1596,15 @@ public class EventProcessor {
 			int totalANL = 0;
 			for (Port iv : inputs) {
 
-				if (iv.isANLset() == false) {
-					iv.setActualNestingLevel(iv.getTypeNestingLevel());
-					iv.setANLset(true);
+				if (iv.isGranularDepthSet() == false) {
+					iv.setGranularDepth(iv.getDepth());
+					iv.setGranularDepthSet(true);
 					getPw().updatePort(iv);
 
 //					logger.debug("var: "+iv.getVName()+" set at nominal level "+iv.getActualNestingLevel());					
 				}
 
-				int delta_nl = iv.getActualNestingLevel() - iv.getTypeNestingLevel();
+				int delta_nl = iv.getGranularDepth() - iv.getDepth();
 
 				// if delta_nl < 0 then Taverna wraps the value into a list --> use dnl(X) in this case
 				if (delta_nl < 0 ) delta_nl = 0;// CHECK iv.getTypeNestingLevel();
@@ -1633,14 +1633,14 @@ public class EventProcessor {
 			List<Port> outputs = getPq().getOutputVars(pname, wfNameRef, wfInstanceId);
 			for (Port ov : outputs) {
 
-				ov.setActualNestingLevel(ov.getTypeNestingLevel() + totalANL);
+				ov.setGranularDepth(ov.getDepth() + totalANL);
 
-				logger.debug("anl for "+pname+":"+ov.getVName()+" = "+(ov.getTypeNestingLevel() + totalANL));
-				ov.setANLset(true);
+				logger.debug("anl for "+pname+":"+ov.getPortName()+" = "+(ov.getDepth() + totalANL));
+				ov.setGranularDepthSet(true);
 				getPw().updatePort(ov);
 
 				// propagate this through all the links from this var
-				List<Port> successors = getPq().getSuccPorts(pname, ov.getVName(), wfNameRef);
+				List<Port> successors = getPq().getSuccPorts(pname, ov.getPortName(), wfNameRef);
 
 //				logger.debug(successors.size()+ " successors for var "+ov.getVName());
 
@@ -1649,22 +1649,22 @@ public class EventProcessor {
 					List<Port> toBeProcessed = new ArrayList<Port>();
 					toBeProcessed.add(v);
 
-					if (pq.isDataflow(v.getPName()) && v.isInput()) {  // this is the input to a nested workflow
+					if (pq.isDataflow(v.getProcessorName()) && v.isInputPort()) {  // this is the input to a nested workflow
 
 //						String tempWfNameRef = pq.getWfNameForDataflow(v.getPName(), wfInstanceId);
-						String tempWfNameRef = pq.getWfNameForDataflow(v.getPName());
-						List<Port> realSuccessors = getPq().getSuccPorts(v.getPName(), v.getVName(), tempWfNameRef);	
+						String tempWfNameRef = pq.getWfNameForDataflow(v.getProcessorName());
+						List<Port> realSuccessors = getPq().getSuccPorts(v.getProcessorName(), v.getPortName(), tempWfNameRef);	
 
 //						logger.debug("realSuccessors size = "+realSuccessors.size());
 
 						toBeProcessed.remove(0);
 						toBeProcessed.addAll(realSuccessors);
 
-					}  else if (pq.isDataflow(v.getPName()) && !v.isInput()) {  // this is the output to a nested workflow
+					}  else if (pq.isDataflow(v.getProcessorName()) && !v.isInputPort()) {  // this is the output to a nested workflow
 
 //						String tempWfNameRef = pq.getWfNameForDataflow(v.getPName(), wfInstanceId);
-						String tempWfNameRef = pq.getWfNameForDataflow(v.getPName());
-						List<Port> realSuccessors = getPq().getSuccPorts(v.getPName(), v.getVName(), null);	
+						String tempWfNameRef = pq.getWfNameForDataflow(v.getProcessorName());
+						List<Port> realSuccessors = getPq().getSuccPorts(v.getProcessorName(), v.getPortName(), null);	
 
 //						logger.debug("realSuccessors size = "+realSuccessors.size());
 
@@ -1674,10 +1674,10 @@ public class EventProcessor {
 					}
 
 					for (Port v1:toBeProcessed) {
-						v1.setActualNestingLevel(ov.getActualNestingLevel());
-						logger.debug("anl for "+v1.getPName()+":"+v1.getVName()+" = "+ov.getActualNestingLevel());
+						v1.setGranularDepth(ov.getGranularDepth());
+						logger.debug("anl for "+v1.getProcessorName()+":"+v1.getPortName()+" = "+ov.getGranularDepth());
 
-						v1.setANLset(true);
+						v1.setGranularDepthSet(true);
 						getPw().updatePort(v1);
 					}
 				}
