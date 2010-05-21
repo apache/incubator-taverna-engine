@@ -33,6 +33,7 @@ import javax.swing.tree.TreePath;
  * @author Philip Milne
  * @author Scott Violet
  */
+@SuppressWarnings("serial")
 public class TreeTableModelAdapter extends AbstractTableModel
 {
     JTree tree;

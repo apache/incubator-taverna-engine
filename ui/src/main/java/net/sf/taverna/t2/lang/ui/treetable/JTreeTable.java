@@ -338,8 +338,8 @@ public class JTreeTable extends JTable {
 		protected int visibleRow;
 		protected Border highlightBorder;
 
-		Border selectedBorder = null;
-		Border unselectedBorder = null;
+		//Border selectedBorder = null;
+		//Border unselectedBorder = null;
 
 		public DateCellRenderer() {
 			setOpaque(true);
@@ -350,23 +350,23 @@ public class JTreeTable extends JTable {
 				int column) {
 
 			if (isSelected) {
-				if (selectedBorder == null) {
-					selectedBorder = BorderFactory.createMatteBorder(2, 5, 2,
-							5, table.getSelectionBackground());
-				}
-				setBorder(selectedBorder);
+//				if (selectedBorder == null) {
+//					selectedBorder = BorderFactory.createMatteBorder(2, 5, 2,
+//							5, table.getSelectionBackground());
+//				}
+//				setBorder(selectedBorder);
 				this.setBackground(table.getSelectionBackground());
 				this.setForeground(table.getSelectionForeground());
 			} else {
-				if (unselectedBorder == null) {
-					unselectedBorder = BorderFactory.createMatteBorder(2, 5, 2,
-							5, table.getBackground());
-				}
-				setBorder(unselectedBorder);
+//				if (unselectedBorder == null) {
+//					unselectedBorder = BorderFactory.createMatteBorder(2, 5, 2,
+//							5, table.getBackground());
+//				}
+//				setBorder(unselectedBorder);
 				this.setBackground(table.getBackground());
 				this.setForeground(table.getForeground());
 			}
-
+			
 			Date date = (Date) ((TreeTableModelAdapter) getModel()).getValueAt(
 					row, column);
 			if (date != null) {
