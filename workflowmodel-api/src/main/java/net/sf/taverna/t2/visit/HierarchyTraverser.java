@@ -292,8 +292,9 @@ public class HierarchyTraverser {
 	 *            The class to consider
 	 * @return The set of names of child-getting methods for the class
 	 */
-	private static Set<String> getMethodsForClass(Class c) {
+	private static synchronized Set<String> getMethodsForClass(Class c) {
 		if (!childrenMethods.containsKey(c)) {
+			
 			Set<String> result = new HashSet<String>();
 			result.addAll(getExplicitMethodsForClass(c));
 			for (Class i : c.getInterfaces()) {
