@@ -140,7 +140,9 @@ public interface Dataflow extends Annotated<Dataflow>, TokenProcessingEntity {
 	 * 
 	 * @return a String representing a unique internal identifier.
 	 */
-	public String getInternalIdentier();
+	public String getInternalIdentifier();
+	
+	public String getInternalIdentifier(boolean saveId);
 	
 	/**
 	 * Check if the given input port is connected to anything 
