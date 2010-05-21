@@ -173,7 +173,7 @@ public class Provenance {
 
 			if (isFirstWorkflowStructure()) {
 
-				String dataflowId = ((WorkflowProvenanceItem) provenanceItem).getDataflow().getInternalIdentifier();
+				String dataflowId = ((WorkflowProvenanceItem) provenanceItem).getDataflow().getInternalIdentifier(false);
 				String instanceId = provenanceItem.getIdentifier();
 				
 				workflowIDMap.put(instanceId, dataflowId);
@@ -191,7 +191,7 @@ public class Provenance {
 				getEp().propagateANL(provenanceItem.getIdentifier());
 			} else {
 				
-				String dataflowId = ((WorkflowProvenanceItem) provenanceItem).getDataflow().getInternalIdentifier();
+				String dataflowId = ((WorkflowProvenanceItem) provenanceItem).getDataflow().getInternalIdentifier(false);
 				String instanceId = provenanceItem.getIdentifier();
 				
 				workflowIDMap.put(instanceId, dataflowId);
@@ -199,7 +199,7 @@ public class Provenance {
 
 				Dataflow df = ((WorkflowProvenanceItem)provenanceItem).getDataflow();
 				synchronized(workflowIDStack) {
-					workflowIDStack.add(0,df.getInternalIdentifier());
+					workflowIDStack.add(0,df.getInternalIdentifier(false));
 				}
 			}
 
