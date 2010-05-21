@@ -26,8 +26,6 @@ import java.util.Map;
 
 import net.sf.taverna.t2.reference.ExternalReferenceSPI;
 import net.sf.taverna.t2.reference.T2Reference;
-import net.sf.taverna.t2.workflowmodel.health.HealthReport;
-import net.sf.taverna.t2.workflowmodel.health.HealthReport.Status;
 import net.sf.taverna.t2.workflowmodel.processor.activity.AbstractAsynchronousActivity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityConfigurationException;
 import net.sf.taverna.t2.workflowmodel.processor.activity.AsynchronousActivity;
@@ -58,11 +56,6 @@ public class AsynchEchoActivity extends
 	@Override
 	public EchoConfig getConfiguration() {
 		return config;
-	}
-
-	public HealthReport checkActivityHealth() {
-		return new HealthReport("AsynchEchoActivity",
-				"Everything is hunky dorey", Status.OK);
 	}
 
 }
