@@ -32,6 +32,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import net.sf.taverna.t2.facade.FailureListener;
 import net.sf.taverna.t2.facade.ResultListener;
 import net.sf.taverna.t2.facade.WorkflowInstanceFacade;
+import net.sf.taverna.t2.facade.WorkflowRunCancellation;
 import net.sf.taverna.t2.invocation.InvocationContext;
 import net.sf.taverna.t2.invocation.TokenOrderException;
 import net.sf.taverna.t2.invocation.WorkflowDataToken;
@@ -61,6 +62,7 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayer;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchStack;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.ErrorBounce;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.IntermediateProvenance;
+import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.Stop;
 
 import org.apache.log4j.Logger;
 
@@ -149,7 +151,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 			workflowItem.setDataflow(dataflow);
 			workflowItem.setProcessId(instanceOwningProcessId);
 			workflowItem.setIdentifier(workflowRunId);
-			workflowItem.setParentId(dataflow.getInternalIdentier());
+			workflowItem.setParentId(dataflow.getInternalIdentifier());
 
 			addProvenanceLayerToProcessors(dataflow, workflowItem);
 			context.getProvenanceReporter().setSessionID(workflowRunId);
@@ -418,6 +420,33 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 	
 	public void setIsRunning(boolean isRunning){
 		this.isRunning = isRunning;
+	}
+
+	public boolean cancelWorkflowRun() {
+		boolean result = Stop.cancelWorkflow(getWorkflowRunId());
+		if (result) {
+			List<FailureListener> copyOfListeners = null;
+			synchronized (failureListeners) {
+				copyOfListeners = new ArrayList<FailureListener>(failureListeners);
+			}			
+			for (FailureListener failureListener : copyOfListeners) {
+				try {
+					failureListener.workflowFailed("Workflow was cancelled", new WorkflowRunCancellation(getWorkflowRunId()));
+				} catch (RuntimeException ex) {
+					logger.warn("Could not notify failure listener "
+							+ failureListener, ex);
+				}
+			}
+		}
+		return result;
+	}
+
+	public boolean pauseWorkflowRun() {
+		return Stop.pauseWorkflow(getWorkflowRunId());
+	}
+
+	public boolean resumeWorkflowRun() {
+		return Stop.resumeWorkflow(getWorkflowRunId());
 	}
 
 }
