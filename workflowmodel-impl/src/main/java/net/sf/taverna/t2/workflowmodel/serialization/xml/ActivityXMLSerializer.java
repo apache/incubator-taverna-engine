@@ -34,8 +34,13 @@ public class ActivityXMLSerializer extends AbstractXMLSerializer {
 	public static ActivityXMLSerializer getInstance() {
 		return instance;
 	}
-
+	
 	public Element activityToXML(Activity<?> activity) throws JDOMException,
+	IOException {
+		return activityToXML(activity, activity, activity.getConfiguration());
+	}
+
+	public Element activityToXML(Activity<?> activity, Activity<?> describingActivity, Object config) throws JDOMException,
 			IOException {
 		Element activityElem = new Element(ACTIVITY, T2_WORKFLOW_NAMESPACE);
 
@@ -51,30 +56,28 @@ public class ActivityXMLSerializer extends AbstractXMLSerializer {
 		// Write out the mappings (processor input -> activity input, activity
 		// output -> processor output)
 		Element ipElement = new Element(INPUT_MAP, T2_WORKFLOW_NAMESPACE);
-		for (String processorInputName : activity.getInputPortMapping()
+		for (String processorInputName : describingActivity.getInputPortMapping()
 				.keySet()) {
 			Element mapElement = new Element(MAP, T2_WORKFLOW_NAMESPACE);
 			mapElement.setAttribute(FROM, processorInputName);
-			mapElement.setAttribute(TO, activity.getInputPortMapping().get(
+			mapElement.setAttribute(TO, describingActivity.getInputPortMapping().get(
 					processorInputName));
 			ipElement.addContent(mapElement);
 		}
 		activityElem.addContent(ipElement);
 
 		Element opElement = new Element(OUTPUT_MAP, T2_WORKFLOW_NAMESPACE);
-		for (String activityOutputName : activity.getOutputPortMapping()
+		for (String activityOutputName : describingActivity.getOutputPortMapping()
 				.keySet()) {
 			Element mapElement = new Element(MAP, T2_WORKFLOW_NAMESPACE);
 			mapElement.setAttribute(FROM, activityOutputName);
-			mapElement.setAttribute(TO, activity.getOutputPortMapping().get(
+			mapElement.setAttribute(TO, describingActivity.getOutputPortMapping().get(
 					activityOutputName));
 			opElement.addContent(mapElement);
 		}
 		activityElem.addContent(opElement);
 
-		// Get element for configuration
-		Object o = activity.getConfiguration();
-		Element configElement = beanAsElement(o);
+		Element configElement = beanAsElement(config);
 		activityElem.addContent(configElement);
 
 		// annotations
