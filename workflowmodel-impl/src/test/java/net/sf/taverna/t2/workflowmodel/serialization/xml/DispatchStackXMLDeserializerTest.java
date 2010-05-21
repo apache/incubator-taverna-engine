@@ -28,6 +28,7 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.Failover;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.Invoke;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.Parallelize;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.Retry;
+import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.Stop;
 
 import org.jdom.Element;
 import org.junit.Test;
@@ -41,12 +42,13 @@ public class DispatchStackXMLDeserializerTest extends DeserializerTestsHelper {
 		Element el = loadXMLFragment("dispatchStack.xml");
 		Processor p = edits.createProcessor("p");
 		deserializer.deserializeDispatchStack(p, el);
-		assertEquals("there should be 5 layers",5,p.getDispatchStack().getLayers().size());
+		assertEquals("there should be 6 layers",6,p.getDispatchStack().getLayers().size());
 		assertTrue("first layer should be parallelize, but was "+p.getDispatchStack().getLayers().get(0),p.getDispatchStack().getLayers().get(0) instanceof Parallelize);
 		assertTrue("2nd layer should be ErrorBounce, but was "+p.getDispatchStack().getLayers().get(1),p.getDispatchStack().getLayers().get(1) instanceof ErrorBounce);
 		assertTrue("3rd layer should be Failover, but was "+p.getDispatchStack().getLayers().get(2),p.getDispatchStack().getLayers().get(2) instanceof Failover);
 		assertTrue("4th layer should be Retry, but was "+p.getDispatchStack().getLayers().get(3),p.getDispatchStack().getLayers().get(3) instanceof Retry);
-		assertTrue("5th layer should be Invoke, but was "+p.getDispatchStack().getLayers().get(4),p.getDispatchStack().getLayers().get(4) instanceof Invoke);
+		assertTrue("5th layer should be Stop, but was "+p.getDispatchStack().getLayers().get(3),p.getDispatchStack().getLayers().get(4) instanceof Stop);
+		assertTrue("6th layer should be Invoke, but was "+p.getDispatchStack().getLayers().get(4),p.getDispatchStack().getLayers().get(5) instanceof Invoke);
 	}
 
 }
