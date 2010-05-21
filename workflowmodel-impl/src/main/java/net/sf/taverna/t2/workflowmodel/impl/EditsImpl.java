@@ -483,4 +483,9 @@ public class EditsImpl implements Edits {
 		return new ReorderMergeInputPortsEdit(merge, reorderedMergeInputPortList);
 	}
 
+	public Edit<Processor> getRemoveActivityEdit(Processor processor,
+			Activity<?> activity) {
+		return new RemoveActivityEdit(processor, activity);
+	}
+
 }
