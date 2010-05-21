@@ -71,7 +71,7 @@ public class ActivityInputPortImpl extends AbstractPort implements
 	}
 
 	public boolean allowsLiteralValues() {
-		return this.allowsLiteralValues();
+		return this.allowsLiteralValues;
 	}
 
 	public List<Class<? extends ExternalReferenceSPI>> getHandledReferenceSchemes() {
