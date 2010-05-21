@@ -26,6 +26,8 @@ import net.sf.taverna.t2.workflowmodel.Processor;
 import net.sf.taverna.t2.workflowmodel.ProcessorInputPort;
 import net.sf.taverna.t2.workflowmodel.ProcessorOutputPort;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
+import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityAndBeanWrapper;
+import net.sf.taverna.t2.workflowmodel.processor.activity.DisabledActivity;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchStack;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationStrategyStack;
 
@@ -91,6 +93,10 @@ public class ProcessorXMLSerializer extends AbstractXMLSerializer {
 
 	protected Element activityToXML(Activity<?> activity) throws JDOMException,
 			IOException {
+		if (activity instanceof DisabledActivity) {
+			ActivityAndBeanWrapper wrapper = ((DisabledActivity) activity).getConfiguration();
+			return ActivityXMLSerializer.getInstance().activityToXML(wrapper.getActivity(), activity, wrapper.getBean());
+		}
 		return ActivityXMLSerializer.getInstance().activityToXML(activity);
 	}
 	
