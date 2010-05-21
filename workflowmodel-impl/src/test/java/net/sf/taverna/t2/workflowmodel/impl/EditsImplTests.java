@@ -50,7 +50,7 @@ public class EditsImplTests {
 	@Test
 	public void createDataflow() {
 		Dataflow df = edits.createDataflow();
-		assertNotNull(df.getInternalIdentier());
+		assertNotNull(df.getInternalIdentifier());
 	}
 	
 	@Test
