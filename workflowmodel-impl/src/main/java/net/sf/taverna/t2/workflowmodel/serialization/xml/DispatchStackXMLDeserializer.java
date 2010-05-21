@@ -25,6 +25,8 @@ import java.util.List;
 import net.sf.taverna.t2.workflowmodel.EditException;
 import net.sf.taverna.t2.workflowmodel.Processor;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayer;
+import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.Invoke;
+import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.Stop;
 
 import org.jdom.Element;
 
@@ -45,6 +47,9 @@ public class DispatchStackXMLDeserializer extends AbstractXMLDeserializer {
 		int layers=0;
 		for (Element layer : (List<Element>)dispatchStack.getChildren(DISPATCH_LAYER,T2_WORKFLOW_NAMESPACE)) {
 			DispatchLayer<?> dispatchLayer = DispatchLayerXMLDeserializer.getInstance().deserializeDispatchLayer(layer);
+			if (dispatchLayer instanceof Invoke) {
+				edits.getAddDispatchLayerEdit(processor.getDispatchStack(), new Stop(), layers++).doEdit();
+			}
 			edits.getAddDispatchLayerEdit(processor.getDispatchStack(), dispatchLayer, layers++).doEdit();
 		}
 		
