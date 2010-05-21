@@ -550,6 +550,11 @@ public interface Edits {
 	 */
 	public Edit<Processor> getMapProcessorPortsForActivityEdit(
 			Processor processor);
+	
+	/**
+	 * Returns an edit to remove an Activity from a Processor
+	 */
+	public Edit<Processor> getRemoveActivityEdit(Processor processor, Activity<?> activity);
 
 	/**
 	 * Returns an edit to remove an ActivityInputPort from an Activity.
