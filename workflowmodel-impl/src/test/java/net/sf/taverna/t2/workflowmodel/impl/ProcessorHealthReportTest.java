@@ -25,10 +25,13 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
-import net.sf.taverna.t2.workflowmodel.health.HealthReport;
-import net.sf.taverna.t2.workflowmodel.health.HealthReport.Status;
+import net.sf.taverna.t2.visit.VisitKind;
+import net.sf.taverna.t2.visit.VisitReport;
+import net.sf.taverna.t2.visit.Visitor;
+import net.sf.taverna.t2.visit.VisitReport.Status;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -36,17 +39,17 @@ import org.junit.Test;
 
 public class ProcessorHealthReportTest {
 
-	List<HealthReport> activityReports;
-	ProcessorHealthReport report;
+	List<VisitReport> activityReports;
+	VisitReport report;
 	
 	@Before
 	public void setUp() throws Exception {
-		activityReports = new ArrayList<HealthReport>();
-		activityReports.add(new HealthReport("","",Status.OK));
-		activityReports.add(new HealthReport("","",Status.OK));
-		activityReports.add(new HealthReport("","",Status.OK));
+		activityReports = new ArrayList<VisitReport>();
+		activityReports.add(new VisitReport(DummyKind.getInstance(), "","",0, Status.OK));
+		activityReports.add(new VisitReport(DummyKind.getInstance(), "","",0, Status.OK));
+		activityReports.add(new VisitReport (DummyKind.getInstance(), "","",0, Status.OK));
 		
-		report = new ProcessorHealthReport("processor subject",activityReports);
+		report = new VisitReport (DummyKind.getInstance(), "processor subject", "", 0, activityReports);
 	}
 
 	@Test
@@ -56,10 +59,9 @@ public class ProcessorHealthReportTest {
 
 	@Test
 	public void testGetActivityHealthReports() {
-		assertEquals("There should be 3 activity reports",3,report.getSubReports().size());
-		assertSame(activityReports.get(0),report.getSubReports().get(0));
-		assertSame(activityReports.get(1),report.getSubReports().get(1));
-		assertSame(activityReports.get(2),report.getSubReports().get(2));
+		Collection<VisitReport> subReports = report.getSubReports();
+		assertEquals("There should be 3 activity reports",3,subReports.size());
+		assert(subReports.containsAll(activityReports));
 	}
 
 	@Ignore("Not yet implented, flagged as Ignore to allow commit")
@@ -70,48 +72,48 @@ public class ProcessorHealthReportTest {
 
 	@Test
 	public void testGetStatusAllOK() {
-		List<HealthReport> activityReports = new ArrayList<HealthReport>();
-		activityReports.add(new HealthReport("","",Status.OK));
-		activityReports.add(new HealthReport("","",Status.OK));
-		activityReports.add(new HealthReport("","",Status.OK));
+		List<VisitReport> activityReports = new ArrayList<VisitReport>();
+		activityReports.add(new VisitReport(DummyKind.getInstance(), "","",0, Status.OK));
+		activityReports.add(new VisitReport(DummyKind.getInstance(), "","",0, Status.OK));
+		activityReports.add(new VisitReport(DummyKind.getInstance(), "","",0, Status.OK));
 		
-		ProcessorHealthReport report = new ProcessorHealthReport("processor subject",activityReports);
+		VisitReport report = new VisitReport(DummyKind.getInstance(), "processor subject","", 0, activityReports);
 		
 		assertEquals("the status should be OK",Status.OK,report.getStatus());
 	}
 	
 	@Test
 	public void testGetStatusContainsWarning() {
-		List<HealthReport> activityReports = new ArrayList<HealthReport>();
-		activityReports.add(new HealthReport("","",Status.OK));
-		activityReports.add(new HealthReport("","",Status.OK));
-		activityReports.add(new HealthReport("","",Status.WARNING));
+		List<VisitReport> activityReports = new ArrayList<VisitReport>();
+		activityReports.add(new VisitReport(DummyKind.getInstance(), "","",0, Status.OK));
+		activityReports.add(new VisitReport(DummyKind.getInstance(), "","",0, Status.OK));
+		activityReports.add(new VisitReport(DummyKind.getInstance(), "","",0, Status.WARNING));
 		
-		ProcessorHealthReport report = new ProcessorHealthReport("processor subject",activityReports);
+		VisitReport report = new VisitReport(DummyKind.getInstance(), "processor subject","", 0, activityReports);
 		
 		assertEquals("the status should be WARNING",Status.WARNING,report.getStatus());
 	}
 	
 	@Test
 	public void testGetStatusContainsSevere() {
-		List<HealthReport> activityReports = new ArrayList<HealthReport>();
-		activityReports.add(new HealthReport("","",Status.OK));
-		activityReports.add(new HealthReport("","",Status.SEVERE));
-		activityReports.add(new HealthReport("","",Status.OK));
+		List<VisitReport> activityReports = new ArrayList<VisitReport>();
+		activityReports.add(new VisitReport(DummyKind.getInstance(), "","",0, Status.OK));
+		activityReports.add(new VisitReport(DummyKind.getInstance(), "","",0, Status.SEVERE));
+		activityReports.add(new VisitReport(DummyKind.getInstance(), "","",0, Status.OK));
 		
-		ProcessorHealthReport report = new ProcessorHealthReport("",activityReports);
+		VisitReport report = new VisitReport(DummyKind.getInstance(), "processor subject","", 0, activityReports);
 		
-		assertEquals("the status should be WARNING",Status.WARNING,report.getStatus());
+		assertEquals("the status should be SEVERE",Status.SEVERE,report.getStatus());
 	}
 	
 	@Test
 	public void testGetStatusAllSevere() {
-		List<HealthReport> activityReports = new ArrayList<HealthReport>();
-		activityReports.add(new HealthReport("","",Status.SEVERE));
-		activityReports.add(new HealthReport("","",Status.SEVERE));
-		activityReports.add(new HealthReport("","",Status.SEVERE));
+		List<VisitReport> activityReports = new ArrayList<VisitReport>();
+		activityReports.add(new VisitReport(DummyKind.getInstance(), "","",0, Status.SEVERE));
+		activityReports.add(new VisitReport(DummyKind.getInstance(), "","",0, Status.SEVERE));
+		activityReports.add(new VisitReport(DummyKind.getInstance(), "","",0, Status.SEVERE));
 		
-		ProcessorHealthReport report = new ProcessorHealthReport("",activityReports);
+		VisitReport report = new VisitReport(DummyKind.getInstance(), "processor subject","", 0, activityReports);
 		
 		assertEquals("the status should be SEVERE",Status.SEVERE,report.getStatus());
 	}
@@ -119,5 +121,22 @@ public class ProcessorHealthReportTest {
 	@Test
 	public void testGetSubject() {
 		assertEquals("processor subject",report.getSubject());
+	}
+	
+	private static class DummyKind extends VisitKind {
+		
+
+		@Override
+		public Class<? extends Visitor> getVisitorClass() {
+			return null;
+		}
+
+		private static class Singleton {
+			private static DummyKind instance = new DummyKind();
+		}
+		
+		public static DummyKind getInstance() {
+			return Singleton.instance;
+		}
 	}
 }
