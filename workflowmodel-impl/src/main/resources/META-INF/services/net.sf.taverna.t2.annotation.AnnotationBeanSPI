@@ -6,3 +6,5 @@ net.sf.taverna.t2.annotation.annotationbeans.HostInstitution
 net.sf.taverna.t2.annotation.annotationbeans.DocumentationUrl
 net.sf.taverna.t2.annotation.annotationbeans.Optional
 net.sf.taverna.t2.annotation.annotationbeans.ExampleValue
+net.sf.taverna.t2.annotation.annotationbeans.SemanticAnnotation
+net.sf.taverna.t2.annotation.annotationbeans.IdentificationAssertion
