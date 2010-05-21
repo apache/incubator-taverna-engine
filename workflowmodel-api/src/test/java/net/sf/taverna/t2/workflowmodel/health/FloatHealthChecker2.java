@@ -20,17 +20,22 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.health;
 
-import net.sf.taverna.t2.workflowmodel.health.HealthChecker;
-import net.sf.taverna.t2.workflowmodel.health.HealthReport;
+import java.util.List;
+
+import net.sf.taverna.t2.visit.VisitReport;
 
 public class FloatHealthChecker2 implements HealthChecker<Float> {
 
-	public boolean canHandle(Object subject) {
+	public boolean canVisit(Object subject) {
 		return subject!=null && subject instanceof Float;
 	}
 
-	public HealthReport checkHealth(Float subject) {
+	public VisitReport visit(Float o, List<Object> ancestry) {
 		return null;
+	}
+
+	public boolean isTimeConsuming() {
+		return false;
 	}
 
 }

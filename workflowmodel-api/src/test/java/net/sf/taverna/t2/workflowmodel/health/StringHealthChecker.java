@@ -20,17 +20,23 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.health;
 
+import java.util.List;
+
+import net.sf.taverna.t2.visit.VisitReport;
 import net.sf.taverna.t2.workflowmodel.health.HealthChecker;
-import net.sf.taverna.t2.workflowmodel.health.HealthReport;
 
 public class StringHealthChecker implements HealthChecker<String> {
 
-	public boolean canHandle(Object subject) {
+	public boolean canVisit(Object subject) {
 		return subject!=null && subject instanceof String;
 	}
 
-	public HealthReport checkHealth(String subject) {
+	public VisitReport visit(String o, List<Object> ancestry) {
 		return null;
+	}
+
+	public boolean isTimeConsuming() {
+		return false;
 	}
 
 }

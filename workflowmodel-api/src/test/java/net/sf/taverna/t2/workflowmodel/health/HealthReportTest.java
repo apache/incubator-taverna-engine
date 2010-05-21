@@ -24,28 +24,29 @@ package net.sf.taverna.t2.workflowmodel.health;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
-import net.sf.taverna.t2.workflowmodel.health.HealthReport;
-import net.sf.taverna.t2.workflowmodel.health.HealthReport.Status;
+import net.sf.taverna.t2.visit.VisitReport;
+import net.sf.taverna.t2.visit.VisitReport.Status;
 
 import org.junit.Before;
 import org.junit.Test;
 
 public class HealthReportTest {
 
-	HealthReport report;
+	VisitReport report;
 	
 	@Before
 	public void setUp() throws Exception {
-		List<HealthReport> subreports = new ArrayList<HealthReport>();
-		subreports.add(new HealthReport("sub subject","this is a subreport",Status.OK));
-		report = new HealthReport("a subject","a message",Status.WARNING,subreports);
+		List<VisitReport> subreports = new ArrayList<VisitReport>();
+		subreports.add(new VisitReport(DummyVisitKind.getInstance(), "sub subject","this is a subreport",0,Status.OK));
+		report = new VisitReport(DummyVisitKind.getInstance(), "a subject","a message",0, Status.WARNING,subreports);
 	}
 
 	@Test
-	public void testActivityHealthReportStringStatus() {
-		report = new HealthReport("the subject","a string",Status.SEVERE);
+	public void testActivityVisitReportStringStatus() {
+		report = new VisitReport(DummyVisitKind.getInstance(), "the subject","a string",0, Status.SEVERE);
 		assertEquals("a string",report.getMessage());
 		assertEquals(Status.SEVERE,report.getStatus());
 		assertEquals("the subject",report.getSubject());
@@ -69,18 +70,18 @@ public class HealthReportTest {
 	
 	@Test
 	public void testGetSubreports() {
-		List<HealthReport> subreports = report.getSubReports();
+		Collection<VisitReport> subreports = report.getSubReports();
 		assertEquals("There should be 1 report",1,subreports.size());
-		assertEquals("Wrong subject","sub subject",subreports.get(0).getSubject());
+		assertEquals("Wrong subject","sub subject",subreports.iterator().next().getSubject());
 	}
 	
 	@Test 
 	public void testStatusHighestIncludingSubReports() {
-		report = new HealthReport("parent","set to ok",Status.OK);
+		report = new VisitReport(DummyVisitKind.getInstance(), "parent","set to ok",0, Status.OK);
 		assertEquals("should be OK",Status.OK,report.getStatus());
-		report.getSubReports().add(new HealthReport("child1","set to warning",Status.WARNING));
+		report.getSubReports().add(new VisitReport(DummyVisitKind.getInstance(), "child1","set to warning",0, Status.WARNING));
 		assertEquals("should be WARNING",Status.WARNING,report.getStatus());
-		report.getSubReports().add(new HealthReport("child1","set to severe",Status.SEVERE));
+		report.getSubReports().add(new VisitReport(DummyVisitKind.getInstance(), "child1","set to severe",0, Status.SEVERE));
 		assertEquals("should be SEVERE",Status.SEVERE,report.getStatus());
 	}
 
