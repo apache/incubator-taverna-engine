@@ -98,7 +98,7 @@ public class DummyDataflow extends AbstractAnnotatedThing<Dataflow> implements
 				"Not implemented for this class");
 	}
 
-	public String getInternalIdentier() {
+	public String getInternalIdentifier() {
 		return "an id";
 	}
 
@@ -114,6 +114,10 @@ public class DummyDataflow extends AbstractAnnotatedThing<Dataflow> implements
 
 	public boolean isInputPortConnected(DataflowInputPort inputPort) {
 		return false;
+	}
+
+	public String getInternalIdentifier(boolean saveId) {
+		return getInternalIdentifier();
 	}
 
 }
