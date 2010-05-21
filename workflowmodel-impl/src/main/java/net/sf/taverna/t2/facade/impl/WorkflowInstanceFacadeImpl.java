@@ -81,6 +81,9 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 	protected static AtomicLong owningProcessId = new AtomicLong(0);
 
 	private InvocationContext context;
+	
+	// Is workflow currently running
+	private boolean isRunning = false;
 
 	public InvocationContext getContext() {
 		return context;
@@ -135,10 +138,8 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 		} else {
 			// Nested workflow
 			this.instanceOwningProcessId = parentProcess + ":" + localName;
-		}
-		
-		
-		
+		}		
+				
 		WorkflowProvenanceItem workflowItem = null;
 		
 		if (context.getProvenanceReporter() != null) {
@@ -229,6 +230,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 		monitorManager.registerNode(this, instanceOwningProcessId.split(":"),
 				new HashSet<MonitorableProperty<?>>());
 		dataflow.fire(instanceOwningProcessId, context);
+		isRunning = true;
 	}
 
 	public Dataflow getDataflow() {
@@ -407,6 +409,15 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 
 	public String getWorkflowRunId() {
 		return workflowRunId;
+	}
+	
+	
+	public boolean isRunning(){
+			return this.isRunning;
+	}
+	
+	public void setIsRunning(boolean isRunning){
+		this.isRunning = isRunning;
 	}
 
 }

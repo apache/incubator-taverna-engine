@@ -170,4 +170,9 @@ public interface WorkflowInstanceFacade {
 	 * Get the unique id of the wf run inside the facede.
 	 */
 	public String getWorkflowRunId();
+
+	// Is the workflow attached to this facade currently running
+	public boolean isRunning();
+	public void setIsRunning(boolean isRunning);
+	
 }
