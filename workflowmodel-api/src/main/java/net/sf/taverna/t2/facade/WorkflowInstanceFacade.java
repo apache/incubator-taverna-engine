@@ -197,4 +197,8 @@ public interface WorkflowInstanceFacade {
 	 * @return true if the workflow run was successfully resumed
 	 */
 	public boolean resumeWorkflowRun();
+
+	// Is the workflow attached to this facade currently running
+	public boolean isRunning();
+	public void setIsRunning(boolean isRunning);
 }
