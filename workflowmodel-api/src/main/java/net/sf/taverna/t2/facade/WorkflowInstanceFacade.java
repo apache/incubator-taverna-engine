@@ -55,16 +55,21 @@ import net.sf.taverna.t2.workflowmodel.Dataflow;
  * @author Stian Soiland-Reyes
  * 
  */
+/**
+ * @author alanrw
+ * 
+ */
 @ControlBoundary
 public interface WorkflowInstanceFacade {
 
 	/**
-	 * A weak hash map of all workflow run IDs mapped against the corresponding WorkflowInstanceFacadeS.
-	 * This is needed for activities with dependencies (such as beanshell and API consumer) to gain access
-	 * to the current workflow via the WorkflowInstanceFacade.
+	 * A weak hash map of all workflow run IDs mapped against the corresponding
+	 * WorkflowInstanceFacadeS. This is needed for activities with dependencies
+	 * (such as beanshell and API consumer) to gain access to the current
+	 * workflow via the WorkflowInstanceFacade.
 	 */
 	public static final WeakHashMap<String, WeakReference<WorkflowInstanceFacade>> workflowRunFacades = new WeakHashMap<String, WeakReference<WorkflowInstanceFacade>>();
-	
+
 	/**
 	 * Push a data token into the specified port. If the token is part of a
 	 * stream the index contains the index of this particular token. If not the
@@ -154,25 +159,42 @@ public interface WorkflowInstanceFacade {
 	 * Return the dataflow this facade facades
 	 */
 	public Dataflow getDataflow();
-	
+
 	/**
-     * Return the invocation context used by this facade
-     */
+	 * Return the invocation context used by this facade
+	 */
 	public InvocationContext getContext();
-	
+
 	/**
 	 * Return a map of the data pushed on the named port
 	 */
 	public WeakHashMap<String, T2Reference> getPushedDataMap();
 
-	
 	/**
 	 * Get the unique id of the wf run inside the facede.
 	 */
 	public String getWorkflowRunId();
 
-	// Is the workflow attached to this facade currently running
-	public boolean isRunning();
-	public void setIsRunning(boolean isRunning);
-	
+	/**
+	 * Cancel the workflow run corresponding to this facade
+	 * 
+	 * @return true if the workflow run was successfully cancelled. Note that
+	 *         this does not mean that all of the invocations associated with
+	 *         the run have finished.
+	 */
+	public boolean cancelWorkflowRun();
+
+	/**
+	 * Pause the workflow run corresponding to this facade
+	 * 
+	 * @return true if the workflow run was successfully paused.
+	 */
+	public boolean pauseWorkflowRun();
+
+	/**
+	 * Resume the workflow run corresponding to this facade
+	 * 
+	 * @return true if the workflow run was successfully resumed
+	 */
+	public boolean resumeWorkflowRun();
 }
