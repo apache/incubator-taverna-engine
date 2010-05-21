@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import net.sf.taverna.t2.annotation.annotationbeans.IdentificationAssertion;
 import net.sf.taverna.t2.workflowmodel.CompoundEdit;
 import net.sf.taverna.t2.workflowmodel.Condition;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
@@ -34,6 +35,7 @@ import net.sf.taverna.t2.workflowmodel.DataflowInputPort;
 import net.sf.taverna.t2.workflowmodel.DataflowOutputPort;
 import net.sf.taverna.t2.workflowmodel.Datalink;
 import net.sf.taverna.t2.workflowmodel.Edit;
+import net.sf.taverna.t2.workflowmodel.EditException;
 import net.sf.taverna.t2.workflowmodel.Edits;
 import net.sf.taverna.t2.workflowmodel.EditsRegistry;
 import net.sf.taverna.t2.workflowmodel.EventForwardingOutputPort;
@@ -868,6 +870,27 @@ public class Tools {
 			uniqueName = preferredName + "_" + suffix++;
 		}
 		return uniqueName;
+	}
+	
+	/**
+	 * Add the identification of a Dataflow into its identification annotation chain (if necessary)
+	 * 
+	 * @return Whether an identification needed to be added
+	 */
+	public static boolean addDataflowIdentification(Dataflow dataflow, String internalId) {
+		boolean added = false;
+		AnnotationTools at = new AnnotationTools();
+		IdentificationAssertion ia = (IdentificationAssertion) (at.getAnnotation(dataflow, IdentificationAssertion.class));
+		if ((ia == null) || !ia.getIdentification().equals(internalId)) {
+			IdentificationAssertion newIa = new IdentificationAssertion();
+			newIa.setIdentification(internalId);
+			try {
+				at.addAnnotation(dataflow, newIa).doEdit();
+			} catch (EditException e) {
+				added = false;
+			}
+		}
+		return added;
 	}
 
 	/**
