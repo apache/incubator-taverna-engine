@@ -20,7 +20,7 @@ import java.util.Set;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 import net.sf.taverna.t2.provenance.lineageservice.utils.QueryPort;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Port;
-import net.sf.taverna.t2.provenance.lineageservice.utils.WorkflowInstance;
+import net.sf.taverna.t2.provenance.lineageservice.utils.WorkflowRun;
 
 import org.apache.log4j.Logger;
 import org.jdom.Document;
@@ -392,7 +392,7 @@ public class ProvenanceQueryParser {
 	private List<String> parseWorkflowAndRuns(Document d) {
 
 		List<String> runsScope = new ArrayList<String>();  // list of run IDs
-		List<WorkflowInstance> feasibleWfInstances = new ArrayList<WorkflowInstance>();
+		List<WorkflowRun> feasibleWfInstances = new ArrayList<WorkflowRun>();
 		List<String> feasibleRuns = new ArrayList<String>();
 
 		Element root = d.getRootElement();  // this should be a <pquery>
@@ -415,10 +415,10 @@ public class ProvenanceQueryParser {
 			}
 
 			//  validate this workflowID
-			List<WorkflowInstance>  allWfInstances = pAccess.listRuns(null, null); // returns all available runs ordered by timestamp
+			List<WorkflowRun>  allWfInstances = pAccess.listRuns(null, null); // returns all available runs ordered by timestamp
 			// is this workflow in one of the instances?
 
-			for (WorkflowInstance i:allWfInstances) {
+			for (WorkflowRun i:allWfInstances) {
 				if (mainWorkflowExternalName.equals(i.getWorkflowExternalName())) {
 					mainWorkflowID = i.getWorkflowIdentifier();
 					logger.debug("workflow name found corresponding to ID "+mainWorkflowID);
@@ -469,7 +469,7 @@ public class ProvenanceQueryParser {
 
 					logger.debug("processing runs range from "+from+" to "+to);
 
-					for (WorkflowInstance i:feasibleWfInstances) {
+					for (WorkflowRun i:feasibleWfInstances) {
 
 						Date fromInstanceDate = null;
 						Date toInstanceDate = null;

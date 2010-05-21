@@ -2,7 +2,7 @@ package net.sf.taverna.t2.provenance.lineageservice.utils;
 
 import java.sql.Blob;
 
-public class WorkflowInstance {
+public class WorkflowRun {
 
 	private String instanceID;
 	private String wfnameRef;  // this is the wfnameRef for the TOP LEVEL workflow for this run  CHECK

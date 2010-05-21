@@ -48,7 +48,7 @@ import net.sf.taverna.t2.provenance.lineageservice.ProvenanceWriter;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Port;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Workflow;
-import net.sf.taverna.t2.provenance.lineageservice.utils.WorkflowInstance;
+import net.sf.taverna.t2.provenance.lineageservice.utils.WorkflowRun;
 import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.reference.impl.T2ReferenceImpl;
@@ -262,7 +262,7 @@ public class ProvenanceAccess {
 	 * @param conditions additional conditions to be defined. This is a placeholder as conditions are currently ignored
 	 * @return a list of wfInstanceID, each representing one run of the input workflowID
 	 */
-	public List<WorkflowInstance> listRuns(String workflowId, Map<String, String> conditions) {
+	public List<WorkflowRun> listRuns(String workflowId, Map<String, String> conditions) {
 
 		try {
 			return pq.getRuns(workflowId, conditions);
@@ -329,7 +329,7 @@ public class ProvenanceAccess {
 	public List<String> getWorkflowID(String runID) {
 
 		try {
-			return pq.getWfNames(runID);
+			return pq.getWorkflowIdsForRun(runID);
 		} catch (SQLException e) {
 			logger.error("Problem getting workflow ID: " + runID, e);
 		}
@@ -344,7 +344,7 @@ public class ProvenanceAccess {
 	public String getTopLevelWorkflowID(String runID) {
 
 		try {
-			return pq.getTopLevelWfName(runID);
+			return pq.getTopLevelWorkflowIdForRun(runID);
 		} catch (SQLException e) {
 			logger.error("Problem getting top level workflow: " + runID, e);
 		}
@@ -354,10 +354,10 @@ public class ProvenanceAccess {
 
 	/**
 	 * 
-	 * @return a list of {@link WorkflowInstance} beans, each representing the complete description of a workflow run (note that this is 
+	 * @return a list of {@link WorkflowRun} beans, each representing the complete description of a workflow run (note that this is 
 	 * not just the ID of the run)
 	 */
-	public List<WorkflowInstance> getAllWorkflowIDs() {
+	public List<WorkflowRun> getAllWorkflowIDs() {
 		try {
 			return pq.getRuns(null, null);
 		} catch (SQLException e) {
@@ -368,20 +368,6 @@ public class ProvenanceAccess {
 	}
 
 	
-//	/ access static workflow structure
-
-
-	/**
-	 * @deprecated This method is not workflowID aware and should not be used
-	 * 
-	 * @param a workflow processor name
-	 * @return the IDs of all workflows that contain a processor named pname
-	 */
-	@Deprecated
-	public List<Workflow> getContainingWorkflowsForProcessor(String processorName) {
-		return pq.getContainingWorkflowsForProcessor(processorName);
-	}
-
 
 
 	/**
@@ -511,6 +497,11 @@ public class ProvenanceAccess {
 	}
 
 
+ 	/**
+	 * @deprecated as workflow 'names' are not globally unique, this method should not be used!
+ 	 * @param workflowName
+ 	 * @return
+ 	 */
 	public String getWorkflowIDForExternalName(String workflowName) {
 		return pq.getWfNameForDataflow(workflowName);
 	}
@@ -576,10 +567,10 @@ public class ProvenanceAccess {
 	}
 
 	public ProvenanceProcessor getProvenanceProcessor(String workflowId, String processorNameRef) {
-		return pq.getProvenanceProcessor(workflowId, processorNameRef);		
+		return pq.getProvenanceProcessorByName(workflowId, processorNameRef);		
 	}
 	public ProvenanceProcessor getProvenanceProcessor(String processorId) {
-		return pq.getProvenanceProcessor(processorId);		
+		return pq.getProvenanceProcessorById(processorId);		
 	}
 
 	public Map<Port, T2Reference> getDataBindings(String dataBindingId) {

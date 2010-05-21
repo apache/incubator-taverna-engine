@@ -611,7 +611,7 @@ public class ProvenanceWriter {
 			ps.setString(1, wfID);
 			ps.executeUpdate();
 			ps = connection.prepareStatement(
-			"DELETE FROM Processor WHERE wfInstanceRef = ?");
+			"DELETE FROM Processor WHERE workflowId = ?");
 			ps.setString(1, wfID);
 			ps.executeUpdate();
 			ps = connection.prepareStatement(
@@ -619,7 +619,7 @@ public class ProvenanceWriter {
 			ps.setString(1, wfID);
 			ps.executeUpdate();
 			ps = connection.prepareStatement(
-			"DELETE FROM Port WHERE wfInstanceRef = ?");
+			"DELETE FROM Port WHERE workflowId = ?");
 			ps.setString(1, wfID);
 			ps.executeUpdate();
 			

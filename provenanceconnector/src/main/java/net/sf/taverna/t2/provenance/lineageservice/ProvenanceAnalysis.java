@@ -34,7 +34,7 @@ import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 import net.sf.taverna.t2.provenance.lineageservice.utils.QueryPort;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Port;
 import net.sf.taverna.t2.provenance.lineageservice.utils.PortBinding;
-import net.sf.taverna.t2.provenance.lineageservice.utils.WorkflowInstance;
+import net.sf.taverna.t2.provenance.lineageservice.utils.WorkflowRun;
 import net.sf.taverna.t2.provenance.opm.OPMManager;
 
 import org.apache.log4j.Logger;
@@ -178,7 +178,7 @@ public class ProvenanceAnalysis {
 	 * @return
 	 * @throws SQLException
 	 */
-	public List<WorkflowInstance> getWFInstanceIDs() throws SQLException { return getPq().getRuns(null, null); }
+	public List<WorkflowRun> getWFInstanceIDs() throws SQLException { return getPq().getRuns(null, null); }
 
 
 	/**
@@ -187,7 +187,7 @@ public class ProvenanceAnalysis {
 	 * @return
 	 * @throws SQLException
 	 */
-	public List<WorkflowInstance> getWFInstanceID(String wfName) throws SQLException { 
+	public List<WorkflowRun> getWFInstanceID(String wfName) throws SQLException { 
 		return getPq().getRuns(wfName, null); }
 
 
@@ -753,8 +753,6 @@ public class ProvenanceAnalysis {
 		// retrieve all Datalinks ending with (var,proc) -- ideally there is exactly one
 		// (because multiple incoming datalinks are disallowed)
 		Map<String, String>  datalinksQueryConstraints = new HashMap<String, String>();
-
-		datalinksQueryConstraints.put("W.instanceID", wfInstanceID);
 		datalinksQueryConstraints.put("destinationPortId", port.getIdentifier());
 		List<DataLink> datalinks = getPq().getDataLinks(datalinksQueryConstraints);
 

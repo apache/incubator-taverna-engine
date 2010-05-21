@@ -633,7 +633,7 @@ public class EventProcessor {
 			processorEnactment.setProcessEnactmentId(iterationProvenanceItem.getIdentifier());
 			processorEnactment.setProcessIdentifier(iterationProvenanceItem.getProcessId());
 
-			ProvenanceProcessor provenanceProcessor = pq.getProvenanceProcessor(currentWorkflowID, procBinding.getprocessorNameRef());
+			ProvenanceProcessor provenanceProcessor = pq.getProvenanceProcessorByName(currentWorkflowID, procBinding.getprocessorNameRef());
 			if (provenanceProcessor == null) {
 				// already logged warning
 				return;
@@ -759,7 +759,7 @@ public class EventProcessor {
 
 		List<Port> inputs=null;
 		try {
-			inputs = getPq().getInputPorts(topLevelDataflowName, topLevelDataflowID, getWfInstanceID());
+			inputs = getPq().getInputPorts(topLevelDataflowName, topLevelDataflowID);
 
 			for (Port input:inputs)  {
 
@@ -848,7 +848,7 @@ public class EventProcessor {
 		List<Port> outputs=null;
 		try {
 
-			outputs = pq.getOutputPorts(topLevelDataflowName, topLevelDataflowID, null);  // null InstanceID 
+			outputs = pq.getOutputPorts(topLevelDataflowName, topLevelDataflowID);  // null InstanceID 
 
 			// for each output O
 			for (Port output:outputs)  {
@@ -1016,7 +1016,7 @@ public class EventProcessor {
 			Map<String,String> queryConstraints = new HashMap<String,String>();
 			queryConstraints.put("destinationPortName", vb.getVarNameRef());
 			queryConstraints.put("destinationProcessorName", vb.getprocessorNameRef());				
-			queryConstraints.put("workflowId", pq.getWfNames(vb.getWfInstanceRef()).get(0));  // CHECK picking first element in list...
+			queryConstraints.put("workflowId", pq.getWorkflowIdsForRun(vb.getWfInstanceRef()).get(0));  // CHECK picking first element in list...
 			List<DataLink> incomingDataLinks = pq.getDataLinks(queryConstraints);
 
 			// there can be only one -- but check that there is one!
@@ -1585,7 +1585,7 @@ public class EventProcessor {
 
 //			logger.debug("processor "+pname);
 
-			List<Port> inputs = getPq().getInputPorts(pname, wfNameRef, wfInstanceId); // null -> do not use instance (??) CHECK
+			List<Port> inputs = getPq().getInputPorts(pname, wfNameRef); // null -> do not use instance (??) CHECK
 
 //			logger.debug(inputs.size()+" inputs for "+pnameInContext.getV1());
 
@@ -1624,7 +1624,7 @@ public class EventProcessor {
 
 			// process pname's outputs -- set ANL based on the sum formula (see
 			// paper)
-			List<Port> outputs = getPq().getOutputPorts(pname, wfNameRef, wfInstanceId);
+			List<Port> outputs = getPq().getOutputPorts(pname, wfNameRef);
 			for (Port ov : outputs) {
 
 				ov.setResolvedDepth(ov.getDepth() + totalANL);

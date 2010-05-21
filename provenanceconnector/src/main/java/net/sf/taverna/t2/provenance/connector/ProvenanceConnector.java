@@ -65,7 +65,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 			+ processEnactmentId + " varchar(36) NOT NULL, \n"
 			+ workflowRunId + " varchar(100) NOT NULL, \n"
 			+ processorId + " varchar(36) NOT NULL, \n"
-			+ processIdentifier + " varchar(100) NOT NULL, \n"
+			+ processIdentifier + " varchar(2047) NOT NULL, \n"
 			+ iteration + " varchar(100) NOT NULL, \n"
 			+ parentProcessEnactmentId + " varchar(36), \n"
 			+ enactmentStarted + " timestamp, \n"
