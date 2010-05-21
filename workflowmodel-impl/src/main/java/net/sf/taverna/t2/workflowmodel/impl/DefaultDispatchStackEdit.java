@@ -34,6 +34,7 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.Failover;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.Invoke;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.Parallelize;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.Retry;
+import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.Stop;
 
 public class DefaultDispatchStackEdit extends AbstractProcessorEdit {
 	private Edit<?> compoundEdit=null;
@@ -55,6 +56,8 @@ public class DefaultDispatchStackEdit extends AbstractProcessorEdit {
 		edits.add(new AddDispatchLayerEdit(stack, new Failover(), layer++));
 		edits.add(new AddDispatchLayerEdit(stack, new Retry(MAX_RETRIES, INITIAL_DELAY,
 				MAX_DELAY, BACKOFF_FACTOR), layer++));
+		edits.add(new AddDispatchLayerEdit(stack, new Stop(), layer++));
+		
 		edits.add(new AddDispatchLayerEdit(stack, new Invoke(), layer++));
 		compoundEdit=new CompoundEdit(edits);
 	}
