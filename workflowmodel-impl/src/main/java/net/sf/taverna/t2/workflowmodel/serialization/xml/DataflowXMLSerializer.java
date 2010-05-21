@@ -46,7 +46,7 @@ public class DataflowXMLSerializer extends AbstractXMLSerializer {
 	public Element serializeDataflow(Dataflow df)
 			throws SerializationException {
 		Element result = new Element(DATAFLOW, T2_WORKFLOW_NAMESPACE);
-		result.setAttribute(DATAFLOW_ID,df.getInternalIdentier());
+		result.setAttribute(DATAFLOW_ID,df.getInternalIdentifier());
 		try {
 			
 			Element name=new Element(NAME,T2_WORKFLOW_NAMESPACE);
