@@ -20,25 +20,37 @@
  ******************************************************************************/
 package net.sf.taverna.t2.activities.stringconstant;
 
+import java.util.List;
+
+import net.sf.taverna.t2.workflowmodel.Processor;
+import net.sf.taverna.t2.workflowmodel.health.HealthCheck;
 import net.sf.taverna.t2.workflowmodel.health.HealthChecker;
-import net.sf.taverna.t2.workflowmodel.health.HealthReport;
-import net.sf.taverna.t2.workflowmodel.health.HealthReport.Status;
+import net.sf.taverna.t2.visit.VisitReport;
+import net.sf.taverna.t2.visit.VisitReport.Status;
 
 public class StringConstantActivityHealthChecker implements HealthChecker<StringConstantActivity> {
 
-	public boolean canHandle(Object subject) {
+	public boolean canVisit(Object subject) {
 		return subject!=null && subject instanceof StringConstantActivity;
 	}
 
-	public HealthReport checkHealth(StringConstantActivity activity) {
+	public VisitReport visit(StringConstantActivity activity, List<Object> ancestors) {
+		Processor p = (Processor) VisitReport.findAncestor(ancestors, Processor.class);
+		if (p == null) {
+			return null;
+		}
 		String value = activity.getConfiguration().getValue();
 		if (value==null) {
-			return new HealthReport("StringConstant Activity","The value is null",Status.SEVERE);
+			return new VisitReport(HealthCheck.getInstance(), p,"StringConstant value is null", HealthCheck.NULL_VALUE, Status.SEVERE);
 		}
-		if ("edit me!".equals(value)) {
-			return new HealthReport("StringConstant Activity","The value is still the default",Status.WARNING);
+		if ("Add your own value here".equals(value)) {
+			return new VisitReport(HealthCheck.getInstance(), p, "StringConstant value is still the default", HealthCheck.DEFAULT_VALUE, Status.WARNING);
 		}
-		return new HealthReport("StringConstant Activity","OK",Status.OK);
+		return new VisitReport(HealthCheck.getInstance(), p, "StringConstant is OK", HealthCheck.NO_PROBLEM, Status.OK);
+	}
+
+	public boolean isTimeConsuming() {
+		return false;
 	}
 
 }
