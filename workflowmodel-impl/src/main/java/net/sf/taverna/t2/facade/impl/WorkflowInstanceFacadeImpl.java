@@ -423,6 +423,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 	}
 
 	public boolean cancelWorkflowRun() {
+		this.isRunning = false;
 		boolean result = Stop.cancelWorkflow(getWorkflowRunId());
 		if (result) {
 			List<FailureListener> copyOfListeners = null;
