@@ -39,7 +39,7 @@ public class IterationProvenanceItem implements ProvenanceItem {
 	private Timestamp enactmentEnded;
 	private Timestamp enactmentStarted;
 	private ErrorProvenanceItem errorItem;
-	private SharedVocabulary eventType = SharedVocabulary.ITERATION_EVENT_TYPE;
+	private final SharedVocabulary eventType = SharedVocabulary.ITERATION_EVENT_TYPE;
 	private String identifier;
 	private InputDataProvenanceItem inputDataItem;
 	private int[] iteration;
@@ -47,6 +47,11 @@ public class IterationProvenanceItem implements ProvenanceItem {
 	private String parentId;
 	private String processId;
 	private String workflowId;
+	private IterationProvenanceItem parentIterationItem = null;
+
+	public IterationProvenanceItem getParentIterationItem() {
+		return parentIterationItem;
+	}
 
 	public IterationProvenanceItem() {
 	}
@@ -134,6 +139,10 @@ public class IterationProvenanceItem implements ProvenanceItem {
 	public void setWorkflowId(String workflowId) {
 		this.workflowId = workflowId;
 	}
-	
+
+	public void setParentIterationItem(
+			IterationProvenanceItem parentIterationItem) {
+		this.parentIterationItem = parentIterationItem;
+	}	
 
 }

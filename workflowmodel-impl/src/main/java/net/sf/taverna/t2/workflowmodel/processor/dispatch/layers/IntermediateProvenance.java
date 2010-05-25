@@ -146,37 +146,40 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 						iterationProvenanceItem1.setIdentifier(UUID
 								.randomUUID().toString());
 						iterationProvenanceItem1.setWorkflowId(workflowItem.getParentId());
+						iterationProvenanceItem1.setParentIterationItem(iterationProvenanceItem);
+						iterationProvenanceItem1.setParentId(iterationProvenanceItem.getParentId());
+						iterationProvenanceItem1.setInputDataItem(iterationProvenanceItem.getInputDataItem());
 
-						for (Entry<ActivityProvenanceItem, List<Object>> entrySet : activityProvenanceItemMap
-								.entrySet()) {
-							List<Object> value = entrySet.getValue();
-							int[] newIndex = (int[]) value.get(0);
-							String owner = (String) value.get(1);
-							String indexString = indexStr(newIndex);
-							String indexString2 = indexStr(index);
-
-							if (owningProcess.equalsIgnoreCase(owner)
-									&& indexString
-											.equalsIgnoreCase(indexString2)) {
-								iterationProvenanceItem1.setParentId(entrySet
-										.getKey().getIdentifier());
-							}
-						}
-						for (Entry<InputDataProvenanceItem, List<Object>> entrySet : inputDataProvenanceItemMap
-								.entrySet()) {
-							List<Object> value = entrySet.getValue();
-							int[] newIndex = (int[]) value.get(0);
-							String owner = (String) value.get(1);
-							String indexString = indexStr(newIndex);
-							String indexString2 = indexStr(index);
-							if (owningProcess.equalsIgnoreCase(owner)
-									&& indexString
-											.equalsIgnoreCase(indexString2)) {
-								iterationProvenanceItem1
-										.setInputDataItem(entrySet.getKey());
-							}
-
-						}
+//						for (Entry<ActivityProvenanceItem, List<Object>> entrySet : activityProvenanceItemMap
+//								.entrySet()) {
+//							List<Object> value = entrySet.getValue();
+//							int[] newIndex = (int[]) value.get(0);
+//							String owner = (String) value.get(1);
+//							String indexString = indexStr(newIndex);
+//							String indexString2 = indexStr(index);
+//
+//							if (owningProcess.equalsIgnoreCase(owner)
+//									&& indexString
+//											.equalsIgnoreCase(indexString2)) {
+//								iterationProvenanceItem1.setParentId(entrySet
+//										.getKey().getIdentifier());
+//							}
+//						}
+//						for (Entry<InputDataProvenanceItem, List<Object>> entrySet : inputDataProvenanceItemMap
+//								.entrySet()) {
+//							List<Object> value = entrySet.getValue();
+//							int[] newIndex = (int[]) value.get(0);
+//							String owner = (String) value.get(1);
+//							String indexString = indexStr(newIndex);
+//							String indexString2 = indexStr(index);
+//							if (owningProcess.equalsIgnoreCase(owner)
+//									&& indexString
+//											.equalsIgnoreCase(indexString2)) {
+//								iterationProvenanceItem1
+//										.setInputDataItem(entrySet.getKey());
+//							}
+//
+//						}
 
 						// for (ActivityProvenanceItem item :
 						// activityProvenanceItemList) {

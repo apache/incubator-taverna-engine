@@ -31,6 +31,7 @@ import java.io.StringWriter;
 import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -121,6 +122,9 @@ public class EventProcessor {
 	private ProvenanceQuery  pq = null;
 
 	private HashMap<String, Port> mapping;
+
+	// Backpatching temporarily disabled
+	private static final boolean backpatching = false;
 
 	public EventProcessor() { }
 
@@ -601,7 +605,12 @@ public class EventProcessor {
 			parentChildMap.put(identifier, parentId);
 
 		} else if (provenanceItem.getEventType().equals(SharedVocabulary.ITERATION_EVENT_TYPE)) {
-
+			IterationProvenanceItem iterationProvenanceItem = (IterationProvenanceItem)provenanceItem;
+			if (iterationProvenanceItem.getParentIterationItem() != null) {
+				// Skipping pipelined outputs, we'll process the parent output later instead
+				return;
+			}
+			
 			// traverse up to root to retrieve ProcBinding that was created when we saw the process event 
 			String iterationID = provenanceItem.getIdentifier();
 			String activityID = provenanceItem.getParentId();
@@ -613,7 +622,7 @@ public class EventProcessor {
 			
 			ProcBinding procBinding = procBindingMap.get(processID);
 
-			IterationProvenanceItem iterationProvenanceItem = (IterationProvenanceItem)provenanceItem;
+			
 			String itVector = extractIterationVector(ProvenanceUtils.iterationToString(iterationProvenanceItem.getIteration()));
 			procBinding.setIterationVector(itVector);
 			InputDataProvenanceItem inputDataEl = iterationProvenanceItem
@@ -1122,8 +1131,14 @@ public class EventProcessor {
 
 				//				// if the new binding involves list values, then check to see if they need to be propagated back to 
 //				// results of iterations
+				
+				// Backpatching disabled as it is very inefficient and not needed
+				// for current Taverna usage
+				
 				try {
-					backpatchIterationResults(newBindings);
+					if (backpatching) {
+						backpatchIterationResults(newBindings);
+					}
 				} catch (SQLException e) {
 					logger.warn("Problem with back patching iteration results", e);
 
