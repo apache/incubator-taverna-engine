@@ -28,6 +28,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -2301,6 +2302,36 @@ public abstract class ProvenanceQuery {
 
 	public List<ProcessorEnactment> getProcessorEnactments(
 			String workflowRunId, String... processorPath) {
+		return getProcessorEnactments(workflowRunId, (ProcessorEnactment)null, Arrays.asList(processorPath));
+	}
+	
+	private List<ProcessorEnactment> getProcessorEnactments(
+			String workflowRunId, ProcessorEnactment processorEnactment,
+			List<String> processorPath) {
+
+		String parentProcessorEnactment = null;
+		if (processorEnactment != null) {
+			parentProcessorEnactment = processorEnactment.getProcessEnactmentId();
+		}		
+		if (processorPath.size() > 1) {
+			// TODO: Make this more efficient by constructing mega-JOIN-SQL.. or specify iterations
+			List<ProcessorEnactment> enactments = new ArrayList<ProcessorEnactment>();			
+			List<ProcessorEnactment> parentEnactments = getProcessorEnactmentsByProcessorName(workflowRunId, 
+					parentProcessorEnactment, processorPath.get(0));
+			for (ProcessorEnactment parent : parentEnactments) {
+				List<String> childPath = processorPath.subList(1, processorPath.size());
+				enactments.addAll(getProcessorEnactments(workflowRunId, parent, childPath));
+			}			
+			return enactments;			
+		} else if (processorPath.size() == 1) {
+			return getProcessorEnactmentsByProcessorName(workflowRunId, parentProcessorEnactment, processorPath.get(0));
+		} else  {
+			return getProcessorEnactmentsByProcessorName(workflowRunId, parentProcessorEnactment, null);						
+		}
+	}
+
+	public List<ProcessorEnactment> getProcessorEnactmentsByProcessorName(
+			String workflowRunId, String parentProcessorEnactmentId, String processorName) {
 		ProvenanceConnector.ProcessorEnactment ProcEnact = ProvenanceConnector.ProcessorEnactment.ProcessorEnactment;
 		
 		String query  = 
@@ -2319,14 +2350,20 @@ public abstract class ProvenanceQuery {
 						+ " INNER JOIN " + "Processor" + " ON "
 						+ ProcEnact.ProcessorEnactment + "."+ ProcEnact.processorId 
 						+ " = " + "Processor.processorId" + " WHERE "
-						+ ProcEnact.workflowRunId + "=?";
+						+ ProcEnact.workflowRunId + "=? ";
 		
-		if (processorPath.length > 1) {
-			throw new UnsupportedOperationException("Support for processor paths not yet implemented");
+		if (processorName != null) {
+			// Specific processor
+			query = query + " AND Processor.processorName=? ";
 		}
-		if (processorPath.length == 1) {
-			query = query + " AND Processor.processorName=? AND " + ProcEnact.parentProcessorEnactmentId + " IS NULL";
+		if (parentProcessorEnactmentId == null) {
+			// null - ie. top level
+			query = query + " AND " + ProcEnact.parentProcessorEnactmentId + " IS NULL";
+		} else {
+			// not null, ie. inside nested workflow
+			query = query + " AND " + ProcEnact.parentProcessorEnactmentId + "=?";
 		}
+		
 		
 		ArrayList<ProcessorEnactment> procEnacts = new ArrayList<ProcessorEnactment>();
 
@@ -2335,16 +2372,19 @@ public abstract class ProvenanceQuery {
 		try {
 			connection = getConnection();
 			statement = connection.prepareStatement(query);
-			statement.setString(1, workflowRunId);
-			if (processorPath.length == 1) {
-				statement.setString(2, processorPath[0]);
+			int pos = 1;
+			statement.setString(pos++, workflowRunId);
+			if (processorName != null) {
+				statement.setString(pos++, processorName);
+			}
+			if (parentProcessorEnactmentId != null) {
+				statement.setString(pos++, parentProcessorEnactmentId);
 			}
 			ResultSet resultSet = statement.executeQuery();
 			while (resultSet.next()) {
 				ProcessorEnactment procEnact = readProcessorEnactment(resultSet);
 				procEnacts.add(procEnact);	
-			}
-			
+			}			
 		} catch (SQLException e) {
 			logger.warn("Could not execute query " + query, e);
 		} catch (InstantiationException e) {
@@ -2361,8 +2401,7 @@ public abstract class ProvenanceQuery {
 					logger.warn("Could not close connection", e);
 				}
 			}
-		}
-		
+		}		
 		return procEnacts;
 	}
 	
