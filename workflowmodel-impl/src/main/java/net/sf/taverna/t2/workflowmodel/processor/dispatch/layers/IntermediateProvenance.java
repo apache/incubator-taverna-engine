@@ -327,82 +327,86 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 	 */
 	@Override
 	public void receiveJob(DispatchJobEvent jobEvent) {
-
-		// FIXME do we need this ProcessProvenanceItem?
-		ProcessProvenanceItem provenanceItem;
-		String[] split = jobEvent.getOwningProcess().split(":");
-		provenanceItem = new ProcessProvenanceItem();
-		//FIXME are the facade id and dataflow name really needed? 
-		String parentDataflowId = workflowItem.getParentId();
-		provenanceItem.setWorkflowId(parentDataflowId);
-		provenanceItem.setFacadeID(split[0]);
-		provenanceItem.setDataflowID(split[1]);
-		provenanceItem.setProcessId(jobEvent.getOwningProcess());
-		provenanceItem.setIdentifier(UUID.randomUUID().toString());
-		provenanceItem.setParentId(workflowItem.getIdentifier());
-		ProcessorProvenanceItem processorProvItem;
-		processorProvItem = new ProcessorProvenanceItem();
-		processorProvItem.setWorkflowId(parentDataflowId);
-		processorProvItem.setProcessId(jobEvent
-				.getOwningProcess());
-		processorProvItem.setIdentifier(UUID.randomUUID().toString());
-		processorProvItem.setParentId(provenanceItem.getIdentifier());
-		provenanceItem.setProcessId(jobEvent.getOwningProcess());
-		getReporter().addProvenanceItem(provenanceItem);
-		getReporter().addProvenanceItem(processorProvItem);
-
-		IterationProvenanceItem iterationProvItem = null;
-		iterationProvItem = new IterationProvenanceItem();
-		iterationProvItem.setWorkflowId(parentDataflowId);
-		iterationProvItem.setIteration(jobEvent.getIndex());
-		iterationProvItem.setIdentifier(UUID.randomUUID().toString());
-		
-		
-		ReferenceService referenceService = jobEvent.getContext()
-				.getReferenceService();
-
-		InputDataProvenanceItem inputDataItem = new InputDataProvenanceItem();
-		inputDataItem.setDataMap(jobEvent.getData());
-		inputDataItem.setReferenceService(referenceService);
-		inputDataItem.setIdentifier(UUID.randomUUID().toString());
-		inputDataItem.setParentId(iterationProvItem.getIdentifier());
-		inputDataItem.setProcessId(jobEvent.getOwningProcess());
-
-		List<Object> inputIndexOwnerList = new ArrayList<Object>();
-		inputIndexOwnerList.add(jobEvent.getIndex());
-		inputIndexOwnerList.add(jobEvent.getOwningProcess());
-		inputDataProvenanceItemMap.put(inputDataItem, inputIndexOwnerList);
-
-		// inputDataProvenanceItemList.add(inputDataItem);
-		iterationProvItem.setInputDataItem(inputDataItem);
-		iterationProvItem.setIteration(jobEvent.getIndex());
-		iterationProvItem.setProcessId(jobEvent.getOwningProcess());
-
-		for (Activity<?> activity : jobEvent.getActivities()) {
-			if (activity instanceof AsynchronousActivity) {
-				ActivityProvenanceItem activityProvItem = new ActivityProvenanceItem();
-				activityProvItem.setWorkflowId(parentDataflowId);
-				activityProvItem.setIdentifier(UUID.randomUUID().toString());
-				iterationProvItem.setParentId(activityProvItem.getIdentifier());
-				// getConnector().addProvenanceItem(iterationProvItem);
-				activityProvItem.setParentId(processorProvItem.getIdentifier());
-				// processorProvItem.setActivityProvenanceItem(activityProvItem);
-				activityProvItem.setProcessId(jobEvent.getOwningProcess());
-				List<Object> activityIndexOwnerList = new ArrayList<Object>();
-				activityIndexOwnerList.add(jobEvent.getOwningProcess());
-				activityIndexOwnerList.add(jobEvent.getIndex());
-				activityProvenanceItemMap.put(activityProvItem,
-						inputIndexOwnerList);
-				// activityProvenanceItemList.add(activityProvItem);
-				// activityProvItem.setIterationProvenanceItem(iterationProvItem);
-				getReporter().addProvenanceItem(activityProvItem);
-				break;
+			try {
+			// FIXME do we need this ProcessProvenanceItem?
+			ProcessProvenanceItem provenanceItem;
+			String[] split = jobEvent.getOwningProcess().split(":");
+			provenanceItem = new ProcessProvenanceItem();
+			//FIXME are the facade id and dataflow name really needed? 
+			String parentDataflowId = workflowItem.getParentId();
+			provenanceItem.setWorkflowId(parentDataflowId);
+			provenanceItem.setFacadeID(split[0]);
+			provenanceItem.setDataflowID(split[1]);
+			provenanceItem.setProcessId(jobEvent.getOwningProcess());
+			provenanceItem.setIdentifier(UUID.randomUUID().toString());
+			provenanceItem.setParentId(workflowItem.getIdentifier());
+			ProcessorProvenanceItem processorProvItem;
+			processorProvItem = new ProcessorProvenanceItem();
+			processorProvItem.setWorkflowId(parentDataflowId);
+			processorProvItem.setProcessId(jobEvent
+					.getOwningProcess());
+			processorProvItem.setIdentifier(UUID.randomUUID().toString());
+			processorProvItem.setParentId(provenanceItem.getIdentifier());
+			provenanceItem.setProcessId(jobEvent.getOwningProcess());
+			getReporter().addProvenanceItem(provenanceItem);
+			getReporter().addProvenanceItem(processorProvItem);
+	
+			IterationProvenanceItem iterationProvItem = null;
+			iterationProvItem = new IterationProvenanceItem();
+			iterationProvItem.setWorkflowId(parentDataflowId);
+			iterationProvItem.setIteration(jobEvent.getIndex());
+			iterationProvItem.setIdentifier(UUID.randomUUID().toString());
+			
+			
+			ReferenceService referenceService = jobEvent.getContext()
+					.getReferenceService();
+	
+			InputDataProvenanceItem inputDataItem = new InputDataProvenanceItem();
+			inputDataItem.setDataMap(jobEvent.getData());
+			inputDataItem.setReferenceService(referenceService);
+			inputDataItem.setIdentifier(UUID.randomUUID().toString());
+			inputDataItem.setParentId(iterationProvItem.getIdentifier());
+			inputDataItem.setProcessId(jobEvent.getOwningProcess());
+	
+			List<Object> inputIndexOwnerList = new ArrayList<Object>();
+			inputIndexOwnerList.add(jobEvent.getIndex());
+			inputIndexOwnerList.add(jobEvent.getOwningProcess());
+			inputDataProvenanceItemMap.put(inputDataItem, inputIndexOwnerList);
+	
+			// inputDataProvenanceItemList.add(inputDataItem);
+			iterationProvItem.setInputDataItem(inputDataItem);
+			iterationProvItem.setIteration(jobEvent.getIndex());
+			iterationProvItem.setProcessId(jobEvent.getOwningProcess());
+	
+			for (Activity<?> activity : jobEvent.getActivities()) {
+				if (activity instanceof AsynchronousActivity) {
+					ActivityProvenanceItem activityProvItem = new ActivityProvenanceItem();
+					activityProvItem.setWorkflowId(parentDataflowId);
+					activityProvItem.setIdentifier(UUID.randomUUID().toString());
+					iterationProvItem.setParentId(activityProvItem.getIdentifier());
+					// getConnector().addProvenanceItem(iterationProvItem);
+					activityProvItem.setParentId(processorProvItem.getIdentifier());
+					// processorProvItem.setActivityProvenanceItem(activityProvItem);
+					activityProvItem.setProcessId(jobEvent.getOwningProcess());
+					List<Object> activityIndexOwnerList = new ArrayList<Object>();
+					activityIndexOwnerList.add(jobEvent.getOwningProcess());
+					activityIndexOwnerList.add(jobEvent.getIndex());
+					activityProvenanceItemMap.put(activityProvItem,
+							inputIndexOwnerList);
+					// activityProvenanceItemList.add(activityProvItem);
+					// activityProvItem.setIterationProvenanceItem(iterationProvItem);
+					getReporter().addProvenanceItem(activityProvItem);
+					break;
+				}
 			}
+			getIndexesByProcess(jobEvent.getOwningProcess()).put(
+					indexStr(jobEvent.getIndex()), iterationProvItem);
+			iterationProvItem.setEnactmentStarted(new Timestamp(System.currentTimeMillis()));
+			getReporter().addProvenanceItem(iterationProvItem);
+		} catch (RuntimeException ex) {
+			logger.error("Could not store provenance for " + jobEvent, ex);
 		}
-		getIndexesByProcess(jobEvent.getOwningProcess()).put(
-				indexStr(jobEvent.getIndex()), iterationProvItem);
-		iterationProvItem.setEnactmentStarted(new Timestamp(System.currentTimeMillis()));
-		getReporter().addProvenanceItem(iterationProvItem);
+		
 		super.receiveJob(jobEvent);
 	}
 

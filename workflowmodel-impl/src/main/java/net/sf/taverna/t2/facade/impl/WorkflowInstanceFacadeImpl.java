@@ -334,7 +334,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 				workflowDataProvenanceItem.setIndex(token.getIndex());
 				workflowDataProvenanceItem.setFinal(token.isFinal());
 				context.getProvenanceReporter().addProvenanceItem(
-						workflowDataProvenanceItem);
+						workflowDataProvenanceItem);				
 			}
 			synchronized (this) {
 				if (token.getIndex().length == 0) {
