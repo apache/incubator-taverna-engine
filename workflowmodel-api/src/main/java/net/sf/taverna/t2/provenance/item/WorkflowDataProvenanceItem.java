@@ -39,7 +39,7 @@ public class WorkflowDataProvenanceItem implements ProvenanceItem {
 	private String parentId;
 	private String processId;
 	private ReferenceService referenceService;
-	/** The output port name that the data is for */
+	/** The port name that the data is for */
 	private String portName;
 	/** A reference to the data token received in the facade */
 	private T2Reference data;
@@ -47,6 +47,15 @@ public class WorkflowDataProvenanceItem implements ProvenanceItem {
 	private boolean isFinal;
 	private int[] index;
 	private String workflowId;
+	private boolean isInputPort;
+
+	public boolean isInputPort() {
+		return isInputPort;
+	}
+
+	public void setInputPort(boolean isInputPort) {
+		this.isInputPort = isInputPort;
+	}
 
 	public WorkflowDataProvenanceItem() {
 	}

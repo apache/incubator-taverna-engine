@@ -30,6 +30,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.sql.Blob;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -45,6 +46,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.sql.rowset.serial.SerialBlob;
 
 import net.sf.taverna.t2.provenance.item.DataProvenanceItem;
+import net.sf.taverna.t2.provenance.item.DataflowRunComplete;
 import net.sf.taverna.t2.provenance.item.InputDataProvenanceItem;
 import net.sf.taverna.t2.provenance.item.IterationProvenanceItem;
 import net.sf.taverna.t2.provenance.item.OutputDataProvenanceItem;
@@ -61,6 +63,7 @@ import net.sf.taverna.t2.provenance.lineageservice.utils.Port;
 import net.sf.taverna.t2.provenance.lineageservice.utils.PortBinding;
 import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
 import net.sf.taverna.t2.reference.T2Reference;
+import net.sf.taverna.t2.visit.DataflowCollation;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
 import net.sf.taverna.t2.workflowmodel.DataflowInputPort;
 import net.sf.taverna.t2.workflowmodel.DataflowOutputPort;
@@ -123,6 +126,10 @@ public class EventProcessor {
 
 	private HashMap<String, Port> mapping;
 
+	private Map<String, ProcessorEnactment> processorEnactmentMap = new ConcurrentHashMap<String, ProcessorEnactment>();
+
+	private Map<String, ProvenanceProcessor> processorMapById = new ConcurrentHashMap<String, ProvenanceProcessor>();
+
 	// Backpatching temporarily disabled
 	private static final boolean backpatching = false;
 
@@ -164,11 +171,12 @@ public class EventProcessor {
 		// which is self-consistent. so we ignore all others
 		if (workflowStructureDone)  { return null; }
 
-		setWfInstanceID(((WorkflowProvenanceItem)provenanceItem).getIdentifier());
+		WorkflowProvenanceItem workflowProvenanceItem = (WorkflowProvenanceItem)provenanceItem;
+		setWfInstanceID(workflowProvenanceItem.getIdentifier());
 //		logger.debug("Workflow instance is: " + getWfInstanceID());
 		Dataflow df = null;
 
-		df = ((WorkflowProvenanceItem)provenanceItem).getDataflow();
+		df = workflowProvenanceItem.getDataflow();
 
 		workflowStructureDone = true;
 
@@ -612,64 +620,95 @@ public class EventProcessor {
 			}
 			
 			// traverse up to root to retrieve ProcBinding that was created when we saw the process event 
-			String iterationID = provenanceItem.getIdentifier();
 			String activityID = provenanceItem.getParentId();
 			String processorID = parentChildMap.get(activityID);
 			String processID = parentChildMap.get(processorID);
-			parentChildMap.put(iterationID, activityID);
+			String iterationID = provenanceItem.getIdentifier();
 			parentChildMap.put(iterationID, activityID);
 			
+			ProcessorEnactment processorEnactment = processorEnactmentMap.get(iterationID);
+			if (processorEnactment == null) {
+				processorEnactment = new ProcessorEnactment();
+			}
 			
 			ProcBinding procBinding = procBindingMap.get(processID);
 
 			
 			String itVector = extractIterationVector(ProvenanceUtils.iterationToString(iterationProvenanceItem.getIteration()));
 			procBinding.setIterationVector(itVector);
-			InputDataProvenanceItem inputDataEl = iterationProvenanceItem
-					.getInputDataItem();
-			OutputDataProvenanceItem outputDataEl = iterationProvenanceItem
-					.getOutputDataItem();
-			processInput(inputDataEl, procBinding, currentWorkflowID);
-			processOutput(outputDataEl, procBinding, currentWorkflowID);
 			
-			ProcessorEnactment processorEnactment = new ProcessorEnactment();
 			processorEnactment.setEnactmentStarted(iterationProvenanceItem.getEnactmentStarted());
 			processorEnactment.setEnactmentEnded(iterationProvenanceItem.getEnactmentEnded());
-			
-			processorEnactment.setIteration(itVector);
-			// TODO: Find parent
-			processorEnactment.setParentProcessEnactmentId(null);
-			processorEnactment.setProcessEnactmentId(iterationProvenanceItem.getIdentifier());
-			processorEnactment.setProcessIdentifier(iterationProvenanceItem.getProcessId());
-
-			ProvenanceProcessor provenanceProcessor = pq.getProvenanceProcessorByName(currentWorkflowID, procBinding.getprocessorNameRef());
-			if (provenanceProcessor == null) {
-				// already logged warning
-				return;
-			}
-			processorEnactment.setProcessorId(provenanceProcessor.getIdentifier());						
-
-			processorEnactment.setInitialInputsDataBindingId(processDataBindings(inputDataEl, provenanceProcessor));
-			processorEnactment.setFinalOutputsDataBindingId(processDataBindings(outputDataEl, provenanceProcessor));
 			processorEnactment.setWorkflowRunId(wfInstanceID);
+			processorEnactment.setIteration(itVector);
+
+			String processId = iterationProvenanceItem.getProcessId();
+			String parentProcessId = ProvenanceUtils.parentProcess(processId, 4);
+			if (parentProcessId != null) {
+				
+				ProcessorEnactment procAct = getPq().getProcessorEnactmentByProcessId(wfInstanceID, parentProcessId);
+				if (procAct != null) {
+					processorEnactment.setParentProcessorEnactmentId(procAct.getProcessEnactmentId());
+				}
+			}
+			processorEnactment.setProcessEnactmentId(iterationProvenanceItem.getIdentifier());
+			processorEnactment.setProcessIdentifier(processId);
+
+			ProvenanceProcessor provenanceProcessor;
+			if (processorEnactment.getProcessorId() == null) {
+				provenanceProcessor = pq.getProvenanceProcessorByName(currentWorkflowID, procBinding.getprocessorNameRef());
+				processorMapById.put(provenanceProcessor.getIdentifier(), provenanceProcessor);
+				if (provenanceProcessor == null) {
+					// already logged warning
+					return;
+				}
+				processorEnactment.setProcessorId(provenanceProcessor.getIdentifier());
+			} else {
+				provenanceProcessor = processorMapById.get(processorEnactment.getProcessorId());
+				if (provenanceProcessor == null) {
+					provenanceProcessor = pq.getProvenanceProcessorById(processorEnactment.getProcessorId());
+					processorMapById.put(provenanceProcessor.getIdentifier(), provenanceProcessor);
+				}
+			}
+			
+			InputDataProvenanceItem inputDataEl = iterationProvenanceItem.getInputDataItem();
+			OutputDataProvenanceItem outputDataEl = iterationProvenanceItem.getOutputDataItem();
+
+			
+			if (inputDataEl != null && processorEnactment.getInitialInputsDataBindingId() == null) {
+				processorEnactment.setInitialInputsDataBindingId(processDataBindings(inputDataEl, provenanceProcessor));
+				processInput(inputDataEl, procBinding, currentWorkflowID);
+			}
+
+			if (outputDataEl != null && processorEnactment.getFinalOutputsDataBindingId() == null) {
+				processorEnactment.setFinalOutputsDataBindingId(processDataBindings(outputDataEl, provenanceProcessor));
+				processOutput(outputDataEl, procBinding, currentWorkflowID);
+			}
+			
 			try {
-				getPw().addProcessorEnactment(processorEnactment);
+				if (processorEnactmentMap.containsKey(iterationID)) {
+					getPw().updateProcessorEnactment(processorEnactment);
+				} else {
+					getPw().addProcessorEnactment(processorEnactment);
+					processorEnactmentMap.put(iterationID, processorEnactment);
+				}
 			} catch (SQLException e) {
 				logger.warn("Could not store processor enactment", e);
 			}
-			
-			
 		} else if (provenanceItem.getEventType().equals(SharedVocabulary.END_WORKFLOW_EVENT_TYPE)) {
-
+			
+			DataflowRunComplete completeEvent = (DataflowRunComplete)provenanceItem;
 			// use this event to do housekeeping on the input/output varbindings 
 
+			// process the input and output values accumulated by WorkflowDataProcessor
+			getWfdp().processTrees(completeEvent, getWfInstanceID());
+
+			
 			if (! provenanceItem.getProcessId().contains(":")) {
 				// Top-level workflow finished
 				
-				// process the outputs accumulated by WorkflowDataProcessor
-				getWfdp().processTrees(provenanceItem.getWorkflowId(), getWfInstanceID());
-
-				patchTopLevelnputs();
+				// No longer needed, done by processTrees()
+				//patchTopLevelnputs();
 
 				// PM changed 23/4/09
 				reconcileTopLevelOutputs();  // patchTopLevelOutputs		
@@ -799,11 +838,16 @@ public class EventProcessor {
 //				logger.info("found the following VBs:");
 				for (PortBinding vb:VBs) {
 //					logger.info(vb.getValue());
-
+					PortBinding inputPortBinding = new PortBinding(vb);
+					
 					// insert PortBinding back into VB with the global input varname
-					vb.setprocessorNameRef(input.getProcessorName());
-					vb.setVarNameRef(input.getPortName());
-					getPw().addPortBinding(vb);
+					inputPortBinding.setprocessorNameRef(input.getProcessorName());
+					inputPortBinding.setVarNameRef(input.getPortName());
+					try { 
+						getPw().addPortBinding(inputPortBinding);						
+					} catch (SQLException ex) {
+						logger.info("Already logged port binding", ex);
+					}
 
 //					logger.info("added");
 

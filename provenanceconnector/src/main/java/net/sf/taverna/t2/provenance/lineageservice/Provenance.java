@@ -69,7 +69,7 @@ public class Provenance {
 
 	private List<String> workflowIDStack = Collections.synchronizedList(new ArrayList<String>());
 	
-	private Map<String, String> workflowIDMap = new ConcurrentHashMap<String, String>(); 
+	private Map<String, String> workflowIDMap = new ConcurrentHashMap<String, String>();
 
 	public Provenance() {	}
 
@@ -170,10 +170,13 @@ public class Provenance {
 
 		if (eventType.equals(SharedVocabulary.WORKFLOW_EVENT_TYPE)) {
 			// process the workflow structure
-
+			//workflowStartedMap.put()
+			WorkflowProvenanceItem workflowProvenanceItem = (WorkflowProvenanceItem) provenanceItem;
+			
+			getEp().getWfdp().workflowStarted.put(workflowProvenanceItem.getIdentifier(), workflowProvenanceItem.getInvocationStarted());
 			if (isFirstWorkflowStructure()) {
 
-				String dataflowId = ((WorkflowProvenanceItem) provenanceItem).getDataflow().getInternalIdentifier(false);
+				String dataflowId = workflowProvenanceItem.getDataflow().getInternalIdentifier(false);
 				String instanceId = provenanceItem.getIdentifier();
 				
 				workflowIDMap.put(instanceId, dataflowId);
@@ -191,13 +194,13 @@ public class Provenance {
 				getEp().propagateANL(provenanceItem.getIdentifier());
 			} else {
 				
-				String dataflowId = ((WorkflowProvenanceItem) provenanceItem).getDataflow().getInternalIdentifier(false);
+				String dataflowId = workflowProvenanceItem.getDataflow().getInternalIdentifier(false);
 				String instanceId = provenanceItem.getIdentifier();
 				
 				workflowIDMap.put(instanceId, dataflowId);
 //				logger.debug("pushed workflowID "+dataflowId);
 
-				Dataflow df = ((WorkflowProvenanceItem)provenanceItem).getDataflow();
+				Dataflow df = workflowProvenanceItem.getDataflow();
 				synchronized(workflowIDStack) {
 					workflowIDStack.add(0,df.getInternalIdentifier(false));
 				}
@@ -207,9 +210,7 @@ public class Provenance {
 
 //			String currentWorkflowID = workflowIDStack.get(0);
 //			workflowIDStack.remove(0);
-			
-
-			String currentWorkflowID = workflowIDMap.get(provenanceItem.getParentId());
+			String currentWorkflowID = provenanceItem.getParentId();
 			
 //			logger.debug("popped workflowID "+currentWorkflowID);
 			

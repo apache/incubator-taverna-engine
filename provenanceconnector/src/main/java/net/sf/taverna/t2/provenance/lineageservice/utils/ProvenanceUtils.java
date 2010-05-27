@@ -1,6 +1,7 @@
 package net.sf.taverna.t2.provenance.lineageservice.utils;
 
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import net.sf.taverna.t2.provenance.item.DataProvenanceItem;
 import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
@@ -13,8 +14,11 @@ import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.reference.T2ReferenceType;
 
 import org.jdom.Element;
+import org.tupeloproject.kernel.NotFoundException;
 
 public class ProvenanceUtils {
+	
+	public static Pattern parentProcessPattern = Pattern.compile("^(.*):?[^:]+:[^:]+$");
 	
 	public static String iterationToString(int[] iteration) {
 		String result = "[";
@@ -108,6 +112,17 @@ public class ProvenanceUtils {
 			// throw something (maybe a tantrum)
 		}
 		return element;
+	}
+
+	public static String parentProcess(String processId, int levels) {
+		if (levels < 1) {
+			return processId;
+		}
+		int lastColon = processId.lastIndexOf(":");
+		if (lastColon == -1) {
+			return null;
+		}
+		return parentProcess(processId.substring(0, lastColon), --levels);
 	}
 
 }

@@ -39,6 +39,23 @@ public class PortBinding {
 	String resolvedValue;
 	
 	
+	public PortBinding(){}
+	
+	public PortBinding(PortBinding vb) {
+		wfNameRef = vb.wfNameRef;
+		varNameRef = vb.varNameRef;
+		wfInstanceRef = vb.wfInstanceRef;
+		value = vb.value;
+		collIDRef = vb.collIDRef;
+		positionInColl = vb.positionInColl;
+		processorNameRef = vb.processorNameRef;
+		valueType = vb.valueType;
+		ref = vb.ref;
+		iterationVector = vb.iterationVector;
+		resolvedValue = vb.resolvedValue;
+	}
+
+
 	public String toString() {
 	
 		StringBuffer sb = new StringBuffer();

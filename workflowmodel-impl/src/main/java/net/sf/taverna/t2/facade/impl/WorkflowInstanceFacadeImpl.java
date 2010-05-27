@@ -21,6 +21,7 @@
 package net.sf.taverna.t2.facade.impl;
 
 import java.lang.ref.WeakReference;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -44,6 +45,7 @@ import net.sf.taverna.t2.monitor.MonitorableProperty;
 import net.sf.taverna.t2.provenance.item.DataflowRunComplete;
 import net.sf.taverna.t2.provenance.item.WorkflowDataProvenanceItem;
 import net.sf.taverna.t2.provenance.item.WorkflowProvenanceItem;
+import net.sf.taverna.t2.provenance.reporter.ProvenanceReporter;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.reference.WorkflowRunIdEntity;
 import net.sf.taverna.t2.utility.TypedTreeModel;
@@ -111,6 +113,10 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 	// Id of this run
 	private String workflowRunId;
 
+	private Timestamp workflowStarted;
+
+	private WorkflowProvenanceItem workflowItem = null;
+
 	public WorkflowInstanceFacadeImpl(final Dataflow dataflow,
 			InvocationContext context, String parentProcess)
 			throws InvalidDataflowException {
@@ -142,8 +148,6 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 			this.instanceOwningProcessId = parentProcess + ":" + localName;
 		}		
 				
-		WorkflowProvenanceItem workflowItem = null;
-		
 		if (context.getProvenanceReporter() != null) {
 
 			provEnabled = true;
@@ -155,7 +159,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 
 			addProvenanceLayerToProcessors(dataflow, workflowItem);
 			context.getProvenanceReporter().setSessionID(workflowRunId);
-			context.getProvenanceReporter().addProvenanceItem(workflowItem);
+
 		}
 		facadeResultListener = new FacadeResultListener(dataflow, workflowItem);
 		
@@ -229,10 +233,16 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 		if (pushDataCalled)
 			throw new IllegalStateException(
 					"Data has already been pushed, fire must be called first!");
-		monitorManager.registerNode(this, instanceOwningProcessId.split(":"),
+		workflowStarted = new Timestamp(System.currentTimeMillis());
+		if (provEnabled) {
+			workflowItem.setInvocationStarted(workflowStarted);
+			context.getProvenanceReporter().addProvenanceItem(workflowItem);
+		}
+		
+		monitorManager.registerNode(this, instanceOwningProcessId.split(":"),				
 				new HashSet<MonitorableProperty<?>>());
 		dataflow.fire(instanceOwningProcessId, context);
-		isRunning = true;
+		isRunning = true;		
 	}
 
 	public Dataflow getDataflow() {
@@ -246,11 +256,35 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 
 	public void pushData(WorkflowDataToken token, String portName)
 			throws TokenOrderException {
+		if (! isRunning) {
+			throw new IllegalStateException("fire() has not yet been called, or workflow has been cancelled");
+		}
 		// TODO: throw TokenOrderException when token stream is violates order
 		// constraints.
 		for (DataflowInputPort port : dataflow.getInputPorts()) {
 			if (portName.equals(port.getName())) {
-				pushedDataMap.put(portName, token.getData());
+				if (token.getIndex().length == 0) {
+					if (pushedDataMap.containsKey(portName)) {
+						throw new IllegalStateException("Already pushed for port " + portName);
+					}
+					pushedDataMap.put(portName, token.getData());					
+				}
+				if (provEnabled) {
+					WorkflowDataProvenanceItem workflowDataProvenanceItem = new WorkflowDataProvenanceItem();
+					workflowDataProvenanceItem.setPortName(portName);
+					workflowDataProvenanceItem.setInputPort(true);
+					workflowDataProvenanceItem.setData(token.getData());
+					workflowDataProvenanceItem.setReferenceService(context.getReferenceService());
+					workflowDataProvenanceItem.setParentId(workflowItem.getIdentifier());
+					workflowDataProvenanceItem.setWorkflowId(workflowItem.getParentId());
+					workflowDataProvenanceItem.setIdentifier(UUID.randomUUID().toString());
+					workflowDataProvenanceItem.setParentId(instanceOwningProcessId);
+					workflowDataProvenanceItem.setProcessId(instanceOwningProcessId);
+					workflowDataProvenanceItem.setIndex(token.getIndex());
+					workflowDataProvenanceItem.setFinal(token.isFinal());
+					context.getProvenanceReporter().addProvenanceItem(
+							workflowDataProvenanceItem);
+				}
 				port.receiveEvent(token.pushOwningProcess(localName));
 			}
 		}
@@ -289,6 +323,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 			if (provEnabled) {
 				WorkflowDataProvenanceItem workflowDataProvenanceItem = new WorkflowDataProvenanceItem();
 				workflowDataProvenanceItem.setPortName(portName);
+				workflowDataProvenanceItem.setInputPort(false);
 				workflowDataProvenanceItem.setData(token.getData());
 				workflowDataProvenanceItem.setReferenceService(context.getReferenceService());
 				workflowDataProvenanceItem.setParentId(workflowItem.getIdentifier());
@@ -314,6 +349,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 						try {
 							DataflowRunComplete dataflowRunComplete = new DataflowRunComplete();
 							dataflowRunComplete.setParentId(workflowItem.getParentId());
+							dataflowRunComplete.setInvocationEnded(new Timestamp(System.currentTimeMillis()));
 							dataflowRunComplete.setWorkflowId(workflowItem.getIdentifier());
 							dataflowRunComplete
 									.setProcessId(instanceOwningProcessId);
@@ -384,8 +420,10 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 				synchronized (this) {
 					if (provEnabled) {
 						DataflowRunComplete dataflowRunComplete = new DataflowRunComplete();
+						dataflowRunComplete.setInvocationEnded(new Timestamp(System.currentTimeMillis()));
 						dataflowRunComplete.setParentId(workflowItem
 								.getIdentifier());
+						dataflowRunComplete.setWorkflowId(workflowItem.getIdentifier());
 						dataflowRunComplete
 								.setProcessId(instanceOwningProcessId);
 						dataflowRunComplete.setIdentifier(UUID.randomUUID()

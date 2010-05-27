@@ -54,9 +54,31 @@ import org.apache.log4j.Logger;
  */
 public abstract class ProvenanceConnector implements ProvenanceReporter {
 
+	public static enum DataflowInvocation {
+		DataflowInvocation, dataflowInvocationId, 
+		workflowId,
+		invocationStarted, invocationEnded, 
+		inputsDataBinding, outputsDataBinding,
+		parentProcessorEnactmentId, workflowRunId;
+		
+		public static String getCreateTable() {
+			return "CREATE TABLE " + DataflowInvocation + "(\n"
+			+ dataflowInvocationId + " varchar(36) NOT NULL,\n"
+			+ workflowId + " varchar(100) NOT NULL, \n"			
+			+ invocationStarted + " timestamp, \n"
+			+ invocationEnded + " timestamp, \n"
+			+ inputsDataBinding + " varchar(36),\n"
+			+ outputsDataBinding + " varchar(36),\n"
+			+ parentProcessorEnactmentId + " varchar(36), \n"
+			+ workflowRunId + " varchar(100) NOT NULL, \n"
+			+ "PRIMARY KEY (" + dataflowInvocationId+ ")\n" + ")";
+		}		
+		
+	}
+	
 	public static enum ProcessorEnactment {
 		ProcessorEnactment, processEnactmentId, workflowRunId, processorId, 
-		processIdentifier, iteration, parentProcessEnactmentId, 
+		processIdentifier, iteration, parentProcessorEnactmentId, 
 		enactmentStarted, enactmentEnded, initialInputsDataBindingId, 
 		finalOutputsDataBindingId;
 	
@@ -67,7 +89,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 			+ processorId + " varchar(36) NOT NULL, \n"
 			+ processIdentifier + " varchar(2047) NOT NULL, \n"
 			+ iteration + " varchar(100) NOT NULL, \n"
-			+ parentProcessEnactmentId + " varchar(36), \n"
+			+ parentProcessorEnactmentId + " varchar(36), \n"
 			+ enactmentStarted + " timestamp, \n"
 			+ enactmentEnded + " timestamp, \n"
 			+ initialInputsDataBindingId + " varchar(36), \n"

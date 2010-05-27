@@ -9,7 +9,7 @@ public class ProcessorEnactment {
 	private String finalOutputsDataBindingId;
 	private String initialInputsDataBindingId;
 	private String iteration;
-	private String parentProcessEnactmentId;
+	private String parentProcessorEnactmentId;
 	private String processEnactmentId;
 	private String processIdentifier;
 	private String processorId;
@@ -52,8 +52,8 @@ public class ProcessorEnactment {
 		return iteration;
 	}
 
-	public String getParentProcessEnactmentId() {
-		return parentProcessEnactmentId;
+	public String getParentProcessorEnactmentId() {
+		return parentProcessorEnactmentId;
 	}
 
 	public String getProcessEnactmentId() {
@@ -103,9 +103,9 @@ public class ProcessorEnactment {
 		this.iteration = iteration;
 	}
 
-	public void setParentProcessEnactmentId(
-			String parentProcessEnactmentId) {
-		this.parentProcessEnactmentId = parentProcessEnactmentId;
+	public void setParentProcessorEnactmentId(
+			String parentProcessorEnactmentId) {
+		this.parentProcessorEnactmentId = parentProcessorEnactmentId;
 	}
 
 	public void setProcessEnactmentId(String processEnactmentId) {
@@ -138,7 +138,7 @@ public class ProcessorEnactment {
 		builder.append(", iteration=");
 		builder.append(iteration);
 		builder.append(", parentProcessEnactmentId=");
-		builder.append(parentProcessEnactmentId);
+		builder.append(parentProcessorEnactmentId);
 		builder.append(", processEnactmentId=");
 		builder.append(processEnactmentId);
 		builder.append(", processIdentifier=");

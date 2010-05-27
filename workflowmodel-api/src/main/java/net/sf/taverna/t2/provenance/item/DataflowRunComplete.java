@@ -20,6 +20,8 @@
  ******************************************************************************/
 package net.sf.taverna.t2.provenance.item;
 
+import java.sql.Timestamp;
+
 import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
 
 /**
@@ -38,6 +40,11 @@ public class DataflowRunComplete implements ProvenanceItem {
 	private String identifier;
 	private SharedVocabulary eventType = SharedVocabulary.END_WORKFLOW_EVENT_TYPE;
 	private String workflowId;
+	private Timestamp invocationEnded;
+
+	public Timestamp getInvocationEnded() {
+		return invocationEnded;
+	}
 
 	public SharedVocabulary getEventType() {
 		return eventType;
@@ -73,6 +80,11 @@ public class DataflowRunComplete implements ProvenanceItem {
 
 	public void setWorkflowId(String workflowId) {
 		this.workflowId = workflowId;		
+	}
+
+	public void setInvocationEnded(Timestamp invocationEnded) {
+		this.invocationEnded = invocationEnded;
+		
 	}
 
 }

@@ -41,6 +41,7 @@ import net.sf.taverna.t2.provenance.connector.ProvenanceConnector;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataBinding;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DDRecord;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DataLink;
+import net.sf.taverna.t2.provenance.lineageservice.utils.DataflowInvocation;
 import net.sf.taverna.t2.provenance.lineageservice.utils.NestedListNode;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Port;
 import net.sf.taverna.t2.provenance.lineageservice.utils.PortBinding;
@@ -2172,7 +2173,7 @@ public abstract class ProvenanceQuery {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-					"SELECT * FROM T2Provenance.Workflow W "+
+					"SELECT * FROM Workflow W "+
 			"WHERE wfname = ? ");
 
 			ps.setString(1, dataflowID);
@@ -2188,6 +2189,8 @@ public abstract class ProvenanceQuery {
 					wf.setExternalName(rs.getString("externalName"));
 
 					return wf;
+				} else {
+					logger.warn("Could not find workflow " + dataflowID);
 				}
 			}
 		} catch (InstantiationException e) {
@@ -2308,7 +2311,8 @@ public abstract class ProvenanceQuery {
 						+ ProcEnact.ProcessorEnactment + "." + ProcEnact.processorId + " AS procId,"
 						+ ProcEnact.processIdentifier + ","
 						+ ProcEnact.processEnactmentId + ","
-						+ ProcEnact.parentProcessEnactmentId + ","						
+						+ ProcEnact.parentProcessorEnactmentId + ","
+						+ ProcEnact.workflowRunId + ","						
 						+ ProcEnact.iteration + ","
 						+ "Processor.processorName" + " FROM "
 						+ ProcEnact.ProcessorEnactment
@@ -2321,7 +2325,7 @@ public abstract class ProvenanceQuery {
 			throw new UnsupportedOperationException("Support for processor paths not yet implemented");
 		}
 		if (processorPath.length == 1) {
-			query = query + " AND Processor.processorName=?";
+			query = query + " AND Processor.processorName=? AND " + ProcEnact.parentProcessorEnactmentId + " IS NULL";
 		}
 		
 		ArrayList<ProcessorEnactment> procEnacts = new ArrayList<ProcessorEnactment>();
@@ -2337,31 +2341,8 @@ public abstract class ProvenanceQuery {
 			}
 			ResultSet resultSet = statement.executeQuery();
 			while (resultSet.next()) {
-				Timestamp enactmentStarted = resultSet.getTimestamp(ProcEnact.enactmentStarted.name());
-				Timestamp enactmentEnded = resultSet.getTimestamp(ProcEnact.enactmentEnded.name());
-				//String pName = resultSet.getString("processorName");
-				String finalOutputsDataBindingId = resultSet.getString(ProcEnact.finalOutputsDataBindingId.name());
-				String initialInputsDataBindingId = resultSet.getString(ProcEnact.initialInputsDataBindingId.name());
-			
-				String iteration = resultSet.getString(ProcEnact.iteration.name());
-				String processorId = resultSet.getString("procId");
-				String processIdentifier = resultSet.getString(ProcEnact.processIdentifier.name());
-				String processEnactmentId = resultSet.getString(ProcEnact.processEnactmentId.name());
-				String parentProcessEnactmentId = resultSet.getString(ProcEnact.parentProcessEnactmentId.name());
-				
-				ProcessorEnactment procEnact = new ProcessorEnactment();
-				procEnact.setEnactmentEnded(enactmentEnded);
-				procEnact.setEnactmentStarted(enactmentStarted);
-				procEnact.setFinalOutputsDataBindingId(finalOutputsDataBindingId);
-				procEnact.setInitialInputsDataBindingId(initialInputsDataBindingId);
-				procEnact.setIteration(iteration);
-				procEnact.setParentProcessEnactmentId(parentProcessEnactmentId);
-				procEnact.setProcessEnactmentId(processEnactmentId);
-				procEnact.setProcessIdentifier(processIdentifier);
-				procEnact.setProcessorId(processorId);
-				procEnact.setWorkflowRunId(workflowRunId);
-				procEnacts.add(procEnact);
-				
+				ProcessorEnactment procEnact = readProcessorEnactment(resultSet);
+				procEnacts.add(procEnact);	
 			}
 			
 		} catch (SQLException e) {
@@ -2383,6 +2364,154 @@ public abstract class ProvenanceQuery {
 		}
 		
 		return procEnacts;
+	}
+	
+
+	private ProcessorEnactment readProcessorEnactment(ResultSet resultSet) throws SQLException {
+		ProvenanceConnector.ProcessorEnactment ProcEnact = ProvenanceConnector.ProcessorEnactment.ProcessorEnactment;
+		
+		Timestamp enactmentStarted = resultSet.getTimestamp(ProcEnact.enactmentStarted.name());
+		Timestamp enactmentEnded = resultSet.getTimestamp(ProcEnact.enactmentEnded.name());
+		//String pName = resultSet.getString("processorName");
+		String finalOutputsDataBindingId = resultSet.getString(ProcEnact.finalOutputsDataBindingId.name());
+		String initialInputsDataBindingId = resultSet.getString(ProcEnact.initialInputsDataBindingId.name());
+	
+		String iteration = resultSet.getString(ProcEnact.iteration.name());
+		String processorId = resultSet.getString("procId");
+		String processIdentifier = resultSet.getString(ProcEnact.processIdentifier.name());
+		String processEnactmentId = resultSet.getString(ProcEnact.processEnactmentId.name());
+		String parentProcessEnactmentId = resultSet.getString(ProcEnact.parentProcessorEnactmentId.name());
+		String workflowRunId = resultSet.getString(ProcEnact.workflowRunId.name());
+		
+		ProcessorEnactment procEnact = new ProcessorEnactment();
+		procEnact.setEnactmentEnded(enactmentEnded);
+		procEnact.setEnactmentStarted(enactmentStarted);
+		procEnact.setFinalOutputsDataBindingId(finalOutputsDataBindingId);
+		procEnact.setInitialInputsDataBindingId(initialInputsDataBindingId);
+		procEnact.setIteration(iteration);
+		procEnact.setParentProcessorEnactmentId(parentProcessEnactmentId);
+		procEnact.setProcessEnactmentId(processEnactmentId);
+		procEnact.setProcessIdentifier(processIdentifier);
+		procEnact.setProcessorId(processorId);
+		procEnact.setWorkflowRunId(workflowRunId);
+		return procEnact;
+	}
+
+	public ProcessorEnactment getProcessorEnactment(String processorEnactmentId) {
+		ProvenanceConnector.ProcessorEnactment ProcEnact = ProvenanceConnector.ProcessorEnactment.ProcessorEnactment;		
+		String query  = 
+				"SELECT " + ProcEnact.enactmentStarted + ","
+						+ ProcEnact.enactmentEnded + ","
+						+ ProcEnact.finalOutputsDataBindingId + ","
+						+ ProcEnact.initialInputsDataBindingId + ","
+						+ ProcEnact.ProcessorEnactment + "." 
+						+ ProcEnact.processorId + " AS procId,"
+						+ ProcEnact.processIdentifier + ","
+						+ ProcEnact.workflowRunId + ","						
+						+ ProcEnact.processEnactmentId + ","
+						+ ProcEnact.parentProcessorEnactmentId + ","						
+						+ ProcEnact.iteration 
+						+ " FROM "
+						+ ProcEnact.ProcessorEnactment
+						+ " WHERE "
+						+ ProcEnact.processEnactmentId + "=?";
+					
+		PreparedStatement statement;
+		Connection connection = null;
+		ProcessorEnactment procEnact = null;
+		try {
+			connection = getConnection();
+			statement = connection.prepareStatement(query);
+			statement.setString(1, processorEnactmentId);
+			ResultSet resultSet = statement.executeQuery();
+			if (! resultSet.next()) {
+				logger.warn("Could not find ProcessorEnactment processEnactmentId=" + processorEnactmentId);
+				
+				return null;
+			}
+			procEnact = readProcessorEnactment(resultSet);
+			if (resultSet.next()) {
+				logger.error("Found more than one ProcessorEnactment processEnactmentId=" + processorEnactmentId);
+				return null;
+			}
+		} catch (SQLException e) {
+			logger.warn("Could not execute query " + query, e);
+		} catch (InstantiationException e) {
+			logger.warn("Could not get database connection", e);
+		} catch (IllegalAccessException e) {
+			logger.warn("Could not get database connection", e);
+		} catch (ClassNotFoundException e) {
+			logger.warn("Could not get database connection", e);
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					logger.warn("Could not close connection", e);
+				}
+			}
+		}
+		return procEnact;
+	}
+	
+	
+	public ProcessorEnactment getProcessorEnactmentByProcessId(String workflowRunId,
+			String processIdentifier) {
+ProvenanceConnector.ProcessorEnactment ProcEnact = ProvenanceConnector.ProcessorEnactment.ProcessorEnactment;		
+		String query  = 
+				"SELECT " + ProcEnact.enactmentStarted + ","
+						+ ProcEnact.enactmentEnded + ","
+						+ ProcEnact.finalOutputsDataBindingId + ","
+						+ ProcEnact.initialInputsDataBindingId + ","
+						+ ProcEnact.ProcessorEnactment + "." + ProcEnact.processorId + " AS procId,"
+						+ ProcEnact.processIdentifier + ","
+						+ ProcEnact.workflowRunId + ","						
+						+ ProcEnact.processEnactmentId + ","
+						+ ProcEnact.parentProcessorEnactmentId + ","						
+						+ ProcEnact.iteration
+						+ " FROM "
+						+ ProcEnact.ProcessorEnactment
+						+ " WHERE "
+						+ ProcEnact.workflowRunId + "=?"
+						+ " AND " + ProcEnact.processIdentifier + "=?";
+
+		
+		PreparedStatement statement;
+		Connection connection = null;
+		ProcessorEnactment procEnact = null;
+		try {
+			connection = getConnection();
+			statement = connection.prepareStatement(query);
+			statement.setString(1, workflowRunId);
+			statement.setString(2, processIdentifier);
+			ResultSet resultSet = statement.executeQuery();
+			if (! resultSet.next()) {
+				logger.warn("Could not find ProcessorEnactment runId=" + workflowRunId + " processIdentifier=" +processIdentifier);
+				return null;
+			}
+			procEnact = readProcessorEnactment(resultSet);
+			if (resultSet.next()) {
+				logger.error("Found more than one ProcessorEnactment runId=" + workflowRunId + " processIdentifier=" +processIdentifier);
+				return null;
+			}
+		} catch (SQLException e) {
+			logger.warn("Could not execute query " + query, e);
+		} catch (InstantiationException e) {
+			logger.warn("Could not get database connection", e);
+		} catch (IllegalAccessException e) {
+			logger.warn("Could not get database connection", e);
+		} catch (ClassNotFoundException e) {
+			logger.warn("Could not get database connection", e);
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					logger.warn("Could not close connection", e);
+				}
+			}
+		}
+		return procEnact;
 	}
 
 	public Map<Port, String> getDataBindings(String dataBindingId) {
@@ -2443,6 +2572,223 @@ public abstract class ProvenanceQuery {
 		}
 		return dataBindings;		
 	}
+
+	public List<Port> getPortsForDataflow(String workflowID) {
+		Workflow w = getWorkflow(workflowID);
+
+		Map<String, String> queryConstraints = new HashMap<String, String>();
+		queryConstraints.put("workflowId", workflowID);
+		queryConstraints.put("processorName", w.getExternalName());
+
+		try {
+			return getPorts(queryConstraints);
+		} catch (SQLException e) {
+			logger.error("Problem getting ports for dataflow: " + workflowID, e);
+		}
+		return null;
+	}
+
+	public List<Port> getPortsForProcessor(String workflowID,
+			String processorName) {
+		Map<String, String> queryConstraints = new HashMap<String, String>();
+		queryConstraints.put("workflowId", workflowID);
+		queryConstraints.put("processorName", processorName);
+
+		try {
+			return getPorts(queryConstraints);
+		} catch (SQLException e) {
+			logger.error("Problem getting ports for processor: " + processorName + " worflow: " + workflowID, e);
+		}
+		return null;
+	}
+
+	@SuppressWarnings("static-access")
+	public DataflowInvocation getDataflowInvocation(String workflowRunId) {
+		net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataflowInvocation DI = 
+			net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataflowInvocation.DataflowInvocation;
+		String query = "SELECT " + 
+				  DI.dataflowInvocationId + ","
+				+ DI.inputsDataBinding + "," 
+				+ DI.invocationEnded + ","
+				+ DI.invocationStarted + "," 
+				+ DI.outputsDataBinding + ","
+				+ DI.parentProcessorEnactmentId + ","  
+				+ DI.workflowId + "," 
+				+ DI.workflowRunId
+				+ " FROM "
+				+ DI.DataflowInvocation +
+				" WHERE "
+				+ DI.parentProcessorEnactmentId + " IS NULL AND "
+				+ DI.workflowRunId + "=?";
+		PreparedStatement statement;
+		Connection connection = null;
+		DataflowInvocation dataflowInvocation = null;
+		try {
+			connection = getConnection();
+			statement = connection.prepareStatement(query);
+			statement.setString(1, workflowRunId);
+			ResultSet rs = statement.executeQuery();
+			if (! rs.next()) {
+				logger.warn("Could not find DataflowInvocation for workflowRunId=" + workflowRunId);
+				return null;
+			}
+			dataflowInvocation = new DataflowInvocation();
+			dataflowInvocation.setDataflowInvocationId(rs.getString(DI.dataflowInvocationId.name()));
+			dataflowInvocation.setInputsDataBindingId(rs.getString(DI.inputsDataBinding.name()));			
+			dataflowInvocation.setInvocationEnded(rs.getTimestamp(DI.invocationEnded.name()));
+			dataflowInvocation.setInvocationStarted(rs.getTimestamp(DI.invocationStarted.name()));
+			dataflowInvocation.setOutputsDataBindingId(rs.getString(DI.outputsDataBinding.name()));
+			dataflowInvocation.setParentProcessorEnactmentId(rs.getString(DI.parentProcessorEnactmentId.name()));
+			dataflowInvocation.setWorkflowId(rs.getString(DI.workflowId.name()));
+			dataflowInvocation.setWorkflowRunId(rs.getString(DI.workflowRunId.name()));
+			if (rs.next()) {
+				logger.error("Found more than one DataflowInvocation for workflowRunId=" + workflowRunId);
+				return null;
+			}
+
+		} catch (SQLException e) {
+			logger.warn("Could not execute query " + query, e);
+		} catch (InstantiationException e) {
+			logger.warn("Could not get database connection", e);
+		} catch (IllegalAccessException e) {
+			logger.warn("Could not get database connection", e);
+		} catch (ClassNotFoundException e) {
+			logger.warn("Could not get database connection", e);			
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					logger.warn("Could not close connection", e);
+				}
+			}
+		}
+		return dataflowInvocation;
+	}
+
+	public DataflowInvocation getDataflowInvocation(
+			ProcessorEnactment processorEnactment) {
+		net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataflowInvocation DI = 
+			net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataflowInvocation.DataflowInvocation;
+		String query = "SELECT " + 
+				  DI.dataflowInvocationId + ","
+				+ DI.inputsDataBinding + "," 
+				+ DI.invocationEnded + ","
+				+ DI.invocationStarted + "," 
+				+ DI.outputsDataBinding + ","
+				+ DI.parentProcessorEnactmentId + ","  
+				+ DI.workflowId + "," 
+				+ DI.workflowRunId
+				+ " FROM "
+				+ DI.DataflowInvocation +
+				" WHERE "
+				+ DI.parentProcessorEnactmentId + "=?";
+		PreparedStatement statement;
+		Connection connection = null;
+		DataflowInvocation dataflowInvocation = null;
+		try {
+			connection = getConnection();
+			statement = connection.prepareStatement(query);
+			statement.setString(1, processorEnactment.getProcessEnactmentId());
+			ResultSet rs = statement.executeQuery();
+			if (! rs.next()) {
+				logger.warn("Could not find DataflowInvocation for processorEnactmentId=" + processorEnactment.getProcessEnactmentId());
+				return null;
+			}
+			dataflowInvocation = new DataflowInvocation();
+			dataflowInvocation.setDataflowInvocationId(rs.getString(DI.dataflowInvocationId.name()));
+			dataflowInvocation.setInputsDataBindingId(rs.getString(DI.inputsDataBinding.name()));			
+			dataflowInvocation.setInvocationEnded(rs.getTimestamp(DI.invocationEnded.name()));
+			dataflowInvocation.setInvocationStarted(rs.getTimestamp(DI.invocationStarted.name()));
+			dataflowInvocation.setOutputsDataBindingId(rs.getString(DI.outputsDataBinding.name()));
+			dataflowInvocation.setParentProcessorEnactmentId(rs.getString(DI.parentProcessorEnactmentId.name()));
+			dataflowInvocation.setWorkflowId(rs.getString(DI.workflowId.name()));
+			dataflowInvocation.setWorkflowRunId(rs.getString(DI.workflowRunId.name()));
+			
+			if (rs.next()) {
+				logger.error("Found more than one DataflowInvocation for processorEnactmentId=" + processorEnactment.getProcessEnactmentId());
+				return null;
+			}
+			
+		} catch (SQLException e) {
+			logger.warn("Could not execute query " + query, e);
+		} catch (InstantiationException e) {
+			logger.warn("Could not get database connection", e);
+		} catch (IllegalAccessException e) {
+			logger.warn("Could not get database connection", e);
+		} catch (ClassNotFoundException e) {
+			logger.warn("Could not get database connection", e);			
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					logger.warn("Could not close connection", e);
+				}
+			}
+		}
+		return dataflowInvocation;
+	}
+	
+	@SuppressWarnings("static-access")
+	public List<DataflowInvocation> getDataflowInvocations(String workflowRunId) {
+		net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataflowInvocation DI = 
+			net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataflowInvocation.DataflowInvocation;
+		String query = "SELECT " + 
+				  DI.dataflowInvocationId + ","
+				+ DI.inputsDataBinding + "," 
+				+ DI.invocationEnded + ","
+				+ DI.invocationStarted + "," 
+				+ DI.outputsDataBinding + ","
+				+ DI.parentProcessorEnactmentId + ","  
+				+ DI.workflowId + "," 
+				+ DI.workflowRunId
+				+ " FROM "
+				+ DI.DataflowInvocation +
+				" WHERE "
+				+ DI.workflowRunId + "=?";
+		PreparedStatement statement;
+		Connection connection = null;
+		List<DataflowInvocation> invocations = new ArrayList<DataflowInvocation>();
+		try {
+			connection = getConnection();
+			statement = connection.prepareStatement(query);
+			statement.setString(1, workflowRunId);
+			ResultSet rs = statement.executeQuery();
+			if (! rs.next()) {
+				logger.warn("Could not find DataflowInvocation for workflowRunId=" + workflowRunId);
+				return null;
+			}
+			DataflowInvocation dataflowInvocation = new DataflowInvocation();
+			dataflowInvocation.setDataflowInvocationId(rs.getString(DI.dataflowInvocationId.name()));
+			dataflowInvocation.setInputsDataBindingId(rs.getString(DI.inputsDataBinding.name()));			
+			dataflowInvocation.setInvocationEnded(rs.getTimestamp(DI.invocationEnded.name()));
+			dataflowInvocation.setInvocationStarted(rs.getTimestamp(DI.invocationStarted.name()));
+			dataflowInvocation.setOutputsDataBindingId(rs.getString(DI.outputsDataBinding.name()));
+			dataflowInvocation.setParentProcessorEnactmentId(rs.getString(DI.parentProcessorEnactmentId.name()));
+			dataflowInvocation.setWorkflowId(rs.getString(DI.workflowId.name()));
+			dataflowInvocation.setWorkflowRunId(rs.getString(DI.workflowRunId.name()));
+			invocations.add(dataflowInvocation);
+		} catch (SQLException e) {
+			logger.warn("Could not execute query " + query, e);
+		} catch (InstantiationException e) {
+			logger.warn("Could not get database connection", e);
+		} catch (IllegalAccessException e) {
+			logger.warn("Could not get database connection", e);
+		} catch (ClassNotFoundException e) {
+			logger.warn("Could not get database connection", e);			
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					logger.warn("Could not close connection", e);
+				}
+			}
+		}
+		return invocations;
+	}
+
 
 
 }

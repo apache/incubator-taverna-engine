@@ -45,6 +45,7 @@ import net.sf.taverna.t2.provenance.lineageservice.LineageQueryResultRecord;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceAnalysis;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceQuery;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceWriter;
+import net.sf.taverna.t2.provenance.lineageservice.utils.DataflowInvocation;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Port;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Workflow;
@@ -385,24 +386,12 @@ public class ProvenanceAccess {
 
 
 	/**
-	 * lists all ports for a processor
+	 * lists all ports for a workflow
 	 * @param workflowID
 	 * @return a list of {@link Port} beans, each representing an input or output port for the workflow 
 	 */
 	public List<Port> getPortsForDataflow(String workflowID) {
-
-		Workflow w = pq.getWorkflow(workflowID);
-
-		Map<String, String> queryConstraints = new HashMap<String, String>();
-		queryConstraints.put("workflowId", workflowID);
-		queryConstraints.put("processorName", w.getExternalName());
-
-		try {
-			return pq.getPorts(queryConstraints);
-		} catch (SQLException e) {
-			logger.error("Problem getting ports for dataflow: " + workflowID, e);
-		}
-		return null;
+		return pq.getPortsForDataflow(workflowID);
 	}
 
 
@@ -414,17 +403,7 @@ public class ProvenanceAccess {
 	 * @return a list of {@link Port} beans, each representing an input or output port for the input processor
 	 */
 	public List<Port> getPortsForProcessor(String workflowID, String processorName) {
-
-		Map<String, String> queryConstraints = new HashMap<String, String>();
-		queryConstraints.put("workflowId", workflowID);
-		queryConstraints.put("processorName", processorName);
-
-		try {
-			return pq.getPorts(queryConstraints);
-		} catch (SQLException e) {
-			logger.error("Problem getting ports for processor: " + processorName + " worflow: " + workflowID, e);
-		}
-		return null;
+		return pq.getPortsForProcessor(workflowID, processorName);
 	}
 
 
@@ -565,6 +544,16 @@ public class ProvenanceAccess {
 			String workflowRunId, String... processorPath) {
 		return pq.getProcessorEnactments(workflowRunId, processorPath);
 	}
+	
+	public net.sf.taverna.t2.provenance.lineageservice.utils.ProcessorEnactment getProcessorEnactmentByProcessId(
+			String workflowRunId, String processIdentifier) {
+		return pq.getProcessorEnactmentByProcessId(workflowRunId, processIdentifier);
+	}
+
+	public net.sf.taverna.t2.provenance.lineageservice.utils.ProcessorEnactment getProcessorEnactment(
+			String processorEnactmentId) {
+		return pq.getProcessorEnactment(processorEnactmentId);
+	}
 
 	public ProvenanceProcessor getProvenanceProcessor(String workflowId, String processorNameRef) {
 		return pq.getProvenanceProcessorByName(workflowId, processorNameRef);		
@@ -582,6 +571,18 @@ public class ProvenanceAccess {
 			references.put(entry.getKey(), t2Ref);
 		}
 		return references;
+	}
+
+	public DataflowInvocation getDataflowInvocation(String workflowRunId) {
+		return pq.getDataflowInvocation(workflowRunId);
+	}
+
+	public DataflowInvocation getDataflowInvocation(net.sf.taverna.t2.provenance.lineageservice.utils.ProcessorEnactment processorEnactment) {
+		return pq.getDataflowInvocation(processorEnactment);
+	}
+	
+	public List<DataflowInvocation> getDataflowInvocations(String workflowRunId) {
+		return pq.getDataflowInvocations(workflowRunId);
 	}
 
 	

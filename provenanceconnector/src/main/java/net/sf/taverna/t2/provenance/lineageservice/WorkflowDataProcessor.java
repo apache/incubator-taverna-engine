@@ -4,30 +4,40 @@
 package net.sf.taverna.t2.provenance.lineageservice;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.log4j.Logger;
-
+import net.sf.taverna.t2.provenance.item.DataflowRunComplete;
 import net.sf.taverna.t2.provenance.item.ProvenanceItem;
 import net.sf.taverna.t2.provenance.item.WorkflowDataProvenanceItem;
-import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceUtils;
+import net.sf.taverna.t2.provenance.lineageservice.utils.DataBinding;
+import net.sf.taverna.t2.provenance.lineageservice.utils.DataflowInvocation;
+import net.sf.taverna.t2.provenance.lineageservice.utils.Port;
 import net.sf.taverna.t2.provenance.lineageservice.utils.PortBinding;
+import net.sf.taverna.t2.provenance.lineageservice.utils.ProcessorEnactment;
+import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceUtils;
+
+import org.apache.log4j.Logger;
 
 /**
  * @author paolo
  * this class manages the outputs from a workflow, as they come along through WorkflowData events
  */
 public class WorkflowDataProcessor {
-
+	
 	private static Logger logger = Logger.getLogger(WorkflowDataProcessor.class);
 
 	// set of trees (impl as lists), one for each varname
 	// PM varname not enough must use the WFID as context as well, because the same output varname 
 	// may occur in multiple nested workflows 
 	Map<String, List<WorkflowDataNode>> workflowDataTrees = new HashMap<String, List<WorkflowDataNode>>();  
+
+	protected Map<String, Timestamp> workflowStarted = new ConcurrentHashMap<String, Timestamp>(); 
 
 	ProvenanceQuery pq=null;
 	ProvenanceWriter pw = null;
@@ -38,14 +48,17 @@ public class WorkflowDataProcessor {
 	 * @param root
 	 */
 	public void addWorkflowDataItem(ProvenanceItem provenanceItem) {
-
+		WorkflowDataProvenanceItem workflowDataItem = (WorkflowDataProvenanceItem)provenanceItem;
+		
 		WorkflowDataNode wdn = new WorkflowDataNode();
-		wdn.setVarName(((WorkflowDataProvenanceItem)provenanceItem).getPortName());
-		wdn.setValue(((WorkflowDataProvenanceItem)provenanceItem).getData().toString());
-		int[] index = ((WorkflowDataProvenanceItem)provenanceItem).getIndex();
+		wdn.setProcessId(provenanceItem.getProcessId());
+		wdn.setVarName(workflowDataItem.getPortName());
+		wdn.setInputPort(workflowDataItem.isInputPort());
+		wdn.setValue(workflowDataItem.getData().toString());
+		int[] index = workflowDataItem.getIndex();
 		String iterationToString = ProvenanceUtils.iterationToString(index);
 		wdn.setIndex(iterationToString);
-		wdn.setWorkflowID(((WorkflowDataProvenanceItem)provenanceItem).getWorkflowId());
+		wdn.setWorkflowID(workflowDataItem.getWorkflowId());
 
 		if (wdn.getValue().contains("list")) wdn.setList(true);  // HACK
 		else wdn.setList(false);
@@ -76,13 +89,16 @@ public class WorkflowDataProcessor {
 	/**
 	 * writes records to PortBinding or Collection by traversing the trees<br/>
 	 * expect this to be invoked after workflow completion
-	 * @param wfInstanceRef  the runID
-	 * @param dataflowID the external name of the dataflow (not the UUID)
+	 * @param workflowId the external name of the dataflow (not the UUID)
+	 * @param workflowRunId  the runID
 	 */
-	public void processTrees(String dataflowID, String wfInstanceRef) {
-
+	public void processTrees(DataflowRunComplete completeEvent, String workflowRunId) {
+		String workflowId = completeEvent.getParentId();
 		logger.debug("processing output trees");
 
+		// i:inputPortName -> t2Ref
+		Map<String, String> workflowPortData = new HashMap<String, String>();
+		
 		for (Map.Entry<String, List<WorkflowDataNode>> entry:workflowDataTrees.entrySet()) {
 
 			String varName = entry.getKey();
@@ -91,11 +107,21 @@ public class WorkflowDataProcessor {
 			PortBinding vb = null;
 
 			try {
-				logger.debug("storing tree for var "+varName+" in workflow with ID "+dataflowID+" and instance "+wfInstanceRef);
+				logger.debug("storing tree for var "+varName+" in workflow with ID "+workflowId+" and instance "+workflowRunId);
 				for (WorkflowDataNode node:tree) {
 
-					if (!node.getWorkflowID().equals(dataflowID)) continue;
+					if (!node.getWorkflowID().equals(workflowId)) continue;
 
+					if (node.getIndex().equals("[]")) {
+						// Store top-level workflow inputs/outputs
+						if (! node.getProcessId().equals(completeEvent.getProcessId())) {
+							logger.warn("Unexpected process ID " + node.getProcessId() + " expected " + completeEvent.getProcessId());
+							continue;
+						}
+						String portKey = (node.isInputPort() ? "/i:" : "/o:") + node.getVarName();
+						workflowPortData.put(portKey, node.getValue());
+					}
+					
 					if (node.isList) {
 
 						logger.debug("creating collection entry for "+
@@ -105,19 +131,19 @@ public class WorkflowDataProcessor {
 						if (node.getParent()!=null) {
 							logger.debug(" and parent "+node.parent.index);
 							// write a collection record to DB
-							getPw().addCollection(dataflowID, 
+							getPw().addCollection(workflowId, 
 									node.getValue(), 
 									node.getParent().getValue(), 
 									node.getIndex(), 
 									varName, 
-									wfInstanceRef);
+									workflowRunId);
 						} else {
-							getPw().addCollection(dataflowID, 
+							getPw().addCollection(workflowId, 
 									node.getValue(), 
 									null, 
 									node.getIndex(), 
 									varName, 
-									wfInstanceRef);							
+									workflowRunId);							
 						}
 
 					} else {
@@ -125,10 +151,10 @@ public class WorkflowDataProcessor {
 
 						vb = new PortBinding();
 
-						vb.setWfNameRef(dataflowID);
-						vb.setWfInstanceRef(wfInstanceRef);
+						vb.setWfNameRef(workflowId);
+						vb.setWfInstanceRef(workflowRunId);
 						
-						vb.setprocessorNameRef(pq.getWorkflow(dataflowID).getExternalName());
+						vb.setprocessorNameRef(pq.getWorkflow(workflowId).getExternalName());
 						
 						// vb.setValueType(); // TODO not sure what to set this to
 						vb.setVarNameRef(varName);
@@ -149,12 +175,59 @@ public class WorkflowDataProcessor {
 					}
 				}
 			} catch (SQLException e) {
-				logger.debug("Problem processing trees for workflow: " +dataflowID + " instance: " + wfInstanceRef + " : "+
+				logger.debug("Problem processing trees for workflow: " +workflowId + " instance: " + workflowRunId + " : "+
 						" updating instead of inserting");
 				getPw().updatePortBinding(vb);
 			}
 
 		}
+		
+		List<Port> ports = getPq().getPortsForDataflow(workflowId);
+		String processId = completeEvent.getProcessId();
+		
+		DataflowInvocation invocation = new DataflowInvocation();
+		invocation.setDataflowInvocationId(UUID.randomUUID().toString());
+		invocation.setWorkflowId(workflowId);
+		invocation.setWorkflowRunId(workflowRunId);
+		
+		String parentProcessId = ProvenanceUtils.parentProcess(processId, 2);
+		if (parentProcessId != null) {
+			ProcessorEnactment procAct = getPq().getProcessorEnactmentByProcessId(workflowRunId, parentProcessId);
+			invocation.setParentProcessorEnactmentId(procAct.getProcessEnactmentId());		
+		}
+		
+		invocation.setInvocationStarted(workflowStarted.get(completeEvent.getWorkflowId()));
+		invocation.setInvocationEnded(completeEvent.getInvocationEnded());
+		
+		// Register data
+		String dataBindingId = UUID.randomUUID().toString();
+		for (Port port : ports) {
+			String portKey = (port.isInputPort() ? "/i:" : "/o:") + port.getPortName();
+			String t2Reference = workflowPortData.get(portKey);
+			if (t2Reference == null) {
+				logger.warn("No workflow port data for " + portKey);
+				continue;
+			}
+			DataBinding dataBinding = new DataBinding();
+			dataBinding.setDataBindingId(dataBindingId);
+			dataBinding.setPort(port);
+			dataBinding.setT2Reference(t2Reference);
+			dataBinding.setWorkflowRunId(workflowRunId);
+			try {
+				pw.addDataBinding(dataBinding);
+			} catch (SQLException e) {
+				logger.warn("Could not add databinding for " + portKey, e);
+			}
+		}
+		
+		invocation.setInputsDataBindingId(dataBindingId);
+		invocation.setOutputsDataBindingId(dataBindingId);			
+		try {
+			pw.addDataflowInvocation(invocation);
+		} catch (SQLException e) {
+			logger.warn("Could not store dataflow invocation for " + processId, e);
+		}
+	
 
 	}
 
@@ -211,12 +284,22 @@ public class WorkflowDataProcessor {
 		int  relativePosition;
 		boolean isList;
 		WorkflowDataNode parent;
+		private String processId;
+		private boolean isInputPort;
 
+		public String getProcessId() {
+			return processId;
+		}
+		
 		/**
 		 * @return the value
 		 */
 		public String getValue() {
 			return value;
+		}
+		public void setProcessId(String processId) {
+			this.processId = processId;
+			
 		}
 		/**
 		 * @param value the value to set
@@ -296,6 +379,14 @@ public class WorkflowDataProcessor {
 		 */
 		public void setWorkflowID(String workflowID) {
 			this.workflowID = workflowID;
+		}
+
+		public void setInputPort(boolean isInputPort) {
+			this.isInputPort = isInputPort;
+		}
+
+		public boolean isInputPort() {
+			return isInputPort;
 		}
 
 	}

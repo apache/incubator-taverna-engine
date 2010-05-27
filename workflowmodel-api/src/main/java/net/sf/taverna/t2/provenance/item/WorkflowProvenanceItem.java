@@ -20,6 +20,8 @@
  ******************************************************************************/
 package net.sf.taverna.t2.provenance.item;
 
+import java.sql.Timestamp;
+
 import net.sf.taverna.t2.facade.WorkflowInstanceFacade;
 import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
@@ -52,7 +54,13 @@ public class WorkflowProvenanceItem implements ProvenanceItem {
 	private boolean isFinal;
 
 	private String workflowId;
+
+	private Timestamp invocationStarted;
 	
+	public Timestamp getInvocationStarted() {
+		return invocationStarted;
+	}
+
 	public WorkflowProvenanceItem() {
 		
 	}
@@ -127,5 +135,9 @@ public class WorkflowProvenanceItem implements ProvenanceItem {
 
 	public void setWorkflowId(String workflowId) {
 		this.workflowId = workflowId;	
+	}
+
+	public void setInvocationStarted(Timestamp invocationStarted) {
+		this.invocationStarted = invocationStarted;
 	}
 }

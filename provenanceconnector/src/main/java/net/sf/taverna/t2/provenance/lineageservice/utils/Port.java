@@ -27,6 +27,37 @@ package net.sf.taverna.t2.provenance.lineageservice.utils;
  */
 public class Port {
 	
+	@Override
+	public String toString() {
+		return "Port [identifier=" + identifier + ", isInputPort="
+				+ isInputPort + ", portName=" + portName + ", processorName="
+				+ processorName + ", workflowId=" + workflowId + "]";
+	}
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((identifier == null) ? 0 : identifier.hashCode());
+		return result;
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Port other = (Port) obj;
+		if (identifier == null) {
+			if (other.identifier != null)
+				return false;
+		} else if (!identifier.equals(other.identifier))
+			return false;
+		return true;
+	}
+
 	private String identifier;
 	private String portName;
 	private String processorName;
@@ -149,6 +180,5 @@ public class Port {
 		this.processorId = processorId;
 		
 	}
-
 
 }

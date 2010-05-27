@@ -53,10 +53,7 @@ import net.sf.taverna.t2.workflowmodel.Dataflow;
  * @author Tom Oinn
  * @author Alex Nenadic
  * @author Stian Soiland-Reyes
- * 
- */
-/**
- * @author alanrw
+ * @author Alan R Williams
  * 
  */
 @ControlBoundary

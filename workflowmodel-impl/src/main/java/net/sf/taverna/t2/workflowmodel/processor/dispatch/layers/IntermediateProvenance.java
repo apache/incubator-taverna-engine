@@ -402,6 +402,7 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 		getIndexesByProcess(jobEvent.getOwningProcess()).put(
 				indexStr(jobEvent.getIndex()), iterationProvItem);
 		iterationProvItem.setEnactmentStarted(new Timestamp(System.currentTimeMillis()));
+		getReporter().addProvenanceItem(iterationProvItem);
 		super.receiveJob(jobEvent);
 	}
 
