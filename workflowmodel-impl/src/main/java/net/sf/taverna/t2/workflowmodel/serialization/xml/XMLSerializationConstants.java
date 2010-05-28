@@ -70,6 +70,7 @@ public interface XMLSerializationConstants {
 	static final String ANNOTATIONS = "annotations";
 	static final String ANNOTATION = "annotation";
 	static final String ANNOTATION_CHAIN = "annotation_chain";
+	static final String ANNOTATION_CHAIN_2_2 = "annotation_chain_2_2";
 	
 	static final String DATALINK = "datalink";
 	static final String DATALINKS = "datalinks";

@@ -182,8 +182,33 @@ public abstract class AbstractXMLDeserializer implements
 				T2_WORKFLOW_NAMESPACE);
 		if (annotationsElement != null) {
 			Set<AnnotationChain> newAnnotationChains = new HashSet<AnnotationChain>();
-			for (Element annotationChainElement : (List<Element>) (annotationsElement
-					.getChildren(ANNOTATION_CHAIN, T2_WORKFLOW_NAMESPACE))) {
+			List<Element> annotationChainElements = (List<Element>) (annotationsElement
+					.getChildren(ANNOTATION_CHAIN, T2_WORKFLOW_NAMESPACE));
+			List <Element>annotationChainElements_2_2 = (List<Element>) (annotationsElement
+					.getChildren(ANNOTATION_CHAIN_2_2, T2_WORKFLOW_NAMESPACE));
+
+			for (Element annotationChainElement : annotationChainElements) {
+				if (annotationChainElement == null) {
+					logger.info("annotationChainElement is null");
+					continue;
+				}
+				if (cl == null) {
+					logger.info("ClassLoader is null");
+					continue;
+				}
+				AnnotationChain ac = (AnnotationChain) createBean(
+						annotationChainElement, XMLDeserializerImpl.class
+								.getClassLoader());
+				if ((ac == null) || (ac.getAssertions() == null)
+						|| (ac.getAssertions().size() == 0)) {
+					logger.warn("Null or empty annotation chain");
+					continue;
+				}
+				newAnnotationChains.add(ac);
+
+			}
+
+			for (Element annotationChainElement : annotationChainElements_2_2) {
 				if (annotationChainElement == null) {
 					logger.info("annotationChainElement is null");
 					continue;

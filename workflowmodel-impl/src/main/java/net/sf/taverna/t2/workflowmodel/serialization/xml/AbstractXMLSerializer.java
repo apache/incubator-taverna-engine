@@ -26,7 +26,10 @@ import java.io.StringReader;
 import net.sf.taverna.raven.repository.Artifact;
 import net.sf.taverna.raven.repository.impl.LocalArtifactClassLoader;
 import net.sf.taverna.t2.annotation.Annotated;
+import net.sf.taverna.t2.annotation.AnnotationAssertion;
 import net.sf.taverna.t2.annotation.AnnotationChain;
+import net.sf.taverna.t2.annotation.annotationbeans.IdentificationAssertion;
+import net.sf.taverna.t2.annotation.annotationbeans.SemanticAnnotation;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
 
 import org.apache.log4j.Logger;
@@ -118,11 +121,27 @@ public abstract class AbstractXMLSerializer implements XMLSerializationConstants
 	protected Element annotationsToXML(Annotated<?> annotated) throws JDOMException, IOException {
 		Element result = new Element(ANNOTATIONS, T2_WORKFLOW_NAMESPACE);
 		for (AnnotationChain a : annotated.getAnnotations()) {
-			Element annotationChainElement = new Element(ANNOTATION_CHAIN,T2_WORKFLOW_NAMESPACE);
-			populateBeanElementFromXStream(a, annotationChainElement);
-			result.addContent(annotationChainElement);
+			Element annotationChainElement;
+			if (annotationChainIs21(a)) {
+				 annotationChainElement = new Element(ANNOTATION_CHAIN,
+						T2_WORKFLOW_NAMESPACE);
+			} else {
+				annotationChainElement = new Element(ANNOTATION_CHAIN_2_2, T2_WORKFLOW_NAMESPACE);
+			}
+				populateBeanElementFromXStream(a, annotationChainElement);
+				result.addContent(annotationChainElement);
 		}
 		return result;
+	}
+
+	private boolean annotationChainIs21(AnnotationChain a) {
+		for (AnnotationAssertion<?> aa : a.getAssertions()) {
+			Object detail = aa.getDetail();
+			if ((detail instanceof IdentificationAssertion) || (detail instanceof SemanticAnnotation)){
+				return false;
+			}
+		}
+		return true;
 	}
 	
 
