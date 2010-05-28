@@ -975,4 +975,31 @@ public class Tools {
 
 	}
 
+	/**
+	 * Return a path of processors where the last element is this processor
+	 * and previous ones are nested processors that contain this one all the 
+	 * way to the top but excluding the top level workflow as this is only a
+	 * list of processors.
+	 */
+	public static List<Processor> getNestedPathForProcessor(
+			Processor processor, Dataflow dataflow) {
+				
+		for (Processor proc : dataflow.getProcessors()){
+			if (proc == processor){ // found it
+				List<Processor> list = new ArrayList<Processor>();
+				list.add(processor);
+				return list;
+			}
+			else if (Tools.containsNestedWorkflow(proc)){ // check inside this nested processor
+				List<Processor> nestedList = getNestedPathForProcessor(processor, ((NestedDataflow)proc.getActivityList().get(0)).getNestedDataflow());
+				if (nestedList == null){ // processor not found in this nested workflow
+					continue;
+				}
+				nestedList.add(0, proc); // add this nested processor to the list
+				return nestedList;
+			}
+		}
+		return null;
+	}
+
 }
