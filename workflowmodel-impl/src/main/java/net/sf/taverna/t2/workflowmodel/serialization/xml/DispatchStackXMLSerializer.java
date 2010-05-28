@@ -24,6 +24,8 @@ import java.io.IOException;
 
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayer;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchStack;
+import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.IntermediateProvenance;
+import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.Stop;
 
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -40,7 +42,9 @@ public class DispatchStackXMLSerializer extends AbstractXMLSerializer {
 			JDOMException {
 		Element result = new Element(DISPATCH_STACK, T2_WORKFLOW_NAMESPACE);
 		for (DispatchLayer<?> layer : stack.getLayers()) {
-			result.addContent(dispatchLayerToXML(layer));
+			if (!((layer instanceof Stop) || (layer instanceof IntermediateProvenance))) {
+				result.addContent(dispatchLayerToXML(layer));
+			}
 		}
 		return result;
 	}
