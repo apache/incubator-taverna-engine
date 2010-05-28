@@ -162,6 +162,10 @@ public class HierarchyTraverser {
 			if ((includeTimeConsuming || !v.isTimeConsuming()) && v.canVisit(o)) {
 				// Make the visitor visit the object
 				VisitReport report = v.visit(o, ancestry);
+				
+				if (report == null) {
+					continue;
+				}
 
 				// If the current object is an Activity then change the report
 				// so that its subject is the Processor containing the Activity
