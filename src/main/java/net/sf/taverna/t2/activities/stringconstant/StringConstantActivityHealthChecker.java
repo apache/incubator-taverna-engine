@@ -41,10 +41,12 @@ public class StringConstantActivityHealthChecker implements HealthChecker<String
 		}
 		String value = activity.getConfiguration().getValue();
 		if (value==null) {
-			return new VisitReport(HealthCheck.getInstance(), p,"StringConstant value is null", HealthCheck.NULL_VALUE, Status.SEVERE);
+			return new VisitReport(HealthCheck.getInstance(), p,"Null value", HealthCheck.NULL_VALUE, Status.SEVERE);
 		}
 		if ("Add your own value here".equals(value)) {
-			return new VisitReport(HealthCheck.getInstance(), p, "StringConstant value is still the default", HealthCheck.DEFAULT_VALUE, Status.WARNING);
+			VisitReport vr = new VisitReport(HealthCheck.getInstance(), p, "Default value", HealthCheck.DEFAULT_VALUE, Status.WARNING);
+			vr.setProperty("value", value);
+			return vr;
 		}
 		return new VisitReport(HealthCheck.getInstance(), p, "StringConstant is OK", HealthCheck.NO_PROBLEM, Status.OK);
 	}
