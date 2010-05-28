@@ -9,12 +9,12 @@ import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.List;
 
 import net.sf.taverna.t2.visit.VisitReport;
 import net.sf.taverna.t2.visit.VisitReport.Status;
-import net.sf.taverna.t2.workflowmodel.Processor;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
+
+import org.apache.log4j.Logger;
 
 /**
  * A RemoteHealthChecker performs a visit to an Activity by trying to contact a
@@ -24,8 +24,18 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
  * 
  */
 public abstract class RemoteHealthChecker implements HealthChecker<Object> {
+	
+	private static Logger logger = Logger.getLogger(RemoteHealthChecker.class);
 
-	private static final int TIMEOUT = 10000;
+	private static int timeout = 1000;
+
+	public static int getTimeoutInSeconds() {
+		return timeout / 1000;
+	}
+
+	public static void setTimeoutInSeconds(int timeout) {
+		RemoteHealthChecker.timeout = timeout * 1000;
+	}
 
 	/**
 	 * Try to contact the specified endpoint as part of the health-checking of the Activity.
@@ -40,42 +50,65 @@ public abstract class RemoteHealthChecker implements HealthChecker<Object> {
 		Status status = Status.OK;
 		String message = "Responded OK";
 		int resultId = HealthCheck.NO_PROBLEM;
+		URLConnection connection = null;
+		int responseCode = HttpURLConnection.HTTP_OK;
 		try {
 			URL url = new URL(endpoint);
-			URLConnection connection = url.openConnection();
+			connection = url.openConnection();
 			if (connection instanceof HttpURLConnection) {
 				HttpURLConnection httpConnection = (HttpURLConnection) connection;
 				httpConnection.setRequestMethod("HEAD");
-				httpConnection.setReadTimeout(TIMEOUT);
+				httpConnection.setReadTimeout(timeout);
 				httpConnection.connect();
-				int responseCode = httpConnection.getResponseCode();
+				responseCode = httpConnection.getResponseCode();
 				if (responseCode != HttpURLConnection.HTTP_OK) {
 					if ((responseCode >= HttpURLConnection.HTTP_INTERNAL_ERROR)
 							|| (responseCode == HttpURLConnection.HTTP_NOT_FOUND)
 							|| (responseCode == HttpURLConnection.HTTP_GONE)) {
 						status = Status.SEVERE;
-						message = "Responded with code: " + responseCode;
+						message = "Bad response";
 						resultId = HealthCheck.CONNECTION_PROBLEM;
 					}
 				}
-				httpConnection.disconnect();
+			} else {
+				status = Status.WARNING;
+				message = "Not HTTP";
+				resultId = HealthCheck.NOT_HTTP;
+				System.err.println(endpoint + " is not HTTP");
 			}
+
 		} catch (MalformedURLException e) {
 			status = Status.SEVERE;
-			message = "Location is not a valid URL";
+			message = "Invalid URL";
 			resultId = HealthCheck.INVALID_URL;
 		} catch (SocketTimeoutException e) {
-			status = Status.WARNING;
-			message = "Failed to respond within 10s";
+			status = Status.SEVERE;
+			message = "Timed out";
 			resultId = HealthCheck.TIME_OUT;
 		} catch (IOException e) {
 			status = Status.SEVERE;
-			message = "Error connecting : " + e.getMessage();
+			message = "I/O problem";
 			resultId = HealthCheck.IO_PROBLEM;
+		} finally {
+			try {
+				if ((connection != null) && (connection.getInputStream() != null)) {
+					connection.getInputStream().close();
+				}
+			} catch (IOException e) {
+				logger.info("Unable to close connection to " + endpoint, e);
+			}
 		}
 
-		return new VisitReport(HealthCheck.getInstance(), activity, message,
+		VisitReport vr = new VisitReport(HealthCheck.getInstance(), activity, message,
 				resultId, status);
+		vr.setProperty("endpoint", endpoint);
+		if (responseCode != HttpURLConnection.HTTP_OK) {
+			vr.setProperty("responseCode", responseCode);
+		}
+		if (resultId == HealthCheck.TIME_OUT) {
+			vr.setProperty("timeOut", Integer.toString(timeout));
+		}
+		return vr;
 	}
 
 	/**
