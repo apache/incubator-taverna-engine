@@ -38,6 +38,7 @@ public class HealthCheck extends VisitKind {
 	public static final int INVALID_CONFIGURATION = 17;
 	public static final int NULL_DATATYPE = 18;
 	public static final int DISABLED = 19;
+    public static final int DATATYPE_SOURCE = 20;
 
 	/**
 	 * Sub-classes of HealthChecker are used to perform HealthCheck visits.
