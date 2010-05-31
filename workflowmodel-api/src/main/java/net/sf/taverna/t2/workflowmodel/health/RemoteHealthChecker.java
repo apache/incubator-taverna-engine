@@ -52,6 +52,7 @@ public abstract class RemoteHealthChecker implements HealthChecker<Object> {
 		int resultId = HealthCheck.NO_PROBLEM;
 		URLConnection connection = null;
 		int responseCode = HttpURLConnection.HTTP_OK;
+		Exception ex = null;
 		try {
 			URL url = new URL(endpoint);
 			connection = url.openConnection();
@@ -71,24 +72,27 @@ public abstract class RemoteHealthChecker implements HealthChecker<Object> {
 					}
 				}
 			} else {
+			    connection.connect();
 				status = Status.WARNING;
 				message = "Not HTTP";
 				resultId = HealthCheck.NOT_HTTP;
-				System.err.println(endpoint + " is not HTTP");
 			}
 
 		} catch (MalformedURLException e) {
 			status = Status.SEVERE;
 			message = "Invalid URL";
 			resultId = HealthCheck.INVALID_URL;
+			ex = e;
 		} catch (SocketTimeoutException e) {
 			status = Status.SEVERE;
 			message = "Timed out";
 			resultId = HealthCheck.TIME_OUT;
+			ex = e;
 		} catch (IOException e) {
 			status = Status.SEVERE;
-			message = "I/O problem";
+			message = "IO problem";
 			resultId = HealthCheck.IO_PROBLEM;
+			ex = e;
 		} finally {
 			try {
 				if ((connection != null) && (connection.getInputStream() != null)) {
@@ -102,8 +106,11 @@ public abstract class RemoteHealthChecker implements HealthChecker<Object> {
 		VisitReport vr = new VisitReport(HealthCheck.getInstance(), activity, message,
 				resultId, status);
 		vr.setProperty("endpoint", endpoint);
+		if (ex != null) {
+		    vr.setProperty("exception", ex);
+		}
 		if (responseCode != HttpURLConnection.HTTP_OK) {
-			vr.setProperty("responseCode", responseCode);
+			vr.setProperty("responseCode", Integer.toString(responseCode));
 		}
 		if (resultId == HealthCheck.TIME_OUT) {
 			vr.setProperty("timeOut", Integer.toString(timeout));
