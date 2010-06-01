@@ -245,11 +245,11 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 							provenanceItem.getEventType(), provenanceItem);
 
 				} catch (SQLException e) {
-					logger.warn("Could not add provenance for " + provenanceItem.getEventType() + " " + provenanceItem.getIdentifier() + " " + e);
+					logger.warn("Could not add provenance for " + provenanceItem.getEventType() + " " + provenanceItem.getIdentifier(), e);
 				} catch (IOException e) {
-					logger.error("Could not add provenance for " + provenanceItem.getEventType() + " " + provenanceItem.getIdentifier() + " " + e);
+					logger.error("Could not add provenance for " + provenanceItem.getEventType() + " " + provenanceItem.getIdentifier(), e);
 				} catch (RuntimeException e) {
-					logger.error("Could not add provenance for " + provenanceItem.getEventType() + " " + provenanceItem.getIdentifier() + " " + e);						
+					logger.error("Could not add provenance for " + provenanceItem.getEventType() + " " + provenanceItem.getIdentifier(), e);						
 				}
 //
 //			}
