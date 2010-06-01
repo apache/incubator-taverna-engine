@@ -74,6 +74,7 @@ import net.sf.taverna.t2.workflowmodel.Processor;
 import net.sf.taverna.t2.workflowmodel.ProcessorInputPort;
 import net.sf.taverna.t2.workflowmodel.ProcessorOutputPort;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
+import net.sf.taverna.t2.workflowmodel.processor.activity.NestedDataflow;
 import net.sf.taverna.t2.workflowmodel.serialization.xml.XMLSerializerRegistry;
 
 import org.apache.commons.io.FileUtils;
@@ -192,33 +193,21 @@ public class EventProcessor {
 		}
 
 		if (wfNames != null && wfNames.contains(topLevelDataflowID)) {  // already in the DB
-//			logger.info("workflow structure with ID "+topLevelDataflowID+" is in the DB -- clearing static portion");
-
-			// clearing the portion of the static DB that pertains to this specific WF.
-			// it is going to be rewritten right away in the rest of this method
-			// this is simpler to implement than selectively avoiding duplicate writes to the DB
-			try {
-				pw.clearDBStatic(topLevelDataflowID);
-			} catch (SQLException e) {
-				logger.warn("Can't clear static database for " + topLevelDataflowID, e);
-			}
-
 		} else {
-//			logger.info("new workflow structure with ID "+topLevelDataflowID);
-		}
-
-		ProvenanceProcessor provProc = new ProvenanceProcessor();
-		provProc.setIdentifier(UUID.randomUUID().toString());
-		provProc.setProcessorName(topLevelDataflowName);
-		provProc.setFirstActivityClassName(ProvenanceProcessor.DATAFLOW_ACTIVITY);
-		provProc.setWorkflowId(topLevelDataflowID);
-		provProc.setTopLevelProcessor(true);
+			logger.info("new workflow structure with ID "+topLevelDataflowID);
+			ProvenanceProcessor provProc = new ProvenanceProcessor();
+			provProc.setIdentifier(UUID.randomUUID().toString());
+			provProc.setProcessorName(topLevelDataflowName);
+			provProc.setFirstActivityClassName(ProvenanceProcessor.DATAFLOW_ACTIVITY);
+			provProc.setWorkflowId(topLevelDataflowID);
+			provProc.setTopLevelProcessor(true);
 		// record the top level dataflow as a processor in the DB
-		try {
-			pw.addProcessor(provProc);
-//			pw.addProcessor(topLevelDataflowName, DATAFLOW_PROCESSOR_TYPE, topLevelDataflowID, true);  // true -> is top level
-		} catch (SQLException e) {
-			logger.warn("Can't add processor " + topLevelDataflowID, e);
+			try {
+				pw.addProcessor(provProc);
+	//			pw.addProcessor(topLevelDataflowName, DATAFLOW_PROCESSOR_TYPE, topLevelDataflowID, true);  // true -> is top level
+			} catch (SQLException e) {
+				logger.warn("Can't add processor " + topLevelDataflowID, e);
+			}
 		}
 
 //		logger.info("top level wf name: "+topLevelDataflowName);
@@ -241,9 +230,6 @@ public class EventProcessor {
 		//dataflowDepth++;
 
 		try {
-
-			List<Port> vars = new ArrayList<Port>();
-
 			// check whether we already have this WF in the DB
 			List<String> wfNames = null;
 			try {
@@ -252,71 +238,67 @@ public class EventProcessor {
 				logger.warn("Problem processing dataflow structure for " + dataflowID, e);
 			}
 
-			if (wfNames != null && wfNames.contains(dataflowID)) {  // already in the DB
-//				logger.info("workflow structure with ID "+dataflowID+" is in the DB -- clearing static portion");
+			boolean alreadyInDb = wfNames != null && wfNames.contains(dataflowID);
 
-				// clearing the portion of the static DB that pertains to this specific WF.
-				// it is going to be rewritten right away in the rest of this method
-				// this is simpler to implement than selectively avoiding duplicate writes to the DB
-				pw.clearDBStatic(dataflowID);
-			} else {
-//				logger.warn("new workflow structure with ID "+dataflowID);
-			}
+			
 
 			// //////
 			// add workflow ID -- this is NOT THE SAME AS the wfInstanceID
 			// /////		
 
 			// this could be a nested workflow -- in this case, override its wfInstanceID with that of its parent
-			String parentDataflow;
-			if ((parentDataflow = wfNestingMap.get(dataflowID)) == null) {
-				Element serializeDataflow = XMLSerializerRegistry.getInstance().getSerializer().serializeDataflow(df);
-				String dataflowString = null;
-				try {
-				    XMLOutputter outputter = new XMLOutputter();
-				    StringWriter stringWriter = new StringWriter();
-				    outputter.output(serializeDataflow, stringWriter);
-				    dataflowString = stringWriter.toString();
-				    
-				} catch (java.io.IOException e) {
-				    logger.error("Could not serialise dataflow", e);
-				}
-				Blob blob = new SerialBlob(dataflowString.getBytes("UTF-8"));
-				// this is a top level dataflow description
-				pw.addWFId(dataflowID, null, externalName, blob); // set its dataflowID with no parent
-
-			} else {
-				Element serializeDataflow = XMLSerializerRegistry.getInstance().getSerializer().serializeDataflow(df);
-				String dataflowString = null;
-				try {
-				    XMLOutputter outputter = new XMLOutputter();
-				    StringWriter stringWriter = new StringWriter();
-				    outputter.output(serializeDataflow, stringWriter);
-				    dataflowString = stringWriter.toString();
-				    
-				} catch (java.io.IOException e) {
-				    logger.error("Could not serialise dataflow", e);
-				}
-				
-				Blob blob = new SerialBlob(dataflowString.getBytes("UTF-8"));
-				// we are processing a nested workflow structure
-				logger.debug("dataflow "+dataflowID+" with external name "+externalName+" is nested within "+parentDataflow);
-
-				pw.addWFId(dataflowID, parentDataflow, externalName, blob); // set its dataflowID along with its parent
-
-				// override wfInstanceID to point to top level -- UNCOMMENTED PM 9/09  CHECK
-				localWfInstanceID = pq.getRuns(parentDataflow, null).get(0).getInstanceID();
-//				logger.debug("overriding nested WFRef "+getWfInstanceID()+" with parent WFRef "+localWfInstanceID);
-
-
+			if (! alreadyInDb) {
+				String parentDataflow;
+				if ((parentDataflow = wfNestingMap.get(dataflowID)) == null) {
+					Element serializeDataflow = XMLSerializerRegistry.getInstance().getSerializer().serializeDataflow(df);
+					String dataflowString = null;
+					try {
+					    XMLOutputter outputter = new XMLOutputter();
+					    StringWriter stringWriter = new StringWriter();
+					    outputter.output(serializeDataflow, stringWriter);
+					    dataflowString = stringWriter.toString();
+					    
+					} catch (java.io.IOException e) {
+					    logger.error("Could not serialise dataflow", e);
+					}
+					Blob blob = new SerialBlob(dataflowString.getBytes("UTF-8"));
+					// this is a top level dataflow description
+					pw.addWFId(dataflowID, null, externalName, blob); // set its dataflowID with no parent
+	
+				} else {
+					Element serializeDataflow = XMLSerializerRegistry.getInstance().getSerializer().serializeDataflow(df);
+					String dataflowString = null;
+					try {
+					    XMLOutputter outputter = new XMLOutputter();
+					    StringWriter stringWriter = new StringWriter();
+					    outputter.output(serializeDataflow, stringWriter);
+					    dataflowString = stringWriter.toString();
+					    
+					} catch (java.io.IOException e) {
+					    logger.error("Could not serialise dataflow", e);
+					}
+					
+					Blob blob = new SerialBlob(dataflowString.getBytes("UTF-8"));
+					// we are processing a nested workflow structure
+					logger.debug("dataflow "+dataflowID+" with external name "+externalName+" is nested within "+parentDataflow);
+	
+					pw.addWFId(dataflowID, parentDataflow, externalName, blob); // set its dataflowID along with its parent
+	
+					// override wfInstanceID to point to top level -- UNCOMMENTED PM 9/09  CHECK
+					localWfInstanceID = pq.getRuns(parentDataflow, null).get(0).getInstanceID();
+	//				logger.debug("overriding nested WFRef "+getWfInstanceID()+" with parent WFRef "+localWfInstanceID);
+	
+	
+				}	
 			}
-			pw.addWFInstanceId(dataflowID, localWfInstanceID);  // wfInstanceID stripped by stripWfInstanceHeader() above
-
+			// Log the run itself
+			pw.addWFInstanceId(dataflowID, localWfInstanceID);
+			
 			// //////
 			// add processors along with their variables
 			// /////
 			List<? extends Processor> processors = df.getProcessors();
-
+			List<Port> vars = new ArrayList<Port>();
 			for (Processor p : processors) {
 
 //				logger.info("adding processor "+p.getLocalName());
@@ -326,18 +308,20 @@ public class EventProcessor {
 				//CHECK get type of first activity and set this as the type of the processor itself
 				List<? extends Activity<?>> activities = p.getActivityList();
 
-				String pType = null;
-				if (activities != null && !activities.isEmpty()) {
-					pType = activities.get(0).getClass().getCanonicalName();
-				}
-				ProvenanceProcessor provProc = new ProvenanceProcessor();
-				provProc.setIdentifier(UUID.randomUUID().toString());
-				provProc.setProcessorName(pName);
-				provProc.setFirstActivityClassName(pType);
-				provProc.setWorkflowId(dataflowID);
-				provProc.setTopLevelProcessor(false);
-				
-				pw.addProcessor(provProc);
+				if (! alreadyInDb) {
+					ProvenanceProcessor provProc;
+					String pType = null;
+					if (activities != null && !activities.isEmpty()) {
+						pType = activities.get(0).getClass().getCanonicalName();
+					}
+					provProc = new ProvenanceProcessor();
+					provProc.setIdentifier(UUID.randomUUID().toString());
+					provProc.setProcessorName(pName);
+					provProc.setFirstActivityClassName(pType);
+					provProc.setWorkflowId(dataflowID);
+					provProc.setTopLevelProcessor(false);
+					
+					pw.addProcessor(provProc);
 				
 				//pw.addProcessor(pName, pType, dataflowID, false);  // false: not a top level processor
 
@@ -345,7 +329,7 @@ public class EventProcessor {
 				// add all input ports for this processor as input variables
 				// ///
 				List<? extends ProcessorInputPort> inputs = p.getInputPorts();
-
+				
 				for (ProcessorInputPort ip : inputs) {
 
 					Port inputVar = new Port();
@@ -381,6 +365,7 @@ public class EventProcessor {
 
 					vars.add(outputVar);
 				}
+				}
 
 
 				// check for nested structures: if the activity is DataflowActivity
@@ -389,9 +374,9 @@ public class EventProcessor {
 
 				for (Activity a:activities) {
 
-					if (a.getClass().getCanonicalName().contains("DataflowActivity" )) {
+					if (a instanceof NestedDataflow) {
 
-						Dataflow nested = (Dataflow) a.getConfiguration();
+						Dataflow nested = ((NestedDataflow)a).getNestedDataflow();
 //						logger.info("RECURSION ON nested workflow: "+p.getLocalName()+" with id: "+nested.getInternalIdentifier());
 
 						wfNestingMap.put(nested.getInternalIdentifier(false), dataflowID); // child -> parent
@@ -420,98 +405,101 @@ public class EventProcessor {
 			// check whether we are processing a nested workflow. in this case
 			// the input vars are not assigned to the INPUT processor but to the containing dataflow
 
-			if (externalName != null) { // override the default if we are nested or someone external name is provided
-				pName = externalName;
-			}
-
-			List<? extends DataflowInputPort> inputPorts = df.getInputPorts();
-
-			for (DataflowInputPort ip : inputPorts) {
-
-				Port inputVar = new Port();
-				inputVar.setIdentifier(UUID.randomUUID().toString());
-				inputVar.setProcessorId(null); // meaning workflow port
-				inputVar.setProcessorName(pName);
-				inputVar.setWorkflowId(dataflowID);
-				inputVar.setPortName(ip.getName());
-				inputVar.setDepth(ip.getDepth());
-				inputVar.setInputPort(true);  // CHECK PM modified 11/08 -- input vars are actually outputs of input processors...
-
-				vars.add(inputVar);
-			}
-
-			// ////
-			// add outputs of entire dataflow
-			// ////
-			pName = OUTPUT_CONTAINER_PROCESSOR;  // overridden -- see below
-
-			// check whether we are processing a nested workflow. in this case
-			// the output vars are not assigned to the OUTPUT processor but to the containing dataflow
-
-			if (externalName != null) { // we are nested
-				pName = externalName;
-			}
-
-			List<? extends DataflowOutputPort> outputPorts = df
-			.getOutputPorts();
-
-			for (DataflowOutputPort op : outputPorts) {
-
-				Port outputVar = new Port();
-				outputVar.setIdentifier(UUID.randomUUID().toString());
-				outputVar.setProcessorId(null); // meaning workflow port
-				outputVar.setProcessorName(pName);
-				outputVar.setWorkflowId(dataflowID);
-				outputVar.setPortName(op.getName());
-				outputVar.setDepth(op.getDepth());
-				outputVar.setInputPort(false);  // CHECK PM modified 11/08 -- output vars are actually outputs of output processors... 
-				vars.add(outputVar);
-			}
-
-			pw.addPorts(vars, dataflowID);
-			makePortMapping(vars);
-
-			// ////
-			// add datalink records using the dataflow links
-			// retrieving the processor names requires navigating from links to
-			// source/sink and from there to the processors
-			// ////
-			List<? extends Datalink> links = df.getLinks();
-
-			for (Datalink l : links) {
-
-				// TODO cover the case of datalinks from an input and to an output to
-				// the entire dataflow
-
-				Port sourcePort = null;
-				Port destinationPort = null;
-				
-				if (l.getSource() instanceof ProcessorOutputPort) {
-					String sourcePname = ((ProcessorOutputPort) l.getSource())
-					.getProcessor().getLocalName();
-					sourcePort = lookupPort(sourcePname, l.getSource().getName(), false);
-				} else if (l.getSource() instanceof MergeOutputPort) {
-					// TODO: Handle merge output ports
-				}  else {
-					// Assume it is internal port from DataflowInputPort
-					sourcePort = lookupPort(externalName, l.getSource().getName(), true);
+			if (! alreadyInDb) {
+	
+				if (externalName != null) { // override the default if we are nested or someone external name is provided
+					pName = externalName;
 				}
 				
-				if (l.getSink() instanceof ProcessorInputPort) {
-					String sinkPname = ((ProcessorInputPort) l.getSink())
-					.getProcessor().getLocalName();
-					destinationPort = lookupPort(sinkPname, l.getSink().getName(), true);
-				} else if (l.getSink() instanceof MergeInputPort) {
-					// TODO: Handle merge input ports
-				} else {
-					// Assume it is internal port from DataflowOutputPort
-					destinationPort = lookupPort(externalName, l.getSink().getName(), false);
+				List<? extends DataflowInputPort> inputPorts = df.getInputPorts();
+	
+				for (DataflowInputPort ip : inputPorts) {
+	
+					Port inputVar = new Port();
+					inputVar.setIdentifier(UUID.randomUUID().toString());
+					inputVar.setProcessorId(null); // meaning workflow port
+					inputVar.setProcessorName(pName);
+					inputVar.setWorkflowId(dataflowID);
+					inputVar.setPortName(ip.getName());
+					inputVar.setDepth(ip.getDepth());
+					inputVar.setInputPort(true);  // CHECK PM modified 11/08 -- input vars are actually outputs of input processors...
+	
+					vars.add(inputVar);
 				}
-
-				if (sourcePort != null && destinationPort != null) {
-					pw.addDataLink(sourcePort, destinationPort, dataflowID);
-				} else {
-					logger.info("Can't record datalink " + l);
+	
+				// ////
+				// add outputs of entire dataflow
+				// ////
+				pName = OUTPUT_CONTAINER_PROCESSOR;  // overridden -- see below
+	
+				// check whether we are processing a nested workflow. in this case
+				// the output vars are not assigned to the OUTPUT processor but to the containing dataflow
+	
+				if (externalName != null) { // we are nested
+					pName = externalName;
+				}
+	
+				List<? extends DataflowOutputPort> outputPorts = df
+				.getOutputPorts();
+	
+				for (DataflowOutputPort op : outputPorts) {
+	
+					Port outputVar = new Port();
+					outputVar.setIdentifier(UUID.randomUUID().toString());
+					outputVar.setProcessorId(null); // meaning workflow port
+					outputVar.setProcessorName(pName);
+					outputVar.setWorkflowId(dataflowID);
+					outputVar.setPortName(op.getName());
+					outputVar.setDepth(op.getDepth());
+					outputVar.setInputPort(false);  // CHECK PM modified 11/08 -- output vars are actually outputs of output processors... 
+					vars.add(outputVar);
+				}
+	
+				pw.addPorts(vars, dataflowID);
+				makePortMapping(vars);
+	
+				// ////
+				// add datalink records using the dataflow links
+				// retrieving the processor names requires navigating from links to
+				// source/sink and from there to the processors
+				// ////
+				List<? extends Datalink> links = df.getLinks();
+	
+				for (Datalink l : links) {
+	
+					// TODO cover the case of datalinks from an input and to an output to
+					// the entire dataflow
+	
+					Port sourcePort = null;
+					Port destinationPort = null;
+					
+					if (l.getSource() instanceof ProcessorOutputPort) {
+						String sourcePname = ((ProcessorOutputPort) l.getSource())
+						.getProcessor().getLocalName();
+						sourcePort = lookupPort(sourcePname, l.getSource().getName(), false);
+					} else if (l.getSource() instanceof MergeOutputPort) {
+						// TODO: Handle merge output ports
+					}  else {
+						// Assume it is internal port from DataflowInputPort
+						sourcePort = lookupPort(externalName, l.getSource().getName(), true);
+					}
+					
+					if (l.getSink() instanceof ProcessorInputPort) {
+						String sinkPname = ((ProcessorInputPort) l.getSink())
+						.getProcessor().getLocalName();
+						destinationPort = lookupPort(sinkPname, l.getSink().getName(), true);
+					} else if (l.getSink() instanceof MergeInputPort) {
+						// TODO: Handle merge input ports
+					} else {
+						// Assume it is internal port from DataflowOutputPort
+						destinationPort = lookupPort(externalName, l.getSink().getName(), false);
+					}
+	
+					if (sourcePort != null && destinationPort != null) {
+						pw.addDataLink(sourcePort, destinationPort, dataflowID);
+					} else {
+						logger.info("Can't record datalink " + l);
+					}
 				}
 			}
 //			logger.info("completed processing dataflow " + dataflowID);

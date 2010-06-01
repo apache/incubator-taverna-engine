@@ -383,6 +383,9 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 					rs = referenceSetService.getReferenceSetWithAugmentation(
 							id, ensureTypes, context);
 				}
+				if (rs == null) {
+					throw new ReferenceServiceException("Could not find ReferenceSet " + id);
+				}
 				return rs;
 			} catch (ReferenceSetServiceException rsse) {
 				throw new ReferenceServiceException(rsse);
@@ -391,6 +394,9 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 		case ErrorDocument:
 			try {
 				ErrorDocument ed = errorDocumentService.getError(id);
+				if (ed == null) {
+					throw new ReferenceServiceException("Could not find ErrorDocument " + id);
+				}
 				return ed;
 			} catch (ErrorDocumentServiceException edse) {
 				throw new ReferenceServiceException(edse);
@@ -399,6 +405,9 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 		case IdentifiedList:
 			try {
 				IdentifiedList<T2Reference> idList = listService.getList(id);
+				if (idList == null) {
+					throw new ReferenceServiceException("Could not find IdentifiedList " + id);
+				}
 				// Construct a new list, and populate with the result of
 				// resolving each ID in turn
 				IdentifiedArrayList<Identified> newList = new IdentifiedArrayList<Identified>();
@@ -464,6 +473,9 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 		case IdentifiedList:
 			try {
 				IdentifiedList<T2Reference> idList = listService.getList(id);
+				if (idList == null) {
+					throw new ReferenceServiceException("Could not find IdentifiedList " + id);
+				}
 				List<Object> result = new ArrayList<Object>();
 				for (T2Reference child : idList) {
 					result.add(renderIdentifierInner(child, leafClass, context,
@@ -477,6 +489,9 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 		case ReferenceSet:
 			try {
 				ReferenceSet rs = referenceSetService.getReferenceSet(id);
+				if (rs == null) {
+					throw new ReferenceServiceException("Could not find ReferenceSet " + id);
+				}
 				// Check that there are references in the set
 				if (rs.getExternalReferences().isEmpty()) {
 					throw new ReferenceServiceException(
