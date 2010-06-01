@@ -731,29 +731,32 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 			// set of ports which have sent final events.
 			alreadyReceivedPortNames.add(portName);
 
+
+			
 			// Check - if we have no duplicates and the set of output ports
 			// which have sent final events in this data thread is the same size
 			// as the number of output ports then we've finished and can
 			// deregister from the monitor
 			if (alreadyReceivedPortNames.size() == getOutputPorts().size()) {
 
-				// request deregistration of processor nodes (arguably we don't
-				// need
-				// to do this and could just deregister the dataflow node in the
-				// tree as that'll by definition detach all the child nodes but
-				// this
-				// seems cleaner)
+
+				// Now performed by WorkflowInstanceFacade.ProcessorFinishedObserver and FacadeResultListener
+				// to be able to handle if it is the workflow port or the processor that finishes last
+
+				/*
 				for (Processor p : getEntities(Processor.class)) {
 					MonitorManager.getInstance().deregisterNode(
 							owningProcess + ":" + p.getLocalName());
 				}
 				MonitorManager.getInstance().deregisterNode(owningProcess);
+				 */
 
 				// Remove this entry from the active process map
 				activeProcessIdentifiers.remove(owningProcess);
 
 			}
 		}
+
 
 	}
 
