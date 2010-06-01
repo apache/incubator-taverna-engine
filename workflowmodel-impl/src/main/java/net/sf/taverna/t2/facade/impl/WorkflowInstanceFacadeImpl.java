@@ -412,7 +412,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 			dataflowRunComplete.setInvocationEnded(new Timestamp(System.currentTimeMillis()));
 			dataflowRunComplete.setParentId(workflowItem
 					.getIdentifier());
-			dataflowRunComplete.setWorkflowId(workflowItem.getIdentifier());
+			dataflowRunComplete.setWorkflowId(dataflow.getInternalIdentifier());
 			dataflowRunComplete
 					.setProcessId(instanceOwningProcessId);
 			dataflowRunComplete.setIdentifier(UUID.randomUUID()

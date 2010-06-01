@@ -93,7 +93,7 @@ public class WorkflowDataProcessor {
 	 * @param workflowRunId  the runID
 	 */
 	public void processTrees(DataflowRunComplete completeEvent, String workflowRunId) {
-		String workflowId = completeEvent.getParentId();
+		String workflowId = completeEvent.getWorkflowId();
 		logger.debug("processing output trees");
 
 		// i:inputPortName -> t2Ref
