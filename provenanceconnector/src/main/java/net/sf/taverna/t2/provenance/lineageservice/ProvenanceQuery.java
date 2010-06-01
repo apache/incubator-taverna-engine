@@ -2356,10 +2356,10 @@ public abstract class ProvenanceQuery {
 			// Specific processor
 			query = query + " AND Processor.processorName=? ";
 		}
-		if (parentProcessorEnactmentId == null) {
+		if (parentProcessorEnactmentId == null && processorName != null) {
 			// null - ie. top level
 			query = query + " AND " + ProcEnact.parentProcessorEnactmentId + " IS NULL";
-		} else {
+		} else if (parentProcessorEnactmentId != null) {
 			// not null, ie. inside nested workflow
 			query = query + " AND " + ProcEnact.parentProcessorEnactmentId + "=?";
 		}
