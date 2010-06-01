@@ -44,10 +44,10 @@ public class Dependencies {
 
 	/**
 	 * adds a single record to the list of dependencies
-	 * @param wfNameRef
+	 * @param workflowId
 	 * @param pname
 	 * @param vname
-	 * @param wfInstance
+	 * @param workflowRun
 	 * @param iteration
 	 * @param collIdRef
 	 * @param parentCollIDRef
@@ -58,10 +58,10 @@ public class Dependencies {
 	 * @param isCollection
 	 */
 	public void addLineageQueryResultRecord(
-			String wfNameRef,
+			String workflowId,
 			String pname,
 			String vname,
-			String wfInstance,
+			String workflowRun,
 			String iteration,
 			String collIdRef,
 			String parentCollIDRef,
@@ -71,15 +71,15 @@ public class Dependencies {
 
 		LineageQueryResultRecord record = new LineageQueryResultRecord();
 
-		record.setWfName(wfNameRef);
-		record.setWfInstance(wfInstance);
-		record.setPname(pname);
+		record.setWorkflowId(workflowId);
+		record.setWorkflowRunId(workflowRun);
+		record.setProcessorName(pname);
 		record.setValue(value);
-		record.setVname(vname);
+		record.setPortName(vname);
 		record.setIteration(iteration);
 		record.setResolvedValue(resolvedValue);
-		record.setInput(isInput);
-		record.setCollIdRef(collIdRef);
+		record.setIsInputPort(isInput);
+		record.setCollectionT2Reference(collIdRef);
 		record.setParentCollIDRef(parentCollIDRef);
 		record.setCollection(isCollection);
 

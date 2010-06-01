@@ -9,71 +9,71 @@ package net.sf.taverna.t2.provenance.lineageservice.utils;
  */
 public class NestedListNode {
 
-	String collId;
-	String parentCollIdRef;
-	String wfInstanceRef;
-	String processorNameRef;
-	String varNameRef;
+	String collectionT2Reference;
+	String parentCollectionT2Reference;
+	String workflowRunId;
+	String processorName;
+	String portName;
 	String iteration;
 	/**
-	 * @return the collId
+	 * @return the collectionT2Reference
 	 */
-	public String getCollId() {
-		return collId;
+	public String getCollectionT2Reference() {
+		return collectionT2Reference;
 	}
 	/**
-	 * @param collId the collId to set
+	 * @param collectionT2Reference the collectionT2Reference to set
 	 */
-	public void setCollId(String collId) {
-		this.collId = collId;
+	public void setCollectionT2Reference(String collectionT2Reference) {
+		this.collectionT2Reference = collectionT2Reference;
 	}
 	/**
 	 * @return the parentCollIdRef
 	 */
 	public String getParentCollIdRef() {
-		return parentCollIdRef;
+		return parentCollectionT2Reference;
 	}
 	/**
 	 * @param parentCollIdRef the parentCollIdRef to set
 	 */
 	public void setParentCollIdRef(String parentCollIdRef) {
-		this.parentCollIdRef = parentCollIdRef;
+		this.parentCollectionT2Reference = parentCollIdRef;
 	}
 	/**
-	 * @return the wfInstanceRef
+	 * @return the workflowRunId
 	 */
-	public String getWfInstanceRef() {
-		return wfInstanceRef;
+	public String getWorkflowRunId() {
+		return workflowRunId;
 	}
 	/**
-	 * @param wfInstanceRef the wfInstanceRef to set
+	 * @param workflowRunId the workflowRunId to set
 	 */
-	public void setWfInstanceRef(String wfInstanceRef) {
-		this.wfInstanceRef = wfInstanceRef;
+	public void setWorkflowRunId(String workflowRunId) {
+		this.workflowRunId = workflowRunId;
 	}
 	/**
 	 * @return the processorNameRef
 	 */
-	public String getprocessorNameRef() {
-		return processorNameRef;
+	public String getProcessorName() {
+		return processorName;
 	}
 	/**
 	 * @param nameRef the processorNameRef to set
 	 */
-	public void setprocessorNameRef(String nameRef) {
-		processorNameRef = nameRef;
+	public void setProcessorName(String nameRef) {
+		processorName = nameRef;
 	}
 	/**
-	 * @return the varNameRef
+	 * @return the portName
 	 */
-	public String getVarNameRef() {
-		return varNameRef;
+	public String getPortName() {
+		return portName;
 	}
 	/**
-	 * @param varNameRef the varNameRef to set
+	 * @param portName the portName to set
 	 */
-	public void setVarNameRef(String varNameRef) {
-		this.varNameRef = varNameRef;
+	public void setPortName(String portName) {
+		this.portName = portName;
 	}
 	/**
 	 * @return the iteration

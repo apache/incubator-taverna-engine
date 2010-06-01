@@ -10,7 +10,7 @@ public class Collection {
 	
 	private String processorName;
 	
-	private String varName;
+	private String portName;
 	
 	private String iteration;
 	
@@ -48,12 +48,12 @@ public class Collection {
 		this.processorName = processorName;
 	}
 
-	public String getVarName() {
-		return varName;
+	public String getPortName() {
+		return portName;
 	}
 
-	public void setVarName(String varName) {
-		this.varName = varName;
+	public void setPortName(String portName) {
+		this.portName = portName;
 	}
 
 	public String getIteration() {

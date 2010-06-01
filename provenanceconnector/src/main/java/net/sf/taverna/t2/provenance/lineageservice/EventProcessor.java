@@ -55,7 +55,7 @@ import net.sf.taverna.t2.provenance.item.WorkflowProvenanceItem;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DataBinding;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DataLink;
 import net.sf.taverna.t2.provenance.lineageservice.utils.NestedListNode;
-import net.sf.taverna.t2.provenance.lineageservice.utils.ProcBinding;
+import net.sf.taverna.t2.provenance.lineageservice.utils.ProcessorBinding;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProcessorEnactment;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceUtils;
@@ -95,7 +95,7 @@ public class EventProcessor {
 	 * A map of UUIDs of the originating processor to the ProcBinding object
 	 * that contains its parameters
 	 */
-	private Map<String, ProcBinding> procBindingMap = new ConcurrentHashMap<String, ProcBinding>();;
+	private Map<String, ProcessorBinding> procBindingMap = new ConcurrentHashMap<String, ProcessorBinding>();;
 
 	/** A map of child ids to their parents in the hierarchy of events:
 	 *  workflow -> process -> processor -> activity -> iteration
@@ -110,7 +110,7 @@ public class EventProcessor {
 
 	private int eventCnt = 0; // for events logging
 	private volatile boolean workflowStructureDone = false; // used to inhibit processing of multiple workflow events -- we only need the first
-	private volatile String wfInstanceID = null; // unique run ID. set when we see the first event of type "process"
+	private volatile String workflowRunId = null; // unique run ID. set when we see the first event of type "process"
 
 	String topLevelDataflowName = null;
 	String topLevelDataflowID   = null;
@@ -163,7 +163,7 @@ public class EventProcessor {
 	 * @param content
 	 *            is a serialized dataflow (XML) -- this is parsed using the T2
 	 *            Deserializer
-	 * @return the wfInstanceRef for this workflow structure
+	 * @return the workflowRunId for this workflow structure
 	 */
 	public String processWorkflowStructure(ProvenanceItem provenanceItem) {
 
@@ -173,8 +173,8 @@ public class EventProcessor {
 		if (workflowStructureDone)  { return null; }
 
 		WorkflowProvenanceItem workflowProvenanceItem = (WorkflowProvenanceItem)provenanceItem;
-		setWfInstanceID(workflowProvenanceItem.getIdentifier());
-//		logger.debug("Workflow instance is: " + getWfInstanceID());
+		setWorkflowRunId(workflowProvenanceItem.getIdentifier());
+//		logger.debug("Workflow instance is: " + getWorkflowRunID());
 		Dataflow df = null;
 
 		df = workflowProvenanceItem.getDataflow();
@@ -185,14 +185,14 @@ public class EventProcessor {
 		topLevelDataflowID   = df.getInternalIdentifier(false);
 
 		// check whether we already have this WF in the DB
-		List<String> wfNames = null;
+		List<String> workflowIds = null;
 		try {
-			wfNames = pq.getAllWFnames();
+			workflowIds = pq.getAllworkflowIds();
 		} catch (SQLException e) { 
 			logger.warn("Problem processing workflow structure", e);
 		}
 
-		if (wfNames != null && wfNames.contains(topLevelDataflowID)) {  // already in the DB
+		if (workflowIds != null && workflowIds.contains(topLevelDataflowID)) {  // already in the DB
 		} else {
 			logger.info("new workflow structure with ID "+topLevelDataflowID);
 			ProvenanceProcessor provProc = new ProvenanceProcessor();
@@ -220,33 +220,33 @@ public class EventProcessor {
 	 * @param df 
 	 * @param dataflowID the UUID for the entire dataflow (may be a sub-dataflow)
 	 * @param localName the external name of the dataflow. Null if this is top level, not null if a sub-dataflow
-	 *  @return the wfInstanceRef for this workflow structure
+	 *  @return the workflowRunId for this workflow structure
 	 */
 	@SuppressWarnings("unchecked")
 	public String processDataflowStructure(Dataflow df, String dataflowID, String externalName) {
 
-		String localWfInstanceID = getWfInstanceID();
+		String localWorkflowRunID = getWorkflowRunId();
 
 		//dataflowDepth++;
 
 		try {
 			// check whether we already have this WF in the DB
-			List<String> wfNames = null;
+			List<String> workflowIds = null;
 			try {
-				wfNames = pq.getAllWFnames();
+				workflowIds = pq.getAllworkflowIds();
 			} catch (SQLException e) {
 				logger.warn("Problem processing dataflow structure for " + dataflowID, e);
 			}
 
-			boolean alreadyInDb = wfNames != null && wfNames.contains(dataflowID);
+			boolean alreadyInDb = workflowIds != null && workflowIds.contains(dataflowID);
 
 			
 
 			// //////
-			// add workflow ID -- this is NOT THE SAME AS the wfInstanceID
+			// add workflow ID -- this is NOT THE SAME AS the workflowRunId
 			// /////		
 
-			// this could be a nested workflow -- in this case, override its wfInstanceID with that of its parent
+			// this could be a nested workflow -- in this case, override its workflowRunId with that of its parent
 			if (! alreadyInDb) {
 				String parentDataflow;
 				if ((parentDataflow = wfNestingMap.get(dataflowID)) == null) {
@@ -284,15 +284,15 @@ public class EventProcessor {
 	
 					pw.addWFId(dataflowID, parentDataflow, externalName, blob); // set its dataflowID along with its parent
 	
-					// override wfInstanceID to point to top level -- UNCOMMENTED PM 9/09  CHECK
-					localWfInstanceID = pq.getRuns(parentDataflow, null).get(0).getInstanceID();
-	//				logger.debug("overriding nested WFRef "+getWfInstanceID()+" with parent WFRef "+localWfInstanceID);
+					// override workflowRunId to point to top level -- UNCOMMENTED PM 9/09  CHECK
+					localWorkflowRunID = pq.getRuns(parentDataflow, null).get(0).getWorkflowRunId();
+	//				logger.debug("overriding nested WFRef "+getWorkflowRunID()+" with parent WFRef "+localWorkflowRunID);
 	
 	
 				}	
 			}
 			// Log the run itself
-			pw.addWFInstanceId(dataflowID, localWfInstanceID);
+			pw.addWorkflowRun(dataflowID, localWorkflowRunID);
 			
 			// //////
 			// add processors along with their variables
@@ -508,7 +508,7 @@ public class EventProcessor {
 			logger.error("Problem processing provenance for dataflow", e);
 		}
 
-//		logger.debug("wfInstanceID at the end of processDataflowStructure: "+getWfInstanceID());
+//		logger.debug("workflowRunId at the end of processDataflowStructure: "+getWorkflowRunID());
 		return dataflowID;
 	}
 
@@ -527,7 +527,7 @@ public class EventProcessor {
 		return mapping.get(key);
 	}
 
-	private Element stripWfInstanceHeader(String content) {
+	private Element stripWorkflowRunHeader(String content) {
 
 		SAXBuilder  b = new SAXBuilder();
 		Document d;
@@ -538,7 +538,7 @@ public class EventProcessor {
 			// get identifier from <workflowItem> element
 			Element root = d.getRootElement();
 
-			setWfInstanceID(root.getAttributeValue("identifier"));
+			setWorkflowRunId(root.getAttributeValue("identifier"));
 
 			Namespace ns = Namespace.getNamespace("http://taverna.sf.net/2008/xml/t2flow");
 
@@ -572,12 +572,12 @@ public class EventProcessor {
 		if (provenanceItem.getEventType().equals(SharedVocabulary.PROCESS_EVENT_TYPE)) {
 
 			String parentId = provenanceItem.getParentId();  // this is the workflowID
-			String identifier = provenanceItem.getIdentifier();  // use this as wfInstanceID if this is the top-level process
+			String identifier = provenanceItem.getIdentifier();  // use this as workflowRunId if this is the top-level process
 
 			parentChildMap.put(identifier, parentId);
-			ProcBinding pb = new ProcBinding();
-			pb.setExecIDRef(getWfInstanceID());  
-			pb.setWfNameRef(currentWorkflowID);
+			ProcessorBinding pb = new ProcessorBinding();
+			pb.setWorkflowRunId(getWorkflowRunId());  
+			pb.setWorkflowId(currentWorkflowID);
 			procBindingMap.put(identifier, pb);
 
 		} else if (provenanceItem.getEventType().equals(SharedVocabulary.PROCESSOR_EVENT_TYPE)) {
@@ -588,7 +588,7 @@ public class EventProcessor {
 
 			// this has the weird form facade0:dataflowname:pname  need to extract pname from here
 			String[] processName = processID.split(":");
-			procBindingMap.get(parentId).setprocessorNameRef(processName[processName.length-1]);  // 3rd component of composite name
+			procBindingMap.get(parentId).setProcessorName(processName[processName.length-1]);  // 3rd component of composite name
 
 
 			parentChildMap.put(identifier, parentId);
@@ -597,7 +597,7 @@ public class EventProcessor {
 
 			String identifier = provenanceItem.getIdentifier();
 			String parentId = provenanceItem.getParentId();
-			procBindingMap.get(parentChildMap.get(parentId)).setActName(identifier);
+			procBindingMap.get(parentChildMap.get(parentId)).setFirstActivityClassName(identifier);
 			parentChildMap.put(identifier, parentId);
 
 		} else if (provenanceItem.getEventType().equals(SharedVocabulary.ITERATION_EVENT_TYPE)) {
@@ -619,7 +619,7 @@ public class EventProcessor {
 				processorEnactment = new ProcessorEnactment();
 			}
 			
-			ProcBinding procBinding = procBindingMap.get(processID);
+			ProcessorBinding procBinding = procBindingMap.get(processID);
 
 			
 			String itVector = extractIterationVector(ProvenanceUtils.iterationToString(iterationProvenanceItem.getIteration()));
@@ -627,14 +627,14 @@ public class EventProcessor {
 			
 			processorEnactment.setEnactmentStarted(iterationProvenanceItem.getEnactmentStarted());
 			processorEnactment.setEnactmentEnded(iterationProvenanceItem.getEnactmentEnded());
-			processorEnactment.setWorkflowRunId(wfInstanceID);
+			processorEnactment.setWorkflowRunId(workflowRunId);
 			processorEnactment.setIteration(itVector);
 
 			String processId = iterationProvenanceItem.getProcessId();
 			String parentProcessId = ProvenanceUtils.parentProcess(processId, 4);
 			if (parentProcessId != null) {
 				
-				ProcessorEnactment procAct = getPq().getProcessorEnactmentByProcessId(wfInstanceID, parentProcessId);
+				ProcessorEnactment procAct = getPq().getProcessorEnactmentByProcessId(workflowRunId, parentProcessId);
 				if (procAct != null) {
 					processorEnactment.setParentProcessorEnactmentId(procAct.getProcessEnactmentId());
 				}
@@ -644,7 +644,7 @@ public class EventProcessor {
 
 			ProvenanceProcessor provenanceProcessor;
 			if (processorEnactment.getProcessorId() == null) {
-				provenanceProcessor = pq.getProvenanceProcessorByName(currentWorkflowID, procBinding.getprocessorNameRef());
+				provenanceProcessor = pq.getProvenanceProcessorByName(currentWorkflowID, procBinding.getProcessorName());
 				processorMapById.put(provenanceProcessor.getIdentifier(), provenanceProcessor);
 				if (provenanceProcessor == null) {
 					// already logged warning
@@ -689,7 +689,7 @@ public class EventProcessor {
 			// use this event to do housekeeping on the input/output varbindings 
 
 			// process the input and output values accumulated by WorkflowDataProcessor
-			getWfdp().processTrees(completeEvent, getWfInstanceID());
+			getWfdp().processTrees(completeEvent, getWorkflowRunId());
 
 			
 			if (! provenanceItem.getProcessId().contains(":")) {
@@ -741,7 +741,7 @@ public class EventProcessor {
 			}
 			dataBinding.setPort(port);
 			dataBinding.setT2Reference(entry.getValue().toUri().toASCIIString());
-			dataBinding.setWorkflowRunId(wfInstanceID);
+			dataBinding.setWorkflowRunId(workflowRunId);
 			try {
 				getPw().addDataBinding(dataBinding);
 			} catch (SQLException e) {
@@ -754,7 +754,7 @@ public class EventProcessor {
 	private Port findPort(ProvenanceProcessor provenanceProcessor, String portName, boolean isInput) {
 		// TODO: Query pr dataflow and cache
 		Map<String, String> queryConstraints = new HashMap<String, String>();
-		queryConstraints.put("workflowId", provenanceProcessor.getWorkflowId());
+		queryConstraints.put("V.workflowId", provenanceProcessor.getWorkflowId());
 		String processorName = provenanceProcessor.getProcessorName();
 		queryConstraints.put("processorName", processorName);
 		queryConstraints.put("portName", portName);
@@ -813,12 +813,12 @@ public class EventProcessor {
 				String targetPname = outgoingDataLinks.get(0).getDestinationProcessorName();
 				String targetVname = outgoingDataLinks.get(0).getDestinationPortName();
 
-//				logger.info("copying values from ["+targetPname+":"+targetVname+"] for instance ID: ["+wfInstanceID+"]");
+//				logger.info("copying values from ["+targetPname+":"+targetVname+"] for instance ID: ["+workflowRunId+"]");
 
 				queryConstraints.clear();
 				queryConstraints.put("V.portName", targetVname);
 				queryConstraints.put("V.processorName", targetPname);
-				queryConstraints.put("VB.wfInstanceRef", getWfInstanceID());
+				queryConstraints.put("VB.workflowRunId", getWorkflowRunId());
 				queryConstraints.put("V.workflowId", topLevelDataflowID);
 
 				List<PortBinding> VBs = getPq().getPortBindings(queryConstraints);
@@ -828,9 +828,9 @@ public class EventProcessor {
 //					logger.info(vb.getValue());
 					PortBinding inputPortBinding = new PortBinding(vb);
 					
-					// insert PortBinding back into VB with the global input varname
-					inputPortBinding.setprocessorNameRef(input.getProcessorName());
-					inputPortBinding.setVarNameRef(input.getPortName());
+					// insert PortBinding back into VB with the global input portName
+					inputPortBinding.setProcessorName(input.getProcessorName());
+					inputPortBinding.setPortName(input.getPortName());
 					try { 
 						getPw().addPortBinding(inputPortBinding);						
 					} catch (SQLException ex) {
@@ -889,7 +889,7 @@ public class EventProcessor {
 		List<Port> outputs=null;
 		try {
 
-			outputs = pq.getOutputPorts(topLevelDataflowName, topLevelDataflowID);  // null InstanceID 
+			outputs = pq.getOutputPorts(topLevelDataflowName, topLevelDataflowID);  // null workflowRunId 
 
 			// for each output O
 			for (Port output:outputs)  {
@@ -899,7 +899,7 @@ public class EventProcessor {
 //				String oVName = output.getVName();
 //				queryConstraints.put("V.portName", oVName);
 //				queryConstraints.put("V.processorName", oPName);
-//				queryConstraints.put("VB.wfInstanceRef", wfInstanceID);
+//				queryConstraints.put("VB.workflowRunId", workflowRunId);
 //				queryConstraints.put("V.workflowId", topLevelDataflowID);
 
 //				List<PortBinding> OValues = pq.getPortBindings(queryConstraints);
@@ -921,7 +921,7 @@ public class EventProcessor {
 				queryConstraints.clear();
 				queryConstraints.put("V.portName", sourceVname);
 				queryConstraints.put("V.processorName", sourcePname);
-				queryConstraints.put("VB.wfInstanceRef", getWfInstanceID());
+				queryConstraints.put("VB.workflowRunId", getWorkflowRunId());
 				queryConstraints.put("V.workflowId", topLevelDataflowID);
 
 				List<PortBinding> YValues = pq.getPortBindings(queryConstraints);
@@ -933,14 +933,14 @@ public class EventProcessor {
 
 
 //					System.out.println("reconcileTopLevelOutputs:: processing "+
-//					yValue.getprocessorNameRef()+"/"+yValue.getVarNameRef()+"/"+yValue.getValue()+
+//					yValue.getprocessorNameRef()+"/"+yValue.getportName()+"/"+yValue.getValue()+
 //					" with collid "+yValue.getCollIDRef());
 
 					// look for a matching record in PortBinding for output O
 					queryConstraints.clear();
 					queryConstraints.put("V.portName", output.getPortName());
 					queryConstraints.put("V.processorName", output.getProcessorName());
-					queryConstraints.put("VB.wfInstanceRef", getWfInstanceID());
+					queryConstraints.put("VB.workflowRunId", getWorkflowRunId());
 					queryConstraints.put("V.workflowid", topLevelDataflowID);
 					queryConstraints.put("VB.iteration", yValue.getIteration());
 					if (yValue.getCollIDRef()!= null) {
@@ -956,7 +956,7 @@ public class EventProcessor {
 
 						PortBinding oValue = matchingOValues.get(0);
 
-//						System.out.println("found "+oValue.getprocessorNameRef()+"/"+oValue.getVarNameRef()+"/"+oValue.getValue()+
+//						System.out.println("found "+oValue.getprocessorNameRef()+"/"+oValue.getportName()+"/"+oValue.getValue()+
 //						" with collid "+oValue.getCollIDRef());
 
 						// copy collection info from oValue to yValue						
@@ -971,9 +971,9 @@ public class EventProcessor {
 //						System.out.println("no match found");
 
 						// copy the yValue to O 
-						// insert PortBinding back into VB with the global output varname
-						yValue.setprocessorNameRef(output.getProcessorName());
-						yValue.setVarNameRef(output.getPortName());
+						// insert PortBinding back into VB with the global output portName
+						yValue.setProcessorName(output.getProcessorName());
+						yValue.setPortName(output.getPortName());
 						pw.addPortBinding(yValue);
 					}
 
@@ -983,9 +983,9 @@ public class EventProcessor {
 
 				// get all collections refs for O
 				queryConstraints.clear();
-				queryConstraints.put("wfInstanceRef", getWfInstanceID());
+				queryConstraints.put("workflowRunId", getWorkflowRunId());
 				queryConstraints.put("processorNameRef", output.getProcessorName());
-				queryConstraints.put("varNameRef", output.getPortName());
+				queryConstraints.put("portName", output.getPortName());
 
 				List<NestedListNode> oCollections = pq.getNestedListNodes(queryConstraints);
 
@@ -993,8 +993,8 @@ public class EventProcessor {
 				for (NestedListNode nln:oCollections) {
 //					System.out.println("collection: "+nln.getCollId());
 
-					nln.setprocessorNameRef(sourcePname);
-					nln.setprocessorNameRef(sourceVname);
+					nln.setProcessorName(sourcePname);
+					nln.setProcessorName(sourceVname);
 
 					getPw().replaceCollectionRecord(nln, sourcePname, sourceVname);
 				}
@@ -1011,7 +1011,7 @@ public class EventProcessor {
 
 
 	@SuppressWarnings("unchecked")
-	private void processOutput(OutputDataProvenanceItem provenanceItem, ProcBinding procBinding, String currentWorkflowID) {
+	private void processOutput(OutputDataProvenanceItem provenanceItem, ProcessorBinding procBinding, String currentWorkflowID) {
 
 		Element dataItemAsXML = ProvenanceUtils.getDataItemAsXML(provenanceItem);
 		List<Element> outputPorts = dataItemAsXML.getChildren("port");
@@ -1025,8 +1025,8 @@ public class EventProcessor {
 
 				Element valueEl = valueElements.get(0); // only really 1 child
 
-				processPortBinding(valueEl,  procBinding.getprocessorNameRef(), portName, procBinding.getIterationVector(),
-						getWfInstanceID(), currentWorkflowID);
+				processPortBinding(valueEl,  procBinding.getProcessorName(), portName, procBinding.getIterationVector(),
+						getWorkflowRunId(), currentWorkflowID);
 			}
 		}
 
@@ -1047,7 +1047,7 @@ public class EventProcessor {
 		logger.debug("backpatchIterationResults: start");
 		for (PortBinding vb:newBindings) {
 
-			logger.debug("backpatchIterationResults: processing vb "+vb.getprocessorNameRef()+"/"+vb.getVarNameRef()+"="+vb.getValue());
+			logger.debug("backpatchIterationResults: processing vb "+vb.getProcessorName()+"/"+vb.getPortName()+"="+vb.getValue());
 
 			if (vb.getCollIDRef()!= null)  {  // this is a member of a collection
 				logger.debug("...which is inside a collection ");
@@ -1055,9 +1055,9 @@ public class EventProcessor {
 
 			// look for its antecedent
 			Map<String,String> queryConstraints = new HashMap<String,String>();
-			queryConstraints.put("destinationPortName", vb.getVarNameRef());
-			queryConstraints.put("destinationProcessorName", vb.getprocessorNameRef());				
-			queryConstraints.put("workflowId", pq.getWorkflowIdsForRun(vb.getWfInstanceRef()).get(0));  // CHECK picking first element in list...
+			queryConstraints.put("destinationPortName", vb.getPortName());
+			queryConstraints.put("destinationProcessorName", vb.getProcessorName());				
+			queryConstraints.put("workflowId", pq.getWorkflowIdsForRun(vb.getWorkflowRunId()).get(0));  // CHECK picking first element in list...
 			List<DataLink> incomingDataLinks = pq.getDataLinks(queryConstraints);
 
 			// there can be only one -- but check that there is one!
@@ -1070,10 +1070,10 @@ public class EventProcessor {
 
 			// get the varbindings for this port and select the one with the same iteration vector as its successor
 			queryConstraints.clear();
-			queryConstraints.put("VB.varNameRef", sourceVname);
+			queryConstraints.put("VB.portName", sourceVname);
 			queryConstraints.put("V.processorName", sourcePname);
 			queryConstraints.put("VB.value", vb.getValue());
-			queryConstraints.put("VB.wfInstanceRef", vb.getWfInstanceRef());
+			queryConstraints.put("VB.workflowRunId", vb.getWorkflowRunId());
 
 			List<PortBinding> VBs = pq.getPortBindings(queryConstraints);
 
@@ -1086,16 +1086,16 @@ public class EventProcessor {
 
 				if (vb.getCollIDRef() != null && b.getCollIDRef() == null) {
 					
-					logger.debug("successor "+vb.getVarNameRef()+" is in collection "+vb.getCollIDRef()+" but pred "+b.getVarNameRef()+" is not");
-					logger.debug("putting "+b.getVarNameRef()+" in collection "+vb.getCollIDRef()+" at pos "+vb.getPositionInColl());
+					logger.debug("successor "+vb.getPortName()+" is in collection "+vb.getCollIDRef()+" but pred "+b.getPortName()+" is not");
+					logger.debug("putting "+b.getPortName()+" in collection "+vb.getCollIDRef()+" at pos "+vb.getPositionInColl());
 					b.setCollIDRef(vb.getCollIDRef());
 					b.setPositionInColl(vb.getPositionInColl());
 					getPw().updatePortBinding(b);
 					
 				} else if (vb.getCollIDRef() == null && b.getCollIDRef() != null) {
 					
-					logger.debug("successor "+vb.getVarNameRef()+" is NOT in collection but pred "+b.getVarNameRef()+" IS");
-					logger.debug("putting "+vb.getVarNameRef()+" in collection "+b.getCollIDRef()+" at pos "+b.getPositionInColl());
+					logger.debug("successor "+vb.getPortName()+" is NOT in collection but pred "+b.getPortName()+" IS");
+					logger.debug("putting "+vb.getPortName()+" in collection "+b.getCollIDRef()+" at pos "+b.getPositionInColl());
 					vb.setCollIDRef(b.getCollIDRef());
 					vb.setPositionInColl(b.getPositionInColl());
 					getPw().updatePortBinding(vb);						
@@ -1110,7 +1110,7 @@ public class EventProcessor {
 	 * @param currentWorkflowID 
 	 */
 	@SuppressWarnings("unchecked")
-	private void processInput(InputDataProvenanceItem provenanceItem, ProcBinding procBinding, String currentWorkflowID) {
+	private void processInput(InputDataProvenanceItem provenanceItem, ProcessorBinding procBinding, String currentWorkflowID) {
 
 		Element dataItemAsXML = ProvenanceUtils.getDataItemAsXML(provenanceItem);
 		List<Element> inputPorts = dataItemAsXML.getChildren("port");
@@ -1124,8 +1124,8 @@ public class EventProcessor {
 				// add process order sequence to Port for this portName
 
 				Map<String, String> queryConstraints = new HashMap<String, String>();
-				queryConstraints.put("workflowId", currentWorkflowID);
-				queryConstraints.put("processorName", procBinding.getprocessorNameRef());
+				queryConstraints.put("V.workflowId", currentWorkflowID);
+				queryConstraints.put("processorName", procBinding.getProcessorName());
 				queryConstraints.put("portName", portName);
 				queryConstraints.put("isInputPort", "1");
 
@@ -1152,8 +1152,8 @@ public class EventProcessor {
 //				dataflow);
 
 				List<PortBinding> newBindings = 
-					processPortBinding(valueEl, procBinding.getprocessorNameRef(), portName, procBinding.getIterationVector(),
-							getWfInstanceID(), currentWorkflowID);
+					processPortBinding(valueEl, procBinding.getProcessorName(), portName, procBinding.getIterationVector(),
+							getWorkflowRunId(), currentWorkflowID);
 				// this is a list whenever valueEl is of type list: in this case processVarBinding recursively
 				// processes all values within the collection, and generates one PortBinding record for each of them
 
@@ -1191,18 +1191,18 @@ public class EventProcessor {
 	 * @param processorId
 	 * @param portName
 	 * @param iterationId
-	 * @param wfInstanceRef
+	 * @param workflowRunId
 	 * @param currentWorkflowID 
 	 */
 	private List<PortBinding> processPortBinding(Element valueEl, String processorId,
-			String portName, String iterationId, String wfInstanceRef, String currentWorkflowID) {
+			String portName, String iterationId, String workflowRunId, String currentWorkflowID) {
 
 		// uses the defaults:
 		// collIdRef = null
 		// parentcollectionRef = null
 		// positionInCollection = 1
 		return processPortBinding(valueEl, processorId, portName, null, 1, null,
-				iterationId, wfInstanceRef, null, currentWorkflowID);
+				iterationId, workflowRunId, null, currentWorkflowID);
 	}
 
 	/**
@@ -1214,13 +1214,13 @@ public class EventProcessor {
 	 * @param positionInCollection
 	 * @param parentCollectionRef
 	 * @param iterationId
-	 * @param wfInstanceRef
+	 * @param workflowRunId
 	 * @param currentWorkflowID 
 	 */
 	@SuppressWarnings("unchecked")
 	private List<PortBinding>  processPortBinding(Element valueEl, String processorId,
 			String portName, String collIdRef, int positionInCollection,
-			String parentCollectionRef, String iterationId, String wfInstanceRef, String itVector, String currentWorkflowID) {
+			String parentCollectionRef, String iterationId, String workflowRunId, String itVector, String currentWorkflowID) {
 
 		List<PortBinding> newBindings = new ArrayList<PortBinding>();
 
@@ -1236,11 +1236,11 @@ public class EventProcessor {
 
 		PortBinding vb = new PortBinding();
 
-		vb.setWfNameRef(currentWorkflowID);
-		vb.setWfInstanceRef(wfInstanceRef);
-		vb.setprocessorNameRef(processorId);
+		vb.setWorkflowId(currentWorkflowID);
+		vb.setWorkflowRunId(workflowRunId);
+		vb.setProcessorName(processorId);
 		vb.setValueType(valueType);
-		vb.setVarNameRef(portName);
+		vb.setPortName(portName);
 		vb.setCollIDRef(collIdRef);
 		vb.setPositionInColl(positionInCollection);
 
@@ -1252,15 +1252,15 @@ public class EventProcessor {
 
 			try {
 
-				vb.setIterationVector(iterationVector);
+				vb.setIteration(iterationVector);
 				vb.setValue(valueEl.getAttributeValue("id"));
 
-				logger.debug("new input VB with wfNameRef="+currentWorkflowID+" processorId="+processorId+
+				logger.debug("new input VB with workflowId="+currentWorkflowID+" processorId="+processorId+
 						" valueType="+valueType+" portName="+portName+" collIdRef="+collIdRef+
 						" position="+positionInCollection+" itvector="+iterationVector+
 						" value="+vb.getValue());
 
-//				logger.info("calling addVarBinding on "+vb.getprocessorNameRef()+" : "+vb.getVarNameRef()); 
+//				logger.info("calling addVarBinding on "+vb.getprocessorNameRef()+" : "+vb.getportName()); 
 				getPw().addPortBinding(vb);
 
 			} catch (SQLException e) {
@@ -1269,17 +1269,17 @@ public class EventProcessor {
 
 		} else if (valueType.equals("referenceSet")) {
 
-			vb.setIterationVector(iterationVector);
+			vb.setIteration(iterationVector);
 			vb.setValue(valueEl.getAttributeValue("id"));
-			vb.setRef(valueEl.getChildText("reference"));
+			vb.setReference(valueEl.getChildText("reference"));
 
-			logger.debug("new input VB with wfNameRef="+currentWorkflowID+" processorId="+processorId+
+			logger.debug("new input VB with workflowId="+currentWorkflowID+" processorId="+processorId+
 					" valueType="+valueType+" portName="+portName+" collIdRef="+collIdRef+
 					" position="+positionInCollection+" itvector="+iterationVector+
 					" value="+vb.getValue());
 
 			try {
-//				logger.debug("calling addVarBinding on "+vb.getprocessorNameRef()+" : "+vb.getVarNameRef()+" with it "+vb.getIteration()); 
+//				logger.debug("calling addVarBinding on "+vb.getprocessorNameRef()+" : "+vb.getportName()+" with it "+vb.getIteration()); 
 				getPw().addPortBinding(vb);
 			} catch (SQLException e) {
 				logger.debug("Problem processing var binding -- performing update instead of insert", e); //, e);
@@ -1302,7 +1302,7 @@ public class EventProcessor {
 
 				parentCollectionRef = getPw().addCollection(processorId, collId,
 						parentCollectionRef, iterationVector, portName,
-						wfInstanceRef);
+						workflowRunId);
 
 				// iterate over each list element
 				List<Element> listElements = valueEl.getChildren();
@@ -1327,7 +1327,7 @@ public class EventProcessor {
 
 					List<PortBinding> bindings = processPortBinding(el, processorId, portName, collId,
 							positionInCollection, parentCollectionRef,
-							iterationId, wfInstanceRef, iterationVector, currentWorkflowID);
+							iterationId, workflowRunId, iterationVector, currentWorkflowID);
 
 					newBindings.addAll(bindings);
 
@@ -1339,7 +1339,7 @@ public class EventProcessor {
 			}
 		} else if (valueType.equals("error")) {
 			try {
-				vb.setIterationVector(iterationVector);
+				vb.setIteration(iterationVector);
 				vb.setValue(valueEl.getAttributeValue("id"));
 
 				getPw().addPortBinding(vb);
@@ -1447,8 +1447,8 @@ public class EventProcessor {
 	class Pair {
 		String v1, v2;
 
-		public Pair(String current, String wfNameRef) {
-			v1=current; v2=wfNameRef;
+		public Pair(String current, String workflowId) {
+			v1=current; v2=workflowId;
 		}
 
 		/**
@@ -1481,15 +1481,15 @@ public class EventProcessor {
 
 	}
 
-	public List<Pair> toposort(String dataflowName, String wfInstanceId) throws SQLException  {
+	public List<Pair> toposort(String dataflowName, String workflowRunId) throws SQLException  {
 
-//		String wfNameRef = pq.getWfNameForDataflow(dataflowName, wfInstanceID);
-		String wfNameRef = pq.getWfNameForDataflow(dataflowName);
+//		String workflowId = pq.getworkflowIdForDataflow(dataflowName, workflowRunId);
+		String workflowId = pq.getWorkflowIdForExternalName(dataflowName);
 
 		// fetch processors along with the count of their predecessors
-		Map<String, Integer> predecessorsCount = getPq().getPredecessorsCount(wfInstanceId);
+		Map<String, Integer> predecessorsCount = getPq().getPredecessorsCount(workflowRunId);
 		Map<String, List<String>> successorsOf = new HashMap<String, List<String>>();
-//		List<String> procList = pq.getContainedProcessors(dataflowName, wfInstanceId);
+//		List<String> procList = pq.getContainedProcessors(dataflowName, workflowRunId);
 		List<String> procList = pq.getContainedProcessors(dataflowName);
 
 //		logger.debug("toposort on "+dataflowName);
@@ -1497,7 +1497,7 @@ public class EventProcessor {
 //		logger.debug("contained procs: ");
 		for (String s:procList) { 
 
-			List<String> successors = getPq().getSuccProcessors(s, wfNameRef, wfInstanceId);
+			List<String> successors = getPq().getSuccProcessors(s, workflowId, workflowRunId);
 			successorsOf.put(s, successors);
 
 //			logger.debug(s+" with "+predecessorsCount.get(s)+" predecessors and successors:");
@@ -1505,7 +1505,7 @@ public class EventProcessor {
 //			for (String s1:successors) { logger.debug(s1); }
 		}
 
-		List<Pair>  sorted = tsort(procList, dataflowName, predecessorsCount, successorsOf, wfNameRef, wfInstanceId);
+		List<Pair>  sorted = tsort(procList, dataflowName, predecessorsCount, successorsOf, workflowId, workflowRunId);
 
 //		logger.debug("tsort:");
 //		for (String p : sorted) { logger.debug(p); }
@@ -1518,7 +1518,7 @@ public class EventProcessor {
 				// recurse on procName
 
 //				logger.debug("recursion on "+procName);
-				List<Pair> sortedSublist = toposort(procName, wfInstanceId);
+				List<Pair> sortedSublist = toposort(procName, workflowRunId);
 
 				// replace procName with sortedSublist in sorted
 				sorted.remove(i);
@@ -1535,7 +1535,7 @@ public class EventProcessor {
 	 * @param procList
 	 * @param predecessorsCount 
 	 * @param successorsOf 
-	 * @param wfInstanceId 
+	 * @param workflowRunId 
 	 * @return
 	 * @throws SQLException 
 	 */
@@ -1543,7 +1543,7 @@ public class EventProcessor {
 			String dataflowName, 
 			Map<String, Integer> predecessorsCount, 
 			Map<String, List<String>> successorsOf, 
-			String wfNameRef, String wfInstanceId) throws SQLException {
+			String workflowId, String workflowRunId) throws SQLException {
 
 		List<Pair> L = new ArrayList<Pair>();		// holds sorted elements
 		List<String> Q = new ArrayList<String>(); 		// temp queue
@@ -1570,7 +1570,7 @@ public class EventProcessor {
 
 			String current = Q.remove(0);
 //			logger.debug("extracted "+current+" and added to L");
-			L.add(new Pair(current,wfNameRef));
+			L.add(new Pair(current,workflowId));
 
 //			for (String s:L) logger.debug(s);
 
@@ -1602,17 +1602,17 @@ public class EventProcessor {
 	}
 
 
-	public void propagateANL(String wfInstanceId) throws SQLException {
+	public void propagateANL(String workflowRunId) throws SQLException {
 
-		String top = pq.getTopLevelDataflowName(wfInstanceId);
+		String top = pq.getTopLevelDataflowName(workflowRunId);
 
 		// //////////////////////
 		// PHASE I: toposort the processors in the whole graph
 		// //////////////////////
-		List<Pair> sorted = toposort(top, wfInstanceId);
+		List<Pair> sorted = toposort(top, workflowRunId);
 
 		logger.debug("final sorted list of processors");
-		for (Pair p:sorted) {  logger.debug(p.getV1()+"  in wfnameRef "+p.getV2()); }
+		for (Pair p:sorted) {  logger.debug(p.getV1()+"  in workflowId "+p.getV2()); }
 
 		// //////////////////////
 		// PHASE II: traverse and set anl on each port
@@ -1628,11 +1628,11 @@ public class EventProcessor {
 
 //			// process pname's inputs -- set ANL to be the DNL if not set in prior steps
 			String pname     = pnameInContext.getV1();
-			String wfNameRef = pnameInContext.getV2();
+			String workflowId = pnameInContext.getV2();
 
 //			logger.debug("processor "+pname);
 
-			List<Port> inputs = getPq().getInputPorts(pname, wfNameRef); // null -> do not use instance (??) CHECK
+			List<Port> inputs = getPq().getInputPorts(pname, workflowId); // null -> do not use instance (??) CHECK
 
 //			logger.debug(inputs.size()+" inputs for "+pnameInContext.getV1());
 
@@ -1656,7 +1656,7 @@ public class EventProcessor {
 
 				// this should take care of the special case of the top level dataflow with inputs that have successors in the graph
 				// propagate this through all the links from this var
-//				List<Port> successors = getPq().getSuccVars(pname, iv.getVName(), wfInstanceId);
+//				List<Port> successors = getPq().getSuccVars(pname, iv.getVName(), workflowRunId);
 
 //				logger.debug(successors.size()+ " successors for var "+iv.getVName());
 
@@ -1671,7 +1671,7 @@ public class EventProcessor {
 
 			// process pname's outputs -- set ANL based on the sum formula (see
 			// paper)
-			List<Port> outputs = getPq().getOutputPorts(pname, wfNameRef);
+			List<Port> outputs = getPq().getOutputPorts(pname, workflowId);
 			for (Port ov : outputs) {
 
 				ov.setResolvedDepth(ov.getDepth() + totalANL);
@@ -1680,7 +1680,7 @@ public class EventProcessor {
 				getPw().updatePort(ov);
 
 				// propagate this through all the links from this var
-				List<Port> successors = getPq().getSuccPorts(pname, ov.getPortName(), wfNameRef);
+				List<Port> successors = getPq().getSuccPorts(pname, ov.getPortName(), workflowId);
 
 //				logger.debug(successors.size()+ " successors for var "+ov.getVName());
 
@@ -1691,9 +1691,9 @@ public class EventProcessor {
 
 					if (v.getProcessorId() == null && v.isInputPort()) {  // this is the input to a nested workflow
 
-//						String tempWfNameRef = pq.getWfNameForDataflow(v.getPName(), wfInstanceId);
-						String tempWfNameRef = pq.getWfNameForDataflow(v.getProcessorName());
-						List<Port> realSuccessors = getPq().getSuccPorts(v.getProcessorName(), v.getPortName(), tempWfNameRef);	
+//						String tempWorkflowId = pq.getworkflowIdForDataflow(v.getPName(), workflowRunId);
+						String tempWorkflowId = pq.getWorkflowIdForExternalName(v.getProcessorName());
+						List<Port> realSuccessors = getPq().getSuccPorts(v.getProcessorName(), v.getPortName(), tempWorkflowId);	
 
 //						logger.debug("realSuccessors size = "+realSuccessors.size());
 
@@ -1702,8 +1702,8 @@ public class EventProcessor {
 
 					}  else if (v.getProcessorId() == null && !v.isInputPort()) {  // this is the output to a nested workflow
 
-//						String tempWfNameRef = pq.getWfNameForDataflow(v.getPName(), wfInstanceId);
-						String tempWfNameRef = pq.getWfNameForDataflow(v.getProcessorName());
+//						String tempworkflowId = pq.getworkflowIdForDataflow(v.getPName(), workflowRunId);
+						String tempWorkflowId = pq.getWorkflowIdForExternalName(v.getProcessorName());
 						List<Port> realSuccessors = getPq().getSuccPorts(v.getProcessorName(), v.getPortName(), null);	
 
 //						logger.debug("realSuccessors size = "+realSuccessors.size());
@@ -1745,12 +1745,12 @@ public class EventProcessor {
 		return pq;
 	}
 
-	public void setWfInstanceID(String wfInstanceID) {
-		this.wfInstanceID = wfInstanceID;
+	public void setWorkflowRunId(String workflowRunId) {
+		this.workflowRunId = workflowRunId;
 	}
 
-	public String getWfInstanceID() {
-		return wfInstanceID;
+	public String getWorkflowRunId() {
+		return workflowRunId;
 	}
 
 	public void setWfdp(WorkflowDataProcessor wfdp) {

@@ -218,28 +218,28 @@ public class ProvenanceAccess {
 	 * specific elements within values associated with a processor port, in the context of a specific run of a workflow.
 	 * <br/>This is used in the workbench to retrieve the "intermediate results" at various points during workflow execution, 
 	 * as opposed to a set of dependencies in response to a full-fledged provenance query.
-	 * @param wfInstance lineage scope -- a specific instance
-	 * @param pname for a specific processor [required]
+	 * @param workflowRunId lineage scope -- a specific instance
+	 * @param processorName for a specific processor [required]
 	 * @param a specific (input or output) variable [optional]
 	 * @param iteration and a specific iteration [optional]
 	 * @return a list of {@ LineageQueryResultRecord}, encapsulated in a {@link Dependencies} object
 	 * @throws SQLException
 	 */
 	public Dependencies fetchPortData(
-			String wfInstance,
+			String workflowRunId,
 			String workflowId,
-			String pname,
-			String port,
+			String processorName,
+			String portName,
 			String iteration) {
 
-		logger.info("running fetchPortData on instance "+wfInstance+
+		logger.info("running fetchPortData on instance "+workflowRunId+
 				" workflow "+workflowId+
-				" processor "+pname+
-				" port "+port+
+				" processor "+processorName+
+				" port "+portName+
 				" iteration "+iteration);
 		// TODO add context workflowID to query
 		try {
-			return pa.fetchIntermediateResult(wfInstance, workflowId, pname, port, iteration);
+			return pa.fetchIntermediateResult(workflowRunId, workflowId, processorName, portName, iteration);
 		} catch (SQLException e) {
 			logger.error("Problem with fetching intermediate results", e);
 		}
@@ -261,7 +261,7 @@ public class ProvenanceAccess {
 	/**
 	 * @param workflowId defines the scope of the query - if null then the query runs on all available workflows
 	 * @param conditions additional conditions to be defined. This is a placeholder as conditions are currently ignored
-	 * @return a list of wfInstanceID, each representing one run of the input workflowID
+	 * @return a list of workflowRunId, each representing one run of the input workflowID
 	 */
 	public List<WorkflowRun> listRuns(String workflowId, Map<String, String> conditions) {
 
@@ -274,8 +274,8 @@ public class ProvenanceAccess {
 	}
 
 	
-	public boolean isTopLevelDataflow(String wfNameID)  {
-		return pq.isTopLevelDataflow(wfNameID);
+	public boolean isTopLevelDataflow(String workflowIdID)  {
+		return pq.isTopLevelDataflow(workflowIdID);
 	}
 	
 
@@ -309,14 +309,14 @@ public class ProvenanceAccess {
 	/**
 	 * removes all records pertaining to the static structure of a workflow.
 	 * 
-	 * @param wfName the ID (not the external name) of the workflow whose static structure is to be deleted from the DB 
+	 * @param workflowId the ID (not the external name) of the workflow whose static structure is to be deleted from the DB 
 	 */
-	public void removeWorkflow(String wfName) {
+	public void removeWorkflow(String workflowId) {
 
 		try {
-			pw.clearDBStatic(wfName);
+			pw.clearDBStatic(workflowId);
 		} catch (SQLException e) {
-			logger.error("Problem with removing static workflow: " + wfName, e);
+			logger.error("Problem with removing static workflow: " + workflowId, e);
 		}
 	}
 
@@ -482,7 +482,7 @@ public class ProvenanceAccess {
  	 * @return
  	 */
 	public String getWorkflowIDForExternalName(String workflowName) {
-		return pq.getWfNameForDataflow(workflowName);
+		return pq.getWorkflowIdForExternalName(workflowName);
 	}
 
 	public String getProcessorNameForWorkflowID(String workflowID) {

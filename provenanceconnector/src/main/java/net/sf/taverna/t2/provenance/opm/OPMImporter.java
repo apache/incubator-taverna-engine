@@ -57,7 +57,7 @@ public class OPMImporter {
 	Map<String, String> accountToWorkflow  = new HashMap<String, String>();
 	Map<String, String> workflowToInstance = new HashMap<String, String>();
 
-	// maps wfName --> (wfName --> List(Port))
+	// maps workflowId --> (workflowId --> List(Port))
 	private Map<String, Map<String, List<Port>>> usedVarsByAccount = new HashMap<String, Map<String, List<Port>>>();
 	private Map<String, Map<String, List<Port>>> wgbVarsByAccount = new HashMap<String, Map<String, List<Port>>>();
 
@@ -129,7 +129,7 @@ public class OPMImporter {
 		logger.debug("XML graph deserialized");
 
 		// 
-		// generates one pair <wfName, wfInstance> for each account in the graph
+		// generates one pair <workflowId, workflowRun> for each account in the graph
 		//
 		List<Account> allAccounts = null;
 		try {
@@ -151,7 +151,7 @@ public class OPMImporter {
 		}
 
 		// 
-		// associates processes and ports to workflows and varbindings to corresponding wfInstances
+		// associates processes and ports to workflows and varbindings to corresponding workflowRuns
 		//
 		List<Object> allDeps;
 
@@ -211,10 +211,10 @@ public class OPMImporter {
 
 		for (String acc:accountNames) {
 
-			String wfName = accountToWorkflow.get(acc);
+			String workflowId = accountToWorkflow.get(acc);
 
-			Map<String, List<Port>> usedVars = usedVarsByAccount.get(wfName);
-			Map<String, List<Port>> wgbVars =  wgbVarsByAccount.get(wfName);
+			Map<String, List<Port>> usedVars = usedVarsByAccount.get(workflowId);
+			Map<String, List<Port>> wgbVars =  wgbVarsByAccount.get(workflowId);
 
 			if (usedVars == null || wgbVars == null) continue;
 
@@ -231,7 +231,7 @@ public class OPMImporter {
 				// note that we expect a single targetVar, but this is not guaranteed
 				for (Port sourceVar:sourceVars) {
 					for (Port targetVar:targetVars) {
-						pw.addDataLink(sourceVar, targetVar, wfName);
+						pw.addDataLink(sourceVar, targetVar, workflowId);
 					}
 				}
 			}
@@ -240,26 +240,26 @@ public class OPMImporter {
 
 	private void generateWFFromAccount(String accName) throws SQLException {
 
-		String wfName     = accName+"-"+UUID.randomUUID().toString();
-		String wfInstance = accName+"-"+UUID.randomUUID().toString();
+		String workflowId     = accName+"-"+UUID.randomUUID().toString();
+		String workflowRun = accName+"-"+UUID.randomUUID().toString();
 
-		pw.addWFId(wfName);
-		pw.addWFInstanceId(wfName, wfInstance);
-		accountToWorkflow.put(accName, wfName);
-		workflowToInstance.put(wfName, wfInstance);
+		pw.addWFId(workflowId);
+		pw.addWorkflowRun(workflowId, workflowRun);
+		accountToWorkflow.put(accName, workflowId);
+		workflowToInstance.put(workflowId, workflowRun);
 
-		logger.info("generated wfName "+wfName+" and instance "+wfInstance+"  for account "+accName);
+		logger.info("generated workflowId "+workflowId+" and instance "+workflowRun+"  for account "+accName);
 	}
 
 
-	private Port processProcessArtifactDep(String procName, String value, String varName,
-			String wfName, String wfInstance, boolean artifactIsInput) {
+	private Port processProcessArtifactDep(String procName, String value, String portName,
+			String workflowId, String workflowRun, boolean artifactIsInput) {
 
 		// generate Process
 		ProvenanceProcessor proc = null;
 		try {
-			proc = pw.addProcessor(procName, wfName, false);
-			logger.debug("added processor "+procName+" to workflow "+wfName);
+			proc = pw.addProcessor(procName, workflowId, false);
+			logger.debug("added processor "+procName+" to workflow "+workflowId);
 		} catch (SQLException e) {  // no panic -- just catch duplicates
 			logger.warn(e.getMessage());
 		}
@@ -268,8 +268,8 @@ public class OPMImporter {
 		Port outputVar = new Port();
 		outputVar.setProcessorId(proc.getIdentifier());
 		outputVar.setProcessorName(procName);
-		outputVar.setWorkflowId(wfName);
-		outputVar.setPortName(varName);
+		outputVar.setWorkflowId(workflowId);
+		outputVar.setPortName(portName);
 		outputVar.setDepth(0);
 		outputVar.setInputPort(artifactIsInput);  // wgby is an output var   
 
@@ -277,24 +277,24 @@ public class OPMImporter {
 		vars.add(outputVar);
 
 		try {
-			pw.addPorts(vars, wfName);
-			logger.debug("added var "+varName+" to workflow "+wfName);
+			pw.addPorts(vars, workflowId);
+			logger.debug("added var "+portName+" to workflow "+workflowId);
 		} catch (SQLException e) {  // no panic -- just catch duplicates
 			logger.warn(e.getMessage());
 		}
 
-		// generate PortBindings (wfInstance, procName, varname, value)			
+		// generate PortBindings (workflowRun, procName, portName, value)			
 		PortBinding vb = new PortBinding();
 
-		vb.setWfInstanceRef(wfInstance);
-		vb.setprocessorNameRef(procName);
-		vb.setVarNameRef(varName);
+		vb.setWorkflowRunId(workflowRun);
+		vb.setProcessorName(procName);
+		vb.setPortName(portName);
 		vb.setValue(value);
-		vb.setIterationVector("[]");
+		vb.setIteration("[]");
 
 		try {
 			pw.addPortBinding(vb);
-			logger.debug("added var binding with value "+value+" to workflow instance "+wfInstance);
+			logger.debug("added var binding with value "+value+" to workflow instance "+workflowRun);
 		} catch (SQLException e) {  // no panic -- just catch duplicates
 			logger.error("Failed to add var binding: " + e.getMessage());
 		}
@@ -308,26 +308,26 @@ public class OPMImporter {
 	 * @param procID
 	 * @param artId
 	 * @param role
-	 * @param wfName
-	 * @param wfInstance
+	 * @param workflowId
+	 * @param workflowRun
 	 * @param artifactIsInput
 	 */
 	private Port processProcessArtifactDep(ProcessId procID, ArtifactId artId, Role role, 
-			String wfName, String wfInstance, boolean artifactIsInput) {
+			String workflowId, String workflowRun, boolean artifactIsInput) {
 
 		String procName = ((org.openprovenance.model.Process) procID.getId()).getId();
-		String varName  = role.getValue();
+		String portName  = role.getValue();
 		String value    = ((Artifact) artId.getId()).getId();
 
-		varName = removeBlanks(varName);
+		portName = removeBlanks(portName);
 
-		return processProcessArtifactDep(procName, value, varName, wfName, wfInstance, artifactIsInput);
+		return processProcessArtifactDep(procName, value, portName, workflowId, workflowRun, artifactIsInput);
 	}
 
 
 
-	private String removeBlanks(String varName) {		
-		return varName.replace(" ", "_");
+	private String removeBlanks(String portName) {		
+		return portName.replace(" ", "_");
 	}
 
 
@@ -353,16 +353,16 @@ public class OPMImporter {
 		accNames.add(OPM_DEF_ACCOUNT);
 
 		for (String accName: accNames) {
-			String wfName = accountToWorkflow.get(accName);
-			String wfInstance = workflowToInstance.get(wfName);
+			String workflowId = accountToWorkflow.get(accName);
+			String workflowRun = workflowToInstance.get(workflowId);
 
-			Port v  = processProcessArtifactDep(procID, artId, role, wfName, wfInstance, true);  // true -> input var
+			Port v  = processProcessArtifactDep(procID, artId, role, workflowId, workflowRun, true);  // true -> input var
 
 			// save the mapping from artifact to var for this account
-			Map<String, List<Port>> usedVars = usedVarsByAccount.get(wfName);
+			Map<String, List<Port>> usedVars = usedVarsByAccount.get(workflowId);
 			if (usedVars == null) {
 				usedVars = new HashMap<String, List<Port>>();
-				usedVarsByAccount.put(wfName, usedVars);
+				usedVarsByAccount.put(workflowId, usedVars);
 			}
 			List<Port> vars = usedVars.get(((Artifact) artId.getId()).getId());
 
@@ -416,15 +416,15 @@ public class OPMImporter {
 
 		for (String accName:accNames) {
 
-			String wfName = accountToWorkflow.get(accName);
-			String wfInstance = workflowToInstance.get(wfName);
+			String workflowId = accountToWorkflow.get(accName);
+			String workflowRun = workflowToInstance.get(workflowId);
 
-			Port v = processProcessArtifactDep(procID, artId, role, wfName, wfInstance, false);  // false -> output var
+			Port v = processProcessArtifactDep(procID, artId, role, workflowId, workflowRun, false);  // false -> output var
 
-			Map<String, List<Port>> wgbVars = wgbVarsByAccount.get(wfName);
+			Map<String, List<Port>> wgbVars = wgbVarsByAccount.get(workflowId);
 			if (wgbVars == null) {
 				wgbVars = new HashMap<String, List<Port>>();
-				wgbVarsByAccount.put(wfName, wgbVars);
+				wgbVarsByAccount.put(workflowId, wgbVars);
 			}
 
 			List<Port> vars = wgbVars.get(((Artifact) artId.getId()).getId());
@@ -479,8 +479,8 @@ public class OPMImporter {
 
 			int varCounter = 0;
 
-			String wfName = accountToWorkflow.get(accName);
-			String wfInstance = workflowToInstance.get(wfName);
+			String workflowId = accountToWorkflow.get(accName);
+			String workflowRun = workflowToInstance.get(workflowId);
 
 			List<String> generatingProcesses=null, usingProcesses=null;
 
@@ -525,25 +525,25 @@ public class OPMImporter {
 			String procName = PROC_NAME+"_"+procNameCounter++;
 
 			try {
-				pw.addProcessor(procName, wfName, false);
-				logger.info("created non-native added processor "+procName+" to workflow "+wfName);
+				pw.addProcessor(procName, workflowId, false);
+				logger.info("created non-native added processor "+procName+" to workflow "+workflowId);
 			} catch (SQLException e) {  // no panic -- just catch duplicates
 				logger.warn(e.getMessage());
 			}
 
 			// create a role for fromArtId from the procName
-			String inputVarName = procName+"_"+varCounter++;
+			String inputPortName = procName+"_"+varCounter++;
 			String inputValue = ((Artifact) fromArtId.getId()).getId();
 
 			// add to DB
-			processProcessArtifactDep(procName, inputValue, inputVarName, wfName, wfInstance, true);
+			processProcessArtifactDep(procName, inputValue, inputPortName, workflowId, workflowRun, true);
 
 			// create a role for toArtId
-			String outputVarName = procName+"_"+varCounter++;
+			String outputPortName = procName+"_"+varCounter++;
 			String outputValue = ((Artifact) toArtId.getId()).getId();
 
 			// add to DB
-			processProcessArtifactDep(procName, outputValue, outputVarName, wfName, wfInstance, false);
+			processProcessArtifactDep(procName, outputValue, outputPortName, workflowId, workflowRun, false);
 		}		
 	}
 

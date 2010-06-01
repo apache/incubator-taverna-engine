@@ -132,7 +132,7 @@ public abstract class ProvenanceQuery {
 	throws SQLException {
 		List<Port> result = new ArrayList<Port>();
 
-		String q0 = "SELECT DISTINCT V.* FROM Port V JOIN WfInstance W ON W.wfnameRef = V.workflowId";
+		String q0 = "SELECT DISTINCT V.*, W.workflowId FROM Port V JOIN WorkflowRun W ON W.workflowId = V.workflowId";
 
 		String q = addWhereClauseToQuery(q0, queryConstraints, true);
 
@@ -185,10 +185,10 @@ public abstract class ProvenanceQuery {
 
 
 	/**
-	 * return the input variables for a given processor and a wfInstanceId
+	 * return the input variables for a given processor and a workflowRunId
 	 *
 	 * @param pname
-	 * @param wfInstanceId
+	 * @param workflowRunId
 	 * @return list of input variables
 	 * @throws SQLException
 	 */
@@ -204,10 +204,10 @@ public abstract class ProvenanceQuery {
 	}
 
 	/**
-	 * return the output variables for a given processor and a wfInstanceId
+	 * return the output variables for a given processor and a workflowRunId
 	 *
 	 * @param pname
-	 * @param wfInstanceId
+	 * @param workflowRunId
 	 * @return list of output variables
 	 * @throws SQLException
 	 */
@@ -285,7 +285,7 @@ public abstract class ProvenanceQuery {
 		List<Workflow> workflows = getWorkflowsForRun(runID);
 
 		for (Workflow w:workflows) { 	
-			if (w.getParentWFname() == null) { return w.getWfname(); }
+			if (w.getParentWorkflowId() == null) { return w.getWorkflowId(); }
 		}		
 		return null;		
 	}
@@ -298,13 +298,13 @@ public abstract class ProvenanceQuery {
 	 */
 	public List<String> getWorkflowIdsForRun(String runID) throws SQLException {
 
-		List<String> wfNames = new ArrayList<String>();
+		List<String> workflowIds = new ArrayList<String>();
 
 		List<Workflow> workflows = getWorkflowsForRun(runID);
 
-		for (Workflow w:workflows) { wfNames.add(w.getWfname()); }
+		for (Workflow w:workflows) { workflowIds.add(w.getWorkflowId()); }
 
-		return wfNames;
+		return workflowIds;
 	}
 
 
@@ -318,7 +318,7 @@ public abstract class ProvenanceQuery {
 
 		List<Workflow> result = new ArrayList<Workflow>();
 
-		String q = "SELECT DISTINCT W.* FROM WfInstance I JOIN Workflow W ON I.wfnameRef = W.wfname WHERE instanceID = ?";
+		String q = "SELECT DISTINCT W.* FROM WorkflowRun I JOIN Workflow W ON I.workflowId = W.workflowId WHERE workflowRunId = ?";
 
 		PreparedStatement stmt = null;
 		Connection connection = null;
@@ -336,8 +336,8 @@ public abstract class ProvenanceQuery {
 				while (rs.next()) {
 
 					Workflow w = new Workflow();
-					w.setWfName(rs.getString("wfname"));
-					w.setParentWFname(rs.getString("parentWFName"));
+					w.setWorkflowId(rs.getString("workflowId"));
+					w.setParentWorkflowId(rs.getString("parentWorkflowId"));
 
 					result.add(w);					
 				}
@@ -371,11 +371,11 @@ public abstract class ProvenanceQuery {
 
 		List<WorkflowRun> result = new ArrayList<WorkflowRun>();
 
-		String q = "SELECT * FROM WfInstance I join Workflow W on I.wfnameRef = W.wfname";
+		String q = "SELECT * FROM WorkflowRun I join Workflow W on I.workflowId = W.workflowId";
 
 		List<String> conds = new ArrayList<String>();
 
-		if (dataflowID != null) { conds.add("wfnameRef = '"+dataflowID+"'"); }
+		if (dataflowID != null) { conds.add("I.workflowId = '"+dataflowID+"'"); }
 		if (conditions != null) {
 			if (conditions.get("from") != null) { conds.add("timestamp >= "+conditions.get("from")); }
 			if (conditions.get("to") != null) { conds.add("timestamp <= "+conditions.get("to")); }
@@ -401,9 +401,9 @@ public abstract class ProvenanceQuery {
 				ResultSet rs = ps.getResultSet();
 				while (rs.next()) {
 					WorkflowRun i = new WorkflowRun();
-					i.setInstanceID(rs.getString("instanceID"));
+					i.setWorkflowRunId(rs.getString("workflowRunId"));
 					i.setTimestamp(rs.getString("timestamp"));
-					i.setWorkflowIdentifier(rs.getString("wfnameRef"));
+					i.setWorkflowId(rs.getString("workflowId"));
 					i.setWorkflowExternalName(rs.getString("externalName"));
 					Blob blob = rs.getBlob("dataflow");
 					long length = blob.length();
@@ -441,9 +441,9 @@ public abstract class ProvenanceQuery {
 
 		String q = "SELECT * FROM PortBinding VB " +
 		"JOIN Port V ON " +
-		"  VB.varNameRef = V.portName " +
+		"  VB.portName = V.portName " +
 		"  AND VB.processorNameRef = V.processorName " +
-		"  AND VB.wfNameRef = V.workflowId ";
+		"  AND VB.workflowId = V.workflowId ";
 
 		q = addWhereClauseToQuery(q, constraints, true);
 
@@ -460,9 +460,9 @@ public abstract class ProvenanceQuery {
 				while (rs.next()) {
 					PortBinding vb = new PortBinding();
 
-					vb.setWfNameRef(rs.getString("wfNameRef"));
-					vb.setVarNameRef(rs.getString("varNameRef"));
-					vb.setWfInstanceRef(rs.getString("wfInstanceRef"));
+					vb.setWorkflowId(rs.getString("workflowId"));
+					vb.setPortName(rs.getString("portName"));
+					vb.setWorkflowRunId(rs.getString("workflowRunId"));
 					vb.setValue(rs.getString("value"));
 
 					if (rs.getString("collIdRef") == null || rs.getString("collIdRef").equals("null")) {
@@ -471,8 +471,8 @@ public abstract class ProvenanceQuery {
 						vb.setCollIDRef(rs.getString("collIdRef"));
 					}
 
-					vb.setIterationVector(rs.getString("iteration"));
-					vb.setprocessorNameRef(rs.getString("processorNameRef"));
+					vb.setIteration(rs.getString("iteration"));
+					vb.setProcessorName(rs.getString("processorNameRef"));
 					vb.setPositionInColl(rs.getInt("positionInColl"));
 
 					result.add(vb);
@@ -522,11 +522,11 @@ public abstract class ProvenanceQuery {
 
 					NestedListNode nln = new NestedListNode();
 
-					nln.setCollId(rs.getString("collId"));
+					nln.setCollectionT2Reference(rs.getString("collId"));
 					nln.setParentCollIdRef(rs.getString("parentCollIdRef"));
-					nln.setWfInstanceRef(rs.getString("wfInstanceRef"));
-					nln.setprocessorNameRef(rs.getString("processorNameRef"));
-					nln.setVarNameRef(rs.getString("varNameRef"));
+					nln.setWorkflowRunId(rs.getString("workflowRunId"));
+					nln.setProcessorName(rs.getString("processorNameRef"));
+					nln.setPortName(rs.getString("portName"));
 					nln.setIteration(rs.getString("iteration"));
 
 					result.add(nln);
@@ -543,7 +543,7 @@ public abstract class ProvenanceQuery {
 		return result;
 	}
 
-	public Map<String, Integer> getPredecessorsCount(String wfInstanceID) {
+	public Map<String, Integer> getPredecessorsCount(String workflowRunId) {
 
 		PreparedStatement ps = null;
 
@@ -555,12 +555,12 @@ public abstract class ProvenanceQuery {
 
 			connection = getConnection();
 			ps = connection.prepareStatement(
-					"SELECT A.sourceProcessorName as source , A.destinationProcessorName as sink, A.workflowId as wfName1, W1.wfName as wfName2, W2.wfName as wfName3 " +
-					"FROM Datalink A join WfInstance I on A.workflowId = I.wfnameRef " +
+					"SELECT A.sourceProcessorName as source , A.destinationProcessorName as sink, A.workflowId as workflowId1, W1.workflowId as workflowId2, W2.workflowId as workflowId3 " +
+					"FROM Datalink A join WorkflowRun I on A.workflowId = I.workflowId " +
 					"left outer join Workflow W1 on W1.externalName = A.sourceProcessorName " +
 					"left outer join Workflow W2 on W2.externalName = A.destinationProcessorName " +
-			"where I.instanceID = ?");
-			ps.setString(1, wfInstanceID);
+			"where I.workflowRunId = ?");
+			ps.setString(1, workflowRunId);
 			boolean success = ps.execute();
 
 			if (success) {
@@ -574,9 +574,9 @@ public abstract class ProvenanceQuery {
 						result.put(sink, 0);
 					}
 
-					String name1 = rs.getString("wfName1");
-					String name2 = rs.getString("wfName2");
-					String name3 = rs.getString("wfName3");
+					String name1 = rs.getString("workflowId1");
+					String name2 = rs.getString("workflowId2");
+					String name3 = rs.getString("workflowId3");
 
 					if (isDataflow(source) && name1.equals(name2)) {
 						continue;
@@ -609,12 +609,12 @@ public abstract class ProvenanceQuery {
 	}
 
 	/**
-	 * new impl of getProcessorsIncomingLinks whicih avoids complications due to nesting, and relies on the wfInstanceID
-	 * rather than the wfnameRef
-	 * @param wfInstanceID
+	 * new impl of getProcessorsIncomingLinks whicih avoids complications due to nesting, and relies on the workflowRunId
+	 * rather than the workflowId
+	 * @param workflowRunId
 	 * @return
 	 */
-	public Map<String, Integer> getPredecessorsCountOld(String wfInstanceID) {
+	public Map<String, Integer> getPredecessorsCountOld(String workflowRunId) {
 
 		PreparedStatement ps = null;
 
@@ -627,15 +627,15 @@ public abstract class ProvenanceQuery {
 			connection = getConnection();
 			ps = connection.prepareStatement(
 					"SELECT destinationProcessorName, P1.firstActivityClass, count(*) as pred " +
-					" FROM Datalink A join WfInstance I on A.workflowId = I.wfnameRef " +
+					" FROM Datalink A join WorkflowRun I on A.workflowId = I.workflowId " +
 					" join Processor P1 on P1.processorName = A.destinationProcessorName " +
 					" join Processor P2 on P2.processorName = A.sourceProcessorName " +
-					"  where I.instanceID = ? " +
+					"  where I.workflowRunId = ? " +
 					"  and P2.firstActivityClass <> '" + ProvenanceProcessor.DATAFLOW_ACTIVITY + "' " +
 					" and ((P1.firstActivityClass = '" + ProvenanceProcessor.DATAFLOW_ACTIVITY + "'  and P1.workflowId = A.workflowId) or " +
 					" (P1.firstActivityClass <> '" + ProvenanceProcessor.DATAFLOW_ACTIVITY + "' )) " +
 			" group by A.destinationProcessorName, firstActivityClass");
-			ps.setString(1, wfInstanceID);
+			ps.setString(1, workflowRunId);
 			boolean success = ps.execute();
 
 			if (success) {
@@ -671,7 +671,7 @@ public abstract class ProvenanceQuery {
 	 * used in the toposort phase -- propagation of anl() values through the
 	 * graph
 	 *
-	 * @param wfnameRef
+	 * @param workflowId
 	 *            reference to static wf name
 	 * @return a map <processor name> --> <incoming links count> for each
 	 *         processor, without counting the datalinks from the dataflow input to
@@ -681,7 +681,7 @@ public abstract class ProvenanceQuery {
 	 *         Note: this must be checked for processors that are roots of
 	 *         sub-flows... are these counted as top-level root nodes??
 	 */
-	public Map<String, Integer> getProcessorsIncomingLinks(String wfnameRef)
+	public Map<String, Integer> getProcessorsIncomingLinks(String workflowId)
 	throws SQLException {
 		Map<String, Integer> result = new HashMap<String, Integer>();
 
@@ -697,7 +697,7 @@ public abstract class ProvenanceQuery {
 			connection = getConnection();
 			ps = connection.prepareStatement(
 			"SELECT processorName, firstActivityClass FROM Processor WHERE workflowId = ?");
-			ps.setString(1, wfnameRef);
+			ps.setString(1, workflowId);
 
 			success = ps.execute();
 
@@ -734,9 +734,9 @@ public abstract class ProvenanceQuery {
 		////////////////
 		// CHECK below -- gets confused on nested workflows
 		////////////////
-		String parentWF = getParentOfWorkflow(wfnameRef);
+		String parentWF = getParentOfWorkflow(workflowId);
 		if (parentWF == null) {
-			parentWF = wfnameRef;  // null parent means we are the top
+			parentWF = workflowId;  // null parent means we are the top
 		}
 		logger.debug("parent WF: " + parentWF);
 
@@ -765,7 +765,7 @@ public abstract class ProvenanceQuery {
 		// and we add them later
 
 		// PM 6/09 not sure we need to exclude datalinks going into sub-flows?? so commented out the condition
-		String q = "SELECT destinationProcessorName, count(*) as cnt " + "FROM Datalink " + "WHERE workflowId = \'" + wfnameRef + "\' " + "AND destinationProcessorName NOT IN " + pNames + " " //		+ "AND sourceProcessorName NOT IN " + pNames
+		String q = "SELECT destinationProcessorName, count(*) as cnt " + "FROM Datalink " + "WHERE workflowId = \'" + workflowId + "\' " + "AND destinationProcessorName NOT IN " + pNames + " " //		+ "AND sourceProcessorName NOT IN " + pNames
 		+ " GROUP BY destinationProcessorName";
 
 		logger.info("executing \n" + q);
@@ -858,7 +858,7 @@ public abstract class ProvenanceQuery {
 		return result;
 	}
 
-	public List<String> getSuccProcessors(String pName, String wfNameRef, String wfInstanceId)
+	public List<String> getSuccProcessors(String pName, String workflowId, String workflowRunId)
 	throws SQLException {
 		List<String> result = new ArrayList<String>();
 
@@ -868,9 +868,9 @@ public abstract class ProvenanceQuery {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-					"SELECT distinct destinationProcessorName FROM Datalink A JOIN Wfinstance I on A.workflowId = I.wfnameRef " + "WHERE A.workflowId = ? and I.instanceID = ? AND sourceProcessorName = ?");
-			ps.setString(1, wfNameRef);
-			ps.setString(2, wfInstanceId);
+					"SELECT distinct destinationProcessorName FROM Datalink A JOIN WorkflowRun I on A.workflowId = I.workflowId " + "WHERE A.workflowId = ? and I.workflowRunId = ? AND sourceProcessorName = ?");
+			ps.setString(1, workflowId);
+			ps.setString(2, workflowRunId);
 			ps.setString(3, pName);
 
 			boolean success = ps.execute();
@@ -900,8 +900,8 @@ public abstract class ProvenanceQuery {
 
 	/**
 	 * get all processors of a given type within a structure identified by
-	 * wfnameRef (reference to dataflow). type constraint is ignored if value is null.<br>
-	 * this only returns the processor for the input wfNameRef, without going into any neted workflows
+	 * workflowId (reference to dataflow). type constraint is ignored if value is null.<br>
+	 * this only returns the processor for the input workflowId, without going into any neted workflows
 	 *
 	 * @param workflowId
 	 * @param firstActivityClass
@@ -960,10 +960,10 @@ public abstract class ProvenanceQuery {
 
 	/**
 	 * this is similar to {@link #getProcessorsShallow(String, String)} but it recursively fetches all processors
-	 * within nested workflows. The result is collected in the form of a map: wfName -> {ProvenanceProcessor}
+	 * within nested workflows. The result is collected in the form of a map: workflowId -> {ProvenanceProcessor}
 	 * @param firstActivityClass
 	 * @param workflowId
-	 * @return a map: wfName -> {ProvenanceProcessor} where wfName is the name of a (possibly nested) workflow, and 
+	 * @return a map: workflowId -> {ProvenanceProcessor} where workflowId is the name of a (possibly nested) workflow, and 
 	 * the values are the processors within that workflow
 	 */
 	public Map<String, List<ProvenanceProcessor>> getProcessorsDeep(String firstActivityClass, String workflowId) {
@@ -1001,8 +1001,8 @@ public abstract class ProvenanceQuery {
 		List<ProvenanceProcessor> result = new ArrayList<ProvenanceProcessor>();
 
 		String q = "SELECT P.* FROM Processor P";
-				//" JOIN WfInstance W ON P.wfInstanceRef = W.wfnameRef "+
-		         //  "JOIN Workflow WF on W.wfnameRef = WF.wfname";
+				//" JOIN WorkflowRun W ON P.workflowRunId = W.workflowId "+
+		         //  "JOIN Workflow WF on W.workflowId = WF.workflowId";
 
 		q = addWhereClauseToQuery(q, constraints, true);
 
@@ -1079,29 +1079,29 @@ public abstract class ProvenanceQuery {
 	/**
 	 * simplest possible pinpoint query. Uses iteration info straight away. Assumes result is in PortBinding not in Collection
 	 *
-	 * @param wfInstance
+	 * @param workflowRun
 	 * @param pname
 	 * @param vname
 	 * @param iteration
 	 * @return
 	 */
-	public LineageSQLQuery simpleLineageQuery(String wfInstance, String wfNameRef, String pname,
+	public LineageSQLQuery simpleLineageQuery(String workflowRun, String workflowId, String pname,
 			String vname, String iteration) {
 		LineageSQLQuery lq = new LineageSQLQuery();
 
 		String q1 = "SELECT * FROM PortBinding VB join Port V " + 
-		"on (VB.varNameRef = V.portName and VB.processorNameRef =  V.processorName and VB.wfNameRef=V.workflowId) " + 
-		"JOIN WfInstance W ON VB.wfInstanceRef = W.instanceID and VB.wfNameRef = W.wfnameRef ";
+		"on (VB.portName = V.portName and VB.processorNameRef =  V.processorName and VB.workflowId=V.workflowId) " + 
+		"JOIN WorkflowRun W ON VB.workflowRunId = W.workflowRunId and VB.workflowId = W.workflowId ";
 
 		// constraints:
 		Map<String, String> lineageQueryConstraints = new HashMap<String, String>();
 
-		lineageQueryConstraints.put("W.instanceID", wfInstance);
+		lineageQueryConstraints.put("W.workflowRunId", workflowRun);
 		lineageQueryConstraints.put("VB.processorNameRef", pname);
-		lineageQueryConstraints.put("VB.wfNameRef", wfNameRef);
+		lineageQueryConstraints.put("VB.workflowId", workflowId);
 
 		if (vname != null) {
-			lineageQueryConstraints.put("VB.varNameRef", vname);
+			lineageQueryConstraints.put("VB.portName", vname);
 		}
 		if (iteration != null) {
 			lineageQueryConstraints.put("VB.iteration", iteration);
@@ -1115,7 +1115,7 @@ public abstract class ProvenanceQuery {
 
 		// add order by clause
 		List<String> orderAttr = new ArrayList<String>();
-		orderAttr.add("varNameRef");
+		orderAttr.add("V.portName");
 		orderAttr.add("iteration");
 
 		q1 = addOrderByToQuery(q1, orderAttr, true);
@@ -1130,7 +1130,7 @@ public abstract class ProvenanceQuery {
 	 * if var2Path is null this generates a trivial query for the current output
 	 * var and current path
 	 *
-	 * @param wfInstanceID
+	 * @param workflowRunId
 	 * @param proc
 	 * @param var2Path
 	 * @param outputVar
@@ -1139,7 +1139,7 @@ public abstract class ProvenanceQuery {
 	 *            returns inputs *and* outputs if set to true
 	 * @return
 	 */
-	public List<LineageSQLQuery> lineageQueryGen(String wfInstanceID, String proc,
+	public List<LineageSQLQuery> lineageQueryGen(String workflowRunId, String proc,
 			Map<Port, String> var2Path, Port outputVar, String path,
 			boolean returnOutputs) {
 		// setup
@@ -1150,7 +1150,7 @@ public abstract class ProvenanceQuery {
 		// use the calculated path for each input var
 		boolean isInput = true;
 		for (Port v : var2Path.keySet()) {
-			LineageSQLQuery q = generateSQL2(wfInstanceID, proc, v.getPortName(), var2Path.get(v), isInput);
+			LineageSQLQuery q = generateSQL2(workflowRunId, proc, v.getPortName(), var2Path.get(v), isInput);
 			if (q != null) {
 				newQueries.add(q);
 			}
@@ -1161,7 +1161,7 @@ public abstract class ProvenanceQuery {
 
 			isInput = false;
 
-			LineageSQLQuery q = generateSQL2(wfInstanceID, proc, outputVar.getPortName(), path, isInput);  // && !var2Path.isEmpty());
+			LineageSQLQuery q = generateSQL2(workflowRunId, proc, outputVar.getPortName(), path, isInput);  // && !var2Path.isEmpty());
 			if (q != null) {
 				newQueries.add(q);
 			}
@@ -1171,7 +1171,7 @@ public abstract class ProvenanceQuery {
 
 	}
 
-	protected LineageSQLQuery generateSQL2(String wfInstance, String proc,
+	protected LineageSQLQuery generateSQL2(String workflowRun, String proc,
 			String var, String path, boolean returnInput) {
 
 		LineageSQLQuery lq = new LineageSQLQuery();
@@ -1180,9 +1180,9 @@ public abstract class ProvenanceQuery {
 		Map<String, String> collQueryConstraints = new HashMap<String, String>();
 
 		// base Collection query
-		String collQuery = "SELECT * FROM Collection C JOIN WfInstance W ON " + "C.wfInstanceRef = W.instanceID " + "JOIN Port V on " + "V.wfInstanceRef = W.wfnameRef and C.processorNameRef = V.processorNameRef and C.varNameRef = V.varName ";
+		String collQuery = "SELECT * FROM Collection C JOIN WorkflowRun W ON " + "C.workflowRunId = W.workflowRunId " + "JOIN Port V on " + "V.workflowRunId = W.workflowId and C.processorNameRef = V.processorNameRef and C.portName = V.portName ";
 
-		collQueryConstraints.put("W.instanceID", wfInstance);
+		collQueryConstraints.put("W.workflowRunId", workflowRun);
 		collQueryConstraints.put("C.processorNameRef", proc);
 
 		if (path != null && path.length() > 0) {
@@ -1205,14 +1205,14 @@ public abstract class ProvenanceQuery {
 		Map<String, String> vbQueryConstraints = new HashMap<String, String>();
 
 		// base PortBinding query
-		String vbQuery = "SELECT * FROM PortBinding VB JOIN WfInstance W ON " + 
-						 "VB.wfInstanceRef = W.instanceID " + 
+		String vbQuery = "SELECT * FROM PortBinding VB JOIN WorkflowRun W ON " + 
+						 "VB.workflowRunId = W.workflowRunId " + 
 						 "JOIN Port V on " + 
-						 "V.wfInstanceRef = W.wfnameRef and VB.processorNameRef = V.processorNameRef and VB.varNameRef = V.varName "; 
+						 "V.workflowRunId = W.workflowId and VB.processorNameRef = V.processorNameRef and VB.portName = V.portName "; 
 
-		vbQueryConstraints.put("W.instanceID", wfInstance);
+		vbQueryConstraints.put("W.workflowRunId", workflowRun);
 		vbQueryConstraints.put("VB.processorNameRef", proc);
-		vbQueryConstraints.put("VB.varNameRef", var);
+		vbQueryConstraints.put("VB.portName", var);
 
 		if (path != null && path.length() > 0) {
 			vbQueryConstraints.put("VB.iteration", "[" + path + "]"); // PM 1/09 -- path
@@ -1228,7 +1228,7 @@ public abstract class ProvenanceQuery {
 		vbQuery = addWhereClauseToQuery(vbQuery, vbQueryConstraints, false);
 
 		List<String> orderAttr = new ArrayList<String>();
-		orderAttr.add("varNameRef");
+		orderAttr.add("portName");
 		orderAttr.add("iteration");
 
 		vbQuery = addOrderByToQuery(vbQuery, orderAttr, true);
@@ -1239,8 +1239,8 @@ public abstract class ProvenanceQuery {
 	}
 
 	/**
-	 * if effectivePath is not null: query varBinding using: wfInstanceRef =
-	 * wfInstance, iteration = effectivePath, processorNameRef = proc if input vars is
+	 * if effectivePath is not null: query varBinding using: workflowRunId =
+	 * workflowRun, iteration = effectivePath, processorNameRef = proc if input vars is
 	 * null, then use the output var this returns the bindings for the set of
 	 * input vars at the correct iteration if effectivePath is null: fetch
 	 * PortBindings for all input vars, without constraint on the iteration<br/>
@@ -1248,14 +1248,14 @@ public abstract class ProvenanceQuery {
 	 * the path is pointing to an internal node in the collection, and we just got the right node.
 	 * Otherwise, query PortBinding for the leaves
 	 *
-	 * @param wfInstance
+	 * @param workflowRun
 	 * @param proc
 	 * @param effectivePath
 	 * @param returnOutputs
 	 *            returns both inputs and outputs if set to true
 	 * @return
 	 */
-	public LineageSQLQuery generateSQL(String wfInstance, String proc,
+	public LineageSQLQuery generateSQL(String workflowRun, String proc,
 			String effectivePath, boolean returnOutputs) {
 
 		LineageSQLQuery lq = new LineageSQLQuery();
@@ -1264,9 +1264,9 @@ public abstract class ProvenanceQuery {
 		Map<String, String> collQueryConstraints = new HashMap<String, String>();
 
 		// base Collection query
-		String collQuery = "SELECT * FROM Collection C JOIN WfInstance W ON " + "C.wfInstanceRef = W.instanceID " + "JOIN Port V on " + "V.wfInstanceRef = W.wfnameRef and C.processorNameRef = V.processorNameRef and C.varNameRef = V.varName ";
+		String collQuery = "SELECT * FROM Collection C JOIN WorkflowRun W ON " + "C.workflowRunId = W.workflowRunId " + "JOIN Port V on " + "V.workflowRunId = W.workflowId and C.processorNameRef = V.processorNameRef and C.portName = V.portName ";
 
-		collQueryConstraints.put("W.instanceID", wfInstance);
+		collQueryConstraints.put("W.workflowRunId", workflowRun);
 		collQueryConstraints.put("C.processorNameRef", proc);
 
 		if (effectivePath != null && effectivePath.length() > 0) {
@@ -1287,12 +1287,12 @@ public abstract class ProvenanceQuery {
 		Map<String, String> vbQueryConstraints = new HashMap<String, String>();
 
 		// base PortBinding query
-		String vbQuery = "SELECT * FROM PortBinding VB JOIN WfInstance W ON " + 
-						 "VB.wfInstanceRef = W.instanceID " + 
+		String vbQuery = "SELECT * FROM PortBinding VB JOIN WorkflowRun W ON " + 
+						 "VB.workflowRunId = W.workflowRunId " + 
 						 "JOIN Port V on " + 
-						 "V.wfInstanceRef = W.wfnameRef and VB.processorNameRef = V.processorNameRef and VB.varNameRef = V.varName "; 
+						 "V.workflowRunId = W.workflowId and VB.processorNameRef = V.processorNameRef and VB.portName = V.portName "; 
 
-		vbQueryConstraints.put("W.instanceID", wfInstance);
+		vbQueryConstraints.put("W.workflowRunId", workflowRun);
 		vbQueryConstraints.put("VB.processorNameRef", proc);
 
 		if (effectivePath != null && effectivePath.length() > 0) {
@@ -1307,7 +1307,7 @@ public abstract class ProvenanceQuery {
 		vbQuery = addWhereClauseToQuery(vbQuery, vbQueryConstraints, false);
 
 		List<String> orderAttr = new ArrayList<String>();
-		orderAttr.add("varNameRef");
+		orderAttr.add("portName");
 		orderAttr.add("iteration");
 
 		vbQuery = addOrderByToQuery(vbQuery, orderAttr, true);
@@ -1345,15 +1345,15 @@ public abstract class ProvenanceQuery {
 
 					String type = lqr.ATOM_TYPE; // temp -- FIXME
 
-					String wfNameRef = rs.getString("wfNameRef");
-					String wfInstance = rs.getString("wfInstanceRef");
+					String workflowId = rs.getString("workflowId");
+					String workflowRun = rs.getString("workflowRunId");
 					String proc = rs.getString("processorNameRef");
-					String var = rs.getString("varNameRef");
+					String var = rs.getString("portName");
 					String it = rs.getString("iteration");
 					String coll = rs.getString("collID");
 					String parentColl = rs.getString("parentCollIDRef");
 
-					lqr.addLineageQueryResultRecord(wfNameRef, proc, var, wfInstance,
+					lqr.addLineageQueryResultRecord(workflowId, proc, var, workflowRun,
 							it, coll, parentColl, null, null, type, false, true);  // true -> is a collection
 				}
 			}
@@ -1401,10 +1401,10 @@ public abstract class ProvenanceQuery {
 
 					String type = lqr.ATOM_TYPE; // temp -- FIXME
 
-					String wfNameRef = rs.getString("wfNameRef");
-					String wfInstance = rs.getString("wfInstanceRef");
+					String workflowId = rs.getString("workflowId");
+					String workflowRun = rs.getString("workflowRunId");
 					String proc = rs.getString("processorNameRef");
-					String var = rs.getString("varNameRef");
+					String var = rs.getString("portName");
 					String it = rs.getString("iteration");
 					String coll = rs.getString("collIDRef");
 					String value = rs.getString("value");
@@ -1419,13 +1419,13 @@ public abstract class ProvenanceQuery {
 //						String resolvedValue = rs.getString("D.data");
 
 						// System.out.println("resolved value: "+resolvedValue);
-//						lqr.addLineageQueryResultRecord(wfNameRef, proc, var, wfInstance,
+//						lqr.addLineageQueryResultRecord(workflowId, proc, var, workflowRun,
 //								it, coll, null, value, resolvedValue, type, isInput, false);  // false -> not a collection
 //					} else {
 
 						// FIXME if the data is required then the query needs
 						// fixing
-						lqr.addLineageQueryResultRecord(wfNameRef, proc, var, wfInstance,
+						lqr.addLineageQueryResultRecord(workflowId, proc, var, workflowRun,
 								it, coll, null, value, null, type, isInput, false);
 //					}
 				}
@@ -1510,14 +1510,14 @@ public abstract class ProvenanceQuery {
 
 			LineageQueryResultRecord record = it.next();
 
-			if (currentVar != null && record.getVname().equals(currentVar)) { // multiple
+			if (currentVar != null && record.getPortName().equals(currentVar)) { // multiple
 				// occurrences
 				addToCollection(record, d); // adds record to d in the correct
 				// position given by the iteration
 				// vector
 			}
 			if (currentVar == null) {
-				currentVar = record.getVname();
+				currentVar = record.getPortName();
 			}
 		}
 		return d;
@@ -1566,7 +1566,7 @@ public abstract class ProvenanceQuery {
 		List<String> result = new ArrayList<String>();
 
 		// dataflow name -> wfRef
-		String containerDataflow = getWfNameForDataflow(workflowName);
+		String containerDataflow = getWorkflowIdForExternalName(workflowName);
 
 		// get all processors within containerDataflow
 		PreparedStatement ps = null;
@@ -1574,12 +1574,12 @@ public abstract class ProvenanceQuery {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-//					"SELECT processorName FROM Processor P  join wfInstance I on P.workflowId = I.wfnameRef " +
-//			"where wfInstanceRef = ? and I.instanceID = ?");
+//					"SELECT processorName FROM Processor P  join workflowRun I on P.workflowId = I.workflowId " +
+//			"where workflowRunId = ? and I.workflowRunId = ?");
 					"SELECT processorName FROM Processor P " +
 					"WHERE workflowId = ?");
 			ps.setString(1, containerDataflow);
-//			ps.setString(2, instanceID);
+//			ps.setString(2, workflowRunId);
 
 
 			boolean success = ps.execute();
@@ -1608,18 +1608,18 @@ public abstract class ProvenanceQuery {
 		return result;
 	}
 
-	public String getTopLevelDataflowName(String wfInstanceID) {
+	public String getTopLevelDataflowName(String workflowRunId) {
 
 		PreparedStatement ps = null;
 		Connection connection = null;
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-					"SELECT processorName FROM Processor P  JOIN WfInstance I on P.workflowId = I.wfnameRef " +
-			"where  I.instanceID =? and isTopLevel = 1");
+					"SELECT processorName FROM Processor P  JOIN WorkflowRun I on P.workflowId = I.workflowId " +
+			"where  I.workflowRunId =? and isTopLevel = 1");
 
 
-			ps.setString(1, wfInstanceID);
+			ps.setString(1, workflowRunId);
 			boolean success = ps.execute();
 
 			if (success) {
@@ -1649,13 +1649,13 @@ public abstract class ProvenanceQuery {
 	
 	/**
 	 * returns the internal ID of a dataflow given its external name
-	 * @param dataflowName
-	 * @param instanceID
+	 * @param externalName
+	 * @param workflowRunId
 	 * @return
 	 * @deprecated as workflow 'names' are not globally unique, this method should not be used!
 	 */
 	@Deprecated
-	public String getWfNameForDataflow(String dataflowName) {
+	public String getWorkflowIdForExternalName(String externalName) {
 
 		PreparedStatement ps = null;
 		Connection connection = null;
@@ -1663,17 +1663,17 @@ public abstract class ProvenanceQuery {
 			connection = getConnection();
 
 			ps = connection.prepareStatement(
-//			"SELECT wfname FROM Workflow W join WfInstance I on W.wfname = I.wfNameRef WHERE W.externalName = ? and I.instanceID = ?");
-			"SELECT wfname FROM Workflow W WHERE W.externalName = ?");
-			ps.setString(1, dataflowName);
-//			ps.setString(2, instanceID);
+//			"SELECT workflowId FROM Workflow W join WorkflowRun I on W.workflowId = I.workflowId WHERE W.externalName = ? and I.workflowRunId = ?");
+			"SELECT workflowId FROM Workflow W WHERE W.externalName = ?");
+			ps.setString(1, externalName);
+//			ps.setString(2, workflowRunId);
 
 			boolean success = ps.execute();
 
 			if (success) {
 				ResultSet rs = ps.getResultSet();
 				if (rs.next()) {
-					return rs.getString("wfname");
+					return rs.getString("workflowId");
 				}
 			}
 		} catch (InstantiationException e) {
@@ -1707,7 +1707,7 @@ public abstract class ProvenanceQuery {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-			"SELECT wfname FROM Workflow WHERE parentWFname = ? ");
+			"SELECT workflowId FROM Workflow WHERE parentWorkflowId = ? ");
 			ps.setString(1, parentWorkflowId);
 
 			boolean success = ps.execute();
@@ -1716,7 +1716,7 @@ public abstract class ProvenanceQuery {
 				ResultSet rs = ps.getResultSet();
 
 				while (rs.next()) {
-					result.add(rs.getString("wfname"));
+					result.add(rs.getString("workflowId"));
 				}
 			}
 		} catch (InstantiationException e) {
@@ -1734,26 +1734,26 @@ public abstract class ProvenanceQuery {
 	}
 
 	/**
-	 * fetch children of parentWFName from the Workflow table
+	 * fetch children of parentWorkflowId from the Workflow table
 	 *
 	 * @return
-	 * @param childWFName
+	 * @param childworkflowId
 	 * @throws SQLException
 	 */
-	public String getParentOfWorkflow(String childWFName) throws SQLException {
+	public String getParentOfWorkflow(String childworkflowId) throws SQLException {
 
 		PreparedStatement ps = null;
 		String result = null;
 		Connection connection = null;
 
-		String q = "SELECT parentWFname FROM Workflow WHERE wfname = ?";
+		String q = "SELECT parentWorkflowId FROM Workflow WHERE workflowId = ?";
 		// Statement stmt;
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(q);
-			ps.setString(1, childWFName);
+			ps.setString(1, childworkflowId);
 
-			logger.debug("getParentOfWorkflow - query: " + q + "  with wfname = " + childWFName);
+			logger.debug("getParentOfWorkflow - query: " + q + "  with workflowId = " + childworkflowId);
 
 			boolean success = ps.execute();
 
@@ -1762,7 +1762,7 @@ public abstract class ProvenanceQuery {
 
 				while (rs.next()) {
 
-					result = rs.getString("parentWFname");
+					result = rs.getString("parentWorkflowId");
 
 					logger.debug("result: " + result);
 					break;
@@ -1784,10 +1784,10 @@ public abstract class ProvenanceQuery {
 		return result;
 	}
 
-	public List<String> getAllWFnames() throws SQLException {
+	public List<String> getAllworkflowIds() throws SQLException {
 		List<String> result = new ArrayList<String>();
 
-		String q = "SELECT wfname FROM Workflow";
+		String q = "SELECT workflowId FROM Workflow";
 
 		Statement stmt = null;
 		Connection connection = null;
@@ -1799,7 +1799,7 @@ public abstract class ProvenanceQuery {
 			if (success) {
 				ResultSet rs = stmt.getResultSet();
 				while (rs.next()) {
-					result.add(rs.getString("wfname"));
+					result.add(rs.getString("workflowId"));
 				}
 			}
 		} catch (InstantiationException e) {
@@ -1860,7 +1860,7 @@ public abstract class ProvenanceQuery {
 	}
 
 	
-	public boolean isTopLevelDataflow(String wfNameID)  {
+	public boolean isTopLevelDataflow(String workflowIdID)  {
 		
 		PreparedStatement ps = null;
 		Connection connection = null;
@@ -1868,16 +1868,16 @@ public abstract class ProvenanceQuery {
 			connection = getConnection();
 			ps = connection.prepareStatement(
 					"SELECT * FROM Workflow W " +
-					" where W.wfname = ? ");
+					" where W.workflowId = ? ");
 			
-			ps.setString(1, wfNameID);
+			ps.setString(1, workflowIdID);
 			boolean success = ps.execute();
 
 			if (success) {
 				ResultSet rs = ps.getResultSet();
 
 				if (rs.next()) {
-					if (rs.getString("parentWFname") == null) return true;
+					if (rs.getString("parentWorkflowId") == null) return true;
 					return false;
 				}
 			}
@@ -1902,17 +1902,17 @@ public abstract class ProvenanceQuery {
 	}
 	
 	
-	public String getTopDataflow(String wfInstanceID) {
+	public String getTopDataflow(String workflowRunId) {
 
 		PreparedStatement ps = null;
 		Connection connection = null;
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-					"SELECT processorName FROM Processor P join WfInstance I on P.workflowId = I.wfNameRef " +
-					" where I.instanceID = ? " +
+					"SELECT processorName FROM Processor P join WorkflowRun I on P.workflowId = I.workflowId " +
+					" where I.workflowRunId = ? " +
 			" and isTopLevel = 1 ");
-			ps.setString(1, wfInstanceID);
+			ps.setString(1, workflowRunId);
 			boolean success = ps.execute();
 
 			if (success) {
@@ -1954,7 +1954,7 @@ public abstract class ProvenanceQuery {
 	 * @throws SQLException
 	 */
 	public List<DDRecord> queryDD(String p, String var, String value,
-			String iteration, String wfInstance) throws SQLException {
+			String iteration, String workflowRun) throws SQLException {
 
 		List<DDRecord> result = new ArrayList<DDRecord>();
 
@@ -1968,8 +1968,8 @@ public abstract class ProvenanceQuery {
 		if (iteration != null) {
 			queryConstraints.put("iteration", iteration);
 		}
-		if (wfInstance != null) {
-			queryConstraints.put("wfInstance", wfInstance);
+		if (workflowRun != null) {
+			queryConstraints.put("workflowRun", workflowRun);
 		}
 
 		String q = "SELECT * FROM   DD ";
@@ -2016,22 +2016,22 @@ public abstract class ProvenanceQuery {
 	}
 
 	public Set<DDRecord> queryDataLinksForDD(String p, String v, String val,
-			String wfInstance) throws SQLException {
+			String workflowRun) throws SQLException {
 
 		Set<DDRecord> result = new HashSet<DDRecord>();
 
 		PreparedStatement ps = null;
 		Connection connection = null;
 
-		String q = "SELECT DISTINCT A.sourceProcessorName AS p, A.sourcePortName AS var, VB.value AS val " + "FROM   Datalink A JOIN PortBinding VB ON VB.varNameRef = A.destinationPortName AND VB.processorNameRef = A.destinationProcessorName " + "JOIN   WfInstance WF ON WF.wfnameRef = A.workflowId AND WF.instanceID = VB.wfInstanceRef  " + "WHERE  WF.instanceID = '" + wfInstance + "' AND A.destinationProcessorName = '" + p + "' AND A.destinationPortName = '" + v + "' AND VB.value = '" + val + "' ";
+		String q = "SELECT DISTINCT A.sourceProcessorName AS p, A.sourcePortName AS var, VB.value AS val " + "FROM   Datalink A JOIN PortBinding VB ON VB.portName = A.destinationPortName AND VB.processorNameRef = A.destinationProcessorName " + "JOIN   WorkflowRun WF ON WF.workflowId = A.workflowId AND WF.workflowRunId = VB.workflowRunId  " + "WHERE  WF.workflowRunId = '" + workflowRun + "' AND A.destinationProcessorName = '" + p + "' AND A.destinationPortName = '" + v + "' AND VB.value = '" + val + "' ";
 
 		// Statement stmt;
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-					"SELECT DISTINCT A.sourceProcessorName AS p, A.sourcePortName AS var, VB.value AS val " + "FROM   Datalink A JOIN PortBinding VB ON VB.varNameRef = A.destinationPortName AND VB.processorNameRef = A.destinationProcessorName " + "JOIN   WfInstance WF ON WF.wfnameRef = A.workflowId AND WF.instanceID = VB.wfInstanceRef  " + "WHERE  WF.instanceID = ? AND A.destinationProcessorName = ? AND A.destinationPortName = ? AND VB.value = ?");
+					"SELECT DISTINCT A.sourceProcessorName AS p, A.sourcePortName AS var, VB.value AS val " + "FROM   Datalink A JOIN PortBinding VB ON VB.portName = A.destinationPortName AND VB.processorNameRef = A.destinationProcessorName " + "JOIN   WorkflowRun WF ON WF.workflowId = A.workflowId AND WF.workflowRunId = VB.workflowRunId  " + "WHERE  WF.workflowRunId = ? AND A.destinationProcessorName = ? AND A.destinationPortName = ? AND VB.value = ?");
 
-			ps.setString(1, wfInstance);
+			ps.setString(1, workflowRun);
 			ps.setString(2, p);
 			ps.setString(3, v);
 			ps.setString(4, val);
@@ -2066,7 +2066,7 @@ public abstract class ProvenanceQuery {
 		return null;
 	}
 
-	public Set<DDRecord> queryAllFromValues(String wfInstance)
+	public Set<DDRecord> queryAllFromValues(String workflowRun)
 	throws SQLException {
 
 		Set<DDRecord> result = new HashSet<DDRecord>();
@@ -2077,8 +2077,8 @@ public abstract class ProvenanceQuery {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-			"SELECT DISTINCT PFrom, vFrom, valFrom FROM DD where wfInstance = ?");
-			ps.setString(1, wfInstance);
+			"SELECT DISTINCT PFrom, vFrom, valFrom FROM DD where workflowRun = ?");
+			ps.setString(1, workflowRun);
 
 			boolean success = ps.execute();
 
@@ -2113,8 +2113,8 @@ public abstract class ProvenanceQuery {
 	}
 
 
-	public boolean isRootProcessorOfWorkflow(String procName, String wfName,
-			String wfInstanceId) {
+	public boolean isRootProcessorOfWorkflow(String procName, String workflowId,
+			String workflowRunId) {
 
 		PreparedStatement ps = null;
 		Connection connection = null;
@@ -2122,14 +2122,14 @@ public abstract class ProvenanceQuery {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-					"SELECT * FROM Datalink A JOIN WfInstance I ON A.workflowId = I.wfnameRef " +
+					"SELECT * FROM Datalink A JOIN WorkflowRun I ON A.workflowId = I.workflowId " +
 					"JOIN Processor P on P.processorName = A.sourceProcessorName WHERE sourceProcessorName = ? " +
 					"AND P.workflowId <> A.workflowId " +
-					"AND I.instanceID = ? " +
+					"AND I.workflowRunId = ? " +
 			"AND destinationProcessorName = ? ");
 
-			ps.setString(1, wfName);
-			ps.setString(2, wfInstanceId);
+			ps.setString(1, workflowId);
+			ps.setString(2, workflowRunId);
 			ps.setString(3, procName);
 
 			boolean success = ps.execute();
@@ -2175,7 +2175,7 @@ public abstract class ProvenanceQuery {
 			connection = getConnection();
 			ps = connection.prepareStatement(
 					"SELECT * FROM Workflow W "+
-			"WHERE wfname = ? ");
+			"WHERE workflowId = ? ");
 
 			ps.setString(1, dataflowID);
 
@@ -2185,8 +2185,8 @@ public abstract class ProvenanceQuery {
 
 				if (rs.next()) {
 					Workflow wf = new Workflow();
-					wf.setWfName(rs.getString("wfname"));
-					wf.setParentWFname(rs.getString("parentWFName"));
+					wf.setWorkflowId(rs.getString("workflowId"));
+					wf.setParentWorkflowId(rs.getString("parentWorkflowId"));
 					wf.setExternalName(rs.getString("externalName"));
 
 					return wf;
@@ -2221,9 +2221,9 @@ public abstract class ProvenanceQuery {
 	 */
 	public String getContainingCollection(LineageQueryResultRecord record) {
 
-		if (record.getCollIdRef() == null) return null;
+		if (record.getCollectionT2Reference() == null) return null;
 		
-		String q = "SELECT * FROM Collection where collID = ? and wfInstanceRef = ? and processorNameRef = ? and varNameRef = ?";
+		String q = "SELECT * FROM Collection where collID = ? and workflowRunId = ? and processorNameRef = ? and portName = ?";
 
 		PreparedStatement stmt = null;
 		Connection connection = null;
@@ -2233,10 +2233,10 @@ public abstract class ProvenanceQuery {
 			connection = getConnection();
 			stmt = connection.prepareStatement(q);
 			
-			stmt.setString(1, record.getCollIdRef());
-			stmt.setString(2, record.getWfInstance());
-			stmt.setString(3, record.getPname());
-			stmt.setString(4, record.getVname());
+			stmt.setString(1, record.getCollectionT2Reference());
+			stmt.setString(2, record.getWorkflowRunId());
+			stmt.setString(3, record.getProcessorName());
+			stmt.setString(4, record.getPortName());
 
 			String tmp = stmt.toString();
 			
@@ -2277,9 +2277,9 @@ public abstract class ProvenanceQuery {
 				stmt = connection.prepareStatement(q);
 				
 				stmt.setString(1, oldParentCollIDRef);
-				stmt.setString(2, record.getWfInstance());
-				stmt.setString(3, record.getPname());
-				stmt.setString(4, record.getVname());
+				stmt.setString(2, record.getWorkflowRunId());
+				stmt.setString(3, record.getProcessorName());
+				stmt.setString(4, record.getPortName());
 
 				//String tmp = stmt.toString();
 
@@ -2616,7 +2616,7 @@ ProvenanceConnector.ProcessorEnactment ProcEnact = ProvenanceConnector.Processor
 		Workflow w = getWorkflow(workflowID);
 
 		Map<String, String> queryConstraints = new HashMap<String, String>();
-		queryConstraints.put("workflowId", workflowID);
+		queryConstraints.put("V.workflowId", workflowID);
 		queryConstraints.put("processorName", w.getExternalName());
 
 		try {
@@ -2630,7 +2630,7 @@ ProvenanceConnector.ProcessorEnactment ProcEnact = ProvenanceConnector.Processor
 	public List<Port> getPortsForProcessor(String workflowID,
 			String processorName) {
 		Map<String, String> queryConstraints = new HashMap<String, String>();
-		queryConstraints.put("workflowId", workflowID);
+		queryConstraints.put("V.workflowId", workflowID);
 		queryConstraints.put("processorName", processorName);
 
 		try {

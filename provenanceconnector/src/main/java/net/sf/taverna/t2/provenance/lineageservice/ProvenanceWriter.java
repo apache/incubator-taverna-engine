@@ -216,7 +216,7 @@ public class ProvenanceWriter {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-			"INSERT INTO Workflow (wfName) VALUES (?)");
+			"INSERT INTO Workflow (workflowId) VALUES (?)");
 			ps.setString(1, wfId);
 			ps.executeUpdate();
 
@@ -227,16 +227,16 @@ public class ProvenanceWriter {
 		}
 	}
 
-	public void addWFId(String wfId, String parentWFname, String externalName, Blob dataflow) throws SQLException {
+	public void addWFId(String wfId, String parentWorkflowId, String externalName, Blob dataflow) throws SQLException {
 
 		PreparedStatement ps = null;
 		Connection connection = null;
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-			"INSERT INTO Workflow (wfname, parentWFname, externalName, dataflow) VALUES (?,?,?, ?)");
+			"INSERT INTO Workflow (workflowId, parentWorkflowId, externalName, dataflow) VALUES (?,?,?, ?)");
 			ps.setString(1, wfId);
-			ps.setString(2, parentWFname);
+			ps.setString(2, parentWorkflowId);
 			ps.setString(3, externalName);
 			ps.setBlob(4, dataflow);
 
@@ -250,7 +250,7 @@ public class ProvenanceWriter {
 		}
 	}
 
-	public void addWFInstanceId(String wfId, String wfInstanceId)
+	public void addWorkflowRun(String wfId, String workflowRunId)
 	throws SQLException {
 
 		PreparedStatement ps = null;
@@ -258,9 +258,9 @@ public class ProvenanceWriter {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-			"INSERT INTO WfInstance (instanceID, wfnameRef) VALUES (?,?)");
+			"INSERT INTO WorkflowRun (workflowRunId, workflowId) VALUES (?,?)");
 
-			ps.setString(1, wfInstanceId);
+			ps.setString(1, workflowRunId);
 			ps.setString(2, wfId);
 
 			ps.executeUpdate();
@@ -291,11 +291,11 @@ public class ProvenanceWriter {
 
 	/**
 	 * add a processor to the static portion of the DB with given name, type and
-	 * wfnameRef scope
+	 * workflowId scope
 	 *
 	 * @param name
 	 * @param type
-	 * @param wfNameRef
+	 * @param workflowId
 	 * @throws SQLException
 	 */
 	
@@ -379,7 +379,7 @@ public class ProvenanceWriter {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-			"INSERT INTO Collection (processorNameRef, wfInstanceRef, varNameRef, iteration, parentCollIdRef, collId) VALUES(?,?,?,?,?,?)");
+			"INSERT INTO Collection (processorNameRef, workflowRunId, portName, iteration, parentCollIdRef, collId) VALUES(?,?,?,?,?,?)");
 
 			if (parentCollectionId == null) {
 				// this is a top-level list
@@ -415,15 +415,15 @@ public class ProvenanceWriter {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-			"INSERT INTO PortBinding (wfNameRef, processorNameRef, wfInstanceRef, varNameRef, valueType, value, ref, collIdRef, iteration,positionInColl) VALUES(?,?,?,?,?,?,?,?,?,?)");
+			"INSERT INTO PortBinding (workflowId, processorNameRef, workflowRunId, portName, valueType, value, ref, collIdRef, iteration,positionInColl) VALUES(?,?,?,?,?,?,?,?,?,?)");
 
-			ps.setString(1, vb.getWfNameRef());
-			ps.setString(2, vb.getprocessorNameRef());
-			ps.setString(3, vb.getWfInstanceRef());
-			ps.setString(4, vb.getVarNameRef());
+			ps.setString(1, vb.getWorkflowId());
+			ps.setString(2, vb.getProcessorName());
+			ps.setString(3, vb.getWorkflowRunId());
+			ps.setString(4, vb.getPortName());
 			ps.setString(5, vb.getValueType());
 			ps.setString(6, vb.getValue());
-			ps.setString(7, vb.getRef());
+			ps.setString(7, vb.getReference());
 			ps.setString(8, vb.getCollIDRef());
 			ps.setString(9, vb.getIteration());
 			ps.setInt(10, vb.getPositionInColl());
@@ -457,7 +457,7 @@ public class ProvenanceWriter {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-					"UPDATE Port SET isInputPort=?, depth = ?," + "resolvedDepth = ?, iterationStrategyOrder = ? WHERE varName = ? AND processorNameRef = ? AND wfInstanceRef = ?");
+					"UPDATE Port SET isInputPort=?, depth = ?," + "resolvedDepth = ?, iterationStrategyOrder = ? WHERE portName = ? AND processorNameRef = ? AND workflowRunId = ?");
 			int i = v.isInputPort() ? 1 : 0;
 			ps.setInt(1, i);
 			ps.setInt(2, v.getDepth());
@@ -520,16 +520,16 @@ public class ProvenanceWriter {
 			connection = getConnection();
 			ps = connection.prepareStatement(
 					"UPDATE PortBinding SET valueType = ?, value = ?, ref = ?, collIdRef = ?, positionInColl = ? "+
-			"WHERE varNameRef = ? AND wfInstanceRef = ? AND processorNameRef = ? AND iteration = ?");
+			"WHERE portName = ? AND workflowRunId = ? AND processorNameRef = ? AND iteration = ?");
 
 			ps.setString(1, vb.getValueType());
 			ps.setString(2, vb.getValue());
-			ps.setString(3, vb.getRef());
+			ps.setString(3, vb.getReference());
 			ps.setString(4, vb.getCollIDRef());
 			ps.setInt(5, vb.getPositionInColl());
-			ps.setString(6, vb.getVarNameRef());
-			ps.setString(7, vb.getWfInstanceRef());
-			ps.setString(8, vb.getprocessorNameRef());
+			ps.setString(6, vb.getPortName());
+			ps.setString(7, vb.getWorkflowRunId());
+			ps.setString(8, vb.getProcessorName());
 			ps.setString(9, vb.getIteration());
 
 			ps.executeUpdate();
@@ -551,7 +551,7 @@ public class ProvenanceWriter {
 	}
 
 	public void replaceCollectionRecord(NestedListNode nln, String prevPName,
-			String prevVarName) {
+			String prevPortName) {
 
 		// Statement stmt;
 		PreparedStatement ps = null;
@@ -559,10 +559,10 @@ public class ProvenanceWriter {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-					"DELETE FROM Collection WHERE collId = ? and wfInstanceRef = ?" + " and varNameRef = ? and processorNameRef = ? and iteration = ?");
-			ps.setString(1, nln.getCollId());
-			ps.setString(2, nln.getWfInstanceRef());
-			ps.setString(3, prevVarName);
+					"DELETE FROM Collection WHERE collId = ? and workflowRunId = ?" + " and portName = ? and processorNameRef = ? and iteration = ?");
+			ps.setString(1, nln.getCollectionT2Reference());
+			ps.setString(2, nln.getWorkflowRunId());
+			ps.setString(3, prevPortName);
 			ps.setString(4, prevPName);
 			ps.setString(5, nln.getIteration());
 
@@ -582,8 +582,8 @@ public class ProvenanceWriter {
 		}
 
 		try {
-			addCollection(prevPName, nln.getCollId(), nln.getParentCollIdRef(),
-					nln.getIteration(), prevVarName, nln.getWfInstanceRef());
+			addCollection(prevPName, nln.getCollectionT2Reference(), nln.getParentCollIdRef(),
+					nln.getIteration(), prevPortName, nln.getWorkflowRunId());
 		} catch (SQLException e) {
 			logger.warn("Collection insert failed", e);
 		}
@@ -643,7 +643,7 @@ public class ProvenanceWriter {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-			"DELETE FROM Workflow WHERE wfname = ?");
+			"DELETE FROM Workflow WHERE workflowId = ?");
 			ps.setString(1, wfID);
 			ps.executeUpdate();
 			ps = connection.prepareStatement(
@@ -695,21 +695,21 @@ public class ProvenanceWriter {
 			connection = getConnection();
 
 			if (runID != null) {
-				ps = connection.prepareStatement("DELETE FROM WfInstance WHERE instanceID = ?");
+				ps = connection.prepareStatement("DELETE FROM WorkflowRun WHERE workflowRunId = ?");
 				ps.setString(1, runID);
 			} else 
-				ps = connection.prepareStatement("DELETE FROM WfInstance");
+				ps = connection.prepareStatement("DELETE FROM WorkflowRun");
 			ps.executeUpdate();
 
 			if (runID != null) {
-				ps = connection.prepareStatement("DELETE FROM PortBinding WHERE wfInstanceRef = ?");
+				ps = connection.prepareStatement("DELETE FROM PortBinding WHERE workflowRunId = ?");
 				ps.setString(1, runID);
 			} else 
 				ps = connection.prepareStatement("DELETE FROM PortBinding");
 			ps.executeUpdate();
 
 			if (runID != null) {
-				ps = connection.prepareStatement("DELETE FROM Collection WHERE wfInstanceRef = ?");
+				ps = connection.prepareStatement("DELETE FROM Collection WHERE workflowRunId = ?");
 				ps.setString(1, runID);
 			} else 
 				ps = connection.prepareStatement("DELETE FROM Collection");
@@ -779,7 +779,7 @@ public class ProvenanceWriter {
 			connection = getConnection();
 
 			if (runID != null) {
-				ps = connection.prepareStatement("SELECT value FROM PortBinding WHERE wfInstanceRef = ?");
+				ps = connection.prepareStatement("SELECT value FROM PortBinding WHERE workflowRunId = ?");
 				ps.setString(1, runID);
 			} else {
 				ps = connection.prepareStatement("SELECT value FROM PortBinding");
@@ -794,7 +794,7 @@ public class ProvenanceWriter {
 			}
 
 			if (runID != null) {
-				ps = connection.prepareStatement("SELECT collId FROM Collection WHERE wfInstanceRef = ?");
+				ps = connection.prepareStatement("SELECT collId FROM Collection WHERE workflowRunId = ?");
 				ps.setString(1, runID);
 			} else {
 				ps = connection.prepareStatement("SELECT collId FROM Collection");
@@ -853,12 +853,12 @@ public class ProvenanceWriter {
 	 * @param vTo
 	 * @param valTo
 	 * @param iteration
-	 * @param wfInstanceID
+	 * @param workflowRunId
 	 */
 	// FIXME needs the db statement corrected
 	public void writeDDRecord(String pFrom, String vFrom, String valFrom,
 			String pTo, String vTo, String valTo, String iteration,
-			String wfInstanceID) {
+			String workflowRunId) {
 
 		Statement stmt = null;
 		Connection connection = null;
@@ -866,7 +866,7 @@ public class ProvenanceWriter {
 		try {
 			connection = getConnection();
 			stmt = connection.createStatement();
-			String q = "INSERT INTO DD (PFrom,VFrom,valFrom,PTo,VTo,valTo,iteration,wfInstance) VALUES (" + "\'" + pFrom + "\'," + "\'" + vFrom + "\",  " + "valFrom = \"" + valFrom + "\", " + "PTo = \"" + pTo + "\", " + "VTo = \"" + vTo + "\", " + "valTo  = \"" + valTo + "\", " + "iteration = \"" + iteration + "\", " + "wfInstance = \"" + wfInstanceID + "\"; ";
+			String q = "INSERT INTO DD (PFrom,VFrom,valFrom,PTo,VTo,valTo,iteration,workflowRun) VALUES (" + "\'" + pFrom + "\'," + "\'" + vFrom + "\",  " + "valFrom = \"" + valFrom + "\", " + "PTo = \"" + pTo + "\", " + "VTo = \"" + vTo + "\", " + "valTo  = \"" + valTo + "\", " + "iteration = \"" + iteration + "\", " + "workflowRun = \"" + workflowRunId + "\"; ";
 
 			stmt.executeUpdate(q);
 		

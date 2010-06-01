@@ -90,7 +90,7 @@ public class ProvenanceAnalysis {
 
 	private boolean tryInit() throws SQLException {
 
-		if (getWFInstanceIDs() != null && getWFInstanceIDs().size()>0) {
+		if (getWorkflowRunIds() != null && getWorkflowRunIds().size()>0) {
 			initGraph();  // init OPM provenance graph
 			return true;
 		} else 
@@ -99,7 +99,7 @@ public class ProvenanceAnalysis {
 
 	/**
 	 * Call to create the opm graph and annotation loader. 
-	 * this may fail due to queries being issued before DB is populated, minimally with wfInstanceID 
+	 * this may fail due to queries being issued before DB is populated, minimally with workflowRunId 
 	 */
 	public void initGraph() {
 
@@ -116,7 +116,7 @@ public class ProvenanceAnalysis {
 		}
 
 		try {
-			aOPMManager.createAccount(getWFInstanceIDs().get(0).getInstanceID());
+			aOPMManager.createAccount(getWorkflowRunIds().get(0).getWorkflowRunId());
 		} catch (SQLException e) {
 			logger.error("Could not initialise OPM Manager: ", e);
 		}
@@ -178,32 +178,32 @@ public class ProvenanceAnalysis {
 	 * @return
 	 * @throws SQLException
 	 */
-	public List<WorkflowRun> getWFInstanceIDs() throws SQLException { return getPq().getRuns(null, null); }
+	public List<WorkflowRun> getWorkflowRunIds() throws SQLException { return getPq().getRuns(null, null); }
 
 
 	/**
-	 * returns all available instances for workflow wfName
-	 *@param wfName
+	 * returns all available instances for workflow workflowId
+	 *@param workflowId
 	 * @return
 	 * @throws SQLException
 	 */
-	public List<WorkflowRun> getWFInstanceID(String wfName) throws SQLException { 
-		return getPq().getRuns(wfName, null); }
+	public List<WorkflowRun> getWorkflowRunsForWorkflow(String workflowId) throws SQLException { 
+		return getPq().getRuns(workflowId, null); }
 
 
 	/**
-	 * @param wfInstance lineage scope -- a specific instance
+	 * @param workflowRun lineage scope -- a specific instance
 	 * @param pname for a specific processor [required]
 	 * @param a specific (input or output) variable [optional]
 	 * @param iteration and a specific iteration [optional]
-	 * @param wfNameRef 
+	 * @param workflowId 
 	 * @return a lineage query ready to be executed, or null if we cannot return an answer because we are not ready
 	 * (for instance the DB is not yet populated) 
 	 * @throws SQLException
 	 */
 	public Dependencies fetchIntermediateResult(
-			String wfInstance,
-			String wfNameRef,
+			String workflowRun,
+			String workflowId,
 			String pname,
 			String vname,
 			String iteration) throws SQLException  {
@@ -214,7 +214,7 @@ public class ProvenanceAnalysis {
 		}
 
 
-		LineageSQLQuery lq = getPq().simpleLineageQuery(wfInstance, wfNameRef, pname, vname, iteration);
+		LineageSQLQuery lq = getPq().simpleLineageQuery(workflowRun, workflowId, pname, vname, iteration);
 
 		return getPq().runLineageQuery(lq, isIncludeDataValue());
 	}
@@ -222,7 +222,7 @@ public class ProvenanceAnalysis {
 
 
 	public QueryAnswer lineageQuery(List<QueryPort> qvList,
-			String wfInstance, List<ProvenanceProcessor> selectedProcessors) throws SQLException {
+			String workflowRun, List<ProvenanceProcessor> selectedProcessors) throws SQLException {
 
 		QueryAnswer  completeAnswer = new QueryAnswer();
 		NativeAnswer nativeAnswer   = new NativeAnswer();
@@ -234,11 +234,11 @@ public class ProvenanceAnalysis {
 
 			// full lineage query			
 			logger.info("************\n lineage query: [instance, workflow, proc, port, path] = ["+
-					wfInstance+","+qv.getWfName()+","+qv.getPname()+","+qv.getVname()+",["+qv.getPath()+"]]\n***********");
+					workflowRun+","+qv.getWorkflowId()+","+qv.getProcessorName()+","+qv.getPortName()+",["+qv.getPath()+"]]\n***********");
 
 			// the OPM manager builds an OPM graph behind the scenes as a side-effect
 			Map<String, List<Dependencies>> a = 
-				computeLineageSingleVar(wfInstance, qv.getWfName(), qv.getVname(), qv.getPname(), qv.getPath(), selectedProcessors);
+				computeLineageSingleVar(workflowRun, qv.getWorkflowId(), qv.getPortName(), qv.getProcessorName(), qv.getPath(), selectedProcessors);
 
 			answerContent.put(qv, a);
 		}
@@ -272,7 +272,7 @@ public class ProvenanceAnalysis {
 	 * (i.e., all values within the collection bound to var) and invokes computeLineageSingleBinding() on each path</br>
 	 * if path is specified, however, this just passes the request to computeLineageSingleBinding. in this case the result map 
 	 * only contains one entry
-	 * @param wfInstance
+	 * @param workflowRun
 	 * @param var
 	 * @param proc
 	 * @param path
@@ -282,8 +282,8 @@ public class ProvenanceAnalysis {
 	 * @throws SQLException
 	 */
 	public Map<String, List<Dependencies>> computeLineageSingleVar (
-			String wfInstance,   // dynamic scope 
-			String wfNameRef,    // static scope
+			String workflowRun,   // dynamic scope 
+			String workflowId,    // static scope
 			String var,   // target var
 			String proc,   // qualified with its processor name
 			String path,   // possibly empty when no collections or no granular lineage required
@@ -305,8 +305,8 @@ public class ProvenanceAnalysis {
 
 			Map<String, String> vbConstraints = new HashMap<String, String>();
 			vbConstraints.put("VB.processorNameRef", proc);
-			vbConstraints.put("VB.varNameRef", var);
-			vbConstraints.put("VB.wfInstanceRef", wfInstance);
+			vbConstraints.put("VB.portName", var);
+			vbConstraints.put("VB.workflowRunId", workflowRun);
 
 			List<PortBinding> vbList = getPq().getPortBindings(vbConstraints); // DB
 
@@ -320,12 +320,12 @@ public class ProvenanceAnalysis {
 				path = vb.getIteration().substring(1, vb.getIteration().length()-1);
 
 				List<Dependencies> result = computeLineageSingleBinding(
-						wfInstance, wfNameRef, var, proc, path, selectedProcessors);
+						workflowRun, workflowId, var, proc, path, selectedProcessors);
 				qa.put(vb.getIteration(), result);
 			}
 		}  else {
 			qa.put(path, computeLineageSingleBinding(
-					wfInstance, wfNameRef, var, proc, path, selectedProcessors));
+					workflowRun, workflowId, var, proc, path, selectedProcessors));
 		}
 		return qa;		
 	}
@@ -348,19 +348,19 @@ public class ProvenanceAnalysis {
 	 */
 	public List<Dependencies> computeLineageSingleBinding(
 			String wfID,   // dynamic scope
-			String wfNameRef,  // static scope
+			String workflowId,  // static scope
 			String var,   // target var
 			String proc,   // qualified with its processor name
 			String path,   // possibly empty when no collections or no granular lineage required
 			List<ProvenanceProcessor> selectedProcessors
 	) throws SQLException  {
 
-//		Map<String, LineageSQLQuery>  varName2lqList =  new HashMap<String, LineageSQLQuery>();
+//		Map<String, LineageSQLQuery>  portName2lqList =  new HashMap<String, LineageSQLQuery>();
 
 //		System.out.println("timing starts...");
 		long start = System.currentTimeMillis();
 
-		List<LineageSQLQuery>  lqList =  searchDataflowGraph(wfID, wfNameRef, var, proc, path, selectedProcessors);
+		List<LineageSQLQuery>  lqList =  searchDataflowGraph(wfID, workflowId, var, proc, path, selectedProcessors);
 		long stop = System.currentTimeMillis();
 
 		long gst = stop-start;
@@ -393,7 +393,7 @@ public class ProvenanceAnalysis {
 	 */
 	public List<LineageSQLQuery> searchDataflowGraph(
 			String wfID,   // dymamic scope
-			String wfNameRef,  // static scope
+			String workflowId,  // static scope
 			String var,   // target var
 			String proc,   // qualified with its processor name
 			String path,  // can be empty but not null
@@ -414,10 +414,10 @@ public class ProvenanceAnalysis {
 
 		// get (var, proc) from Port  to see if it's input/output
 		Map<String, String>  varQueryConstraints = new HashMap<String, String>();
-		varQueryConstraints.put("W.instanceID", wfID);
+		varQueryConstraints.put("W.workflowRunId", wfID);
 		varQueryConstraints.put("V.processorName", proc);  
 		varQueryConstraints.put("V.portName", var);  
-		varQueryConstraints.put("V.workflowId", wfNameRef);  
+		varQueryConstraints.put("V.workflowId", workflowId);  
 
 		List<Port> vars = getPq().getPorts(varQueryConstraints);
 
@@ -427,18 +427,18 @@ public class ProvenanceAnalysis {
 		}
 
 		Port v = vars.get(0); 		// expect exactly one record
-		// CHECK there can be multiple (pname, varname) pairs, i.e., in case of nested workflows
+		// CHECK there can be multiple (pname, portName) pairs, i.e., in case of nested workflows
 		// here we pick the first that turns up -- we would need to let users choose, or process all of them...
 
 		if (v.isInputPort() || v.getProcessorId()==null) { // if vName is input, then do a xfer() step
 
 			// rec. accumulates SQL queries into lqList
-			xferStep(wfID, wfNameRef, v, path, selectedProcessors, lqList);
+			xferStep(wfID, workflowId, v, path, selectedProcessors, lqList);
 
 		} else { // start with xform
 
 			// rec. accumulates SQL queries into lqList
-			xformStep(wfID, wfNameRef, v, proc, path, selectedProcessors, lqList);			
+			xformStep(wfID, workflowId, v, proc, path, selectedProcessors, lqList);			
 		}
 
 		return lqList;
@@ -459,7 +459,7 @@ public class ProvenanceAnalysis {
 	 */
 	private void xformStep(
 			String wfID,
-			String wfNameRef, 				
+			String workflowId, 				
 			Port outputVar, // we need the dnl from this output var
 			String proc,
 			String path,
@@ -495,7 +495,7 @@ public class ProvenanceAnalysis {
 
 		} else {
 
-			varsQueryConstraints.put("W.instanceID", wfID);
+			varsQueryConstraints.put("W.workflowRunId", wfID);
 			varsQueryConstraints.put("processorName", proc);  
 			varsQueryConstraints.put("isInputPort", "1");  
 
@@ -567,10 +567,10 @@ public class ProvenanceAnalysis {
 
 		// if this is a selected processor, add a copy of the current path to the list of paths for the processor
 
-		// is <wfNameRef, proc>  in selectedProcessors?
+		// is <workflowId, proc>  in selectedProcessors?
 		boolean isSelected = false;
 		for (ProvenanceProcessor pp: selectedProcessors)  {
-			if (pp.getWorkflowId().equals(wfNameRef) && pp.getProcessorName().equals(proc)) {
+			if (pp.getWorkflowId().equals(workflowId) && pp.getProcessorName().equals(proc)) {
 				List<List<String>> paths = validPaths.get(pp);
 
 				// copy the path since the original will change
@@ -614,8 +614,8 @@ public class ProvenanceAnalysis {
 				// fetch value for this variable and assert it as an Artifact in the OPM graph
 				Map<String, String> vbConstraints = new HashMap<String, String>();
 				vbConstraints.put("VB.processorNameRef", outputVar.getProcessorName());
-				vbConstraints.put("VB.varNameRef", outputVar.getPortName());
-				vbConstraints.put("VB.wfInstanceRef", wfID);
+				vbConstraints.put("VB.portName", outputVar.getPortName());
+				vbConstraints.put("VB.workflowRunId", wfID);
 
 				if (path != null) { 
 
@@ -643,9 +643,9 @@ public class ProvenanceAnalysis {
 					replace(',', '-').replace('[', ' ').replace(']', ' ').trim();
 
 					if (URIFriendlyIterationVector.length()>0) {
-						role = vb.getprocessorNameRef()+"/"+vb.getVarNameRef()+"?it="+URIFriendlyIterationVector;
+						role = vb.getProcessorName()+"/"+vb.getPortName()+"?it="+URIFriendlyIterationVector;
 					} else
-						role = vb.getprocessorNameRef()+"/"+vb.getVarNameRef();
+						role = vb.getProcessorName()+"/"+vb.getPortName();
 
 					if (aOPMManager!=null && !pq.isDataflow(proc)) {
 						if (isRecordArtifactValues())
@@ -684,7 +684,7 @@ public class ProvenanceAnalysis {
 					for (LineageQueryResultRecord resultRecord: inputs.getRecords()) {
 
 						// process inputs only
-						if (!resultRecord.isInput()) continue;
+						if (!resultRecord.isInputPort()) continue;
 
 						URIFriendlyIterationVector = resultRecord.getIteration().
 						replace(',', '-').replace('[', ' ').replace(']', ' ').trim();
@@ -702,15 +702,15 @@ public class ProvenanceAnalysis {
 							aOPMManager.addArtifact(resultRecord.getValue(), resultRecord.getResolvedValue());
 						else 
 							aOPMManager.addArtifact(resultRecord.getValue());
-						var2Artifact.put(resultRecord.getVname(), aOPMManager.getCurrentArtifact());
+						var2Artifact.put(resultRecord.getPortName(), aOPMManager.getCurrentArtifact());
 
 						if (URIFriendlyIterationVector.length()>0) {
-							role = resultRecord.getPname()+"/"+resultRecord.getVname()+"?it="+URIFriendlyIterationVector;
+							role = resultRecord.getProcessorName()+"/"+resultRecord.getPortName()+"?it="+URIFriendlyIterationVector;
 						} else
-							role = resultRecord.getPname()+"/"+resultRecord.getVname();
+							role = resultRecord.getProcessorName()+"/"+resultRecord.getPortName();
 
 						aOPMManager.createRole(role);	// this also sets currentRole to role				
-						var2ArtifactRole.put(resultRecord.getVname(), aOPMManager.getCurrentRole());
+						var2ArtifactRole.put(resultRecord.getPortName(), aOPMManager.getCurrentRole());
 
 
 						//
@@ -732,7 +732,7 @@ public class ProvenanceAnalysis {
 
 		// recursion -- xfer path is next up
 		for (Port inputVar: inputVars) {
-			xferStep(wfID, wfNameRef, inputVar, var2Path.get(inputVar), selectedProcessors, lqList);	
+			xferStep(wfID, workflowId, inputVar, var2Path.get(inputVar), selectedProcessors, lqList);	
 		}
 		currentPath.remove(currentPath.size()-1);  // CHECK	
 	}  // end xformStep
@@ -740,15 +740,15 @@ public class ProvenanceAnalysis {
 
 
 	private void xferStep(
-			String wfInstanceID,
-			String wfNameRef, 
+			String workflowRunId,
+			String workflowId, 
 			Port port,
 			String path, 
 			List<ProvenanceProcessor> selectedProcessors,
 			List<LineageSQLQuery> lqList) throws SQLException {
 
 		String sourceProcName = null;
-		String sourceVarName  = null;
+		String sourcePortName  = null;
 
 		// retrieve all Datalinks ending with (var,proc) -- ideally there is exactly one
 		// (because multiple incoming datalinks are disallowed)
@@ -765,9 +765,9 @@ public class ProvenanceAnalysis {
 
 		// get source node
 		sourceProcName = a.getSourceProcessorName();
-		sourceVarName  = a.getSourcePortName();
+		sourcePortName  = a.getSourcePortName();
 
-		//System.out.println("xfer() from ["+proc+","+var+"] to ["+sourceProcName+","+sourceVarName+"]");
+		//System.out.println("xfer() from ["+proc+","+var+"] to ["+sourceProcName+","+sourcePortName+"]");
 
 		// CHECK transfer same path with only exception: when anl(sink) > anl(source)
 		// in this case set path to null
@@ -776,16 +776,16 @@ public class ProvenanceAnalysis {
 		// retrieve input vars for current processor 
 		Map<String, String>  varsQueryConstraints = new HashMap<String, String>();
 
-//		varsQueryConstraints.put("W.instanceID", wfInstanceID);
+//		varsQueryConstraints.put("W.workflowRunId", workflowRunId);
 		varsQueryConstraints.put("portId", a.getSourcePortId());
 //		varsQueryConstraints.put("processorNameRef", sourceProcName);  
-//		varsQueryConstraints.put("varName", sourceVarName);  
+//		varsQueryConstraints.put("portName", sourcePortName);  
 		List<Port>  varList  = getPq().getPorts(varsQueryConstraints);
 
 		Port outputVar = varList.get(0);
 
 		// recurse on xform
-		xformStep(wfInstanceID, wfNameRef, outputVar, sourceProcName, path, selectedProcessors, lqList);
+		xformStep(workflowRunId, workflowId, outputVar, sourceProcName, path, selectedProcessors, lqList);
 
 	} // end xferStep2
 
@@ -815,7 +815,7 @@ public class ProvenanceAnalysis {
 		int DNL = 0; // declared nesting level -- copied from VAR
 		int ANL  = 0;  // actual nesting level -- copied from Port
 
-		String wfInstance;  // TODO generalize to list / time interval?
+		String workflowRun;  // TODO generalize to list / time interval?
 
 		public String toString() {
 
@@ -957,18 +957,18 @@ public class ProvenanceAnalysis {
 
 
 		/**
-		 * @return the wfInstance
+		 * @return the workflowRun
 		 */
-		public String getWfInstance() {
-			return wfInstance;
+		public String getWorkflowRun() {
+			return workflowRun;
 		}
 
 
 		/**
-		 * @param wfInstance the wfInstance to set
+		 * @param workflowRun the workflowRun to set
 		 */
-		public void setWfInstance(String wfInstance) {
-			this.wfInstance = wfInstance;
+		public void setWorkflowRun(String workflowRun) {
+			this.workflowRun = workflowRun;
 		}
 
 

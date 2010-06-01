@@ -2,24 +2,24 @@ package net.sf.taverna.t2.provenance.lineageservice.utils;
 
 public class Workflow {
 
-	private String wfname;
-	private String parentWFname;
+	private String workflowId;
+	private String parentWorkflowId;
 	private String externalName;
 	
-	public void setWfName(String identifier) {
-		this.wfname = identifier;
+	public void setWorkflowId(String workflowId) {
+		this.workflowId = workflowId;
 	}
 
-	public String getWfname() {
-		return wfname;
+	public String getWorkflowId() {
+		return workflowId;
 	}
 
-	public void setParentWFname(String parentIdentifier) {
-		this.parentWFname = parentIdentifier;
+	public void setParentWorkflowId(String parentIdentifier) {
+		this.parentWorkflowId = parentIdentifier;
 	}
 
-	public String getParentWFname() {
-		return parentWFname;
+	public String getParentWorkflowId() {
+		return parentWorkflowId;
 	}
 
 	/**

@@ -32,8 +32,8 @@ public class WorkflowDataProcessor {
 	
 	private static Logger logger = Logger.getLogger(WorkflowDataProcessor.class);
 
-	// set of trees (impl as lists), one for each varname
-	// PM varname not enough must use the WFID as context as well, because the same output varname 
+	// set of trees (impl as lists), one for each portName
+	// PM portName not enough must use the WFID as context as well, because the same output portName 
 	// may occur in multiple nested workflows 
 	Map<String, List<WorkflowDataNode>> workflowDataTrees = new HashMap<String, List<WorkflowDataNode>>();  
 
@@ -43,7 +43,7 @@ public class WorkflowDataProcessor {
 	ProvenanceWriter pw = null;
 
 	/**
-	 * adds the input ProvenanceItem event to the tree structure corresponding to the varname found in the item. 
+	 * adds the input ProvenanceItem event to the tree structure corresponding to the portName found in the item. 
 	 * Repeated invocations of this method incrementally reconstruct the tree structure for each of the workflow outputs
 	 * @param root
 	 */
@@ -52,7 +52,7 @@ public class WorkflowDataProcessor {
 		
 		WorkflowDataNode wdn = new WorkflowDataNode();
 		wdn.setProcessId(provenanceItem.getProcessId());
-		wdn.setVarName(workflowDataItem.getPortName());
+		wdn.setPortName(workflowDataItem.getPortName());
 		wdn.setInputPort(workflowDataItem.isInputPort());
 		wdn.setValue(workflowDataItem.getData().toString());
 		int[] index = workflowDataItem.getIndex();
@@ -63,12 +63,12 @@ public class WorkflowDataProcessor {
 		if (wdn.getValue().contains("list")) wdn.setList(true);  // HACK
 		else wdn.setList(false);
 
-		// position this wdn into the tree associated to its varname
-		List<WorkflowDataNode> aTree = workflowDataTrees.get(wdn.getVarName());
+		// position this wdn into the tree associated to its portName
+		List<WorkflowDataNode> aTree = workflowDataTrees.get(wdn.getPortName());
 
 		if (aTree == null)  { // first item in the tree
 			aTree = new ArrayList<WorkflowDataNode>();
-			workflowDataTrees.put(wdn.getVarName(), aTree);
+			workflowDataTrees.put(wdn.getPortName(), aTree);
 		} else {
 			// update parent pointers
 			for (WorkflowDataNode aNode: aTree) {
@@ -101,13 +101,13 @@ public class WorkflowDataProcessor {
 		
 		for (Map.Entry<String, List<WorkflowDataNode>> entry:workflowDataTrees.entrySet()) {
 
-			String varName = entry.getKey();
+			String portName = entry.getKey();
 			List<WorkflowDataNode> tree = entry.getValue();
 
 			PortBinding vb = null;
 
 			try {
-				logger.debug("storing tree for var "+varName+" in workflow with ID "+workflowId+" and instance "+workflowRunId);
+				logger.debug("storing tree for var "+portName+" in workflow with ID "+workflowId+" and instance "+workflowRunId);
 				for (WorkflowDataNode node:tree) {
 
 					if (!node.getWorkflowID().equals(workflowId)) continue;
@@ -118,7 +118,7 @@ public class WorkflowDataProcessor {
 							logger.warn("Unexpected process ID " + node.getProcessId() + " expected " + completeEvent.getProcessId());
 							continue;
 						}
-						String portKey = (node.isInputPort() ? "/i:" : "/o:") + node.getVarName();
+						String portKey = (node.isInputPort() ? "/i:" : "/o:") + node.getPortName();
 						workflowPortData.put(portKey, node.getValue());
 					}
 					
@@ -135,14 +135,14 @@ public class WorkflowDataProcessor {
 									node.getValue(), 
 									node.getParent().getValue(), 
 									node.getIndex(), 
-									varName, 
+									portName, 
 									workflowRunId);
 						} else {
 							getPw().addCollection(workflowId, 
 									node.getValue(), 
 									null, 
 									node.getIndex(), 
-									varName, 
+									portName, 
 									workflowRunId);							
 						}
 
@@ -151,14 +151,14 @@ public class WorkflowDataProcessor {
 
 						vb = new PortBinding();
 
-						vb.setWfNameRef(workflowId);
-						vb.setWfInstanceRef(workflowRunId);
+						vb.setWorkflowId(workflowId);
+						vb.setWorkflowRunId(workflowRunId);
 						
-						vb.setprocessorNameRef(pq.getWorkflow(workflowId).getExternalName());
+						vb.setProcessorName(pq.getWorkflow(workflowId).getExternalName());
 						
 						// vb.setValueType(); // TODO not sure what to set this to
-						vb.setVarNameRef(varName);
-						vb.setIterationVector(node.getIndex());
+						vb.setPortName(portName);
+						vb.setIteration(node.getIndex());
 						vb.setValue(node.getValue());
 
 						if (node.getParent()!=null) {
@@ -277,7 +277,7 @@ public class WorkflowDataProcessor {
 
 	class WorkflowDataNode {
 
-		String varName;
+		String portName;
 		String value;
 		String index;
 		String workflowID;
@@ -321,16 +321,16 @@ public class WorkflowDataProcessor {
 		}
 
 		/**
-		 * @return the varName
+		 * @return the portName
 		 */
-		public String getVarName() {
-			return varName;
+		public String getPortName() {
+			return portName;
 		}
 		/**
-		 * @param varName the varName to set
+		 * @param portName the portName to set
 		 */
-		public void setVarName(String varName) {
-			this.varName = varName;
+		public void setPortName(String portName) {
+			this.portName = portName;
 		}
 		/**
 		 * @return the isList

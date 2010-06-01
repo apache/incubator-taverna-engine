@@ -4,18 +4,18 @@ import java.sql.Blob;
 
 public class WorkflowRun {
 
-	private String instanceID;
-	private String wfnameRef;  // this is the wfnameRef for the TOP LEVEL workflow for this run  CHECK
+	private String workflowRunId;
+	private String workflowId;  // this is the workflowId for the TOP LEVEL workflow for this run  CHECK
 	private String timestamp;
 	private String workflowExternalName;
 	private byte[] dataflowBlob;
 
-	public void setWorkflowIdentifier(String workflowIdentifier) {
-		this.wfnameRef = workflowIdentifier;
+	public void setWorkflowId(String workflowIdentifier) {
+		this.workflowId = workflowIdentifier;
 	}
 
-	public String getWorkflowIdentifier() {
-		return wfnameRef;
+	public String getWorkflowId() {
+		return workflowId;
 	}
 
 	public void setTimestamp(String timestamp) {
@@ -27,17 +27,17 @@ public class WorkflowRun {
 	}
 
 	/**
-	 * @return the instanceID
+	 * @return the workflowRunId
 	 */
-	public String getInstanceID() {
-		return instanceID;
+	public String getWorkflowRunId() {
+		return workflowRunId;
 	}
 
 	/**
-	 * @param instanceID the instanceID to set
+	 * @param workflowRunId the workflowRunId to set
 	 */
-	public void setInstanceID(String instanceID) {
-		this.instanceID = instanceID;
+	public void setWorkflowRunId(String workflowRunId) {
+		this.workflowRunId = workflowRunId;
 	}
 
 	/**

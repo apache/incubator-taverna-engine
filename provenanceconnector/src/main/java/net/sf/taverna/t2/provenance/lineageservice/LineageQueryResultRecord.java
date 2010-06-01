@@ -29,44 +29,44 @@ package net.sf.taverna.t2.provenance.lineageservice;
  */
 public class LineageQueryResultRecord {
 
-	String wfName;
-	String pname;
-	String vname;
-	String wfInstance;
-	String iteration;
-	String value;     // atomic or XML-formatted collection -- this is actually a reference to the value...
-	String collIdRef;
-	String parentCollIDRef;
-	String resolvedValue;
-	String type;  // one of referenceSet, referenceSetCollection
+	private String workflowId;
+	private String processorName;
+	private String portName;
+	private String workflowRunId;
+	private String iteration;
+	private String value;     // atomic or XML-formatted collection -- this is actually a reference to the value...
+	private String collIdRef;
+	private String parentCollIDRef;
+	private String resolvedValue;
+	private String type;  // one of referenceSet, referenceSetCollection
 	boolean printResolvedValue;
 	boolean isInput; 
 	boolean isCollection;
 
 	public String toString() {
 		if (isCollection) {
-			return "COLLECTION: proc "+getPname()+
-			" var "+getVname()+" " +
+			return "COLLECTION: proc "+getProcessorName()+
+			" var "+getPortName()+" " +
 			" iteration: "+getIteration()+
 			" value: "+getValue()+
-			" collection id: "+getCollIdRef()+
+			" collection id: "+getCollectionT2Reference()+
 			" parent collection: "+getParentCollIDRef();
 		} else {
 
 			if (printResolvedValue)
-				return "workflow "+ getWfName()+
-				" proc "+getPname()+
-				" var "+getVname()+" " +
+				return "workflow "+ getworkflowId()+
+				" proc "+getProcessorName()+
+				" var "+getPortName()+" " +
 				" iteration: "+getIteration()+
 				" value: "+getValue()+
-				" collection id: "+getCollIdRef()+
+				" collection id: "+getCollectionT2Reference()+
 				" resolvedValue: "+getResolvedValue();
 			else  
-				return "workflow "+ getWfName()+
-				" proc "+getPname()+
-				" var "+getVname()+" " +
+				return "workflow "+ getworkflowId()+
+				" proc "+getProcessorName()+
+				" var "+getPortName()+" " +
 				" iteration: "+getIteration()+
-				" collection id: "+getCollIdRef()+
+				" collection id: "+getCollectionT2Reference()+
 				" value: "+getValue();
 		}
 	}
@@ -75,38 +75,38 @@ public class LineageQueryResultRecord {
 	/**
 	 * @return the pname
 	 */
-	public String getPname() {
-		return pname;
+	public String getProcessorName() {
+		return processorName;
 	}
 	/**
 	 * @param pname the pname to set
 	 */
-	public void setPname(String pname) {
-		this.pname = pname;
+	public void setProcessorName(String pname) {
+		this.processorName = pname;
 	}
 	/**
 	 * @return the vname
 	 */
-	public String getVname() {
-		return vname;
+	public String getPortName() {
+		return portName;
 	}
 	/**
 	 * @param vname the vname to set
 	 */
-	public void setVname(String vname) {
-		this.vname = vname;
+	public void setPortName(String vname) {
+		this.portName = vname;
 	}
 	/**
-	 * @return the wfInstance
+	 * @return the workflowRun
 	 */
-	public String getWfInstance() {
-		return wfInstance;
+	public String getWorkflowRunId() {
+		return workflowRunId;
 	}
 	/**
-	 * @param wfInstance the wfInstance to set
+	 * @param workflowRun the workflowRun to set
 	 */
-	public void setWfInstance(String wfInstance) {
-		this.wfInstance = wfInstance;
+	public void setWorkflowRunId(String workflowRun) {
+		this.workflowRunId = workflowRun;
 	}
 	/**
 	 * @return the value
@@ -158,15 +158,15 @@ public class LineageQueryResultRecord {
 	}
 
 
-	public void setPrintResolvedValue(boolean b) {
-		this.printResolvedValue = b
-		;	}
+	public void setPrintResolvedValue(boolean printResolvedValue) {
+		this.printResolvedValue = printResolvedValue;
+	}
 
 
 	/**
 	 * @return the isInput
 	 */
-	public boolean isInput() {
+	public boolean isInputPort() {
 		return isInput;
 	}
 
@@ -174,7 +174,7 @@ public class LineageQueryResultRecord {
 	/**
 	 * @param isInput the isInput to set
 	 */
-	public void setInput(boolean isInput) {
+	public void setIsInputPort(boolean isInput) {
 		this.isInput = isInput;
 	}
 
@@ -182,7 +182,7 @@ public class LineageQueryResultRecord {
 	/**
 	 * @return the collIdRef
 	 */
-	public String getCollIdRef() {
+	public String getCollectionT2Reference() {
 		return collIdRef;
 	}
 
@@ -190,7 +190,7 @@ public class LineageQueryResultRecord {
 	/**
 	 * @param collIdRef the collIdRef to set
 	 */
-	public void setCollIdRef(String collIdRef) {
+	public void setCollectionT2Reference(String collIdRef) {
 		this.collIdRef = collIdRef;
 	}
 
@@ -228,18 +228,18 @@ public class LineageQueryResultRecord {
 
 
 	/**
-	 * @return the wfName
+	 * @return the workflowId
 	 */
-	public String getWfName() {
-		return wfName;
+	public String getworkflowId() {
+		return workflowId;
 	}
 
 
 	/**
-	 * @param wfName the wfName to set
+	 * @param workflowId the workflowId to set
 	 */
-	public void setWfName(String wfName) {
-		this.wfName = wfName;
+	public void setWorkflowId(String workflowId) {
+		this.workflowId = workflowId;
 	}
 
 }

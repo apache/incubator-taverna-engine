@@ -9,20 +9,20 @@ package net.sf.taverna.t2.provenance.lineageservice.utils;
  */	
 public class QueryPort {
 
-	String wfInstanceId;
-	String wfName;
-	String pname;
-	String vname;
-	String path;
-	String value;
+	private String workflowRunId;
+	private String workflowId;
+	private String processorName;
+	private String portName;
+	private String path;
+	private String value;
 
 	public String toString() {
 
 		StringBuffer sb = new StringBuffer();
 		sb.append("PORT: ****").
-		append("\nworkflow: "+getWfName()).
-		append("\nprocessor: "+getPname()).
-		append("\nport: "+getVname()).
+		append("\nworkflow: "+getWorkflowId()).
+		append("\nprocessor: "+getProcessorName()).
+		append("\nport: "+getPortName()).
 		append("\npath to value: "+getPath());
 
 		return sb.toString();
@@ -30,28 +30,28 @@ public class QueryPort {
 
 
 	/**
-	 * @return the pname
+	 * @return the processorName
 	 */
-	public String getPname() {
-		return pname;
+	public String getProcessorName() {
+		return processorName;
 	}
 	/**
-	 * @param pname the pname to set
+	 * @param processorName the processorName to set
 	 */
-	public void setPname(String pname) {
-		this.pname = pname;
+	public void setProcessorName(String processorName) {
+		this.processorName = processorName;
 	}
 	/**
 	 * @return the vname
 	 */
-	public String getVname() {
-		return vname;
+	public String getPortName() {
+		return portName;
 	}
 	/**
 	 * @param vname the vname to set
 	 */
-	public void setVname(String vname) {
-		this.vname = vname;
+	public void setPortName(String vname) {
+		this.portName = vname;
 	}
 	/**
 	 * @return the path
@@ -78,28 +78,28 @@ public class QueryPort {
 		this.value = value;
 	}
 	/**
-	 * @return the wfInstanceId
+	 * @return the workflowRunId
 	 */
-	public String getWfInstanceId() {
-		return wfInstanceId;
+	public String getWorkflowRunId() {
+		return workflowRunId;
 	}
 	/**
-	 * @param wfInstanceId the wfInstanceId to set
+	 * @param workflowRunId the workflowRunId to set
 	 */
-	public void setWfInstanceId(String wfInstanceId) {
-		this.wfInstanceId = wfInstanceId;
+	public void setWorkflowRunId(String workflowRunId) {
+		this.workflowRunId = workflowRunId;
 	}
 	/**
-	 * @return the wfName
+	 * @return the workflowId
 	 */
-	public String getWfName() {
-		return wfName;
+	public String getWorkflowId() {
+		return workflowId;
 	}
 	/**
-	 * @param wfName the wfName to set
+	 * @param workflowId the workflowId to set
 	 */
-	public void setWfName(String wfName) {
-		this.wfName = wfName;
+	public void setWorkflowId(String workflowId) {
+		this.workflowId = workflowId;
 	}
 
 }

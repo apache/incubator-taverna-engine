@@ -259,9 +259,9 @@ public class ProvenanceQueryParser {
 			for (Port p:ports) {
 				if (!p.isInputPort()) {
 					QueryPort qv = new QueryPort();
-					qv.setWfName(p.getWorkflowId());
-					qv.setPname(p.getProcessorName());
-					qv.setVname(p.getPortName());
+					qv.setWorkflowId(p.getWorkflowId());
+					qv.setProcessorName(p.getProcessorName());
+					qv.setPortName(p.getPortName());
 					qv.setPath("ALL");
 					queryVars.add(qv);	
 				}
@@ -288,9 +288,9 @@ public class ProvenanceQueryParser {
 				for (Port p1:ports) {				
 					if (portName.equals(p1.getPortName())) {
 						QueryPort qv = new QueryPort();
-						qv.setWfName(p1.getWorkflowId());
-						qv.setPname(p1.getProcessorName());
-						qv.setVname(p1.getPortName());
+						qv.setWorkflowId(p1.getWorkflowId());
+						qv.setProcessorName(p1.getProcessorName());
+						qv.setPortName(p1.getPortName());
 						String index = portToIndex.get(p1.getPortName());
 						if (index != null) qv.setPath(portToIndex.get(p1.getPortName()));
 						else qv.setPath("ALL");
@@ -392,7 +392,7 @@ public class ProvenanceQueryParser {
 	private List<String> parseWorkflowAndRuns(Document d) {
 
 		List<String> runsScope = new ArrayList<String>();  // list of run IDs
-		List<WorkflowRun> feasibleWfInstances = new ArrayList<WorkflowRun>();
+		List<WorkflowRun> feasibleWorkflowRuns = new ArrayList<WorkflowRun>();
 		List<String> feasibleRuns = new ArrayList<String>();
 
 		Element root = d.getRootElement();  // this should be a <pquery>
@@ -415,15 +415,15 @@ public class ProvenanceQueryParser {
 			}
 
 			//  validate this workflowID
-			List<WorkflowRun>  allWfInstances = pAccess.listRuns(null, null); // returns all available runs ordered by timestamp
+			List<WorkflowRun>  allWorkflowRuns = pAccess.listRuns(null, null); // returns all available runs ordered by timestamp
 			// is this workflow in one of the instances?
 
-			for (WorkflowRun i:allWfInstances) {
+			for (WorkflowRun i:allWorkflowRuns) {
 				if (mainWorkflowExternalName.equals(i.getWorkflowExternalName())) {
-					mainWorkflowID = i.getWorkflowIdentifier();
+					mainWorkflowID = i.getWorkflowId();
 					logger.debug("workflow name found corresponding to ID "+mainWorkflowID);
-					feasibleWfInstances.add(i);
-					feasibleRuns.add(i.getInstanceID());
+					feasibleWorkflowRuns.add(i);
+					feasibleRuns.add(i.getWorkflowRunId());
 				}
 			}
 			if (mainWorkflowID == null) {
@@ -434,7 +434,7 @@ public class ProvenanceQueryParser {
 			logger.fatal("no <scope> tag found, giving up");
 			return null;
 		}
-		if (feasibleWfInstances.size() == 0) {
+		if (feasibleWorkflowRuns.size() == 0) {
 			logger.debug("workflow "+mainWorkflowExternalName+" not found -- giving up");
 			return null;
 		}
@@ -469,7 +469,7 @@ public class ProvenanceQueryParser {
 
 					logger.debug("processing runs range from "+from+" to "+to);
 
-					for (WorkflowRun i:feasibleWfInstances) {
+					for (WorkflowRun i:feasibleWorkflowRuns) {
 
 						Date fromInstanceDate = null;
 						Date toInstanceDate = null;
@@ -495,7 +495,7 @@ public class ProvenanceQueryParser {
 						}
 						if (fromDate == null || (fromDate != null && fromDate.before(fromInstanceDate))) {
 							if (toDate == null || (toDate != null && toInstanceDate.before(toDate)));
-							runsScope.add(i.getInstanceID());
+							runsScope.add(i.getWorkflowRunId());
 						}
 					}
 				}
@@ -503,7 +503,7 @@ public class ProvenanceQueryParser {
 		} else {
 			// no explicit run:  using latest from feasible
 			logger.debug("null runs scope: using latest run");
-			if (feasibleWfInstances != null) runsScope.add(feasibleWfInstances.get(0).getInstanceID());
+			if (feasibleWorkflowRuns != null) runsScope.add(feasibleWorkflowRuns.get(0).getWorkflowRunId());
 		}
 
 		logger.debug("runs scope:");

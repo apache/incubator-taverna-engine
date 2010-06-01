@@ -48,8 +48,8 @@ public class DataLink {
 	 * @param workflowId
 	 *            the workflowId to set
 	 */
-	public void setWorkflowId(String wfInstanceRef) {
-		this.workflowId = wfInstanceRef;
+	public void setWorkflowId(String workflowRunId) {
+		this.workflowId = workflowRunId;
 	}
 
 

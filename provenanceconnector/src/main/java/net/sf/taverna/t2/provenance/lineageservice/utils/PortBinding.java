@@ -26,57 +26,50 @@ package net.sf.taverna.t2.provenance.lineageservice.utils;
  */
 public class PortBinding {
 
-	String wfNameRef;
-	String varNameRef;
-	String wfInstanceRef;
-	String value;
-	String collIDRef;
-	int positionInColl;
-	String processorNameRef;
-	String valueType;
-	String ref;
-	String    iterationVector;
-	String resolvedValue;
+	private String workflowId;
+	private String portName;
+	private String workflowRunId;
+	private String value;
+	private String collIDRef;
+	private int positionInColl;
+	private String processorName;
+	private String valueType;
+	private String reference;
+	private String iteration;
+	private String resolvedValue;
 	
 	
 	public PortBinding(){}
 	
 	public PortBinding(PortBinding vb) {
-		wfNameRef = vb.wfNameRef;
-		varNameRef = vb.varNameRef;
-		wfInstanceRef = vb.wfInstanceRef;
+		workflowId = vb.workflowId;
+		portName = vb.portName;
+		workflowRunId = vb.workflowRunId;
 		value = vb.value;
 		collIDRef = vb.collIDRef;
 		positionInColl = vb.positionInColl;
-		processorNameRef = vb.processorNameRef;
+		processorName = vb.processorName;
 		valueType = vb.valueType;
-		ref = vb.ref;
-		iterationVector = vb.iterationVector;
+		reference = vb.reference;
+		iteration = vb.iteration;
 		resolvedValue = vb.resolvedValue;
 	}
 
 
+	
+	
+	
+	@Override
 	public String toString() {
-	
-		StringBuffer sb = new StringBuffer();
-		
-		sb.append("**** PortBinding: \n").
-			append("wfInstanceRef = "+wfInstanceRef+"\n").
-			append("wfNameRef = "+wfNameRef+"\n").
-			append("processorNameRef = "+processorNameRef+"\n").
-			append("varNameRef = "+varNameRef+"\n").
-			append("iteration = "+iterationVector+"\n").
-			append("collIdef  " +collIDRef+"\n").
-			append("positionInColl = "+positionInColl+"\n").
-			append("value = "+value+"\n").
-			append("ref = "+ref+"\n").
-			append("resolvedValue = "+resolvedValue+"\n");
-			
-
-		return sb.toString();
+		return "PortBinding [collIDRef=" + collIDRef + ", iteration="
+				+ iteration + ", portName=" + portName + ", positionInColl="
+				+ positionInColl + ", processorName=" + processorName
+				+ ", reference=" + reference + ", resolvedValue="
+				+ resolvedValue + ", value=" + value + ", valueType="
+				+ valueType + ", workflowId=" + workflowId + ", workflowRunId="
+				+ workflowRunId + "]";
 	}
-	
-	
+
 	/**
 	 * @return the positionInColl
 	 */
@@ -102,40 +95,40 @@ public class PortBinding {
 		this.valueType = valueType;
 	}
 	/**
-	 * @return the varNameRef
+	 * @return the portName
 	 */
-	public String getVarNameRef() {
-		return varNameRef;
+	public String getPortName() {
+		return portName;
 	}
 	/**
-	 * @param varNameRef the varNameRef to set
+	 * @param portName the portName to set
 	 */
-	public void setVarNameRef(String varNameRef) {
-		this.varNameRef = varNameRef;
+	public void setPortName(String portName) {
+		this.portName = portName;
 	}
 	/**
-	 * @return the wfInstanceRef
+	 * @return the workflowRunId
 	 */
-	public String getWfInstanceRef() {
-		return wfInstanceRef;
+	public String getWorkflowRunId() {
+		return workflowRunId;
 	}
 	/**
-	 * @param wfInstanceRef the wfInstanceRef to set
+	 * @param workflowRunId the workflowRunId to set
 	 */
-	public void setWfInstanceRef(String wfInstanceRef) {
-		this.wfInstanceRef = wfInstanceRef;
+	public void setWorkflowRunId(String workflowRunId) {
+		this.workflowRunId = workflowRunId;
 	}
 	/**
-	 * @return the processorNameRef
+	 * @return the processorName
 	 */
-	public String getprocessorNameRef() {
-		return processorNameRef;
+	public String getProcessorName() {
+		return processorName;
 	}
 	/**
-	 * @param nameRef the processorNameRef to set
+	 * @param processorName the processorName to set
 	 */
-	public void setprocessorNameRef(String nameRef) {
-		processorNameRef = nameRef;
+	public void setProcessorName(String processorName) {
+		this.processorName = processorName;
 	}
 	/**
 	 * @return the collIDRef
@@ -153,13 +146,13 @@ public class PortBinding {
 	 * @return the iteration
 	 */
 	public String getIteration() {
-		return iterationVector;
+		return iteration;
 	}
 	/**
 	 * @param iterationVector the iteration to set
 	 */
-	public void setIterationVector(String iterationVector) {
-		this.iterationVector = iterationVector;
+	public void setIteration(String iterationVector) {
+		this.iteration = iterationVector;
 	}
 	/**
 	 * @return the value
@@ -176,14 +169,14 @@ public class PortBinding {
 	/**
 	 * @return the ref
 	 */
-	public String getRef() {
-		return ref;
+	public String getReference() {
+		return reference;
 	}
 	/**
 	 * @param ref the ref to set
 	 */
-	public void setRef(String ref) {
-		this.ref = ref;
+	public void setReference(String ref) {
+		this.reference = ref;
 	}
 
 
@@ -204,18 +197,18 @@ public class PortBinding {
 
 
 	/**
-	 * @return the wfNameRef
+	 * @return the workflowId
 	 */
-	public String getWfNameRef() {
-		return wfNameRef;
+	public String getWorkflowId() {
+		return workflowId;
 	}
 
 
 	/**
-	 * @param wfNameRef the wfNameRef to set
+	 * @param workflowId the workflowId to set
 	 */
-	public void setWfNameRef(String wfNameRef) {
-		this.wfNameRef = wfNameRef;
+	public void setWorkflowId(String workflowId) {
+		this.workflowId = workflowId;
 	}
 	
 	

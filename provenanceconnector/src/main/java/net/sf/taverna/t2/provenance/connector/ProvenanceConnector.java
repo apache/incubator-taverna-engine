@@ -342,7 +342,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 //		logger.warn("Could not execute statement " + q + " :" + e);
 //		}
 
-//		q = "DELETE FROM WfInstance";
+//		q = "DELETE FROM WorkflowRun";
 //		try {
 //		stmt.executeUpdate(q);
 //		} catch (SQLException e) {
@@ -406,19 +406,19 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 	}
 
 
-	public List<LineageQueryResultRecord> computeLineage(String wfInstance,
+	public List<LineageQueryResultRecord> computeLineage(String workflowRun,
 			String port, String proc, String path, Set<String> selectedProcessors) {
 		return null;
 	}
 
 	public String getDataflowInstance(String dataflowId) {
-		String instanceID = null;
+		String workflowRunId = null;
 		try {
-			instanceID = (getProvenance()).getPq().getRuns(dataflowId, null).get(0).getInstanceID();
+			workflowRunId = (getProvenance()).getPq().getRuns(dataflowId, null).get(0).getWorkflowRunId();
 		} catch (SQLException e) {
 			logger.error("Error finding the dataflow instance", e);
 		}
-		return instanceID;
+		return workflowRunId;
 	}
 
 	/**
