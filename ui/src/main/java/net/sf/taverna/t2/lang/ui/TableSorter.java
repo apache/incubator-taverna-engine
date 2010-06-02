@@ -277,6 +277,39 @@ public class TableSorter extends TableMap {
 		sort(this);
 		super.tableChanged(new TableModelEvent(this));
 	}
+	
+	private int lastSortedColumn = -1;
+	private boolean lastAscending = false;
+	
+	public void sortColumn(JTable tableView, int column) {
+		int currentlySelectedRow = tableView.getSelectedRow();
+		int underlyingSelectedRow = -1;
+		if (currentlySelectedRow != -1) {
+			underlyingSelectedRow = transposeRow(currentlySelectedRow);
+		}
+		// System.out.println("Sorting ...");
+		boolean ascendingColumn = true;
+		if (lastSortedColumn == column) {
+			ascendingColumn = !lastAscending;
+		}
+		lastSortedColumn = column;
+		lastAscending = ascendingColumn;
+		this.sortByColumn(column, ascendingColumn);
+		if (underlyingSelectedRow != -1) {
+			for (int row = 0; row < indexes.length; row++) {
+				if (transposeRow(row) == underlyingSelectedRow) {
+					tableView.setRowSelectionInterval(row, row);
+				}
+			}
+		}		
+	}
+	
+	public void resort(JTable tableView) {
+		if (lastSortedColumn != -1) {
+			lastAscending = !lastAscending;
+			sortColumn(tableView, lastSortedColumn);
+		}
+	}
 
 	// There is no-where else to put this.
 	// Add a mouse listener to the Table to trigger a table sort
@@ -294,26 +327,7 @@ public class TableSorter extends TableMap {
 				int viewColumn = columnModel.getColumnIndexAtX(e.getX());
 				int column = tableView.convertColumnIndexToModel(viewColumn);
 				if (e.getClickCount() == 1 && column != -1) {
-					int currentlySelectedRow = tableView.getSelectedRow();
-					int underlyingSelectedRow = -1;
-					if (currentlySelectedRow != -1) {
-						underlyingSelectedRow = transposeRow(currentlySelectedRow);
-					}
-					// System.out.println("Sorting ...");
-					boolean ascendingColumn = true;
-					if (lastClickedColumn == column) {
-						ascendingColumn = !lastAscending;
-					}
-					lastClickedColumn = column;
-					lastAscending = ascendingColumn;
-					sorter.sortByColumn(column, ascendingColumn);
-					if (underlyingSelectedRow != -1) {
-						for (int row = 0; row < indexes.length; row++) {
-							if (transposeRow(row) == underlyingSelectedRow) {
-								tableView.setRowSelectionInterval(row, row);
-							}
-						}
-					}
+					sortColumn(tableView, column);
 				}
 			}
 		};
