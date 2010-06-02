@@ -52,8 +52,10 @@ import net.sf.taverna.t2.workflowmodel.ProcessorInputPort;
 import net.sf.taverna.t2.workflowmodel.ProcessorOutputPort;
 import net.sf.taverna.t2.workflowmodel.TokenProcessingEntity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
+import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityConfigurationException;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityInputPort;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityOutputPort;
+import net.sf.taverna.t2.workflowmodel.processor.activity.DisabledActivity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.NestedDataflow;
 
 /**
@@ -396,6 +398,29 @@ public class Tools {
 		for (Activity<?> activity : processor.getActivityList()) {
 			editList.add(edits.getRemoveActivityInputPortMappingEdit(activity,
 					port.getName()));
+		}
+		return new CompoundEdit(editList);
+	}
+	
+	public static Edit<?> getEnableDisabledActivityEdit(Processor processor, DisabledActivity disabledActivity) {
+		List<Edit<?>> editList = new ArrayList<Edit<?>>();
+		Activity<?> brokenActivity = disabledActivity.getActivity();
+		try {
+			Activity ra = brokenActivity.getClass().newInstance();
+		    ra.configure(disabledActivity.getActivityConfiguration());
+		    editList.add(edits.getRemoveActivityEdit(processor, disabledActivity));
+		    ra.getInputPortMapping().clear();
+		    ra.getInputPortMapping().putAll(disabledActivity.getInputPortMapping());
+		    ra.getOutputPortMapping().clear();
+		    ra.getOutputPortMapping().putAll(disabledActivity.getOutputPortMapping());
+		    editList.add(edits.getAddActivityEdit(processor, ra));
+		}
+		catch (ActivityConfigurationException ex) {
+		    return null;
+		} catch (InstantiationException e) {
+			return null;
+		} catch (IllegalAccessException e) {
+			return null;
 		}
 		return new CompoundEdit(editList);
 	}
