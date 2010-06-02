@@ -32,11 +32,11 @@ import java.util.Set;
 import java.util.UUID;
 
 import net.sf.taverna.t2.provenance.connector.JDBCConnector;
-import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.Activity;
-import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataBinding;
-import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataflowInvocation;
-import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.ProcessorEnactment;
-import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.ServiceInvocation;
+import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.ActivityTable;
+import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataBindingTable;
+import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataflowInvocationTable;
+import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.ProcessorEnactmentTable;
+import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.ServiceInvocationTable;
 import net.sf.taverna.t2.provenance.lineageservice.utils.NestedListNode;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Port;
 import net.sf.taverna.t2.provenance.lineageservice.utils.PortBinding;
@@ -114,7 +114,7 @@ public class ProvenanceWriter {
 		Connection connection = null;
 		try {
 			connection = getConnection();
-			DataflowInvocation DI = DataflowInvocation.DataflowInvocation;
+			DataflowInvocationTable DI = DataflowInvocationTable.DataflowInvocation;
 			String sql = "INSERT INTO " + DI.DataflowInvocation + "("
 					+ DI.dataflowInvocationId + "," + DI.workflowId + ","
 					+ DI.invocationStarted + "," + DI.invocationEnded + ","
@@ -181,11 +181,11 @@ public class ProvenanceWriter {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement("INSERT INTO "
-					+ DataBinding.DataBinding + "("
-					+ DataBinding.dataBindingId + ","
-					+ DataBinding.portId + ","
-					+ DataBinding.t2Reference + ","
-					+ DataBinding.workflowRunId 
+					+ DataBindingTable.DataBinding + "("
+					+ DataBindingTable.dataBindingId + ","
+					+ DataBindingTable.portId + ","
+					+ DataBindingTable.t2Reference + ","
+					+ DataBindingTable.workflowRunId 
 					+ ") VALUES(?,?,?,?)");
 			
 			ps.setString(1, dataBinding.getDataBindingId());
@@ -331,17 +331,17 @@ public class ProvenanceWriter {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement("INSERT INTO "
-					+ ProcessorEnactment.ProcessorEnactment + "("
-					+ ProcessorEnactment.processEnactmentId + ","
-					+ ProcessorEnactment.workflowRunId + ","
-					+ ProcessorEnactment.processorId + ","
-					+ ProcessorEnactment.processIdentifier + ","
-					+ ProcessorEnactment.iteration + ","
-					+ ProcessorEnactment.parentProcessorEnactmentId + "," 
-					+ ProcessorEnactment.enactmentStarted + ","
-					+ ProcessorEnactment.enactmentEnded + ","
-					+ ProcessorEnactment.initialInputsDataBindingId + ","
-					+ ProcessorEnactment.finalOutputsDataBindingId
+					+ ProcessorEnactmentTable.ProcessorEnactment + "("
+					+ ProcessorEnactmentTable.processEnactmentId + ","
+					+ ProcessorEnactmentTable.workflowRunId + ","
+					+ ProcessorEnactmentTable.processorId + ","
+					+ ProcessorEnactmentTable.processIdentifier + ","
+					+ ProcessorEnactmentTable.iteration + ","
+					+ ProcessorEnactmentTable.parentProcessorEnactmentId + "," 
+					+ ProcessorEnactmentTable.enactmentStarted + ","
+					+ ProcessorEnactmentTable.enactmentEnded + ","
+					+ ProcessorEnactmentTable.initialInputsDataBindingId + ","
+					+ ProcessorEnactmentTable.finalOutputsDataBindingId
 					+ ") VALUES(?,?,?,?,?,?,?,?,?,?)");
 			ps.setString(1, enactment.getProcessEnactmentId());
 			ps.setString(2, enactment.getWorkflowRunId());
@@ -486,10 +486,10 @@ public class ProvenanceWriter {
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement("UPDATE "
-					+ ProcessorEnactment.ProcessorEnactment + " SET "
-					+ ProcessorEnactment.finalOutputsDataBindingId + "=?, "
-					+ ProcessorEnactment.enactmentEnded+ "=?"
-					+ " WHERE " + ProcessorEnactment.processEnactmentId + "=?");
+					+ ProcessorEnactmentTable.ProcessorEnactment + " SET "
+					+ ProcessorEnactmentTable.finalOutputsDataBindingId + "=?, "
+					+ ProcessorEnactmentTable.enactmentEnded+ "=?"
+					+ " WHERE " + ProcessorEnactmentTable.processEnactmentId + "=?");
 
 			ps.setString(1, enactment.getFinalOutputsDataBindingId());				
 			ps.setTimestamp(2, enactment.getEnactmentEnded());
@@ -615,7 +615,7 @@ public class ProvenanceWriter {
 			q = "DELETE FROM Port";
 			stmt.executeUpdate(q);
 			
-			q = "DELETE FROM " + Activity.Activity;
+			q = "DELETE FROM " + ActivityTable.Activity;
 			stmt.executeUpdate(q);
 			
 		} catch (SQLException e) {
@@ -659,7 +659,7 @@ public class ProvenanceWriter {
 			ps.setString(1, wfID);
 			ps.executeUpdate();
 			
-			q = "DELETE FROM " + Activity.Activity + " WHERE " + Activity.workflowId + "=?";
+			q = "DELETE FROM " + ActivityTable.Activity + " WHERE " + ActivityTable.workflowId + "=?";
 			ps = connection.prepareStatement(q);
 			ps.setString(1, wfID);
 			ps.executeUpdate();
@@ -717,45 +717,45 @@ public class ProvenanceWriter {
 			
 			if (runID != null) {
 				ps = connection.prepareStatement("DELETE FROM "
-						+ DataflowInvocation.DataflowInvocation + " WHERE "
-						+ DataflowInvocation.workflowRunId + "=?");
+						+ DataflowInvocationTable.DataflowInvocation + " WHERE "
+						+ DataflowInvocationTable.workflowRunId + "=?");
 				ps.setString(1, runID);
 			} else
 				ps = connection.prepareStatement("DELETE FROM "
-						+ DataflowInvocation.DataflowInvocation);
+						+ DataflowInvocationTable.DataflowInvocation);
 			ps.executeUpdate();
 			
 			if (runID != null) {
 				ps = connection.prepareStatement("DELETE FROM "
-						+ ServiceInvocation.ServiceInvocation + " WHERE "
-						+ ServiceInvocation.workflowRunId + "=?");
+						+ ServiceInvocationTable.ServiceInvocation + " WHERE "
+						+ ServiceInvocationTable.workflowRunId + "=?");
 				ps.setString(1, runID);
 			} else
 				ps = connection.prepareStatement("DELETE FROM "
-						+ ServiceInvocation.ServiceInvocation);
+						+ ServiceInvocationTable.ServiceInvocation);
 			ps.executeUpdate();
 			
 			if (runID != null) {
 				ps = connection.prepareStatement("DELETE FROM "
-						+ ProcessorEnactment.ProcessorEnactment + " WHERE "
-						+ ProcessorEnactment.workflowRunId + "=?");
+						+ ProcessorEnactmentTable.ProcessorEnactment + " WHERE "
+						+ ProcessorEnactmentTable.workflowRunId + "=?");
 				ps.setString(1, runID);
 			} else
 				ps = connection
 						.prepareStatement("DELETE FROM "
-								+ ProcessorEnactment.ProcessorEnactment);
+								+ ProcessorEnactmentTable.ProcessorEnactment);
 			ps.executeUpdate();
 			
 			
 			
 			if (runID != null) {
 				ps = connection.prepareStatement("DELETE FROM "
-						+ DataBinding.DataBinding + " WHERE "
-						+ DataBinding.workflowRunId + "=?");
+						+ DataBindingTable.DataBinding + " WHERE "
+						+ DataBindingTable.workflowRunId + "=?");
 				ps.setString(1, runID);
 			} else
 				ps = connection.prepareStatement("DELETE FROM "
-						+ DataBinding.DataBinding);
+						+ DataBindingTable.DataBinding);
 			ps.executeUpdate();
 		} finally {
 			if (connection != null) {

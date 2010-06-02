@@ -39,7 +39,7 @@ import java.util.Map.Entry;
 
 import net.sf.taverna.t2.provenance.connector.JDBCConnector;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector;
-import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataBinding;
+import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataBindingTable;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DDRecord;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DataLink;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DataflowInvocation;
@@ -2332,7 +2332,7 @@ public abstract class ProvenanceQuery {
 
 	public List<ProcessorEnactment> getProcessorEnactmentsByProcessorName(
 			String workflowRunId, String parentProcessorEnactmentId, String processorName) {
-		ProvenanceConnector.ProcessorEnactment ProcEnact = ProvenanceConnector.ProcessorEnactment.ProcessorEnactment;
+		ProvenanceConnector.ProcessorEnactmentTable ProcEnact = ProvenanceConnector.ProcessorEnactmentTable.ProcessorEnactment;
 		
 		String query  = 
 				"SELECT " + ProcEnact.enactmentStarted + ","
@@ -2407,7 +2407,7 @@ public abstract class ProvenanceQuery {
 	
 
 	private ProcessorEnactment readProcessorEnactment(ResultSet resultSet) throws SQLException {
-		ProvenanceConnector.ProcessorEnactment ProcEnact = ProvenanceConnector.ProcessorEnactment.ProcessorEnactment;
+		ProvenanceConnector.ProcessorEnactmentTable ProcEnact = ProvenanceConnector.ProcessorEnactmentTable.ProcessorEnactment;
 		
 		Timestamp enactmentStarted = resultSet.getTimestamp(ProcEnact.enactmentStarted.name());
 		Timestamp enactmentEnded = resultSet.getTimestamp(ProcEnact.enactmentEnded.name());
@@ -2437,7 +2437,7 @@ public abstract class ProvenanceQuery {
 	}
 
 	public ProcessorEnactment getProcessorEnactment(String processorEnactmentId) {
-		ProvenanceConnector.ProcessorEnactment ProcEnact = ProvenanceConnector.ProcessorEnactment.ProcessorEnactment;		
+		ProvenanceConnector.ProcessorEnactmentTable ProcEnact = ProvenanceConnector.ProcessorEnactmentTable.ProcessorEnactment;		
 		String query  = 
 				"SELECT " + ProcEnact.enactmentStarted + ","
 						+ ProcEnact.enactmentEnded + ","
@@ -2496,7 +2496,7 @@ public abstract class ProvenanceQuery {
 	
 	public ProcessorEnactment getProcessorEnactmentByProcessId(String workflowRunId,
 			String processIdentifier) {
-ProvenanceConnector.ProcessorEnactment ProcEnact = ProvenanceConnector.ProcessorEnactment.ProcessorEnactment;		
+ProvenanceConnector.ProcessorEnactmentTable ProcEnact = ProvenanceConnector.ProcessorEnactmentTable.ProcessorEnactment;		
 		String query  = 
 				"SELECT " + ProcEnact.enactmentStarted + ","
 						+ ProcEnact.enactmentEnded + ","
@@ -2556,7 +2556,7 @@ ProvenanceConnector.ProcessorEnactment ProcEnact = ProvenanceConnector.Processor
 	public Map<Port, String> getDataBindings(String dataBindingId) {
 		HashMap<Port, String> dataBindings = new HashMap<Port, String>();
 		String query = "SELECT " 
-				+ DataBinding.t2Reference + ","
+				+ DataBindingTable.t2Reference + ","
 				+ "Port.portId AS portId," 
 				+ "Port.processorName,"
 				+ "Port.processorId,"
@@ -2565,10 +2565,10 @@ ProvenanceConnector.ProcessorEnactment ProcEnact = ProvenanceConnector.Processor
 				+ "Port.depth,"
 				+ "Port.resolvedDepth," 
 				+ "Port.workflowId"
-				+ " FROM " + DataBinding.DataBinding
+				+ " FROM " + DataBindingTable.DataBinding
 				+ " INNER JOIN " + "Port" + " ON " 
-				+ " Port.portId=" + DataBinding.DataBinding + "." + DataBinding.portId
-				+ " WHERE " + DataBinding.dataBindingId + "=?";
+				+ " Port.portId=" + DataBindingTable.DataBinding + "." + DataBindingTable.portId
+				+ " WHERE " + DataBindingTable.dataBindingId + "=?";
 		PreparedStatement statement;
 		Connection connection = null;
 		try {
@@ -2577,7 +2577,7 @@ ProvenanceConnector.ProcessorEnactment ProcEnact = ProvenanceConnector.Processor
 			statement.setString(1, dataBindingId);
 			ResultSet rs = statement.executeQuery();
 			while (rs.next()) {
-				String t2Ref = rs.getString(DataBinding.t2Reference.name());
+				String t2Ref = rs.getString(DataBindingTable.t2Reference.name());
 				
 				Port port = new Port();
 				port.setWorkflowId(rs.getString("workflowId"));
@@ -2643,8 +2643,8 @@ ProvenanceConnector.ProcessorEnactment ProcEnact = ProvenanceConnector.Processor
 
 	@SuppressWarnings("static-access")
 	public DataflowInvocation getDataflowInvocation(String workflowRunId) {
-		net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataflowInvocation DI = 
-			net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataflowInvocation.DataflowInvocation;
+		net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataflowInvocationTable DI = 
+			net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataflowInvocationTable.DataflowInvocation;
 		String query = "SELECT " + 
 				  DI.dataflowInvocationId + ","
 				+ DI.inputsDataBinding + "," 
@@ -2707,8 +2707,8 @@ ProvenanceConnector.ProcessorEnactment ProcEnact = ProvenanceConnector.Processor
 
 	public DataflowInvocation getDataflowInvocation(
 			ProcessorEnactment processorEnactment) {
-		net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataflowInvocation DI = 
-			net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataflowInvocation.DataflowInvocation;
+		net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataflowInvocationTable DI = 
+			net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataflowInvocationTable.DataflowInvocation;
 		String query = "SELECT " + 
 				  DI.dataflowInvocationId + ","
 				+ DI.inputsDataBinding + "," 
@@ -2771,8 +2771,8 @@ ProvenanceConnector.ProcessorEnactment ProcEnact = ProvenanceConnector.Processor
 	
 	@SuppressWarnings("static-access")
 	public List<DataflowInvocation> getDataflowInvocations(String workflowRunId) {
-		net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataflowInvocation DI = 
-			net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataflowInvocation.DataflowInvocation;
+		net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataflowInvocationTable DI = 
+			net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataflowInvocationTable.DataflowInvocation;
 		String query = "SELECT " + 
 				  DI.dataflowInvocationId + ","
 				+ DI.inputsDataBinding + "," 

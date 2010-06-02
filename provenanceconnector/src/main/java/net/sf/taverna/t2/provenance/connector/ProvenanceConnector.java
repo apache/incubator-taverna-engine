@@ -53,8 +53,50 @@ import org.apache.log4j.Logger;
  * 
  */
 public abstract class ProvenanceConnector implements ProvenanceReporter {
+	
+	public static enum ActivityTable {
+		Activity, activityId, activityDefinition, workflowId;
+		
+		public static String getCreateTable() {
+			return "CREATE TABLE " + Activity + "(\n"
+			+ activityId + " varchar(36) NOT NULL,\n" 
+			+ activityDefinition + " blob NOT NULL,\n"	
+			+ workflowId + " varchar(100) NOT NULL, \n"
+			+ "PRIMARY KEY (" + activityId + ")\n" + ")";
+		}		
+	}
+	
+	public static enum CollectionTable {
+		Collection, collID, parentCollIDRef, workflowRunId, processorNameRef, portName, iteration;
+		public static String getCreateTable() {
+			return "CREATE TABLE " + Collection + " (\n"
+				+ collID + " varchar(100) NOT NULL,\n"
+				+ parentCollIDRef + " varchar(100) NOT NULL ,\n"
+				+ workflowRunId + " varchar(36) NOT NULL,\n"
+				+ processorNameRef + " varchar(100) NOT NULL,\n"
+				+ portName + " varchar(100) NOT NULL,\n"
+				+ iteration + " varchar(2000) NOT NULL default '',\n"
+				+ " PRIMARY KEY (\n"
+				+ collID + "," + workflowRunId + "," + processorNameRef
+				+ "," + portName + "," + parentCollIDRef + "," + iteration
+				+ "))";
+		}
+	}
 
-	public static enum DataflowInvocation {
+	public static enum DataBindingTable {
+		DataBinding, dataBindingId, portId, t2Reference, workflowRunId;
+		
+		public static String getCreateTable() {
+			return "CREATE TABLE " + DataBinding + "(\n"
+			+ dataBindingId + " varchar(36) NOT NULL,\n" 
+			+ portId + " varchar(36) NOT NULL,\n"		
+			+ t2Reference + " varchar(100) NOT NULL,\n"		
+			+ workflowRunId + " varchar(100) NOT NULL, \n"
+			+ "PRIMARY KEY (" + dataBindingId + "," + portId + ")\n" + ")";
+		}		
+	}
+	
+	public static enum DataflowInvocationTable {
 		DataflowInvocation, dataflowInvocationId, 
 		workflowId,
 		invocationStarted, invocationEnded, 
@@ -73,10 +115,69 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 			+ workflowRunId + " varchar(100) NOT NULL, \n"
 			+ "PRIMARY KEY (" + dataflowInvocationId+ ")\n" + ")";
 		}		
-		
 	}
 	
-	public static enum ProcessorEnactment {
+	public static enum DataLinkTable { 
+		Datalink, sourcePortName, sourcePortId, destinationPortId, 
+		destinationPortName, sourceProcessorName, destinationProcessorName, workflowId;
+		public static String getCreateTable() {
+			return "CREATE TABLE " + Datalink + " (\n"
+					+ sourcePortName + " varchar(100) NOT NULL ,\n"
+					+ sourcePortId + " varchar(36) NOT NULL ,\n"
+					+ destinationPortId + " varchar(36) NOT NULL ,\n"
+					+ destinationPortName + " varchar(100) NOT NULL,\n"
+					+ sourceProcessorName + " varchar(100) NOT NULL,\n"
+					+ destinationProcessorName + " varchar(100) NOT NULL,\n"
+					+ workflowId + " varchar(36) NOT NULL," 
+					+ " PRIMARY KEY  ("
+					+ sourcePortId + "," + destinationPortId + "," + workflowId
+					+ "))";
+		}
+	}
+
+	public static enum PortBindingTable {
+		PortBinding, portName, workflowRunId, value, collIDRef, positionInColl, processorNameRef, valueType, ref, iteration, workflowId;
+		public static String getCreateTable() {
+			return  "CREATE TABLE " + PortBinding + " (\n"
+			+ portName + " varchar(100) NOT NULL,\n"
+			+ workflowRunId + " varchar(100) NOT NULL,\n"
+			+ value + " varchar(100) default NULL,\n"
+			+ collIDRef + " varchar(100),\n"
+			+ positionInColl + " int NOT NULL,\n"
+			+ processorNameRef + " varchar(100) NOT NULL,\n"
+			+ valueType + " varchar(50) default NULL,\n"
+			+ ref + " varchar(100) default NULL,\n"
+			+ iteration + " varchar(2000) NOT NULL,\n"
+			+ workflowId + " varchar(36),\n"
+			+ "PRIMARY KEY (\n" 
+			+ portName + "," + workflowRunId + ","
+			+ processorNameRef + "," + iteration + ", " + workflowId
+			+ "))";
+		}
+	}
+
+	public static enum PortTable {
+		Port, portId, processorId, portName, isInputPort, processorName, 
+		workflowId, depth, resolvedDepth, iterationStrategyOrder;
+		public static String getCreateTable() {
+			return  "CREATE TABLE " + Port + " (\n"
+			+ portId + " varchar(36) NOT NULL,\n"
+			+ processorId + " varchar(36),\n"
+			+ portName + " varchar(100) NOT NULL,\n"			
+			+ isInputPort + " smallint NOT NULL ,\n"
+			+ processorName + " varchar(100) NOT NULL,\n"
+			+ workflowId + " varchar(36) NOT NULL,\n" 
+			+ depth + " int,\n"
+			+ resolvedDepth + " int,\n" 
+			+ iterationStrategyOrder + " smallint, \n" 
+			+ "PRIMARY KEY (" + "portId" + "),\n"
+			+ "CONSTRAINT port_constraint UNIQUE (\n"
+			+ portName + "," + isInputPort + "," + processorName + "," + workflowId + "\n"
+			+ "))";
+		}
+	}
+
+	public static enum ProcessorEnactmentTable {
 		ProcessorEnactment, processEnactmentId, workflowRunId, processorId, 
 		processIdentifier, iteration, parentProcessorEnactmentId, 
 		enactmentStarted, enactmentEnded, initialInputsDataBindingId, 
@@ -94,11 +195,26 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 			+ enactmentEnded + " timestamp, \n"
 			+ initialInputsDataBindingId + " varchar(36), \n"
 			+ finalOutputsDataBindingId + " varchar(36), \n"
-			+ " PRIMARY KEY (" + processEnactmentId + ")\n" + ")";
+			+ " PRIMARY KEY (" + processEnactmentId + ")" + ")";
 		}
 	}
 	
-	public static enum ServiceInvocation {
+	public static enum ProcessorTable {
+		Processor,processorId, processorName,workflowId,firstActivityClass,isTopLevel ;
+		public static String getCreateTable() {
+			return  "CREATE TABLE "+ Processor +" (\n"
+			+ processorId + " varchar(36) NOT NULL,\n"
+			+ processorName + " varchar(100) NOT NULL,\n"
+			+ workflowId + " varchar(36) NOT NULL ,\n\n"
+			+ firstActivityClass + " varchar(100) default NULL,\n"
+			+ isTopLevel + " smallint, \n"
+			+ "PRIMARY KEY (" + processorId+ "),\n"
+			+ "CONSTRAINT processor_constraint UNIQUE (\n"
+			+	processorName + "," + workflowId + "))";
+		}
+	}
+
+	public static enum ServiceInvocationTable {
 		ServiceInvocation, processorEnactmentId, workflowRunId, 
 		invocationNumber, invocationStarted, invocationEnded, 
 		inputsDataBinding, outputsDataBinding, failureT2Reference, 
@@ -117,35 +233,33 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 			+ activityId + " varchar(36),\n"
 			+ initiatingDispatchLayer + " varchar(250) NOT NULL,\n"
 			+ finalDispatchLayer + " varchar(250) NOT NULL,\n"
-			+ "PRIMARY KEY (" + processorEnactmentId + ", " + invocationNumber + ")\n" + ")";
+			+ "PRIMARY KEY (" + processorEnactmentId + ", " 
+			+ invocationNumber + "))";
 		}			
 	}
-	
-	public static enum Activity {
-		Activity, activityId, activityDefinition, workflowId;
-		
+
+	public static enum WorkflowRunTable {
+		WorkflowRun, workflowRunId, workflowId, timestamp;
 		public static String getCreateTable() {
-			return "CREATE TABLE " + Activity + "(\n"
-			+ activityId + " varchar(36) NOT NULL,\n" 
-			+ activityDefinition + " blob NOT NULL,\n"	
-			+ workflowId + " varchar(100) NOT NULL, \n"
-			+ "PRIMARY KEY (" + activityId + ")\n" + ")";
-		}		
+			return  "CREATE TABLE " + WorkflowRun + " (\n"
+			+ workflowRunId + " varchar(36) NOT NULL,\n"
+			+ workflowId + " varchar(36) NOT NULL,\n"
+			+ timestamp + " timestamp NOT NULL default CURRENT_TIMESTAMP,\n"
+			+ " PRIMARY KEY (" + workflowRunId + ", " + workflowId + "))";
+		}
 	}
 	
-	public static enum DataBinding {
-		DataBinding, dataBindingId, portId, t2Reference, workflowRunId;
-		
+	public static enum WorkflowTable {
+		WorkflowTable, workflowId, parentWorkflowId, externalName, dataflow;
 		public static String getCreateTable() {
-			return "CREATE TABLE " + DataBinding + "(\n"
-			+ dataBindingId + " varchar(36) NOT NULL,\n" 
-			+ portId + " varchar(36) NOT NULL,\n"		
-			+ t2Reference + " varchar(100) NOT NULL,\n"		
-			+ workflowRunId + " varchar(100) NOT NULL, \n"
-			+ "PRIMARY KEY (" + dataBindingId + "," + portId + ")\n" + ")";
-		}		
+			return "CREATE TABLE " + "Workflow (\n" +
+					workflowId	+ " varchar(36) NOT NULL,\n" 
+					+ parentWorkflowId + " varchar(100),\n" 
+					+ externalName + " varchar(100),\n"
+					+ dataflow + " blob, \n" 
+					+ "PRIMARY KEY  (" + workflowId	+ "))";
+		}
 	}
-	
 	
 	private static Logger logger = Logger.getLogger(ProvenanceConnector.class);
 	private String saveEvents;    
