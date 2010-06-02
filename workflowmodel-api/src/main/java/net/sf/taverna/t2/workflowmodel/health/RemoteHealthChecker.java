@@ -63,8 +63,12 @@ public abstract class RemoteHealthChecker implements HealthChecker<Object> {
 				httpConnection.connect();
 				responseCode = httpConnection.getResponseCode();
 				if (responseCode != HttpURLConnection.HTTP_OK) {
-					if ((responseCode >= HttpURLConnection.HTTP_INTERNAL_ERROR)
-							|| (responseCode == HttpURLConnection.HTTP_NOT_FOUND)
+					if ((responseCode >= HttpURLConnection.HTTP_INTERNAL_ERROR)) {
+						status = Status.WARNING;
+						message = "Unexpected response";
+						resultId = HealthCheck.CONNECTION_PROBLEM;
+					}
+					else if ((responseCode == HttpURLConnection.HTTP_NOT_FOUND)
 							|| (responseCode == HttpURLConnection.HTTP_GONE)) {
 						status = Status.SEVERE;
 						message = "Bad response";

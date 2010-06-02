@@ -161,7 +161,16 @@ public class HierarchyTraverser {
 
 			if ((includeTimeConsuming || !v.isTimeConsuming()) && v.canVisit(o)) {
 				// Make the visitor visit the object
-				VisitReport report = v.visit(o, ancestry);
+				VisitReport report = null;
+				try {
+					report = v.visit(o, ancestry);
+				}
+				catch (NullPointerException npe) {
+					logger.error("Visit threw exception", npe);
+				}
+				catch (ClassCastException cce) {
+					logger.error("Visit threw exception", cce);					
+				}
 				
 				if (report == null) {
 					continue;
@@ -203,19 +212,16 @@ public class HierarchyTraverser {
 			if (p != null) {
 				Status worstStatus = VisitReport.getWorstStatus(subReports);
 				if (!worstStatus.equals(Status.OK)) {
-					if (worstStatus.equals(Status.WARNING)) {
-						reports.add(new VisitReport(DataflowCollation
-								.getInstance(), p,
-								"Warnings in nested workflow",
-								DataflowCollation.NESTED_ISSUES, worstStatus,
-								subReports));
-					} else {
-						reports.add(new VisitReport(DataflowCollation
-								.getInstance(), p,
-								"Problems in nested workflow",
-								DataflowCollation.NESTED_ISSUES, worstStatus,
-								subReports));
-					}
+					VisitReport report = new VisitReport(
+							DataflowCollation.getInstance(),
+							p,
+							(worstStatus.equals(Status.WARNING) ? "Warnings in nested workflow"
+									: "Problems in nested workflow"),
+							DataflowCollation.NESTED_ISSUES, worstStatus,
+							subReports);
+					report.setWasTimeConsuming(includeTimeConsuming);
+					reports.add(report);
+
 				}
 			}
 		}

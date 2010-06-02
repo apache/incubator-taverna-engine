@@ -296,11 +296,19 @@ public class VisitReport {
 			return false;
 		}
 		VisitReport vr = (VisitReport) o;
-		return (vr.getClass().equals(this.getClass())
+		if (vr == this) {
+			return true;
+		}
+		boolean result = (vr.getClass().equals(this.getClass())
 				&& (vr.getKind().equals(this.getKind()))
 				&& (vr.getMessage().equals(this.getMessage()))
 				&& (vr.getResultId() == this.getResultId())
-				&& (vr.getStatus().equals(this.getStatus())) && (vr
-				.getSubject().equals(this.getSubject())));
+				&& (vr.getStatus().equals(this.getStatus()))
+				&& (vr.getSubject() == this.getSubject()));
+		return result;
+	}
+	
+	public int hashCode() {
+		return ((this.getMessage().hashCode() / 2) + (this.getSubject().hashCode() / 2));
 	}
 }

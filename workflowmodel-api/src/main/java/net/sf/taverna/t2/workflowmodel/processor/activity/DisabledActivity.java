@@ -3,6 +3,7 @@
  */
 package net.sf.taverna.t2.workflowmodel.processor.activity;
 
+import java.util.HashSet;
 import java.util.Map;
 
 import net.sf.taverna.t2.reference.T2Reference;
@@ -185,6 +186,48 @@ public final class DisabledActivity extends
 				callback.fail("The service is offline");
 			}
 		});
+	}
+	
+	public boolean configurationWouldWork() {
+		return configurationWouldWork(conf.getBean());
+	}
+	
+	public boolean configurationWouldWork(Object newConfig) {
+		boolean result = true;
+		try {
+			Activity aa = (Activity) (conf.getActivity().getClass().newInstance());
+			aa.configure(newConfig);
+			boolean unknownPort = false;
+			Map<String, String> currentInputPortMap = this
+					.getInputPortMapping();
+			HashSet<String> currentInputNames = new HashSet<String>();
+			currentInputNames.addAll(currentInputPortMap.values()) ;
+			for (ActivityInputPort aip : ((Activity<?>)aa).getInputPorts()) {
+				currentInputNames.remove(aip.getName());
+			}
+			unknownPort = !currentInputNames.isEmpty();
+			
+			if (!unknownPort) {
+				Map<String, String> currentOutputPortMap = this
+				.getOutputPortMapping();
+				HashSet<String> currentOutputNames = new HashSet<String>();
+				currentOutputNames.addAll(currentOutputPortMap.values()) ;
+				for (OutputPort aop : ((Activity<?>)aa).getOutputPorts()) {
+					currentOutputNames.remove(aop.getName());
+				}
+				unknownPort = !currentOutputNames.isEmpty();
+			}
+			if (unknownPort) {
+				result = false;
+			}
+		} catch (ActivityConfigurationException ex) {
+			result = false;
+		} catch (InstantiationException e) {
+			return false;
+		} catch (IllegalAccessException e) {
+			return false;
+		}
+		return result;
 	}
 
 }
