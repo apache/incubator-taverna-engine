@@ -332,7 +332,6 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 			ProcessProvenanceItem provenanceItem;
 			String[] split = jobEvent.getOwningProcess().split(":");
 			provenanceItem = new ProcessProvenanceItem();
-			//FIXME are the facade id and dataflow name really needed? 
 			String parentDataflowId = workflowItem.getParentId();
 			provenanceItem.setWorkflowId(parentDataflowId);
 			provenanceItem.setFacadeID(split[0]);

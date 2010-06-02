@@ -196,11 +196,12 @@ public class WorkflowDataProcessor {
 			invocation.setParentProcessorEnactmentId(procAct.getProcessEnactmentId());		
 		}
 		
-		invocation.setInvocationStarted(workflowStarted.get(completeEvent.getWorkflowId()));
+		invocation.setInvocationStarted(workflowStarted.get(completeEvent.getParentId()));
 		invocation.setInvocationEnded(completeEvent.getInvocationEnded());
 		
 		// Register data
-		String dataBindingId = UUID.randomUUID().toString();
+		String inputsDataBindingId = UUID.randomUUID().toString();
+		String outputsDataBindingId = UUID.randomUUID().toString();
 		for (Port port : ports) {
 			String portKey = (port.isInputPort() ? "/i:" : "/o:") + port.getPortName();
 			String t2Reference = workflowPortData.get(portKey);
@@ -209,7 +210,7 @@ public class WorkflowDataProcessor {
 				continue;
 			}
 			DataBinding dataBinding = new DataBinding();
-			dataBinding.setDataBindingId(dataBindingId);
+			dataBinding.setDataBindingId(port.isInputPort() ? inputsDataBindingId : outputsDataBindingId);
 			dataBinding.setPort(port);
 			dataBinding.setT2Reference(t2Reference);
 			dataBinding.setWorkflowRunId(workflowRunId);
@@ -220,8 +221,8 @@ public class WorkflowDataProcessor {
 			}
 		}
 		
-		invocation.setInputsDataBindingId(dataBindingId);
-		invocation.setOutputsDataBindingId(dataBindingId);			
+		invocation.setInputsDataBindingId(inputsDataBindingId);
+		invocation.setOutputsDataBindingId(outputsDataBindingId);			
 		try {
 			pw.addDataflowInvocation(invocation);
 		} catch (SQLException e) {

@@ -158,6 +158,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 			workflowItem.setProcessId(instanceOwningProcessId);
 			workflowItem.setIdentifier(workflowRunId);
 			workflowItem.setParentId(dataflow.getInternalIdentifier());
+			workflowItem.setWorkflowId(dataflow.getInternalIdentifier());
 
 			addProvenanceLayerToProcessors(dataflow, workflowItem);
 			context.getProvenanceReporter().setSessionID(workflowRunId);
@@ -412,7 +413,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 			dataflowRunComplete.setInvocationEnded(new Timestamp(System.currentTimeMillis()));
 			dataflowRunComplete.setParentId(workflowItem
 					.getIdentifier());
-			dataflowRunComplete.setWorkflowId(dataflow.getInternalIdentifier());
+			dataflowRunComplete.setWorkflowId(workflowItem.getParentId());
 			dataflowRunComplete
 					.setProcessId(instanceOwningProcessId);
 			dataflowRunComplete.setIdentifier(UUID.randomUUID()
