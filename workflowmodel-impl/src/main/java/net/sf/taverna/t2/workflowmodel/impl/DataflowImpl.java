@@ -684,7 +684,7 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 	
 	@Override
 	public String toString() {
-		return "Dataflow " + getLocalName() + "[" + getInternalIdentifier(false) + "]"; 
+		return "Dataflow " + getLocalName() + "[" + getIdentifier() + "]"; 
 	}
 
 	public void fire(String owningProcess, InvocationContext context) {
@@ -774,19 +774,17 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 		internalIdentifier=UUID.randomUUID().toString();
 	}
 
-	public String getInternalIdentifier() {
-		return getInternalIdentifier(true);
-}
+	public String getIdentifier() {
+	    return internalIdentifier;
+	}
 	
-	public String getInternalIdentifier(boolean saveId) {
-		if (saveId) {
-			net.sf.taverna.t2.workflowmodel.utils.Tools.addDataflowIdentification(this, internalIdentifier);
-		}
+	public String recordIdentifier() {
+	    net.sf.taverna.t2.workflowmodel.utils.Tools.addDataflowIdentification(this, internalIdentifier);
 		return internalIdentifier;
 	}
 	
-	protected void setInternalIndentifier(String id) {
-		this.internalIdentifier=id;
+	void setIdentifier(String id) {
+	    this.internalIdentifier=id;
 	}
 
 	public boolean isInputPortConnected(DataflowInputPort inputPort) {

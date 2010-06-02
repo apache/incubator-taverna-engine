@@ -64,7 +64,7 @@ public class XMLSerializerImpl implements XMLSerializer, XMLSerializationConstan
 		
 		Set<String> outputIds = new HashSet<String>();
 		for (Dataflow innerDataflow : innerDataflows) {
-			String currentId = innerDataflow.getInternalIdentifier();
+			String currentId = innerDataflow.getIdentifier();
 			if (outputIds.add(currentId)) {
 				Element innerDataflowElement = DataflowXMLSerializer.getInstance().serializeDataflow(innerDataflow);
 				innerDataflowElement.setAttribute(DATAFLOW_ROLE,DATAFLOW_ROLE_NESTED);

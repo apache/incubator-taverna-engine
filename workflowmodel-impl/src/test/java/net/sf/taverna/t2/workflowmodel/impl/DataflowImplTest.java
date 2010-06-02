@@ -30,14 +30,14 @@ public class DataflowImplTest {
 	
 	@Test
 	public void testInternalIdentifer() {
-		assertNotNull("the identifier should be created at construction time",df.getInternalIdentifier(false));
+		assertNotNull("the identifier should be created at construction time",df.getIdentifier());
 	}
 	
 	@Test
 	public void testRefreshInternalIndentifier() {
-		String oldId=df.getInternalIdentifier(false);
+		String oldId=df.getIdentifier();
 		df.refreshInternalIdentifier();
-		assertNotNull("the new identifier should not be null",df.getInternalIdentifier(false));
-		assertFalse("the identifier should have changed",oldId.equals(df.getInternalIdentifier(false)));
+		assertNotNull("the new identifier should not be null",df.getIdentifier());
+		assertFalse("the identifier should have changed",oldId.equals(df.getIdentifier()));
 	}
 }

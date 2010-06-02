@@ -98,7 +98,7 @@ public class DummyDataflow extends AbstractAnnotatedThing<Dataflow> implements
 				"Not implemented for this class");
 	}
 
-	public String getInternalIdentifier() {
+	public String getIdentifier() {
 		return "an id";
 	}
 
@@ -116,8 +116,8 @@ public class DummyDataflow extends AbstractAnnotatedThing<Dataflow> implements
 		return false;
 	}
 
-	public String getInternalIdentifier(boolean saveId) {
-		return getInternalIdentifier();
+	public String recordIdentifier() {
+		return getIdentifier();
 	}
 
 }

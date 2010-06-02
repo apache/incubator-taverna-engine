@@ -66,7 +66,7 @@ public class DataflowXMLDeserializerTest extends DeserializerTestsHelper {
 	public void testDataflowNameAndId() throws Exception {
 		Element element = loadXMLFragment("empty_dataflow_with_ports.xml");
 		Dataflow df = deserializer.deserializeDataflow(element,new HashMap<String, Element>());
-		assertEquals("Dataflow should have an id of 123","123",df.getInternalIdentifier());
+		assertEquals("Dataflow should have an id of 123","123",df.getIdentifier());
 		assertEquals("dataflow should have the name george","george",df.getLocalName());
 	}
 	

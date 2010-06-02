@@ -108,7 +108,7 @@ public abstract class AbstractXMLSerializer implements XMLSerializationConstants
 		bean.setAttribute(BEAN_ENCODING,DATAFLOW_ENCODING);
 		Element dataflowElement = new Element(DATAFLOW,T2_WORKFLOW_NAMESPACE);
 		
-		dataflowElement.setAttribute(DATAFLOW_REFERENCE,dataflow.getInternalIdentifier(false));
+		dataflowElement.setAttribute(DATAFLOW_REFERENCE,dataflow.getIdentifier());
 		
 		bean.addContent(dataflowElement);
 	}

@@ -31,17 +31,17 @@ public class UpdateDataflowInternalIdentifierEdit extends AbstractDataflowEdit {
 	public UpdateDataflowInternalIdentifierEdit(Dataflow dataflow,String newId) {
 		super(dataflow);
 		this.newId=newId;
-		this.oldId=dataflow.getInternalIdentifier(false);
+		this.oldId=dataflow.getIdentifier();
 	}
 
 	@Override
 	protected void doEditAction(DataflowImpl dataflow) throws EditException {
-		dataflow.internalIdentifier=newId;
+	    dataflow.setIdentifier(newId);
 	}
 
 	@Override
 	protected void undoEditAction(DataflowImpl dataflow) {
-		dataflow.internalIdentifier=oldId;
+	    dataflow.setIdentifier(oldId);
 	}
 	
 

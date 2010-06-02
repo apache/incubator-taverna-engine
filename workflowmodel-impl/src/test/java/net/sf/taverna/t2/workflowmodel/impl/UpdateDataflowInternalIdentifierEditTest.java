@@ -35,16 +35,16 @@ public class UpdateDataflowInternalIdentifierEditTest {
 	public void testDoEdit() throws Exception {
 		Dataflow df = edits.createDataflow();
 		edits.getUpdateDataflowInternalIdentifierEdit(df, "123").doEdit();
-		assertEquals("The internal id should be 123","123",df.getInternalIdentifier(false));
+		assertEquals("The internal id should be 123","123",df.getIdentifier());
 	}
 	
 	@Test 
 	public void testUndo() throws Exception {
 		Dataflow df = edits.createDataflow();
 		Edit<?> edit = edits.getUpdateDataflowInternalIdentifierEdit(df, "123");
-		String oldID=df.getInternalIdentifier(false);
+		String oldID=df.getIdentifier();
 		edit.doEdit();
 		edit.undo();
-		assertEquals("The id should be reset to its original value",oldID,df.getInternalIdentifier(false));
+		assertEquals("The id should be reset to its original value",oldID,df.getIdentifier());
 	}
 }

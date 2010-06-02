@@ -182,7 +182,7 @@ public class EventProcessor {
 		workflowStructureDone = true;
 
 		topLevelDataflowName = df.getLocalName();
-		topLevelDataflowID   = df.getInternalIdentifier(false);
+		topLevelDataflowID   = df.getIdentifier();
 
 		// check whether we already have this WF in the DB
 		List<String> workflowIds = null;
@@ -377,14 +377,14 @@ public class EventProcessor {
 					if (a instanceof NestedDataflow) {
 
 						Dataflow nested = ((NestedDataflow)a).getNestedDataflow();
-//						logger.info("RECURSION ON nested workflow: "+p.getLocalName()+" with id: "+nested.getInternalIdentifier());
+//						logger.info("RECURSION ON nested workflow: "+p.getLocalName()+" with id: "+nested.getIdentifier());
 
-						wfNestingMap.put(nested.getInternalIdentifier(false), dataflowID); // child -> parent
+						wfNestingMap.put(nested.getIdentifier(), dataflowID); // child -> parent
 
 						//////////////
 						/// RECURSIVE CALL 
 						//////////////
-						processDataflowStructure(nested, nested.getInternalIdentifier(false), p.getLocalName());
+						processDataflowStructure(nested, nested.getIdentifier(), p.getLocalName());
 						
 						//List<? extends Processor> procs = nested.getProcessors();						
 //						for (Processor nestedP:procs) {

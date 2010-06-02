@@ -61,7 +61,7 @@ public class DataflowXMLSerializerTest implements XMLSerializationConstants {
 		assertEquals("there should be 1 child called name",1,el.getChildren("name",T2_WORKFLOW_NAMESPACE).size());
 		assertEquals("the name should be the-name","the-name",el.getChildText("name",T2_WORKFLOW_NAMESPACE));
 		assertNotNull("there should be an id attribute set",el.getAttributeValue("id"));
-		assertEquals("there should be an id attribute set that matches the dataflow",df.getInternalIdentifier(),el.getAttributeValue("id"));
+		assertEquals("there should be an id attribute set that matches the dataflow",df.getIdentifier(),el.getAttributeValue("id"));
 	}
 	
 	@Test
