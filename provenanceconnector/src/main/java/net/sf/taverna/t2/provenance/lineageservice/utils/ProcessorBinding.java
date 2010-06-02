@@ -26,65 +26,58 @@ package net.sf.taverna.t2.provenance.lineageservice.utils;
  * @author Paolo Missier
  *
  */
-public class ProcBinding {
+public class ProcessorBinding {
 	private String identifier;
 
-	private String processorNameRef;
-	private String execIDRef;
-	private String wfNameRef;
-	private String actName;
+	private String processorName;
+	private String workflowRunId;
+	private String workflowId;
+	private String firstActivityClassName;
 	private String iterationVector;
 	
-	
+	@Override
 	public String toString() {
-		
-		StringBuffer sb = new StringBuffer();
-		
-		sb.append("**** ProcBinding: \n").
-			append("execIDRef = "+execIDRef+"\n").
-			append("wfNameRef = "+wfNameRef+"\n").
-			append("processorNameRef = "+processorNameRef+"\n").
-			append("actName = "+actName+"\n").
-			append("iteration = "+iterationVector+"\n");
-
-		return sb.toString();
+		return "ProcessorBinding [firstActivityClassName="
+				+ firstActivityClassName + ", identifier=" + identifier
+				+ ", iterationVector=" + iterationVector + ", processorName="
+				+ processorName + ", workflowId=" + workflowId
+				+ ", workflowRunId=" + workflowRunId + "]";
 	}
-	
 	/**
 	 * @return the processorNameRef
 	 */
-	public String getprocessorNameRef() {
-		return processorNameRef;
+	public String getProcessorName() {
+		return processorName;
 	}
 	/**
 	 * @param nameRef the processorNameRef to set
 	 */
-	public void setprocessorNameRef(String nameRef) {
-		processorNameRef = nameRef;
+	public void setProcessorName(String processorNameRef) {
+		this.processorName = processorNameRef;
 	}
 	/**
 	 * @return the execIDRef
 	 */
-	public String getExecIDRef() {
-		return execIDRef;
+	public String getWorkflowRunId() {
+		return workflowRunId;
 	}
 	/**
-	 * @param execIDRef the execIDRef to set
+	 * @param workflowRunId the workflowRunId to set
 	 */
-	public void setExecIDRef(String execIDRef) {
-		this.execIDRef = execIDRef;
+	public void setWorkflowRunId(String workflowRunId) {
+		this.workflowRunId = workflowRunId;
 	}
 	/**
 	 * @return the actName
 	 */
-	public String getActName() {
-		return actName;
+	public String getFirstActivityClassName() {
+		return firstActivityClassName;
 	}
 	/**
 	 * @param actName the actName to set
 	 */
-	public void setActName(String actName) {
-		this.actName = actName;
+	public void setFirstActivityClassName(String actName) {
+		this.firstActivityClassName = actName;
 	}
 	/**
 	 * @return the iteration
@@ -108,17 +101,17 @@ public class ProcBinding {
 	}
 
 	/**
-	 * @return the wfNameRef
+	 * @return the workflowId
 	 */
-	public String getWfNameRef() {
-		return wfNameRef;
+	public String getWorkflowId() {
+		return workflowId;
 	}
 
 	/**
-	 * @param wfNameRef the wfNameRef to set
+	 * @param workflowId the workflowId to set
 	 */
-	public void setWfNameRef(String wfNameRef) {
-		this.wfNameRef = wfNameRef;
+	public void setWorkflowId(String workflowId) {
+		this.workflowId = workflowId;
 	}
 	
 	
