@@ -24,6 +24,7 @@ import java.lang.ref.WeakReference;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
@@ -34,6 +35,7 @@ import net.sf.taverna.t2.facade.FailureListener;
 import net.sf.taverna.t2.facade.ResultListener;
 import net.sf.taverna.t2.facade.WorkflowInstanceFacade;
 import net.sf.taverna.t2.facade.WorkflowRunCancellation;
+import net.sf.taverna.t2.facade.WorkflowInstanceFacade.State;
 import net.sf.taverna.t2.invocation.InvocationContext;
 import net.sf.taverna.t2.invocation.TokenOrderException;
 import net.sf.taverna.t2.invocation.WorkflowDataToken;
@@ -42,10 +44,10 @@ import net.sf.taverna.t2.lang.observer.Observer;
 import net.sf.taverna.t2.monitor.MonitorManager;
 import net.sf.taverna.t2.monitor.MonitorNode;
 import net.sf.taverna.t2.monitor.MonitorableProperty;
+import net.sf.taverna.t2.monitor.NoSuchPropertyException;
 import net.sf.taverna.t2.provenance.item.DataflowRunComplete;
 import net.sf.taverna.t2.provenance.item.WorkflowDataProvenanceItem;
 import net.sf.taverna.t2.provenance.item.WorkflowProvenanceItem;
-import net.sf.taverna.t2.provenance.reporter.ProvenanceReporter;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.reference.WorkflowRunIdEntity;
 import net.sf.taverna.t2.utility.TypedTreeModel;
@@ -78,7 +80,7 @@ import org.apache.log4j.Logger;
  * 
  */
 public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
-
+	
 	private static Logger logger = Logger
 			.getLogger(WorkflowInstanceFacadeImpl.class);
 
@@ -86,8 +88,8 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 
 	private InvocationContext context;
 	
-	// Is workflow currently running
-	private boolean isRunning = false;
+	private State state = State.prepared;
+	public Date stateLastModified = new Date();
 
 	public InvocationContext getContext() {
 		return context;
@@ -100,7 +102,6 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 	private String instanceOwningProcessId;
 	private String localName;
 	private MonitorManager monitorManager = MonitorManager.getInstance();
-	private boolean pushDataCalled = false;
 	protected List<FailureListener> failureListeners = Collections.synchronizedList(new ArrayList<FailureListener>());
 	protected List<ResultListener> resultListeners = Collections.synchronizedList(new ArrayList<ResultListener>());
 
@@ -227,22 +228,39 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 		}		
 	}
 
-	public void fire() throws IllegalStateException {
-		if (pushDataCalled)
+	public synchronized void fire() throws IllegalStateException {
+		if (getState().equals(State.running)) {
 			throw new IllegalStateException(
-					"Data has already been pushed, fire must be called first!");
+					"Workflow is already running!");
+		}
 		workflowStarted = new Timestamp(System.currentTimeMillis());
 		if (provEnabled) {
 			workflowItem.setInvocationStarted(workflowStarted);
 			context.getProvenanceReporter().addProvenanceItem(workflowItem);
 		}
 		
+		HashSet<MonitorableProperty<?>> properties = new HashSet<MonitorableProperty<?>>();
+		properties.add(new StateProperty());
 		monitorManager.registerNode(this, instanceOwningProcessId.split(":"),				
-				new HashSet<MonitorableProperty<?>>());
+				properties);
 		dataflow.fire(instanceOwningProcessId, context);
-		isRunning = true;		
+		setState(State.running);
 	}
 
+	public final class StateProperty implements MonitorableProperty<State> {
+		public Date getLastModified() {
+			return stateLastModified;
+		}
+
+		public String[] getName() {
+			return new String[] { "facade", "state" };
+		}
+
+		public State getValue() throws NoSuchPropertyException {
+			return state;
+		}
+	}
+	
 	public Dataflow getDataflow() {
 		return dataflow;
 	}
@@ -254,8 +272,9 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 
 	public void pushData(WorkflowDataToken token, String portName)
 			throws TokenOrderException {
-		if (! isRunning) {
-			throw new IllegalStateException("fire() has not yet been called, or workflow has been cancelled");
+		State currentState = getState();
+		if (! currentState.equals(State.running)) {
+			throw new IllegalStateException("Can't push data, current state is not running, but " + currentState);
 		}
 		// TODO: throw TokenOrderException when token stream is violates order
 		// constraints.
@@ -286,7 +305,6 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 				port.receiveEvent(token.pushOwningProcess(localName));
 			}
 		}
-		pushDataCalled = true;
 	}
 
 	public void removeFailureListener(FailureListener listener) {
@@ -423,7 +441,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 		}
 		processorsToComplete = -1;
 		portsToComplete = -1;
-		
+		setState(State.completed);
 	}
 
 
@@ -439,23 +457,56 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 		return workflowRunId;
 	}
 	
-	
-	public boolean isRunning(){
-			return this.isRunning;
+	public State getState() {
+		return state;
 	}
 	
-	public void setIsRunning(boolean isRunning){
-		this.isRunning = isRunning;
+	public synchronized void setState(State newState) throws IllegalStateException {
+		if (newState.equals(state)) {
+			return;
+		}
+		if (newState.equals(State.running)) {
+			if (state.equals(State.prepared) || state.equals(State.paused)) {
+				stateLastModified = new Date();
+				state = newState;
+				return;
+			}
+		} else if (newState.equals(State.paused)) {			
+			if (state.equals(State.running)) {
+				stateLastModified = new Date();
+				state = newState;
+				return;
+			}
+		} else if (newState.equals(State.completed)) {
+			if (state.equals(State.running)) {
+				stateLastModified = new Date();
+				state = newState;
+			} else if (state.equals(State.cancelled)) {
+				// Keep as cancelled
+				return;
+			}
+		} else if (newState.equals(State.cancelled)) {
+			if (! state.equals(State.completed)) {
+				stateLastModified = new Date();
+				state = newState;
+				return;
+			}
+		}		
+		throw new IllegalStateException("Can't change state from " + state  + " to " + newState);		
 	}
-
+	
+	
 	public synchronized boolean cancelWorkflowRun() {
-		this.isRunning = false;
+		if (getState().equals(State.completed)) {
+			return false;
+		}
 		boolean result = Stop.cancelWorkflow(getWorkflowRunId());
 		if (result) {
+			setState(State.cancelled);
 			List<FailureListener> copyOfListeners = null;
 			synchronized (failureListeners) {
 				copyOfListeners = new ArrayList<FailureListener>(failureListeners);
-			}			
+			}
 			for (FailureListener failureListener : copyOfListeners) {
 				try {
 					failureListener.workflowFailed("Workflow was cancelled", new WorkflowRunCancellation(getWorkflowRunId()));
@@ -472,10 +523,12 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 	}
 
 	public boolean pauseWorkflowRun() {
+		setState(State.paused);
 		return Stop.pauseWorkflow(getWorkflowRunId());
 	}
 
 	public boolean resumeWorkflowRun() {
+		setState(State.running);
 		return Stop.resumeWorkflow(getWorkflowRunId());
 	}
 

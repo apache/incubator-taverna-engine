@@ -59,6 +59,30 @@ import net.sf.taverna.t2.workflowmodel.Dataflow;
 @ControlBoundary
 public interface WorkflowInstanceFacade {
 
+	public static enum State {
+		/**
+		 * Workflow has not yet been started using {@link WorkflowInstanceFacade#fire()}
+		 */
+		prepared,
+		/**
+		 * Workflow is running (or have been resumed using {@link WorkflowInstanceFacade#fire()})
+		 */
+		running,
+		/**
+		 * Workflow has been paused using {@link WorkflowInstanceFacade#pauseWorkflowRun()}
+		 */
+		paused,
+		/**
+		 * Workflow has completed, all processors are finished and all data delivered to all output ports. 
+		 */
+		completed,
+		/**
+		 * Workflow has been cancelled using {@link WorkflowInstanceFacade#cancelWorkflowRun()}
+		 */
+		cancelled;
+	}
+	
+	
 	/**
 	 * A weak hash map of all workflow run IDs mapped against the corresponding
 	 * WorkflowInstanceFacadeS. This is needed for activities with dependencies
@@ -179,23 +203,27 @@ public interface WorkflowInstanceFacade {
 	 *         this does not mean that all of the invocations associated with
 	 *         the run have finished.
 	 */
-	public boolean cancelWorkflowRun();
+	public boolean cancelWorkflowRun() throws IllegalStateException;
 
 	/**
 	 * Pause the workflow run corresponding to this facade
 	 * 
 	 * @return true if the workflow run was successfully paused.
 	 */
-	public boolean pauseWorkflowRun();
+	public boolean pauseWorkflowRun() throws IllegalStateException;
 
 	/**
 	 * Resume the workflow run corresponding to this facade
 	 * 
 	 * @return true if the workflow run was successfully resumed
 	 */
-	public boolean resumeWorkflowRun();
+	public boolean resumeWorkflowRun() throws IllegalStateException;
 
-	// Is the workflow attached to this facade currently running
-	public boolean isRunning();
-	public void setIsRunning(boolean isRunning);
+	/**
+	 * Return the current workflow {@link State}.
+
+	 * @return The workflow state.
+	 */
+	public State getState();
+	
 }
