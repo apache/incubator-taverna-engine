@@ -418,6 +418,8 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 			logger.error("Already finished workflow", new IllegalStateException());
 			return;
 		}
+		setState(State.completed);
+		
 		// De-register the workflow node from the monitor
 		monitorManager.deregisterNode(instanceOwningProcessId + ":" + dataflow.getLocalName());
 
@@ -441,7 +443,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 		}
 		processorsToComplete = -1;
 		portsToComplete = -1;
-		setState(State.completed);
+		
 	}
 
 
