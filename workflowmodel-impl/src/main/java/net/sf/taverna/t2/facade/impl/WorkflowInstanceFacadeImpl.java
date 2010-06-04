@@ -481,6 +481,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 			if (state.equals(State.running)) {
 				stateLastModified = new Date();
 				state = newState;
+				return;
 			} else if (state.equals(State.cancelled)) {
 				// Keep as cancelled
 				return;
