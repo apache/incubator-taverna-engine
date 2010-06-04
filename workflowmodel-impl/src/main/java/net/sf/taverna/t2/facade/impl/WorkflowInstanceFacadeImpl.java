@@ -234,6 +234,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 					"Workflow is already running!");
 		}
 		workflowStarted = new Timestamp(System.currentTimeMillis());
+		setState(State.running);
 		if (provEnabled) {
 			workflowItem.setInvocationStarted(workflowStarted);
 			context.getProvenanceReporter().addProvenanceItem(workflowItem);
@@ -244,7 +245,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 		monitorManager.registerNode(this, instanceOwningProcessId.split(":"),				
 				properties);
 		dataflow.fire(instanceOwningProcessId, context);
-		setState(State.running);
+		
 	}
 
 	public final class StateProperty implements MonitorableProperty<State> {
@@ -257,7 +258,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 		}
 
 		public State getValue() throws NoSuchPropertyException {
-			return state;
+			return getState();
 		}
 	}
 	
@@ -410,16 +411,23 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 		}
 	}
 
-	private synchronized void checkWorkflowFinished() {
-		if (processorsToComplete > 0 || portsToComplete > 0) { 
-			return;
-		}
-		if (processorsToComplete < 0 || portsToComplete < 0) {
-			logger.error("Already finished workflow", new IllegalStateException());
-			return;
-		}
-		setState(State.completed);
-		
+	private void checkWorkflowFinished() {
+		synchronized (this) {
+			if (processorsToComplete > 0 || portsToComplete > 0) { 
+				return;
+			}
+			if (processorsToComplete < 0 || portsToComplete < 0) {
+				logger.error("Already finished workflow", new IllegalStateException());
+				return;
+			}
+			if (getState().equals(State.completed)) {
+				logger.error("Already finished workflow", new IllegalStateException());
+				return;
+			}
+			setState(State.completed);
+			processorsToComplete = -1;
+			portsToComplete = -1;
+		}	
 		// De-register the workflow node from the monitor
 		monitorManager.deregisterNode(instanceOwningProcessId + ":" + dataflow.getLocalName());
 
@@ -441,8 +449,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 			context.getProvenanceReporter().addProvenanceItem(
 					dataflowRunComplete);
 		}
-		processorsToComplete = -1;
-		portsToComplete = -1;
+		
 		
 	}
 
@@ -459,7 +466,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 		return workflowRunId;
 	}
 	
-	public State getState() {
+	public synchronized State getState() {
 		return state;
 	}
 	
