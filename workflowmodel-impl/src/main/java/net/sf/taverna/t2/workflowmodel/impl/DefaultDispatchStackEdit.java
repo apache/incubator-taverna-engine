@@ -39,10 +39,7 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.Stop;
 public class DefaultDispatchStackEdit extends AbstractProcessorEdit {
 	private Edit<?> compoundEdit=null;
 	private static final int MAX_JOBS = 1;
-	private static final long BACKOFF_FACTOR = (long) 1.1;
-	private static final int MAX_DELAY = 5000;
-	private static final int INITIAL_DELAY = 1000;
-	private static final int MAX_RETRIES = 0;
+
 
 	public DefaultDispatchStackEdit(Processor processor) {
 		super(processor);
@@ -54,8 +51,7 @@ public class DefaultDispatchStackEdit extends AbstractProcessorEdit {
 		edits.add(new AddDispatchLayerEdit(stack, new Parallelize(MAX_JOBS), layer++));
 		edits.add(new AddDispatchLayerEdit(stack, new ErrorBounce(), layer++));
 		edits.add(new AddDispatchLayerEdit(stack, new Failover(), layer++));
-		edits.add(new AddDispatchLayerEdit(stack, new Retry(MAX_RETRIES, INITIAL_DELAY,
-				MAX_DELAY, BACKOFF_FACTOR), layer++));
+		edits.add(new AddDispatchLayerEdit(stack, new Retry(), layer++));
 		edits.add(new AddDispatchLayerEdit(stack, new Stop(), layer++));
 		
 		edits.add(new AddDispatchLayerEdit(stack, new Invoke(), layer++));

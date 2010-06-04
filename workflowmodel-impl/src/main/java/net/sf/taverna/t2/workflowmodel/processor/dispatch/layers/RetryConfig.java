@@ -21,12 +21,17 @@
 package net.sf.taverna.t2.workflowmodel.processor.dispatch.layers;
 
 public class RetryConfig {
+	private static final long BACKOFF_FACTOR = (long) 1.1;
+	private static final int MAX_DELAY = 5000;
+	private static final int INITIAL_DELAY = 1000;
+	private static final int MAX_RETRIES = 0;
 
-	private float backoffFactor = 1f;
-	private int initialDelay = 1000;
-	private int maxDelay = 2000;
-	private int maxRetries = 0;
+	private float backoffFactor = BACKOFF_FACTOR;
+	private int initialDelay = INITIAL_DELAY;
+	private int maxDelay = MAX_DELAY;
+	private int maxRetries = MAX_RETRIES;
 
+	
 	/**
 	 * Factor by which the initial delay is multiplied for each retry after the
 	 * first, this allows for exponential backoff of retry times up to a certain
