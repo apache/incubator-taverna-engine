@@ -22,7 +22,7 @@ import org.apache.log4j.Logger;
  * 
  */
 public final class DisabledActivity extends
-		AbstractAsynchronousActivity<ActivityAndBeanWrapper> {
+		NonExecutableActivity<ActivityAndBeanWrapper> {
 
 	private static Logger logger = Logger.getLogger(DisabledActivity.class);
 
@@ -122,42 +122,6 @@ public final class DisabledActivity extends
 	}
 
 	/**
-	 * Add an input to the DisabledActivity with the specified name.
-	 * @param portName
-	 */
-	public void addProxyInput(String portName) {
-		super.addInput(portName, 0, true, null, null);
-	}
-
-	/**
-	 * Add an input to the DisabledActivity with the specified name and depth.
-	 * @param portName
-	 * @param depth
-	 */
-	public void addProxyInput(String portName, int depth) {
-		super.addInput(portName, depth, true, null, null);
-	}
-
-	/**
-	 * Add an output to the DisabledActivity with the specified name
-	 * 
-	 * @param portName
-	 */
-	public void addProxyOutput(String portName) {
-		super.addOutput(portName, 0);
-	}
-
-	/**
-	 * Add an output to the DisabledActivity with the specified name and depth
-	 * 
-	 * @param portName
-	 * @param depth
-	 */
-	public void addProxyOutput(String portName, int depth) {
-		super.addOutput(portName, depth);
-	}
-
-	/**
 	 * @return The Activity that has been disabled
 	 */
 	public Activity<?> getActivity() {
@@ -171,23 +135,6 @@ public final class DisabledActivity extends
 		return getConfiguration().getBean();
 	}
 
-	/* 
-	 * Attempting to run a DisabledActivity will always fail.
-	 * 
-	 * (non-Javadoc)
-	 * @see net.sf.taverna.t2.workflowmodel.processor.activity.AbstractAsynchronousActivity#executeAsynch(java.util.Map, net.sf.taverna.t2.workflowmodel.processor.activity.AsynchronousActivityCallback)
-	 */
-	@Override
-	public void executeAsynch(Map<String, T2Reference> data,
-			final AsynchronousActivityCallback callback) {
-		callback.requestRun(new Runnable() {
-
-			public void run() {
-				callback.fail("The service is offline");
-			}
-		});
-	}
-	
 	public boolean configurationWouldWork() {
 		return configurationWouldWork(conf.getBean());
 	}

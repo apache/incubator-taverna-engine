@@ -29,6 +29,8 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityAndBeanWrapper;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityConfigurationException;
 import net.sf.taverna.t2.workflowmodel.processor.activity.DisabledActivity;
+import net.sf.taverna.t2.workflowmodel.processor.activity.NonExecutableActivity;
+import net.sf.taverna.t2.workflowmodel.processor.activity.UnrecognizedActivity;
 import net.sf.taverna.t2.workflowmodel.serialization.DeserializationException;
 
 import org.apache.log4j.Logger;
@@ -67,34 +69,41 @@ public class ActivityXMLDeserializer extends AbstractXMLDeserializer {
 		}
 		String className = element.getChild(CLASS, T2_WORKFLOW_NAMESPACE)
 				.getTextTrim();
-		Class<? extends Activity> c = (Class<? extends Activity>) cl
-				.loadClass(className);
-		Activity activity = c.newInstance();
+		Activity activity;
+
+		try {
+		    Class<? extends Activity> c = (Class<? extends Activity>) cl
+			.loadClass(className);
+		    activity = c.newInstance();
 		
-		// Handle the configuration of the activity
-		Element configElement = element.getChild(CONFIG_BEAN,
-				T2_WORKFLOW_NAMESPACE);
-		Object configObject=null;
-		if (DATAFLOW_ENCODING.equals(configElement.getAttributeValue(BEAN_ENCODING))) {
+		    // Handle the configuration of the activity
+		    Element configElement = element.getChild(CONFIG_BEAN,
+							     T2_WORKFLOW_NAMESPACE);
+		    Object configObject=null;
+		    if (DATAFLOW_ENCODING.equals(configElement.getAttributeValue(BEAN_ENCODING))) {
 			String ref = configElement.getChild(DATAFLOW,T2_WORKFLOW_NAMESPACE).getAttributeValue(DATAFLOW_REFERENCE);
 			configObject = resolveDataflowReference(ref,innerDataflowElements);
-		}
-		else {
+		    }
+		    else {
 			configObject = createBean(configElement, cl);
-		}
-		try {
+		    }
+		    try {
 			activity.configure(configObject);
-		} catch (ActivityConfigurationException e) {
+		    } catch (ActivityConfigurationException e) {
 			activity = new DisabledActivity(c, configObject);
-		}
+		    }
 
+		}
+		catch (ClassNotFoundException e) {
+		    activity = new UnrecognizedActivity((Element) (element.clone()));
+		}
 		//port mappings
 		Element ipElement = element.getChild(INPUT_MAP, T2_WORKFLOW_NAMESPACE);
 		for (Element mapElement : (List<Element>) (ipElement.getChildren(MAP,
 				T2_WORKFLOW_NAMESPACE))) {
 			String processorInputName = mapElement.getAttributeValue(FROM);
 			String activityInputName = mapElement.getAttributeValue(TO);
-			if (activity instanceof DisabledActivity) {
+			if (activity instanceof NonExecutableActivity) {
 				Element processorElement = element.getParentElement().getParentElement();
 					Element inputPorts = processorElement.getChild(PROCESSOR_INPUT_PORTS,T2_WORKFLOW_NAMESPACE);
 					int depth = 0;
@@ -104,7 +113,7 @@ public class ActivityXMLDeserializer extends AbstractXMLDeserializer {
 								depth = Integer.valueOf(inputPort.getChildText(DEPTH,T2_WORKFLOW_NAMESPACE));
 							}
 						}
-				((DisabledActivity) activity).addProxyInput(activityInputName, depth);
+				((NonExecutableActivity) activity).addProxyInput(activityInputName, depth);
 			}
 			activity.getInputPortMapping().put(processorInputName,
 					activityInputName);
@@ -125,7 +134,7 @@ public class ActivityXMLDeserializer extends AbstractXMLDeserializer {
 						depth = Integer.valueOf(outputPort.getChildText(DEPTH,T2_WORKFLOW_NAMESPACE));
 					}
 				}
-				((DisabledActivity) activity).addProxyOutput(activityOutputName, depth);
+				((NonExecutableActivity) activity).addProxyOutput(activityOutputName, depth);
 			}
 			activity.getOutputPortMapping().put(activityOutputName,
 					processorOutputName);

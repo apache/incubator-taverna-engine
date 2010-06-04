@@ -30,6 +30,7 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityAndBeanWrapper
 import net.sf.taverna.t2.workflowmodel.processor.activity.DisabledActivity;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchStack;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationStrategyStack;
+import net.sf.taverna.t2.workflowmodel.processor.activity.UnrecognizedActivity;
 
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -96,6 +97,8 @@ public class ProcessorXMLSerializer extends AbstractXMLSerializer {
 		if (activity instanceof DisabledActivity) {
 			ActivityAndBeanWrapper wrapper = ((DisabledActivity) activity).getConfiguration();
 			return ActivityXMLSerializer.getInstance().activityToXML(wrapper.getActivity(), activity, wrapper.getBean());
+		} else if (activity instanceof UnrecognizedActivity) {
+		    return ((UnrecognizedActivity) activity).getConfiguration();
 		}
 		return ActivityXMLSerializer.getInstance().activityToXML(activity);
 	}
