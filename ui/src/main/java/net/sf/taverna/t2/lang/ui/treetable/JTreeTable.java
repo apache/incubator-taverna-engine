@@ -17,6 +17,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
@@ -83,8 +84,11 @@ public class JTreeTable extends JTable {
 		setDefaultRenderer(Date.class, new DateCellRenderer());
 		setDefaultEditor(TreeTableModel.class, new TreeTableCellEditor());
 		
-		// No grid.
+		// Show grid.
 		setShowGrid(true);
+		if (System.getProperty("os.name").equals("Mac OS X")){ // Seems like grid colour on MAC is white?
+			setGridColor(Color.LIGHT_GRAY);
+		}
 
 		// No intercell spacing
 		setIntercellSpacing(new Dimension(0, 0));
@@ -265,7 +269,7 @@ public class JTreeTable extends JTable {
 		}
 
 		/**
-		 * Sublcassed to translate the graphics such that the last visible row
+		 * Subclassed to translate the graphics such that the last visible row
 		 * will be drawn at 0,0.
 		 */
 		public void paint(Graphics g) {
@@ -275,6 +279,15 @@ public class JTreeTable extends JTable {
 			if (highlightBorder != null) {
 				highlightBorder.paintBorder(this, g, 0, visibleRow
 						* getRowHeight(), getWidth(), getRowHeight());
+			}
+			else{			
+				// Tree cell renderer get rid of the grid lines for some 
+				// reason so we draw them here
+				LinesBorder linesBorder = new LinesBorder(getGridColor(),
+						new Insets(0, 0, 1, 1));
+				linesBorder
+						.paintBorder(this, g, 0, visibleRow * getRowHeight(),
+								getWidth(), getRowHeight());
 			}
 		}
 
@@ -298,9 +311,13 @@ public class JTreeTable extends JTable {
 			if (realEditingRow() == row && getEditingColumn() == column) {
 				// background = UIManager.getColor("Table.focusCellBackground");
 				// foreground = UIManager.getColor("Table.focusCellForeground");
-			} else if (hasFocus) {
-				highlightBorder = UIManager
-						.getBorder("Table.focusCellHighlightBorder");
+			} else if (hasFocus) {		
+				if (isSelected) {
+						highlightBorder = UIManager.getBorder("Table.focusSelectedCellHighlightBorder");
+				}
+				else{
+					highlightBorder = UIManager.getBorder("Table.focusCellHighlightBorder");
+				}				
 				if (isCellEditable(row, column)) {
 					// background = UIManager.getColor
 					// ("Table.focusCellBackground");
@@ -322,7 +339,7 @@ public class JTreeTable extends JTable {
 					dtcr.setTextNonSelectionColor(foreground);
 					dtcr.setBackgroundNonSelectionColor(background);
 				}
-			}
+			}		
 			return this;
 		}
 
