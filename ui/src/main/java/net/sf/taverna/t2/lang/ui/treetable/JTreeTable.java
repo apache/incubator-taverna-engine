@@ -86,9 +86,9 @@ public class JTreeTable extends JTable {
 		
 		// Show grid.
 		setShowGrid(true);
-		if (System.getProperty("os.name").equals("Mac OS X")){ // Seems like grid colour on MAC is white?
+		//if (System.getProperty("os.name").equals("Mac OS X")){ // Seems like grid colour on MAC is white?
 			setGridColor(Color.LIGHT_GRAY);
-		}
+		//}
 
 		// No intercell spacing
 		setIntercellSpacing(new Dimension(0, 0));
