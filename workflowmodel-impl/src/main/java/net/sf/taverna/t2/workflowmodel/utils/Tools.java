@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
@@ -407,15 +408,39 @@ public class Tools {
 		Activity<?> brokenActivity = disabledActivity.getActivity();
 		try {
 			Activity ra = brokenActivity.getClass().newInstance();
-		    ra.configure(disabledActivity.getActivityConfiguration());
+			Object lastConfig = disabledActivity.getLastWorkingConfiguration();
+			if (lastConfig == null) {
+			    lastConfig = disabledActivity.getActivityConfiguration();
+			}
+		    ra.configure(lastConfig);
+
+		    Map<String, String> portMapping = ra.getInputPortMapping();
+		    Set<String> portNames = new HashSet<String>();
+		    portNames.addAll(portMapping.keySet());
+		    for (String portName : portNames) {
+			editList.add(edits.getRemoveActivityInputPortMappingEdit(ra, portName));
+		    }
+		    portMapping = ra.getOutputPortMapping();
+		    portNames.clear();
+		    portNames.addAll(portMapping.keySet());
+		    for (String portName : portNames) {
+			editList.add(edits.getRemoveActivityOutputPortMappingEdit(ra, portName));
+		    }
+		    
+		    portMapping = disabledActivity.getInputPortMapping();
+		    for (String portName : portMapping.keySet()) {
+			editList.add(edits.getAddActivityInputPortMappingEdit(ra, portName, portMapping.get(portName)));
+		    }
+		    portMapping = disabledActivity.getOutputPortMapping();
+		    for (String portName : portMapping.keySet()) {
+			editList.add(edits.getAddActivityOutputPortMappingEdit(ra, portName, portMapping.get(portName)));
+		    }
+		    
 		    editList.add(edits.getRemoveActivityEdit(processor, disabledActivity));
-		    ra.getInputPortMapping().clear();
-		    ra.getInputPortMapping().putAll(disabledActivity.getInputPortMapping());
-		    ra.getOutputPortMapping().clear();
-		    ra.getOutputPortMapping().putAll(disabledActivity.getOutputPortMapping());
 		    editList.add(edits.getAddActivityEdit(processor, ra));
 		}
 		catch (ActivityConfigurationException ex) {
+		    System.err.println("Configuration exception " + ex.getMessage());
 		    return null;
 		} catch (InstantiationException e) {
 			return null;
