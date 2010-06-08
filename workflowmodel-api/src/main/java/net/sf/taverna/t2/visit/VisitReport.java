@@ -15,6 +15,8 @@ import java.util.Map;
  */
 public class VisitReport {
 
+	private static final String INDENTION = "    ";
+
 	/**
 	 * Enumeration of the possible status's in increasing severity: OK,
 	 * WARNING,SEVERE
@@ -311,4 +313,29 @@ public class VisitReport {
 	public int hashCode() {
 		return ((this.getMessage().hashCode() / 2) + (this.getSubject().hashCode() / 2));
 	}
+	
+	@Override
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		visitReportToStringBuffer(sb, "");
+		return sb.toString();
+	}
+	
+	protected void visitReportToStringBuffer(
+			StringBuffer sb, String indent) {	
+		sb.append(indent);
+		sb.append(getStatus());
+		sb.append(' ');
+		sb.append(getMessage());
+		if (! propertyMap.isEmpty()) {
+			sb.append(' ');
+			sb.append(propertyMap);
+		}
+		sb.append('\n');
+		indent = indent + INDENTION;
+		for (VisitReport subReport : getSubReports()) {
+			subReport.visitReportToStringBuffer(sb, indent);
+		}
+	}
+	
 }
