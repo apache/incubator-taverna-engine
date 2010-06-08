@@ -31,11 +31,14 @@ public final class DisabledActivity extends
 	 */
 	private ActivityAndBeanWrapper conf;
 
+	private Object lastWorkingConfiguration;
+
 	/**
 	 * It is not possible to create a "naked" DisabledActivity.
 	 */
 	private DisabledActivity() {
 		super();
+		lastWorkingConfiguration = null;
 	}
 
 	/**
@@ -141,6 +144,7 @@ public final class DisabledActivity extends
 	
 	public boolean configurationWouldWork(Object newConfig) {
 		boolean result = true;
+		lastWorkingConfiguration = null;
 		try {
 			Activity aa = (Activity) (conf.getActivity().getClass().newInstance());
 			aa.configure(newConfig);
@@ -174,7 +178,13 @@ public final class DisabledActivity extends
 		} catch (IllegalAccessException e) {
 			return false;
 		}
+		if (result) {
+		    lastWorkingConfiguration = newConfig;
+		}
 		return result;
 	}
 
+	public Object getLastWorkingConfiguration() {
+	    return lastWorkingConfiguration;
+	}
 }
