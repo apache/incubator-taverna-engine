@@ -25,6 +25,8 @@ import java.io.IOException;
 import net.sf.taverna.t2.workflowmodel.Configurable;
 import net.sf.taverna.t2.workflowmodel.ConfigurationException;
 import net.sf.taverna.t2.workflowmodel.EditException;
+import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityAndBeanWrapper;
+import net.sf.taverna.t2.workflowmodel.processor.activity.DisabledActivity;
 import net.sf.taverna.t2.workflowmodel.serialization.xml.AbstractXMLDeserializer;
 import net.sf.taverna.t2.workflowmodel.serialization.xml.AbstractXMLSerializer;
 
@@ -54,6 +56,8 @@ public class ConfigureEdit<SubjectInterface extends Configurable, SubjectType ex
 
 	private Element previousBean;
 
+	private ClassLoader cl;
+
 	public ConfigureEdit(Class<?> subjectType,
 			SubjectInterface configurable, Object configurationBean) {
 		super(subjectType, configurable);
@@ -81,6 +85,9 @@ public class ConfigureEdit<SubjectInterface extends Configurable, SubjectType ex
 			// FIXME: Should clone bean on configuration to prevent caller from
 			// modifying bean afterwards
 			subject.configure(configurationBean);
+			if (subject instanceof DisabledActivity) {
+			    cl = ((ActivityAndBeanWrapper)configurationBean).getActivity().getClass().getClassLoader();
+			}
 		} catch (ConfigurationException e) {
 			logger.error("Error configuring :"
 					+ subject.getClass().getSimpleName(), e);
@@ -118,14 +125,17 @@ public class ConfigureEdit<SubjectInterface extends Configurable, SubjectType ex
 	 */
 	protected class BeanDeSerialiser extends AbstractXMLDeserializer {
 		public Object createBean(Element configElement) {
-			ClassLoader beanClassLoader = getClass().getClassLoader();
-			ClassLoader configurableClassLoader = getSubject()
-					.getConfiguration().getClass().getClassLoader();
-			if (configurableClassLoader != null) {
-				return super.createBean(configElement, configurableClassLoader);
-			} else {
-				return super.createBean(configElement, beanClassLoader);
-			}
+		    if (cl != null) {
+		    return super.createBean(configElement, cl);
+		    }
+		    ClassLoader beanClassLoader = getClass().getClassLoader();
+		    ClassLoader configurableClassLoader = getSubject()
+			.getConfiguration().getClass().getClassLoader();
+		    if (configurableClassLoader != null) {
+			return super.createBean(configElement, configurableClassLoader);
+		    } else {
+			return super.createBean(configElement, beanClassLoader);
+		    }
 		}
 	}
 
