@@ -116,6 +116,16 @@ public class HierarchyTraverser {
 		}
 	}
 
+    private void patchCheckTime(VisitReport vr, long time) {
+	    vr.setCheckTime(time);
+		Collection<VisitReport> subReports = vr.getSubReports();
+		if (subReports != null) {
+			for (VisitReport child : vr.getSubReports()) {
+			    patchCheckTime(child, time);
+			}
+		}
+	}
+
 	/**
 	 * Change a VisitReport and its sub-reports (if any) to indicate that the
 	 * visit was time-consuming. This is done to ensure that the time-consuming
@@ -175,6 +185,8 @@ public class HierarchyTraverser {
 				if (report == null) {
 					continue;
 				}
+
+				patchCheckTime(report, System.currentTimeMillis());
 
 				// If the current object is an Activity then change the report
 				// so that its subject is the Processor containing the Activity
