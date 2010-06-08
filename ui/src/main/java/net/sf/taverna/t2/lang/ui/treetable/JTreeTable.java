@@ -84,11 +84,14 @@ public class JTreeTable extends JTable {
 		setDefaultRenderer(Date.class, new DateCellRenderer());
 		setDefaultEditor(TreeTableModel.class, new TreeTableCellEditor());
 		
-		// Show grid.
-		setShowGrid(true);
-		//if (System.getProperty("os.name").equals("Mac OS X")){ // Seems like grid colour on MAC is white?
+		// Show grid but only if Look and Feel is not Java 6's Nimbus
+		if (!UIManager.getLookAndFeel().getName().equals("Nimbus")){
+			setShowGrid(true);
 			setGridColor(Color.LIGHT_GRAY);
-		//}
+		}
+		else{
+			setShowGrid(false);
+		}
 
 		// No intercell spacing
 		setIntercellSpacing(new Dimension(0, 0));
@@ -128,7 +131,7 @@ public class JTreeTable extends JTable {
 
 	/**
 	 * Overridden to message super and forward the method to the tree. Since the
-	 * tree is not actually in the component hieachy it will never receive this
+	 * tree is not actually in the component hierarchy it will never receive this
 	 * unless we forward it in this manner.
 	 */
 	public void updateUI() {
@@ -235,7 +238,7 @@ public class JTreeTable extends JTable {
 			// colors.
 			TreeCellRenderer tcr = getCellRenderer();
 			if (tcr instanceof DefaultTreeCellRenderer) {
-				DefaultTreeCellRenderer dtcr = ((DefaultTreeCellRenderer) tcr);
+				//DefaultTreeCellRenderer dtcr = ((DefaultTreeCellRenderer) tcr);
 				// For 1.1 uncomment this, 1.2 has a bug that will cause an
 				// exception to be thrown if the border selection color is
 				// null.
@@ -282,12 +285,16 @@ public class JTreeTable extends JTable {
 			}
 			else{			
 				// Tree cell renderer get rid of the grid lines for some 
-				// reason so we draw them here
-				LinesBorder linesBorder = new LinesBorder(getGridColor(),
-						new Insets(0, 0, 1, 1));
-				linesBorder
-						.paintBorder(this, g, 0, visibleRow * getRowHeight(),
-								getWidth(), getRowHeight());
+				// reason so we draw them here but only if Look and Feel
+				// is different from Java 6's Nimbus LaF
+				// as it completely ignores the grid lines
+				if (!UIManager.getLookAndFeel().getName().equals("Nimbus")){
+					LinesBorder linesBorder = new LinesBorder(getGridColor(),
+							new Insets(0, 0, 1, 1));
+					linesBorder
+					.paintBorder(this, g, 0, visibleRow * getRowHeight(),
+							getWidth(), getRowHeight());
+				}
 			}
 		}
 
