@@ -101,6 +101,11 @@ public class VisitReport {
 		this(kind, subject, message, resultId, status,
 				new ArrayList<VisitReport>());
 	}
+	
+	/**
+	 * Used internally by {@link #clone()}.
+	 */
+	protected VisitReport() {}
 
 	/**
 	 * Constructs the Visit Report
@@ -259,6 +264,10 @@ public class VisitReport {
 		return propertyMap.get(key);
 	}
 
+	public Map<String, Object> getProperties() {
+		return propertyMap;
+	}
+	
 	/**
 	 * Find the most recent ancestor (earliest in the list) of a given class from the list of ancestors
 	 * 
@@ -324,6 +333,29 @@ public class VisitReport {
 		for (VisitReport subReport : getSubReports()) {
 			subReport.visitReportToStringBuffer(sb, indent);
 		}
+	}
+	
+	@Override
+	public VisitReport clone() throws CloneNotSupportedException {
+		if (! getClass().equals(VisitReport.class)) {
+			throw new CloneNotSupportedException("Can't clone subclass " + getClass() + ", reimplement clone() and use internalClone()");
+		}
+		return internalClone(new VisitReport());
+	}
+
+	protected VisitReport internalClone(VisitReport newReport) throws CloneNotSupportedException {
+		newReport.checkTime = this.checkTime;
+		newReport.kind = this.kind;
+		newReport.message = this.message;
+		newReport.propertyMap.putAll(this.propertyMap);
+		newReport.resultId = this.resultId;
+		newReport.status = this.status;
+		newReport.subject = this.subject;
+		newReport.wasTimeConsuming = this.wasTimeConsuming;
+		for (VisitReport childReport : this.subReports) {
+			newReport.subReports.add(childReport.clone());
+		}
+		return newReport;
 	}
 	
 }
