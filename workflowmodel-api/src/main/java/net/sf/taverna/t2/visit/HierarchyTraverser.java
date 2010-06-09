@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -44,13 +45,13 @@ public class HierarchyTraverser {
 	 * done by String because of problems with annotations on overridden
 	 * methods.
 	 */
-	private static Map<Class, Set<String>> childrenMethods = new WeakHashMap<Class, Set<String>>();
+	private static Map<Class, Set<String>> childrenMethods = Collections.synchronizedMap(new WeakHashMap<Class, Set<String>>());
 
 	/**
 	 * The set of visitors that can perform visits of one or more of a set of
 	 * VisitKind.
 	 */
-	protected Set<Visitor> visitors;
+	protected Set<Visitor> visitors = new HashSet<Visitor>();;
 
 	/**
 	 * Create a HierarchyTraverser that can perform visits of the specified set
@@ -58,8 +59,7 @@ public class HierarchyTraverser {
 	 * 
 	 * @param descriptions
 	 */
-	public HierarchyTraverser(Collection<VisitKind> descriptions) {
-		visitors = new HashSet<Visitor>();
+	public HierarchyTraverser(Collection<VisitKind> descriptions) {		
 		for (VisitKind kind : descriptions) {
 			SPIRegistry<Visitor> visitorRegistry = new SPIRegistry(kind
 					.getVisitorClass());
@@ -276,7 +276,7 @@ public class HierarchyTraverser {
 	 * Determine the set of singletons corresponding to an object. If the object
 	 * is a singleton then a set containing just the object is returned. If the
 	 * object is iterable then the singletons of the elements of the iteration
-	 * are returned.ï
+	 * are returned.ï¿½
 	 * 
 	 * @param o
 	 *            The object.
