@@ -4,11 +4,14 @@
 package net.sf.taverna.t2.workflowmodel.health;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.sf.taverna.t2.visit.VisitReport;
 import net.sf.taverna.t2.visit.VisitReport.Status;
@@ -24,11 +27,15 @@ import org.apache.log4j.Logger;
  * 
  */
 public abstract class RemoteHealthChecker implements HealthChecker<Object> {
-	
-	private static Logger logger = Logger.getLogger(RemoteHealthChecker.class);
+		
+	public static final long ENDPOINT_EXPIRY_MILLIS = 30 * 1000; // 30 seconds
 
+	private static Logger logger = Logger.getLogger(RemoteHealthChecker.class);
+	
 	private static int timeout = 1000;
 
+	private static long endpointExpiryMillis = ENDPOINT_EXPIRY_MILLIS;
+	
 	public static int getTimeoutInSeconds() {
 		return timeout / 1000;
 	}
@@ -36,7 +43,27 @@ public abstract class RemoteHealthChecker implements HealthChecker<Object> {
 	public static void setTimeoutInSeconds(int timeout) {
 		RemoteHealthChecker.timeout = timeout * 1000;
 	}
+	
+	public static long getEndpointExpiryInMilliseconds() {
+		return endpointExpiryMillis;
+	}
+	public static void setendpointExpiryInMilliseconds(int endpointExpiry) {
+		endpointExpiryMillis = endpointExpiry;
+	}
 
+	/**
+	 * Clear the cached endpoint statuses. Normally {@link RemoteHealthChecker}
+	 * will only check an endpoint again if it has been more than
+	 * {@link #getEndpointExpiryInMilliseconds()} milliseconds since last check,
+	 * by default 30 seconds.
+	 */
+	public static void clearCachedEndpointStatus() {
+		visitReportsByEndpoint.clear();
+	}
+
+	private static Map<String, WeakReference<VisitReport>> visitReportsByEndpoint = new ConcurrentHashMap<String, WeakReference<VisitReport>>();
+
+	
 	/**
 	 * Try to contact the specified endpoint as part of the health-checking of the Activity.
 	 * 
@@ -47,6 +74,29 @@ public abstract class RemoteHealthChecker implements HealthChecker<Object> {
 	 */
 	public static VisitReport contactEndpoint(Activity activity, String endpoint) {
 
+		WeakReference<VisitReport> cachedReportRef = visitReportsByEndpoint.get(endpoint);
+		VisitReport cachedReport = null;
+		if (cachedReportRef != null) {
+			cachedReport = cachedReportRef.get();
+		}
+		if (cachedReport != null) {
+			long now = System.currentTimeMillis();
+			long age = now - cachedReport.getCheckTime();
+			if (age < getEndpointExpiryInMilliseconds()) {
+				VisitReport newReport;
+				try {
+					// Make a copy
+					newReport = cachedReport.clone();
+					// But changed the subject
+					newReport.setSubject(activity);
+					logger.info("Returning cached report for endpoint " + endpoint + ": " + newReport);
+					return newReport;
+				} catch (CloneNotSupportedException e) {
+					logger.warn("Could not clone VisitReport " + cachedReport, e);
+				}				
+			}
+		}
+		
 		Status status = Status.OK;
 		String message = "Responded OK";
 		int resultId = HealthCheck.NO_PROBLEM;
@@ -106,7 +156,7 @@ public abstract class RemoteHealthChecker implements HealthChecker<Object> {
 				logger.info("Unable to close connection to " + endpoint, e);
 			}
 		}
-
+		
 		VisitReport vr = new VisitReport(HealthCheck.getInstance(), activity, message,
 				resultId, status);
 		vr.setProperty("endpoint", endpoint);
@@ -119,6 +169,7 @@ public abstract class RemoteHealthChecker implements HealthChecker<Object> {
 		if (resultId == HealthCheck.TIME_OUT) {
 			vr.setProperty("timeOut", Integer.toString(timeout));
 		}
+		visitReportsByEndpoint.put(endpoint, new WeakReference<VisitReport>(vr));
 		return vr;
 	}
 
