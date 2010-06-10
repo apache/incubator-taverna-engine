@@ -35,7 +35,6 @@ import net.sf.taverna.t2.facade.FailureListener;
 import net.sf.taverna.t2.facade.ResultListener;
 import net.sf.taverna.t2.facade.WorkflowInstanceFacade;
 import net.sf.taverna.t2.facade.WorkflowRunCancellation;
-import net.sf.taverna.t2.facade.WorkflowInstanceFacade.State;
 import net.sf.taverna.t2.invocation.InvocationContext;
 import net.sf.taverna.t2.invocation.TokenOrderException;
 import net.sf.taverna.t2.invocation.WorkflowDataToken;
@@ -413,15 +412,20 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 
 	private void checkWorkflowFinished() {
 		synchronized (this) {
-			if (processorsToComplete > 0 || portsToComplete > 0) { 
-				return;
-			}
-			if (processorsToComplete < 0 || portsToComplete < 0) {
-				logger.error("Already finished workflow", new IllegalStateException());
+			if (getState().equals(State.cancelled)) {
+				logger.error("Already cancelled workflow run");
 				return;
 			}
 			if (getState().equals(State.completed)) {
-				logger.error("Already finished workflow", new IllegalStateException());
+				logger.error("Already finished workflow run", new IllegalStateException());
+				return;
+			}
+			if (processorsToComplete > 0 || portsToComplete > 0) { 
+				// Not yet finished
+				return;
+			}
+			if (processorsToComplete < 0 || portsToComplete < 0) {
+				logger.error("Already finished workflow run", new IllegalStateException());
 				return;
 			}
 			setState(State.completed);
