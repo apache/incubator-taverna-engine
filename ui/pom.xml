@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.sf.taverna.t2.lang</groupId>
 	<artifactId>ui</artifactId>
@@ -13,16 +14,16 @@
 		<dependency>
 			<groupId>net.sf.taverna.t2.lang</groupId>
 			<artifactId>observer</artifactId>
-		<version>${project.version}</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 		</dependency>
 		<dependency>
-	<groupId>net.sf.taverna.jedit</groupId>
-	<artifactId>jedit-syntax</artifactId>
-	<version>2.2.4-SNAPSHOT</version>
+			<groupId>net.sf.taverna.jedit</groupId>
+			<artifactId>jedit-syntax</artifactId>
+			<version>2.2.4-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 </project>
