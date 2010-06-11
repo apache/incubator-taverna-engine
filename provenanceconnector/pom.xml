@@ -6,13 +6,13 @@
     <parent>
         <groupId>net.sf.taverna.t2</groupId>
         <artifactId>core</artifactId>
-        <version>1.1-SNAPSHOT</version>
+        <version>1.2</version>
     </parent>
     <groupId>net.sf.taverna.t2.core</groupId>
     <artifactId>provenanceconnector</artifactId>
     <name>Database storage and analysis of provenance info</name>
     <properties>
-        <t2.ui.components.version>1.1-SNAPSHOT</t2.ui.components.version>
+        <t2.ui.components.version>1.2</t2.ui.components.version>
     </properties>
     <repositories>
         <repository>
