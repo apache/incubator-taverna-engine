@@ -228,7 +228,7 @@ public class HierarchyTraverser {
 							DataflowCollation.getInstance(),
 							p,
 							(worstStatus.equals(Status.WARNING) ? "Warnings in nested workflow"
-									: "Problems in nested workflow"),
+									: "Errors in nested workflow"),
 							DataflowCollation.NESTED_ISSUES, worstStatus,
 							subReports);
 					report.setWasTimeConsuming(includeTimeConsuming);

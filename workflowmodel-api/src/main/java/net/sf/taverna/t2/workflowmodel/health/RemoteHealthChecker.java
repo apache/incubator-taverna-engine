@@ -144,7 +144,7 @@ public abstract class RemoteHealthChecker implements HealthChecker<Object> {
 			ex = e;
 		} catch (IOException e) {
 			status = Status.SEVERE;
-			message = "IO problem";
+			message = "Read problem";
 			resultId = HealthCheck.IO_PROBLEM;
 			ex = e;
 		} finally {
