@@ -124,7 +124,7 @@ public class ActivityXMLDeserializer extends AbstractXMLDeserializer {
 				T2_WORKFLOW_NAMESPACE))) {
 			String activityOutputName = mapElement.getAttributeValue(FROM);
 			String processorOutputName = mapElement.getAttributeValue(TO);
-			if (activity instanceof DisabledActivity) {
+			if (activity instanceof NonExecutableActivity) {
 				Element processorElement = element.getParentElement().getParentElement();
 				int depth = 0;
 				Element outputPorts = processorElement.getChild(PROCESSOR_OUTPUT_PORTS,T2_WORKFLOW_NAMESPACE);
