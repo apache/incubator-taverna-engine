@@ -106,10 +106,11 @@ public abstract class RemoteHealthChecker implements HealthChecker<Object> {
 		try {
 			URL url = new URL(endpoint);
 			connection = url.openConnection();
+			connection.setReadTimeout(timeout);
+			connection.setConnectTimeout(timeout);
 			if (connection instanceof HttpURLConnection) {
 				HttpURLConnection httpConnection = (HttpURLConnection) connection;
 				httpConnection.setRequestMethod("HEAD");
-				httpConnection.setReadTimeout(timeout);
 				httpConnection.connect();
 				responseCode = httpConnection.getResponseCode();
 				if (responseCode != HttpURLConnection.HTTP_OK) {
