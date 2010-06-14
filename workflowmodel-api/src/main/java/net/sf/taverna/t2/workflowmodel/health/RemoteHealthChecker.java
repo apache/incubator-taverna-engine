@@ -121,7 +121,7 @@ public abstract class RemoteHealthChecker implements HealthChecker<Object> {
 					}
 					else if ((responseCode == HttpURLConnection.HTTP_NOT_FOUND)
 							|| (responseCode == HttpURLConnection.HTTP_GONE)) {
-						status = Status.SEVERE;
+						status = Status.WARNING;
 						message = "Bad response";
 						resultId = HealthCheck.CONNECTION_PROBLEM;
 					}
