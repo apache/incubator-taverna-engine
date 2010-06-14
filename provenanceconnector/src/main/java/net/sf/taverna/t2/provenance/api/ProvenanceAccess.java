@@ -546,8 +546,8 @@ public class ProvenanceAccess {
 	}
 	
 	public net.sf.taverna.t2.provenance.lineageservice.utils.ProcessorEnactment getProcessorEnactmentByProcessId(
-			String workflowRunId, String processIdentifier) {
-		return pq.getProcessorEnactmentByProcessId(workflowRunId, processIdentifier);
+			String workflowRunId, String processIdentifier, String iteration) {
+		return pq.getProcessorEnactmentByProcessId(workflowRunId, processIdentifier, iteration);
 	}
 
 	public net.sf.taverna.t2.provenance.lineageservice.utils.ProcessorEnactment getProcessorEnactment(

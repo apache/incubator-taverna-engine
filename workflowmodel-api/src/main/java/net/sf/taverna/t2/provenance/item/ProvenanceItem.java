@@ -25,6 +25,8 @@ import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
 /**
  * Used to store some enactment information during a workflow run
  * 
+ * @see AbstractProvenanceItem
+ * 
  * @author Ian Dunlop
  * 
  */

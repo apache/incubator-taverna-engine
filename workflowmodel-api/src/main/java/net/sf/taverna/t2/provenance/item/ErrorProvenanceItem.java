@@ -32,16 +32,12 @@ import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
  * @author Paolo Missier
  * 
  */
-public class ErrorProvenanceItem implements ProvenanceItem {
+public class ErrorProvenanceItem extends AbstractProvenanceItem {
 
 	private Throwable cause;
 	private String message;
 	private String errorType;
-	private String processId;
-	private String parentId;
-	private String identifier;
 	private SharedVocabulary eventType = SharedVocabulary.ERROR_EVENT_TYPE;
-	private String workflowId;
 
 	public ErrorProvenanceItem() {
 	}
@@ -72,40 +68,6 @@ public class ErrorProvenanceItem implements ProvenanceItem {
 
 	public void setErrorType(String errorType) {
 		this.errorType = errorType;
-	}
-
-	public String getIdentifier() {
-		return identifier;
-	}
-
-	public void setIdentifier(String identifier) {
-		this.identifier = identifier;
-	}
-	
-	public void setProcessId(String processId) {
-		this.processId = processId;
-	}
-
-	public String getParentId() {
-		return parentId;
-	}
-
-
-	public void setParentId(String parentId) {
-		this.parentId = parentId;
-
-	}
-
-	public String getProcessId() {
-		return processId;
-	}
-	
-	public String getWorkflowId() {
-		return workflowId;
-	}
-
-	public void setWorkflowId(String workflowId) {
-		this.workflowId = workflowId;	
 	}
 
 }

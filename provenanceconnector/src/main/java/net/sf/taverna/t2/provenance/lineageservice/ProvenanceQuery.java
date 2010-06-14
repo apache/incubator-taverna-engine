@@ -2494,8 +2494,9 @@ public abstract class ProvenanceQuery {
 	}
 	
 	
+	@SuppressWarnings("static-access")
 	public ProcessorEnactment getProcessorEnactmentByProcessId(String workflowRunId,
-			String processIdentifier) {
+			String processIdentifier, String iteration) {
 ProvenanceConnector.ProcessorEnactmentTable ProcEnact = ProvenanceConnector.ProcessorEnactmentTable.ProcessorEnactment;		
 		String query  = 
 				"SELECT " + ProcEnact.enactmentStarted + ","
@@ -2512,7 +2513,8 @@ ProvenanceConnector.ProcessorEnactmentTable ProcEnact = ProvenanceConnector.Proc
 						+ ProcEnact.ProcessorEnactment
 						+ " WHERE "
 						+ ProcEnact.workflowRunId + "=?"
-						+ " AND " + ProcEnact.processIdentifier + "=?";
+						+ " AND " + ProcEnact.processIdentifier + "=?"
+						+ " AND " + ProcEnact.iteration+"=?";
 
 		
 		PreparedStatement statement;
@@ -2523,14 +2525,20 @@ ProvenanceConnector.ProcessorEnactmentTable ProcEnact = ProvenanceConnector.Proc
 			statement = connection.prepareStatement(query);
 			statement.setString(1, workflowRunId);
 			statement.setString(2, processIdentifier);
+			statement.setString(3, iteration);
+
 			ResultSet resultSet = statement.executeQuery();
+			String debugString = "ProcessorEnactment runId=" + workflowRunId
+					+ " processIdentifier=" + processIdentifier + " iteration="
+					+ iteration;
 			if (! resultSet.next()) {
-				logger.warn("Could not find ProcessorEnactment runId=" + workflowRunId + " processIdentifier=" +processIdentifier);
+				logger.warn("Could not find " +
+						debugString);
 				return null;
 			}
 			procEnact = readProcessorEnactment(resultSet);
 			if (resultSet.next()) {
-				logger.error("Found more than one ProcessorEnactment runId=" + workflowRunId + " processIdentifier=" +processIdentifier);
+				logger.error("Found more than one " + debugString);
 				return null;
 			}
 		} catch (SQLException e) {

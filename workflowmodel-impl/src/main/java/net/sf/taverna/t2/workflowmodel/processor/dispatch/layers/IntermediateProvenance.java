@@ -28,12 +28,10 @@ import java.io.InputStream;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.Map.Entry;
 
 import net.sf.taverna.t2.invocation.Event;
 import net.sf.taverna.t2.provenance.item.ActivityProvenanceItem;

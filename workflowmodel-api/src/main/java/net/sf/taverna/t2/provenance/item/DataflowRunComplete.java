@@ -33,13 +33,9 @@ import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
  * @author Ian Dunlop
  * 
  */
-public class DataflowRunComplete implements ProvenanceItem {
+public class DataflowRunComplete extends AbstractProvenanceItem {
 
-	private String processId;
-	private String parentId;
-	private String identifier;
 	private SharedVocabulary eventType = SharedVocabulary.END_WORKFLOW_EVENT_TYPE;
-	private String workflowId;
 	private Timestamp invocationEnded;
 
 	public Timestamp getInvocationEnded() {
@@ -48,38 +44,6 @@ public class DataflowRunComplete implements ProvenanceItem {
 
 	public SharedVocabulary getEventType() {
 		return eventType;
-	}
-
-	public String getIdentifier() {
-		return identifier;
-	}
-
-	public void setProcessId(String processId) {
-		this.processId = processId;
-	}
-
-	public String getParentId() {
-		return parentId;
-	}
-
-	public void setIdentifier(String identifier) {
-		this.identifier = identifier;
-	}
-
-	public void setParentId(String parentId) {
-		this.parentId = parentId;
-	}
-
-	public String getProcessId() {
-		return processId;
-	}
-
-	public String getWorkflowId() {
-		return workflowId;
-	}
-
-	public void setWorkflowId(String workflowId) {
-		this.workflowId = workflowId;		
 	}
 
 	public void setInvocationEnded(Timestamp invocationEnded) {

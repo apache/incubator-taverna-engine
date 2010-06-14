@@ -26,8 +26,6 @@ import net.sf.taverna.t2.facade.WorkflowInstanceFacade;
 import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
 
-import org.apache.log4j.Logger;
-
 /**
  * The first {@link ProvenanceItem} that the {@link ProvenanceConnector} will
  * receive for a workflow run. Contains the {@link Dataflow} itself as well as
@@ -40,20 +38,12 @@ import org.apache.log4j.Logger;
  * @author Stuart Owen
  * 
  */
-public class WorkflowProvenanceItem implements ProvenanceItem {
-
-	private static Logger logger = Logger
-			.getLogger(WorkflowProvenanceItem.class);
+public class WorkflowProvenanceItem extends AbstractProvenanceItem {
 
 	private Dataflow dataflow;
-	private String processId;
-	private String parentId;
-	private String identifier;
 	private SharedVocabulary eventType  = SharedVocabulary.WORKFLOW_EVENT_TYPE;
 	private int[] index;
 	private boolean isFinal;
-
-	private String workflowId;
 
 	private Timestamp invocationStarted;
 	
@@ -76,31 +66,7 @@ public class WorkflowProvenanceItem implements ProvenanceItem {
 	public SharedVocabulary getEventType() {
 		return eventType;
 	}
-
-	public String getIdentifier() {
-		return identifier;
-	}
-
-	public void setProcessId(String processId) {
-		this.processId = processId;
-	}
-
-	public String getParentId() {
-		return parentId;
-	}
-
-	public void setIdentifier(String identifier) {
-		this.identifier = identifier;
-	}
-
-	public void setParentId(String parentId) {
-		this.parentId = parentId;
-	}
-
-	public String getProcessId() {
-		return processId;
-	}
-
+	
 	/**
 	 * @return the index
 	 */
@@ -127,14 +93,6 @@ public class WorkflowProvenanceItem implements ProvenanceItem {
 	 */
 	public void setFinal(boolean isFinal) {
 		this.isFinal = isFinal;
-	}
-	
-	public String getWorkflowId() {
-		return workflowId;
-	}
-
-	public void setWorkflowId(String workflowId) {
-		this.workflowId = workflowId;	
 	}
 
 	public void setInvocationStarted(Timestamp invocationStarted) {

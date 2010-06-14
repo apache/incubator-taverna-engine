@@ -42,6 +42,8 @@ public class WorkflowDataProcessor {
 	ProvenanceQuery pq=null;
 	ProvenanceWriter pw = null;
 
+	protected Map<String, ProcessorEnactment> invocationProcessToProcessEnactment = new ConcurrentHashMap<String, ProcessorEnactment>();
+
 	/**
 	 * adds the input ProvenanceItem event to the tree structure corresponding to the portName found in the item. 
 	 * Repeated invocations of this method incrementally reconstruct the tree structure for each of the workflow outputs
@@ -115,7 +117,7 @@ public class WorkflowDataProcessor {
 					if (node.getIndex().equals("[]")) {
 						// Store top-level workflow inputs/outputs
 						if (! node.getProcessId().equals(completeEvent.getProcessId())) {
-							logger.warn("Unexpected process ID " + node.getProcessId() + " expected " + completeEvent.getProcessId());
+							//logger.warn("Unexpected process ID " + node.getProcessId() + " expected " + completeEvent.getProcessId());
 							continue;
 						}
 						String portKey = (node.isInputPort() ? "/i:" : "/o:") + node.getPortName();
@@ -190,10 +192,12 @@ public class WorkflowDataProcessor {
 		invocation.setWorkflowId(workflowId);
 		invocation.setWorkflowRunId(workflowRunId);
 		
-		String parentProcessId = ProvenanceUtils.parentProcess(processId, 2);
-		if (parentProcessId != null) {
-			ProcessorEnactment procAct = getPq().getProcessorEnactmentByProcessId(workflowRunId, parentProcessId);
-			invocation.setParentProcessorEnactmentId(procAct.getProcessEnactmentId());		
+		String parentProcessId = ProvenanceUtils.parentProcess(processId, 1);
+		if (parentProcessId != null) {				
+			ProcessorEnactment procAct = invocationProcessToProcessEnactment.get(parentProcessId);
+			if (procAct != null) {
+				invocation.setParentProcessorEnactmentId(procAct.getProcessEnactmentId());		
+			}
 		}
 		
 		invocation.setInvocationStarted(workflowStarted.get(completeEvent.getParentId()));

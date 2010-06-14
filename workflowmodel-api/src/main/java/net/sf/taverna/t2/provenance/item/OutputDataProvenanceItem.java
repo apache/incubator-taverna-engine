@@ -32,9 +32,6 @@ import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
  */
 public class OutputDataProvenanceItem extends DataProvenanceItem {
 
-	private String processId;
-	private String parentId;
-	private String identifier;
 	private SharedVocabulary eventType = SharedVocabulary.OUTPUTDATA_EVENT_TYPE;
 	/**
 	 * Used when generating the xml version by the {@link DataProvenanceItem}.
@@ -43,39 +40,9 @@ public class OutputDataProvenanceItem extends DataProvenanceItem {
 	protected boolean isInput() {
 		return false;
 	}
-	
-	public OutputDataProvenanceItem() {
-		super();
-	}
 
 	public SharedVocabulary getEventType() {
 		return eventType;
 	}
-	
-	public String getIdentifier() {
-		return identifier;
-	}
-
-	public void setProcessId(String processId) {
-		this.processId = processId;
-	}
-	
-	public String getProcessId() {
-		return processId;
-	}
-	
-	public String getParentId() {
-		return parentId;
-	}
-
-	public void setIdentifier(String identifier) {
-		this.identifier = identifier;		
-	}
-
-	public void setParentId(String parentId) {
-		this.parentId = parentId;		
-	}
-
-
 
 }

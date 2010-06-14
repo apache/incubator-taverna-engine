@@ -34,23 +34,11 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
  * @author Paolo Missier
  * 
  */
-public class ActivityProvenanceItem implements ProvenanceItem {
+public class ActivityProvenanceItem extends AbstractProvenanceItem implements ProvenanceItem  {
 
 	private Activity<?> activity;
 	private IterationProvenanceItem iterationProvenanceItem;
-	private String processId;
-	private String identifier;
-	private String parentId;
-	private SharedVocabulary eventType = SharedVocabulary.ACTIVITY_EVENT_TYPE;
-	private String workflowId;
-
-	public ActivityProvenanceItem() {
-	}
-
-	private String getActivityID() {
-		return activity.getClass().getSimpleName();
-	}
-
+	
 	public void setIterationProvenanceItem(
 			IterationProvenanceItem iterationProvenanceItem) {
 		this.iterationProvenanceItem = iterationProvenanceItem;
@@ -60,12 +48,8 @@ public class ActivityProvenanceItem implements ProvenanceItem {
 		return iterationProvenanceItem;
 	}
 
-	public String getAsString() {
-		return null;
-	}
-
 	public SharedVocabulary getEventType() {
-		return eventType;
+		return SharedVocabulary.ACTIVITY_EVENT_TYPE;
 	}
 
 	public Activity<?> getActivity() {
@@ -75,40 +59,5 @@ public class ActivityProvenanceItem implements ProvenanceItem {
 	public void setActivity(Activity<?> activity) {
 		this.activity = activity;
 	}
-
-	public String getIdentifier() {
-		return identifier;
-	}
-
-	public void setProcessId(String processId) {
-		this.processId = processId;
-	}
-
-	public String getProcessId() {
-		return processId;
-	}
-	
-	public String getParentId() {
-		return parentId;
-	}
-
-	public void setIdentifier(String identifier) {
-		this.identifier = identifier;
-
-	}
-
-	public void setParentId(String parentId) {
-		this.parentId = parentId;
-
-	}
-
-	public String getWorkflowId() {
-		return workflowId;
-	}
-
-	public void setWorkflowId(String workflowId) {
-		this.workflowId = workflowId;	
-	}
-
 
 }
