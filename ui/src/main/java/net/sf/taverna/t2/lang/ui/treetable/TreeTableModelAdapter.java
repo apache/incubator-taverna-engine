@@ -122,7 +122,9 @@ public class TreeTableModelAdapter extends AbstractTableModel
     protected void delayedFireTableDataChanged() {
 	SwingUtilities.invokeLater(new Runnable() {
 	    public void run() {
+	    TreePath[] selected = tree.getSelectionPaths();
 		fireTableDataChanged();
+		tree.setSelectionPaths(selected);
 	    }
 	});
     }
