@@ -1343,15 +1343,20 @@ public class EventProcessor {
 				logger.warn("Problem processing var binding", e);
 			}
 		} else if (valueType.equals("error")) {
+			vb.setIteration(iterationVector);
+			vb.setValue(valueEl.getAttributeValue("id"));
+			vb.setReference(valueEl.getChildText("reference"));
 			try {
-				vb.setIteration(iterationVector);
-				vb.setValue(valueEl.getAttributeValue("id"));
-
+//					logger.debug("calling addVarBinding on "+vb.getprocessorNameRef()+" : "+vb.getportName()+" with it "+vb.getIteration()); 
 				getPw().addPortBinding(vb);
-
 			} catch (SQLException e) {
-				logger.warn("Process Port Binding problem with provenance", e);
+				logger.debug("Problem processing var binding -- performing update instead of insert", e); //, e);
+				// try to update the existing record instead using the current collection info
+				
+				getPw().updatePortBinding(vb);
+//					logger.warn("PortBinding update successful");					
 			}
+
 		} else {
 			logger.warn("unrecognized value type element for "
 					+ processorId + ": " + valueType);
