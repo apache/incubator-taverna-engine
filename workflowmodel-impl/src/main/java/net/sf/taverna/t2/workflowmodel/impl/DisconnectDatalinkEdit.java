@@ -24,6 +24,8 @@ import net.sf.taverna.t2.workflowmodel.Datalink;
 import net.sf.taverna.t2.workflowmodel.EditException;
 import net.sf.taverna.t2.workflowmodel.EventForwardingOutputPort;
 import net.sf.taverna.t2.workflowmodel.EventHandlingInputPort;
+import net.sf.taverna.t2.workflowmodel.impl.MergeInputPortImpl;
+import net.sf.taverna.t2.workflowmodel.impl.MergeImpl;
 
 /**
  * Disconnect a datalink from its source and sink.
@@ -46,6 +48,11 @@ public class DisconnectDatalinkEdit extends AbstractDatalinkEdit {
 		}
 		if (sink instanceof AbstractEventHandlingInputPort) {
 			((AbstractEventHandlingInputPort) sink).setIncomingLink(null);
+			if (sink instanceof MergeInputPortImpl) {
+			    MergeInputPortImpl mip = (MergeInputPortImpl) sink;
+			    MergeImpl parent = (MergeImpl) mip.getMerge();
+			    parent.removeInputPort(mip);
+			}
 		}
 	}
 
@@ -58,6 +65,11 @@ public class DisconnectDatalinkEdit extends AbstractDatalinkEdit {
 		}
 		if (sink instanceof AbstractEventHandlingInputPort) {
 			((AbstractEventHandlingInputPort) sink).setIncomingLink(datalink);
+			if (sink instanceof MergeInputPortImpl) {
+			    MergeInputPortImpl mip = (MergeInputPortImpl) sink;
+			    MergeImpl parent = (MergeImpl) mip.getMerge();
+			    parent.addInputPort(mip);
+			}
 		}
 	}
 
