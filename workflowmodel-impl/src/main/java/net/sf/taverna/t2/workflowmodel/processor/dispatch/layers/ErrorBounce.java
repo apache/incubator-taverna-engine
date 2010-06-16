@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.sf.taverna.t2.invocation.Event;
 import net.sf.taverna.t2.monitor.MonitorableProperty;
@@ -79,9 +80,10 @@ public class ErrorBounce extends AbstractDispatchLayer<Object> implements
 	 * Track the number of reflected and translated errors handled by this error
 	 * bounce instance
 	 */
-	private Map<String, ErrorBounceState> state = new HashMap<String, ErrorBounceState>();
-	
-	
+	private Map<String, ErrorBounceState> state = new ConcurrentHashMap<String, ErrorBounceState>();
+
+	private int totalTranslatedErrors = 0;
+	private int totalReflectedErrors = 0;
 
 	private synchronized ErrorBounceState getState(String owningProcess) {
 		if (state.containsKey(owningProcess)) {
@@ -231,12 +233,48 @@ public class ErrorBounce extends AbstractDispatchLayer<Object> implements
 		};
 		dispatchStack.receiveMonitorableProperty(errorsTranslatedProperty,
 				owningProcess);
+		
+		MonitorableProperty<Integer> totalTranslatedTranslatedProperty = new MonitorableProperty<Integer>() {
+			public Date getLastModified() {
+				return new Date();
+			}
+
+			public String[] getName() {
+				return new String[] { "dispatch", "errorbounce", "totalTranslated" };
+			}
+
+			public Integer getValue() throws NoSuchPropertyException {
+				return totalTranslatedErrors;
+			}
+		};
+		dispatchStack.receiveMonitorableProperty(totalTranslatedTranslatedProperty,
+				owningProcess);
+		
+		MonitorableProperty<Integer> totalReflectedTranslatedProperty = new MonitorableProperty<Integer>() {
+			public Date getLastModified() {
+				return new Date();
+			}
+
+			public String[] getName() {
+				return new String[] { "dispatch", "errorbounce", "totalReflected" };
+			}
+
+			public Integer getValue() throws NoSuchPropertyException {
+				return totalReflectedErrors;
+			}
+		};
+		dispatchStack.receiveMonitorableProperty(totalReflectedTranslatedProperty,
+				owningProcess);
+		
+		
 
 	}
 
-	class ErrorBounceState {
+	
+	public class ErrorBounceState {
 		private int errorsReflected = 0;
 		private int errorsTranslated = 0;
+		
 
 		/**
 		 * Number of times the bounce layer has converted an incoming job event
@@ -254,13 +292,23 @@ public class ErrorBounce extends AbstractDispatchLayer<Object> implements
 		int getErrorsTranslated() {
 			return this.errorsTranslated;
 		}
-
-		synchronized void incrementErrorsReflected() {
-			errorsReflected++;
+		
+		void incrementErrorsReflected() {
+			 synchronized(this) {				 
+				 errorsReflected++;
+			 }
+			synchronized(ErrorBounce.this) {
+				totalReflectedErrors++;
+			}
 		}
 
-		synchronized void incrementErrorsTranslated() {
-			errorsTranslated++;
+		void incrementErrorsTranslated() {
+			synchronized(this) {
+				errorsTranslated++;
+			}
+			synchronized(ErrorBounce.this) {
+				totalTranslatedErrors++;
+			}
 		}
 	}
 
