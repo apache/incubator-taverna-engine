@@ -2302,39 +2302,40 @@ public abstract class ProvenanceQuery {
 
 	public List<ProcessorEnactment> getProcessorEnactments(
 			String workflowRunId, String... processorPath) {
-		return getProcessorEnactments(workflowRunId, (ProcessorEnactment)null, Arrays.asList(processorPath));
+		return getProcessorEnactments(workflowRunId, (List<ProcessorEnactment>)null, Arrays.asList(processorPath));
 	}
 	
+	
 	private List<ProcessorEnactment> getProcessorEnactments(
-			String workflowRunId, ProcessorEnactment processorEnactment,
+			String workflowRunId, List<ProcessorEnactment> parentProcessorEnactments,
 			List<String> processorPath) {
-
-		String parentProcessorEnactment = null;
-		if (processorEnactment != null) {
-			parentProcessorEnactment = processorEnactment.getProcessEnactmentId();
+		
+		List<String> processorEnactmentIds = null;
+		if (parentProcessorEnactments != null) {
+			processorEnactmentIds = new ArrayList<String>();
+			for (ProcessorEnactment processorEnactment : parentProcessorEnactments) {
+				String parentId = processorEnactment.getProcessEnactmentId();
+				processorEnactmentIds.add(parentId);
+			}
 		}		
 		if (processorPath.size() > 1) {
-			// TODO: Make this more efficient by constructing mega-JOIN-SQL.. or specify iterations
-			List<ProcessorEnactment> enactments = new ArrayList<ProcessorEnactment>();			
 			List<ProcessorEnactment> parentEnactments = getProcessorEnactmentsByProcessorName(workflowRunId, 
-					parentProcessorEnactment, processorPath.get(0));
-			for (ProcessorEnactment parent : parentEnactments) {
-				List<String> childPath = processorPath.subList(1, processorPath.size());
-				enactments.addAll(getProcessorEnactments(workflowRunId, parent, childPath));
-			}			
-			return enactments;			
+					processorEnactmentIds, processorPath.get(0));
+			List<String> childPath = processorPath.subList(1, processorPath.size());
+			return getProcessorEnactments(workflowRunId, parentEnactments, childPath);
 		} else if (processorPath.size() == 1) {
-			return getProcessorEnactmentsByProcessorName(workflowRunId, parentProcessorEnactment, processorPath.get(0));
+			return getProcessorEnactmentsByProcessorName(workflowRunId, processorEnactmentIds, processorPath.get(0));
 		} else  {
-			return getProcessorEnactmentsByProcessorName(workflowRunId, parentProcessorEnactment, null);						
+			return getProcessorEnactmentsByProcessorName(workflowRunId, processorEnactmentIds, null);						
 		}
 	}
 
 	public List<ProcessorEnactment> getProcessorEnactmentsByProcessorName(
-			String workflowRunId, String parentProcessorEnactmentId, String processorName) {
+			String workflowRunId, List<String> parentProcessorEnactmentIds, String processorName) {
 		ProvenanceConnector.ProcessorEnactmentTable ProcEnact = ProvenanceConnector.ProcessorEnactmentTable.ProcessorEnactment;
 		
-		String query  = 
+		StringBuilder query = new StringBuilder();
+		query.append( 
 				"SELECT " + ProcEnact.enactmentStarted + ","
 						+ ProcEnact.enactmentEnded + ","
 						+ ProcEnact.finalOutputsDataBindingId + ","
@@ -2350,18 +2351,25 @@ public abstract class ProvenanceQuery {
 						+ " INNER JOIN " + "Processor" + " ON "
 						+ ProcEnact.ProcessorEnactment + "."+ ProcEnact.processorId 
 						+ " = " + "Processor.processorId" + " WHERE "
-						+ ProcEnact.workflowRunId + "=? ";
+						+ ProcEnact.workflowRunId + "=? ");
 		
 		if (processorName != null) {
 			// Specific processor
-			query = query + " AND Processor.processorName=? ";
+			query.append(" AND Processor.processorName=? ");
 		}
-		if (parentProcessorEnactmentId == null && processorName != null) {
+		if ((parentProcessorEnactmentIds == null || parentProcessorEnactmentIds.isEmpty()) && processorName != null) {
 			// null - ie. top level
-			query = query + " AND " + ProcEnact.parentProcessorEnactmentId + " IS NULL";
-		} else if (parentProcessorEnactmentId != null) {
+			query.append(" AND " + ProcEnact.parentProcessorEnactmentId + " IS NULL");
+		} else if (parentProcessorEnactmentIds != null) {
 			// not null, ie. inside nested workflow
-			query = query + " AND " + ProcEnact.parentProcessorEnactmentId + "=?";
+			query.append(" AND " + ProcEnact.parentProcessorEnactmentId + " IN (");
+			for (int i=0; i<parentProcessorEnactmentIds.size(); i++) {
+				query.append('?');
+				if (i < (parentProcessorEnactmentIds.size()-1)) {
+					query.append(',');
+				}
+			}
+			query.append(')');
 		}
 		
 		
@@ -2371,14 +2379,16 @@ public abstract class ProvenanceQuery {
 		Connection connection = null;
 		try {
 			connection = getConnection();
-			statement = connection.prepareStatement(query);
+			statement = connection.prepareStatement(query.toString());
 			int pos = 1;
 			statement.setString(pos++, workflowRunId);
 			if (processorName != null) {
 				statement.setString(pos++, processorName);
 			}
-			if (parentProcessorEnactmentId != null) {
-				statement.setString(pos++, parentProcessorEnactmentId);
+			if (parentProcessorEnactmentIds != null) {
+				for (String parentId : parentProcessorEnactmentIds) {
+					statement.setString(pos++, parentId);
+				}
 			}
 			ResultSet resultSet = statement.executeQuery();
 			while (resultSet.next()) {
