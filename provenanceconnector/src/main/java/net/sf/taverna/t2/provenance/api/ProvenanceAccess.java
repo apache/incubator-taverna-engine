@@ -274,8 +274,12 @@ public class ProvenanceAccess {
 	}
 
 	
-	public boolean isTopLevelDataflow(String workflowIdID)  {
-		return pq.isTopLevelDataflow(workflowIdID);
+	public boolean isTopLevelDataflow(String workflowId)  {
+		return pq.isTopLevelDataflow(workflowId);
+	}
+	
+	public boolean isTopLevelDataflow(String workflowId, String workflowRunId) {
+		return pq.isTopLevelDataflow(workflowId, workflowRunId);
 	}
 	
 
@@ -584,6 +588,8 @@ public class ProvenanceAccess {
 	public List<DataflowInvocation> getDataflowInvocations(String workflowRunId) {
 		return pq.getDataflowInvocations(workflowRunId);
 	}
+
+	
 
 	
 

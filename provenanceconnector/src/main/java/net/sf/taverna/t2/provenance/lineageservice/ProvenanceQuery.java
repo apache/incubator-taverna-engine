@@ -40,6 +40,7 @@ import java.util.Map.Entry;
 import net.sf.taverna.t2.provenance.connector.JDBCConnector;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataBindingTable;
+import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataflowInvocationTable;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DDRecord;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DataLink;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DataflowInvocation;
@@ -1901,6 +1902,50 @@ public abstract class ProvenanceQuery {
 		return false;
 	}
 	
+	public boolean isTopLevelDataflow(String workflowId, String workflowRunId) {
+		PreparedStatement ps = null;
+		Connection connection = null;
+		try {
+			connection = getConnection();
+			ps = connection.prepareStatement(
+					"SELECT " + DataflowInvocationTable.parentProcessorEnactmentId + " AS parent" +
+					" FROM " + DataflowInvocationTable.DataflowInvocation + " W " +					
+					" WHERE "+ DataflowInvocationTable.workflowId + "=? AND " + 
+					DataflowInvocationTable.workflowRunId + "=?");
+			
+			ps.setString(1, workflowId);
+			ps.setString(2, workflowRunId);
+			boolean success = ps.execute();
+
+			if (success) {
+				ResultSet rs = ps.getResultSet();
+				if (rs.next()) {
+					if (rs.getString("parent") == null) { 
+						return true;					
+					}
+					return false;
+				}
+			}
+		} catch (SQLException e) {
+			logger.warn("Could not execute query", e);
+		} catch (InstantiationException e) {
+			logger.warn("Could not execute query", e);
+		} catch (IllegalAccessException e) {
+			logger.warn("Could not execute query", e);
+		} catch (ClassNotFoundException e) {
+			logger.warn("Could not execute query", e);
+		} finally {
+			try {
+				if (connection != null) {
+					connection.close();
+				}
+			} catch (SQLException ex) {
+				logger.error("An error occurred closing the database connection", ex);
+			}
+		}
+		return false;
+	}
+	
 	
 	public String getTopDataflow(String workflowRunId) {
 
@@ -2845,6 +2890,8 @@ ProvenanceConnector.ProcessorEnactmentTable ProcEnact = ProvenanceConnector.Proc
 		}
 		return invocations;
 	}
+
+	
 
 
 
