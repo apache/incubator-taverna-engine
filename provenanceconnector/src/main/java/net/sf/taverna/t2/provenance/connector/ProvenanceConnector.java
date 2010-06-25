@@ -101,7 +101,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 		workflowId,
 		invocationStarted, invocationEnded, 
 		inputsDataBinding, outputsDataBinding,
-		parentProcessorEnactmentId, workflowRunId;
+		parentProcessorEnactmentId, workflowRunId, completed;
 		
 		public static String getCreateTable() {
 			return "CREATE TABLE " + DataflowInvocation + "(\n"
@@ -113,6 +113,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 			+ outputsDataBinding + " varchar(36),\n"
 			+ parentProcessorEnactmentId + " varchar(36), \n"
 			+ workflowRunId + " varchar(100) NOT NULL, \n"
+			+ completed + " smallint NOT NULL,\n"
 			+ "PRIMARY KEY (" + dataflowInvocationId+ ")\n" + ")";
 		}		
 	}

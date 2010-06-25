@@ -22,6 +22,7 @@ package net.sf.taverna.t2.provenance.item;
 
 import java.sql.Timestamp;
 
+import net.sf.taverna.t2.facade.WorkflowInstanceFacade.State;
 import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
 
 /**
@@ -37,6 +38,7 @@ public class DataflowRunComplete extends AbstractProvenanceItem {
 
 	private SharedVocabulary eventType = SharedVocabulary.END_WORKFLOW_EVENT_TYPE;
 	private Timestamp invocationEnded;
+	private State state;
 
 	public Timestamp getInvocationEnded() {
 		return invocationEnded;
@@ -49,6 +51,14 @@ public class DataflowRunComplete extends AbstractProvenanceItem {
 	public void setInvocationEnded(Timestamp invocationEnded) {
 		this.invocationEnded = invocationEnded;
 		
+	}
+
+	public void setState(State state) {
+		this.state = state;
+	}
+	
+	public State getState() {
+		return state;
 	}
 
 }

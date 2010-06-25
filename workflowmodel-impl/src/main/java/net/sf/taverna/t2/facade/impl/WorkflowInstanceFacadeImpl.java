@@ -331,8 +331,12 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 			
 		}
 
-		public void resultTokenProduced(WorkflowDataToken token, String portName) {
+		public void resultTokenProduced(WorkflowDataToken token, String portName) {			
 			if (!instanceOwningProcessId.equals(token.getOwningProcess())) {
+				return;
+			}
+			if (getState().equals(State.cancelled)) {
+				// Throw the token away
 				return;
 			}
 			if (provEnabled) {
@@ -410,25 +414,30 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 		}
 	}
 
-	private void checkWorkflowFinished() {
+	protected void checkWorkflowFinished() {
 		synchronized (this) {
-			if (getState().equals(State.cancelled)) {
-				logger.error("Already cancelled workflow run");
+			if (getState().equals(State.cancelled) && processorsToComplete < 0) {
+				logger.error("Already cancelled workflow run "
+						+ instanceOwningProcessId);
 				return;
 			}
 			if (getState().equals(State.completed)) {
-				logger.error("Already finished workflow run", new IllegalStateException());
+				logger.error("Already finished workflow run "
+						+ instanceOwningProcessId, new IllegalStateException());
 				return;
 			}
-			if (processorsToComplete > 0 || portsToComplete > 0) { 
+			if (processorsToComplete > 0 || portsToComplete > 0) {
 				// Not yet finished
 				return;
 			}
 			if (processorsToComplete < 0 || portsToComplete < 0) {
-				logger.error("Already finished workflow run", new IllegalStateException());
+				logger.error("Already finished workflow run "
+						+ instanceOwningProcessId, new IllegalStateException());
 				return;
 			}
-			setState(State.completed);
+			if (!getState().equals(State.cancelled)) {
+				setState(State.completed);
+			}
 			processorsToComplete = -1;
 			portsToComplete = -1;
 		}	
@@ -450,6 +459,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 					.setProcessId(instanceOwningProcessId);
 			dataflowRunComplete.setIdentifier(UUID.randomUUID()
 					.toString());
+			dataflowRunComplete.setState(getState());
 			context.getProvenanceReporter().addProvenanceItem(
 					dataflowRunComplete);
 		}
@@ -517,13 +527,16 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 		boolean result = Stop.cancelWorkflow(getWorkflowRunId());
 		if (result) {
 			setState(State.cancelled);
+			logger.info("Cancelled workflow runId=" + getWorkflowRunId()
+					+ " processId=" + instanceOwningProcessId);
 			List<FailureListener> copyOfListeners = null;
 			synchronized (failureListeners) {
 				copyOfListeners = new ArrayList<FailureListener>(failureListeners);
 			}
 			for (FailureListener failureListener : copyOfListeners) {
 				try {
-					failureListener.workflowFailed("Workflow was cancelled", new WorkflowRunCancellation(getWorkflowRunId()));
+					failureListener.workflowFailed("Workflow was cancelled",
+							new WorkflowRunCancellation(getWorkflowRunId()));
 				} catch (RuntimeException ex) {
 					logger.warn("Could not notify failure listener "
 							+ failureListener, ex);
@@ -538,12 +551,22 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 
 	public boolean pauseWorkflowRun() {
 		setState(State.paused);
-		return Stop.pauseWorkflow(getWorkflowRunId());
+		if (Stop.pauseWorkflow(getWorkflowRunId())) {
+			logger.info("Paused workflow runId=" + getWorkflowRunId()
+					+ " processId=" + instanceOwningProcessId);
+			return true;
+		}
+		return false;
 	}
 
 	public boolean resumeWorkflowRun() {
 		setState(State.running);
-		return Stop.resumeWorkflow(getWorkflowRunId());
+		if (Stop.resumeWorkflow(getWorkflowRunId())) {
+			logger.info("Resumed paused workflow runId=" + getWorkflowRunId()
+					+ " processId=" + instanceOwningProcessId);
+			return true;
+		}
+		return false;
 	}
 
 }

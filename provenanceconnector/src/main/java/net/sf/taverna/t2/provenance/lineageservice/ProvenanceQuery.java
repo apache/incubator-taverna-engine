@@ -2716,7 +2716,8 @@ ProvenanceConnector.ProcessorEnactmentTable ProcEnact = ProvenanceConnector.Proc
 				+ DI.outputsDataBinding + ","
 				+ DI.parentProcessorEnactmentId + ","  
 				+ DI.workflowId + "," 
-				+ DI.workflowRunId
+				+ DI.workflowRunId + ","
+				+ DI.completed
 				+ " FROM "
 				+ DI.DataflowInvocation +
 				" WHERE "
@@ -2743,6 +2744,7 @@ ProvenanceConnector.ProcessorEnactmentTable ProcEnact = ProvenanceConnector.Proc
 			dataflowInvocation.setParentProcessorEnactmentId(rs.getString(DI.parentProcessorEnactmentId.name()));
 			dataflowInvocation.setWorkflowId(rs.getString(DI.workflowId.name()));
 			dataflowInvocation.setWorkflowRunId(rs.getString(DI.workflowRunId.name()));
+			dataflowInvocation.setCompleted(rs.getBoolean(DI.completed.name()));
 			if (rs.next()) {
 				logger.error("Found more than one DataflowInvocation for workflowRunId=" + workflowRunId);
 				return null;
@@ -2779,8 +2781,9 @@ ProvenanceConnector.ProcessorEnactmentTable ProcEnact = ProvenanceConnector.Proc
 				+ DI.invocationStarted + "," 
 				+ DI.outputsDataBinding + ","
 				+ DI.parentProcessorEnactmentId + ","  
-				+ DI.workflowId + "," 
-				+ DI.workflowRunId
+				+ DI.workflowId + ","
+				+ DI.workflowRunId + ","
+				+ DI.completed 
 				+ " FROM "
 				+ DI.DataflowInvocation +
 				" WHERE "
@@ -2806,6 +2809,7 @@ ProvenanceConnector.ProcessorEnactmentTable ProcEnact = ProvenanceConnector.Proc
 			dataflowInvocation.setParentProcessorEnactmentId(rs.getString(DI.parentProcessorEnactmentId.name()));
 			dataflowInvocation.setWorkflowId(rs.getString(DI.workflowId.name()));
 			dataflowInvocation.setWorkflowRunId(rs.getString(DI.workflowRunId.name()));
+			dataflowInvocation.setCompleted(rs.getBoolean(DI.completed.name()));
 			
 			if (rs.next()) {
 				logger.error("Found more than one DataflowInvocation for processorEnactmentId=" + processorEnactment.getProcessEnactmentId());
@@ -2844,7 +2848,8 @@ ProvenanceConnector.ProcessorEnactmentTable ProcEnact = ProvenanceConnector.Proc
 				+ DI.outputsDataBinding + ","
 				+ DI.parentProcessorEnactmentId + ","  
 				+ DI.workflowId + "," 
-				+ DI.workflowRunId
+				+ DI.workflowRunId + ","
+				+ DI.completed
 				+ " FROM "
 				+ DI.DataflowInvocation +
 				" WHERE "
@@ -2870,6 +2875,7 @@ ProvenanceConnector.ProcessorEnactmentTable ProcEnact = ProvenanceConnector.Proc
 			dataflowInvocation.setParentProcessorEnactmentId(rs.getString(DI.parentProcessorEnactmentId.name()));
 			dataflowInvocation.setWorkflowId(rs.getString(DI.workflowId.name()));
 			dataflowInvocation.setWorkflowRunId(rs.getString(DI.workflowRunId.name()));
+			dataflowInvocation.setCompleted(rs.getBoolean(DI.completed.name()));
 			invocations.add(dataflowInvocation);
 		} catch (SQLException e) {
 			logger.warn("Could not execute query " + query, e);

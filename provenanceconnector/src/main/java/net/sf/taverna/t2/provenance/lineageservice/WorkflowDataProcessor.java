@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.sf.taverna.t2.facade.WorkflowInstanceFacade.State;
 import net.sf.taverna.t2.provenance.item.DataflowRunComplete;
 import net.sf.taverna.t2.provenance.item.ProvenanceItem;
 import net.sf.taverna.t2.provenance.item.WorkflowDataProvenanceItem;
@@ -202,6 +203,7 @@ public class WorkflowDataProcessor {
 		
 		invocation.setInvocationStarted(workflowStarted.get(completeEvent.getParentId()));
 		invocation.setInvocationEnded(completeEvent.getInvocationEnded());
+		invocation.setCompleted(completeEvent.getState().equals(State.completed));
 		
 		// Register data
 		String inputsDataBindingId = UUID.randomUUID().toString();
