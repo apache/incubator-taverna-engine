@@ -231,6 +231,7 @@ public class HierarchyTraverser {
 									: "Errors in nested workflow"),
 							DataflowCollation.NESTED_ISSUES, worstStatus,
 							subReports);
+					report.setProperty("dataflowIdentifier", subFlow.getIdentifier());
 					report.setWasTimeConsuming(includeTimeConsuming);
 					reports.add(report);
 
