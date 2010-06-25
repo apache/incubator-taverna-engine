@@ -32,7 +32,7 @@ public abstract class RemoteHealthChecker implements HealthChecker<Object> {
 
 	private static Logger logger = Logger.getLogger(RemoteHealthChecker.class);
 	
-	private static int timeout = 1000;
+	private static int timeout = 10000;
 
 	private static long endpointExpiryMillis = ENDPOINT_EXPIRY_MILLIS;
 	
@@ -47,7 +47,7 @@ public abstract class RemoteHealthChecker implements HealthChecker<Object> {
 	public static long getEndpointExpiryInMilliseconds() {
 		return endpointExpiryMillis;
 	}
-	public static void setendpointExpiryInMilliseconds(int endpointExpiry) {
+	public static void setEndpointExpiryInMilliseconds(int endpointExpiry) {
 		endpointExpiryMillis = endpointExpiry;
 	}
 
