@@ -33,11 +33,8 @@ import net.sf.taverna.t2.reference.T2Reference;
  * @author Ian Dunlop
  * 
  */
-public class WorkflowDataProvenanceItem implements ProvenanceItem {
+public class WorkflowDataProvenanceItem extends AbstractProvenanceItem {
 
-	private String identifier;
-	private String parentId;
-	private String processId;
 	private ReferenceService referenceService;
 	/** The port name that the data is for */
 	private String portName;
@@ -46,7 +43,6 @@ public class WorkflowDataProvenanceItem implements ProvenanceItem {
 	private SharedVocabulary eventType = SharedVocabulary.WORKFLOW_DATA_EVENT_TYPE;
 	private boolean isFinal;
 	private int[] index;
-	private String workflowId;
 	private boolean isInputPort;
 
 	public boolean isInputPort() {
@@ -62,30 +58,6 @@ public class WorkflowDataProvenanceItem implements ProvenanceItem {
 
 	public SharedVocabulary getEventType() {
 		return eventType;
-	}
-
-	public String getIdentifier() {
-		return identifier;
-	}
-
-	public String getParentId() {
-		return parentId;
-	}
-
-	public String getProcessId() {
-		return processId;
-	}
-
-	public void setIdentifier(String identifier) {
-		this.identifier = identifier;
-	}
-
-	public void setParentId(String parentId) {
-		this.parentId = parentId;
-	}
-
-	public void setProcessId(String processId) {
-		this.processId = processId;
 	}
 
 	public void setPortName(String portName) {
@@ -127,14 +99,6 @@ public class WorkflowDataProvenanceItem implements ProvenanceItem {
 	
 	public boolean isFinal() {
 		return isFinal;
-	}
-	
-	public String getWorkflowId() {
-		return workflowId;
-	}
-
-	public void setWorkflowId(String workflowId) {
-		this.workflowId = workflowId;	
-	}
+	}	
 
 }

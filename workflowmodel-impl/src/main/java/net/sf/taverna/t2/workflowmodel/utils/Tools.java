@@ -768,7 +768,7 @@ public class Tools {
 	 * @return
 	 */
 	public static ProcessorSplit splitProcessors(
-			Collection<? extends Processor> processors, Processor splitPoint) {
+			Collection<? extends Processor> processors, TokenProcessingEntity splitPoint) {
 		Set<Processor> upStream = new HashSet<Processor>();
 		Set<Processor> downStream = new HashSet<Processor>();
 		Set<TokenProcessingEntity> queue = new HashSet<TokenProcessingEntity>();
@@ -952,7 +952,7 @@ public class Tools {
 	 */
 	public static class ProcessorSplit {
 
-		private final Processor splitPoint;
+		private final TokenProcessingEntity splitPoint;
 		private final Set<Processor> upStream;
 		private final Set<Processor> downStream;
 		private final Set<Processor> unconnected;
@@ -962,7 +962,7 @@ public class Tools {
 		 * 
 		 * @return Split point processor
 		 */
-		public Processor getSplitPoint() {
+		public TokenProcessingEntity getSplitPoint() {
 			return splitPoint;
 		}
 
@@ -1015,7 +1015,7 @@ public class Tools {
 		 *            The rest of the processors, that are by definition
 		 *            unconnected to split point
 		 */
-		public ProcessorSplit(Processor splitPoint, Set<Processor> upStream,
+		public ProcessorSplit(TokenProcessingEntity splitPoint, Set<Processor> upStream,
 				Set<Processor> downStream, Set<Processor> unconnected) {
 			this.splitPoint = splitPoint;
 			this.upStream = upStream;

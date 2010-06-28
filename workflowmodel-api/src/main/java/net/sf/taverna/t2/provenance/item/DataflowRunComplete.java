@@ -22,6 +22,7 @@ package net.sf.taverna.t2.provenance.item;
 
 import java.sql.Timestamp;
 
+import net.sf.taverna.t2.facade.WorkflowInstanceFacade.State;
 import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
 
 /**
@@ -33,14 +34,11 @@ import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
  * @author Ian Dunlop
  * 
  */
-public class DataflowRunComplete implements ProvenanceItem {
+public class DataflowRunComplete extends AbstractProvenanceItem {
 
-	private String processId;
-	private String parentId;
-	private String identifier;
 	private SharedVocabulary eventType = SharedVocabulary.END_WORKFLOW_EVENT_TYPE;
-	private String workflowId;
 	private Timestamp invocationEnded;
+	private State state;
 
 	public Timestamp getInvocationEnded() {
 		return invocationEnded;
@@ -50,41 +48,17 @@ public class DataflowRunComplete implements ProvenanceItem {
 		return eventType;
 	}
 
-	public String getIdentifier() {
-		return identifier;
-	}
-
-	public void setProcessId(String processId) {
-		this.processId = processId;
-	}
-
-	public String getParentId() {
-		return parentId;
-	}
-
-	public void setIdentifier(String identifier) {
-		this.identifier = identifier;
-	}
-
-	public void setParentId(String parentId) {
-		this.parentId = parentId;
-	}
-
-	public String getProcessId() {
-		return processId;
-	}
-
-	public String getWorkflowId() {
-		return workflowId;
-	}
-
-	public void setWorkflowId(String workflowId) {
-		this.workflowId = workflowId;		
-	}
-
 	public void setInvocationEnded(Timestamp invocationEnded) {
 		this.invocationEnded = invocationEnded;
 		
+	}
+
+	public void setState(State state) {
+		this.state = state;
+	}
+	
+	public State getState() {
+		return state;
 	}
 
 }

@@ -35,20 +35,12 @@ import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
  * @author Ian Dunlop
  * 
  */
-public class ProcessProvenanceItem implements ProvenanceItem {
+public class ProcessProvenanceItem extends AbstractProvenanceItem {
 	private String owningProcess;
 	private ProcessorProvenanceItem processorProvenanceItem;
-	private String parentId;
-	private String identifier;
 	private String facadeID;
-	private String processId;
 	private String dataflowID;
 	private SharedVocabulary eventType = SharedVocabulary.PROCESS_EVENT_TYPE;
-	private String workflowId;
-
-	public ProcessProvenanceItem() {
-		
-	}
 
 	/**
 	 * As {@link WorkflowInstanceFacade}s are created for a Processor the
@@ -82,30 +74,6 @@ public class ProcessProvenanceItem implements ProvenanceItem {
 		this.owningProcess = owningProcess;
 	}
 
-	public String getIdentifier() {
-		return identifier;
-	}
-
-	public void setProcessId(String processId) {
-		this.processId = processId;
-	}
-
-	public String getParentId() {
-		return parentId;
-	}
-
-	public void setIdentifier(String identifier) {
-		this.identifier = identifier;
-	}
-
-	public void setParentId(String parentId) {
-		this.parentId = parentId;
-	}
-
-	public String getProcessId() {
-		return processId;
-	}
-
 	public void setFacadeID(String facadeID) {
 		this.facadeID = facadeID;
 	}
@@ -116,14 +84,6 @@ public class ProcessProvenanceItem implements ProvenanceItem {
 	
 	public String getDataflowID() {
 		return dataflowID;
-	}
-	
-	public String getWorkflowId() {
-		return workflowId;
-	}
-
-	public void setWorkflowId(String workflowId) {
-		this.workflowId = workflowId;	
 	}
 
 }

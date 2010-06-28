@@ -25,16 +25,22 @@ import static net.sf.taverna.t2.workflowmodel.processor.dispatch.description.Dis
 import static net.sf.taverna.t2.workflowmodel.processor.dispatch.description.DispatchMessageType.RESULT_COMPLETION;
 
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.sql.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import org.apache.log4j.Logger;
 
 import net.sf.taverna.t2.invocation.InvocationContext;
 import net.sf.taverna.t2.monitor.MonitorManager;
 import net.sf.taverna.t2.monitor.MonitorableProperty;
+import net.sf.taverna.t2.provenance.item.InvocationStartedProvenanceItem;
+import net.sf.taverna.t2.provenance.item.IterationProvenanceItem;
+import net.sf.taverna.t2.provenance.reporter.ProvenanceReporter;
 import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.workflowmodel.ControlBoundary;
@@ -44,6 +50,7 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.AsynchronousActivity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.AsynchronousActivityCallback;
 import net.sf.taverna.t2.workflowmodel.processor.activity.MonitorableAsynchronousActivity;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.AbstractDispatchLayer;
+import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayer;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.description.DispatchLayerJobReaction;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchCompletionEvent;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchErrorEvent;
@@ -127,9 +134,28 @@ public class Invoke extends AbstractDispatchLayer<Object> {
 				// cases this will just be a single DataManager for the entire
 				// workflow system but it never hurts to generalize
 
-				final ReferenceService refService = jobEvent.getContext()
+				InvocationContext context = jobEvent.getContext();
+				final ReferenceService refService = context
 						.getReferenceService();
 
+				InvocationStartedProvenanceItem invocationItem = null;
+				ProvenanceReporter provenanceReporter = context.getProvenanceReporter();
+				if (provenanceReporter != null) {
+					IntermediateProvenance intermediateProvenance = findIntermediateProvenance();
+					if (intermediateProvenance != null) {						
+						invocationItem = new InvocationStartedProvenanceItem();
+						IterationProvenanceItem parentItem = intermediateProvenance.getIterationProvItem(jobEvent);						
+						invocationItem.setIdentifier(UUID.randomUUID().toString());
+						invocationItem.setActivity(asyncActivity);
+						invocationItem.setProcessId(jobEvent.getOwningProcess());
+						invocationItem.setInvocationProcessId(invocationProcessIdentifier);
+						invocationItem.setParentId(parentItem.getIdentifier());
+						invocationItem.setWorkflowId(parentItem.getWorkflowId());
+						invocationItem.setInvocationStarted(new Date(System.currentTimeMillis()));
+						provenanceReporter.addProvenanceItem(invocationItem);							
+					}
+				}
+				
 				// Create a Map of EntityIdentifiers named appropriately given
 				// the activity mapping
 				Map<String, T2Reference> inputData = new HashMap<String, T2Reference>();
@@ -164,6 +190,16 @@ public class Invoke extends AbstractDispatchLayer<Object> {
 				return;
 			}
 		}
+	}
+
+	protected IntermediateProvenance findIntermediateProvenance() {
+		List<DispatchLayer<?>> layers = getProcessor().getDispatchStack().getLayers();
+		for (DispatchLayer<?> layer : layers) {
+			if (layer instanceof IntermediateProvenance) {
+				return (IntermediateProvenance) layer;
+			}
+		}
+		return null;
 	}
 
 	protected class InvokeCallBack implements AsynchronousActivityCallback {

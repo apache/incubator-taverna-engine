@@ -32,7 +32,7 @@ public abstract class RemoteHealthChecker implements HealthChecker<Object> {
 
 	private static Logger logger = Logger.getLogger(RemoteHealthChecker.class);
 	
-	private static int timeout = 1000;
+	private static int timeout = 10000;
 
 	private static long endpointExpiryMillis = ENDPOINT_EXPIRY_MILLIS;
 	
@@ -47,7 +47,7 @@ public abstract class RemoteHealthChecker implements HealthChecker<Object> {
 	public static long getEndpointExpiryInMilliseconds() {
 		return endpointExpiryMillis;
 	}
-	public static void setendpointExpiryInMilliseconds(int endpointExpiry) {
+	public static void setEndpointExpiryInMilliseconds(int endpointExpiry) {
 		endpointExpiryMillis = endpointExpiry;
 	}
 
@@ -106,10 +106,11 @@ public abstract class RemoteHealthChecker implements HealthChecker<Object> {
 		try {
 			URL url = new URL(endpoint);
 			connection = url.openConnection();
+			connection.setReadTimeout(timeout);
+			connection.setConnectTimeout(timeout);
 			if (connection instanceof HttpURLConnection) {
 				HttpURLConnection httpConnection = (HttpURLConnection) connection;
 				httpConnection.setRequestMethod("HEAD");
-				httpConnection.setReadTimeout(timeout);
 				httpConnection.connect();
 				responseCode = httpConnection.getResponseCode();
 				if (responseCode != HttpURLConnection.HTTP_OK) {
@@ -120,7 +121,7 @@ public abstract class RemoteHealthChecker implements HealthChecker<Object> {
 					}
 					else if ((responseCode == HttpURLConnection.HTTP_NOT_FOUND)
 							|| (responseCode == HttpURLConnection.HTTP_GONE)) {
-						status = Status.SEVERE;
+						status = Status.WARNING;
 						message = "Bad response";
 						resultId = HealthCheck.CONNECTION_PROBLEM;
 					}
@@ -144,7 +145,7 @@ public abstract class RemoteHealthChecker implements HealthChecker<Object> {
 			ex = e;
 		} catch (IOException e) {
 			status = Status.SEVERE;
-			message = "IO problem";
+			message = "Read problem";
 			resultId = HealthCheck.IO_PROBLEM;
 			ex = e;
 		} finally {

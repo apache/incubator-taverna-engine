@@ -40,6 +40,7 @@ import java.util.Map.Entry;
 import net.sf.taverna.t2.provenance.connector.JDBCConnector;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataBindingTable;
+import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataflowInvocationTable;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DDRecord;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DataLink;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DataflowInvocation;
@@ -1901,6 +1902,50 @@ public abstract class ProvenanceQuery {
 		return false;
 	}
 	
+	public boolean isTopLevelDataflow(String workflowId, String workflowRunId) {
+		PreparedStatement ps = null;
+		Connection connection = null;
+		try {
+			connection = getConnection();
+			ps = connection.prepareStatement(
+					"SELECT " + DataflowInvocationTable.parentProcessorEnactmentId + " AS parent" +
+					" FROM " + DataflowInvocationTable.DataflowInvocation + " W " +					
+					" WHERE "+ DataflowInvocationTable.workflowId + "=? AND " + 
+					DataflowInvocationTable.workflowRunId + "=?");
+			
+			ps.setString(1, workflowId);
+			ps.setString(2, workflowRunId);
+			boolean success = ps.execute();
+
+			if (success) {
+				ResultSet rs = ps.getResultSet();
+				if (rs.next()) {
+					if (rs.getString("parent") == null) { 
+						return true;					
+					}
+					return false;
+				}
+			}
+		} catch (SQLException e) {
+			logger.warn("Could not execute query", e);
+		} catch (InstantiationException e) {
+			logger.warn("Could not execute query", e);
+		} catch (IllegalAccessException e) {
+			logger.warn("Could not execute query", e);
+		} catch (ClassNotFoundException e) {
+			logger.warn("Could not execute query", e);
+		} finally {
+			try {
+				if (connection != null) {
+					connection.close();
+				}
+			} catch (SQLException ex) {
+				logger.error("An error occurred closing the database connection", ex);
+			}
+		}
+		return false;
+	}
+	
 	
 	public String getTopDataflow(String workflowRunId) {
 
@@ -2302,39 +2347,40 @@ public abstract class ProvenanceQuery {
 
 	public List<ProcessorEnactment> getProcessorEnactments(
 			String workflowRunId, String... processorPath) {
-		return getProcessorEnactments(workflowRunId, (ProcessorEnactment)null, Arrays.asList(processorPath));
+		return getProcessorEnactments(workflowRunId, (List<ProcessorEnactment>)null, Arrays.asList(processorPath));
 	}
 	
+	
 	private List<ProcessorEnactment> getProcessorEnactments(
-			String workflowRunId, ProcessorEnactment processorEnactment,
+			String workflowRunId, List<ProcessorEnactment> parentProcessorEnactments,
 			List<String> processorPath) {
-
-		String parentProcessorEnactment = null;
-		if (processorEnactment != null) {
-			parentProcessorEnactment = processorEnactment.getProcessEnactmentId();
+		
+		List<String> processorEnactmentIds = null;
+		if (parentProcessorEnactments != null) {
+			processorEnactmentIds = new ArrayList<String>();
+			for (ProcessorEnactment processorEnactment : parentProcessorEnactments) {
+				String parentId = processorEnactment.getProcessEnactmentId();
+				processorEnactmentIds.add(parentId);
+			}
 		}		
 		if (processorPath.size() > 1) {
-			// TODO: Make this more efficient by constructing mega-JOIN-SQL.. or specify iterations
-			List<ProcessorEnactment> enactments = new ArrayList<ProcessorEnactment>();			
 			List<ProcessorEnactment> parentEnactments = getProcessorEnactmentsByProcessorName(workflowRunId, 
-					parentProcessorEnactment, processorPath.get(0));
-			for (ProcessorEnactment parent : parentEnactments) {
-				List<String> childPath = processorPath.subList(1, processorPath.size());
-				enactments.addAll(getProcessorEnactments(workflowRunId, parent, childPath));
-			}			
-			return enactments;			
+					processorEnactmentIds, processorPath.get(0));
+			List<String> childPath = processorPath.subList(1, processorPath.size());
+			return getProcessorEnactments(workflowRunId, parentEnactments, childPath);
 		} else if (processorPath.size() == 1) {
-			return getProcessorEnactmentsByProcessorName(workflowRunId, parentProcessorEnactment, processorPath.get(0));
+			return getProcessorEnactmentsByProcessorName(workflowRunId, processorEnactmentIds, processorPath.get(0));
 		} else  {
-			return getProcessorEnactmentsByProcessorName(workflowRunId, parentProcessorEnactment, null);						
+			return getProcessorEnactmentsByProcessorName(workflowRunId, processorEnactmentIds, null);						
 		}
 	}
 
 	public List<ProcessorEnactment> getProcessorEnactmentsByProcessorName(
-			String workflowRunId, String parentProcessorEnactmentId, String processorName) {
+			String workflowRunId, List<String> parentProcessorEnactmentIds, String processorName) {
 		ProvenanceConnector.ProcessorEnactmentTable ProcEnact = ProvenanceConnector.ProcessorEnactmentTable.ProcessorEnactment;
 		
-		String query  = 
+		StringBuilder query = new StringBuilder();
+		query.append( 
 				"SELECT " + ProcEnact.enactmentStarted + ","
 						+ ProcEnact.enactmentEnded + ","
 						+ ProcEnact.finalOutputsDataBindingId + ","
@@ -2350,18 +2396,25 @@ public abstract class ProvenanceQuery {
 						+ " INNER JOIN " + "Processor" + " ON "
 						+ ProcEnact.ProcessorEnactment + "."+ ProcEnact.processorId 
 						+ " = " + "Processor.processorId" + " WHERE "
-						+ ProcEnact.workflowRunId + "=? ";
+						+ ProcEnact.workflowRunId + "=? ");
 		
 		if (processorName != null) {
 			// Specific processor
-			query = query + " AND Processor.processorName=? ";
+			query.append(" AND Processor.processorName=? ");
 		}
-		if (parentProcessorEnactmentId == null && processorName != null) {
+		if ((parentProcessorEnactmentIds == null || parentProcessorEnactmentIds.isEmpty()) && processorName != null) {
 			// null - ie. top level
-			query = query + " AND " + ProcEnact.parentProcessorEnactmentId + " IS NULL";
-		} else if (parentProcessorEnactmentId != null) {
+			query.append(" AND " + ProcEnact.parentProcessorEnactmentId + " IS NULL");
+		} else if (parentProcessorEnactmentIds != null) {
 			// not null, ie. inside nested workflow
-			query = query + " AND " + ProcEnact.parentProcessorEnactmentId + "=?";
+			query.append(" AND " + ProcEnact.parentProcessorEnactmentId + " IN (");
+			for (int i=0; i<parentProcessorEnactmentIds.size(); i++) {
+				query.append('?');
+				if (i < (parentProcessorEnactmentIds.size()-1)) {
+					query.append(',');
+				}
+			}
+			query.append(')');
 		}
 		
 		
@@ -2371,14 +2424,16 @@ public abstract class ProvenanceQuery {
 		Connection connection = null;
 		try {
 			connection = getConnection();
-			statement = connection.prepareStatement(query);
+			statement = connection.prepareStatement(query.toString());
 			int pos = 1;
 			statement.setString(pos++, workflowRunId);
 			if (processorName != null) {
 				statement.setString(pos++, processorName);
 			}
-			if (parentProcessorEnactmentId != null) {
-				statement.setString(pos++, parentProcessorEnactmentId);
+			if (parentProcessorEnactmentIds != null) {
+				for (String parentId : parentProcessorEnactmentIds) {
+					statement.setString(pos++, parentId);
+				}
 			}
 			ResultSet resultSet = statement.executeQuery();
 			while (resultSet.next()) {
@@ -2494,8 +2549,9 @@ public abstract class ProvenanceQuery {
 	}
 	
 	
+	@SuppressWarnings("static-access")
 	public ProcessorEnactment getProcessorEnactmentByProcessId(String workflowRunId,
-			String processIdentifier) {
+			String processIdentifier, String iteration) {
 ProvenanceConnector.ProcessorEnactmentTable ProcEnact = ProvenanceConnector.ProcessorEnactmentTable.ProcessorEnactment;		
 		String query  = 
 				"SELECT " + ProcEnact.enactmentStarted + ","
@@ -2512,7 +2568,8 @@ ProvenanceConnector.ProcessorEnactmentTable ProcEnact = ProvenanceConnector.Proc
 						+ ProcEnact.ProcessorEnactment
 						+ " WHERE "
 						+ ProcEnact.workflowRunId + "=?"
-						+ " AND " + ProcEnact.processIdentifier + "=?";
+						+ " AND " + ProcEnact.processIdentifier + "=?"
+						+ " AND " + ProcEnact.iteration+"=?";
 
 		
 		PreparedStatement statement;
@@ -2523,14 +2580,20 @@ ProvenanceConnector.ProcessorEnactmentTable ProcEnact = ProvenanceConnector.Proc
 			statement = connection.prepareStatement(query);
 			statement.setString(1, workflowRunId);
 			statement.setString(2, processIdentifier);
+			statement.setString(3, iteration);
+
 			ResultSet resultSet = statement.executeQuery();
+			String debugString = "ProcessorEnactment runId=" + workflowRunId
+					+ " processIdentifier=" + processIdentifier + " iteration="
+					+ iteration;
 			if (! resultSet.next()) {
-				logger.warn("Could not find ProcessorEnactment runId=" + workflowRunId + " processIdentifier=" +processIdentifier);
+				logger.warn("Could not find " +
+						debugString);
 				return null;
 			}
 			procEnact = readProcessorEnactment(resultSet);
 			if (resultSet.next()) {
-				logger.error("Found more than one ProcessorEnactment runId=" + workflowRunId + " processIdentifier=" +processIdentifier);
+				logger.error("Found more than one " + debugString);
 				return null;
 			}
 		} catch (SQLException e) {
@@ -2653,7 +2716,8 @@ ProvenanceConnector.ProcessorEnactmentTable ProcEnact = ProvenanceConnector.Proc
 				+ DI.outputsDataBinding + ","
 				+ DI.parentProcessorEnactmentId + ","  
 				+ DI.workflowId + "," 
-				+ DI.workflowRunId
+				+ DI.workflowRunId + ","
+				+ DI.completed
 				+ " FROM "
 				+ DI.DataflowInvocation +
 				" WHERE "
@@ -2680,6 +2744,7 @@ ProvenanceConnector.ProcessorEnactmentTable ProcEnact = ProvenanceConnector.Proc
 			dataflowInvocation.setParentProcessorEnactmentId(rs.getString(DI.parentProcessorEnactmentId.name()));
 			dataflowInvocation.setWorkflowId(rs.getString(DI.workflowId.name()));
 			dataflowInvocation.setWorkflowRunId(rs.getString(DI.workflowRunId.name()));
+			dataflowInvocation.setCompleted(rs.getBoolean(DI.completed.name()));
 			if (rs.next()) {
 				logger.error("Found more than one DataflowInvocation for workflowRunId=" + workflowRunId);
 				return null;
@@ -2716,8 +2781,9 @@ ProvenanceConnector.ProcessorEnactmentTable ProcEnact = ProvenanceConnector.Proc
 				+ DI.invocationStarted + "," 
 				+ DI.outputsDataBinding + ","
 				+ DI.parentProcessorEnactmentId + ","  
-				+ DI.workflowId + "," 
-				+ DI.workflowRunId
+				+ DI.workflowId + ","
+				+ DI.workflowRunId + ","
+				+ DI.completed 
 				+ " FROM "
 				+ DI.DataflowInvocation +
 				" WHERE "
@@ -2743,6 +2809,7 @@ ProvenanceConnector.ProcessorEnactmentTable ProcEnact = ProvenanceConnector.Proc
 			dataflowInvocation.setParentProcessorEnactmentId(rs.getString(DI.parentProcessorEnactmentId.name()));
 			dataflowInvocation.setWorkflowId(rs.getString(DI.workflowId.name()));
 			dataflowInvocation.setWorkflowRunId(rs.getString(DI.workflowRunId.name()));
+			dataflowInvocation.setCompleted(rs.getBoolean(DI.completed.name()));
 			
 			if (rs.next()) {
 				logger.error("Found more than one DataflowInvocation for processorEnactmentId=" + processorEnactment.getProcessEnactmentId());
@@ -2781,7 +2848,8 @@ ProvenanceConnector.ProcessorEnactmentTable ProcEnact = ProvenanceConnector.Proc
 				+ DI.outputsDataBinding + ","
 				+ DI.parentProcessorEnactmentId + ","  
 				+ DI.workflowId + "," 
-				+ DI.workflowRunId
+				+ DI.workflowRunId + ","
+				+ DI.completed
 				+ " FROM "
 				+ DI.DataflowInvocation +
 				" WHERE "
@@ -2807,6 +2875,7 @@ ProvenanceConnector.ProcessorEnactmentTable ProcEnact = ProvenanceConnector.Proc
 			dataflowInvocation.setParentProcessorEnactmentId(rs.getString(DI.parentProcessorEnactmentId.name()));
 			dataflowInvocation.setWorkflowId(rs.getString(DI.workflowId.name()));
 			dataflowInvocation.setWorkflowRunId(rs.getString(DI.workflowRunId.name()));
+			dataflowInvocation.setCompleted(rs.getBoolean(DI.completed.name()));
 			invocations.add(dataflowInvocation);
 		} catch (SQLException e) {
 			logger.warn("Could not execute query " + query, e);
@@ -2827,6 +2896,8 @@ ProvenanceConnector.ProcessorEnactmentTable ProcEnact = ProvenanceConnector.Proc
 		}
 		return invocations;
 	}
+
+	
 
 
 

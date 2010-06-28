@@ -119,8 +119,8 @@ public class ProvenanceWriter {
 					+ DI.dataflowInvocationId + "," + DI.workflowId + ","
 					+ DI.invocationStarted + "," + DI.invocationEnded + ","
 					+ DI.inputsDataBinding + "," + DI.outputsDataBinding + ","
-					+ DI.parentProcessorEnactmentId + "," + DI.workflowRunId
-					+ ") " + " VALUES(?,?,?,?,?,?,?,?)";
+					+ DI.parentProcessorEnactmentId + "," + DI.workflowRunId + "," + DI.completed
+					+ ") " + " VALUES(?,?,?,?,?,?,?,?,?)";
 			ps = connection.prepareStatement(sql);
 			ps.setString(1, invocation.getDataflowInvocationId());
 			ps.setString(2, invocation.getWorkflowId());
@@ -130,6 +130,7 @@ public class ProvenanceWriter {
 			ps.setString(6, invocation.getOutputsDataBindingId());
 			ps.setString(7, invocation.getParentProcessorEnactmentId());
 			ps.setString(8, invocation.getWorkflowRunId());
+			ps.setBoolean(9, invocation.getCompleted());
 			ps.executeUpdate();
 		} finally {
 			if (connection != null) {

@@ -30,9 +30,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.sql.Blob;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,6 +46,7 @@ import javax.sql.rowset.serial.SerialBlob;
 import net.sf.taverna.t2.provenance.item.DataProvenanceItem;
 import net.sf.taverna.t2.provenance.item.DataflowRunComplete;
 import net.sf.taverna.t2.provenance.item.InputDataProvenanceItem;
+import net.sf.taverna.t2.provenance.item.InvocationStartedProvenanceItem;
 import net.sf.taverna.t2.provenance.item.IterationProvenanceItem;
 import net.sf.taverna.t2.provenance.item.OutputDataProvenanceItem;
 import net.sf.taverna.t2.provenance.item.ProvenanceItem;
@@ -55,15 +54,14 @@ import net.sf.taverna.t2.provenance.item.WorkflowProvenanceItem;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DataBinding;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DataLink;
 import net.sf.taverna.t2.provenance.lineageservice.utils.NestedListNode;
+import net.sf.taverna.t2.provenance.lineageservice.utils.Port;
+import net.sf.taverna.t2.provenance.lineageservice.utils.PortBinding;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProcessorBinding;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProcessorEnactment;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceUtils;
-import net.sf.taverna.t2.provenance.lineageservice.utils.Port;
-import net.sf.taverna.t2.provenance.lineageservice.utils.PortBinding;
 import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
 import net.sf.taverna.t2.reference.T2Reference;
-import net.sf.taverna.t2.visit.DataflowCollation;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
 import net.sf.taverna.t2.workflowmodel.DataflowInputPort;
 import net.sf.taverna.t2.workflowmodel.DataflowOutputPort;
@@ -631,12 +629,11 @@ public class EventProcessor {
 			processorEnactment.setIteration(itVector);
 
 			String processId = iterationProvenanceItem.getProcessId();
-			String parentProcessId = ProvenanceUtils.parentProcess(processId, 4);
+			String parentProcessId = ProvenanceUtils.parentProcess(processId, 3);
 			if (parentProcessId != null) {
-				
-				ProcessorEnactment procAct = getPq().getProcessorEnactmentByProcessId(workflowRunId, parentProcessId);
-				if (procAct != null) {
-					processorEnactment.setParentProcessorEnactmentId(procAct.getProcessEnactmentId());
+				ProcessorEnactment parentProcEnact = getWfdp().invocationProcessToProcessEnactment.get(parentProcessId);
+				if (parentProcEnact != null) {
+					processorEnactment.setParentProcessorEnactmentId(parentProcEnact.getProcessEnactmentId());
 				}
 			}
 			processorEnactment.setProcessEnactmentId(iterationProvenanceItem.getIdentifier());
@@ -715,6 +712,14 @@ public class EventProcessor {
 //			logger.info("Received workflow data - not processing");
 			//FIXME not sure  - needs to be stored somehow
 
+		} else if (provenanceItem.getEventType().equals((SharedVocabulary.INVOCATION_STARTED_EVENT_TYPE))) {
+			InvocationStartedProvenanceItem startedItem = (InvocationStartedProvenanceItem) provenanceItem;
+			ProcessorEnactment processorEnactment = processorEnactmentMap.get(startedItem.getParentId());
+			if (processorEnactment == null) {
+				logger.error("Could not find ProcessorEnactment for invocation " + startedItem);
+				return;
+			}
+			getWfdp().invocationProcessToProcessEnactment.put(startedItem.getInvocationProcessId(), processorEnactment);			
 		} else if (provenanceItem.getEventType().equals((SharedVocabulary.ERROR_EVENT_TYPE))) {
 			//TODO process the error
 
@@ -1338,15 +1343,20 @@ public class EventProcessor {
 				logger.warn("Problem processing var binding", e);
 			}
 		} else if (valueType.equals("error")) {
+			vb.setIteration(iterationVector);
+			vb.setValue(valueEl.getAttributeValue("id"));
+			vb.setReference(valueEl.getChildText("reference"));
 			try {
-				vb.setIteration(iterationVector);
-				vb.setValue(valueEl.getAttributeValue("id"));
-
+//					logger.debug("calling addVarBinding on "+vb.getprocessorNameRef()+" : "+vb.getportName()+" with it "+vb.getIteration()); 
 				getPw().addPortBinding(vb);
-
 			} catch (SQLException e) {
-				logger.warn("Process Port Binding problem with provenance", e);
+				logger.debug("Problem processing var binding -- performing update instead of insert", e); //, e);
+				// try to update the existing record instead using the current collection info
+				
+				getPw().updatePortBinding(vb);
+//					logger.warn("PortBinding update successful");					
 			}
+
 		} else {
 			logger.warn("unrecognized value type element for "
 					+ processorId + ": " + valueType);

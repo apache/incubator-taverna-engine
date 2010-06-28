@@ -20,11 +20,7 @@
  ******************************************************************************/
 package net.sf.taverna.t2.provenance.item;
 
-import net.sf.taverna.t2.provenance.item.ProvenanceItem;
 import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
-import net.sf.taverna.t2.reference.ReferenceService;
-
-import org.jdom.Element;
 
 /**
  * Each Processor inside a workflow will have one of these for each provenance
@@ -37,18 +33,11 @@ import org.jdom.Element;
  * @author Paolo Missier
  * 
  */
-public class ProcessorProvenanceItem implements ProvenanceItem {
+public class ProcessorProvenanceItem extends AbstractProvenanceItem {
 
 	private ActivityProvenanceItem activityProvenanceItem;
-	private String processId;
-	private String parentId;
 	private String identifier;
 	private SharedVocabulary eventType = SharedVocabulary.PROCESSOR_EVENT_TYPE;
-	private String workflowId;
-
-	public ProcessorProvenanceItem() {
-	}
-
 
 	public void setActivityProvenanceItem(
 			ActivityProvenanceItem activityProvenanceItem) {
@@ -66,42 +55,5 @@ public class ProcessorProvenanceItem implements ProvenanceItem {
 	public SharedVocabulary getEventType() {
 		return eventType;
 	}
-
-	public void setProcessId(String processId) {
-		this.processId = processId;
-	}
-	
-	public String getProcessId() {
-		return processId;
-	}
-	
-	public String getParentId() {
-		return parentId;
-	}
-
-	public void setParentId(String parentId) {
-		this.parentId = parentId;
-	}
-	
-	public void setIdentifier(String identifier) {
-		// FIXME this used to be the code below but not really sure why so have
-		// changed it
-//		String facadeId = processId.split(":")[0];
-//		this.identifier = facadeId + "(" + identifier + ")";
-		this.identifier = identifier;
-	}
-	
-	public String getIdentifier() {
-		return identifier;
-	}
-	
-	public String getWorkflowId() {
-		return workflowId;
-	}
-
-	public void setWorkflowId(String workflowId) {
-		this.workflowId = workflowId;	
-	}
-
 
 }

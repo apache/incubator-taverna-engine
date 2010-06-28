@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.sf.taverna.t2.facade.WorkflowInstanceFacade.State;
 import net.sf.taverna.t2.provenance.item.DataflowRunComplete;
 import net.sf.taverna.t2.provenance.item.ProvenanceItem;
 import net.sf.taverna.t2.provenance.item.WorkflowDataProvenanceItem;
@@ -41,6 +42,8 @@ public class WorkflowDataProcessor {
 
 	ProvenanceQuery pq=null;
 	ProvenanceWriter pw = null;
+
+	protected Map<String, ProcessorEnactment> invocationProcessToProcessEnactment = new ConcurrentHashMap<String, ProcessorEnactment>();
 
 	/**
 	 * adds the input ProvenanceItem event to the tree structure corresponding to the portName found in the item. 
@@ -115,7 +118,7 @@ public class WorkflowDataProcessor {
 					if (node.getIndex().equals("[]")) {
 						// Store top-level workflow inputs/outputs
 						if (! node.getProcessId().equals(completeEvent.getProcessId())) {
-							logger.warn("Unexpected process ID " + node.getProcessId() + " expected " + completeEvent.getProcessId());
+							//logger.warn("Unexpected process ID " + node.getProcessId() + " expected " + completeEvent.getProcessId());
 							continue;
 						}
 						String portKey = (node.isInputPort() ? "/i:" : "/o:") + node.getPortName();
@@ -190,14 +193,17 @@ public class WorkflowDataProcessor {
 		invocation.setWorkflowId(workflowId);
 		invocation.setWorkflowRunId(workflowRunId);
 		
-		String parentProcessId = ProvenanceUtils.parentProcess(processId, 2);
-		if (parentProcessId != null) {
-			ProcessorEnactment procAct = getPq().getProcessorEnactmentByProcessId(workflowRunId, parentProcessId);
-			invocation.setParentProcessorEnactmentId(procAct.getProcessEnactmentId());		
+		String parentProcessId = ProvenanceUtils.parentProcess(processId, 1);
+		if (parentProcessId != null) {				
+			ProcessorEnactment procAct = invocationProcessToProcessEnactment.get(parentProcessId);
+			if (procAct != null) {
+				invocation.setParentProcessorEnactmentId(procAct.getProcessEnactmentId());		
+			}
 		}
 		
 		invocation.setInvocationStarted(workflowStarted.get(completeEvent.getParentId()));
 		invocation.setInvocationEnded(completeEvent.getInvocationEnded());
+		invocation.setCompleted(completeEvent.getState().equals(State.completed));
 		
 		// Register data
 		String inputsDataBindingId = UUID.randomUUID().toString();

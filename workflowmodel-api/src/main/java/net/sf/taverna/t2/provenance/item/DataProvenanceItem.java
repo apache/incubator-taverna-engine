@@ -34,11 +34,10 @@ import net.sf.taverna.t2.reference.T2Reference;
  * @author Paolo Missier
  * 
  */
-public abstract class DataProvenanceItem implements ProvenanceItem {
+public abstract class DataProvenanceItem extends AbstractProvenanceItem {
 	/** A map of port name to data reference */
 	private Map<String, T2Reference> dataMap;
 	private ReferenceService referenceService;
-	private String workflowId;
 
 	/**
 	 * Is this {@link ProvenanceItem} for input or output data
@@ -46,10 +45,6 @@ public abstract class DataProvenanceItem implements ProvenanceItem {
 	 * @return
 	 */
 	protected abstract boolean isInput();
-
-	public DataProvenanceItem() {
-
-	}
 
 	/* (non-Javadoc)
 	 * @see net.sf.taverna.t2.provenance.item.DataProvenanceItemInterface#getDataMap()
@@ -64,13 +59,7 @@ public abstract class DataProvenanceItem implements ProvenanceItem {
 	public void setDataMap(Map<String, T2Reference> dataMap) {
 		this.dataMap = dataMap;
 	}
-
-	public abstract String getIdentifier();
-
-	public abstract String getParentId();
-
-	public abstract String getProcessId();
-
+	
 	public void setReferenceService(ReferenceService referenceService) {
 		this.referenceService = referenceService;
 	}
@@ -79,12 +68,4 @@ public abstract class DataProvenanceItem implements ProvenanceItem {
 		return referenceService;
 	}
 	
-	public String getWorkflowId() {
-		return workflowId;
-	}
-
-	public void setWorkflowId(String workflowId) {
-		this.workflowId = workflowId;	
-	}
-
 }

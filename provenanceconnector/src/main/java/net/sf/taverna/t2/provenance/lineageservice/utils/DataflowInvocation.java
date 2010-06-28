@@ -10,7 +10,8 @@ public class DataflowInvocation {
 	private String inputsDataBindingId;
 	private String outputsDataBindingId;
 	private Timestamp invocationEnded;
-	private Timestamp invocationStarted;	
+	private Timestamp invocationStarted;
+	private boolean completed;	
 	
 	@Override
 	public int hashCode() {
@@ -92,6 +93,12 @@ public class DataflowInvocation {
 	}
 	public void setInvocationStarted(Timestamp invocationStarted) {
 		this.invocationStarted = invocationStarted;
+	}
+	public void setCompleted(boolean completed) {
+		this.completed = completed;		
+	}
+	public boolean getCompleted() {
+		return completed;
 	}
 
 }
