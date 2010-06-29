@@ -38,6 +38,7 @@ import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeSelectionModel;
@@ -62,6 +63,13 @@ public class JTreeTable extends JTable {
 	/** A subclass of JTree. */
 	protected TreeTableCellRenderer tree;
 
+
+	private static SimpleDateFormat ISO_8601_FORMAT = new SimpleDateFormat(
+			"yyyy-MM-dd HH:mm:ss");
+	private static SimpleDateFormat TIME_FORMAT = new SimpleDateFormat(
+			"HH:mm:ss");
+
+	
 	public JTreeTable() {
 		super();
 	}
@@ -352,11 +360,27 @@ public class JTreeTable extends JTable {
 
 	}
 
+	public static String formatDate(Date date) {
+		final Date midnight = new Date();
+		midnight.setHours(0);
+		midnight.setMinutes(0);
+		midnight.setSeconds(0);
+		SimpleDateFormat format;
+		if (date.before(midnight)) {
+			// FULL DATE
+			format = ISO_8601_FORMAT;
+		} else {
+			format = TIME_FORMAT; 
+		}
+		final String formatted = format.format(date);
+		return formatted;
+	}
+	
 	/**
 	 * A TreeCellRenderer that displays a date in a "yyyy-MM-dd HH:mm:ss"
 	 * format.
 	 */
-	public class DateCellRenderer extends JLabel implements TableCellRenderer {
+	public class DateCellRenderer extends DefaultTableCellRenderer {
 		/** Last table/tree row asked to renderer. */
 		protected int visibleRow;
 		protected Border highlightBorder;
@@ -368,23 +392,31 @@ public class JTreeTable extends JTable {
 		public Component getTableCellRendererComponent(JTable table,
 				Object value, boolean isSelected, boolean hasFocus, int row,
 				int column) {
-
+			super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+			
 			if (isSelected) {
-				this.setBackground(table.getSelectionBackground());
-				this.setForeground(table.getSelectionForeground());
+//				this.setBackground(table.getSelectionBackground());
+//				this.setForeground(table.getSelectionForeground());
 			} else {
-				this.setBackground(table.getBackground());
-				this.setForeground(table.getForeground());
+				/*this.setBackground(table.getBackground());
+				this.setForeground(table.getForeground());*/
 			}
+			
+		
+			//dtcr.setBorderSelectionColor(null);
+			// dtcr.setTextSelectionColor(UIManager.getColor
+			// ("Table.selectionForeground"));
+			// dtcr.setBackgroundSelectionColor(UIManager.getColor
+			// ("Table.selectionBackground"));
+					
+
 			
 			Date date = (Date) ((TreeTableModelAdapter) getModel()).getValueAt(
 					row, column);
-			if (date != null) {
-				SimpleDateFormat sdf = new SimpleDateFormat(
-						"yyyy-MM-dd HH:mm:ss");
-				this.setText(sdf.format(date));
+			if (date != null) {				
+				setText(formatDate(date));
 			} else {
-				this.setText(null);
+				setText(null);
 			}
 			return this;
 		}
