@@ -14,6 +14,9 @@ import net.sf.taverna.t2.servicedescriptions.ServiceDescriptionProvider;
 
 public class ExampleServiceProvider implements ServiceDescriptionProvider {
 	
+	private static final URI providerId = URI
+		.create("http://example.com/2010/service-provider/${artifactId}");
+	
 	/**
 	 * Do the actual search for services. Return using the callBack parameter.
 	 */
@@ -64,6 +67,10 @@ public class ExampleServiceProvider implements ServiceDescriptionProvider {
 	@Override
 	public String toString() {
 		return getName();
+	}
+	
+	public String getId() {
+		return providerId.toASCIIString();
 	}
 
 }
