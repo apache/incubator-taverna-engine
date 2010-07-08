@@ -53,7 +53,7 @@ public class ExampleServiceProvider implements ServiceDescriptionProvider {
 	 * Icon for service provider
 	 */
 	public Icon getIcon() {
-		return null;
+		return ExampleServiceIcon.getIcon();
 	}
 
 	/**

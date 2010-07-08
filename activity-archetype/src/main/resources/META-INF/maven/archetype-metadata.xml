@@ -12,6 +12,12 @@
 						<include>**/*.java</include>
 					</includes>
 				</fileSet>
+				<fileSet encoding="UTF-8" filtered="true">
+					<directory>src/main/resources</directory>
+					<includes>
+						<include>**/*</include>
+					</includes>
+				</fileSet>
 				<fileSet filtered="true" packaged="true" encoding="UTF-8">
 					<directory>src/test/java</directory>
 					<includes>
@@ -32,8 +38,13 @@
 				<fileSet encoding="UTF-8" filtered="true">
 					<directory>src/main/resources</directory>
 					<includes>
-						<include>**/*.ServiceDescriptionProvider</include>
-						<include>**/*.ContextualViewFactory</include>
+						<include>**/net*</include>
+					</includes>
+				</fileSet>
+				<fileSet encoding="UTF-8" filtered="false">
+					<directory>src/main/resources</directory>
+					<includes>
+						<include>exampleIcon.png</include>
 					</includes>
 				</fileSet>
 				<fileSet filtered="true" packaged="true" encoding="UTF-8">
@@ -41,8 +52,7 @@
 					<includes>
 						<include>**/*.java</include>
 					</includes>
-				</fileSet>
-			
+				</fileSet>			
 			</fileSets>
 		</module>
 	</modules>

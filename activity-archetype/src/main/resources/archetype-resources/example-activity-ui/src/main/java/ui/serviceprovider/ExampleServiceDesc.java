@@ -45,8 +45,7 @@ public class ExampleServiceDesc extends ServiceDescription<ExampleActivityConfig
 	 */
 	@Override
 	public Icon getIcon() {
-		// TODO Auto-generated method stub
-		return null;
+		return ExampleServiceIcon.getIcon();
 	}
 
 	/**
