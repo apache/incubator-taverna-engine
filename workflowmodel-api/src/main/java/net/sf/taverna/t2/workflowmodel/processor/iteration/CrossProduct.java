@@ -38,10 +38,9 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Job;
  * than 'n'.
  * 
  * @author Tom Oinn
- * 
+ * @author David Withers
  */
-public class CrossProduct extends
-		CompletionHandlingAbstractIterationStrategyNode {
+public class CrossProduct extends CompletionHandlingAbstractIterationStrategyNode {
 
 	private Map<String, List<Set<Job>>> ownerToCache = new HashMap<String, List<Set<Job>>>();
 
@@ -51,6 +50,12 @@ public class CrossProduct extends
 	 */
 	@Override
 	public synchronized void innerReceiveJob(int inputIndex, Job newJob) {
+		if (getChildCount() == 1) {
+			// there's only one input and there's nothing to do here so push the
+			// job through
+			pushJob(newJob);
+			return;
+		}
 		if (!ownerToCache.containsKey(newJob.getOwningProcess())) {
 			List<Set<Job>> perInputCache = new ArrayList<Set<Job>>();
 			for (int i = 0; i < getChildCount(); i++) {
@@ -59,8 +64,7 @@ public class CrossProduct extends
 			ownerToCache.put(newJob.getOwningProcess(), perInputCache);
 		}
 		// Store the new job
-		List<Set<Job>> perInputCache = ownerToCache.get(newJob
-				.getOwningProcess());
+		List<Set<Job>> perInputCache = ownerToCache.get(newJob.getOwningProcess());
 		perInputCache.get(inputIndex).add(newJob);
 		// Find all combinations of the new job with all permutations of jobs in
 		// the other caches. We could make this a lot easier by restricting it
@@ -84,15 +88,18 @@ public class CrossProduct extends
 		for (Job outputJob : workingSet) {
 			pushJob(outputJob);
 		}
-
+		if (canClearCache(inputIndex, newJob.getOwningProcess())) {
+			// If we've seen completions for all the other indexes we don't need
+			// to cache jobs for this index
+			perInputCache.get(inputIndex).clear();
+		}
 	}
 
 	private Set<Job> merge(Set<Job> set1, Set<Job> set2) {
 		Set<Job> newSet = new HashSet<Job>();
 		for (Job job1 : set1) {
 			for (Job job2 : set2) {
-				int[] newIndex = new int[job1.getIndex().length
-						+ job2.getIndex().length];
+				int[] newIndex = new int[job1.getIndex().length + job2.getIndex().length];
 				int j = 0;
 				for (int i = 0; i < job1.getIndex().length; i++) {
 					newIndex[j++] = job1.getIndex()[i];
@@ -103,16 +110,14 @@ public class CrossProduct extends
 				Map<String, T2Reference> newDataMap = new HashMap<String, T2Reference>();
 				newDataMap.putAll(job1.getData());
 				newDataMap.putAll(job2.getData());
-				newSet.add(new Job(job1.getOwningProcess(), newIndex,
-						newDataMap, job1.getContext()));
+				newSet.add(new Job(job1.getOwningProcess(), newIndex, newDataMap, job1.getContext()));
 			}
 		}
 		return newSet;
 	}
 
 	@Override
-	public synchronized void innerReceiveCompletion(int inputIndex,
-			Completion completion) {
+	public synchronized void innerReceiveCompletion(int inputIndex, Completion completion) {
 		// Do nothing, let the superclass handle final completion events
 	}
 
@@ -121,11 +126,30 @@ public class CrossProduct extends
 		ownerToCache.remove(owningProcess);
 	}
 
+	/**
+	 * Returns true iff completions have been received for all other inputs.
+	 * 
+	 * @param inputIndex
+	 * @param owningProcess
+	 * @return true iff completions have been received for all other inputs
+	 */
+	private boolean canClearCache(int inputIndex, String owningProcess) {
+		boolean[] completionState = getCompletionState(owningProcess).inputComplete;
+		for (int i = 0; i < completionState.length; i++) {
+			if (i != inputIndex) {
+				if (!completionState[i]) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
 	public synchronized int getIterationDepth(Map<String, Integer> inputDepths)
 			throws IterationTypeMismatchException {
 		if (isLeaf()) {
 			// No children!
-			throw new IterationTypeMismatchException("Cross product with no children");			
+			throw new IterationTypeMismatchException("Cross product with no children");
 		}
 		int temp = 0;
 		for (IterationStrategyNode child : getChildren()) {
