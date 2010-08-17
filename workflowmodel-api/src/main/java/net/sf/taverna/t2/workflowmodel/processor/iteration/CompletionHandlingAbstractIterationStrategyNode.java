@@ -45,7 +45,7 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Job;
  * will lead to duplicatation.
  * 
  * @author Tom Oinn
- * 
+ * @author David Withers
  */
 public abstract class CompletionHandlingAbstractIterationStrategyNode extends
 		AbstractIterationStrategyNode {
@@ -57,7 +57,7 @@ public abstract class CompletionHandlingAbstractIterationStrategyNode extends
 	 * @author Tom Oinn
 	 * 
 	 */
-	private final class CompletionState {
+	protected final class CompletionState {
 		protected CompletionState(int indexLength) {
 			inputComplete = new boolean[indexLength];
 			for (int i = 0; i < indexLength; i++) {
@@ -116,16 +116,18 @@ public abstract class CompletionHandlingAbstractIterationStrategyNode extends
 			if (isCompletion) {
 				cs.receivedCompletion = true;
 			}
-			if (cs.isComplete() && cs.receivedCompletion) {
-				ownerToCompletion.remove(owningProcess);
+			if (cs.isComplete()) {
 				cleanUp(owningProcess);
-				pushCompletion(new Completion(owningProcess, new int[0],
-						context));
+				ownerToCompletion.remove(owningProcess);
+				if (cs.receivedCompletion) {
+					pushCompletion(new Completion(owningProcess, new int[0],
+							context));
+				}
 			}
 		}
 	}
 
-	private CompletionState getCompletionState(String owningProcess) {
+	protected CompletionState getCompletionState(String owningProcess) {
 		synchronized (ownerToCompletion) {
 			if (ownerToCompletion.containsKey(owningProcess)) {
 				return ownerToCompletion.get(owningProcess);
