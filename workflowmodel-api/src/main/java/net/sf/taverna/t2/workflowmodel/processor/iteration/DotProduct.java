@@ -42,6 +42,12 @@ public class DotProduct extends CompletionHandlingAbstractIterationStrategyNode 
 
 	@Override
 	public synchronized void innerReceiveJob(int inputIndex, Job newJob) {
+		if (getChildCount() == 1) {
+			// if there's only one input there's nothing to do here so push the
+			// job through
+			pushJob(newJob);
+			return;
+		}
 		String owningProcess = newJob.getOwningProcess();
 		if (!ownerToCache.containsKey(owningProcess)) {
 			TreeCache[] caches = new TreeCache[getChildCount()];
