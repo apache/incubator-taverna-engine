@@ -45,6 +45,7 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Job;
  * <p>
  * 
  * @author Tom Oinn
+ * @author David Withers
  */
 public abstract class AbstractCrystalizer implements Crystalizer {
 
@@ -84,7 +85,8 @@ public abstract class AbstractCrystalizer implements Crystalizer {
 			if (e instanceof Job) {
 				// Pass through Job after storing it in the cache
 				Job j = (Job) e;
-				cache.insertJob(j);
+//				cache.insertJob(j);
+				cache.insertJob(new Job("", j.getIndex(), j.getData(), j.getContext()));
 				jobCreated(j);
 				if (j.getIndex().length == 0) {
 					cacheMap.remove(j.getOwningProcess());
