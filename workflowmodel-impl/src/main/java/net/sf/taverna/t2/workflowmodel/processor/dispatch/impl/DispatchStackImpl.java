@@ -55,7 +55,7 @@ import org.apache.log4j.Logger;
  * 
  * @author Tom Oinn
  * @author Stian Soiland-Reyes
- * 
+ * @author David Withers
  */
 public abstract class DispatchStackImpl extends
 		AbstractAnnotatedThing<DispatchStack> implements DispatchStack {
@@ -311,6 +311,7 @@ public abstract class DispatchStackImpl extends
 				layer.finishedWith(owningProcess);
 			}
 			DispatchStackImpl.this.finishedWith(owningProcess);
+			queues.remove(owningProcess);
 		}
 
 		public void configure(Object config) {
