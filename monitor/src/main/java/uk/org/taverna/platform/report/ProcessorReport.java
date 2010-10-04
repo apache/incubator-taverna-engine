@@ -1,0 +1,158 @@
+/*******************************************************************************
+ * Copyright (C) 2010 The University of Manchester   
+ * 
+ *  Modifications to the initial code base are copyright of their
+ *  respective authors, or their employers as appropriate.
+ * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public License
+ *  as published by the Free Software Foundation; either version 2.1 of
+ *  the License, or (at your option) any later version.
+ *    
+ *  This program is distributed in the hope that it will be useful, but
+ *  WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *    
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ ******************************************************************************/
+package uk.org.taverna.platform.report;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import uk.org.taverna.scufl2.api.activity.Activity;
+import uk.org.taverna.scufl2.api.core.Processor;
+
+/**
+ * 
+ * @author David Withers
+ */
+public class ProcessorReport extends StatusReport {
+
+	private final Processor processor;
+	
+	private final WorkflowReport parentReport;
+
+	private Map<Processor, ActivityReport> activityReports;
+
+	private int jobsQueued, jobsStarted, jobsCompleted, jobsCompletedWithErrors;
+
+	private Map<String, Object> properties = new HashMap<String, Object>();
+
+	public ProcessorReport(Processor processor, WorkflowReport parentReport) {
+		this.processor = processor;
+		this.parentReport = parentReport;
+		activityReports = new HashMap<Processor, ActivityReport>();
+		// not as simple as this : need to look at processor bindings
+//		for (Activity activity : processor.getActivities()) {
+//			activityReports.put(processor, createActivityReport(activity, this));
+//		}
+	}
+
+	/**
+	 * @return the processor
+	 */
+	public Processor getProcessor() {
+		return processor;
+	}
+	
+	/**
+	 * @return the parentReport
+	 */
+	public WorkflowReport getParentReport() {
+		return parentReport;
+	}
+
+	/**
+	 * @return the activityReports
+	 */
+	public Set<ActivityReport> getActivityReports() {
+		return new HashSet<ActivityReport>(activityReports.values());
+	}
+
+	/**
+	 * @return the jobsQueued
+	 */
+	public int getJobsQueued() {
+		return jobsQueued;
+	}
+
+	/**
+	 * @param jobsQueued
+	 *            the jobsQueued to set
+	 */
+	public void setJobsQueued(int jobsQueued) {
+		this.jobsQueued = jobsQueued;
+	}
+
+	/**
+	 * @return the jobsStarted
+	 */
+	public int getJobsStarted() {
+		return jobsStarted;
+	}
+
+	/**
+	 * @param jobsStarted
+	 *            the jobsStarted to set
+	 */
+	public void setJobsStarted(int jobsStarted) {
+		this.jobsStarted = jobsStarted;
+	}
+
+	/**
+	 * @return the jobsCompleted
+	 */
+	public int getJobsCompleted() {
+		return jobsCompleted;
+	}
+
+	/**
+	 * @param jobsCompleted
+	 *            the jobsCompleted to set
+	 */
+	public void setJobsCompleted(int jobsCompleted) {
+		this.jobsCompleted = jobsCompleted;
+	}
+
+	/**
+	 * @return the jobsCompletedWithErrors
+	 */
+	public int getJobsCompletedWithErrors() {
+		return jobsCompletedWithErrors;
+	}
+
+	/**
+	 * @param jobsCompletedWithErrors
+	 *            the jobsCompletedWithErrors to set
+	 */
+	public void setJobsCompletedWithErrors(int jobsCompletedWithErrors) {
+		this.jobsCompletedWithErrors = jobsCompletedWithErrors;
+	}
+
+	public Set<String> getPropertyKeys() {
+		return new HashSet<String>(properties.keySet());
+	}
+
+	public Object getProperty(String key) {
+		return properties.get(key);
+	}
+
+	public void setProperty(String key, Object value) {
+		synchronized (properties) {
+//			if (properties.containsKey(key)) {
+				properties.put(key, value);
+//			}
+		}
+	}
+	
+	protected ActivityReport createActivityReport(Activity activity, ProcessorReport parentReport) {
+		return new ActivityReport(activity, parentReport);
+	}
+
+}

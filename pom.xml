@@ -1,0 +1,35 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>parent</artifactId>
+		<groupId>net.sf.taverna</groupId>
+		<version>0.1.2009-02-12</version>
+	</parent>
+	<groupId>uk.org.taverna</groupId>
+	<artifactId>platform</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>Taverna Platform</name>
+	<scm>
+		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/platform/uk.org.taverna.platform/trunk/</connection>
+		<developerConnection>scm:svn:https://taverna.googlecode.com/svn/taverna/platform/uk.org.taverna.platform/trunk/</developerConnection>
+		<url>http://code.google.com/p/taverna/source/browse/#svn/taverna/platform/uk.org.taverna.platform/trunk</url>
+	</scm>
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<modules>
+		<module>execution</module>
+		<module>run</module>
+		<module>monitor</module>
+	</modules>
+</project>

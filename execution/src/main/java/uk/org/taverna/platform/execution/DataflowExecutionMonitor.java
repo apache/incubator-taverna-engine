@@ -1,0 +1,177 @@
+/*******************************************************************************
+ * Copyright (C) 2010 The University of Manchester   
+ * 
+ *  Modifications to the initial code base are copyright of their
+ *  respective authors, or their employers as appropriate.
+ * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public License
+ *  as published by the Free Software Foundation; either version 2.1 of
+ *  the License, or (at your option) any later version.
+ *    
+ *  This program is distributed in the hope that it will be useful, but
+ *  WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *    
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ ******************************************************************************/
+package uk.org.taverna.platform.execution;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import net.sf.taverna.t2.lang.observer.Observable;
+import net.sf.taverna.t2.lang.observer.Observer;
+import net.sf.taverna.t2.monitor.MonitorManager.AddPropertiesMessage;
+import net.sf.taverna.t2.monitor.MonitorManager.DeregisterNodeMessage;
+import net.sf.taverna.t2.monitor.MonitorManager.MonitorMessage;
+import net.sf.taverna.t2.monitor.MonitorManager.RegisterNodeMessage;
+import net.sf.taverna.t2.monitor.MonitorableProperty;
+import net.sf.taverna.t2.workflowmodel.Dataflow;
+import net.sf.taverna.t2.workflowmodel.Processor;
+import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
+
+import org.apache.log4j.Logger;
+
+import uk.org.taverna.platform.report.ActivityReport;
+import uk.org.taverna.platform.report.ProcessorReport;
+
+/**
+ * 
+ * 
+ * @author David Withers
+ */
+public class DataflowExecutionMonitor implements Observer<MonitorMessage> {
+
+	private static final Logger logger = Logger.getLogger(DataflowExecutionMonitor.class);
+
+	private Map<String, Object> dataflowObjects;
+
+	private Map<Dataflow, DataflowWorkflowReport> workflowReports;
+	
+	private Map<Processor, DataflowProcessorReport> processorReports;
+	
+	private Map<Activity<?>, ActivityReport> activityReports;
+	
+	private Map<Processor, AtomicInteger> processorInvocations;
+
+	private Map<Activity<?>, AtomicInteger> activityInvocations;
+
+	public DataflowExecutionMonitor(DataflowWorkflowReport workflowReport, WorkflowToDataflowMapper mapping) {
+		dataflowObjects = new HashMap<String, Object>();
+		workflowReports = new HashMap<Dataflow, DataflowWorkflowReport>();
+		processorReports = new HashMap<Processor, DataflowProcessorReport>();
+		processorInvocations = new HashMap<Processor, AtomicInteger>();
+		mapReports(workflowReport, mapping);
+	}
+
+	private void mapReports(DataflowWorkflowReport workflowReport, WorkflowToDataflowMapper mapping) {
+		workflowReports.put(mapping.getDataflow(workflowReport.getWorkflow()), workflowReport);
+		for (ProcessorReport processorReport : workflowReport.getProcessorReports()) {
+			Processor processor = mapping.getDataflowProcessor(processorReport.getProcessor());
+			processorReports.put(processor, (DataflowProcessorReport) processorReport);
+			processorInvocations.put(processor, new AtomicInteger());
+			for (ActivityReport activityReport : processorReport.getActivityReports()) {
+				Activity<?> activity = mapping.getDataflowActivity(activityReport.getActivity());
+				activityReports.put(activity, activityReport);
+			}
+		}
+	}
+
+	public void notify(Observable<MonitorMessage> sender, MonitorMessage message) throws Exception {
+		String[] owningProcess = message.getOwningProcess();
+		if (message instanceof RegisterNodeMessage) {
+			RegisterNodeMessage regMessage = (RegisterNodeMessage) message;
+			registerNode(regMessage.getWorkflowObject(), owningProcess, regMessage.getProperties());
+		} else if (message instanceof DeregisterNodeMessage) {
+			deregisterNode(owningProcess);
+		} else if (message instanceof AddPropertiesMessage) {
+			AddPropertiesMessage addMessage = (AddPropertiesMessage) message;
+			addPropertiesToNode(owningProcess, addMessage.getNewProperties());
+		} else {
+			logger.warn("Unknown message " + message + " from " + sender);
+		}
+	}
+
+	public void registerNode(Object dataflowObject, String[] owningProcess,
+			Set<MonitorableProperty<?>> properties) {
+		dataflowObjects.put(getOwningProcessId(owningProcess), dataflowObject);
+		if (dataflowObject instanceof Dataflow) {
+			Dataflow dataflow = (Dataflow) dataflowObject;
+			workflowReports.get(dataflow).setStartedDate(new Date());
+		} else if (dataflowObject instanceof Processor) {
+			Processor dataflowProcessor = (Processor) dataflowObject;
+			if (processorInvocations.get(dataflowProcessor).getAndIncrement() == 0) {
+				System.out.println("Adding " + dataflowProcessor.getLocalName());
+				DataflowProcessorReport processorReport = processorReports.get(dataflowProcessor);
+				processorReport.addProperties(properties);
+//				processorReport.setStartedDate(new Date());
+			}
+		} else if (dataflowObject instanceof Activity) {
+			Activity<?> activity = (Activity<?>) dataflowObject;
+			if (activityInvocations.get(activity).getAndIncrement() == 0) {
+				ActivityReport activityReport = activityReports.get(activity);
+				ProcessorReport parentReport = activityReport.getParentReport();
+				parentReport.setStartedDate(new Date());
+				activityReport.setStartedDate(new Date());
+			}
+		}
+	}
+
+	public void deregisterNode(String[] owningProcess) {
+		Object dataflowObject = dataflowObjects.remove(getOwningProcessId(owningProcess));
+		if (dataflowObject instanceof Dataflow) {
+			Dataflow dataflow = (Dataflow) dataflowObject;
+			workflowReports.get(dataflow).setCompletedDate(new Date());
+		} else if (dataflowObject instanceof Processor) {
+			Processor dataflowProcessor = (Processor) dataflowObject;
+			if (processorInvocations.get(dataflowProcessor).decrementAndGet() == 0) {
+				System.out.println("Removing " + dataflowProcessor.getLocalName());
+				DataflowProcessorReport processorReport = processorReports.get(dataflowProcessor);
+				processorReport.saveProperties();
+				processorReport.setCompletedDate(new Date());
+			}
+		} else if (dataflowObject instanceof Activity) {
+			Activity<?> activity = (Activity<?>) dataflowObject;
+			if (activityInvocations.get(activity).decrementAndGet() == 0) {
+				ActivityReport activityReport = activityReports.get(activity);
+				activityReport.setCompletedDate(new Date());
+			}
+		}
+	}
+
+	public void addPropertiesToNode(String[] owningProcess,
+			Set<MonitorableProperty<?>> newProperties) {
+		Object dataflowObject = dataflowObjects.get(owningProcess);
+		if (dataflowObject instanceof Processor) {
+			Processor dataflowProcessor = (Processor) dataflowObject;
+			DataflowProcessorReport processorReport = processorReports.get(dataflowProcessor);
+			processorReport.addProperties(newProperties);
+		}
+	}
+
+	/**
+	 * Converts the owning process array to a string.
+	 * 
+	 * @param owningProcess
+	 *            the owning process id
+	 * @return the owning process as a string
+	 */
+	private static String getOwningProcessId(String[] owningProcess) {
+		StringBuilder sb = new StringBuilder();
+		for (String string : owningProcess) {
+			if (sb.length() > 0) {
+				sb.append(':');
+			}
+			sb.append(string);
+		}
+		return sb.toString();
+	}
+
+}

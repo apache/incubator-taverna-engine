@@ -1,0 +1,57 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>platform</artifactId>
+		<groupId>uk.org.taverna</groupId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+	<groupId>uk.org.taverna.platform</groupId>
+	<artifactId>run</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>bundle</packaging>
+	<name>Workflow Run Service</name>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Bundle-Activator>uk.org.taverna.platform.run.impl.Activator</Bundle-Activator>
+						<Export-Package>uk.org.taverna.platform.run.api</Export-Package>
+						<Import-Package>org.osgi.framework;version="1.4.0",*;resolution:=optional</Import-Package>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.osgi.core</artifactId>
+			<version>1.4.0</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.taverna.t2.core</groupId>
+			<artifactId>reference-api</artifactId>
+			<version>1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>uk.org.taverna.platform</groupId>
+			<artifactId>monitor</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>uk.org.taverna.platform</groupId>
+			<artifactId>execution</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>uk.org.taverna.scufl2</groupId>
+			<artifactId>scufl2-api</artifactId>
+			<version>0.1-SNAPSHOT</version>
+		</dependency>
+	</dependencies>
+</project>
