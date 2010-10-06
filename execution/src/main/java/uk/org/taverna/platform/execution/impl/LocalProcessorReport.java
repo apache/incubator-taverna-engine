@@ -14,7 +14,7 @@ import uk.org.taverna.platform.report.ProcessorReport;
 import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.scufl2.api.core.Processor;
 
-public class DataflowProcessorReport extends ProcessorReport {
+public class LocalProcessorReport extends ProcessorReport {
 
 	private static final String DISPATCH_ERRORBOUNCE_TOTAL_TRANSLATED = "dispatch:errorbounce:totalTranslated";
 
@@ -26,7 +26,7 @@ public class DataflowProcessorReport extends ProcessorReport {
 
 	private Map<String, MonitorableProperty<?>> propertyMap;
 	
-	public DataflowProcessorReport(Processor processor, WorkflowReport parentReport) {
+	public LocalProcessorReport(Processor processor, WorkflowReport parentReport) {
 		super(processor, parentReport);
 		propertyMap = new HashMap<String, MonitorableProperty<?>>();
 	}

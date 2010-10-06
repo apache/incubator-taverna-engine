@@ -39,8 +39,8 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 
 import org.apache.log4j.Logger;
 
-import uk.org.taverna.platform.execution.impl.DataflowProcessorReport;
-import uk.org.taverna.platform.execution.impl.DataflowWorkflowReport;
+import uk.org.taverna.platform.execution.impl.LocalProcessorReport;
+import uk.org.taverna.platform.execution.impl.LocalWorkflowReport;
 import uk.org.taverna.platform.report.ActivityReport;
 import uk.org.taverna.platform.report.ProcessorReport;
 
@@ -55,9 +55,9 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 
 	private Map<String, Object> dataflowObjects;
 
-	private Map<Dataflow, DataflowWorkflowReport> workflowReports;
+	private Map<Dataflow, LocalWorkflowReport> workflowReports;
 	
-	private Map<Processor, DataflowProcessorReport> processorReports;
+	private Map<Processor, LocalProcessorReport> processorReports;
 	
 	private Map<Activity<?>, ActivityReport> activityReports;
 	
@@ -65,19 +65,19 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 
 	private Map<Activity<?>, AtomicInteger> activityInvocations;
 
-	public LocalExecutionMonitor(DataflowWorkflowReport workflowReport, WorkflowToDataflowMapper mapping) {
+	public LocalExecutionMonitor(LocalWorkflowReport workflowReport, WorkflowToDataflowMapper mapping) {
 		dataflowObjects = new HashMap<String, Object>();
-		workflowReports = new HashMap<Dataflow, DataflowWorkflowReport>();
-		processorReports = new HashMap<Processor, DataflowProcessorReport>();
+		workflowReports = new HashMap<Dataflow, LocalWorkflowReport>();
+		processorReports = new HashMap<Processor, LocalProcessorReport>();
 		processorInvocations = new HashMap<Processor, AtomicInteger>();
 		mapReports(workflowReport, mapping);
 	}
 
-	private void mapReports(DataflowWorkflowReport workflowReport, WorkflowToDataflowMapper mapping) {
+	private void mapReports(LocalWorkflowReport workflowReport, WorkflowToDataflowMapper mapping) {
 		workflowReports.put(mapping.getDataflow(workflowReport.getWorkflow()), workflowReport);
 		for (ProcessorReport processorReport : workflowReport.getProcessorReports()) {
 			Processor processor = mapping.getDataflowProcessor(processorReport.getProcessor());
-			processorReports.put(processor, (DataflowProcessorReport) processorReport);
+			processorReports.put(processor, (LocalProcessorReport) processorReport);
 			processorInvocations.put(processor, new AtomicInteger());
 			for (ActivityReport activityReport : processorReport.getActivityReports()) {
 				Activity<?> activity = mapping.getDataflowActivity(activityReport.getActivity());
@@ -111,7 +111,7 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 			Processor dataflowProcessor = (Processor) dataflowObject;
 			if (processorInvocations.get(dataflowProcessor).getAndIncrement() == 0) {
 				System.out.println("Adding " + dataflowProcessor.getLocalName());
-				DataflowProcessorReport processorReport = processorReports.get(dataflowProcessor);
+				LocalProcessorReport processorReport = processorReports.get(dataflowProcessor);
 				processorReport.addProperties(properties);
 //				processorReport.setStartedDate(new Date());
 			}
@@ -135,7 +135,7 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 			Processor dataflowProcessor = (Processor) dataflowObject;
 			if (processorInvocations.get(dataflowProcessor).decrementAndGet() == 0) {
 				System.out.println("Removing " + dataflowProcessor.getLocalName());
-				DataflowProcessorReport processorReport = processorReports.get(dataflowProcessor);
+				LocalProcessorReport processorReport = processorReports.get(dataflowProcessor);
 				processorReport.saveProperties();
 				processorReport.setCompletedDate(new Date());
 			}
@@ -153,7 +153,7 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 		Object dataflowObject = dataflowObjects.get(owningProcess);
 		if (dataflowObject instanceof Processor) {
 			Processor dataflowProcessor = (Processor) dataflowObject;
-			DataflowProcessorReport processorReport = processorReports.get(dataflowProcessor);
+			LocalProcessorReport processorReport = processorReports.get(dataflowProcessor);
 			processorReport.addProperties(newProperties);
 		}
 	}

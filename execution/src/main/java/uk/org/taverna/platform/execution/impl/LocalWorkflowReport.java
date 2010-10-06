@@ -5,15 +5,15 @@ import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.scufl2.api.core.Processor;
 import uk.org.taverna.scufl2.api.core.Workflow;
 
-public class DataflowWorkflowReport extends WorkflowReport {
+public class LocalWorkflowReport extends WorkflowReport {
 	
-	public DataflowWorkflowReport(Workflow workflow) {
+	public LocalWorkflowReport(Workflow workflow) {
 		super(workflow);
 	}
 
 	@Override
 	protected ProcessorReport createProcessorReport(Processor processor, WorkflowReport parentReport) {
-		return new DataflowProcessorReport(processor, parentReport);
+		return new LocalProcessorReport(processor, parentReport);
 	}
 	
 }

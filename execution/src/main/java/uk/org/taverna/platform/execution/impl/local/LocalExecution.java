@@ -48,7 +48,7 @@ import org.apache.log4j.Logger;
 
 import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
 import uk.org.taverna.platform.execution.impl.ConfigurationManager;
-import uk.org.taverna.platform.execution.impl.DataflowWorkflowReport;
+import uk.org.taverna.platform.execution.impl.LocalWorkflowReport;
 import uk.org.taverna.platform.execution.impl.Execution;
 import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.scufl2.api.core.Workflow;
@@ -80,7 +80,7 @@ public class LocalExecution extends Execution implements ResultListener {
 			Dataflow dataflow = mapping.getDataflow();
 			printDataflow(dataflow);
 			facade = edits.createWorkflowInstanceFacade(dataflow, createContext(), /*getID()*/"");
-			executionMonitor = new LocalExecutionMonitor((DataflowWorkflowReport) getWorkflowReport(), mapping);
+			executionMonitor = new LocalExecutionMonitor((LocalWorkflowReport) getWorkflowReport(), mapping);
 		} catch (InvalidDataflowException e) {
 			// TODO do something with the validation report
 			DataflowValidationReport report = e.getDataflowValidationReport();
@@ -155,7 +155,7 @@ public class LocalExecution extends Execution implements ResultListener {
 
 	@Override
 	protected WorkflowReport createWorkflowReport(Workflow workflow) {
-		return new DataflowWorkflowReport(workflow);
+		return new LocalWorkflowReport(workflow);
 	}
 
 	public Map<String, Object> getResults() {
