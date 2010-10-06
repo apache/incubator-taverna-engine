@@ -1,4 +1,4 @@
-package uk.org.taverna.platform.execution.impl;
+package uk.org.taverna.platform.execution.impl.local;
 
 import uk.org.taverna.platform.report.ProcessorReport;
 import uk.org.taverna.platform.report.WorkflowReport;

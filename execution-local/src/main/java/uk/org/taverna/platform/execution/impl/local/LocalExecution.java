@@ -46,10 +46,8 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 
 import org.apache.log4j.Logger;
 
+import uk.org.taverna.platform.execution.api.Execution;
 import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
-import uk.org.taverna.platform.execution.impl.ConfigurationManager;
-import uk.org.taverna.platform.execution.impl.LocalWorkflowReport;
-import uk.org.taverna.platform.execution.impl.Execution;
 import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.scufl2.api.core.Workflow;
 import uk.org.taverna.scufl2.api.profiles.Profile;

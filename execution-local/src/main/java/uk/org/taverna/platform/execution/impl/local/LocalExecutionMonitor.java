@@ -39,8 +39,6 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 
 import org.apache.log4j.Logger;
 
-import uk.org.taverna.platform.execution.impl.LocalProcessorReport;
-import uk.org.taverna.platform.execution.impl.LocalWorkflowReport;
 import uk.org.taverna.platform.report.ActivityReport;
 import uk.org.taverna.platform.report.ProcessorReport;
 

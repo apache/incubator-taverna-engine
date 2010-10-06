@@ -31,5 +31,6 @@
 		<module>execution</module>
 		<module>run</module>
 		<module>monitor</module>
+		<module>execution-local</module>
 	</modules>
 </project>
