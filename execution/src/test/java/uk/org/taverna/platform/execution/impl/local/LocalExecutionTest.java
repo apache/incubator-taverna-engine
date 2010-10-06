@@ -18,7 +18,7 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package uk.org.taverna.platform.execution.impl.dataflow;
+package uk.org.taverna.platform.execution.impl.local;
 
 import java.util.Map;
 
@@ -31,7 +31,7 @@ import uk.org.taverna.platform.report.WorkflowReport;
  * 
  * @author David Withers
  */
-public class DataflowExecutionTest /*extends InvocationTestHelper*/ {
+public class LocalExecutionTest {
 	
 	/**
 	 * @throws java.lang.Exception
@@ -42,7 +42,7 @@ public class DataflowExecutionTest /*extends InvocationTestHelper*/ {
 
 	/**
 	 * Test method for
-	 * {@link uk.org.taverna.platform.execution.impl.dataflow.DataflowExecution#start()}.
+	 * {@link uk.org.taverna.platform.execution.impl.local.LocalExecution#start()}.
 	 */
 	@Test
 	public void testStart() {
@@ -51,7 +51,7 @@ public class DataflowExecutionTest /*extends InvocationTestHelper*/ {
 
 	/**
 	 * Test method for
-	 * {@link uk.org.taverna.platform.execution.impl.dataflow.DataflowExecution#pause()}.
+	 * {@link uk.org.taverna.platform.execution.impl.local.LocalExecution#pause()}.
 	 */
 	@Test
 	public void testPause() {
@@ -60,7 +60,7 @@ public class DataflowExecutionTest /*extends InvocationTestHelper*/ {
 
 	/**
 	 * Test method for
-	 * {@link uk.org.taverna.platform.execution.impl.dataflow.DataflowExecution#resume()}.
+	 * {@link uk.org.taverna.platform.execution.impl.local.LocalExecution#resume()}.
 	 */
 	@Test
 	public void testResume() {
@@ -69,7 +69,7 @@ public class DataflowExecutionTest /*extends InvocationTestHelper*/ {
 
 	/**
 	 * Test method for
-	 * {@link uk.org.taverna.platform.execution.impl.dataflow.DataflowExecution#cancel()}.
+	 * {@link uk.org.taverna.platform.execution.impl.local.LocalExecution#cancel()}.
 	 */
 	@Test
 	public void testCancel() {
@@ -78,7 +78,7 @@ public class DataflowExecutionTest /*extends InvocationTestHelper*/ {
 
 	/**
 	 * Test method for
-	 * {@link uk.org.taverna.platform.execution.impl.dataflow.DataflowExecution#DataflowExecution(uk.org.taverna.scufl2.api.core.Workflow, java.util.Map, net.sf.taverna.t2.reference.ReferenceService)}
+	 * {@link uk.org.taverna.platform.execution.impl.local.LocalExecution#DataflowExecution(uk.org.taverna.scufl2.api.core.Workflow, java.util.Map, net.sf.taverna.t2.reference.ReferenceService)}
 	 * .
 	 * @throws Exception 
 	 */
@@ -149,7 +149,7 @@ public class DataflowExecutionTest /*extends InvocationTestHelper*/ {
 
 	/**
 	 * Test method for
-	 * {@link uk.org.taverna.platform.execution.impl.dataflow.DataflowExecution#resultTokenProduced(net.sf.taverna.t2.invocation.WorkflowDataToken, java.lang.String)}
+	 * {@link uk.org.taverna.platform.execution.impl.local.LocalExecution#resultTokenProduced(net.sf.taverna.t2.invocation.WorkflowDataToken, java.lang.String)}
 	 * .
 	 */
 	@Test

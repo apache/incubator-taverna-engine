@@ -132,13 +132,12 @@ public abstract class AbstractExecutionService implements ExecutionService {
 		getExecution(executionID).cancel();
 	}
 
-	private Execution getExecution(String executionID) throws InvalidExecutionIdException {
+	protected Execution getExecution(String executionID) throws InvalidExecutionIdException {
 		Execution execution = executionMap.get(executionID);
 		if (execution == null) {
 			throw new InvalidExecutionIdException("Execution ID " + executionID + " is not valid");
 		}
 		return execution;
 	}
-
 
 }

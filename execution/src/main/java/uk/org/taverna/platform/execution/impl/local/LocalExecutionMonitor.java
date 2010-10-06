@@ -18,7 +18,7 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package uk.org.taverna.platform.execution.impl.dataflow;
+package uk.org.taverna.platform.execution.impl.local;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -49,9 +49,9 @@ import uk.org.taverna.platform.report.ProcessorReport;
  * 
  * @author David Withers
  */
-public class DataflowExecutionMonitor implements Observer<MonitorMessage> {
+public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 
-	private static final Logger logger = Logger.getLogger(DataflowExecutionMonitor.class);
+	private static final Logger logger = Logger.getLogger(LocalExecutionMonitor.class);
 
 	private Map<String, Object> dataflowObjects;
 
@@ -65,7 +65,7 @@ public class DataflowExecutionMonitor implements Observer<MonitorMessage> {
 
 	private Map<Activity<?>, AtomicInteger> activityInvocations;
 
-	public DataflowExecutionMonitor(DataflowWorkflowReport workflowReport, WorkflowToDataflowMapper mapping) {
+	public LocalExecutionMonitor(DataflowWorkflowReport workflowReport, WorkflowToDataflowMapper mapping) {
 		dataflowObjects = new HashMap<String, Object>();
 		workflowReports = new HashMap<Dataflow, DataflowWorkflowReport>();
 		processorReports = new HashMap<Processor, DataflowProcessorReport>();

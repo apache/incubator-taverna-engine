@@ -18,7 +18,7 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package uk.org.taverna.platform.execution.impl.dataflow;
+package uk.org.taverna.platform.execution.impl.local;
 
 import java.util.Map;
 
@@ -34,20 +34,20 @@ import uk.org.taverna.scufl2.api.profiles.Profile;
  * 
  * @author David Withers
  */
-public class DataflowExecutionService extends AbstractExecutionService {
+public class LocalExecutionService extends AbstractExecutionService {
 
 	/**
 	 * Constructs an execution service that executes workflows using the T2
 	 * dataflow engine.
 	 */
-	public DataflowExecutionService() {
-		super(DataflowExecutionService.class.getName(), null, null);
+	public LocalExecutionService() {
+		super(LocalExecutionService.class.getName(), null, null);
 	}
 
 	@Override
 	protected Execution createExecutionImpl(Workflow workflow, Profile profile,
 			Map<String, T2Reference> inputs, ReferenceService referenceService) throws InvalidWorkflowException {
-		return new DataflowExecution(workflow, profile, inputs, referenceService);
+		return new LocalExecution(workflow, profile, inputs, referenceService);
 	}
 
 }

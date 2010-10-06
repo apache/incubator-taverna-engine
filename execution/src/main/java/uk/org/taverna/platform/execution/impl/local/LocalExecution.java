@@ -18,7 +18,7 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package uk.org.taverna.platform.execution.impl.dataflow;
+package uk.org.taverna.platform.execution.impl.local;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -58,9 +58,9 @@ import uk.org.taverna.scufl2.api.profiles.Profile;
  * 
  * @author David Withers
  */
-public class DataflowExecution extends Execution implements ResultListener {
+public class LocalExecution extends Execution implements ResultListener {
 
-	private static Logger logger = Logger.getLogger(DataflowExecution.class);
+	private static Logger logger = Logger.getLogger(LocalExecution.class);
 
 	private static Edits edits = EditsRegistry.getEdits();
 
@@ -68,11 +68,11 @@ public class DataflowExecution extends Execution implements ResultListener {
 	
 	private WorkflowInstanceFacade facade;
 		
-	private DataflowExecutionMonitor executionMonitor;
+	private LocalExecutionMonitor executionMonitor;
 	
 	private Map<String, Object> results = new HashMap<String, Object>();
 
-	public DataflowExecution(Workflow workflow, Profile profile, Map<String, T2Reference> inputs,
+	public LocalExecution(Workflow workflow, Profile profile, Map<String, T2Reference> inputs,
 			ReferenceService referenceService) throws InvalidWorkflowException {
 		super(workflow, profile, inputs, referenceService);
 		try {
@@ -80,32 +80,13 @@ public class DataflowExecution extends Execution implements ResultListener {
 			Dataflow dataflow = mapping.getDataflow();
 			printDataflow(dataflow);
 			facade = edits.createWorkflowInstanceFacade(dataflow, createContext(), /*getID()*/"");
-			executionMonitor = new DataflowExecutionMonitor((DataflowWorkflowReport) getWorkflowReport(), mapping);
+			executionMonitor = new LocalExecutionMonitor((DataflowWorkflowReport) getWorkflowReport(), mapping);
 		} catch (InvalidDataflowException e) {
 			// TODO do something with the validation report
 			DataflowValidationReport report = e.getDataflowValidationReport();
 			System.out.println("Workflow incomplete = " + report.isWorkflowIncomplete());
 			throw new InvalidWorkflowException(e);
 		}
-	}
-
-	private void printDataflow(Dataflow dataflow) {
-		System.out.println(dataflow.getInputPorts());
-		System.out.println(dataflow.getOutputPorts());
-		for (Processor processor : dataflow.getProcessors()) {
-			System.out.println("  " + processor);
-			System.out.println("    " + processor.getInputPorts());
-			System.out.println("    " + processor.getOutputPorts());
-			for (Activity<?> activity : processor.getActivityList()) {
-				System.out.println("    " + activity);
-				System.out.println("    " + activity.getInputPorts());
-				System.out.println("    " + activity.getInputPortMapping());
-				System.out.println("    " + activity.getOutputPorts());
-				System.out.println("    " + activity.getOutputPortMapping());
-			}
-			System.out.println("    " + processor.getActivityList().get(0));
-		}
-		System.out.println(dataflow.getLinks());
 	}
 
 	/**
@@ -216,6 +197,25 @@ public class DataflowExecution extends Execution implements ResultListener {
 		if (token.getIndex().length == 0) {
 			results.put(portName, token.getData());
 		}
+	}
+
+	private void printDataflow(Dataflow dataflow) {
+		System.out.println(dataflow.getInputPorts());
+		System.out.println(dataflow.getOutputPorts());
+		for (Processor processor : dataflow.getProcessors()) {
+			System.out.println("  " + processor);
+			System.out.println("    " + processor.getInputPorts());
+			System.out.println("    " + processor.getOutputPorts());
+			for (Activity<?> activity : processor.getActivityList()) {
+				System.out.println("    " + activity);
+				System.out.println("    " + activity.getInputPorts());
+				System.out.println("    " + activity.getInputPortMapping());
+				System.out.println("    " + activity.getOutputPorts());
+				System.out.println("    " + activity.getOutputPortMapping());
+			}
+			System.out.println("    " + processor.getActivityList().get(0));
+		}
+		System.out.println(dataflow.getLinks());
 	}
 
 }

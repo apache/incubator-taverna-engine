@@ -9,7 +9,7 @@ import java.util.Set;
 import net.sf.taverna.t2.monitor.MonitorableProperty;
 import net.sf.taverna.t2.monitor.NoSuchPropertyException;
 import net.sf.taverna.t2.monitor.SteerableProperty;
-import uk.org.taverna.platform.execution.impl.dataflow.StaticProperty;
+import uk.org.taverna.platform.execution.impl.local.StaticProperty;
 import uk.org.taverna.platform.report.ProcessorReport;
 import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.scufl2.api.core.Processor;
