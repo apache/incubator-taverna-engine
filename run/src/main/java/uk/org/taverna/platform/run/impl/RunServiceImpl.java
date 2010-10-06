@@ -20,13 +20,15 @@
  ******************************************************************************/
 package uk.org.taverna.platform.run.impl;
 
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.T2Reference;
-import uk.org.taverna.platform.execution.InvalidWorkflowException;
+import uk.org.taverna.platform.execution.api.InvalidExecutionIdException;
+import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
 import uk.org.taverna.platform.report.State;
 import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.platform.run.api.InvalidRunIdException;
@@ -42,9 +44,14 @@ import uk.org.taverna.scufl2.api.profiles.Profile;
  */
 public class RunServiceImpl implements RunService {
 
-	private List<String> runs;
+	private final List<String> runs;
 
-	private Map<String, Run> runMap;
+	private final Map<String, Run> runMap;
+
+	public RunServiceImpl() {
+		runs = new ArrayList<String>();
+		runMap = new HashMap<String, Run>();
+	}
 
 	/* (non-Javadoc)
 	 * @see uk.org.taverna.platform.run.RunService#getRuns()
@@ -69,7 +76,7 @@ public class RunServiceImpl implements RunService {
 	 * @see uk.org.taverna.platform.run.RunService#start(java.lang.String)
 	 */
 	@Override
-	public void start(String runID) throws InvalidRunIdException, RunStateException {
+	public void start(String runID) throws InvalidRunIdException, RunStateException, InvalidExecutionIdException {
 		getRun(runID).start();
 	}
 
@@ -77,7 +84,7 @@ public class RunServiceImpl implements RunService {
 	 * @see uk.org.taverna.platform.run.RunService#pause(java.lang.String)
 	 */
 	@Override
-	public void pause(String runID) throws InvalidRunIdException, RunStateException {
+	public void pause(String runID) throws InvalidRunIdException, RunStateException, InvalidExecutionIdException {
 		getRun(runID).pause();
 	}
 
@@ -85,7 +92,7 @@ public class RunServiceImpl implements RunService {
 	 * @see uk.org.taverna.platform.run.RunService#resume(java.lang.String)
 	 */
 	@Override
-	public void resume(String runID) throws InvalidRunIdException, RunStateException {
+	public void resume(String runID) throws InvalidRunIdException, RunStateException, InvalidExecutionIdException {
 		getRun(runID).resume();
 	}
 
@@ -93,7 +100,7 @@ public class RunServiceImpl implements RunService {
 	 * @see uk.org.taverna.platform.run.RunService#cancel(java.lang.String)
 	 */
 	@Override
-	public void cancel(String runID) throws InvalidRunIdException, RunStateException {
+	public void cancel(String runID) throws InvalidRunIdException, RunStateException, InvalidExecutionIdException {
 		getRun(runID).cancel();
 	}
 
@@ -129,58 +136,10 @@ public class RunServiceImpl implements RunService {
 		return getRun(runID).getWorkflowReport();
 	}
 	
-	/* (non-Javadoc)
-	 * @see uk.org.taverna.platform.run.RunService#getCreatedDate(java.lang.String)
-	 */
-	@Override
-	public Date getCreatedDate(String runID) throws InvalidRunIdException {
-		return getWorkflowReport(runID).getCreatedDate();
-	}
-
-	/* (non-Javadoc)
-	 * @see uk.org.taverna.platform.run.RunService#getStartedDate(java.lang.String)
-	 */
-	@Override
-	public Date getStartedDate(String runID) throws InvalidRunIdException {
-		return getWorkflowReport(runID).getStartedDate();
-	}
-
-	/* (non-Javadoc)
-	 * @see uk.org.taverna.platform.run.RunService#getPausedDate(java.lang.String)
-	 */
-	@Override
-	public Date getPausedDate(String runID) throws InvalidRunIdException {
-		return getWorkflowReport(runID).getPausedDate();
-	}
-
-	/* (non-Javadoc)
-	 * @see uk.org.taverna.platform.run.RunService#getResumedDate(java.lang.String)
-	 */
-	@Override
-	public Date getResumedDate(String runID) throws InvalidRunIdException {
-		return getWorkflowReport(runID).getResumedDate();
-	}
-
-	/* (non-Javadoc)
-	 * @see uk.org.taverna.platform.run.RunService#getCancelledDate(java.lang.String)
-	 */
-	@Override
-	public Date getCancelledDate(String runID) throws InvalidRunIdException {
-		return getWorkflowReport(runID).getCancelledDate();
-	}
-
-	/* (non-Javadoc)
-	 * @see uk.org.taverna.platform.run.RunService#getCompletedDate(java.lang.String)
-	 */
-	@Override
-	public Date getCompletedDate(String runID) throws InvalidRunIdException {
-		return getWorkflowReport(runID).getCompletedDate();
-	}
-
 	private Run getRun(String runID) throws InvalidRunIdException {
 		Run run = runMap.get(runID);
 		if (run == null) {
-			throw new InvalidRunIdException("Run ID " + runID + "is not valid");
+			throw new InvalidRunIdException("Run ID " + runID + " is not valid");
 		}
 		return run;
 	}

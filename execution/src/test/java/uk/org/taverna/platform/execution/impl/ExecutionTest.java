@@ -18,7 +18,7 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package uk.org.taverna.platform.execution;
+package uk.org.taverna.platform.execution.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -33,6 +33,10 @@ import net.sf.taverna.t2.reference.impl.ReferenceServiceImpl;
 import org.junit.Before;
 import org.junit.Test;
 
+import uk.org.taverna.platform.execution.impl.Execution;
+import uk.org.taverna.platform.report.ProcessorReport;
+import uk.org.taverna.platform.report.WorkflowReport;
+import uk.org.taverna.scufl2.api.core.Processor;
 import uk.org.taverna.scufl2.api.core.Workflow;
 import uk.org.taverna.scufl2.api.profiles.Profile;
 
@@ -67,11 +71,19 @@ public class ExecutionTest {
 			public void resume() {}
 			public void pause() {}
 			public void cancel() {}
+			protected WorkflowReport createWorkflowReport(Workflow workflow) {
+				return new WorkflowReport(workflow) {
+					protected ProcessorReport createProcessorReport(Processor processor,
+							WorkflowReport parentReport) {
+						return null;
+					}
+				};
+			}
 		};
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.execution.Execution#createWorkflowReport(uk.org.taverna.scufl2.api.core.Workflow)}.
+	 * Test method for {@link uk.org.taverna.platform.execution.impl.Execution#createWorkflowReport(uk.org.taverna.scufl2.api.core.Workflow)}.
 	 */
 	@Test
 	public void testCreateWorkflowReport() {
@@ -79,7 +91,7 @@ public class ExecutionTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.execution.Execution#getID()}.
+	 * Test method for {@link uk.org.taverna.platform.execution.impl.Execution#getID()}.
 	 */
 	@Test
 	public void testGetID() {
@@ -88,7 +100,7 @@ public class ExecutionTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.execution.Execution#getWorkflow()}.
+	 * Test method for {@link uk.org.taverna.platform.execution.impl.Execution#getWorkflow()}.
 	 */
 	@Test
 	public void testGetWorkflow() {
@@ -96,7 +108,7 @@ public class ExecutionTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.execution.Execution#getInputs()}.
+	 * Test method for {@link uk.org.taverna.platform.execution.impl.Execution#getInputs()}.
 	 */
 	@Test
 	public void testGetInputs() {
@@ -104,7 +116,7 @@ public class ExecutionTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.execution.Execution#getReferenceService()}.
+	 * Test method for {@link uk.org.taverna.platform.execution.impl.Execution#getReferenceService()}.
 	 */
 	@Test
 	public void testGetReferenceService() {
@@ -112,7 +124,7 @@ public class ExecutionTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.execution.Execution#getWorkflowReport()}.
+	 * Test method for {@link uk.org.taverna.platform.execution.impl.Execution#getWorkflowReport()}.
 	 */
 	@Test
 	public void testGetWorkflowReport() {

@@ -1,4 +1,4 @@
-package uk.org.taverna.platform.execution;
+package uk.org.taverna.platform.execution.impl;
 
 public class ConfigurationManager {
 

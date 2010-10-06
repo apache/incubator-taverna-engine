@@ -32,7 +32,8 @@ public class StatusReport {
 
 	private State state;
 
-	private Date createdDate, startedDate, pausedDate, resumedDate, cancelledDate, completedDate;
+	private Date createdDate, startedDate, pausedDate, resumedDate,
+			cancelledDate, completedDate, failedDate;
 
 	private List<Date> pausedDates, resumedDates;
 
@@ -44,7 +45,7 @@ public class StatusReport {
 
 	/**
 	 * Returns the current state. A state can be CREATED, RUNNING, COMPLETED,
-	 * PAUSED or CANCELLED.
+	 * PAUSED, CANCELLED or FAILED.
 	 * 
 	 * @return the current state
 	 */
@@ -53,19 +54,19 @@ public class StatusReport {
 	}
 
 	/**
-	 * Returns the date that the run was created.
+	 * Returns the date that the status was set to CREATED.
 	 * 
-	 * @return the the date that the run was created
+	 * @return the the date that the status was set to CREATED
 	 */
 	public Date getCreatedDate() {
 		return createdDate;
 	}
 
 	/**
-	 * Sets the date that the run was created.
+	 * Sets the date that the status was set to CREATED.
 	 * 
 	 * @param createdDate
-	 *            the date that the run was created
+	 *            the date that the status was set to CREATED
 	 */
 	public void setCreatedDate(Date createdDate) {
 		this.createdDate = createdDate;
@@ -73,20 +74,20 @@ public class StatusReport {
 	}
 
 	/**
-	 * Returns the date that the run was started. If the run has not been
-	 * started <code>null</code> is returned.
+	 * Returns the date that the status changed to RUNNING. If the status has
+	 * never been RUNNING <code>null</code> is returned.
 	 * 
-	 * @return the date that the run was started
+	 * @return the date that the status changed to started
 	 */
 	public Date getStartedDate() {
 		return startedDate;
 	}
 
 	/**
-	 * Sets the date that the run was started.
+	 * Sets the date that the status changed to RUNNING.
 	 * 
 	 * @param startedDate
-	 *            the date that the run was started
+	 *            the date that the status changed to RUNNING
 	 */
 	public void setStartedDate(Date startedDate) {
 		if (this.startedDate == null) {
@@ -96,20 +97,20 @@ public class StatusReport {
 	}
 
 	/**
-	 * Returns the date that the run was last paused. If the run has never been
-	 * paused <code>null</code> is returned.
+	 * Returns the date that the status last changed to PAUSED. If the status
+	 * has never been PAUSED <code>null</code> is returned.
 	 * 
-	 * @return the date that the run was last paused
+	 * @return the date that the status last changed to PAUSED
 	 */
 	public Date getPausedDate() {
 		return pausedDate;
 	}
 
 	/**
-	 * Sets the date that the run was last paused.
+	 * Sets the date that the status last changed to PAUSED.
 	 * 
 	 * @param pausedDate
-	 *            the date that the run was last paused
+	 *            the date that the status last changed to PAUSED
 	 */
 	public void setPausedDate(Date pausedDate) {
 		this.pausedDate = pausedDate;
@@ -118,20 +119,21 @@ public class StatusReport {
 	}
 
 	/**
-	 * Returns the date that the run was last resumed. If the run has never been
-	 * resumed <code>null</code> is returned.
+	 * Returns the date that the status last changed form PAUSED to RUNNING. If
+	 * the status has never changed form PAUSED to RUNNING <code>null</code> is
+	 * returned.
 	 * 
-	 * @return the date that the run was last resumed
+	 * @return the date that the status last changed form PAUSED to RUNNING
 	 */
 	public Date getResumedDate() {
 		return resumedDate;
 	}
 
 	/**
-	 * Sets the date that the run was last resumed.
+	 * Sets the date that the status last changed form PAUSED to RUNNING.
 	 * 
 	 * @param resumedDate
-	 *            the date that the run was last resumed
+	 *            the date that the status last changed form PAUSED to RUNNING
 	 */
 	public void setResumedDate(Date resumedDate) {
 		this.resumedDate = resumedDate;
@@ -140,20 +142,20 @@ public class StatusReport {
 	}
 
 	/**
-	 * Returns the date that the run was canceled. If the run has not been
-	 * canceled <code>null</code> is returned.
+	 * Returns the date that the status changed to CANCELLED. If the status has
+	 * never been CANCELLED <code>null</code> is returned.
 	 * 
-	 * @return the date that the run was canceled
+	 * @return the date that the status changed to canceled
 	 */
 	public Date getCancelledDate() {
 		return cancelledDate;
 	}
 
 	/**
-	 * Sets the date that the run was canceled.
+	 * Sets the date that the status changed to CANCELLED.
 	 * 
 	 * @param cancelledDate
-	 *            the date that the run was canceled
+	 *            the date that the status changed to CANCELLED
 	 */
 	public void setCancelledDate(Date cancelledDate) {
 		this.cancelledDate = cancelledDate;
@@ -161,20 +163,20 @@ public class StatusReport {
 	}
 
 	/**
-	 * Returns the date that the run completed. If the run has not completed
-	 * <code>null</code> is returned.
+	 * Returns the date that the status changed to COMPLETED. If the status
+	 * never been COMPLETED <code>null</code> is returned.
 	 * 
-	 * @return the date that the run completed
+	 * @return the date that the status changed to COMPLETED
 	 */
 	public Date getCompletedDate() {
 		return completedDate;
 	}
 
 	/**
-	 * Sets the date that the run completed.
+	 * Sets the date that the status changed to COMPLETED.
 	 * 
 	 * @param completedDate
-	 *            the date that the run completed
+	 *            the date that the status changed to COMPLETED
 	 */
 	public void setCompletedDate(Date completedDate) {
 		this.completedDate = completedDate;
@@ -182,20 +184,42 @@ public class StatusReport {
 	}
 
 	/**
-	 * Returns the dates that the run was paused. If the run has never been
-	 * paused an empty list is returned.
+	 * Returns the date that the status changed to FAILED. If the status has
+	 * never been FAILED <code>null</code> is returned.
 	 * 
-	 * @return the dates that the run was paused
+	 * @return the date that the status changed to failed
+	 */
+	public Date getFailedDate() {
+		return failedDate;
+	}
+
+	/**
+	 * Sets the date that the status changed to FAILED.
+	 * 
+	 * @param failedDate
+	 *            the date that the status changed to FAILED
+	 */
+	public void setFailedDate(Date failedDate) {
+		this.failedDate = failedDate;
+		state = State.FAILED;
+	}
+
+	/**
+	 * Returns the dates that the status changed to PAUSED. If the status has
+	 * never been PAUSED an empty list is returned.
+	 * 
+	 * @return the dates that the status was paused
 	 */
 	public List<Date> getPausedDates() {
 		return pausedDates;
 	}
 
 	/**
-	 * Returns the dates that the run was resumed. If the run has never been
-	 * resumed an empty list is returned.
+	 * Returns the dates that the status changed from PAUSED to RUNNING. If the
+	 * status has never changed from PAUSED to RUNNING an empty list is
+	 * returned.
 	 * 
-	 * @return the resumedDates
+	 * @return the dates that the status was resumed
 	 */
 	public List<Date> getResumedDates() {
 		return resumedDates;

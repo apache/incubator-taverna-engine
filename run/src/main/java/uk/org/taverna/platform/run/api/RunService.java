@@ -1,12 +1,12 @@
 package uk.org.taverna.platform.run.api;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.T2Reference;
-import uk.org.taverna.platform.execution.InvalidWorkflowException;
+import uk.org.taverna.platform.execution.api.InvalidExecutionIdException;
+import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
 import uk.org.taverna.platform.report.State;
 import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.scufl2.api.core.Workflow;
@@ -40,8 +40,9 @@ public interface RunService {
 	 *             if the run ID is not valid
 	 * @throws RunStateException
 	 *             if the run state is not CREATED
+	 * @throws InvalidExecutionIdException 
 	 */
-	public void start(String runID) throws InvalidRunIdException, RunStateException;
+	public void start(String runID) throws InvalidRunIdException, RunStateException, InvalidExecutionIdException;
 
 	/**
 	 * Pauses a running run.
@@ -52,8 +53,9 @@ public interface RunService {
 	 *             if the run ID is not valid
 	 * @throws RunStateException
 	 *             if the run state is not RUNNING
+	 * @throws InvalidExecutionIdException 
 	 */
-	public void pause(String runID) throws InvalidRunIdException, RunStateException;
+	public void pause(String runID) throws InvalidRunIdException, RunStateException, InvalidExecutionIdException;
 
 	/**
 	 * Resumes a paused run.
@@ -64,8 +66,9 @@ public interface RunService {
 	 *             if the run ID is not valid
 	 * @throws RunStateException
 	 *             if the run state is not PAUSED
+	 * @throws InvalidExecutionIdException 
 	 */
-	public void resume(String runID) throws InvalidRunIdException, RunStateException;
+	public void resume(String runID) throws InvalidRunIdException, RunStateException, InvalidExecutionIdException;
 
 	/**
 	 * Cancels a running or paused run.
@@ -76,8 +79,9 @@ public interface RunService {
 	 *             if the run ID is not valid
 	 * @throws RunStateException
 	 *             if the run state is not RUNNING or PAUSED
+	 * @throws InvalidExecutionIdException 
 	 */
-	public void cancel(String runID) throws InvalidRunIdException, RunStateException;
+	public void cancel(String runID) throws InvalidRunIdException, RunStateException, InvalidExecutionIdException;
 
 	/**
 	 * Returns the current state of the run. A run's state can be CREATED,
@@ -105,76 +109,5 @@ public interface RunService {
 	 *             if the run ID is not valid
 	 */
 	public WorkflowReport getWorkflowReport(String runID) throws InvalidRunIdException;
-
-	/**
-	 * Returns the date that the run was created.
-	 * 
-	 * @param runID
-	 *            the ID of the run
-	 * @return the date that the run was created
-	 * @throws InvalidRunIdException
-	 *             if the run ID is not valid
-	 */
-	public Date getCreatedDate(String runID) throws InvalidRunIdException;
-
-	/**
-	 * Returns the date that the run was started. If the run has not been
-	 * started then <code>null</code> is returned.
-	 * 
-	 * @param runID
-	 *            the ID of the run
-	 * @return the date that the run was started
-	 * @throws InvalidRunIdException
-	 *             if the run ID is not valid
-	 */
-	public Date getStartedDate(String runID) throws InvalidRunIdException;
-
-	/**
-	 * Returns the date that the run was last paused. If the run has never been
-	 * paused then <code>null</code> is returned.
-	 * 
-	 * @param runID
-	 *            the ID of the run
-	 * @return the date that the run was last paused
-	 * @throws InvalidRunIdException
-	 *             if the run ID is not valid
-	 */
-	public Date getPausedDate(String runID) throws InvalidRunIdException;
-
-	/**
-	 * Returns the date that the run was last resumed. If the run has never been
-	 * resumed then <code>null</code> is returned.
-	 * 
-	 * @param runID
-	 *            the ID of the run
-	 * @return the date that the run was last resumed
-	 * @throws InvalidRunIdException
-	 *             if the run ID is not valid
-	 */
-	public Date getResumedDate(String runID) throws InvalidRunIdException;
-
-	/**
-	 * Returns the date that the run was canceled. If the run has not been
-	 * canceled then <code>null</code> is returned.
-	 * 
-	 * @param runID
-	 *            the ID of the run
-	 * @return the date that the run was canceled
-	 * @throws InvalidRunIdException
-	 *             if the run ID is not valid
-	 */
-	public Date getCancelledDate(String runID) throws InvalidRunIdException;
-
-	/**
-	 * Returns the date that the run completed. If the run has not completed then
-	 * <code>null</code> is returned.
-	 * 
-	 * @param runID
-	 *            the ID of the run
-	 * @return the date the the run completed
-	 * @throws InvalidRunIdException
-	 *             if the run ID is not valid
-	 */
-	public Date getCompletedDate(String runID) throws InvalidRunIdException;
 
 }

@@ -26,8 +26,9 @@ import java.util.UUID;
 
 import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.T2Reference;
-import uk.org.taverna.platform.execution.ExecutionService;
-import uk.org.taverna.platform.execution.InvalidWorkflowException;
+import uk.org.taverna.platform.execution.api.ExecutionService;
+import uk.org.taverna.platform.execution.api.InvalidExecutionIdException;
+import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
 import uk.org.taverna.platform.report.State;
 import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.platform.run.api.RunStateException;
@@ -45,7 +46,7 @@ public class Run {
 
 	private Map<String, T2Reference> inputs, outputs;
 
-	private ExecutionService executionManager;
+	private ExecutionService executionService;
 	
 	private State state;
 	
@@ -57,15 +58,19 @@ public class Run {
 
 	private final ReferenceService referenceService;
 
-	public Run(Workflow workflow, Profile profile, Map<String, T2Reference> inputs, ReferenceService referenceService, ExecutionService executionManager) throws InvalidWorkflowException {
+	public Run(Workflow workflow, Profile profile, Map<String, T2Reference> inputs, ReferenceService referenceService, ExecutionService executionService) throws InvalidWorkflowException {
 		this.workflow = workflow;
 		this.profile = profile;
 		this.inputs = inputs;
 		this.referenceService = referenceService;
-		this.executionManager = executionManager;
+		this.executionService = executionService;
 		ID = UUID.randomUUID().toString();
-		executionID = executionManager.createExecution(workflow, profile, inputs, referenceService);
-		workflowReport = executionManager.getWorkflowReport(executionID);
+		executionID = executionService.createExecution(workflow, profile, inputs, referenceService);
+		try {
+			workflowReport = executionService.getWorkflowReport(executionID);
+		} catch (InvalidExecutionIdException e) {
+			//TODO throw an exception
+		}
 		workflowReport.setCreatedDate(new Date());
 		state = State.CREATED;
 	}
@@ -90,10 +95,10 @@ public class Run {
 		this.outputs = outputs;
 	}
 
-	public void start() throws RunStateException {
+	public void start() throws RunStateException, InvalidExecutionIdException {
 		synchronized (state) {
 			if (state.equals(State.CREATED)) {
-				executionManager.start(executionID);
+				executionService.start(executionID);
 				state = State.RUNNING;
 				workflowReport.setStartedDate(new Date());
 			} else {
@@ -103,10 +108,10 @@ public class Run {
 		}
 	}
 
-	public void pause() throws RunStateException {
+	public void pause() throws RunStateException, InvalidExecutionIdException {
 		synchronized (state) {
 			if (state.equals(State.RUNNING)) {
-				executionManager.pause(executionID);
+				executionService.pause(executionID);
 				state = State.PAUSED;
 				workflowReport.setPausedDate(new Date());
 			} else {
@@ -116,10 +121,10 @@ public class Run {
 		}
 	}
 
-	public void resume() throws RunStateException {
+	public void resume() throws RunStateException, InvalidExecutionIdException {
 		synchronized (state) {
 			if (state.equals(State.PAUSED)) {
-				executionManager.resume(executionID);
+				executionService.resume(executionID);
 				state = State.RUNNING;
 				workflowReport.setResumedDate(new Date());
 			} else {
@@ -128,12 +133,12 @@ public class Run {
 		}
 	}
 
-	public void cancel() throws RunStateException {
+	public void cancel() throws RunStateException, InvalidExecutionIdException {
 		synchronized (state) {
 			if (state.equals(State.CANCELLED) || state.equals(State.COMPLETED)) {
 				throw new RunStateException("Cannot cancel a " + state + " run.");
 			} else {
-				executionManager.cancel(executionID);
+				executionService.cancel(executionID);
 				state = State.CANCELLED;
 				workflowReport.setCancelledDate(new Date());
 			}

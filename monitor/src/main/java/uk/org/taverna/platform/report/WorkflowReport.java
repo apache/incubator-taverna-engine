@@ -33,7 +33,7 @@ import uk.org.taverna.scufl2.api.core.Workflow;
  * 
  * @author David Withers
  */
-public class WorkflowReport extends StatusReport {
+public abstract class WorkflowReport extends StatusReport {
 
 	private Workflow workflow;
 
@@ -89,9 +89,7 @@ public class WorkflowReport extends StatusReport {
 //		return null;
 //	}
 	
-	protected ProcessorReport createProcessorReport(Processor processor, WorkflowReport parentReport) {
-		return new ProcessorReport(processor, parentReport);
-	}
+	protected abstract ProcessorReport createProcessorReport(Processor processor, WorkflowReport parentReport);
 
 	public String toString() {
 		StringBuilder sb = new StringBuilder();

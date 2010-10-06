@@ -1,4 +1,4 @@
-package uk.org.taverna.platform.execution;
+package uk.org.taverna.platform.execution.impl;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,101 +9,90 @@ import java.util.Set;
 import net.sf.taverna.t2.monitor.MonitorableProperty;
 import net.sf.taverna.t2.monitor.NoSuchPropertyException;
 import net.sf.taverna.t2.monitor.SteerableProperty;
+import uk.org.taverna.platform.execution.impl.dataflow.StaticProperty;
 import uk.org.taverna.platform.report.ProcessorReport;
 import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.scufl2.api.core.Processor;
 
 public class DataflowProcessorReport extends ProcessorReport {
 
-	private Map<String, MonitorableProperty<?>> propertyMap;
+	private static final String DISPATCH_ERRORBOUNCE_TOTAL_TRANSLATED = "dispatch:errorbounce:totalTranslated";
 
-	private MonitorableProperty<?> jobsQueued, jobsStarted, jobsCompleted, jobsCompletedWithErrors;
+	private static final String DISPATCH_PARALLELIZE_COMPLETEDJOBS = "dispatch:parallelize:completedjobs";
+
+	private static final String DISPATCH_PARALLELIZE_SENTJOBS = "dispatch:parallelize:sentjobs";
+
+	private static final String DISPATCH_PARALLELIZE_QUEUESIZE = "dispatch:parallelize:queuesize";
+
+	private Map<String, MonitorableProperty<?>> propertyMap;
 	
 	public DataflowProcessorReport(Processor processor, WorkflowReport parentReport) {
 		super(processor, parentReport);
+		propertyMap = new HashMap<String, MonitorableProperty<?>>();
 	}
 
 	public void addProperties(Set<MonitorableProperty<?>> properties) {
-		propertyMap = new HashMap<String, MonitorableProperty<?>>();
 		for (MonitorableProperty<?> property : properties) {
-			String propertyName = getPropertyName(property);
-			propertyMap.put(propertyName, property);
-			if (propertyName.equals("dispatch:parallelize:queuesize")) {
-				jobsQueued = property;
-			} else if (propertyName.equals("dispatch:parallelize:sentjobs")) {
-				jobsStarted = property;
-			} else if (propertyName.equals("dispatch:parallelize:completedjobs")) {
-				jobsCompleted = property;
-			} else if (propertyName.equals("dispatch:errorbounce:totalTranslated")) {
-				jobsCompletedWithErrors = property;
-			}
+			propertyMap.put(getPropertyName(property), property);
 		}
 	}
 	
 	public void saveProperties() {
-		setJobsQueued(getJobsQueued());
-		setJobsStarted(getJobsStarted());
-		setJobsCompleted(getJobsCompleted());
-		setJobsCompletedWithErrors(getJobsCompletedWithErrors());
-		jobsQueued = null;
-		jobsStarted = null;
-		jobsCompleted = null;
-		jobsCompletedWithErrors = null;
 		for (Entry<String, MonitorableProperty<?>> entry : propertyMap.entrySet()) {
-			try {
-				super.setProperty(entry.getKey(), entry.getValue().getValue());
-			} catch (NoSuchPropertyException e) {
-			}
+			entry.setValue(new StaticProperty(entry.getValue()));
 		}
-		propertyMap.clear();
 	}
 
 	@Override
 	public int getJobsQueued() {
-		if (jobsQueued != null) {
+		int result = -1;
+		MonitorableProperty<?> property = propertyMap.get(DISPATCH_PARALLELIZE_QUEUESIZE);
+		if (property != null) {
 			try {
-				return (Integer) jobsQueued.getValue();
+				result = (Integer) property.getValue();
 			} catch (NoSuchPropertyException e) {
-				return super.getJobsQueued();
 			}
 		}
-		return super.getJobsQueued();
+		return result;
 	}
 
 	@Override
 	public int getJobsStarted() {
-		if (jobsStarted != null) {
+		int result = -1;
+		MonitorableProperty<?> property = propertyMap.get(DISPATCH_PARALLELIZE_SENTJOBS);
+		if (property != null) {
 			try {
-				return (Integer) jobsStarted.getValue();
+				result = (Integer) property.getValue();
 			} catch (NoSuchPropertyException e) {
-				return super.getJobsStarted();
 			}
 		}
-		return super.getJobsStarted();
+		return result;
 	}
 
 	@Override
 	public int getJobsCompleted() {
-		if (jobsCompleted != null) {
+		int result = -1;
+		MonitorableProperty<?> property = propertyMap.get(DISPATCH_PARALLELIZE_COMPLETEDJOBS);
+		if (property != null) {
 			try {
-				return (Integer) jobsCompleted.getValue();
+				result =  (Integer) property.getValue();
 			} catch (NoSuchPropertyException e) {
-				return super.getJobsCompleted();
 			}
 		}
-		return super.getJobsCompleted();
+		return result;
 	}
 
 	@Override
 	public int getJobsCompletedWithErrors() {
-		if (jobsCompletedWithErrors != null) {
+		int result = -1;
+		MonitorableProperty<?> property = propertyMap.get(DISPATCH_ERRORBOUNCE_TOTAL_TRANSLATED);
+		if (property != null) {
 			try {
-				return (Integer) jobsCompletedWithErrors.getValue();
+				result =  (Integer) property.getValue();
 			} catch (NoSuchPropertyException e) {
-				return super.getJobsCompletedWithErrors();
 			}
 		}
-		return super.getJobsCompletedWithErrors();
+		return result;
 	}
 
 	public Set<String> getPropertyKeys() {
@@ -114,10 +103,15 @@ public class DataflowProcessorReport extends ProcessorReport {
 	}
 	
 	public Object getProperty(String key) {
-		if (propertyMap.containsKey(key)) {
-			return propertyMap.get(key);
+		Object result = null;
+		MonitorableProperty<?> property = propertyMap.get(key);
+		if (property != null) {
+			try {
+				result = property.getValue();
+			} catch (NoSuchPropertyException e) {
+			}
 		}
-		return super.getProperty(key);
+		return result;
 	}
 	
 	public void setProperty(String key, Object value) {
@@ -127,10 +121,7 @@ public class DataflowProcessorReport extends ProcessorReport {
 			try {
 				 steerableProperty.setProperty(value);
 			} catch (NoSuchPropertyException e) {
-				super.setProperty(key, value);
 			}
-		} else {
-			super.setProperty(key, value);
 		}
 	}
 	

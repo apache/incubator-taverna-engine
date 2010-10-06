@@ -18,7 +18,7 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package uk.org.taverna.platform.execution;
+package uk.org.taverna.platform.execution.impl.dataflow;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -39,6 +39,8 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 
 import org.apache.log4j.Logger;
 
+import uk.org.taverna.platform.execution.impl.DataflowProcessorReport;
+import uk.org.taverna.platform.execution.impl.DataflowWorkflowReport;
 import uk.org.taverna.platform.report.ActivityReport;
 import uk.org.taverna.platform.report.ProcessorReport;
 

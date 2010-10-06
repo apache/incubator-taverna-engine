@@ -18,7 +18,7 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package uk.org.taverna.platform.execution.dataflow;
+package uk.org.taverna.platform.execution.impl.dataflow;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -46,12 +46,10 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 
 import org.apache.log4j.Logger;
 
-import uk.org.taverna.platform.execution.ConfigurationManager;
-import uk.org.taverna.platform.execution.DataflowExecutionMonitor;
-import uk.org.taverna.platform.execution.DataflowWorkflowReport;
-import uk.org.taverna.platform.execution.Execution;
-import uk.org.taverna.platform.execution.InvalidWorkflowException;
-import uk.org.taverna.platform.execution.WorkflowToDataflowMapper;
+import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
+import uk.org.taverna.platform.execution.impl.ConfigurationManager;
+import uk.org.taverna.platform.execution.impl.DataflowWorkflowReport;
+import uk.org.taverna.platform.execution.impl.Execution;
 import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.scufl2.api.core.Workflow;
 import uk.org.taverna.scufl2.api.profiles.Profile;

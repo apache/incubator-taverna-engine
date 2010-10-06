@@ -18,13 +18,30 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package uk.org.taverna.platform.report;
+package uk.org.taverna.platform.execution.api;
 
 /**
- *
- *
+ * 
  * @author David Withers
  */
-public enum State {
-	CREATED, RUNNING, COMPLETED, PAUSED, CANCELLED, FAILED
+public class InvalidWorkflowException extends Exception {
+
+	private static final long serialVersionUID = 7491175798204912590L;
+
+	public InvalidWorkflowException() {
+		super();
+	}
+
+	public InvalidWorkflowException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
+	public InvalidWorkflowException(String message) {
+		super(message);
+	}
+
+	public InvalidWorkflowException(Throwable cause) {
+		super(cause);
+	}
+
 }

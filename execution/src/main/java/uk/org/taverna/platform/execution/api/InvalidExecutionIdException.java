@@ -18,30 +18,30 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package uk.org.taverna.platform.execution;
+package uk.org.taverna.platform.execution.api;
 
 /**
  * 
  * @author David Withers
  */
-public class InvalidWorkflowException extends Exception {
+public class InvalidExecutionIdException extends Exception {
 
-	private static final long serialVersionUID = 7491175798204912590L;
+	private static final long serialVersionUID = 4086661335641172903L;
 
-	public InvalidWorkflowException() {
-		super();
-	}
+	public InvalidExecutionIdException() {
+    	super();
+    }
 
-	public InvalidWorkflowException(String message, Throwable cause) {
-		super(message, cause);
-	}
+    public InvalidExecutionIdException(String message) {
+    	super(message);
+    }
 
-	public InvalidWorkflowException(String message) {
-		super(message);
-	}
+    public InvalidExecutionIdException(String message, Throwable cause) {
+    	super(message, cause);
+    }
 
-	public InvalidWorkflowException(Throwable cause) {
-		super(cause);
-	}
-
+    public InvalidExecutionIdException(Throwable cause) {
+    	super(cause);
+    }
+    
 }

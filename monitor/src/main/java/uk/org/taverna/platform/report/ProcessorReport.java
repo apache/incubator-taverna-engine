@@ -32,15 +32,13 @@ import uk.org.taverna.scufl2.api.core.Processor;
  * 
  * @author David Withers
  */
-public class ProcessorReport extends StatusReport {
+public abstract class ProcessorReport extends StatusReport {
 
 	private final Processor processor;
-	
+
 	private final WorkflowReport parentReport;
 
 	private Map<Processor, ActivityReport> activityReports;
-
-	private int jobsQueued, jobsStarted, jobsCompleted, jobsCompletedWithErrors;
 
 	private Map<String, Object> properties = new HashMap<String, Object>();
 
@@ -49,9 +47,9 @@ public class ProcessorReport extends StatusReport {
 		this.parentReport = parentReport;
 		activityReports = new HashMap<Processor, ActivityReport>();
 		// not as simple as this : need to look at processor bindings
-//		for (Activity activity : processor.getActivities()) {
-//			activityReports.put(processor, createActivityReport(activity, this));
-//		}
+		// for (Activity activity : processor.getActivities()) {
+		// activityReports.put(processor, createActivityReport(activity, this));
+		// }
 	}
 
 	/**
@@ -60,7 +58,7 @@ public class ProcessorReport extends StatusReport {
 	public Processor getProcessor() {
 		return processor;
 	}
-	
+
 	/**
 	 * @return the parentReport
 	 */
@@ -76,64 +74,32 @@ public class ProcessorReport extends StatusReport {
 	}
 
 	/**
-	 * @return the jobsQueued
+	 * Returns the number of jobs queued by the processor.
+	 * 
+	 * @return the number of jobs queued by the processor
 	 */
-	public int getJobsQueued() {
-		return jobsQueued;
-	}
+	public abstract int getJobsQueued();
 
 	/**
-	 * @param jobsQueued
-	 *            the jobsQueued to set
+	 * Returns the number of jobs that the processor has started processing.
+	 * 
+	 * @return the number of jobs that the processor has started processing
 	 */
-	public void setJobsQueued(int jobsQueued) {
-		this.jobsQueued = jobsQueued;
-	}
+	public abstract int getJobsStarted();
 
 	/**
-	 * @return the jobsStarted
+	 * Returns the number of jobs that the processor has completed.
+	 * 
+	 * @return the number of jobs that the processor has completed
 	 */
-	public int getJobsStarted() {
-		return jobsStarted;
-	}
+	public abstract int getJobsCompleted();
 
 	/**
-	 * @param jobsStarted
-	 *            the jobsStarted to set
+	 * Returns the number of jobs that completed with an error.
+	 * 
+	 * @return the number of jobs that completed with an error
 	 */
-	public void setJobsStarted(int jobsStarted) {
-		this.jobsStarted = jobsStarted;
-	}
-
-	/**
-	 * @return the jobsCompleted
-	 */
-	public int getJobsCompleted() {
-		return jobsCompleted;
-	}
-
-	/**
-	 * @param jobsCompleted
-	 *            the jobsCompleted to set
-	 */
-	public void setJobsCompleted(int jobsCompleted) {
-		this.jobsCompleted = jobsCompleted;
-	}
-
-	/**
-	 * @return the jobsCompletedWithErrors
-	 */
-	public int getJobsCompletedWithErrors() {
-		return jobsCompletedWithErrors;
-	}
-
-	/**
-	 * @param jobsCompletedWithErrors
-	 *            the jobsCompletedWithErrors to set
-	 */
-	public void setJobsCompletedWithErrors(int jobsCompletedWithErrors) {
-		this.jobsCompletedWithErrors = jobsCompletedWithErrors;
-	}
+	public abstract int getJobsCompletedWithErrors();
 
 	public Set<String> getPropertyKeys() {
 		return new HashSet<String>(properties.keySet());
@@ -145,13 +111,14 @@ public class ProcessorReport extends StatusReport {
 
 	public void setProperty(String key, Object value) {
 		synchronized (properties) {
-//			if (properties.containsKey(key)) {
-				properties.put(key, value);
-//			}
+			// if (properties.containsKey(key)) {
+			properties.put(key, value);
+			// }
 		}
 	}
-	
-	protected ActivityReport createActivityReport(Activity activity, ProcessorReport parentReport) {
+
+	protected ActivityReport createActivityReport(Activity activity,
+			ProcessorReport parentReport) {
 		return new ActivityReport(activity, parentReport);
 	}
 
