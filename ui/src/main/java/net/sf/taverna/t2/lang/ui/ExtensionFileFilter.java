@@ -26,6 +26,7 @@
 package net.sf.taverna.t2.lang.ui;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -41,13 +42,27 @@ import javax.swing.filechooser.FileFilter;
 public class ExtensionFileFilter extends FileFilter {
 	List<String> allowedExtensions;
 
-	public ExtensionFileFilter(List<String> allowedExtensions) {
-		this.allowedExtensions = allowedExtensions;
+	public ExtensionFileFilter(List<String> extensions) {
+	    setAllowedExtensions(extensions);
 	}
 
 	public ExtensionFileFilter(String[] allowedExtensions) {
-		this.allowedExtensions = Arrays.asList(allowedExtensions);
+	    setAllowedExtensions(Arrays.asList(allowedExtensions));
 	}
+
+    private void setAllowedExtensions(List<String> extensions) {
+	    this.allowedExtensions = new ArrayList<String>();
+            for (String e : extensions) {
+		if (e.startsWith(".")) {
+                    if (e.length() > 1) {
+			allowedExtensions.add(e.substring(1));
+		    }
+		}
+		else {
+		    allowedExtensions.add(e);
+		}
+	    }
+    }
 
 	@Override
 	public boolean accept(File f) {
