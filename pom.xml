@@ -29,7 +29,7 @@
 			<groupId>net.sf.taverna.t2.core</groupId>
 			<artifactId>reference-core-extensions
 			</artifactId>
-			<version>${t2.core.refexts.version}</version>
+			<version>${t2.reference-core-extensions.version}</version>
 		</dependency>
 	</dependencies>
 </project>
