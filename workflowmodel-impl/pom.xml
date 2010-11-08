@@ -15,7 +15,7 @@
 		definition objects and enactment behaviours.</description>
 	<dependencies>
 		<dependency>
-			<groupId>jdom</groupId>
+			<groupId>org.jdom</groupId>
 			<artifactId>jdom</artifactId>
 		</dependency>
 		<dependency>
@@ -31,7 +31,7 @@
 		<dependency>
 			<groupId>com.thoughtworks.xstream</groupId>
 			<artifactId>xstream</artifactId>
-			<version>1.2.1</version>
+			<version>${xstream.version}</version>
 		</dependency>
 	</dependencies>
 </project>
