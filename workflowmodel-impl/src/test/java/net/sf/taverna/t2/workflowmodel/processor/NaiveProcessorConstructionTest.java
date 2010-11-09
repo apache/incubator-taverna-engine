@@ -24,6 +24,7 @@ import java.io.IOException;
 
 import junit.framework.TestCase;
 import net.sf.taverna.t2.workflowmodel.EditException;
+import net.sf.taverna.t2.workflowmodel.impl.EditsImpl;
 import net.sf.taverna.t2.workflowmodel.impl.Tools;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityConfigurationException;
 
@@ -40,6 +41,7 @@ public class NaiveProcessorConstructionTest extends TestCase {
 	public void testProcessorFactory() throws EditException, JDOMException,
 			IOException, ActivityConfigurationException {
 		AsynchEchoActivity activity = new AsynchEchoActivity();
+		activity.setEdits(new EditsImpl());
 		activity.configure(new EchoConfig("blah"));
 		Tools.buildFromActivity(activity);
 	}
