@@ -48,8 +48,7 @@ import net.sf.taverna.t2.reference.ValueCarryingExternalReference;
 import net.sf.taverna.t2.reference.ValueToReferenceConversionException;
 import net.sf.taverna.t2.reference.ValueToReferenceConverterSPI;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 
 /**
  * Implementation of ReferenceService, inject with ReferenceSetService,
@@ -63,7 +62,7 @@ import org.apache.commons.logging.LogFactory;
 public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 		implements ReferenceService {
 
-	private final Log log = LogFactory.getLog(ReferenceServiceImpl.class);
+	private final Logger log = Logger.getLogger(ReferenceServiceImpl.class);
 
 	/**
 	 * The top level registration method is used to register either as yet
@@ -282,7 +281,7 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 									+ currentDepth);
 				}
 				
-				for (ValueToReferenceConverterSPI converter : converterRegistry) {
+				for (ValueToReferenceConverterSPI converter : converters) {
 					if (converter.canConvert(o, context)) {
 						try {
 							ExternalReferenceSPI ers = converter.convert(o,
@@ -445,8 +444,8 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 		// Attempt to find an appropriate StreamToValueConverterSPI instance to
 		// build the specified class
 		StreamToValueConverterSPI<?> converter = null;
-		if (valueBuilderRegistry != null) {
-			for (StreamToValueConverterSPI<?> stvc : valueBuilderRegistry) {
+		if (valueBuilders != null) {
+			for (StreamToValueConverterSPI<?> stvc : valueBuilders) {
 				Class<?> builtClass = stvc.getPojoClass();
 				if (leafClass.isAssignableFrom(builtClass)) {
 					converter = stvc;

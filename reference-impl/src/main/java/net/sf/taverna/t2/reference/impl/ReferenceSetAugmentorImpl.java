@@ -31,8 +31,6 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
 
-import net.sf.taverna.raven.spi.InstanceRegistry;
-import net.sf.taverna.raven.spi.InstanceRegistryListener;
 import net.sf.taverna.t2.reference.ExternalReferenceBuilderSPI;
 import net.sf.taverna.t2.reference.ExternalReferenceSPI;
 import net.sf.taverna.t2.reference.ExternalReferenceTranslatorSPI;
@@ -46,9 +44,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Implementation of ReferenceSetAugmentor using Dijkstra's shortest path
- * algorithm over a type graph built from SPI instance registries of reference
- * builders and reference translators.
+ * Implementation of ReferenceSetAugmentor using Dijkstra's shortest path algorithm over a type
+ * graph built from SPI instance registries of reference builders and reference translators.
  * 
  * @author Tom Oinn
  * 
@@ -57,110 +54,82 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 
 	private final Log log = LogFactory.getLog(ReferenceSetAugmentorImpl.class);
 
-	// An instance registry of ExternalReferenceBuilderSPI instances used to
+	// A list of ExternalReferenceBuilderSPI instances used to
 	// construct ExternalReferenceSPI instances from byte streams
-	private InstanceRegistry<ExternalReferenceBuilderSPI<?>> builders;
+	private List<ExternalReferenceBuilderSPI<?>> builders;
 
-	// An instance registry of ExternalReferenceTranslatorSPI instances used to
+	// A list of ExternalReferenceTranslatorSPI instances used to
 	// construct ExternalReferenceSPI instances from existing
 	// ExternalReferenceSPI instances.
-	private InstanceRegistry<ExternalReferenceTranslatorSPI<?, ?>> translators;
+	private List<ExternalReferenceTranslatorSPI<?, ?>> translators;
 
 	private boolean cacheValid = false;
 
-	// A private listener used to trigger re-compilation of the shortest paths
-	// from each node to each other node in the known types set
-	private InstanceRegistryListener registryListener = new InstanceRegistryListener() {
-		/**
-		 * Call the updateAdjacencyList on the enclosing type when any change
-		 * occurs in the SPIs
-		 */
-		@SuppressWarnings("unchecked")
-		public void instanceRegistryUpdated(InstanceRegistry theRegistry) {
-			cacheValid = false;
-		}
-	};
-
 	private final Set<Class<ExternalReferenceSPI>> knownReferenceTypes = new HashSet<Class<ExternalReferenceSPI>>();
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	private final Map<Class<ExternalReferenceSPI>, Set<ExternalReferenceTranslatorSPI>> adjacencySets = new HashMap<Class<ExternalReferenceSPI>, Set<ExternalReferenceTranslatorSPI>>();
 
 	private final Map<Class<ExternalReferenceSPI>, ShortestPathSolver> solvers = new HashMap<Class<ExternalReferenceSPI>, ShortestPathSolver>();
 
 	/**
-	 * Default constructor to make life easier when using Spring. To be
-	 * functional this implementation should be injected with InstanceRegistry
-	 * implementations containing lists of known implementations of the
-	 * ExternalReferenceBuilderSPI and ExternalReferenceTranslatorSPI
+	 * Default constructor to make life easier when using Spring. To be functional this
+	 * implementation should be injected with InstanceRegistry implementations containing lists of
+	 * known implementations of the ExternalReferenceBuilderSPI and ExternalReferenceTranslatorSPI
 	 * interfaces.
 	 */
 	public ReferenceSetAugmentorImpl() {
 		super();
 	}
 
+	public void invalidateCache() {
+		cacheValid = false;
+	}
+
 	/**
-	 * Inject an instance registry containing all known implementations of
-	 * ExternalReferenceBuilderSPI *
+	 * Inject a list containing all known implementations of ExternalReferenceBuilderSPI.
 	 * 
 	 * @throws IllegalStateException
-	 *             if this has already been set, the instance registries should
-	 *             only be set on bean construction.
+	 *             if this has already been set, the instance registries should only be set on bean
+	 *             construction.
 	 */
-	public synchronized void setBuilderRegistry(
-			InstanceRegistry<ExternalReferenceBuilderSPI<?>> theRegistry) {
+	public synchronized void setBuilders(List<ExternalReferenceBuilderSPI<?>> builders) {
 		if (this.builders == null) {
-			this.builders = theRegistry;
-			theRegistry.addRegistryListener(registryListener);
-			List<ExternalReferenceBuilderSPI<?>> erb = theRegistry
-					.getInstances();
-			log.debug("* Builder registry injected :");
+			this.builders = builders;
+			log.debug("* Builders injected :");
 			int counter = 0;
-			for (ExternalReferenceBuilderSPI<?> builder : erb) {
-				log.debug("*   " + (++counter) + ") "
-						+ builder.getClass().getSimpleName() + ", builds "
-						+ builder.getReferenceType().getSimpleName());
+			for (ExternalReferenceBuilderSPI<?> builder : builders) {
+				log.debug("*   " + (++counter) + ") " + builder.getClass().getSimpleName()
+						+ ", builds " + builder.getReferenceType().getSimpleName());
 			}
 			cacheValid = false;
 		} else {
 			log.error("Builder registry already injected, invalid operation");
-			throw new IllegalStateException(
-					"Can't inject the external reference builder registry "
-							+ "multiple times.");
+			throw new IllegalStateException("Can't inject the external reference builder registry "
+					+ "multiple times.");
 		}
 	}
 
 	/**
-	 * Inject an instance registry containing all known implementations of
-	 * ExternalReferenceTranslatorSPI
+	 * Inject a list containing all known implementations of ExternalReferenceTranslatorSPI.
 	 * 
 	 * @throws IllegalStateException
-	 *             if this has already been set, the instance registries should
-	 *             only be set on bean construction.
+	 *             if this has already been set, the instance registries should only be set on bean
+	 *             construction.
 	 */
-	public synchronized void setTranslatorRegistry(
-			InstanceRegistry<ExternalReferenceTranslatorSPI<?, ?>> theRegistry) {
+	public synchronized void setTranslators(List<ExternalReferenceTranslatorSPI<?, ?>> translators) {
 		if (this.translators == null) {
-			this.translators = theRegistry;
-			theRegistry.addRegistryListener(registryListener);
-			List<ExternalReferenceTranslatorSPI<?, ?>> ert = theRegistry
-					.getInstances();
-			log.debug("* Translator registry injected :");
+			this.translators = translators;
+			log.debug("* Translators injected :");
 			int counter = 0;
-			for (ExternalReferenceTranslatorSPI<?, ?> translator : ert) {
-				log.debug("*   " + (++counter) + ") "
-						+ translator.getClass().getSimpleName()
-						+ ", translates "
-						+ translator.getSourceReferenceType().getSimpleName()
-						+ " to "
-						+ translator.getTargetReferenceType().getSimpleName());
+			for (ExternalReferenceTranslatorSPI<?, ?> translator : translators) {
+				log.debug("*   " + (++counter) + ") " + translator.getClass().getSimpleName()
+						+ ", translates " + translator.getSourceReferenceType().getSimpleName()
+						+ " to " + translator.getTargetReferenceType().getSimpleName());
 			}
-			theRegistry.getInstances();
 			cacheValid = false;
 		} else {
-			log
-					.error("Translator registry already injected, invalid operation");
-			throw new IllegalStateException(
-					"Can't inject the translator registry multiple times.");
+			log.error("Translator registry already injected, invalid operation");
+			throw new IllegalStateException("Can't inject the translator registry multiple times.");
 		}
 	}
 
@@ -196,10 +165,8 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 	}
 
 	@SuppressWarnings("unchecked")
-	Set<ExternalReferenceTranslatorSPI> getNeighbours(
-			Class<ExternalReferenceSPI> node) {
-		Set<ExternalReferenceTranslatorSPI> adjacentTo = adjacencySets
-				.get(node);
+	Set<ExternalReferenceTranslatorSPI> getNeighbours(Class<ExternalReferenceSPI> node) {
+		Set<ExternalReferenceTranslatorSPI> adjacentTo = adjacencySets.get(node);
 		if (adjacentTo != null) {
 			return adjacentTo;
 		} else {
@@ -214,10 +181,9 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 	 * {@inheritDoc}
 	 */
 	@SuppressWarnings("unchecked")
-	public final Set<ExternalReferenceSPI> augmentReferenceSet(
-			ReferenceSet references,
-			Set<Class<ExternalReferenceSPI>> targetReferenceTypes,
-			ReferenceContext context) throws ReferenceSetAugmentationException {
+	public final Set<ExternalReferenceSPI> augmentReferenceSet(ReferenceSet references,
+			Set<Class<ExternalReferenceSPI>> targetReferenceTypes, ReferenceContext context)
+			throws ReferenceSetAugmentationException {
 
 		synchronized (this) {
 			if (!cacheValid) {
@@ -248,8 +214,7 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 				}
 				if (solver != null) {
 					for (TranslationPath path : solver.getTranslationPaths()) {
-						for (ExternalReferenceSPI er : references
-								.getExternalReferences()) {
+						for (ExternalReferenceSPI er : references.getExternalReferences()) {
 							if (er.getClass().equals(path.getSourceType())) {
 								candidatePaths.add(path);
 							}
@@ -269,8 +234,7 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 					// The builder can construct one of the target types, add
 					// paths for all possible pairs of 'de-reference existing
 					// reference' and the builder
-					for (ExternalReferenceSPI er : references
-							.getExternalReferences()) {
+					for (ExternalReferenceSPI er : references.getExternalReferences()) {
 						TranslationPath newPath = new TranslationPath();
 						newPath.initialBuilder = builder;
 						newPath.sourceReference = er;
@@ -282,15 +246,13 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 			// Got a list of candidate paths sorted by estimated overall path
 			// cost
 			Collections.sort(candidatePaths);
-			log
-					.debug("Found "
-							+ candidatePaths.size()
-							+ " contextual translation path(s) including builder based :");
+			log.debug("Found " + candidatePaths.size()
+					+ " contextual translation path(s) including builder based :");
 			int counter = 0;
 			for (TranslationPath path : candidatePaths) {
 				log.debug("  " + (++counter) + ") " + path.toString());
 			}
-			
+
 			if (candidatePaths.isEmpty()) {
 				log.warn("No candidate paths found for augmentation");
 				throw new ReferenceSetAugmentationException(
@@ -301,12 +263,13 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 				for (TranslationPath path : candidatePaths) {
 					try {
 						counter++;
-						Set<ExternalReferenceSPI> newReferences = path
-								.doTranslation(references, context);
-						log.debug("  Success ("+counter+"), created "+printRefSet(newReferences));
+						Set<ExternalReferenceSPI> newReferences = path.doTranslation(references,
+								context);
+						log.debug("  Success (" + counter + "), created "
+								+ printRefSet(newReferences));
 						return newReferences;
 					} catch (Exception ex) {
-						log.debug("  Failed ("+counter+")");
+						log.debug("  Failed (" + counter + ")");
 						log.trace(ex);
 						// Use next path...
 					}
@@ -333,20 +296,19 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 		sb.append("]");
 		return sb.toString();
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public final void augmentReferenceSetAsynch(final ReferenceSet references,
 			final Set<Class<ExternalReferenceSPI>> targetReferenceTypes,
-			final ReferenceContext context,
-			final ReferenceSetAugmentorCallback callback)
+			final ReferenceContext context, final ReferenceSetAugmentorCallback callback)
 			throws ReferenceSetAugmentationException {
 		Runnable r = new Runnable() {
 			public void run() {
 				try {
-					callback.augmentationCompleted(augmentReferenceSet(
-							references, targetReferenceTypes, context));
+					callback.augmentationCompleted(augmentReferenceSet(references,
+							targetReferenceTypes, context));
 
 				} catch (ReferenceSetAugmentationException rsae) {
 					callback.augmentationFailed(rsae);
@@ -357,9 +319,9 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 	}
 
 	/**
-	 * Schedule a runnable for execution - current naive implementation uses a
-	 * new thread and executes immediately, but this is where any thread pool
-	 * logic would go if we wanted to add that.
+	 * Schedule a runnable for execution - current naive implementation uses a new thread and
+	 * executes immediately, but this is where any thread pool logic would go if we wanted to add
+	 * that.
 	 * 
 	 * @param r
 	 */
@@ -368,8 +330,8 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 	}
 
 	/**
-	 * A path from one external reference to another along with a total
-	 * estimated path cost through one or more reference translators.
+	 * A path from one external reference to another along with a total estimated path cost through
+	 * one or more reference translators.
 	 */
 	class TranslationPath implements Comparable<TranslationPath>,
 			Iterable<ExternalReferenceTranslatorSPI<?, ?>> {
@@ -379,8 +341,8 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 		ExternalReferenceSPI sourceReference = null;
 
 		/**
-		 * Return a human readable representation of this translation path, used
-		 * by the logging methods to print trace information.
+		 * Return a human readable representation of this translation path, used by the logging
+		 * methods to print trace information.
 		 */
 		@SuppressWarnings("unchecked")
 		@Override
@@ -390,39 +352,30 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 			if (sourceReference != null && initialBuilder != null) {
 				sb.append(sourceReference.toString() + "->bytes("
 						+ sourceReference.getResolutionCost() + ")->");
-				String builderClassName = initialBuilder.getClass()
-						.getSimpleName();
-				String builtType = initialBuilder.getReferenceType()
-						.getSimpleName();
+				String builderClassName = initialBuilder.getClass().getSimpleName();
+				String builtType = initialBuilder.getReferenceType().getSimpleName();
 				sb.append("builder:" + builderClassName + "("
-						+ initialBuilder.getConstructionCost() + "):<"
-						+ builtType + ">");
+						+ initialBuilder.getConstructionCost() + "):<" + builtType + ">");
 			} else if (translators.isEmpty() == false) {
-				sb.append("<"
-						+ translators.get(0).getSourceReferenceType()
-								.getSimpleName() + ">");
+				sb.append("<" + translators.get(0).getSourceReferenceType().getSimpleName() + ">");
 			}
 			for (ExternalReferenceTranslatorSPI translator : translators) {
 				sb.append("-" + translator.getClass().getSimpleName() + "("
 						+ translator.getTranslationCost() + ")" + "-");
-				sb.append("<"
-						+ translator.getTargetReferenceType().getSimpleName()
-						+ ">");
+				sb.append("<" + translator.getTargetReferenceType().getSimpleName() + ">");
 			}
 			return sb.toString();
 		}
 
 		@SuppressWarnings("unchecked")
-		public Set<ExternalReferenceSPI> doTranslation(ReferenceSet rs,
-				ReferenceContext context) {
+		public Set<ExternalReferenceSPI> doTranslation(ReferenceSet rs, ReferenceContext context) {
 			Set<ExternalReferenceSPI> results = new HashSet<ExternalReferenceSPI>();
 			// Firstly check whether we have an initial reference and builder
 			// defined
 			ExternalReferenceSPI currentReference = null;
 			if (initialBuilder != null && sourceReference != null) {
-				ExternalReferenceSPI builtReference = initialBuilder
-						.createReference(sourceReference.openStream(context),
-								context);
+				ExternalReferenceSPI builtReference = initialBuilder.createReference(
+						sourceReference.openStream(context), context);
 				results.add(builtReference);
 				currentReference = builtReference;
 			}
@@ -433,21 +386,19 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 				// references for an appropriate starting point for the
 				// translation.
 				for (ExternalReferenceSPI er : rs.getExternalReferences()) {
-					if (er.getClass().equals(
-							translators.get(0).getSourceReferenceType())) {
+					if (er.getClass().equals(translators.get(0).getSourceReferenceType())) {
 						currentReference = er;
 						break;
 					}
 				}
 			}
 			if (currentReference == null) {
-				throw new RuntimeException(
-						"Can't locate a starting reference for the"
-								+ " translation path");
+				throw new RuntimeException("Can't locate a starting reference for the"
+						+ " translation path");
 			} else {
 				for (ExternalReferenceTranslatorSPI translator : translators) {
-					ExternalReferenceSPI translatedReference = translator
-							.createReference(currentReference, context);
+					ExternalReferenceSPI translatedReference = translator.createReference(
+							currentReference, context);
 					results.add(translatedReference);
 					currentReference = translatedReference;
 				}
@@ -478,11 +429,10 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 		}
 
 		/**
-		 * Return a list of translation paths based on this one but which start
-		 * at an existing reference within the supplied reference set. Will only
-		 * function if there is a reference builder registered that can build
-		 * the initial reference type used by this translation path, otherwise
-		 * it returns an empty list.
+		 * Return a list of translation paths based on this one but which start at an existing
+		 * reference within the supplied reference set. Will only function if there is a reference
+		 * builder registered that can build the initial reference type used by this translation
+		 * path, otherwise it returns an empty list.
 		 * 
 		 * @param rs
 		 * @return
@@ -507,8 +457,7 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 						// wouldn't make any sense
 						boolean overlapsExistingType = false;
 						for (ExternalReferenceTranslatorSPI translationStep : this) {
-							if (translationStep.getSourceReferenceType()
-									.equals(er.getClass())) {
+							if (translationStep.getSourceReferenceType().equals(er.getClass())) {
 								overlapsExistingType = true;
 								break;
 							}
@@ -565,8 +514,7 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 
 		public Class<? extends ExternalReferenceSPI> getTargetType() {
 			if (translators.isEmpty() == false) {
-				return translators.get(translators.size() - 1)
-						.getTargetReferenceType();
+				return translators.get(translators.size() - 1).getTargetReferenceType();
 			} else if (this.initialBuilder != null) {
 				return this.initialBuilder.getReferenceType();
 			} else {
@@ -582,8 +530,7 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 		private Map<Class<ExternalReferenceSPI>, ExternalReferenceTranslatorSPI<?, ?>> translators;
 		private Map<Class<ExternalReferenceSPI>, Float> shortestDistances;
 		private final Comparator<Class<ExternalReferenceSPI>> shortestDistanceComparator = new Comparator<Class<ExternalReferenceSPI>>() {
-			public int compare(Class<ExternalReferenceSPI> left,
-					Class<ExternalReferenceSPI> right) {
+			public int compare(Class<ExternalReferenceSPI> left, Class<ExternalReferenceSPI> right) {
 				float shortestDistanceLeft = shortestDistances.get(left);
 				float shortestDistanceRight = shortestDistances.get(right);
 				if (shortestDistanceLeft > shortestDistanceRight) {
@@ -591,8 +538,7 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 				} else if (shortestDistanceLeft < shortestDistanceRight) {
 					return -1;
 				} else {
-					return left.getCanonicalName().compareTo(
-							right.getCanonicalName());
+					return left.getCanonicalName().compareTo(right.getCanonicalName());
 				}
 			}
 		};
@@ -607,8 +553,7 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 		}
 
 		public ShortestPathSolver(Class<ExternalReferenceSPI> targetType) {
-			log.debug("# Constructing shortest paths to '"
-					+ targetType.getSimpleName() + "'");
+			log.debug("# Constructing shortest paths to '" + targetType.getSimpleName() + "'");
 			predecessors = new HashMap<Class<ExternalReferenceSPI>, Class<ExternalReferenceSPI>>();
 			translators = new HashMap<Class<ExternalReferenceSPI>, ExternalReferenceTranslatorSPI<?, ?>>();
 			shortestDistances = new HashMap<Class<ExternalReferenceSPI>, Float>();
@@ -634,11 +579,9 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 			}
 			Collections.sort(translationPaths);
 			if (translationPaths.isEmpty()) {
-				log
-						.debug("#   no paths discovered, type not reachable through translation");
+				log.debug("#   no paths discovered, type not reachable through translation");
 			} else {
-				log.debug("#   found " + translationPaths.size()
-						+ " distinct path(s) :");
+				log.debug("#   found " + translationPaths.size() + " distinct path(s) :");
 				int counter = 0;
 				for (TranslationPath path : translationPaths) {
 					log.debug("#     " + (++counter) + ") " + path.toString());
@@ -659,10 +602,8 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 					// Avoid duplicate edges, always take the first one where
 					// such duplicates exist
 					alreadySeen.add(v);
-					if (getShortestDistance(v) > getShortestDistance(u)
-							+ ert.getTranslationCost()) {
-						setShortestDistance(v, getShortestDistance(u)
-								+ ert.getTranslationCost());
+					if (getShortestDistance(v) > getShortestDistance(u) + ert.getTranslationCost()) {
+						setShortestDistance(v, getShortestDistance(u) + ert.getTranslationCost());
 						setPredecessor(v, u, ert);
 						unsettledNodes.add(v);
 					}
@@ -674,8 +615,7 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 			return settledNodes.contains(node);
 		}
 
-		private void setShortestDistance(Class<ExternalReferenceSPI> node,
-				float distance) {
+		private void setShortestDistance(Class<ExternalReferenceSPI> node, float distance) {
 			shortestDistances.put(node, distance);
 		}
 
@@ -689,8 +629,7 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 		}
 
 		private void setPredecessor(Class<ExternalReferenceSPI> child,
-				Class<ExternalReferenceSPI> parent,
-				ExternalReferenceTranslatorSPI<?, ?> translator) {
+				Class<ExternalReferenceSPI> parent, ExternalReferenceTranslatorSPI<?, ?> translator) {
 			predecessors.put(child, parent);
 			translators.put(child, translator);
 		}

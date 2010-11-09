@@ -20,9 +20,9 @@
  ******************************************************************************/
 package net.sf.taverna.t2.reference.impl;
 
+import java.util.List;
 import java.util.Set;
 
-import net.sf.taverna.raven.spi.InstanceRegistry;
 import net.sf.taverna.t2.reference.ErrorDocumentService;
 import net.sf.taverna.t2.reference.ExternalReferenceSPI;
 import net.sf.taverna.t2.reference.ListService;
@@ -53,25 +53,23 @@ public abstract class AbstractReferenceServiceImpl extends AbstractServiceImpl
 	protected ErrorDocumentService errorDocumentService = null;
 	protected ReferenceSetService referenceSetService = null;
 	protected ListService listService = null;
-	protected InstanceRegistry<ValueToReferenceConverterSPI> converterRegistry = null;
-	@SuppressWarnings("unchecked")
-	protected InstanceRegistry<StreamToValueConverterSPI> valueBuilderRegistry = null;
+	protected List<ValueToReferenceConverterSPI> converters = null;
+	@SuppressWarnings("rawtypes")
+	protected List<StreamToValueConverterSPI> valueBuilders = null;
 
 	/**
 	 * Inject value to reference convertor SPI
 	 */
-	public final void setConverterRegistry(
-			InstanceRegistry<ValueToReferenceConverterSPI> reg) {
-		this.converterRegistry = reg;
+	public final void setConverters(List<ValueToReferenceConverterSPI> converters) {
+		this.converters = converters;
 	}
 
 	/**
 	 * Inject stream to value converter SPI
 	 */
-	@SuppressWarnings("unchecked")
-	public final void setValueBuilderRegistry(
-			InstanceRegistry<StreamToValueConverterSPI> reg) {
-		this.valueBuilderRegistry = reg;
+	@SuppressWarnings("rawtypes")
+	public final void setValueBuilders(List<StreamToValueConverterSPI> valueBuilders) {
+		this.valueBuilders = valueBuilders;
 	}
 
 	/**
@@ -123,7 +121,7 @@ public abstract class AbstractReferenceServiceImpl extends AbstractServiceImpl
 	 */
 	protected final void checkConverterRegistry()
 			throws ReferenceServiceException {
-		if (converterRegistry == null) {
+		if (converters == null) {
 			throw new ReferenceServiceException(
 					"Reference service must be configued with an "
 							+ "instance registry of ValueToReferenceConvertorSPI "
