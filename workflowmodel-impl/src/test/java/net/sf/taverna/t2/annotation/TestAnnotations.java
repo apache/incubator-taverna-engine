@@ -20,7 +20,8 @@
  ******************************************************************************/
 package net.sf.taverna.t2.annotation;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.lang.annotation.Annotation;
 import java.net.URI;
@@ -31,12 +32,16 @@ import java.util.Set;
 
 import net.sf.taverna.t2.annotation.annotationbeans.FreeTextDescription;
 import net.sf.taverna.t2.annotation.annotationbeans.MimeType;
+import net.sf.taverna.t2.annotation.impl.AnnotationAssertionImpl;
+import net.sf.taverna.t2.annotation.impl.AnnotationChainImpl;
+import net.sf.taverna.t2.annotation.impl.PersonImpl;
+import net.sf.taverna.t2.annotation.impl.URISource;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
 import net.sf.taverna.t2.workflowmodel.Edit;
 import net.sf.taverna.t2.workflowmodel.EditException;
 import net.sf.taverna.t2.workflowmodel.Edits;
-import net.sf.taverna.t2.workflowmodel.EditsRegistry;
 import net.sf.taverna.t2.workflowmodel.impl.DummyDataflow;
+import net.sf.taverna.t2.workflowmodel.impl.EditsImpl;
 
 import org.junit.Test;
 
@@ -46,7 +51,7 @@ public class TestAnnotations {
 	@Test
 	public void getAnnotationsForADataFlow() {
 
-		Edits edits = EditsRegistry.getEdits();
+		Edits edits = new EditsImpl();
 
 		FreeTextDescription freeTextDescription = new FreeTextDescription();
 		freeTextDescription.setText("i am the mime type for some object");
