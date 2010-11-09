@@ -47,9 +47,9 @@ public class Run {
 	private Map<String, T2Reference> inputs, outputs;
 
 	private ExecutionService executionService;
-	
+
 	private State state;
-	
+
 	private WorkflowReport workflowReport;
 
 	private final Workflow workflow;
@@ -58,7 +58,9 @@ public class Run {
 
 	private final ReferenceService referenceService;
 
-	public Run(Workflow workflow, Profile profile, Map<String, T2Reference> inputs, ReferenceService referenceService, ExecutionService executionService) throws InvalidWorkflowException {
+	public Run(Workflow workflow, Profile profile, Map<String, T2Reference> inputs,
+			ReferenceService referenceService, ExecutionService executionService)
+			throws InvalidWorkflowException {
 		this.workflow = workflow;
 		this.profile = profile;
 		this.inputs = inputs;
@@ -69,7 +71,7 @@ public class Run {
 		try {
 			workflowReport = executionService.getWorkflowReport(executionID);
 		} catch (InvalidExecutionIdException e) {
-			//TODO throw an exception
+			// TODO throw an exception
 		}
 		workflowReport.setCreatedDate(new Date());
 		state = State.CREATED;
@@ -135,7 +137,8 @@ public class Run {
 
 	public void cancel() throws RunStateException, InvalidExecutionIdException {
 		synchronized (state) {
-			if (state.equals(State.CANCELLED) || state.equals(State.COMPLETED)) {
+			if (state.equals(State.CANCELLED) || state.equals(State.COMPLETED)
+					|| state.equals(State.FAILED)) {
 				throw new RunStateException("Cannot cancel a " + state + " run.");
 			} else {
 				executionService.cancel(executionID);

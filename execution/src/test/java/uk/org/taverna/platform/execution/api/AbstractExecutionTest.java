@@ -33,7 +33,7 @@ import net.sf.taverna.t2.reference.impl.ReferenceServiceImpl;
 import org.junit.Before;
 import org.junit.Test;
 
-import uk.org.taverna.platform.execution.api.Execution;
+import uk.org.taverna.platform.execution.api.AbstractExecution;
 import uk.org.taverna.platform.report.ProcessorReport;
 import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.scufl2.api.core.Processor;
@@ -44,7 +44,7 @@ import uk.org.taverna.scufl2.api.profiles.Profile;
  * 
  * @author David Withers
  */
-public class ExecutionTest {
+public class AbstractExecutionTest {
 	
 	private Execution execution;
 	
@@ -66,7 +66,7 @@ public class ExecutionTest {
 		profile = new Profile();
 		inputs = new HashMap<String, T2Reference>();
 		referenceService = new ReferenceServiceImpl();
-		execution = new Execution(workflow, profile, inputs, referenceService) {
+		execution = new AbstractExecution(workflow, profile, inputs, referenceService) {
 			public void start() {}
 			public void resume() {}
 			public void pause() {}
@@ -83,7 +83,7 @@ public class ExecutionTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.execution.api.Execution#getID()}.
+	 * Test method for {@link uk.org.taverna.platform.execution.api.AbstractExecution#getID()}.
 	 */
 	@Test
 	public void testGetID() {
@@ -92,7 +92,7 @@ public class ExecutionTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.execution.api.Execution#getWorkflow()}.
+	 * Test method for {@link uk.org.taverna.platform.execution.api.AbstractExecution#getWorkflow()}.
 	 */
 	@Test
 	public void testGetWorkflow() {
@@ -100,7 +100,7 @@ public class ExecutionTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.execution.api.Execution#getInputs()}.
+	 * Test method for {@link uk.org.taverna.platform.execution.api.AbstractExecution#getInputs()}.
 	 */
 	@Test
 	public void testGetInputs() {
@@ -108,7 +108,7 @@ public class ExecutionTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.execution.api.Execution#getReferenceService()}.
+	 * Test method for {@link uk.org.taverna.platform.execution.api.AbstractExecution#getReferenceService()}.
 	 */
 	@Test
 	public void testGetReferenceService() {
@@ -116,7 +116,7 @@ public class ExecutionTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.execution.api.Execution#getWorkflowReport()}.
+	 * Test method for {@link uk.org.taverna.platform.execution.api.AbstractExecution#getWorkflowReport()}.
 	 */
 	@Test
 	public void testGetWorkflowReport() {

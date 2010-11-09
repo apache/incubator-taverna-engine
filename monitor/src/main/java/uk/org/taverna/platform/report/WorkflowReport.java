@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import net.sf.taverna.t2.reference.T2Reference;
 import uk.org.taverna.scufl2.api.core.Processor;
 import uk.org.taverna.scufl2.api.core.Workflow;
 
@@ -36,6 +37,8 @@ import uk.org.taverna.scufl2.api.core.Workflow;
 public abstract class WorkflowReport extends StatusReport {
 
 	private Workflow workflow;
+	
+	private Map<String, T2Reference> outputs;
 
 	private Map<Processor, ProcessorReport> processorReports;
 
@@ -45,6 +48,20 @@ public abstract class WorkflowReport extends StatusReport {
 		for (Processor processor : workflow.getProcessors()) {
 			processorReports.put(processor, createProcessorReport(processor, this));
 		}
+	}
+
+	/**
+	 * @return the outputs
+	 */
+	public Map<String, T2Reference> getOutputs() {
+		return outputs;
+	}
+
+	/**
+	 * @param outputs the outputs to set
+	 */
+	public void setOutputs(Map<String, T2Reference> outputs) {
+		this.outputs = outputs;
 	}
 
 	/**

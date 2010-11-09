@@ -116,6 +116,7 @@ public class LocalProcessorReport extends ProcessorReport {
 	public void setProperty(String key, Object value) {
 		MonitorableProperty<?> monitorableProperty = propertyMap.get(key);
 		if (monitorableProperty instanceof SteerableProperty<?>) {
+			@SuppressWarnings("unchecked")
 			SteerableProperty<Object> steerableProperty = (SteerableProperty<Object>) monitorableProperty;
 			try {
 				 steerableProperty.setProperty(value);

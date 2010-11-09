@@ -14,8 +14,6 @@ import uk.org.taverna.scufl2.api.profiles.Profile;
 
 public interface RunService {
 
-	public List<String> getRuns();
-
 	/**
 	 * Creates a new run and returns the ID for the run.
 	 * 
@@ -26,10 +24,17 @@ public interface RunService {
 	 * @param inputs
 	 *            the workflow inputs
 	 * @return the run ID
-	 * @throws InvalidWorkflowException 
+	 * @throws InvalidWorkflowException
 	 */
 	public String createRun(Workflow workflow, Profile profile, Map<String, T2Reference> inputs,
 			ReferenceService referenceService) throws InvalidWorkflowException;
+
+	/**
+	 * Returns the list runs that this service is managing.
+	 * 
+	 * @return the list runs that this service is managing
+	 */
+	public List<String> getRuns();
 
 	/**
 	 * Starts a run.
@@ -40,9 +45,10 @@ public interface RunService {
 	 *             if the run ID is not valid
 	 * @throws RunStateException
 	 *             if the run state is not CREATED
-	 * @throws InvalidExecutionIdException 
+	 * @throws InvalidExecutionIdException
 	 */
-	public void start(String runID) throws InvalidRunIdException, RunStateException, InvalidExecutionIdException;
+	public void start(String runID) throws InvalidRunIdException, RunStateException,
+			InvalidExecutionIdException;
 
 	/**
 	 * Pauses a running run.
@@ -53,9 +59,10 @@ public interface RunService {
 	 *             if the run ID is not valid
 	 * @throws RunStateException
 	 *             if the run state is not RUNNING
-	 * @throws InvalidExecutionIdException 
+	 * @throws InvalidExecutionIdException
 	 */
-	public void pause(String runID) throws InvalidRunIdException, RunStateException, InvalidExecutionIdException;
+	public void pause(String runID) throws InvalidRunIdException, RunStateException,
+			InvalidExecutionIdException;
 
 	/**
 	 * Resumes a paused run.
@@ -66,9 +73,10 @@ public interface RunService {
 	 *             if the run ID is not valid
 	 * @throws RunStateException
 	 *             if the run state is not PAUSED
-	 * @throws InvalidExecutionIdException 
+	 * @throws InvalidExecutionIdException
 	 */
-	public void resume(String runID) throws InvalidRunIdException, RunStateException, InvalidExecutionIdException;
+	public void resume(String runID) throws InvalidRunIdException, RunStateException,
+			InvalidExecutionIdException;
 
 	/**
 	 * Cancels a running or paused run.
@@ -79,13 +87,14 @@ public interface RunService {
 	 *             if the run ID is not valid
 	 * @throws RunStateException
 	 *             if the run state is not RUNNING or PAUSED
-	 * @throws InvalidExecutionIdException 
+	 * @throws InvalidExecutionIdException
 	 */
-	public void cancel(String runID) throws InvalidRunIdException, RunStateException, InvalidExecutionIdException;
+	public void cancel(String runID) throws InvalidRunIdException, RunStateException,
+			InvalidExecutionIdException;
 
 	/**
-	 * Returns the current state of the run. A run's state can be CREATED,
-	 * RUNNING, COMPLETED, PAUSED or CANCELLED.
+	 * Returns the current state of the run. A run's state can be CREATED, RUNNING, COMPLETED,
+	 * PAUSED, CANCELLED or FAILED.
 	 * 
 	 * @param runID
 	 *            the ID of the run
