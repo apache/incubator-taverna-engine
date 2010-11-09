@@ -20,7 +20,6 @@
             <name>tupelo2</name>
             <url>http://dlt-dev.ncsa.uiuc.edu/m2</url>
         </repository>
-<!--
         <repository>
             <snapshots>
                 <enabled>true</enabled>
@@ -29,7 +28,6 @@
             <name>opm</name>
             <url>http://openprovenance.org/java/maven-releases</url>
         </repository>
--->
     </repositories>
 
     <dependencies>
