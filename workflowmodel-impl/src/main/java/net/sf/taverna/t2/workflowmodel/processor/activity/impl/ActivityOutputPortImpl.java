@@ -22,12 +22,12 @@ package net.sf.taverna.t2.workflowmodel.processor.activity.impl;
 
 import java.util.Set;
 
-import net.sf.taverna.raven.log.Log;
 import net.sf.taverna.t2.annotation.AnnotationChain;
 import net.sf.taverna.t2.workflowmodel.AbstractOutputPort;
 import net.sf.taverna.t2.workflowmodel.EditException;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityOutputPort;
-import net.sf.taverna.t2.workflowmodel.serialization.xml.DispatchLayerXMLDeserializer;
+
+import org.apache.log4j.Logger;
 
 /**
  * An output port on an Activity instance, used as a bean to hold port name,
@@ -38,8 +38,7 @@ import net.sf.taverna.t2.workflowmodel.serialization.xml.DispatchLayerXMLDeseria
  */
 public class ActivityOutputPortImpl extends AbstractOutputPort implements ActivityOutputPort {
 
-	private static Log logger = Log.getLogger(ActivityOutputPortImpl.class);
-
+	private static Logger logger = Logger.getLogger(ActivityOutputPortImpl.class);
 
 	/**
 	 * Constructs an Activity output port instance with the provided name,depth
