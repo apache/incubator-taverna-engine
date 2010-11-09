@@ -18,15 +18,8 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package net.sf.taverna.t2.annotation;
+package net.sf.taverna.t2.annotation.impl;
 
-public class PersonImpl implements Person {
-	
-	@SuppressWarnings("unused")
-	private String name;
-
-	public PersonImpl(String name) {
-		this.name = name;
-	}
+public class AnnotationEditsImpl  {
 
 }

@@ -18,33 +18,14 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package net.sf.taverna.t2.annotation;
+package net.sf.taverna.t2.annotation.impl;
 
-import java.util.ArrayList;
-import java.util.List;
+import net.sf.taverna.t2.annotation.CurationEventBeanSPI;
 
-public class AnnotationChainImpl implements AnnotationChain{
-
-	private List<AnnotationAssertion<?>> annotationAssertions = new ArrayList<AnnotationAssertion<?>>();
+public class DisputeEventDetails implements CurationEventBeanSPI {
 	
-	public List<AnnotationAssertion<?>> getAssertions() {
-		return new ArrayList<AnnotationAssertion<?>>(annotationAssertions);
-	}
-	
-	/**
-	 * Add an annotation to the chain Added because without the edits stuff how
-	 * else can we do it?
-	 * 
-	 * @param annotationAssertion
-	 */
-	@SuppressWarnings("unchecked")
-	public void addAnnotationAssertion(AnnotationAssertion annotationAssertion) {
-		annotationAssertions.add(annotationAssertion);
-	}
-	
-	@SuppressWarnings("unchecked")
-	public void removeAnnotationAssertion(AnnotationAssertion annotationAssertion) {
-		annotationAssertions.remove(annotationAssertion);
+	public DisputeEventDetails() {
+		
 	}
 
 }

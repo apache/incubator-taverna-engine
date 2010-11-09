@@ -18,11 +18,18 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package net.sf.taverna.t2.annotation;
+package net.sf.taverna.t2.annotation.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import net.sf.taverna.t2.annotation.AnnotationAssertion;
+import net.sf.taverna.t2.annotation.AnnotationBeanSPI;
+import net.sf.taverna.t2.annotation.AnnotationRole;
+import net.sf.taverna.t2.annotation.AnnotationSourceSPI;
+import net.sf.taverna.t2.annotation.CurationEvent;
+import net.sf.taverna.t2.annotation.Person;
 
 public class AnnotationAssertionImpl implements AnnotationAssertion<AnnotationBeanSPI> {
 	

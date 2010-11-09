@@ -18,7 +18,11 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package net.sf.taverna.t2.annotation;
+package net.sf.taverna.t2.annotation.impl;
+
+import net.sf.taverna.t2.annotation.Curateable;
+import net.sf.taverna.t2.annotation.CurationEvent;
+import net.sf.taverna.t2.annotation.CurationEventType;
 
 public class DisputeEvent implements CurationEvent<DisputeEventDetails>{
 	

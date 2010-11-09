@@ -18,12 +18,33 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package net.sf.taverna.t2.annotation;
+package net.sf.taverna.t2.annotation.impl;
 
-public class DisputeEventDetails implements CurationEventBeanSPI {
+import java.net.URI;
+
+import net.sf.taverna.t2.annotation.AnnotationSourceSPI;
+
+public class URISource implements AnnotationSourceSPI{
 	
-	public DisputeEventDetails() {
+	private URI uri;
+	
+	public URISource() {
 		
+	}
+
+	public URISource(URI uri) {
+		this.uri = uri;
+	}
+
+	public void setUri(URI uri) {
+//		if (uri != null) {
+//			throw new RuntimeException("URI has already been set");
+//		}
+		this.uri = uri;
+	}
+
+	public URI getUri() {
+		return uri;
 	}
 
 }

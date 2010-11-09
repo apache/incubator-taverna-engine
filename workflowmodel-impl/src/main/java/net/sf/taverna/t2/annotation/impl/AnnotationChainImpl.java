@@ -18,31 +18,36 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package net.sf.taverna.t2.annotation;
+package net.sf.taverna.t2.annotation.impl;
 
-import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
-public class URISource implements AnnotationSourceSPI{
+import net.sf.taverna.t2.annotation.AnnotationAssertion;
+import net.sf.taverna.t2.annotation.AnnotationChain;
+
+public class AnnotationChainImpl implements AnnotationChain{
+
+	private List<AnnotationAssertion<?>> annotationAssertions = new ArrayList<AnnotationAssertion<?>>();
 	
-	private URI uri;
+	public List<AnnotationAssertion<?>> getAssertions() {
+		return new ArrayList<AnnotationAssertion<?>>(annotationAssertions);
+	}
 	
-	public URISource() {
-		
+	/**
+	 * Add an annotation to the chain Added because without the edits stuff how
+	 * else can we do it?
+	 * 
+	 * @param annotationAssertion
+	 */
+	@SuppressWarnings("unchecked")
+	public void addAnnotationAssertion(AnnotationAssertion annotationAssertion) {
+		annotationAssertions.add(annotationAssertion);
 	}
-
-	public URISource(URI uri) {
-		this.uri = uri;
-	}
-
-	public void setUri(URI uri) {
-//		if (uri != null) {
-//			throw new RuntimeException("URI has already been set");
-//		}
-		this.uri = uri;
-	}
-
-	public URI getUri() {
-		return uri;
+	
+	@SuppressWarnings("unchecked")
+	public void removeAnnotationAssertion(AnnotationAssertion annotationAssertion) {
+		annotationAssertions.remove(annotationAssertion);
 	}
 
 }
