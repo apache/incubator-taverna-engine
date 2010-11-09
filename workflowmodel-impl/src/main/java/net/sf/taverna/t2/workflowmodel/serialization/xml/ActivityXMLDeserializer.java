@@ -24,9 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.sf.taverna.t2.workflowmodel.EditException;
-import net.sf.taverna.t2.workflowmodel.ProcessorInputPort;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
-import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityAndBeanWrapper;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityConfigurationException;
 import net.sf.taverna.t2.workflowmodel.processor.activity.DisabledActivity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.NonExecutableActivity;
@@ -57,16 +55,16 @@ public class ActivityXMLDeserializer extends AbstractXMLDeserializer {
 		if (cl == null) {
 			cl = getClass().getClassLoader();
 		}
-		if (ravenElement != null) {
-			try {
-				cl = getRavenLoader(ravenElement);
-			} catch (Exception ex) {
-				logger.warn("Could not load raven classloader " + ravenElement + " for activity", ex);
-				// TODO - handle this properly, either by logging correctly or
-				// by going back to the repository and attempting to fetch the
-				// offending missing artifacts
-			}
-		}
+//		if (ravenElement != null) {
+//			try {
+//				cl = getRavenLoader(ravenElement);
+//			} catch (Exception ex) {
+//				logger.warn("Could not load raven classloader " + ravenElement + " for activity", ex);
+//				// TODO - handle this properly, either by logging correctly or
+//				// by going back to the repository and attempting to fetch the
+//				// offending missing artifacts
+//			}
+//		}
 		String className = element.getChild(CLASS, T2_WORKFLOW_NAMESPACE)
 				.getTextTrim();
 		Activity activity;

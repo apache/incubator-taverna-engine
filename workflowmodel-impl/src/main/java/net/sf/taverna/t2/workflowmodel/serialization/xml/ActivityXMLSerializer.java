@@ -22,7 +22,6 @@ package net.sf.taverna.t2.workflowmodel.serialization.xml;
 
 import java.io.IOException;
 
-import net.sf.taverna.raven.repository.impl.LocalArtifactClassLoader;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 
 import org.jdom.Element;
@@ -44,11 +43,11 @@ public class ActivityXMLSerializer extends AbstractXMLSerializer {
 			IOException {
 		Element activityElem = new Element(ACTIVITY, T2_WORKFLOW_NAMESPACE);
 
-		ClassLoader cl = activity.getClass().getClassLoader();
-		if (cl instanceof LocalArtifactClassLoader) {
-			activityElem
-					.addContent(ravenElement((LocalArtifactClassLoader) cl));
-		}
+//		ClassLoader cl = activity.getClass().getClassLoader();
+//		if (cl instanceof LocalArtifactClassLoader) {
+//			activityElem
+//					.addContent(ravenElement((LocalArtifactClassLoader) cl));
+//		}
 		Element classNameElement = new Element(CLASS, T2_WORKFLOW_NAMESPACE);
 		classNameElement.setText(activity.getClass().getName());
 		activityElem.addContent(classNameElement);

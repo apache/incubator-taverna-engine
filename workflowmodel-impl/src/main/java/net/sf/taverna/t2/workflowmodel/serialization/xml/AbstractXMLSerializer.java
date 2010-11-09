@@ -23,8 +23,6 @@ package net.sf.taverna.t2.workflowmodel.serialization.xml;
 import java.io.IOException;
 import java.io.StringReader;
 
-import net.sf.taverna.raven.repository.Artifact;
-import net.sf.taverna.raven.repository.impl.LocalArtifactClassLoader;
 import net.sf.taverna.t2.annotation.Annotated;
 import net.sf.taverna.t2.annotation.AnnotationAssertion;
 import net.sf.taverna.t2.annotation.AnnotationChain;
@@ -51,31 +49,31 @@ public abstract class AbstractXMLSerializer implements XMLSerializationConstants
 	@SuppressWarnings("unused")
 	private static Logger logger = Logger.getLogger(AbstractXMLSerializer.class);
 
-	/**
-	 * Create the &lt;raven&gt; element for a given local artifact classloader.
-	 * 
-	 * @param classLoader
-	 *            The {@link LocalArtifactClassLoader} for the artifact
-	 * @return Populated &lt;raven&gt; element
-	 */
-	protected Element ravenElement(LocalArtifactClassLoader classLoader) {
-		Element element = new Element(RAVEN, T2_WORKFLOW_NAMESPACE);
-		Artifact artifact = classLoader.getArtifact();
-		// Group
-		Element groupIdElement = new Element(GROUP, T2_WORKFLOW_NAMESPACE);
-		groupIdElement.setText(artifact.getGroupId());
-		element.addContent(groupIdElement);
-		// Artifact ID
-		Element artifactIdElement = new Element(ARTIFACT, T2_WORKFLOW_NAMESPACE);
-		artifactIdElement.setText(artifact.getArtifactId());
-		element.addContent(artifactIdElement);
-		// Version
-		Element versionElement = new Element(VERSION, T2_WORKFLOW_NAMESPACE);
-		versionElement.setText(artifact.getVersion());
-		element.addContent(versionElement);
-		// Return assembled raven element
-		return element;
-	}
+//	/**
+//	 * Create the &lt;raven&gt; element for a given local artifact classloader.
+//	 * 
+//	 * @param classLoader
+//	 *            The {@link LocalArtifactClassLoader} for the artifact
+//	 * @return Populated &lt;raven&gt; element
+//	 */
+//	protected Element ravenElement(LocalArtifactClassLoader classLoader) {
+//		Element element = new Element(RAVEN, T2_WORKFLOW_NAMESPACE);
+//		Artifact artifact = classLoader.getArtifact();
+//		// Group
+//		Element groupIdElement = new Element(GROUP, T2_WORKFLOW_NAMESPACE);
+//		groupIdElement.setText(artifact.getGroupId());
+//		element.addContent(groupIdElement);
+//		// Artifact ID
+//		Element artifactIdElement = new Element(ARTIFACT, T2_WORKFLOW_NAMESPACE);
+//		artifactIdElement.setText(artifact.getArtifactId());
+//		element.addContent(artifactIdElement);
+//		// Version
+//		Element versionElement = new Element(VERSION, T2_WORKFLOW_NAMESPACE);
+//		versionElement.setText(artifact.getVersion());
+//		element.addContent(versionElement);
+//		// Return assembled raven element
+//		return element;
+//	}
 
 	protected Element beanAsElement(Object obj) throws JDOMException,
 			IOException {

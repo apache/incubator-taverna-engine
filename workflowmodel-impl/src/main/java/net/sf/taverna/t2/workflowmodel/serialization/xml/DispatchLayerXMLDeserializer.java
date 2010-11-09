@@ -20,18 +20,16 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.serialization.xml;
 
-import net.sf.taverna.raven.log.Log;
-import net.sf.taverna.raven.repository.impl.LocalRepository;
 import net.sf.taverna.t2.workflowmodel.ConfigurationException;
-import net.sf.taverna.t2.workflowmodel.impl.Tools;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayer;
 
+import org.apache.log4j.Logger;
 import org.jdom.Element;
 
 public class DispatchLayerXMLDeserializer extends AbstractXMLDeserializer {
 	private static DispatchLayerXMLDeserializer instance = new DispatchLayerXMLDeserializer();
 
-	private static Log logger = Log.getLogger(DispatchLayerXMLDeserializer.class);
+	private static Logger logger = Logger.getLogger(DispatchLayerXMLDeserializer.class);
 
 	private DispatchLayerXMLDeserializer() {
 
@@ -44,17 +42,17 @@ public class DispatchLayerXMLDeserializer extends AbstractXMLDeserializer {
 	@SuppressWarnings("unchecked")
 	public DispatchLayer<?> deserializeDispatchLayer(Element element) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
 		Element ravenElement = element.getChild(RAVEN,T2_WORKFLOW_NAMESPACE);
-		ClassLoader cl = Tools.class.getClassLoader();
-		if (ravenElement != null) {
-			try {
-				cl = getRavenLoader(ravenElement);
-			} catch (Exception ex) {
-				logger.error(ex);
-				// TODO - handle this properly, either by logging correctly or
-				// by going back to the repository and attempting to fetch the
-				// offending missing artifacts
-			}
-		}
+		ClassLoader cl = DispatchLayerXMLDeserializer.class.getClassLoader();
+//		if (ravenElement != null) {
+//			try {
+//				cl = getRavenLoader(ravenElement);
+//			} catch (Exception ex) {
+//				logger.error(ex);
+//				// TODO - handle this properly, either by logging correctly or
+//				// by going back to the repository and attempting to fetch the
+//				// offending missing artifacts
+//			}
+//		}
 		String className = element.getChild(CLASS,T2_WORKFLOW_NAMESPACE).getTextTrim();
 		Class<? extends DispatchLayer> c = (Class<? extends DispatchLayer>) cl
 				.loadClass(className);

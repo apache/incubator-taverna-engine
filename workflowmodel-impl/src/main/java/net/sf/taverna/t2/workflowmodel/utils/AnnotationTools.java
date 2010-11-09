@@ -1,20 +1,15 @@
 package net.sf.taverna.t2.workflowmodel.utils;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
-import net.sf.taverna.raven.appconfig.ApplicationRuntime;
-import net.sf.taverna.raven.spi.SpiRegistry;
 import net.sf.taverna.t2.annotation.Annotated;
 import net.sf.taverna.t2.annotation.AnnotationAssertion;
 import net.sf.taverna.t2.annotation.AnnotationBeanSPI;
 import net.sf.taverna.t2.annotation.AnnotationChain;
-import net.sf.taverna.t2.annotation.AppliesTo;
 import net.sf.taverna.t2.annotation.annotationbeans.AbstractTextualValueAssertion;
 import net.sf.taverna.t2.workflowmodel.Edit;
 import net.sf.taverna.t2.workflowmodel.Edits;
-import net.sf.taverna.t2.workflowmodel.EditsRegistry;
+import net.sf.taverna.t2.workflowmodel.impl.EditsImpl;
 
 import org.apache.log4j.Logger;
 
@@ -22,25 +17,25 @@ public class AnnotationTools {
 
 	private static Logger logger = Logger.getLogger(AnnotationTools.class);
 
-	@SuppressWarnings("unchecked")
-	private Iterable<Class> annotationBeanRegistry;
+//	@SuppressWarnings("unchecked")
+//	private Iterable<Class> annotationBeanRegistry;
 
 	private Edits edits;
 
 	public AnnotationTools() {
-		setAnnotationBeanRegistry(getSpiRegistry());
-		setEdits(EditsRegistry.getEdits());
+//		setAnnotationBeanRegistry(getSpiRegistry());
+		setEdits(new EditsImpl());
 	}
 
-	protected static Iterable<Class> getSpiRegistry() {
-		return new SpiRegistry(ApplicationRuntime
-				.getInstance().getRavenRepository(), AnnotationBeanSPI.class
-				.getCanonicalName(), AnnotationTools.class.getClassLoader());
-	}
+//	protected static Iterable<Class> getSpiRegistry() {
+//		return new SpiRegistry(ApplicationRuntime
+//				.getInstance().getRavenRepository(), AnnotationBeanSPI.class
+//				.getCanonicalName(), AnnotationTools.class.getClassLoader());
+//	}
 
 	@SuppressWarnings("unchecked")
 	public AnnotationTools(Iterable<Class> annotationBeanRegistry, Edits edits) {
-		setAnnotationBeanRegistry(annotationBeanRegistry);
+//		setAnnotationBeanRegistry(annotationBeanRegistry);
 		setEdits(edits);
 	}
 
@@ -73,42 +68,42 @@ public class AnnotationTools {
 		return result;
 	}
 
-	@SuppressWarnings("unchecked")
-	public Iterable<Class<? extends AnnotationBeanSPI>> getAnnotationBeanClasses() {
-		// Mega casting mega trick!
-		Iterable registry = getAnnotationBeanRegistry();
-		return (Iterable<Class<? extends AnnotationBeanSPI>>) registry;
-	}
+//	@SuppressWarnings("unchecked")
+//	public Iterable<Class<? extends AnnotationBeanSPI>> getAnnotationBeanClasses() {
+//		// Mega casting mega trick!
+//		Iterable registry = getAnnotationBeanRegistry();
+//		return (Iterable<Class<? extends AnnotationBeanSPI>>) registry;
+//	}
 
-	@SuppressWarnings("unchecked")
-	public <T> List<Class<? extends T>> getAnnotationBeanClasses(
-			Class<T> superClass) {
-		List<Class<? extends T>> results = new ArrayList<Class<? extends T>>();
-		for (Class<? extends AnnotationBeanSPI> annotationBeanClass : getAnnotationBeanClasses()) {
-			if (superClass.isAssignableFrom(annotationBeanClass)) {
-				results.add((Class<? extends T>) annotationBeanClass);
-			}
-		}
-		return results;
-	}
-
-	@SuppressWarnings("unchecked")
-	public List<Class> getAnnotatingClasses(Annotated annotated) {
-		List<Class> result = new ArrayList<Class>();
-		for (Class<? extends AbstractTextualValueAssertion> c : getAnnotationBeanClasses(AbstractTextualValueAssertion.class)) {
-			AppliesTo appliesToAnnotation = (AppliesTo) c
-					.getAnnotation(AppliesTo.class);
-			if (appliesToAnnotation == null) {
-				continue;
-			}
-			for (Class<?> target : appliesToAnnotation.targetObjectType()) {
-				if (target.isInstance(annotated)) {
-					result.add(c);
-				}
-			}
-		}
-		return result;
-	}
+//	@SuppressWarnings("unchecked")
+//	public <T> List<Class<? extends T>> getAnnotationBeanClasses(
+//			Class<T> superClass) {
+//		List<Class<? extends T>> results = new ArrayList<Class<? extends T>>();
+//		for (Class<? extends AnnotationBeanSPI> annotationBeanClass : getAnnotationBeanClasses()) {
+//			if (superClass.isAssignableFrom(annotationBeanClass)) {
+//				results.add((Class<? extends T>) annotationBeanClass);
+//			}
+//		}
+//		return results;
+//	}
+//
+//	@SuppressWarnings("unchecked")
+//	public List<Class> getAnnotatingClasses(Annotated annotated) {
+//		List<Class> result = new ArrayList<Class>();
+//		for (Class<? extends AbstractTextualValueAssertion> c : getAnnotationBeanClasses(AbstractTextualValueAssertion.class)) {
+//			AppliesTo appliesToAnnotation = (AppliesTo) c
+//					.getAnnotation(AppliesTo.class);
+//			if (appliesToAnnotation == null) {
+//				continue;
+//			}
+//			for (Class<?> target : appliesToAnnotation.targetObjectType()) {
+//				if (target.isInstance(annotated)) {
+//					result.add(c);
+//				}
+//			}
+//		}
+//		return result;
+//	}
 
 	public Edit<?> setAnnotationString(Annotated<?> annotated, Class<?> c,
 			String value) {
@@ -142,12 +137,12 @@ public class AnnotationTools {
 		this.edits = edits;
 	}
 
-	public void setAnnotationBeanRegistry(Iterable<Class> annotationBeanRegistry) {
-		this.annotationBeanRegistry = annotationBeanRegistry;
-	}
-
-	public Iterable<Class> getAnnotationBeanRegistry() {
-		return annotationBeanRegistry;
-	}
+//	public void setAnnotationBeanRegistry(Iterable<Class> annotationBeanRegistry) {
+//		this.annotationBeanRegistry = annotationBeanRegistry;
+//	}
+//
+//	public Iterable<Class> getAnnotationBeanRegistry() {
+//		return annotationBeanRegistry;
+//	}
 
 }
