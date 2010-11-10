@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import net.sf.taverna.raven.log.Log;
 import net.sf.taverna.t2.annotation.AbstractAnnotatedThing;
 import net.sf.taverna.t2.invocation.InvocationContext;
 import net.sf.taverna.t2.invocation.IterationInternalEvent;
@@ -55,6 +54,8 @@ import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationTypeMismatch
 import net.sf.taverna.t2.workflowmodel.processor.iteration.MissingIterationInputException;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.impl.IterationStrategyImpl;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.impl.IterationStrategyStackImpl;
+
+import org.apache.log4j.Logger;
 
 /**
  * Implementation of Processor
@@ -91,7 +92,7 @@ public final class ProcessorImpl extends AbstractAnnotatedThing<Processor>
 
 	protected transient Map<String, Set<MonitorableProperty<?>>> monitorables = new HashMap<String, Set<MonitorableProperty<?>>>();
 	
-	private static Log logger = Log.getLogger(ProcessorImpl.class);
+	private static Logger logger = Logger.getLogger(ProcessorImpl.class);
 
 	private MultiCaster<ProcessorFinishedEvent> processorFinishedMultiCaster = new MultiCaster<ProcessorFinishedEvent>(this);
 	
