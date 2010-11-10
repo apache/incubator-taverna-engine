@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean id="referenceService" class="net.sf.taverna.t2.reference.impl.ReferenceServiceImpl">
+		<property name="converters" ref="converters" />
+		<property name="valueBuilders" ref="valueBuilders" />
+		<property name="referenceSetService">
+			<ref local="referenceSetService" />
+		</property>
+		<property name="listService">
+			<ref local="listService" />
+		</property>
+		<property name="errorDocumentService">
+			<ref local="errorDocumentService" />
+		</property>
+	</bean>
+
+	<bean id="referenceSetService" class="net.sf.taverna.t2.reference.impl.ReferenceSetServiceImpl">
+		<property name="referenceSetDao">
+			<ref local="referenceSetDao" />
+		</property>
+		<property name="t2ReferenceGenerator">
+			<ref local="t2ReferenceGenerator" />
+		</property>
+		<property name="referenceSetAugmentor">
+			<ref local="referenceSetAugmentor" />
+		</property>
+	</bean>
+
+	<bean id="listService" class="net.sf.taverna.t2.reference.impl.ListServiceImpl">
+		<property name="listDao">
+			<ref bean="listDao" />
+		</property>
+		<property name="t2ReferenceGenerator">
+			<ref local="t2ReferenceGenerator" />
+		</property>
+	</bean>
+
+	<bean id="errorDocumentService" class="net.sf.taverna.t2.reference.impl.ErrorDocumentServiceImpl">
+		<property name="errorDao">
+			<ref local="errorDocumentDao" />
+		</property>
+		<property name="t2ReferenceGenerator">
+			<ref local="t2ReferenceGenerator" />
+		</property>
+	</bean>
+	
+	<bean id="referenceSetAugmentor" class="net.sf.taverna.t2.reference.impl.ReferenceSetAugmentorImpl">
+		<property name="builders" ref="builders" />
+		<property name="translators" ref="translators" />
+	</bean>
+
+	<bean id="t2ReferenceGenerator" class="net.sf.taverna.t2.reference.impl.UUIDT2ReferenceGenerator">
+		<property name="namespace" value="taverna" />
+	</bean>
+
+	<bean id="referenceSetDao" class="net.sf.taverna.t2.reference.impl.InMemoryReferenceSetDao" />
+	<bean id="listDao" class="net.sf.taverna.t2.reference.impl.InMemoryListDao" />
+	<bean id="errorDocumentDao" class="net.sf.taverna.t2.reference.impl.InMemoryErrorDocumentDao" />
+
+</beans>
