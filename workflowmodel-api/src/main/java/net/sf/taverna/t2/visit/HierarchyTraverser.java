@@ -15,16 +15,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-import org.apache.log4j.Logger;
-
 import net.sf.taverna.t2.annotation.HierarchyRole;
 import net.sf.taverna.t2.annotation.HierarchyTraversal;
-import net.sf.taverna.t2.spi.SPIRegistry;
 import net.sf.taverna.t2.visit.VisitReport.Status;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
 import net.sf.taverna.t2.workflowmodel.Processor;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.NestedDataflow;
+
+import org.apache.log4j.Logger;
+
 
 /**
  * 
@@ -51,20 +51,24 @@ public class HierarchyTraverser {
 	 * The set of visitors that can perform visits of one or more of a set of
 	 * VisitKind.
 	 */
-	protected Set<Visitor> visitors = new HashSet<Visitor>();;
+	protected Set<Visitor<?>> visitors;
 
+	public HierarchyTraverser() {
+		visitors = new HashSet<Visitor<?>>();
+	}
+	
 	/**
 	 * Create a HierarchyTraverser that can perform visits of the specified set
 	 * of VisitKind.
 	 * 
 	 * @param descriptions
 	 */
-	public HierarchyTraverser(Collection<VisitKind> descriptions) {		
-		for (VisitKind kind : descriptions) {
-			SPIRegistry<Visitor> visitorRegistry = new SPIRegistry(kind
-					.getVisitorClass());
-			visitors.addAll(visitorRegistry.getInstances());
-		}
+	public HierarchyTraverser(Set<Visitor<?>> visitors) {		
+		this.visitors = visitors;
+	}
+	
+	public void setVisitors(Set<Visitor<?>> visitors) {
+		this.visitors = visitors;
 	}
 
 	/**
