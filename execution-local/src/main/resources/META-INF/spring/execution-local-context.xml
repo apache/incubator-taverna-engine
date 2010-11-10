@@ -4,9 +4,9 @@
                            http://www.springframework.org/schema/beans/spring-beans.xsd">
 
 	<bean id="localExecution" class="uk.org.taverna.platform.execution.impl.local.LocalExecutionService">
-		<!--<property name="edits">
+		<property name="edits">
 			<ref bean="workflowModelEdits" />
-		</property>-->
+		</property>
 	</bean>
 
 </beans>
