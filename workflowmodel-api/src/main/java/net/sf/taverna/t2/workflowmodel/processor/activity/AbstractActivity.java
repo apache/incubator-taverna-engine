@@ -31,7 +31,7 @@ import net.sf.taverna.t2.annotation.AbstractAnnotatedThing;
 import net.sf.taverna.t2.annotation.annotationbeans.MimeType;
 import net.sf.taverna.t2.reference.ExternalReferenceSPI;
 import net.sf.taverna.t2.workflowmodel.EditException;
-import net.sf.taverna.t2.workflowmodel.EditsRegistry;
+import net.sf.taverna.t2.workflowmodel.Edits;
 import net.sf.taverna.t2.workflowmodel.OutputPort;
 import net.sf.taverna.t2.workflowmodel.processor.activity.config.ActivityInputPortDefinitionBean;
 import net.sf.taverna.t2.workflowmodel.processor.activity.config.ActivityOutputPortDefinitionBean;
@@ -68,6 +68,8 @@ public abstract class AbstractActivity<ConfigType> extends
 	private static Logger logger = Logger
 	.getLogger(AbstractActivity.class);
 
+	private Edits edits;
+	
 	protected Map<String, String> inputPortMapping = new HashMap<String, String>();
 
 	protected Map<String, String> outputPortMapping = new HashMap<String, String>();
@@ -75,6 +77,10 @@ public abstract class AbstractActivity<ConfigType> extends
 	protected Set<OutputPort> outputPorts = new HashSet<OutputPort>();
 
 	protected Set<ActivityInputPort> inputPorts = new HashSet<ActivityInputPort>();
+	
+	public void setEdits(Edits edits) {
+		this.edits = edits;
+	}
 
 	/**
 	 * @see net.sf.taverna.t2.workflowmodel.processor.activity.Activity#configure(java.lang.Object)
@@ -141,7 +147,7 @@ public abstract class AbstractActivity<ConfigType> extends
 		if (handledReferenceSchemes == null) {
 			handledReferenceSchemes = Collections.emptyList();
 		}
-		inputPorts.add(EditsRegistry.getEdits().createActivityInputPort(
+		inputPorts.add(edits.createActivityInputPort(
 				portName, portDepth, allowsLiteralValues,
 				handledReferenceSchemes, translatedElementClass));
 	}
@@ -161,7 +167,7 @@ public abstract class AbstractActivity<ConfigType> extends
 	 *            will emit as outputs.
 	 */
 	protected void addOutput(String portName, int portDepth, int granularDepth) {
-		outputPorts.add(EditsRegistry.getEdits().createActivityOutputPort(
+		outputPorts.add(edits.createActivityOutputPort(
 				portName, portDepth, granularDepth));
 	}
 
@@ -205,7 +211,7 @@ public abstract class AbstractActivity<ConfigType> extends
 
 		for (ActivityOutputPortDefinitionBean outputDef : configBean
 				.getOutputPortDefinitions()) {
-			OutputPort createActivityOutputPort = EditsRegistry.getEdits().createActivityOutputPort(
+			OutputPort createActivityOutputPort = edits.createActivityOutputPort(
 					outputDef.getName(), outputDef.getDepth(), outputDef
 					.getGranularDepth());
 //			addOutput(outputDef.getName(), outputDef.getDepth(), outputDef
@@ -216,7 +222,7 @@ public abstract class AbstractActivity<ConfigType> extends
 				MimeType mimeTypeAnnotation = new MimeType();
 				mimeTypeAnnotation.setText(mimeType);
 				try {
-					EditsRegistry.getEdits().getAddAnnotationChainEdit(createActivityOutputPort, mimeTypeAnnotation).doEdit();
+					edits.getAddAnnotationChainEdit(createActivityOutputPort, mimeTypeAnnotation).doEdit();
 				} catch (EditException e) {
 					logger.error(e);
 				}
