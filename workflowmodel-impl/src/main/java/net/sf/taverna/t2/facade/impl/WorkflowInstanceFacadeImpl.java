@@ -56,10 +56,10 @@ import net.sf.taverna.t2.workflowmodel.DataflowOutputPort;
 import net.sf.taverna.t2.workflowmodel.DataflowValidationReport;
 import net.sf.taverna.t2.workflowmodel.EditException;
 import net.sf.taverna.t2.workflowmodel.Edits;
-import net.sf.taverna.t2.workflowmodel.EditsRegistry;
 import net.sf.taverna.t2.workflowmodel.InvalidDataflowException;
 import net.sf.taverna.t2.workflowmodel.Processor;
 import net.sf.taverna.t2.workflowmodel.ProcessorFinishedEvent;
+import net.sf.taverna.t2.workflowmodel.impl.EditsImpl;
 import net.sf.taverna.t2.workflowmodel.impl.ProcessorImpl;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayer;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchStack;
@@ -198,7 +198,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 				intermediateProvenance.setReporter(context
 						.getProvenanceReporter());
 
-				Edits edits = EditsRegistry.getEdits();
+				Edits edits = new EditsImpl();
 				try {
 					edits.getAddDispatchLayerEdit(dispatchStack, provenance,
 							j).doEdit();
