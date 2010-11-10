@@ -27,13 +27,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 
-import net.sf.taverna.raven.Raven;
-import net.sf.taverna.raven.repository.Artifact;
-import net.sf.taverna.raven.repository.ArtifactNotFoundException;
-import net.sf.taverna.raven.repository.ArtifactStateException;
-import net.sf.taverna.raven.repository.BasicArtifact;
-import net.sf.taverna.raven.repository.Repository;
-import net.sf.taverna.raven.repository.impl.LocalArtifactClassLoader;
 import net.sf.taverna.t2.annotation.Annotated;
 import net.sf.taverna.t2.workflowmodel.ConfigurationException;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
@@ -108,11 +101,11 @@ public class Tools {
 			throws JDOMException, IOException {
 		Element activityElem = new Element(ACTIVITY);
 
-		ClassLoader cl = activity.getClass().getClassLoader();
-		if (cl instanceof LocalArtifactClassLoader) {
-			activityElem
-					.addContent(ravenElement((LocalArtifactClassLoader) cl));
-		}
+//		ClassLoader cl = activity.getClass().getClassLoader();
+//		if (cl instanceof LocalArtifactClassLoader) {
+//			activityElem
+//					.addContent(ravenElement((LocalArtifactClassLoader) cl));
+//		}
 		Element classNameElement = new Element(CLASS);
 		classNameElement.setText(activity.getClass().getName());
 		activityElem.addContent(classNameElement);  
@@ -258,14 +251,14 @@ public class Tools {
 			IllegalAccessException, ActivityConfigurationException {
 		Element ravenElement = element.getChild(RAVEN);
 		ClassLoader cl = Tools.class.getClassLoader();
-		if (ravenElement != null) {
-			try {
-				cl = getRavenLoader(ravenElement);
-			} catch (Exception ex) {
-				logger.error("Exception loading raven classloader "
-						+ "for Activity instance", ex);
-			}
-		}
+//		if (ravenElement != null) {
+//			try {
+//				cl = getRavenLoader(ravenElement);
+//			} catch (Exception ex) {
+//				logger.error("Exception loading raven classloader "
+//						+ "for Activity instance", ex);
+//			}
+//		}
 		String className = element.getChild(CLASS).getTextTrim();
 		Class<? extends Activity> c = (Class<? extends Activity>) cl
 				.loadClass(className);
@@ -313,17 +306,17 @@ public class Tools {
 			IllegalAccessException {
 		Element ravenElement = element.getChild(RAVEN);
 		ClassLoader cl = Tools.class.getClassLoader();
-		if (ravenElement != null) {
-			try {
-				cl = getRavenLoader(ravenElement);
-			} catch (Exception ex) {
-				logger.error("Exception loading raven classloader "
-						+ "for Activity instance", ex);
-				// TODO - handle this properly, either by logging correctly or
-				// by going back to the repository and attempting to fetch the
-				// offending missing artifacts
-			}
-		}
+//		if (ravenElement != null) {
+//			try {
+//				cl = getRavenLoader(ravenElement);
+//			} catch (Exception ex) {
+//				logger.error("Exception loading raven classloader "
+//						+ "for Activity instance", ex);
+//				// TODO - handle this properly, either by logging correctly or
+//				// by going back to the repository and attempting to fetch the
+//				// offending missing artifacts
+//			}
+//		}
 		String className = element.getChild(CLASS).getTextTrim();
 		Class<? extends DispatchLayer> c = (Class<? extends DispatchLayer>) cl
 				.loadClass(className);
@@ -419,10 +412,10 @@ public class Tools {
 			throws JDOMException, IOException {
 		Element layerElem = new Element(LAYER);
 
-		ClassLoader cl = layer.getClass().getClassLoader();
-		if (cl instanceof LocalArtifactClassLoader) {
-			layerElem.addContent(ravenElement((LocalArtifactClassLoader) cl));
-		}
+//		ClassLoader cl = layer.getClass().getClassLoader();
+//		if (cl instanceof LocalArtifactClassLoader) {
+//			layerElem.addContent(ravenElement((LocalArtifactClassLoader) cl));
+//		}
 		Element classNameElement = new Element(CLASS);
 		classNameElement.setText(layer.getClass().getName());
 		layerElem.addContent(classNameElement);
@@ -464,47 +457,47 @@ public class Tools {
 		return result;
 	}
 
-	/**
-	 * Get the {@link ClassLoader} for loading classes from the artifact
-	 * specified by the &lt;raven&gt; element.
-	 * <p>
-	 * If this class wasn't loaded by Raven then this ignores the element
-	 * entirely and defaults to using the same classloader as
-	 * {@link Tools this class} was loaded by. This is probably not what you
-	 * want but it's a sensible enough fallback position
-	 * 
-	 * @param ravenElement
-	 *            &lt;raven&gt; element describing artifact
-	 * @return Resolved {@link LocalArtifactClassLoader} or current
-	 *         {@link ClassLoader}
-	 * @throws ArtifactNotFoundException
-	 *             If the element (directly or indirectly) specified an unknown
-	 *             artifact
-	 * @throws ArtifactStateException
-	 *             If something went wrong when fetching artifact
-	 */
-	public static ClassLoader getRavenLoader(Element ravenElement)
-			throws ArtifactNotFoundException, ArtifactStateException {
-		// Try to get the current Repository object, if there isn't one we can't
-		// do this here
-		Repository repository = null;
-		try {
-			LocalArtifactClassLoader lacl = (LocalArtifactClassLoader) (Tools.class
-					.getClassLoader());
-			repository = lacl.getRepository();
-
-		} catch (ClassCastException cce) {
-			return Tools.class.getClassLoader();
-			// TODO - should probably warn that this is happening as it's likely
-			// to be because of an error in API usage. There are times it won't
-			// be though so leave it for now.
-		}
-		String groupId = ravenElement.getChildTextTrim(GROUP);
-		String artifactId = ravenElement.getChildTextTrim(ARTIFACT);
-		String version = ravenElement.getChildTextTrim(VERSION);
-		Artifact artifact = new BasicArtifact(groupId, artifactId, version);
-		return repository.getLoader(artifact, null);
-	}
+//	/**
+//	 * Get the {@link ClassLoader} for loading classes from the artifact
+//	 * specified by the &lt;raven&gt; element.
+//	 * <p>
+//	 * If this class wasn't loaded by Raven then this ignores the element
+//	 * entirely and defaults to using the same classloader as
+//	 * {@link Tools this class} was loaded by. This is probably not what you
+//	 * want but it's a sensible enough fallback position
+//	 * 
+//	 * @param ravenElement
+//	 *            &lt;raven&gt; element describing artifact
+//	 * @return Resolved {@link LocalArtifactClassLoader} or current
+//	 *         {@link ClassLoader}
+//	 * @throws ArtifactNotFoundException
+//	 *             If the element (directly or indirectly) specified an unknown
+//	 *             artifact
+//	 * @throws ArtifactStateException
+//	 *             If something went wrong when fetching artifact
+//	 */
+//	public static ClassLoader getRavenLoader(Element ravenElement)
+//			throws ArtifactNotFoundException, ArtifactStateException {
+//		// Try to get the current Repository object, if there isn't one we can't
+//		// do this here
+//		Repository repository = null;
+//		try {
+//			LocalArtifactClassLoader lacl = (LocalArtifactClassLoader) (Tools.class
+//					.getClassLoader());
+//			repository = lacl.getRepository();
+//
+//		} catch (ClassCastException cce) {
+//			return Tools.class.getClassLoader();
+//			// TODO - should probably warn that this is happening as it's likely
+//			// to be because of an error in API usage. There are times it won't
+//			// be though so leave it for now.
+//		}
+//		String groupId = ravenElement.getChildTextTrim(GROUP);
+//		String artifactId = ravenElement.getChildTextTrim(ARTIFACT);
+//		String version = ravenElement.getChildTextTrim(VERSION);
+//		Artifact artifact = new BasicArtifact(groupId, artifactId, version);
+//		return repository.getLoader(artifact, null);
+//	}
 
 	/**
 	 * Insert the element produce by {@link #getAnnotationsElement(Annotated)}
@@ -544,31 +537,31 @@ public class Tools {
 		}
 	}
 
-	/**
-	 * Create the &lt;raven&gt; element for a given local artifact classloader.
-	 * 
-	 * @param classLoader
-	 *            The {@link LocalArtifactClassLoader} for the artifact
-	 * @return Populated &lt;raven&gt; element
-	 */
-	public static Element ravenElement(LocalArtifactClassLoader classLoader) {
-		Element element = new Element(RAVEN);
-		Artifact artifact = classLoader.getArtifact();
-		// Group
-		Element groupIdElement = new Element(GROUP);
-		groupIdElement.setText(artifact.getGroupId());
-		element.addContent(groupIdElement);
-		// Artifact ID
-		Element artifactIdElement = new Element(ARTIFACT);
-		artifactIdElement.setText(artifact.getArtifactId());
-		element.addContent(artifactIdElement);
-		// Version
-		Element versionElement = new Element(VERSION);
-		versionElement.setText(artifact.getVersion());
-		element.addContent(versionElement);
-		// Return assembled raven element
-		return element;
-	}
+//	/**
+//	 * Create the &lt;raven&gt; element for a given local artifact classloader.
+//	 * 
+//	 * @param classLoader
+//	 *            The {@link LocalArtifactClassLoader} for the artifact
+//	 * @return Populated &lt;raven&gt; element
+//	 */
+//	public static Element ravenElement(LocalArtifactClassLoader classLoader) {
+//		Element element = new Element(RAVEN);
+//		Artifact artifact = classLoader.getArtifact();
+//		// Group
+//		Element groupIdElement = new Element(GROUP);
+//		groupIdElement.setText(artifact.getGroupId());
+//		element.addContent(groupIdElement);
+//		// Artifact ID
+//		Element artifactIdElement = new Element(ARTIFACT);
+//		artifactIdElement.setText(artifact.getArtifactId());
+//		element.addContent(artifactIdElement);
+//		// Version
+//		Element versionElement = new Element(VERSION);
+//		versionElement.setText(artifact.getVersion());
+//		element.addContent(versionElement);
+//		// Return assembled raven element
+//		return element;
+//	}
 
 	/**
 	 * 
