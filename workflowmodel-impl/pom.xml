@@ -9,29 +9,63 @@
 	</parent>
 	<groupId>net.sf.taverna.t2.core</groupId>
 	<artifactId>workflowmodel-impl</artifactId>
+	<packaging>bundle</packaging>
 	<name>Workflow Model implementation</name>
 	<description> Implementation of the core workflow object model for
-		Taverna 2 workflows including concrete instances of the workflow
-		definition objects and enactment behaviours.</description>
+		Taverna 2 workflows including
+		concrete instances of the workflow
+		definition objects and enactment behaviours.
+	</description>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Export-Package>net.sf.taverna.t2.workflowmodel.processor.dispatch.layers,net.sf.taverna.t2.invocation.impl</Export-Package>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<properties>
+		<spring.osgi.version>1.2.1</spring.osgi.version>
+	</properties>
 	<dependencies>
-		<dependency>
-			<groupId>jdom</groupId>
-			<artifactId>jdom</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>net.sf.taverna.t2.core</groupId>
 			<artifactId>workflowmodel-api</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>org.jdom</groupId>
+			<artifactId>com.springsource.org.jdom</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.thoughtworks.xstream</groupId>
+			<artifactId>com.springsource.com.thoughtworks.xstream</artifactId>
+			<version>1.2.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.log4j</groupId>
+			<artifactId>com.springsource.org.apache.log4j</artifactId>
+			<version>1.2.16</version>
+		</dependency>
+
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.thoughtworks.xstream</groupId>
-			<artifactId>xstream</artifactId>
-			<version>1.2.1</version>
+			<groupId>org.springframework.osgi</groupId>
+			<artifactId>spring-osgi-test</artifactId>
+			<version>${spring.osgi.version}</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>
