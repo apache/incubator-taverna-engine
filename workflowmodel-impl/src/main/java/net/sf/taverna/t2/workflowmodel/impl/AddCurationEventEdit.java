@@ -21,8 +21,8 @@
 package net.sf.taverna.t2.workflowmodel.impl;
 
 import net.sf.taverna.t2.annotation.AnnotationAssertion;
-import net.sf.taverna.t2.annotation.AnnotationAssertionImpl;
 import net.sf.taverna.t2.annotation.CurationEvent;
+import net.sf.taverna.t2.annotation.impl.AnnotationAssertionImpl;
 import net.sf.taverna.t2.workflowmodel.Edit;
 import net.sf.taverna.t2.workflowmodel.EditException;
 
