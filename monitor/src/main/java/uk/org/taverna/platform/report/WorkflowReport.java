@@ -44,6 +44,7 @@ public abstract class WorkflowReport extends StatusReport {
 
 	public WorkflowReport(Workflow workflow) {
 		this.workflow = workflow;
+		outputs = new HashMap<String, T2Reference>();
 		processorReports = new HashMap<Processor, ProcessorReport>();
 		for (Processor processor : workflow.getProcessors()) {
 			processorReports.put(processor, createProcessorReport(processor, this));
@@ -55,13 +56,6 @@ public abstract class WorkflowReport extends StatusReport {
 	 */
 	public Map<String, T2Reference> getOutputs() {
 		return outputs;
-	}
-
-	/**
-	 * @param outputs the outputs to set
-	 */
-	public void setOutputs(Map<String, T2Reference> outputs) {
-		this.outputs = outputs;
 	}
 
 	/**
