@@ -71,6 +71,12 @@
 		</dependency>
 		<dependency>
 			<groupId>uk.org.taverna.platform</groupId>
+			<artifactId>run</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>uk.org.taverna.platform</groupId>
 			<artifactId>execution-local</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 			<scope>test</scope>
