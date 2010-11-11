@@ -20,7 +20,6 @@
  ******************************************************************************/
 package uk.org.taverna.platform.execution.impl.local;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -46,10 +45,12 @@ import org.apache.log4j.Logger;
 import uk.org.taverna.platform.execution.api.AbstractExecution;
 import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
 import uk.org.taverna.platform.report.WorkflowReport;
+import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.Workflow;
 import uk.org.taverna.scufl2.api.profiles.Profile;
 
 /**
+ * An Execution for executing a Taverna workflow using a local Taverna Dataflow Engine.
  * 
  * @author David Withers
  */
@@ -65,18 +66,16 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 		
 	private LocalExecutionMonitor executionMonitor;
 	
-	private Map<String, T2Reference> outputs = new HashMap<String, T2Reference>();
-
-	public LocalExecution(Workflow workflow, Profile profile, Map<String, T2Reference> inputs,
+	public LocalExecution(WorkflowBundle workflowBundle, Workflow workflow, Profile profile, Map<String, T2Reference> inputs,
 			ReferenceService referenceService, Edits edits) throws InvalidWorkflowException {
-		super(workflow, profile, inputs, referenceService);
+		super(workflowBundle, workflow, profile, inputs, referenceService);
 		this.edits = edits;
 		try {
-			mapping = new WorkflowToDataflowMapper(workflow, profile, edits);
+			mapping = new WorkflowToDataflowMapper(workflowBundle, workflow, profile, edits);
 			Dataflow dataflow = mapping.getDataflow();
 			printDataflow(dataflow);
-			facade = edits.createWorkflowInstanceFacade(dataflow, createContext(), /*getID()*/"");
-			executionMonitor = new LocalExecutionMonitor((LocalWorkflowReport) getWorkflowReport(), mapping);
+			facade = edits.createWorkflowInstanceFacade(dataflow, createContext(), "");
+			executionMonitor = new LocalExecutionMonitor((LocalWorkflowReport) getWorkflowReport(), mapping, facade.getIdentifier());
 		} catch (InvalidDataflowException e) {
 			// TODO do something with the validation report
 			DataflowValidationReport report = e.getDataflowValidationReport();
@@ -124,10 +123,6 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 		return new LocalWorkflowReport(workflow);
 	}
 
-	public Map<String, T2Reference> getOutputs() {
-		return outputs;
-	}
-
 	private InvocationContext createContext() {
 		ProvenanceReporter provenanceConnector = null;
 
@@ -161,7 +156,7 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 
 	public void resultTokenProduced(WorkflowDataToken token, String portName) {
 		if (token.getIndex().length == 0) {
-			outputs.put(portName, token.getData());
+			getWorkflowReport().getOutputs().put(portName, token.getData());
 		}
 	}
 

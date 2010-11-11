@@ -43,7 +43,7 @@ import uk.org.taverna.platform.report.ActivityReport;
 import uk.org.taverna.platform.report.ProcessorReport;
 
 /**
- * 
+ * A workflow monitor for local executions.
  * 
  * @author David Withers
  */
@@ -63,7 +63,10 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 
 	private Map<Activity<?>, AtomicInteger> activityInvocations;
 
-	public LocalExecutionMonitor(LocalWorkflowReport workflowReport, WorkflowToDataflowMapper mapping) {
+	private final String facadeId;
+
+	public LocalExecutionMonitor(LocalWorkflowReport workflowReport, WorkflowToDataflowMapper mapping, String facadeId) {
+		this.facadeId = facadeId;
 		dataflowObjects = new HashMap<String, Object>();
 		workflowReports = new HashMap<Dataflow, LocalWorkflowReport>();
 		processorReports = new HashMap<Processor, LocalProcessorReport>();
@@ -80,22 +83,25 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 			for (ActivityReport activityReport : processorReport.getActivityReports()) {
 				Activity<?> activity = mapping.getDataflowActivity(activityReport.getActivity());
 				activityReports.put(activity, activityReport);
+				activityInvocations.put(activity, new AtomicInteger());
 			}
 		}
 	}
 
 	public void notify(Observable<MonitorMessage> sender, MonitorMessage message) throws Exception {
 		String[] owningProcess = message.getOwningProcess();
-		if (message instanceof RegisterNodeMessage) {
-			RegisterNodeMessage regMessage = (RegisterNodeMessage) message;
-			registerNode(regMessage.getWorkflowObject(), owningProcess, regMessage.getProperties());
-		} else if (message instanceof DeregisterNodeMessage) {
-			deregisterNode(owningProcess);
-		} else if (message instanceof AddPropertiesMessage) {
-			AddPropertiesMessage addMessage = (AddPropertiesMessage) message;
-			addPropertiesToNode(owningProcess, addMessage.getNewProperties());
-		} else {
-			logger.warn("Unknown message " + message + " from " + sender);
+		if (owningProcess.length > 0 && owningProcess[0].equals(facadeId)) {
+			if (message instanceof RegisterNodeMessage) {
+				RegisterNodeMessage regMessage = (RegisterNodeMessage) message;
+				registerNode(regMessage.getWorkflowObject(), owningProcess, regMessage.getProperties());
+			} else if (message instanceof DeregisterNodeMessage) {
+				deregisterNode(owningProcess);
+			} else if (message instanceof AddPropertiesMessage) {
+				AddPropertiesMessage addMessage = (AddPropertiesMessage) message;
+				addPropertiesToNode(owningProcess, addMessage.getNewProperties());
+			} else {
+				logger.warn("Unknown message " + message + " from " + sender);
+			}
 		}
 	}
 
@@ -114,13 +120,13 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 //				processorReport.setStartedDate(new Date());
 			}
 		} else if (dataflowObject instanceof Activity) {
-			Activity<?> activity = (Activity<?>) dataflowObject;
-			if (activityInvocations.get(activity).getAndIncrement() == 0) {
-				ActivityReport activityReport = activityReports.get(activity);
-				ProcessorReport parentReport = activityReport.getParentReport();
-				parentReport.setStartedDate(new Date());
-				activityReport.setStartedDate(new Date());
-			}
+//			Activity<?> activity = (Activity<?>) dataflowObject;
+//			if (activityInvocations.get(activity).getAndIncrement() == 0) {
+//				ActivityReport activityReport = activityReports.get(activity);
+//				ProcessorReport parentReport = activityReport.getParentReport();
+//				parentReport.setStartedDate(new Date());
+//				activityReport.setStartedDate(new Date());
+//			}
 		}
 	}
 
@@ -138,11 +144,11 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 				processorReport.setCompletedDate(new Date());
 			}
 		} else if (dataflowObject instanceof Activity) {
-			Activity<?> activity = (Activity<?>) dataflowObject;
-			if (activityInvocations.get(activity).decrementAndGet() == 0) {
-				ActivityReport activityReport = activityReports.get(activity);
-				activityReport.setCompletedDate(new Date());
-			}
+//			Activity<?> activity = (Activity<?>) dataflowObject;
+//			if (activityInvocations.get(activity).decrementAndGet() == 0) {
+//				ActivityReport activityReport = activityReports.get(activity);
+//				activityReport.setCompletedDate(new Date());
+//			}
 		}
 	}
 

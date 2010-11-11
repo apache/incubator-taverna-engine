@@ -49,6 +49,7 @@ import uk.org.taverna.scufl2.api.common.NamedSet;
 import uk.org.taverna.scufl2.api.configurations.Configuration;
 import uk.org.taverna.scufl2.api.configurations.DataProperty;
 import uk.org.taverna.scufl2.api.configurations.Property;
+import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.DataLink;
 import uk.org.taverna.scufl2.api.core.Processor;
 import uk.org.taverna.scufl2.api.core.RunAfterCondition;
@@ -92,14 +93,16 @@ public class WorkflowToDataflowMapper {
 
 	private Map<net.sf.taverna.t2.workflowmodel.processor.activity.Activity<?>, Activity> dataflowToWorkflowActivities;
 	
+	private final WorkflowBundle workflowBundle;
+
 	private final Workflow workflow;
 
 	private final Profile profile;
 
 	private final Dataflow dataflow;
 
-
-	public WorkflowToDataflowMapper(Workflow workflow, Profile profile, Edits edits) throws InvalidWorkflowException {
+	public WorkflowToDataflowMapper(WorkflowBundle workflowBundle, Workflow workflow, Profile profile, Edits edits) throws InvalidWorkflowException {
+		this.workflowBundle = workflowBundle;
 		this.workflow = workflow;
 		this.profile = profile;
 		this.edits = edits;
@@ -238,16 +241,18 @@ public class WorkflowToDataflowMapper {
 		for (ProcessorBinding processorBinding : profile.getProcessorBindings()) {
 			net.sf.taverna.t2.workflowmodel.Processor processor = workflowToDataflowProcessors.get(processorBinding.getBoundProcessor());
 			Activity activity = processorBinding.getBoundActivity();
+			String activityType = activity.getType().getName();
 			// TODO decide how to map activities properly
-			if (activity.getType().getName().endsWith("beanshell")) {
+			if (activityType.equals("http://ns.taverna.org.uk/2010/activity/beanshell")) {
 				BeanshellActivity beanshellActivity = new BeanshellActivity();
+				beanshellActivity.setEdits(edits);
 				BeanshellActivityConfigurationBean configurationBean = new BeanshellActivityConfigurationBean();
 				NamedSet<Configuration> configurations = profile.getConfigurations();
 				for (Configuration configuration : configurations) {
 					if (configuration.getConfigures().equals(activity)) {
 						List<Property> properties = configuration.getProperties();
 						for (Property property : properties) {
-							if (property.getPredicate().getPath().endsWith("script")) {
+							if (property.getPredicate().getFragment().equals("script")) {
 								if (property instanceof DataProperty) {
 									DataProperty dataProperty = (DataProperty) property;
 									configurationBean.setScript(dataProperty.getDataValue());
@@ -261,6 +266,7 @@ public class WorkflowToDataflowMapper {
 					ActivityInputPortDefinitionBean inputPortDefinitionBean = new ActivityInputPortDefinitionBean();
 					inputPortDefinitionBean.setName(inputActivityPort.getName());
 					inputPortDefinitionBean.setDepth(/*inputActivityPort.getDepth()*/0);
+					inputPortDefinitionBean.setTranslatedElementType(String.class);
 					inputPortDefinitionBeans.add(inputPortDefinitionBean);
 				}
 				configurationBean.setInputPortDefinitions(inputPortDefinitionBeans);

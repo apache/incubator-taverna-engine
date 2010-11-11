@@ -25,6 +25,11 @@ import java.util.Date;
 import net.sf.taverna.t2.monitor.MonitorableProperty;
 import net.sf.taverna.t2.monitor.NoSuchPropertyException;
 
+/**
+ * A MonitorableProperty with fixed values.
+ * 
+ * @author David Withers
+ */
 public class StaticProperty implements MonitorableProperty<Object> {
 
 	private Object value;
@@ -33,6 +38,11 @@ public class StaticProperty implements MonitorableProperty<Object> {
 	
 	private Date lastModified;
 	
+	/**
+	 * Records the state of the MonitorableProperty.
+	 * 
+	 * @param property
+	 */
 	public StaticProperty(MonitorableProperty<?> property) {
 		try {
 			value = property.getValue();

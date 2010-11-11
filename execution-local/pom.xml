@@ -10,7 +10,8 @@
 	<artifactId>execution-local</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>bundle</packaging>
-	<name>Local Workflow Execution Service</name>
+	<name>Taverna Local Workflow Execution Service</name>
+	<description>An Execution Service for executing Taverna workflows using a local Taverna Dataflow Engine</description>
 	<build>
 		<plugins>
 			<plugin>

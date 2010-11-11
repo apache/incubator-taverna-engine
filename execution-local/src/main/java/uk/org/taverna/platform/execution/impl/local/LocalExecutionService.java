@@ -28,36 +28,43 @@ import net.sf.taverna.t2.workflowmodel.Edits;
 import uk.org.taverna.platform.execution.api.AbstractExecutionService;
 import uk.org.taverna.platform.execution.api.Execution;
 import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
+import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.Workflow;
 import uk.org.taverna.scufl2.api.profiles.Profile;
 
 /**
+ * An Execution Service for executing Taverna workflows using a local Taverna Dataflow Engine.
  * 
  * @author David Withers
  */
 public class LocalExecutionService extends AbstractExecutionService {
 
 	private Edits edits;
-	
+
 	/**
-	 * Constructs an execution service that executes workflows using the T2
-	 * dataflow engine.
+	 * Constructs an execution service that executes workflows using the T2 dataflow engine.
 	 */
 	public LocalExecutionService() {
-		super(LocalExecutionService.class.getName(), null, null);
+		super(LocalExecutionService.class.getName(), "Taverna Local Execution Service",
+				"Execution Service for executing Taverna workflows using a local Taverna Dataflow Engine");
 	}
 
 	/**
-	 * @param edits the edits to set
+	 * Sets the Edits Service for creating Taverna Dataflows.
+	 * 
+	 * @param edits
+	 *            the Edits Service for creating Taverna Dataflows
 	 */
 	public void setEdits(Edits edits) {
 		this.edits = edits;
 	}
 
 	@Override
-	protected Execution createExecutionImpl(Workflow workflow, Profile profile,
-			Map<String, T2Reference> inputs, ReferenceService referenceService) throws InvalidWorkflowException {
-		return new LocalExecution(workflow, profile, inputs, referenceService, edits);
+	protected Execution createExecutionImpl(WorkflowBundle workflowBundle, Workflow workflow,
+			Profile profile, Map<String, T2Reference> inputs, ReferenceService referenceService)
+			throws InvalidWorkflowException {
+		return new LocalExecution(workflowBundle, workflow, profile, inputs, referenceService,
+				edits);
 	}
 
 }
