@@ -21,6 +21,7 @@
 package uk.org.taverna.platform.run.api;
 
 /**
+ * Thrown when a RunProfile doesn't contain the correct components to run a workflow.
  * 
  * @author David Withers
  */

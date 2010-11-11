@@ -114,7 +114,7 @@ public class Run {
 			executionService = runProfile.getExecutionService();
 		}
 		ID = UUID.randomUUID().toString();
-		executionID = executionService.createExecution(workflow, profile, inputs, referenceService);
+		executionID = executionService.createExecution(workflowBundle, workflow, profile, inputs, referenceService);
 		try {
 			workflowReport = executionService.getWorkflowReport(executionID);
 		} catch (InvalidExecutionIdException e) {

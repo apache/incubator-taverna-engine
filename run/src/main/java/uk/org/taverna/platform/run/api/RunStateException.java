@@ -21,6 +21,8 @@
 package uk.org.taverna.platform.run.api;
 
 /**
+ * Thrown when an operation is attempted when a workflow is in the wrong state, e.g. resuming a
+ * workflow that is not paused.
  * 
  * @author David Withers
  */

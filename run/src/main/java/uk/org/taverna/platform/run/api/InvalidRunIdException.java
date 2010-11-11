@@ -21,6 +21,7 @@
 package uk.org.taverna.platform.run.api;
 
 /**
+ * Thrown when a runID is not valid for the RunService.
  * 
  * @author David Withers
  */
@@ -29,19 +30,19 @@ public class InvalidRunIdException extends Exception {
 	private static final long serialVersionUID = -8524012164316151704L;
 
 	public InvalidRunIdException() {
-    	super();
-    }
+		super();
+	}
 
-    public InvalidRunIdException(String message) {
-    	super(message);
-    }
+	public InvalidRunIdException(String message) {
+		super(message);
+	}
 
-    public InvalidRunIdException(String message, Throwable cause) {
-    	super(message, cause);
-    }
+	public InvalidRunIdException(String message, Throwable cause) {
+		super(message, cause);
+	}
 
-    public InvalidRunIdException(Throwable cause) {
-    	super(cause);
-    }
-    
+	public InvalidRunIdException(Throwable cause) {
+		super(cause);
+	}
+
 }

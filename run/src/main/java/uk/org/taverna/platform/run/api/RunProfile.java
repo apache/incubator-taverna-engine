@@ -9,6 +9,11 @@ import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.Workflow;
 import uk.org.taverna.scufl2.api.profiles.Profile;
 
+/**
+ * A RunProfile contains the parameters required to run a workflow.
+ * 
+ * @author David Withers
+ */
 public class RunProfile {
 
 	private WorkflowBundle workflowBundle;

@@ -9,6 +9,11 @@ import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
 import uk.org.taverna.platform.report.State;
 import uk.org.taverna.platform.report.WorkflowReport;
 
+/**
+ * A Service for managing the runs of Taverna workflows.
+ * 
+ * @author David Withers
+ */
 public interface RunService {
 
 	/**
@@ -22,14 +27,15 @@ public interface RunService {
 	 *            the workflow inputs
 	 * @return the run ID
 	 * @throws InvalidWorkflowException
-	 * @throws RunProfileException 
+	 * @throws RunProfileException
 	 */
-	public String createRun(RunProfile runProfile) throws InvalidWorkflowException, RunProfileException;
+	public String createRun(RunProfile runProfile) throws InvalidWorkflowException,
+			RunProfileException;
 
 	/**
-	 * Returns the list runs that this service is managing.
+	 * Returns the list of runs that this service is managing.
 	 * 
-	 * @return the list runs that this service is managing
+	 * @return the list of runs that this service is managing
 	 */
 	public List<String> getRuns();
 
@@ -101,8 +107,26 @@ public interface RunService {
 	 */
 	public State getState(String runID) throws InvalidRunIdException;
 
+	/**
+	 * Returns the inputs of the run. May be null if there are no inputs.
+	 * 
+	 * @param runID
+	 *            the ID of the run
+	 * @return the inputs of the run
+	 * @throws InvalidRunIdException
+	 *             if the run ID is not valid
+	 */
 	public Map<String, T2Reference> getInputs(String runID) throws InvalidRunIdException;
 
+	/**
+	 * Returns the outputs of the run. May be null if there are no outputs.
+	 * 
+	 * @param runID
+	 *            the ID of the run
+	 * @return the outputs of the run
+	 * @throws InvalidRunIdException
+	 *             if the run ID is not valid
+	 */
 	public Map<String, T2Reference> getOutputs(String runID) throws InvalidRunIdException;
 
 	/**
