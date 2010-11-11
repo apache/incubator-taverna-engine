@@ -21,6 +21,7 @@
 package uk.org.taverna.platform.execution.api;
 
 /**
+ * Thrown when an executionID is not valid for an ExecutionService.
  * 
  * @author David Withers
  */

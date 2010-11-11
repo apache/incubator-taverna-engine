@@ -25,10 +25,14 @@ import java.util.Map;
 import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.T2Reference;
 import uk.org.taverna.platform.report.WorkflowReport;
+import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.Workflow;
 import uk.org.taverna.scufl2.api.profiles.Profile;
 
 /**
+ * Service for executing Taverna workflows. There may be several <code>ExecutionService</code>s
+ * available that offer different execution environments, e.g. one <code>ExecutionService</code> may
+ * execute workflows on a remote server while another executes workflows on the local machine.
  * 
  * @author David Withers
  */
@@ -58,8 +62,10 @@ public interface ExecutionService {
 	/**
 	 * Creates a workflow execution and returns its ID.
 	 * 
+	 * @param workflowBundle
+	 *            the <code>WorkflowBundle</code> containing the workflows required for execution
 	 * @param workflow
-	 *            the workflow to execute
+	 *            the top level workflow to execute
 	 * @param profile
 	 *            the profile to use to execute the workflow
 	 * @param inputs
@@ -69,7 +75,7 @@ public interface ExecutionService {
 	 * @return the ID of the created workflow execution
 	 * @throws InvalidWorkflowException
 	 */
-	public String createExecution(Workflow workflow, Profile profile,
+	public String createExecution(WorkflowBundle workflowBundle, Workflow workflow, Profile profile,
 			Map<String, T2Reference> inputs, ReferenceService referenceService)
 			throws InvalidWorkflowException;
 

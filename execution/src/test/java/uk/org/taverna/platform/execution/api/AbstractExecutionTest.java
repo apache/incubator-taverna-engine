@@ -33,9 +33,9 @@ import net.sf.taverna.t2.reference.impl.ReferenceServiceImpl;
 import org.junit.Before;
 import org.junit.Test;
 
-import uk.org.taverna.platform.execution.api.AbstractExecution;
 import uk.org.taverna.platform.report.ProcessorReport;
 import uk.org.taverna.platform.report.WorkflowReport;
+import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.Processor;
 import uk.org.taverna.scufl2.api.core.Workflow;
 import uk.org.taverna.scufl2.api.profiles.Profile;
@@ -46,6 +46,8 @@ import uk.org.taverna.scufl2.api.profiles.Profile;
  */
 public class AbstractExecutionTest {
 	
+	private WorkflowBundle workflowBundle;
+
 	private Execution execution;
 	
 	private Workflow workflow;
@@ -56,17 +58,17 @@ public class AbstractExecutionTest {
 	
 	private ReferenceService referenceService;
 
-
 	/**
 	 * @throws java.lang.Exception
 	 */
 	@Before
 	public void setUp() throws Exception {
+		workflowBundle = new WorkflowBundle();
 		workflow = new Workflow();
 		profile = new Profile();
 		inputs = new HashMap<String, T2Reference>();
 		referenceService = new ReferenceServiceImpl();
-		execution = new AbstractExecution(workflow, profile, inputs, referenceService) {
+		execution = new AbstractExecution(workflowBundle, workflow, profile, inputs, referenceService) {
 			public void start() {}
 			public void resume() {}
 			public void pause() {}
@@ -91,6 +93,14 @@ public class AbstractExecutionTest {
 		assertEquals(execution.getID(), execution.getID());
 	}
 
+	/**
+	 * Test method for {@link uk.org.taverna.platform.execution.api.AbstractExecution#getWorkflowBundle()}.
+	 */
+	@Test
+	public void testGetWorkflowBundle() {
+		assertEquals(workflowBundle, execution.getWorkflowBundle());
+	}
+	
 	/**
 	 * Test method for {@link uk.org.taverna.platform.execution.api.AbstractExecution#getWorkflow()}.
 	 */

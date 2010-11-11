@@ -21,6 +21,7 @@
 package uk.org.taverna.platform.execution.api;
 
 /**
+ * Thrown when a Workflow fails to validate.
  * 
  * @author David Withers
  */

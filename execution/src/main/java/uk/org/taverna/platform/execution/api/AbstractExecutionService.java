@@ -26,11 +26,12 @@ import java.util.Map;
 import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.T2Reference;
 import uk.org.taverna.platform.report.WorkflowReport;
+import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.Workflow;
 import uk.org.taverna.scufl2.api.profiles.Profile;
 
 /**
- * 
+ * A common super type for concrete implementations of <code>ExecutionService</code>s.
  * 
  * @author David Withers
  */
@@ -79,14 +80,14 @@ public abstract class AbstractExecutionService implements ExecutionService {
 	 * @see uk.org.taverna.platform.execution.ExecutionService#createExecution(uk.org.taverna.scufl2.api.core.Workflow, uk.org.taverna.scufl2.api.profiles.Profile, java.util.Map, net.sf.taverna.t2.reference.ReferenceService)
 	 */
 	@Override
-	public String createExecution(Workflow workflow, Profile profile, Map<String, T2Reference> inputs,
+	public String createExecution(WorkflowBundle workflowBundle, Workflow workflow, Profile profile, Map<String, T2Reference> inputs,
 			ReferenceService referenceService) throws InvalidWorkflowException {
-		Execution execution = createExecutionImpl(workflow, profile, inputs, referenceService);
+		Execution execution = createExecutionImpl(workflowBundle, workflow, profile, inputs, referenceService);
 		executionMap.put(execution.getID(), execution);
 		return execution.getID();
 	}
 	
-	protected abstract Execution createExecutionImpl(Workflow workflow, Profile profile, Map<String, T2Reference> inputs,
+	protected abstract Execution createExecutionImpl(WorkflowBundle workflowBundle, Workflow workflow, Profile profile, Map<String, T2Reference> inputs,
 			ReferenceService referenceService) throws InvalidWorkflowException;
 
 	/* (non-Javadoc)

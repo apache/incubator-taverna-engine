@@ -25,33 +25,87 @@ import java.util.Map;
 import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.T2Reference;
 import uk.org.taverna.platform.report.WorkflowReport;
+import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.Workflow;
 import uk.org.taverna.scufl2.api.profiles.Profile;
 
 /**
+ * Interface for a single execution of a Taverna workflow.
  * 
  * @author David Withers
  */
 public interface Execution {
 
+	/**
+	 * @return
+	 */
 	public abstract String getID();
 
+	/**
+	 * Returns the <code>WorkflowBundle</code> containing the <code>Workflow</code>s required for execution.
+	 * 
+	 * @return the <code>WorkflowBundle</code> containing the <code>Workflow</code>s required for execution
+	 */
+	public abstract WorkflowBundle getWorkflowBundle();
+
+	/**
+	 * Returns the <code>Workflow</code> to execute.
+	 * 
+	 * @return the <code>Workflow</code> to execute
+	 */
 	public abstract Workflow getWorkflow();
 
+	/**
+	 * Returns the <code>Profile</code> to use when executing the <code>Workflow</code>.
+	 * 
+	 * @return the <code>Profile</code> to use when executing the <code>Workflow</code>
+	 */
 	public abstract Profile getProfile();
 
+	/**
+	 * Returns the inputs for the <code>Workflow</code>.
+	 * 
+	 * May be <code>null</code> if the <code>Workflow</code> doesn't require any inputs.
+	 * 
+	 * @return the inputs for the <code>Workflow</code>
+	 */
 	public abstract Map<String, T2Reference> getInputs();
 
+	/**
+	 * Returns the <code>ReferenceService</code> used to register the inputs.
+	 * 
+	 * This <code>ReferenceService</code> will also be used to register any outputs and intermediate
+	 * values produced by the <code>Workflow</code>.
+	 * 
+	 * @return the <code>ReferenceService</code> used to register the inputs
+	 */
 	public abstract ReferenceService getReferenceService();
 
+	/**
+	 * Returns the <code>WorkflowReport</code> for the execution.
+	 * 
+	 * @return the <code>WorkflowReport</code> for the execution
+	 */
 	public abstract WorkflowReport getWorkflowReport();
 
+	/**
+	 * Starts the execution.
+	 */
 	public abstract void start();
 
+	/**
+	 * Pauses the execution.
+	 */
 	public abstract void pause();
 
+	/**
+	 * Resumes a paused execution.
+	 */
 	public abstract void resume();
 
+	/**
+	 * Cancels the execution.
+	 */
 	public abstract void cancel();
 
 }
