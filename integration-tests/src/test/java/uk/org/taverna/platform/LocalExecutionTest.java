@@ -27,9 +27,9 @@ public class LocalExecutionTest extends PlatformTest {
 	public void testLocalExecution() throws Exception {
 		URL wfResource = getClass().getResource("/t2flow/in-out.t2flow");
 		assertNotNull(wfResource);
-		WorkflowBundle researchObject = new T2FlowParser().parseT2Flow(wfResource.openStream());
-		Workflow workflow = researchObject.getMainWorkflow();
-		Profile profile = researchObject.getProfiles().iterator().next();
+		WorkflowBundle workflowBundle = new T2FlowParser().parseT2Flow(wfResource.openStream());
+		Workflow workflow = workflowBundle.getMainWorkflow();
+		Profile profile = workflowBundle.getProfiles().iterator().next();
 
 		ServiceReference referenceServiceReference = bundleContext
 				.getServiceReference("net.sf.taverna.t2.reference.ReferenceService");
@@ -46,7 +46,7 @@ public class LocalExecutionTest extends PlatformTest {
 		Map<String, T2Reference> inputs = new HashMap<String, T2Reference>();
 		inputs.put("in", reference);
 
-		String executionId = executionService.createExecution(workflow, profile, inputs,
+		String executionId = executionService.createExecution(workflowBundle, workflow, profile, inputs,
 				referenceService);
 		WorkflowReport report = executionService.getWorkflowReport(executionId);
 		assertEquals(State.CREATED, report.getState());
@@ -68,9 +68,9 @@ public class LocalExecutionTest extends PlatformTest {
 		assertNotNull(wfResource);
 		T2FlowParser t2FlowParser = new T2FlowParser();
 		t2FlowParser.setStrict(true);
-		WorkflowBundle researchObject = t2FlowParser.parseT2Flow(wfResource.openStream());
-		Workflow workflow = researchObject.getMainWorkflow();
-		Profile profile = researchObject.getProfiles().iterator().next();
+		WorkflowBundle workflowBundle = t2FlowParser.parseT2Flow(wfResource.openStream());
+		Workflow workflow = workflowBundle.getMainWorkflow();
+		Profile profile = workflowBundle.getProfiles().iterator().next();
 
 		ServiceReference referenceServiceReference = bundleContext
 				.getServiceReference("net.sf.taverna.t2.reference.ReferenceService");
@@ -86,7 +86,7 @@ public class LocalExecutionTest extends PlatformTest {
 		Map<String, T2Reference> inputs = new HashMap<String, T2Reference>();
 		inputs.put("in", reference);
 
-		String executionId = executionService.createExecution(workflow, profile, inputs,
+		String executionId = executionService.createExecution(workflowBundle, workflow, profile, inputs,
 				referenceService);
 		WorkflowReport report = executionService.getWorkflowReport(executionId);
 		System.out.println(report);
