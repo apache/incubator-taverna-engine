@@ -3,14 +3,11 @@ package uk.org.taverna.platform.run.api;
 import java.util.List;
 import java.util.Map;
 
-import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.T2Reference;
 import uk.org.taverna.platform.execution.api.InvalidExecutionIdException;
 import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
 import uk.org.taverna.platform.report.State;
 import uk.org.taverna.platform.report.WorkflowReport;
-import uk.org.taverna.scufl2.api.core.Workflow;
-import uk.org.taverna.scufl2.api.profiles.Profile;
 
 public interface RunService {
 
@@ -25,9 +22,9 @@ public interface RunService {
 	 *            the workflow inputs
 	 * @return the run ID
 	 * @throws InvalidWorkflowException
+	 * @throws RunProfileException 
 	 */
-	public String createRun(Workflow workflow, Profile profile, Map<String, T2Reference> inputs,
-			ReferenceService referenceService) throws InvalidWorkflowException;
+	public String createRun(RunProfile runProfile) throws InvalidWorkflowException, RunProfileException;
 
 	/**
 	 * Returns the list runs that this service is managing.

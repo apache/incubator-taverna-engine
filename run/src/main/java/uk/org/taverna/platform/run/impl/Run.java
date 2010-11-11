@@ -26,12 +26,18 @@ import java.util.UUID;
 
 import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.T2Reference;
+
+import org.apache.log4j.Logger;
+
 import uk.org.taverna.platform.execution.api.ExecutionService;
 import uk.org.taverna.platform.execution.api.InvalidExecutionIdException;
 import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
 import uk.org.taverna.platform.report.State;
 import uk.org.taverna.platform.report.WorkflowReport;
+import uk.org.taverna.platform.run.api.RunProfile;
+import uk.org.taverna.platform.run.api.RunProfileException;
 import uk.org.taverna.platform.run.api.RunStateException;
+import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.Workflow;
 import uk.org.taverna.scufl2.api.profiles.Profile;
 
@@ -42,15 +48,17 @@ import uk.org.taverna.scufl2.api.profiles.Profile;
  */
 public class Run {
 
+	private static final Logger logger = Logger.getLogger(Run.class);
+
 	private String ID, executionID;
 
-	private Map<String, T2Reference> inputs, outputs;
+	private Map<String, T2Reference> inputs;
 
 	private ExecutionService executionService;
 
-	private State state;
-
 	private WorkflowReport workflowReport;
+
+	private final WorkflowBundle workflowBundle;
 
 	private final Workflow workflow;
 
@@ -58,14 +66,53 @@ public class Run {
 
 	private final ReferenceService referenceService;
 
-	public Run(Workflow workflow, Profile profile, Map<String, T2Reference> inputs,
-			ReferenceService referenceService, ExecutionService executionService)
-			throws InvalidWorkflowException {
-		this.workflow = workflow;
-		this.profile = profile;
-		this.inputs = inputs;
-		this.referenceService = referenceService;
-		this.executionService = executionService;
+	public Run(RunProfile runProfile) throws InvalidWorkflowException, RunProfileException {
+		if (runProfile.getWorkflowBundle() == null) {
+			String message = "No WorkflowBundle specified in the RunProfile";
+			logger.warn(message);
+			throw new RunProfileException(message);
+		} else {
+			workflowBundle = runProfile.getWorkflowBundle();
+		}
+		if (runProfile.getWorkflow() == null) {
+			if (workflowBundle.getMainWorkflow() == null) {
+				String message = "No Workflow specified in either the RunProfile or the WorkflowBundle";
+				logger.warn(message);
+				throw new RunProfileException(message);
+			} else {
+				logger.info("No Workflow specified - using the main Workflow from the WorkflowBundle");
+				workflow = workflowBundle.getMainWorkflow();
+			}
+		} else {
+			workflow = runProfile.getWorkflow();
+		}
+		if (runProfile.getProfile() == null) {
+			String message = "No Profile specified in the RunProfile";
+			logger.warn(message);
+			throw new RunProfileException(message);
+		} else {
+			profile = runProfile.getProfile();
+		}
+		if (runProfile.getInputs() == null) {
+			String message = "No workflow inputs in the RunProfile";
+			logger.info(message);
+		} else {
+			inputs = runProfile.getInputs();
+		}
+		if (runProfile.getReferenceService() == null) {
+			String message = "No ReferenceService specified in the RunProfile";
+			logger.warn(message);
+			throw new RunProfileException(message);
+		} else {
+			referenceService = runProfile.getReferenceService();
+		}
+		if (runProfile.getExecutionService() == null) {
+			String message = "No ExecutionService specified in the RunProfile";
+			logger.warn(message);
+			throw new RunProfileException(message);
+		} else {
+			executionService = runProfile.getExecutionService();
+		}
 		ID = UUID.randomUUID().toString();
 		executionID = executionService.createExecution(workflow, profile, inputs, referenceService);
 		try {
@@ -74,35 +121,34 @@ public class Run {
 			// TODO throw an exception
 		}
 		workflowReport.setCreatedDate(new Date());
-		state = State.CREATED;
 	}
 
 	public String getID() {
 		return ID;
 	}
 
-	public WorkflowReport getWorkflowReport() {
-		return workflowReport;
-	}
-
+	public State getState() {
+		return workflowReport.getState();
+	}	
+	
 	public Map<String, T2Reference> getInputs() {
 		return inputs;
 	}
 
 	public Map<String, T2Reference> getOutputs() {
-		return outputs;
+		return workflowReport.getOutputs();
 	}
 
-	public void setOutputs(Map<String, T2Reference> outputs) {
-		this.outputs = outputs;
+	public WorkflowReport getWorkflowReport() {
+		return workflowReport;
 	}
 
 	public void start() throws RunStateException, InvalidExecutionIdException {
-		synchronized (state) {
+		synchronized (workflowReport) {
+			State state = workflowReport.getState();
 			if (state.equals(State.CREATED)) {
-				executionService.start(executionID);
-				state = State.RUNNING;
 				workflowReport.setStartedDate(new Date());
+				executionService.start(executionID);
 			} else {
 				throw new RunStateException("Cannot start a " + state + " run.");
 			}
@@ -111,10 +157,10 @@ public class Run {
 	}
 
 	public void pause() throws RunStateException, InvalidExecutionIdException {
-		synchronized (state) {
+		synchronized (workflowReport) {
+			State state = workflowReport.getState();
 			if (state.equals(State.RUNNING)) {
 				executionService.pause(executionID);
-				state = State.PAUSED;
 				workflowReport.setPausedDate(new Date());
 			} else {
 				throw new RunStateException("Cannot pause a " + state + " run.");
@@ -124,10 +170,10 @@ public class Run {
 	}
 
 	public void resume() throws RunStateException, InvalidExecutionIdException {
-		synchronized (state) {
+		synchronized (workflowReport) {
+			State state = workflowReport.getState();
 			if (state.equals(State.PAUSED)) {
 				executionService.resume(executionID);
-				state = State.RUNNING;
 				workflowReport.setResumedDate(new Date());
 			} else {
 				throw new RunStateException("Cannot resume a " + state + " run.");
@@ -136,13 +182,13 @@ public class Run {
 	}
 
 	public void cancel() throws RunStateException, InvalidExecutionIdException {
-		synchronized (state) {
+		synchronized (workflowReport) {
+			State state = workflowReport.getState();
 			if (state.equals(State.CANCELLED) || state.equals(State.COMPLETED)
 					|| state.equals(State.FAILED)) {
 				throw new RunStateException("Cannot cancel a " + state + " run.");
 			} else {
 				executionService.cancel(executionID);
-				state = State.CANCELLED;
 				workflowReport.setCancelledDate(new Date());
 			}
 		}

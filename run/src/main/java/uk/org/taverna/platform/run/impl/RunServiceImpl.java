@@ -25,17 +25,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.T2Reference;
 import uk.org.taverna.platform.execution.api.InvalidExecutionIdException;
 import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
 import uk.org.taverna.platform.report.State;
 import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.platform.run.api.InvalidRunIdException;
+import uk.org.taverna.platform.run.api.RunProfile;
+import uk.org.taverna.platform.run.api.RunProfileException;
 import uk.org.taverna.platform.run.api.RunService;
 import uk.org.taverna.platform.run.api.RunStateException;
-import uk.org.taverna.scufl2.api.core.Workflow;
-import uk.org.taverna.scufl2.api.profiles.Profile;
 
 /**
  * 
@@ -65,8 +64,8 @@ public class RunServiceImpl implements RunService {
 	 * @see uk.org.taverna.platform.run.RunService#createRun(uk.org.taverna.scufl2.api.core.Workflow, uk.org.taverna.scufl2.api.profiles.Profile, java.util.Map, net.sf.taverna.t2.reference.ReferenceService)
 	 */
 	@Override
-	public String createRun(Workflow workflow, Profile profile, Map<String, T2Reference> inputs, ReferenceService referenceService) throws InvalidWorkflowException {
-		Run run = new Run(workflow, profile, inputs, referenceService, null);
+	public String createRun(RunProfile runProfile) throws InvalidWorkflowException, RunProfileException {
+		Run run = new Run(runProfile);
 		runMap.put(run.getID(), run);
 		runs.add(run.getID());
 		return run.getID();
@@ -109,7 +108,7 @@ public class RunServiceImpl implements RunService {
 	 */
 	@Override
 	public State getState(String runID) throws InvalidRunIdException {
-		return getWorkflowReport(runID).getState();
+		return getRun(runID).getState();
 	}
 
 	/* (non-Javadoc)
