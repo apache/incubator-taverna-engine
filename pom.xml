@@ -16,10 +16,10 @@
 	<name>Taverna 2 Core</name>
 	<build>
 		<plugins>
-<plugin>
-        <artifactId>maven-release-plugin</artifactId>
-        <version>2.0-beta-9</version>
-      </plugin>
+			<plugin>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.0-beta-9</version>
+			</plugin>
 
 			<plugin>
 				<artifactId>maven-clover-plugin</artifactId>
@@ -40,14 +40,14 @@
 			</plugin>
 		</plugins>
 	</build>
-	
+
 	<modules>
 		<module>reference-api</module>
-	   	<module>reference-impl</module>
-	   	<module>reference-testhelpers</module>
+		<module>reference-impl</module>
+		<module>reference-testhelpers</module>
 		<module>workflowmodel-api</module>
-		<module>workflowmodel-impl</module>   
-		<module>provenanceconnector</module>		
+		<module>workflowmodel-impl</module>
+		<module>provenanceconnector</module>
 	</modules>
 	<repositories>
 		<repository>
@@ -58,6 +58,15 @@
 			<id>mygrid-repository</id>
 			<name>myGrid Repository</name>
 			<url>http://www.mygrid.org.uk/maven/repository</url>
+		</repository>
+		<repository>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots />
+			<id>mygrid-snapshot-repository</id>
+			<name>myGrid Snapshot Repository</name>
+			<url>http://www.mygrid.org.uk/maven/snapshot-repository</url>
 		</repository>
 	</repositories>
 	<reporting>
