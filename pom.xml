@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<artifactId>taverna-parent</artifactId>
@@ -19,8 +20,9 @@
 
 	<modules>
 		<module>credential-manager</module>
-		<!--<module>security-agents</module>
-		<module>security-profiles</module>-->
+		<!--
+			<module>security-agents</module> <module>security-profiles</module>
+		-->
 	</modules>
 	<build>
 		<plugins>
@@ -54,20 +56,29 @@
 			<id>mygrid-repository</id>
 			<name>myGrid Repository</name>
 			<url>http://www.mygrid.org.uk/maven/repository</url>
-		</repository>	
-        <repository>
-            <id>jboss</id>
-            <name>JBoss repository</name>
-            <url>http://repository.jboss.org/maven2/</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-        </repository>
-        <repository>
-            <id>javanet</id>
-            <name>java.net</name>
-            <url>http://download.java.net/maven/2/</url>
-        </repository>
+		</repository>
+		<repository>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots />
+			<id>mygrid-snapshot-repository</id>
+			<name>myGrid Snapshot Repository</name>
+			<url>http://www.mygrid.org.uk/maven/snapshot-repository</url>
+		</repository>
+		<repository>
+			<id>jboss</id>
+			<name>JBoss repository</name>
+			<url>http://repository.jboss.org/maven2/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+		</repository>
+		<repository>
+			<id>javanet</id>
+			<name>java.net</name>
+			<url>http://download.java.net/maven/2/</url>
+		</repository>
 	</repositories>
 	<scm>
 		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/engine/net.sf.taverna.t2.security/trunk/</connection>
@@ -75,7 +86,7 @@
 		<url>http://code.google.com/p/taverna/source/browse/#svn/taverna/engine/net.sf.taverna.t2.security/trunk/</url>
 	</scm>
 	<dependencyManagement>
-		<dependencies>			
+		<dependencies>
 			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
@@ -88,11 +99,11 @@
 				<version>${javahelp.version}</version>
 			</dependency>
 			<dependency>
-	            <groupId>log4j</groupId>
-	            <artifactId>log4j</artifactId>
-	            <version>${log4j.version}</version>
-	        </dependency>
-	     		<dependency>
+				<groupId>log4j</groupId>
+				<artifactId>log4j</artifactId>
+				<version>${log4j.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
 				<version>${commons.io.version}</version>
@@ -102,7 +113,7 @@
 				<artifactId>commons-codec</artifactId>
 				<version>${commons.codec.version}</version>
 			</dependency>
-	       		<dependency>
+			<dependency>
 				<groupId>commons-logging</groupId>
 				<artifactId>commons-logging</artifactId>
 				<version>${commons.logging.version}</version>
