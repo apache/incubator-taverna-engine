@@ -20,18 +20,30 @@
  ******************************************************************************/
 package net.sf.taverna.t2.activities.testutils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
 
-import net.sf.taverna.platform.spring.RavenAwareClassPathXmlApplicationContext;
+import net.sf.taverna.t2.reference.ExternalReferenceBuilderSPI;
 import net.sf.taverna.t2.reference.ExternalReferenceSPI;
+import net.sf.taverna.t2.reference.ExternalReferenceTranslatorSPI;
 import net.sf.taverna.t2.reference.ReferenceService;
+import net.sf.taverna.t2.reference.StreamToValueConverterSPI;
 import net.sf.taverna.t2.reference.T2Reference;
+import net.sf.taverna.t2.reference.ValueToReferenceConverterSPI;
+import net.sf.taverna.t2.reference.impl.ErrorDocumentServiceImpl;
+import net.sf.taverna.t2.reference.impl.InMemoryErrorDocumentDao;
+import net.sf.taverna.t2.reference.impl.InMemoryListDao;
+import net.sf.taverna.t2.reference.impl.InMemoryReferenceSetDao;
+import net.sf.taverna.t2.reference.impl.ListServiceImpl;
+import net.sf.taverna.t2.reference.impl.ReferenceServiceImpl;
+import net.sf.taverna.t2.reference.impl.ReferenceSetAugmentorImpl;
+import net.sf.taverna.t2.reference.impl.ReferenceSetServiceImpl;
+import net.sf.taverna.t2.reference.impl.SimpleT2ReferenceGenerator;
 import net.sf.taverna.t2.workflowmodel.processor.activity.AbstractAsynchronousActivity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.AsynchronousActivity;
-
-import org.springframework.context.ApplicationContext;
 
 /**
  * Helper class to facilitate in executing Activities in isolation.
@@ -39,7 +51,7 @@ import org.springframework.context.ApplicationContext;
  * @author Stuart Owen
  * @author Alex Nenadic
  * @author Stian Soiland-Reyes
- * 
+ * @author David Withers
  */
 public class ActivityInvoker {
 
@@ -117,10 +129,8 @@ public class ActivityInvoker {
 		
 		Map<String, Object> results = new HashMap<String, Object>();
 
-		ApplicationContext context = new RavenAwareClassPathXmlApplicationContext(
-		"inMemoryActivityTestsContext.xml");
-		ReferenceService referenceService = (ReferenceService) context.getBean("t2reference.service.referenceService");
-
+		ReferenceService referenceService = createReferenceService();
+		
 		DummyCallback callback = new DummyCallback(referenceService);
 		Map<String, T2Reference> inputEntities = new HashMap<String, T2Reference>();
 		for (String inputName : inputs.keySet()) {
@@ -153,6 +163,70 @@ public class ActivityInvoker {
 			}
 		}
 		return results;
+	}
+
+	private static ReferenceService createReferenceService() {
+		SimpleT2ReferenceGenerator referenceGenerator = new SimpleT2ReferenceGenerator();
+		ReferenceSetAugmentorImpl referenceSetAugmentor = new ReferenceSetAugmentorImpl();
+		referenceSetAugmentor.setBuilders((List<ExternalReferenceBuilderSPI<?>>) getBuilders());
+		referenceSetAugmentor.setTranslators(getTranslators());
+		
+		ReferenceSetServiceImpl referenceSetService = new ReferenceSetServiceImpl();
+		referenceSetService.setT2ReferenceGenerator(referenceGenerator);
+		referenceSetService.setReferenceSetDao(new InMemoryReferenceSetDao());
+		referenceSetService.setReferenceSetAugmentor(referenceSetAugmentor);
+		
+		ListServiceImpl listService = new ListServiceImpl();
+		listService.setT2ReferenceGenerator(referenceGenerator);
+		listService.setListDao(new InMemoryListDao());
+		
+		ErrorDocumentServiceImpl errorDocumentService = new ErrorDocumentServiceImpl();
+		errorDocumentService.setT2ReferenceGenerator(referenceGenerator);
+		errorDocumentService.setErrorDao(new InMemoryErrorDocumentDao());
+		
+		ReferenceServiceImpl referenceService = new ReferenceServiceImpl();
+		referenceService.setReferenceSetService(referenceSetService);
+		referenceService.setListService(listService);
+		referenceService.setErrorDocumentService(errorDocumentService);
+		referenceService.setConverters(getConverters());
+		referenceService.setValueBuilders(getValueBuilders());
+		
+		return referenceService;
+	}
+	
+	private static <T> List<T> getImplementations(Class<T> api) {
+		List<T> implementations = new ArrayList<T>();
+		ServiceLoader<T> serviceLoader = ServiceLoader.load(api);
+		for (T implementation : serviceLoader) {
+			implementations.add(implementation);
+		}
+		return implementations;
+	}
+	
+	private static List<StreamToValueConverterSPI> getValueBuilders() {
+		return getImplementations(StreamToValueConverterSPI.class);
+	}
+
+	private static List<ValueToReferenceConverterSPI> getConverters() {
+		return getImplementations(ValueToReferenceConverterSPI.class);
+	}
+
+	private static List<ExternalReferenceTranslatorSPI<?, ?>> getTranslators() {
+		List<ExternalReferenceTranslatorSPI<?, ?>> implementations = new ArrayList<ExternalReferenceTranslatorSPI<?, ?>>();
+		ServiceLoader<ExternalReferenceTranslatorSPI> serviceLoader = ServiceLoader.load(ExternalReferenceTranslatorSPI.class);
+		for (ExternalReferenceTranslatorSPI implementation : serviceLoader) {
+			implementations.add(implementation);
+		}
+		return implementations;
+	}
+
+	private static List<ExternalReferenceBuilderSPI<?>> getBuilders() {
+		List<ExternalReferenceBuilderSPI<?>> implementations = new ArrayList<ExternalReferenceBuilderSPI<?>>();
+		ServiceLoader<ExternalReferenceBuilderSPI> serviceLoader = ServiceLoader.load(ExternalReferenceBuilderSPI.class);
+		for (ExternalReferenceBuilderSPI implementation : serviceLoader) {
+			implementations.add(implementation);
+		}
+		return implementations;
 	}
 
 	/**
