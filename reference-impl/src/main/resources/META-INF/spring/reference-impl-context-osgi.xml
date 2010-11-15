@@ -11,10 +11,10 @@
 	<list id="converters" interface="net.sf.taverna.t2.reference.ValueToReferenceConverterSPI" cardinality="0..N" />
 	<list id="valueBuilders" interface="net.sf.taverna.t2.reference.StreamToValueConverterSPI" cardinality="0..N" />
 	<list id="builders" interface="net.sf.taverna.t2.reference.ExternalReferenceBuilderSPI" cardinality="0..N">
-		<!--<listener ref="serviceListener" bind-method="servicesChanged" unbind-method="servicesChanged" />-->
+		<listener ref="referenceSetAugmentor" bind-method="buildersUpdated" unbind-method="buildersUpdated" />
 	</list>
 	<list id="translators" interface="net.sf.taverna.t2.reference.ExternalReferenceTranslatorSPI" cardinality="0..N">
-		<!--<listener ref="serviceListener" bind-method="servicesChanged" unbind-method="servicesChanged" />-->
+		<listener ref="referenceSetAugmentor" bind-method="translatorsUpdated" unbind-method="translatorsUpdated" />
 	</list>
 
 	<service ref="referenceService" interface="net.sf.taverna.t2.reference.ReferenceService" />

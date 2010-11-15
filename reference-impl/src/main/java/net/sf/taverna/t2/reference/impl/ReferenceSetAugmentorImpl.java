@@ -81,7 +81,11 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 		super();
 	}
 
-	public void invalidateCache() {
+	public void buildersUpdated(Object service, Map properties) {
+		cacheValid = false;
+	}
+
+	public void translatorsUpdated(Object service, Map properties) {
 		cacheValid = false;
 	}
 
