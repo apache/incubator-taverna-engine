@@ -10,7 +10,7 @@ import uk.org.taverna.scufl2.api.core.Workflow;
 import uk.org.taverna.scufl2.api.profiles.Profile;
 
 /**
- * A RunProfile contains the parameters required to run a workflow.
+ * A <code>RunProfile</code> contains the parameters required to run a workflow.
  * 
  * @author David Withers
  */

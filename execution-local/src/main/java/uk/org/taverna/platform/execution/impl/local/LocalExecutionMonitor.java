@@ -71,6 +71,8 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 		workflowReports = new HashMap<Dataflow, LocalWorkflowReport>();
 		processorReports = new HashMap<Processor, LocalProcessorReport>();
 		processorInvocations = new HashMap<Processor, AtomicInteger>();
+		activityReports = new HashMap<Activity<?>, ActivityReport>();
+		activityInvocations = new HashMap<Activity<?>, AtomicInteger>();
 		mapReports(workflowReport, mapping);
 	}
 
@@ -117,16 +119,15 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 				System.out.println("Adding " + dataflowProcessor.getLocalName());
 				LocalProcessorReport processorReport = processorReports.get(dataflowProcessor);
 				processorReport.addProperties(properties);
-//				processorReport.setStartedDate(new Date());
 			}
 		} else if (dataflowObject instanceof Activity) {
-//			Activity<?> activity = (Activity<?>) dataflowObject;
-//			if (activityInvocations.get(activity).getAndIncrement() == 0) {
-//				ActivityReport activityReport = activityReports.get(activity);
-//				ProcessorReport parentReport = activityReport.getParentReport();
-//				parentReport.setStartedDate(new Date());
-//				activityReport.setStartedDate(new Date());
-//			}
+			Activity<?> activity = (Activity<?>) dataflowObject;
+			if (activityInvocations.get(activity).getAndIncrement() == 0) {
+				ActivityReport activityReport = activityReports.get(activity);
+				ProcessorReport parentReport = activityReport.getParentReport();
+				parentReport.setStartedDate(new Date());
+				activityReport.setStartedDate(new Date());
+			}
 		}
 	}
 
@@ -144,11 +145,11 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 				processorReport.setCompletedDate(new Date());
 			}
 		} else if (dataflowObject instanceof Activity) {
-//			Activity<?> activity = (Activity<?>) dataflowObject;
-//			if (activityInvocations.get(activity).decrementAndGet() == 0) {
-//				ActivityReport activityReport = activityReports.get(activity);
-//				activityReport.setCompletedDate(new Date());
-//			}
+			Activity<?> activity = (Activity<?>) dataflowObject;
+			if (activityInvocations.get(activity).decrementAndGet() == 0) {
+				ActivityReport activityReport = activityReports.get(activity);
+				activityReport.setCompletedDate(new Date());
+			}
 		}
 	}
 

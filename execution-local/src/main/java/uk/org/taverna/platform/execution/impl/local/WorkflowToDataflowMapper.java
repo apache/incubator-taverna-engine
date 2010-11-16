@@ -288,13 +288,8 @@ public class WorkflowToDataflowMapper {
 					EventForwardingOutputPort outputPort = outputPorts.get(processorOutputPortBinding.getBoundProcessorPort());
 					edits.getAddActivityOutputPortMappingEdit(beanshellActivity, outputPort.getName(), outputPort.getName()).doEdit();
 				}
-//				System.out.println(beanshellActivity);
-//				System.out.println(beanshellActivity.getInputPorts());
-//				System.out.println(beanshellActivity.getOutputPorts());
-//				System.out.println(beanshellActivity.getInputPortMapping());
-//				System.out.println(beanshellActivity.getOutputPortMapping());
-//				System.out.println(beanshellActivity.getConfiguration().getScript());
-//				System.out.println();
+				workflowToDataflowActivities.put(activity, beanshellActivity);
+				dataflowToWorkflowActivities.put(beanshellActivity, activity);
 			} else {
 				throw new RuntimeException("Unknown activity : " + activity.getType().getName());
 			}

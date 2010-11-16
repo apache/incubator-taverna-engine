@@ -42,7 +42,7 @@ import uk.org.taverna.scufl2.api.core.Workflow;
 import uk.org.taverna.scufl2.api.profiles.Profile;
 
 /**
- * 
+ * A single run of a Taverna workflow.
  * 
  * @author David Withers
  */
@@ -50,13 +50,13 @@ public class Run {
 
 	private static final Logger logger = Logger.getLogger(Run.class);
 
-	private String ID, executionID;
+	private final String ID, executionID;
 
 	private Map<String, T2Reference> inputs;
 
-	private ExecutionService executionService;
+	private final ExecutionService executionService;
 
-	private WorkflowReport workflowReport;
+	private final WorkflowReport workflowReport;
 
 	private final WorkflowBundle workflowBundle;
 
@@ -66,6 +66,17 @@ public class Run {
 
 	private final ReferenceService referenceService;
 
+	/**
+	 * Constructs a <code>Run</code> from the specified <code>RunProfile</code>.
+	 * 
+	 * @param runProfile
+	 *            the profile to create a <code>Run</code> from
+	 * @throws InvalidWorkflowException
+	 *             if the workflow specified by the <code>RunProfile</code> is not valid
+	 * @throws RunProfileException
+	 *             if the <code>RunProfile</code> does not contain the correct information to run a
+	 *             workflow
+	 */
 	public Run(RunProfile runProfile) throws InvalidWorkflowException, RunProfileException {
 		if (runProfile.getWorkflowBundle() == null) {
 			String message = "No WorkflowBundle specified in the RunProfile";
@@ -114,11 +125,14 @@ public class Run {
 			executionService = runProfile.getExecutionService();
 		}
 		ID = UUID.randomUUID().toString();
-		executionID = executionService.createExecution(workflowBundle, workflow, profile, inputs, referenceService);
+		executionID = executionService.createExecution(workflowBundle, workflow, profile, inputs,
+				referenceService);
 		try {
 			workflowReport = executionService.getWorkflowReport(executionID);
 		} catch (InvalidExecutionIdException e) {
-			// TODO throw an exception
+			String message = "Error while creating a execution on the " + executionService.getName();
+			logger.error(message);
+			throw new RuntimeException(message, e);
 		}
 		workflowReport.setCreatedDate(new Date());
 	}
@@ -129,8 +143,8 @@ public class Run {
 
 	public State getState() {
 		return workflowReport.getState();
-	}	
-	
+	}
+
 	public Map<String, T2Reference> getInputs() {
 		return inputs;
 	}

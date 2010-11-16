@@ -61,13 +61,14 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 	private Edits edits;
 
 	private WorkflowToDataflowMapper mapping;
-	
+
 	private WorkflowInstanceFacade facade;
-		
+
 	private LocalExecutionMonitor executionMonitor;
-	
-	public LocalExecution(WorkflowBundle workflowBundle, Workflow workflow, Profile profile, Map<String, T2Reference> inputs,
-			ReferenceService referenceService, Edits edits) throws InvalidWorkflowException {
+
+	public LocalExecution(WorkflowBundle workflowBundle, Workflow workflow, Profile profile,
+			Map<String, T2Reference> inputs, ReferenceService referenceService, Edits edits)
+			throws InvalidWorkflowException {
 		super(workflowBundle, workflow, profile, inputs, referenceService);
 		this.edits = edits;
 		try {
@@ -75,7 +76,8 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 			Dataflow dataflow = mapping.getDataflow();
 			printDataflow(dataflow);
 			facade = edits.createWorkflowInstanceFacade(dataflow, createContext(), "");
-			executionMonitor = new LocalExecutionMonitor((LocalWorkflowReport) getWorkflowReport(), mapping, facade.getIdentifier());
+			executionMonitor = new LocalExecutionMonitor((LocalWorkflowReport) getWorkflowReport(),
+					mapping, facade.getIdentifier());
 		} catch (InvalidDataflowException e) {
 			// TODO do something with the validation report
 			DataflowValidationReport report = e.getDataflowValidationReport();
@@ -126,26 +128,26 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 	private InvocationContext createContext() {
 		ProvenanceReporter provenanceConnector = null;
 
-//		if (ConfigurationManager.isProvenanceEnabled()) {
-//			String connectorType = ConfigurationManager.getProvenanceConnectorType();
-//
-//			for (ProvenanceConnectorFactory factory : ProvenanceConnectorFactoryRegistry
-//					.getInstance().getInstances()) {
-//				if (connectorType.equalsIgnoreCase(factory.getConnectorType())) {
-//					provenanceConnector = factory.getProvenanceConnector();
-//				}
-//				break;
-//			}
-//
-//			try {
-//				if (provenanceConnector != null) {
-//					provenanceConnector.init();
-//					provenanceConnector.setReferenceService(getReferenceService());
-//				}
-//			} catch (Exception exception) {
-//				logger.error("Error initializing provenance connector", exception);
-//			}
-//		}
+		// if (ConfigurationManager.isProvenanceEnabled()) {
+		// String connectorType = ConfigurationManager.getProvenanceConnectorType();
+		//
+		// for (ProvenanceConnectorFactory factory : ProvenanceConnectorFactoryRegistry
+		// .getInstance().getInstances()) {
+		// if (connectorType.equalsIgnoreCase(factory.getConnectorType())) {
+		// provenanceConnector = factory.getProvenanceConnector();
+		// }
+		// break;
+		// }
+		//
+		// try {
+		// if (provenanceConnector != null) {
+		// provenanceConnector.init();
+		// provenanceConnector.setReferenceService(getReferenceService());
+		// }
+		// } catch (Exception exception) {
+		// logger.error("Error initializing provenance connector", exception);
+		// }
+		// }
 		InvocationContext context = new InvocationContextImpl(getReferenceService(),
 				provenanceConnector);
 		if (provenanceConnector != null) {

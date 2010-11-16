@@ -10,7 +10,7 @@ import uk.org.taverna.platform.report.State;
 import uk.org.taverna.platform.report.WorkflowReport;
 
 /**
- * A Service for managing the runs of Taverna workflows.
+ * A Service for managing runs of Taverna workflows.
  * 
  * @author David Withers
  */
