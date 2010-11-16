@@ -25,7 +25,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import uk.org.taverna.scufl2.api.activity.Activity;
 import uk.org.taverna.scufl2.api.core.Processor;
 
 /**
@@ -38,18 +37,13 @@ public abstract class ProcessorReport extends StatusReport {
 
 	private final WorkflowReport parentReport;
 
-	private Map<Processor, ActivityReport> activityReports;
+	private Set<ActivityReport> activityReports = new HashSet<ActivityReport>();
 
 	private Map<String, Object> properties = new HashMap<String, Object>();
 
 	public ProcessorReport(Processor processor, WorkflowReport parentReport) {
 		this.processor = processor;
 		this.parentReport = parentReport;
-		activityReports = new HashMap<Processor, ActivityReport>();
-		// not as simple as this : need to look at processor bindings
-		// for (Activity activity : processor.getActivities()) {
-		// activityReports.put(processor, createActivityReport(activity, this));
-		// }
 	}
 
 	/**
@@ -66,11 +60,15 @@ public abstract class ProcessorReport extends StatusReport {
 		return parentReport;
 	}
 
+	public void addActivityReport(ActivityReport processorReport) {
+		activityReports.add(processorReport);
+	}
+	
 	/**
 	 * @return the activityReports
 	 */
 	public Set<ActivityReport> getActivityReports() {
-		return new HashSet<ActivityReport>(activityReports.values());
+		return activityReports;
 	}
 
 	/**
@@ -115,11 +113,6 @@ public abstract class ProcessorReport extends StatusReport {
 			properties.put(key, value);
 			// }
 		}
-	}
-
-	protected ActivityReport createActivityReport(Activity activity,
-			ProcessorReport parentReport) {
-		return new ActivityReport(activity, parentReport);
 	}
 
 }

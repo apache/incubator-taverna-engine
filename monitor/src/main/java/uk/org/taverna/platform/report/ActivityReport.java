@@ -32,15 +32,16 @@ public class ActivityReport extends StatusReport {
 	
 	private final ProcessorReport parentReport;
 	
-	private WorkflowReport nestedWorkflowReport;
+	private final WorkflowReport nestedWorkflowReport;
 		
-	/**
-	 * @param activity
-	 */
 	public ActivityReport(Activity activity, ProcessorReport parentReport) {
+		this(activity, parentReport, null);
+	}
+
+	public ActivityReport(Activity activity, ProcessorReport parentReport, WorkflowReport nestedWorkflowReport) {
 		this.activity = activity;
 		this.parentReport = parentReport;
-		// TODO test if nested workflow
+		this.nestedWorkflowReport = nestedWorkflowReport;
 	}
 
 	/**

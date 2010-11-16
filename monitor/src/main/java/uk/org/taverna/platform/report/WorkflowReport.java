@@ -20,12 +20,16 @@
  ******************************************************************************/
 package uk.org.taverna.platform.report;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import net.sf.taverna.t2.reference.T2Reference;
+import uk.org.taverna.scufl2.api.activity.Activity;
 import uk.org.taverna.scufl2.api.core.Processor;
 import uk.org.taverna.scufl2.api.core.Workflow;
 
@@ -37,25 +41,13 @@ import uk.org.taverna.scufl2.api.core.Workflow;
 public abstract class WorkflowReport extends StatusReport {
 
 	private Workflow workflow;
-	
-	private Map<String, T2Reference> outputs;
 
-	private Map<Processor, ProcessorReport> processorReports;
+	private Map<String, T2Reference> outputs = new HashMap<String, T2Reference>();
+
+	private Set<ProcessorReport> processorReports = new HashSet<ProcessorReport>();
 
 	public WorkflowReport(Workflow workflow) {
 		this.workflow = workflow;
-		outputs = new HashMap<String, T2Reference>();
-		processorReports = new HashMap<Processor, ProcessorReport>();
-		for (Processor processor : workflow.getProcessors()) {
-			processorReports.put(processor, createProcessorReport(processor, this));
-		}
-	}
-
-	/**
-	 * @return the outputs
-	 */
-	public Map<String, T2Reference> getOutputs() {
-		return outputs;
 	}
 
 	/**
@@ -66,10 +58,21 @@ public abstract class WorkflowReport extends StatusReport {
 	}
 
 	/**
+	 * @return the outputs
+	 */
+	public Map<String, T2Reference> getOutputs() {
+		return outputs;
+	}
+
+	public void addProcessorReport(ProcessorReport processorReport) {
+		processorReports.add(processorReport);
+	}
+	
+	/**
 	 * @return the processorReports
 	 */
 	public Set<ProcessorReport> getProcessorReports() {
-		return new HashSet<ProcessorReport>(processorReports.values());
+		return processorReports;
 	}
 
 	public Set<ProcessorReport> getAllProcessorReports() {
@@ -86,21 +89,9 @@ public abstract class WorkflowReport extends StatusReport {
 		return allProcessorReports;
 	}
 
-//	public ProcessorReport getProcessorReport(Processor processor) {
-//		if (workflow.equals(processor.getParent())) {
-//			return processorReports.get(processor);
-//		}
-//		for (WorkflowReport nestedWorkflowReport : nestedWorkflowReports) {
-//			ProcessorReport nestedProcessorReport = nestedWorkflowReport
-//					.getProcessorReport(processor);
-//			if (nestedProcessorReport != null) {
-//				return nestedProcessorReport;
-//			}
-//		}
-//		return null;
-//	}
-	
-	protected abstract ProcessorReport createProcessorReport(Processor processor, WorkflowReport parentReport);
+	public abstract ProcessorReport createProcessorReport(Processor processor, WorkflowReport parentReport);
+
+	public abstract ActivityReport createActivityReport(Activity activity, ProcessorReport parentReport);
 
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -110,11 +101,23 @@ public abstract class WorkflowReport extends StatusReport {
 		sb.append("Queued    ");
 		sb.append("Started   ");
 		sb.append("Complete  ");
-		sb.append("Errors\n");
+		sb.append("Errors    ");
+		sb.append("Started             ");
+		sb.append("Finished\n");
 		sb.append(workflow.getName());
 		sb.append(spaces(max - workflow.getName().length() +1));
-		sb.append(getState() + "\n");
-		for (ProcessorReport  processorReport : processorReports.values()) {
+		sb.append(getState());
+		sb.append(spaces(10 - getState().name().length()));
+		sb.append("-");
+		sb.append(spaces(9));
+		sb.append("-");
+		sb.append(spaces(9));
+		sb.append("-");
+		sb.append(spaces(9));
+		sb.append("-");
+		sb.append(spaces(9));
+		sb.append(dates(getStartedDate(), getCompletedDate()));
+		for (ProcessorReport  processorReport : processorReports) {
 			String processorName = processorReport.getProcessor().getName();
 			sb.append(processorName);
 			sb.append(spaces(max - processorName.length() +1));
@@ -139,9 +142,27 @@ public abstract class WorkflowReport extends StatusReport {
 			sb.append(jobsCompletedWithErrors);
 			sb.append(spaces(10 - jobsCompletedWithErrors.length()));
 			
-			sb.append("\n");
+			sb.append(dates(processorReport.getStartedDate(), processorReport.getCompletedDate()));
 		}
 		return sb.toString();
+	}
+	
+	private String dates(Date started, Date stopped) {
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		StringBuilder sb = new StringBuilder();
+		if (started != null) {
+			sb.append(dateFormat.format(started));
+			sb.append(spaces(1));
+		} else {
+			sb.append("-");
+			sb.append(spaces(19));
+		}
+		if (stopped != null) {
+			sb.append(dateFormat.format(stopped) + "\n");
+		} else {
+			sb.append("-\n");
+		}
+		return sb.toString();		
 	}
 	
 	private int getLongestName() {

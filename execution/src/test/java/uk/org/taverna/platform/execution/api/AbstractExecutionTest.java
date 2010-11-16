@@ -33,8 +33,10 @@ import net.sf.taverna.t2.reference.impl.ReferenceServiceImpl;
 import org.junit.Before;
 import org.junit.Test;
 
+import uk.org.taverna.platform.report.ActivityReport;
 import uk.org.taverna.platform.report.ProcessorReport;
 import uk.org.taverna.platform.report.WorkflowReport;
+import uk.org.taverna.scufl2.api.activity.Activity;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.Processor;
 import uk.org.taverna.scufl2.api.core.Workflow;
@@ -75,8 +77,12 @@ public class AbstractExecutionTest {
 			public void cancel() {}
 			protected WorkflowReport createWorkflowReport(Workflow workflow) {
 				return new WorkflowReport(workflow) {
-					protected ProcessorReport createProcessorReport(Processor processor,
+					public ProcessorReport createProcessorReport(Processor processor,
 							WorkflowReport parentReport) {
+						return null;
+					}
+					public ActivityReport createActivityReport(Activity activity,
+							ProcessorReport parentReport) {
 						return null;
 					}
 				};

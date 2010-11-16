@@ -20,14 +20,21 @@
  ******************************************************************************/
 package uk.org.taverna.platform.execution.api;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.T2Reference;
+import uk.org.taverna.platform.report.ActivityReport;
+import uk.org.taverna.platform.report.ProcessorReport;
 import uk.org.taverna.platform.report.WorkflowReport;
+import uk.org.taverna.scufl2.api.activity.Activity;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
+import uk.org.taverna.scufl2.api.core.Processor;
 import uk.org.taverna.scufl2.api.core.Workflow;
+import uk.org.taverna.scufl2.api.profiles.ProcessorBinding;
 import uk.org.taverna.scufl2.api.profiles.Profile;
 
 /**
@@ -53,10 +60,29 @@ public abstract class AbstractExecution implements Execution {
 		this.inputs = inputs;
 		this.referenceService = referenceService;
 		ID = UUID.randomUUID().toString();
-		workflowReport = createWorkflowReport(workflow);
+		workflowReport = generateWorkflowReport(workflow);
 	}
 
 	protected abstract WorkflowReport createWorkflowReport(Workflow workflow);
+	
+	public WorkflowReport generateWorkflowReport(Workflow workflow) {
+		WorkflowReport workflowReport = createWorkflowReport(workflow);
+		Map<Processor, ProcessorReport> processorReports = new HashMap<Processor, ProcessorReport>();
+		for (Processor processor : workflow.getProcessors()) {
+			ProcessorReport processorReport = workflowReport.createProcessorReport(processor, workflowReport);
+			processorReports.put(processor, processorReport);
+			workflowReport.addProcessorReport(processorReport);
+		}
+		Set<ProcessorBinding> processorBindings = profile.getProcessorBindings();
+		for (ProcessorBinding processorBinding : processorBindings) {
+			Activity boundActivity = processorBinding.getBoundActivity();
+			Processor boundProcessor = processorBinding.getBoundProcessor();
+			ProcessorReport processorReport = processorReports.get(boundProcessor);
+			ActivityReport activityReport = workflowReport.createActivityReport(boundActivity, processorReport);
+			processorReport.addActivityReport(activityReport);
+		}
+		return workflowReport;
+	}
 
 	@Override
 	public String getID() {
@@ -67,7 +93,7 @@ public abstract class AbstractExecution implements Execution {
 	public WorkflowBundle getWorkflowBundle() {
 		return workflowBundle;
 	}
-	
+
 	@Override
 	public Workflow getWorkflow() {
 		return workflow;
