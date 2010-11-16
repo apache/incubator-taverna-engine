@@ -34,21 +34,7 @@ public class PlatformTest extends AbstractConfigurableBundleCreatorTests {
 				"uk.org.taverna.platform, execution-local, 0.0.1-SNAPSHOT",
 				"uk.org.taverna.platform, run, 0.0.1-SNAPSHOT" };
 	}
-
-	// public void testOsgiPlatformStarts() throws Exception {
-	// System.out.println(bundleContext.getProperty(Constants.FRAMEWORK_VENDOR));
-	// System.out.println(bundleContext.getProperty(Constants.FRAMEWORK_VERSION));
-	// System.out.println(bundleContext.getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT));
-	// }
-	//
-//	public void testOsgiEnvironment() throws Exception {
-//		Bundle[] bundles = bundleContext.getBundles();
-//		for (int i = 0; i < bundles.length; i++) {
-//			System.out.println(OsgiStringUtils.nullSafeName(bundles[i]));
-//		}
-//		System.out.println();
-//	}
-
+	
 	public void waitForResult(Map<String, T2Reference> results, String port, WorkflowReport report)
 			throws InterruptedException {
 		int wait = 0;
