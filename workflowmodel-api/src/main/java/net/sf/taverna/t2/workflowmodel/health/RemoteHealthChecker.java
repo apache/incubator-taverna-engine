@@ -114,6 +114,22 @@ public abstract class RemoteHealthChecker implements HealthChecker<Object> {
 				httpConnection.connect();
 				responseCode = httpConnection.getResponseCode();
 				if (responseCode != HttpURLConnection.HTTP_OK) {
+					try {
+						if ((connection != null) && (connection.getInputStream() != null)) {
+							connection.getInputStream().close();
+						}
+					} catch (IOException e) {
+						logger.info("Unable to close connection to " + endpoint, e);
+					}
+					connection = url.openConnection();
+					connection.setReadTimeout(timeout);
+					connection.setConnectTimeout(timeout);
+					httpConnection = (HttpURLConnection) connection;
+					httpConnection.setRequestMethod("GET");
+					httpConnection.connect();
+					responseCode = httpConnection.getResponseCode();
+				}
+ 				if (responseCode != HttpURLConnection.HTTP_OK) {
 					if ((responseCode >= HttpURLConnection.HTTP_INTERNAL_ERROR)) {
 						status = Status.WARNING;
 						message = "Unexpected response";
