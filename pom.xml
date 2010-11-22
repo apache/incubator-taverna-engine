@@ -45,5 +45,6 @@
 		<module>monitor</module>
 		<module>execution-local</module>
 		<module>integration-tests</module>
+		<module>activity</module>
 	</modules>
 </project>
