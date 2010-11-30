@@ -24,9 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.sf.taverna.t2.workflowmodel.EditException;
-import net.sf.taverna.t2.workflowmodel.ProcessorInputPort;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
-import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityAndBeanWrapper;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityConfigurationException;
 import net.sf.taverna.t2.workflowmodel.processor.activity.DisabledActivity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.NonExecutableActivity;
