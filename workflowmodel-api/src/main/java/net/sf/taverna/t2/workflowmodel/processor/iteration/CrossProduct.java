@@ -21,6 +21,7 @@
 package net.sf.taverna.t2.workflowmodel.processor.iteration;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -42,7 +43,7 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Job;
  */
 public class CrossProduct extends CompletionHandlingAbstractIterationStrategyNode {
 
-	private Map<String, List<Set<Job>>> ownerToCache = new HashMap<String, List<Set<Job>>>();
+	private Map<String, List<Set<Job>>> ownerToCache = Collections.synchronizedMap(new HashMap<String, List<Set<Job>>>());
 
 	/**
 	 * Receive a job, emit jobs corresponding to the orthogonal join of the new
@@ -117,12 +118,12 @@ public class CrossProduct extends CompletionHandlingAbstractIterationStrategyNod
 	}
 
 	@Override
-	public synchronized void innerReceiveCompletion(int inputIndex, Completion completion) {
+	public void innerReceiveCompletion(int inputIndex, Completion completion) {
 		// Do nothing, let the superclass handle final completion events
 	}
 
 	@Override
-	protected final synchronized void cleanUp(String owningProcess) {
+	protected final void cleanUp(String owningProcess) {
 		ownerToCache.remove(owningProcess);
 	}
 
@@ -145,7 +146,7 @@ public class CrossProduct extends CompletionHandlingAbstractIterationStrategyNod
 		return true;
 	}
 
-	public synchronized int getIterationDepth(Map<String, Integer> inputDepths)
+	public int getIterationDepth(Map<String, Integer> inputDepths)
 			throws IterationTypeMismatchException {
 		if (isLeaf()) {
 			// No children!

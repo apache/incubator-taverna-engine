@@ -20,6 +20,7 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.processor.iteration;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,7 +39,7 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Job;
  */
 public class DotProduct extends CompletionHandlingAbstractIterationStrategyNode {
 
-	Map<String, TreeCache[]> ownerToCache = new HashMap<String, TreeCache[]>();
+	Map<String, TreeCache[]> ownerToCache = Collections.synchronizedMap(new HashMap<String, TreeCache[]>());
 
 	@Override
 	public synchronized void innerReceiveJob(int inputIndex, Job newJob) {
@@ -91,7 +92,7 @@ public class DotProduct extends CompletionHandlingAbstractIterationStrategyNode 
 	 * grained logic here in the future.
 	 */
 	@Override
-	public synchronized void innerReceiveCompletion(int inputIndex,
+	public void innerReceiveCompletion(int inputIndex,
 			Completion completion) {
 		// Do nothing, let the superclass handle final completion events, ignore
 		// others for now (although in theory we should be able to do better
@@ -99,7 +100,7 @@ public class DotProduct extends CompletionHandlingAbstractIterationStrategyNode 
 	}
 
 	@Override
-	protected synchronized void cleanUp(String owningProcess) {
+	protected  void cleanUp(String owningProcess) {
 		ownerToCache.remove(owningProcess);
 	}
 
