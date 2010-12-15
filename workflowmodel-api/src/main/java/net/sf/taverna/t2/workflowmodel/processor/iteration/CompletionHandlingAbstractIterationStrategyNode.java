@@ -20,6 +20,7 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.processor.iteration;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -81,7 +82,7 @@ public abstract class CompletionHandlingAbstractIterationStrategyNode extends
 		}
 	}
 
-	private Map<String, CompletionState> ownerToCompletion = new HashMap<String, CompletionState>();
+	private Map<String, CompletionState> ownerToCompletion = Collections.synchronizedMap(new HashMap<String, CompletionState>());
 
 	public final void receiveCompletion(int inputIndex, Completion completion) {
 		innerReceiveCompletion(inputIndex, completion);
@@ -110,32 +111,28 @@ public abstract class CompletionHandlingAbstractIterationStrategyNode extends
 
 	private void pingCompletionState(int inputIndex, String owningProcess,
 			boolean isCompletion, InvocationContext context) {
-		synchronized (ownerToCompletion) {
-			CompletionState cs = getCompletionState(owningProcess);
-			cs.inputComplete[inputIndex] = true;
-			if (isCompletion) {
-				cs.receivedCompletion = true;
-			}
-			if (cs.isComplete()) {
-				cleanUp(owningProcess);
-				ownerToCompletion.remove(owningProcess);
-				if (cs.receivedCompletion) {
-					pushCompletion(new Completion(owningProcess, new int[0],
-							context));
-				}
+		CompletionState cs = getCompletionState(owningProcess);
+		cs.inputComplete[inputIndex] = true;
+		if (isCompletion) {
+			cs.receivedCompletion = true;
+		}
+		if (cs.isComplete()) {
+			cleanUp(owningProcess);
+			ownerToCompletion.remove(owningProcess);
+			if (cs.receivedCompletion) {
+				pushCompletion(new Completion(owningProcess, new int[0],
+						context));
 			}
 		}
 	}
 
 	protected CompletionState getCompletionState(String owningProcess) {
-		synchronized (ownerToCompletion) {
-			if (ownerToCompletion.containsKey(owningProcess)) {
-				return ownerToCompletion.get(owningProcess);
-			} else {
-				CompletionState cs = new CompletionState(getChildCount());
-				ownerToCompletion.put(owningProcess, cs);
-				return cs;
-			}
+		if (ownerToCompletion.containsKey(owningProcess)) {
+			return ownerToCompletion.get(owningProcess);
+		} else {
+			CompletionState cs = new CompletionState(getChildCount());
+			ownerToCompletion.put(owningProcess, cs);
+			return cs;
 		}
 	}
 
