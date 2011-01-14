@@ -3,8 +3,9 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans 
                            http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-	<bean id="activityService" class="uk.org.taverna.platform.activity.impl.ActivityServiceImpl" >
-			<property name="activityFactories" ref="activityFactories" />
+	<bean id="activityService" class="uk.org.taverna.platform.activity.impl.ActivityServiceImpl">
+		<property name="activityFactories" ref="activityFactories" />
+		<property name="edits" ref="workflowModelEdits" />
 	</bean>
 
 </beans>

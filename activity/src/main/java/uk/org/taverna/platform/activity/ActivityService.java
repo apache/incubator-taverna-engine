@@ -22,18 +22,16 @@ package uk.org.taverna.platform.activity;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Map;
 
-import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
-import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityConfigurationException;
+import net.sf.taverna.t2.workflowmodel.Edits;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityFactory;
-import net.sf.taverna.t2.workflowmodel.processor.activity.config.ActivityConfigurationDefinition;
-import net.sf.taverna.t2.workflowmodel.processor.activity.config.ActivityInputPortDefinitionBean;
-import net.sf.taverna.t2.workflowmodel.processor.activity.config.ActivityOutputPortDefinitionBean;
+import uk.org.taverna.scufl2.api.activity.Activity;
+import uk.org.taverna.scufl2.api.configurations.Configuration;
+import uk.org.taverna.scufl2.api.configurations.ConfigurationDefinition;
 
 /**
  * Service for discovering available activities and the properties required to configure the
- * acitivities.
+ * activities.
  * 
  * @author David Withers
  */
@@ -42,9 +40,18 @@ public interface ActivityService {
 	/**
 	 * Returns a list URI's that identify available activities.
 	 * 
-	 * @return
+	 * @return a list URI's that identify available activities
 	 */
 	public List<URI> getActivityURIs();
+
+	/**
+	 * Returns true iff an activity exists for the specified URI.
+	 * 
+	 * @param uri
+	 *            the activity URI to check
+	 * @return true if an activity exists for the specified URI
+	 */
+	public boolean activityExists(URI uri);
 
 	/**
 	 * Returns a definition of the configuration required by an activity.
@@ -54,21 +61,37 @@ public interface ActivityService {
 	 * @return a definition of the configuration required by an activity
 	 * @throws ActivityNotFoundException
 	 *             if an activity cannot be found for the specified URI
+	 * @throws ActivityConfigurationException 
 	 */
-	public ActivityConfigurationDefinition getActivityConfigurationDefinition(URI uri)
-			throws ActivityNotFoundException;
-
-	public Activity<?> createActivity(URI uri, Map<URI, Object> configurationProperties,
-			List<ActivityInputPortDefinitionBean> inputPortDefinitions,
-			List<ActivityOutputPortDefinitionBean> outputPortDefinitions)
+	public ConfigurationDefinition getActivityConfigurationDefinition(URI uri)
 			throws ActivityNotFoundException, ActivityConfigurationException;
+
+	public void addDynamicPorts(Activity activity, Configuration configuration)
+			throws ActivityNotFoundException, ActivityConfigurationException;
+
+	public net.sf.taverna.t2.workflowmodel.processor.activity.Activity<?> createActivity(URI uri,
+			Configuration configuration/*, Set<InputActivityPort> inputs,
+			Set<OutputActivityPort> outputs*/) throws ActivityNotFoundException,
+			ActivityConfigurationException;
 
 	/**
 	 * Sets the list of available <code>ActivityFactory</code>s.
 	 * 
+	 * In a production environment this should be set by Spring DM.
+	 * 
 	 * @param activityFactories
 	 *            the list of available <code>ActivityFactory</code>s
 	 */
-	public void setActivityFactories(List<ActivityFactory<? extends Activity<?>>> activityFactories);
+	public void setActivityFactories(List<ActivityFactory> activityFactories);
+
+	/**
+	 * Sets the workflow model Edits service.
+	 * 
+	 * In a production environment this should be set by Spring DM.
+	 * 
+	 * @param edits
+	 *            the workflow model Edits service
+	 */
+	public void setEdits(Edits edits);
 
 }

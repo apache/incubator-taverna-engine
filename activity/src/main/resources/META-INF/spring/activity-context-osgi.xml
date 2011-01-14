@@ -10,4 +10,6 @@
 
 	<list id="activityFactories" interface="net.sf.taverna.t2.workflowmodel.processor.activity.ActivityFactory" cardinality="0..N" />
 
+    <reference id="workflowModelEdits" interface="net.sf.taverna.t2.workflowmodel.Edits" />
+
 </beans:beans>
