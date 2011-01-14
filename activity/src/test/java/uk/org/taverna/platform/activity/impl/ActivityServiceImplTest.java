@@ -111,7 +111,7 @@ public class ActivityServiceImplTest {
 			}
 
 			public Object createActivityConfiguration() {
-				return new TestBean();
+				return new ActivityTestBean();
 			}
 
 			public URI getActivityURI() {
@@ -455,8 +455,8 @@ public class ActivityServiceImplTest {
 		Activity<?> activity2 = activityServiceImpl.createActivity(URI.create(annotatedBeanURI), configuration);
 		assertNotNull(activity2);
 		Object configuration2 = activity2.getConfiguration();
-		assertTrue(configuration2 instanceof TestBean);
-		TestBean testBean = (TestBean) configuration2;
+		assertTrue(configuration2 instanceof ActivityTestBean);
+		ActivityTestBean testBean = (ActivityTestBean) configuration2;
 		assertEquals("string value", testBean.stringType);
 		assertEquals("optional string value", testBean.optionalStringType);
 		assertEquals(5, testBean.integerType);
@@ -464,7 +464,7 @@ public class ActivityServiceImplTest {
 		assertEquals(1.2f, testBean.floatType, 0.0001);
 		assertEquals(36.2d, testBean.doubleType, 0.0001);
 		assertEquals(false, testBean.booleanType);
-		assertEquals(TestEnum.A, testBean.enumType);
+		assertEquals(ActivityTestEnum.A, testBean.enumType);
 		assertEquals("string value 2", testBean.beanType.stringType2);
 		assertEquals("string value 2", testBean.beanType2.stringType2);
 		assertArrayEquals(new String[] {"array element 1", "array element 2"}, testBean.arrayType);

@@ -31,7 +31,7 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.config.ConfigurationPr
  * @author David Withers
  */
 @ConfigurationBean(uri = ActivityServiceImplTest.annotatedBeanURI + "/configuration")
-public class TestBean {
+public class ActivityTestBean {
 
 	public String stringType, optionalStringType;
 	public int integerType;
@@ -39,8 +39,8 @@ public class TestBean {
 	public float floatType;
 	public double doubleType;
 	public boolean booleanType;
-	public TestEnum enumType;
-	public TestBean2 beanType, beanType2;
+	public ActivityTestEnum enumType;
+	public ActivityTestBean2 beanType, beanType2;
 	public String[] arrayType;
 	public List<String> listType;
 	public HashSet<String> setType;
@@ -81,17 +81,17 @@ public class TestBean {
 	}
 
 	@ConfigurationProperty(name = "enumType")
-	public void setEnumType(TestEnum parameter) {
+	public void setEnumType(ActivityTestEnum parameter) {
 		enumType = parameter;
 	}
 
 	@ConfigurationProperty(name = "beanType")
-	public void setBeanType(TestBean2 parameter) {
+	public void setBeanType(ActivityTestBean2 parameter) {
 		beanType = parameter;
 	}
 
 	@ConfigurationProperty(name = "beanType2")
-	public void setBeanType2(TestBean2 parameter) {
+	public void setBeanType2(ActivityTestBean2 parameter) {
 		beanType2 = parameter;
 	}
 

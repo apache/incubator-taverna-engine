@@ -20,21 +20,6 @@
  ******************************************************************************/
 package uk.org.taverna.platform.activity.impl;
 
-import net.sf.taverna.t2.workflowmodel.processor.activity.config.ConfigurationBean;
-import net.sf.taverna.t2.workflowmodel.processor.activity.config.ConfigurationProperty;
-
-/**
- * 
- * @author David Withers
- */
-@ConfigurationBean(uri = ActivityServiceImplTest.annotatedBeanURI + "/configuration2")
-public class TestBean2 {
-
-	public String stringType2;
-
-	@ConfigurationProperty(name = "stringType2")
-	public void setStringType(String stringType) {
-		stringType2 = stringType;
-	}
+public enum ActivityTestEnum {
+	A, B
 }
-
