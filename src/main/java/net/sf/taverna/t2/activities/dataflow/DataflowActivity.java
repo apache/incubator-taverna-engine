@@ -33,8 +33,6 @@ import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
 import net.sf.taverna.t2.workflowmodel.DataflowInputPort;
 import net.sf.taverna.t2.workflowmodel.DataflowOutputPort;
-import net.sf.taverna.t2.workflowmodel.Edits;
-import net.sf.taverna.t2.workflowmodel.EditsRegistry;
 import net.sf.taverna.t2.workflowmodel.InvalidDataflowException;
 import net.sf.taverna.t2.workflowmodel.processor.activity.AbstractAsynchronousActivity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityConfigurationException;
@@ -53,11 +51,11 @@ import org.apache.log4j.Logger;
 public class DataflowActivity extends
 		AbstractAsynchronousActivity<Dataflow> implements NestedDataflow{
 
+	public static final String URI = "http://ns.taverna.org.uk/2010/activity/dataflow";
+
 	@SuppressWarnings("unused")
 	private static final Logger logger = Logger
 			.getLogger(DataflowActivity.class);
-
-	private Edits edits = EditsRegistry.getEdits();
 
 	private Dataflow dataflow;
 	

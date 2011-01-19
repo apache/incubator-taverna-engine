@@ -22,14 +22,12 @@ package net.sf.taverna.t2.activities.dataflow;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
 import net.sf.taverna.t2.workflowmodel.Datalink;
 import net.sf.taverna.t2.workflowmodel.Edits;
-import net.sf.taverna.t2.workflowmodel.EditsRegistry;
+import net.sf.taverna.t2.workflowmodel.impl.EditsImpl;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -47,7 +45,7 @@ public class DataflowActivityTest {
 	@Before
 	public void setUp() throws Exception {
 		activity = new DataflowActivity();
-		Edits edits = EditsRegistry.getEdits();
+		Edits edits = new EditsImpl();
 		dataflow = edits.createDataflow();
 		edits.getCreateDataflowInputPortEdit(dataflow, "input", 0, 0).doEdit();
 		edits.getCreateDataflowOutputPortEdit(dataflow, "output").doEdit();
