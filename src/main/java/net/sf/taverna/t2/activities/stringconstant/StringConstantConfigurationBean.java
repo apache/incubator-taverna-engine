@@ -20,6 +20,9 @@
  ******************************************************************************/
 package net.sf.taverna.t2.activities.stringconstant;
 
+import net.sf.taverna.t2.workflowmodel.processor.activity.config.ConfigurationBean;
+import net.sf.taverna.t2.workflowmodel.processor.activity.config.ConfigurationProperty;
+
 /**
  * Configuration bean for setting up a StringConstantActivity.<br>
  * The only thing to be configured is the string value, since the ports are fixed.
@@ -27,6 +30,7 @@ package net.sf.taverna.t2.activities.stringconstant;
  * @author Stuart Owen
  * @see StringConstantActivity
  */
+@ConfigurationBean(uri = StringConstantActivity.URI + "/configuration")
 public class StringConstantConfigurationBean {
 	private String value;
 
@@ -34,6 +38,7 @@ public class StringConstantConfigurationBean {
 		return value;
 	}
 
+	@ConfigurationProperty(name = "value", label = "Constant Value", description = "The value of the string constant")
 	public void setValue(String value) {
 		this.value = value;
 	}
