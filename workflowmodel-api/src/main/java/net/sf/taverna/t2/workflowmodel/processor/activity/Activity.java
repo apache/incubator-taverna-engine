@@ -27,8 +27,9 @@ import java.util.Set;
 
 import net.sf.taverna.t2.annotation.Annotated;
 import net.sf.taverna.t2.annotation.HierarchyTraversal;
-import net.sf.taverna.t2.workflowmodel.OutputPort;
 import net.sf.taverna.t2.workflowmodel.Configurable;
+import net.sf.taverna.t2.workflowmodel.Edits;
+import net.sf.taverna.t2.workflowmodel.OutputPort;
 
 /**
  * Defines a single abstract or concrete invokable activity. Each Processor
@@ -38,7 +39,7 @@ import net.sf.taverna.t2.workflowmodel.Configurable;
  * 
  * @param <ConfigurationType> the ConfigurationType associated with the Activity. This is an arbitrary java class that provides details on how the Activity is configured..
  * @author Tom Oinn
- * 
+ * @author David Withers
  */
 public interface Activity<ConfigurationType> extends Annotated<Activity<?>>, Configurable<ConfigurationType> {
 
@@ -88,5 +89,6 @@ public interface Activity<ConfigurationType> extends Annotated<Activity<?>>, Con
 	 */
 	public abstract void configure(ConfigurationType conf) throws ActivityConfigurationException;
 
-
+	public void setEdits(Edits edits);
+	
 }

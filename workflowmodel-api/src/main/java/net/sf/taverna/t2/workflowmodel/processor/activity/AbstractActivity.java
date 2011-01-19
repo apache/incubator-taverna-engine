@@ -68,7 +68,7 @@ public abstract class AbstractActivity<ConfigType> extends
 	private static Logger logger = Logger
 	.getLogger(AbstractActivity.class);
 
-	private Edits edits;
+	protected Edits edits;
 	
 	protected Map<String, String> inputPortMapping = new HashMap<String, String>();
 
