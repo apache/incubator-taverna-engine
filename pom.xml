@@ -42,7 +42,7 @@
 	<modules>
 		<module>execution</module>
 		<module>run</module>
-		<module>monitor</module>
+		<module>report</module>
 		<module>execution-local</module>
 		<module>integration-tests</module>
 		<module>activity</module>

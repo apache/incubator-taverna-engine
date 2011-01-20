@@ -83,7 +83,7 @@
 		</dependency>
 		<dependency>
 			<groupId>uk.org.taverna.platform</groupId>
-			<artifactId>monitor</artifactId>
+			<artifactId>report</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
