@@ -129,6 +129,12 @@ public class ActivityServiceImplTest {
 		
 		PropertyResource propertyResource = configuration.getPropertyResource();
 		propertyResource.setTypeURI(URI.create(annotatedBeanURI + "#ConfigType"));
+		PropertyResource propertyResource2 = new PropertyResource(URI.create(annotatedBeanURI + "/configuration2"));
+		propertyResource2.addProperty(URI.create(annotatedBeanURI + "#stringType2"), new PropertyLiteral("string value 2"));
+		PropertyResource propertyResource3 = new PropertyResource(URI.create(annotatedBeanURI + "/configuration2"));
+		propertyResource3.addProperty(URI.create(annotatedBeanURI + "#stringType2"), new PropertyLiteral("string value 3"));
+		PropertyResource propertyResource4 = new PropertyResource(URI.create(annotatedBeanURI + "/configuration2"));
+		propertyResource4.addProperty(URI.create(annotatedBeanURI + "#stringType2"), new PropertyLiteral("string value 4"));
 		
 		propertyResource.addProperty(URI.create(annotatedBeanURI + "#stringType"), new PropertyLiteral("string value"));
 		propertyResource.addProperty(URI.create(annotatedBeanURI + "#optionalStringType"), new PropertyLiteral("optional string value"));
@@ -139,11 +145,8 @@ public class ActivityServiceImplTest {
 		propertyResource.addProperty(URI.create(annotatedBeanURI + "#booleanType"), new PropertyLiteral(false));
 		propertyResource.addProperty(URI.create(annotatedBeanURI + "#enumType"), new PropertyLiteral("A"));
 		
-		PropertyResource propertyResource2 = new PropertyResource(URI.create(annotatedBeanURI + "/configuration2"));
-		propertyResource2.addProperty(URI.create(annotatedBeanURI + "#stringType2"), new PropertyLiteral("string value 2"));
-
 		propertyResource.addProperty(URI.create(annotatedBeanURI + "#beanType"), propertyResource2);
-		propertyResource.addProperty(URI.create(annotatedBeanURI + "#beanType2"), propertyResource2);
+		propertyResource.addProperty(URI.create(annotatedBeanURI + "#beanType2"), propertyResource4);
 
 		PropertyList propertyList = new PropertyList();
 		propertyList.add(new PropertyLiteral("array element 1"));
@@ -158,6 +161,29 @@ public class ActivityServiceImplTest {
 		propertyResource.addProperty(URI.create(annotatedBeanURI + "#setType"), new PropertyLiteral("x"));
 		propertyResource.addProperty(URI.create(annotatedBeanURI + "#setType"), new PropertyLiteral("y"));
 		propertyResource.addProperty(URI.create(annotatedBeanURI + "#setType"), new PropertyLiteral("z"));
+
+		propertyList = new PropertyList();
+		propertyList.add(propertyResource2);
+		propertyList.add(propertyResource3);
+		propertyList.add(propertyResource4);
+		propertyResource.addProperty(URI.create(annotatedBeanURI + "#arrayOfBeanType"), propertyList);
+		propertyList = new PropertyList();
+		propertyList.add(propertyResource3);
+		propertyList.add(propertyResource4);
+		propertyResource.addProperty(URI.create(annotatedBeanURI + "#listOfBeanType"), propertyList);
+		propertyResource.addProperty(URI.create(annotatedBeanURI + "#setOfBeanType"), propertyResource2);
+		propertyResource.addProperty(URI.create(annotatedBeanURI + "#setOfBeanType"), propertyResource3);
+		
+		propertyList = new PropertyList();
+		propertyList.add(new PropertyLiteral("A"));
+		propertyList.add(new PropertyLiteral("B"));
+		propertyResource.addProperty(URI.create(annotatedBeanURI + "#arrayOfEnumType"), propertyList);
+		propertyList = new PropertyList();
+		propertyList.add(new PropertyLiteral("B"));
+		propertyList.add(new PropertyLiteral("A"));
+		propertyResource.addProperty(URI.create(annotatedBeanURI + "#listOfEnumType"), propertyList);
+		propertyResource.addProperty(URI.create(annotatedBeanURI + "#setOfEnumType"), new PropertyLiteral("A"));
+		propertyResource.addProperty(URI.create(annotatedBeanURI + "#setOfEnumType"), new PropertyLiteral("B"));
 	}
 
 	/**
@@ -430,6 +456,136 @@ public class ActivityServiceImplTest {
 		assertFalse(definition.isOrdered());
 		assertTrue(definition.isRequired());
 
+		definition = propertyResourceDefinition.getPropertyDefinition(URI.create(annotatedBeanURI
+				+ "#arrayOfBeanType"));
+		definitionCount++;
+		assertNotNull(definition);
+		assertTrue(definition instanceof PropertyResourceDefinition);
+		assertEquals(URI.create(annotatedBeanURI + "#arrayOfBeanType"),
+				definition.getPredicate());
+		assertEquals(URI.create(annotatedBeanURI + "/configuration2"), ((PropertyResourceDefinition) definition).getTypeURI());
+		assertEquals("", definition.getDescription());
+		assertEquals("", definition.getLabel());
+		assertArrayEquals(new String[0], definition.getOptions());
+		assertTrue(definition.isMultiple());
+		assertTrue(definition.isOrdered());
+		assertTrue(definition.isRequired());
+		definition = ((PropertyResourceDefinition) definition).getPropertyDefinition(URI
+				.create(annotatedBeanURI + "#stringType2"));
+		assertNotNull(definition);
+		assertTrue(definition instanceof PropertyLiteralDefinition);
+		assertEquals(URI.create(annotatedBeanURI + "#stringType2"),
+				definition.getPredicate());
+		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
+		assertEquals("", definition.getDescription());
+		assertEquals("", definition.getLabel());
+		assertArrayEquals(new String[0], definition.getOptions());
+		assertFalse(definition.isMultiple());
+		assertFalse(definition.isOrdered());
+		assertTrue(definition.isRequired());
+
+		definition = propertyResourceDefinition.getPropertyDefinition(URI.create(annotatedBeanURI
+				+ "#listOfBeanType"));
+		definitionCount++;
+		assertNotNull(definition);
+		assertTrue(definition instanceof PropertyResourceDefinition);
+		assertEquals(URI.create(annotatedBeanURI + "#listOfBeanType"),
+				definition.getPredicate());
+		assertEquals(URI.create(annotatedBeanURI + "/configuration2"), ((PropertyResourceDefinition) definition).getTypeURI());
+		assertEquals("", definition.getDescription());
+		assertEquals("", definition.getLabel());
+		assertArrayEquals(new String[0], definition.getOptions());
+		assertTrue(definition.isMultiple());
+		assertTrue(definition.isOrdered());
+		assertTrue(definition.isRequired());
+		definition = ((PropertyResourceDefinition) definition).getPropertyDefinition(URI
+				.create(annotatedBeanURI + "#stringType2"));
+		assertNotNull(definition);
+		assertTrue(definition instanceof PropertyLiteralDefinition);
+		assertEquals(URI.create(annotatedBeanURI + "#stringType2"),
+				definition.getPredicate());
+		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
+		assertEquals("", definition.getDescription());
+		assertEquals("", definition.getLabel());
+		assertArrayEquals(new String[0], definition.getOptions());
+		assertFalse(definition.isMultiple());
+		assertFalse(definition.isOrdered());
+		assertTrue(definition.isRequired());
+
+		definition = propertyResourceDefinition.getPropertyDefinition(URI.create(annotatedBeanURI
+				+ "#setOfBeanType"));
+		definitionCount++;
+		assertNotNull(definition);
+		assertTrue(definition instanceof PropertyResourceDefinition);
+		assertEquals(URI.create(annotatedBeanURI + "#setOfBeanType"),
+				definition.getPredicate());
+		assertEquals(URI.create(annotatedBeanURI + "/configuration2"), ((PropertyResourceDefinition) definition).getTypeURI());
+		assertEquals("", definition.getDescription());
+		assertEquals("", definition.getLabel());
+		assertArrayEquals(new String[0], definition.getOptions());
+		assertTrue(definition.isMultiple());
+		assertFalse(definition.isOrdered());
+		assertTrue(definition.isRequired());
+		definition = ((PropertyResourceDefinition) definition).getPropertyDefinition(URI
+				.create(annotatedBeanURI + "#stringType2"));
+		assertNotNull(definition);
+		assertTrue(definition instanceof PropertyLiteralDefinition);
+		assertEquals(URI.create(annotatedBeanURI + "#stringType2"),
+				definition.getPredicate());
+		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
+		assertEquals("", definition.getDescription());
+		assertEquals("", definition.getLabel());
+		assertArrayEquals(new String[0], definition.getOptions());
+		assertFalse(definition.isMultiple());
+		assertFalse(definition.isOrdered());
+		assertTrue(definition.isRequired());
+		
+		definition = propertyResourceDefinition.getPropertyDefinition(URI.create(annotatedBeanURI
+				+ "#arrayOfEnumType"));
+		definitionCount++;
+		assertNotNull(definition);
+		assertTrue(definition instanceof PropertyLiteralDefinition);
+		assertEquals(URI.create(annotatedBeanURI + "#arrayOfEnumType"),
+				definition.getPredicate());
+		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
+		assertEquals("", definition.getDescription());
+		assertEquals("", definition.getLabel());
+		assertArrayEquals(new String[] {"A", "B"}, definition.getOptions());
+		assertTrue(definition.isMultiple());
+		assertTrue(definition.isOrdered());
+		assertTrue(definition.isRequired());
+
+		definition = propertyResourceDefinition.getPropertyDefinition(URI.create(annotatedBeanURI
+				+ "#listOfEnumType"));
+		definitionCount++;
+		assertNotNull(definition);
+		assertTrue(definition instanceof PropertyLiteralDefinition);
+		assertEquals(URI.create(annotatedBeanURI + "#listOfEnumType"),
+				definition.getPredicate());
+		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
+		assertEquals("", definition.getDescription());
+		assertEquals("", definition.getLabel());
+		assertArrayEquals(new String[] {"A", "B"}, definition.getOptions());
+		assertTrue(definition.isMultiple());
+		assertTrue(definition.isOrdered());
+		assertTrue(definition.isRequired());
+
+		definition = propertyResourceDefinition.getPropertyDefinition(URI.create(annotatedBeanURI
+				+ "#setOfEnumType"));
+		definitionCount++;
+		assertNotNull(definition);
+		assertTrue(definition instanceof PropertyLiteralDefinition);
+		assertEquals(URI.create(annotatedBeanURI + "#setOfEnumType"),
+				definition.getPredicate());
+		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
+		assertEquals("", definition.getDescription());
+		assertEquals("", definition.getLabel());
+		assertArrayEquals(new String[] {"A", "B"}, definition.getOptions());
+		assertTrue(definition.isMultiple());
+		assertFalse(definition.isOrdered());
+		assertTrue(definition.isRequired());
+
+
 		assertEquals(definitionCount, propertyResourceDefinition.getPropertyDefinitions().size());
 	}
 
@@ -457,6 +613,12 @@ public class ActivityServiceImplTest {
 		Object configuration2 = activity2.getConfiguration();
 		assertTrue(configuration2 instanceof ActivityTestBean);
 		ActivityTestBean testBean = (ActivityTestBean) configuration2;
+		ActivityTestBean2 testBean2 = new ActivityTestBean2();
+		testBean2.stringType2 = "string value 2";
+		ActivityTestBean2 testBean3 = new ActivityTestBean2();
+		testBean3.stringType2 = "string value 3";
+		ActivityTestBean2 testBean4 = new ActivityTestBean2();
+		testBean4.stringType2 = "string value 4";
 		assertEquals("string value", testBean.stringType);
 		assertEquals("optional string value", testBean.optionalStringType);
 		assertEquals(5, testBean.integerType);
@@ -465,11 +627,18 @@ public class ActivityServiceImplTest {
 		assertEquals(36.2d, testBean.doubleType, 0.0001);
 		assertEquals(false, testBean.booleanType);
 		assertEquals(ActivityTestEnum.A, testBean.enumType);
-		assertEquals("string value 2", testBean.beanType.stringType2);
-		assertEquals("string value 2", testBean.beanType2.stringType2);
+		assertEquals(testBean2, testBean.beanType);
+		assertEquals(testBean4, testBean.beanType2);
 		assertArrayEquals(new String[] {"array element 1", "array element 2"}, testBean.arrayType);
 		assertEquals(Arrays.asList("1","2","3","4"), testBean.listType);
 		assertEquals(new HashSet<String>(Arrays.asList("x","y","z")), testBean.setType);
+		assertEquals(Arrays.asList("1","2","3","4"), testBean.listType);
+		assertArrayEquals(new ActivityTestBean2[] {testBean2, testBean3,testBean4}, testBean.arrayOfBeanType);
+		assertEquals(Arrays.asList(testBean3,testBean4), testBean.listOfBeanType);
+		assertEquals(new HashSet<ActivityTestBean2>(Arrays.asList(testBean2,testBean3)), testBean.setOfBeanType);
+		assertArrayEquals(new ActivityTestEnum[] {ActivityTestEnum.A, ActivityTestEnum.B}, testBean.arrayOfEnumType);
+		assertEquals(Arrays.asList(ActivityTestEnum.B, ActivityTestEnum.A), testBean.listOfEnumType);
+		assertEquals(new HashSet<ActivityTestEnum>(Arrays.asList(ActivityTestEnum.B, ActivityTestEnum.A)), testBean.setOfEnumType);
 	}
 
 	/**

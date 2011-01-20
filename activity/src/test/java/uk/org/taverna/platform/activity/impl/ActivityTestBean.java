@@ -22,6 +22,8 @@ package uk.org.taverna.platform.activity.impl;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
 
 import net.sf.taverna.t2.workflowmodel.processor.activity.config.ConfigurationBean;
 import net.sf.taverna.t2.workflowmodel.processor.activity.config.ConfigurationProperty;
@@ -44,6 +46,12 @@ public class ActivityTestBean {
 	public String[] arrayType;
 	public List<String> listType;
 	public HashSet<String> setType;
+	public ActivityTestBean2[] arrayOfBeanType;
+	public List<ActivityTestBean2> listOfBeanType;
+	public Set<ActivityTestBean2> setOfBeanType;
+	public ActivityTestEnum[] arrayOfEnumType;
+	public List<ActivityTestEnum> listOfEnumType;
+	public SortedSet<ActivityTestEnum> setOfEnumType;
 	
 	@ConfigurationProperty(name = "stringType")
 	public void setStringType(String parameter) {
@@ -108,6 +116,36 @@ public class ActivityTestBean {
 	@ConfigurationProperty(name = "setType")
 	public void setSetType(HashSet<String> parameter) {
 		setType = parameter;
+	}
+
+	@ConfigurationProperty(name = "arrayOfBeanType")
+	public void setArrayOfBeanType(ActivityTestBean2[] parameter) {
+		arrayOfBeanType = parameter;
+	}
+
+	@ConfigurationProperty(name = "listOfBeanType")
+	public void setListOfBeanType(List<ActivityTestBean2> parameter) {
+		listOfBeanType = parameter;
+	}
+
+	@ConfigurationProperty(name = "setOfBeanType")
+	public void setSetOfBeanType(Set<ActivityTestBean2> parameter) {
+		setOfBeanType = parameter;
+	}
+
+	@ConfigurationProperty(name = "arrayOfEnumType")
+	public void setArrayOfEnumType(ActivityTestEnum[] parameter) {
+		arrayOfEnumType = parameter;
+	}
+
+	@ConfigurationProperty(name = "listOfEnumType")
+	public void setListOfEnumType(List<ActivityTestEnum> parameter) {
+		listOfEnumType = parameter;
+	}
+
+	@ConfigurationProperty(name = "setOfEnumType")
+	public void setSetOfEnumType(SortedSet<ActivityTestEnum> parameter) {
+		setOfEnumType = parameter;
 	}
 
 }

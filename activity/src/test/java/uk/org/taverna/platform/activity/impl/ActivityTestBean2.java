@@ -36,5 +36,31 @@ public class ActivityTestBean2 {
 	public void setStringType(String stringType) {
 		stringType2 = stringType;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((stringType2 == null) ? 0 : stringType2.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ActivityTestBean2 other = (ActivityTestBean2) obj;
+		if (stringType2 == null) {
+			if (other.stringType2 != null)
+				return false;
+		} else if (!stringType2.equals(other.stringType2))
+			return false;
+		return true;
+	}
+	
 }
 
