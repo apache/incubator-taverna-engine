@@ -27,36 +27,43 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
 import java.net.URI;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 import net.sf.taverna.t2.workflowmodel.Configurable;
 import net.sf.taverna.t2.workflowmodel.ConfigurationException;
+import net.sf.taverna.t2.workflowmodel.Dataflow;
 import net.sf.taverna.t2.workflowmodel.Edits;
+import net.sf.taverna.t2.workflowmodel.OutputPort;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityFactory;
-import net.sf.taverna.t2.workflowmodel.processor.activity.config.ActivityPortsDefinitionBean;
+import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityInputPort;
+import net.sf.taverna.t2.workflowmodel.processor.activity.config.ActivityInputPortDefinitionBean;
+import net.sf.taverna.t2.workflowmodel.processor.activity.config.ActivityOutputPortDefinitionBean;
 import net.sf.taverna.t2.workflowmodel.processor.activity.config.ConfigurationBean;
 import net.sf.taverna.t2.workflowmodel.processor.activity.config.ConfigurationProperty;
 
 import org.apache.log4j.Logger;
+import org.jdom.Element;
 
 import uk.org.taverna.platform.activity.ActivityConfigurationException;
 import uk.org.taverna.platform.activity.ActivityNotFoundException;
 import uk.org.taverna.platform.activity.ActivityService;
-import uk.org.taverna.scufl2.api.common.Scufl2Tools;
 import uk.org.taverna.scufl2.api.configurations.Configuration;
 import uk.org.taverna.scufl2.api.configurations.ConfigurationDefinition;
 import uk.org.taverna.scufl2.api.configurations.PropertyDefinition;
 import uk.org.taverna.scufl2.api.configurations.PropertyLiteralDefinition;
 import uk.org.taverna.scufl2.api.configurations.PropertyResourceDefinition;
+import uk.org.taverna.scufl2.api.port.InputActivityPort;
+import uk.org.taverna.scufl2.api.port.OutputActivityPort;
 import uk.org.taverna.scufl2.api.property.MultiplePropertiesException;
 import uk.org.taverna.scufl2.api.property.PropertyException;
 import uk.org.taverna.scufl2.api.property.PropertyList;
@@ -73,9 +80,6 @@ public class ActivityServiceImpl implements ActivityService {
 	private List<ActivityFactory> activityFactories;
 
 	private Edits edits;
-
-	// TODO inject Scufl2Tools as a service
-	private Scufl2Tools scufl2Tools = new Scufl2Tools();
 
 	@Override
 	public List<URI> getActivityURIs() {
@@ -100,143 +104,116 @@ public class ActivityServiceImpl implements ActivityService {
 	public ConfigurationDefinition getActivityConfigurationDefinition(URI uri)
 			throws ActivityNotFoundException, ActivityConfigurationException {
 		ActivityFactory factory = getActivityFactory(uri);
-		return generateConfigurationDefinition(uri, factory.createActivityConfiguration()
-				.getClass());
+		return createConfigurationDefinition(uri, factory.createActivityConfiguration().getClass());
 	}
 
 	@Override
-	public Activity<?> createActivity(URI uri, Configuration configuration/*,
-			Set<InputActivityPort> inputs, Set<OutputActivityPort> outputs*/)
+	public Activity<?> createActivity(URI uri, Configuration configuration)
 			throws ActivityNotFoundException, ActivityConfigurationException {
 		ActivityFactory factory = getActivityFactory(uri);
-		
-		// check configuration is for the correct activity
-		uk.org.taverna.scufl2.api.common.Configurable configurable = configuration.getConfigures();
-		if (configurable instanceof uk.org.taverna.scufl2.api.activity.Activity) {
-			uk.org.taverna.scufl2.api.activity.Activity scufl2Activity = (uk.org.taverna.scufl2.api.activity.Activity) configurable;
-			if (!scufl2Activity.getConfigurableType().equals(uri)) {
-				throw new ActivityConfigurationException(MessageFormat.format(
-						"Expected a configuration for {0} but got a configuration for {1}", uri,
-						scufl2Activity.getConfigurableType()));
-			}
-		} else {
-			throw new ActivityConfigurationException("Configuration does not configure an Activity");
-		}
-		
+
+		// create the activity and inject the edits
 		Activity<?> activity = factory.createActivity();
 		activity.setEdits(edits);
-		Object configurationBean = factory.createActivityConfiguration();
 
-		try {
-			setConfigurationProperties(configurationBean, configuration.getPropertyResource(), uri);
-		} catch (PropertyException e) {
-			throw new ActivityConfigurationException(e);
+		if (configuration != null) {
+			// check configuration is for the correct activity
+			uk.org.taverna.scufl2.api.common.Configurable configurable = configuration.getConfigures();
+			if (configurable instanceof uk.org.taverna.scufl2.api.activity.Activity) {
+				uk.org.taverna.scufl2.api.activity.Activity scufl2Activity = (uk.org.taverna.scufl2.api.activity.Activity) configurable;
+				if (!scufl2Activity.getConfigurableType().equals(uri)) {
+					String message = MessageFormat.format(
+							"Expected a configuration for {0} but got a configuration for {1}", uri,
+							scufl2Activity.getConfigurableType());
+					logger.debug(message);
+					throw new ActivityConfigurationException(message);
+				}
+			} else {
+				String message = "Configuration does not configure an Activity";
+				logger.debug(message);
+				throw new ActivityConfigurationException(message);
+			}
+			// create the configuration bean
+			Object configurationBean = factory.createActivityConfiguration();
+			try {
+				// set the properties on the configuration bean
+				setConfigurationProperties(configurationBean, configuration.getPropertyResource(), uri);
+				// configure the activity with the configuration bean
+				((Configurable) activity).configure(configurationBean);
+			} catch (PropertyException e) {
+				throw new ActivityConfigurationException(e);
+			} catch (ConfigurationException e) {
+				throw new ActivityConfigurationException(e);
+			}
 		}
-
-		if (configurationBean instanceof ActivityPortsDefinitionBean) {
-			// ActivityPortsDefinitionBean activityPortsDefinitionBean =
-			// (ActivityPortsDefinitionBean) configurationBean;
-			// // input port definitions
-			// List<ActivityInputPortDefinitionBean> inputPortDefinitions = new
-			// ArrayList<ActivityInputPortDefinitionBean>();
-			// for (InputActivityPort inputActivityPort : inputs) {
-			// ActivityInputPortDefinitionBean inputPortDefinitionBean = new
-			// ActivityInputPortDefinitionBean();
-			// inputPortDefinitionBean.setName(inputActivityPort.getName());
-			// inputPortDefinitionBean.setDepth(inputActivityPort.getDepth());
-			// inputPortDefinitionBean.setTranslatedElementType(String.class);
-			// inputPortDefinitions.add(inputPortDefinitionBean);
-			// }
-			// // output port definitions
-			// List<ActivityOutputPortDefinitionBean> outputPortDefinitions = new
-			// ArrayList<ActivityOutputPortDefinitionBean>();
-			// for (OutputActivityPort outputActivityPort : outputs) {
-			// ActivityOutputPortDefinitionBean outputPortDefinitionBean = new
-			// ActivityOutputPortDefinitionBean();
-			// outputPortDefinitionBean.setName(outputActivityPort.getName());
-			// outputPortDefinitionBean.setDepth(outputActivityPort.getDepth());
-			// outputPortDefinitions.add(outputPortDefinitionBean);
-			// }
-			// activityPortsDefinitionBean.setInputPortDefinitions(inputPortDefinitions);
-			// activityPortsDefinitionBean.setOutputPortDefinitions(outputPortDefinitions);
-		} else {
-			// for (InputActivityPort inputActivityPort : inputs) {
-			// ActivityInputPort inputPort = edits.createActivityInputPort(
-			// inputActivityPort.getName(), inputActivityPort.getDepth(), false, null,
-			// null);
-			// try {
-			// edits.getAddActivityInputPortEdit(activity, inputPort).doEdit();
-			// } catch (EditException e) {
-			// throw new ActivityConfigurationException(e);
-			// }
-			// }
-			// for (OutputActivityPort outputActivityPort : outputs) {
-			// OutputPort outputPort = edits.createActivityOutputPort(
-			// outputActivityPort.getName(), outputActivityPort.getDepth(),
-			// outputActivityPort.getGranularDepth());
-			// try {
-			// edits.getAddActivityOutputPortEdit(activity, outputPort).doEdit();
-			// } catch (EditException e) {
-			// throw new ActivityConfigurationException(e);
-			// }
-			// }
-		}
-
-		try {
-			((Configurable) activity).configure(configurationBean);
-		} catch (ConfigurationException e) {
-			throw new ActivityConfigurationException(e);
-		}
-
 		return activity;
 	}
 
-	private void setConfigurationProperties(Object configurationBean, PropertyResource propertyResource,
-			URI uri) throws ActivityConfigurationException, PropertyException {
+	@Override
+	public void addDynamicPorts(uk.org.taverna.scufl2.api.activity.Activity scufl2Activity,
+			Configuration configuration) throws ActivityNotFoundException,
+			ActivityConfigurationException {
+		Activity<?> activity = createActivity(scufl2Activity.getConfigurableType(), configuration);
+		Set<ActivityInputPort> inputPorts = activity.getInputPorts();
+		for (ActivityInputPort inputPort : inputPorts) {
+			InputActivityPort inputActivityPort = new InputActivityPort(scufl2Activity,
+					inputPort.getName());
+			inputActivityPort.setDepth(inputPort.getDepth());
+		}
+		Set<OutputPort> outputPorts = activity.getOutputPorts();
+		for (OutputPort outputPort : outputPorts) {
+			OutputActivityPort outputActivityPort = new OutputActivityPort(scufl2Activity,
+					outputPort.getName());
+			outputActivityPort.setDepth(outputPort.getDepth());
+			outputActivityPort.setGranularDepth(outputPort.getGranularDepth());
+		}
+	}
+
+	@Override
+	public void setEdits(Edits edits) {
+		this.edits = edits;
+	}
+
+	@Override
+	public void setActivityFactories(List<ActivityFactory> activityFactories) {
+		this.activityFactories = activityFactories;
+	}
+
+	private void setConfigurationProperties(Object configurationBean,
+			PropertyResource propertyResource, URI uri) throws ActivityConfigurationException,
+			PropertyException {
 		try {
 			Class<?> configurationClass = configurationBean.getClass();
-			ConfigurationDefinition definition = generateConfigurationDefinition(uri, configurationClass);
+			ConfigurationDefinition definition = createConfigurationDefinition(uri,
+					configurationClass);
 
-			for (PropertyDefinition propertyDefinition : definition.getPropertyResourceDefinition().getPropertyDefinitions()) {
+			for (PropertyDefinition propertyDefinition : definition.getPropertyResourceDefinition()
+					.getPropertyDefinitions()) {
 				URI predicate = propertyDefinition.getPredicate();
 				Method method = getPropertySetMethod(configurationClass,
 						propertyDefinition.getName());
 				Class<?>[] parameterTypes = method.getParameterTypes();
-				if (parameterTypes.length != 1) {
+				Type[] genericParameterTypes = method.getGenericParameterTypes();
+				if (parameterTypes.length != 1 || genericParameterTypes.length != 1) {
 					throw new ActivityConfigurationException(MessageFormat.format(
 							"Property set method has {0} parameters; expected 1",
 							parameterTypes.length));
 				}
 				Class<?> parameterType = parameterTypes[0];
+				Type genericParameterType = genericParameterTypes[0];
+				Class<?> propertyType = parameterType;
+				Class<?> elementType = getElementType(genericParameterType);
+				if (elementType != null) {
+					propertyType = elementType;
+				}
+
 				List<Object> propertyValues = new ArrayList<Object>();
 				URI type = null;
 				if (propertyDefinition instanceof PropertyLiteralDefinition) {
 					PropertyLiteralDefinition dataPropertyDefinition = (PropertyLiteralDefinition) propertyDefinition;
-					List<PropertyLiteral> literals = new ArrayList<PropertyLiteral>();
-					if (propertyDefinition.isOrdered()) {
-						PropertyObject property = propertyResource.getProperty(predicate);
-						if (property instanceof PropertyList) {
-							PropertyList propertyList = (PropertyList) property;
-							for (PropertyObject propertyObject : propertyList) {
-								if (propertyObject instanceof PropertyLiteral) {
-									literals.add((PropertyLiteral) propertyObject);
-								} else {
-									throw new UnexpectedPropertyException("Expected a PropertyList of PropertyLiteral", predicate, propertyResource);
-								}
-							}
-						} else {
-							throw new UnexpectedPropertyException("Expected a PropertyList", predicate, propertyResource);
-						}
-					} else {
-						literals.addAll(propertyResource.getPropertiesAsLiterals(predicate));
-					}
-					if (literals.size() == 0 && propertyDefinition.isRequired()) {
-						throw new PropertyNotFoundException(predicate, propertyResource);
-					}
-					if (literals.size() > 1 && !propertyDefinition.isMultiple()) {
-						throw new MultiplePropertiesException(predicate, propertyResource);
-					}
 					type = dataPropertyDefinition.getLiteralType();
+					List<PropertyLiteral> literals = getProperties(predicate, propertyDefinition,
+							propertyResource, PropertyLiteral.class);
 					for (PropertyLiteral literal : literals) {
 						if (!literal.getLiteralType().equals(type)) {
 							throw new ActivityConfigurationException(MessageFormat.format(
@@ -246,16 +223,16 @@ public class ActivityServiceImpl implements ActivityService {
 									literal.getLiteralType()));
 						}
 						if (type.equals(PropertyLiteral.XSD_STRING)) {
-							String literalValue = literal.getLiteralValue();
-							if (parameterType.isEnum()) {
-								for (Object enumConstant : parameterType.getEnumConstants()) {
-									if (((Enum<?>) enumConstant).name().equals(literalValue)) {
+							if (propertyType.isEnum()) {
+								for (Object enumConstant : propertyType.getEnumConstants()) {
+									if (((Enum<?>) enumConstant).name().equals(
+											literal.getLiteralValue())) {
 										propertyValues.add(enumConstant);
 										break;
 									}
 								}
 							} else {
-								propertyValues.add(literalValue);
+								propertyValues.add(literal.getLiteralValue());
 							}
 						} else if (type.equals(PropertyLiteral.XSD_INT)) {
 							propertyValues.add(literal.getLiteralValueAsInt());
@@ -270,56 +247,53 @@ public class ActivityServiceImpl implements ActivityService {
 						} else {
 							// TODO
 						}
-
 					}
 				} else if (propertyDefinition instanceof PropertyResourceDefinition) {
 					PropertyResourceDefinition propertyResourceDefinition = (PropertyResourceDefinition) propertyDefinition;
 					type = propertyResourceDefinition.getTypeURI();
-					List<PropertyResource> resources = new ArrayList<PropertyResource>();
-					if (propertyDefinition.isOrdered()) {
-						PropertyObject property = propertyResource.getProperty(predicate);
-						if (property instanceof PropertyList) {
-							PropertyList propertyList = (PropertyList) property;
-							for (PropertyObject propertyObject : propertyList) {
-								if (propertyObject instanceof PropertyResource) {
-									resources.add((PropertyResource) propertyObject);
-								} else {
-									throw new UnexpectedPropertyException("Expected a PropertyList of PropertyResource", predicate, propertyResource);
-								}
-							}
-						} else {
-							throw new UnexpectedPropertyException("Expected a PropertyList", predicate, propertyResource);
-						}
-					} else {
-						resources.addAll(propertyResource.getPropertiesAsResources(predicate));
-					}
-					if (resources.isEmpty() && propertyDefinition.isRequired()) {
-						throw new PropertyNotFoundException(predicate, propertyResource);
-					}
-					if (resources.size() > 1 && !propertyDefinition.isMultiple()) {
-						throw new MultiplePropertiesException(predicate, propertyResource);
-					}
+					List<PropertyResource> resources = getProperties(predicate, propertyDefinition,
+							propertyResource, PropertyResource.class);
 					for (PropertyResource resource : resources) {
-						Object configurationObject = parameterType.newInstance();
-						setConfigurationProperties(configurationObject, resource, uri);
-						propertyValues.add(configurationObject);
+						// special cases
+						if (propertyDefinition.getName().equals("definesInputPort")) {
+							URI resourceURI = resource.getResourceURI();
+							InputActivityPort inputActivityPort = null; // dereference uri
+							ActivityInputPortDefinitionBean inputPortDefinitionBean = new ActivityInputPortDefinitionBean();
+							inputPortDefinitionBean.setName(inputActivityPort.getName());
+							inputPortDefinitionBean.setDepth(inputActivityPort.getDepth());
+							inputPortDefinitionBean.setTranslatedElementType(String.class);
+							propertyValues.add(inputPortDefinitionBean);
+						} else if (propertyDefinition.getName().equals("definesOutputPort")) {
+							URI resourceURI = resource.getResourceURI();
+							OutputActivityPort outputActivityPort = null; // dereference uri
+							ActivityOutputPortDefinitionBean outputPortDefinitionBean = new ActivityOutputPortDefinitionBean();
+							outputPortDefinitionBean.setName(outputActivityPort.getName());
+							outputPortDefinitionBean.setDepth(outputActivityPort.getDepth());
+							propertyValues.add(outputPortDefinitionBean);
+						} else {
+							Object configurationObject = propertyType.newInstance();
+							setConfigurationProperties(configurationObject, resource, uri);
+							propertyValues.add(configurationObject);
+						}
 					}
 				}
+
 				if (propertyDefinition.isMultiple()) {
 					if (Collection.class.isAssignableFrom(parameterType)) {
 						Class<?> collectionImplementation = getCollectionImplementation(parameterType);
-						Object collectionObject = collectionImplementation.getConstructor(Collection.class)
-							.newInstance(propertyValues);
+						Object collectionObject = collectionImplementation.getConstructor(
+								Collection.class).newInstance(propertyValues);
 						method.invoke(configurationBean, collectionObject);
 					} else if (parameterType.isArray()) {
-						Object array = Array.newInstance(parameterType.getComponentType(), propertyValues.size());
+						Object array = Array.newInstance(parameterType.getComponentType(),
+								propertyValues.size());
 						for (int i = 0; i < propertyValues.size(); i++) {
 							Array.set(array, i, propertyValues.get(i));
 						}
 						method.invoke(configurationBean, array);
 					} else {
-						throw new ActivityConfigurationException(MessageFormat.format("Expected a Collection or an array but found {0}",
-								parameterType));
+						throw new ActivityConfigurationException(MessageFormat.format(
+								"Expected a Collection or an array but found {0}", parameterType));
 					}
 				} else {
 					// TODO check that we have one value here
@@ -343,15 +317,183 @@ public class ActivityServiceImpl implements ActivityService {
 		}
 	}
 
-	private Class<?> getCollectionImplementation(Class<?> collectionClass) {
-		if (collectionClass.isInterface() || Modifier.isAbstract(collectionClass.getModifiers())) {
-			if (Set.class.isAssignableFrom(collectionClass)) {
-				return TreeSet.class;
+	private <T extends PropertyObject> List<T> getProperties(URI predicate,
+			PropertyDefinition propertyDefinition, PropertyResource propertyResource,
+			Class<T> propertyType) throws PropertyNotFoundException, MultiplePropertiesException,
+			UnexpectedPropertyException {
+		List<T> properties = new ArrayList<T>();
+		if (propertyDefinition.isOrdered()) {
+			PropertyObject property = propertyResource.getProperty(predicate);
+			if (property instanceof PropertyList) {
+				PropertyList propertyList = (PropertyList) property;
+				for (PropertyObject propertyObject : propertyList) {
+					if (propertyType.isInstance(propertyObject)) {
+						properties.add(propertyType.cast(propertyObject));
+					} else {
+						throw new UnexpectedPropertyException("Expected a PropertyList of "
+								+ propertyType.getSimpleName(), predicate, propertyResource);
+					}
+				}
 			} else {
-				return LinkedList.class;
+				throw new UnexpectedPropertyException("Expected a PropertyList", predicate,
+						propertyResource);
+			}
+		} else {
+			properties.addAll(propertyResource.getPropertiesOfType(predicate, propertyType));
+		}
+		if (properties.size() == 0 && propertyDefinition.isRequired()) {
+			throw new PropertyNotFoundException(predicate, propertyResource);
+		}
+		if (properties.size() > 1 && !propertyDefinition.isMultiple()) {
+			throw new MultiplePropertiesException(predicate, propertyResource);
+		}
+		return properties;
+	}
+
+	private ConfigurationDefinition createConfigurationDefinition(URI uri,
+			Class<?> configurationClass) throws ActivityConfigurationException {
+		
+		ConfigurationDefinition configurationDefinition = new ConfigurationDefinition(uri);
+		PropertyResourceDefinition propertyResourceDefinition = configurationDefinition
+				.getPropertyResourceDefinition();
+
+		ConfigurationBean configurationBean = configurationClass
+				.getAnnotation(ConfigurationBean.class);
+		if (configurationBean == null) {
+			if (configurationClass.equals(Dataflow.class)) {
+				// TODO dataflow activity
+				propertyResourceDefinition.setPredicate(uri.resolve("#dataflow"));
+				propertyResourceDefinition.setTypeURI(URI.create("java:" + Dataflow.class.getName()));
+				propertyResourceDefinition.setName("dataflow");
+				propertyResourceDefinition.setLabel("Nested Workflow");
+				
+//				 PropertyResourceDefinition definition = new PropertyResourceDefinition(uri.resolve("#dataflow"), null, "dataflow", "Dataflow", "",
+//						true, false, false);
+//				 propertyResourceDefinition.setPropertyDefinitions(Collections.<PropertyDefinition>singletonList(definition));
+			} else if (configurationClass.equals(Element.class)) {
+				// TODO biomart activity
+			} else {
+				throw new ActivityConfigurationException("Configuration bean is not annotated");
+			}
+		} else {
+			propertyResourceDefinition.setPropertyDefinitions(createPropertyDefinitions(uri,
+					configurationClass));
+		}
+
+		return configurationDefinition;
+	}
+
+	private List<PropertyDefinition> createPropertyDefinitions(URI activityURI,
+			Class<?> configurationClass) {
+		List<PropertyDefinition> propertyDefinitions = new ArrayList<PropertyDefinition>();
+		Method[] methods = configurationClass.getMethods();
+		for (Method method : methods) {
+			ConfigurationProperty property = method.getAnnotation(ConfigurationProperty.class);
+			if (property != null && method.getParameterTypes().length == 1) {
+				Class<?>[] parameterTypes = method.getParameterTypes();
+				Type[] genericParameterTypes = method.getGenericParameterTypes();
+				if (parameterTypes.length == 1 && genericParameterTypes.length == 1) {
+					Class<?> type = parameterTypes[0];
+					Class<?> elementType = getElementType(genericParameterTypes[0]);
+					String name = property.name();
+					String label = property.label();
+					String description = property.description();
+					boolean required = property.required();
+					boolean multiple = elementType != null;
+					boolean ordered = type.isArray() || List.class.isAssignableFrom(type);
+
+					propertyDefinitions
+							.add(createPropertyDefinition(activityURI, name, label, description,
+									required, multiple, ordered, multiple ? elementType : type));
+				}
+
 			}
 		}
-		return collectionClass;
+		return propertyDefinitions;
+	}
+
+	private PropertyDefinition createPropertyDefinition(URI activityURI, String name, String label,
+			String description, boolean required, boolean multiple, boolean ordered, Class<?> type) {
+		URI predicate = activityURI.resolve("#" + name);
+		if (type.isEnum()) {
+			return new PropertyLiteralDefinition(predicate, PropertyLiteral.XSD_STRING, name,
+					label, description, required, multiple, ordered, getOptions(type));
+		} else if (type.equals(String.class)) {
+			return new PropertyLiteralDefinition(predicate, PropertyLiteral.XSD_STRING, name,
+					label, description, required, multiple, ordered);
+		} else if (type.equals(Integer.class) || type.equals(Integer.TYPE)) {
+			return new PropertyLiteralDefinition(predicate, PropertyLiteral.XSD_INT, name, label,
+					description, required, multiple, ordered);
+		} else if (type.equals(Long.class) || type.equals(Long.TYPE)) {
+			return new PropertyLiteralDefinition(predicate, PropertyLiteral.XSD_LONG, name, label,
+					description, required, multiple, ordered);
+		} else if (type.equals(Float.class) || type.equals(Float.TYPE)) {
+			return new PropertyLiteralDefinition(predicate, PropertyLiteral.XSD_FLOAT, name, label,
+					description, required, multiple, ordered);
+		} else if (type.equals(Double.class) || type.equals(Double.TYPE)) {
+			return new PropertyLiteralDefinition(predicate, PropertyLiteral.XSD_DOUBLE, name,
+					label, description, required, multiple, ordered);
+		} else if (type.equals(Boolean.class) || type.equals(Boolean.TYPE)) {
+			return new PropertyLiteralDefinition(predicate, PropertyLiteral.XSD_BOOLEAN, name,
+					label, description, required, multiple, ordered);
+		} else {
+			ConfigurationBean configurationBean = type.getAnnotation(ConfigurationBean.class);
+			if (configurationBean == null) {
+				// TODO special cases
+				URI typeURI = null;
+				if (type.equals(ActivityInputPortDefinitionBean.class)) {
+					name = "definesInputPort";
+					predicate = activityURI.resolve("#" + name);
+				} else if (type.equals(ActivityOutputPortDefinitionBean.class)) {
+					name = "definesOutputPort";
+					predicate = activityURI.resolve("#" + name);
+				} else {
+					// should throw an exception ? or XSD_ANY ?
+					typeURI = URI.create("java:" + type.getName());
+				}
+				return new PropertyResourceDefinition(predicate, typeURI, name, label, description,
+						required, multiple, ordered);
+			} else {
+				URI typeURI = URI.create(configurationBean.uri());
+				return new PropertyResourceDefinition(predicate, typeURI, name, label, description,
+						required, multiple, ordered, createPropertyDefinitions(activityURI, type));
+			}
+		}
+	}
+
+	private Class<?> getElementType(Type type) {
+		if (type instanceof ParameterizedType) {
+			ParameterizedType parameterizedType = (ParameterizedType) type;
+			Type rawType = parameterizedType.getRawType();
+			if (rawType instanceof Class) {
+				Class<?> rawClass = (Class<?>) rawType;
+				if (Collection.class.isAssignableFrom(rawClass)) {
+					Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+					if (actualTypeArguments.length == 1) {
+						Type actualTypeArgument = actualTypeArguments[0];
+						if (actualTypeArgument instanceof Class) {
+							return (Class<?>) actualTypeArgument;
+						}
+					}
+				}
+			}
+		} else if (type instanceof GenericArrayType) {
+			GenericArrayType genericArrayType = (GenericArrayType) type;
+			Type componentType = genericArrayType.getGenericComponentType();
+			if (componentType instanceof ParameterizedType) {
+				ParameterizedType parameterizedType = (ParameterizedType) componentType;
+				Type rawType = parameterizedType.getRawType();
+				if (rawType instanceof Class) {
+					return (Class<?>) rawType;
+				}
+			}
+		} else if (type instanceof Class) {
+			Class<?> classType = (Class<?>) type;
+			if (classType.isArray()) {
+				return classType.getComponentType();
+			}
+		}
+		return null;
 	}
 
 	private Method getPropertySetMethod(Class<?> configurationClass, String name) {
@@ -366,135 +508,17 @@ public class ActivityServiceImpl implements ActivityService {
 		return null;
 	}
 
-	@Override
-	public void setActivityFactories(List<ActivityFactory> activityFactories) {
-		this.activityFactories = activityFactories;
-	}
-
-	private ConfigurationDefinition generateConfigurationDefinition(URI uri,
-			Class<?> configurationClass) throws ActivityConfigurationException {
-		ConfigurationBean configurationBean = configurationClass
-				.getAnnotation(ConfigurationBean.class);
-		if (configurationBean == null) {
-			// TODO special cases for Dataflow and Element (BioMART)
-			throw new ActivityConfigurationException("Configuration bean is not annotated");
-		}
-		
-		ConfigurationDefinition configurationDefinition = new ConfigurationDefinition(uri);
-		PropertyResourceDefinition propertyResourceDefinition = configurationDefinition.getPropertyResourceDefinition();
-		propertyResourceDefinition.setPropertyDefinitions(getPropertyDefinitions(uri,configurationClass));
-		return configurationDefinition;
-	}
-
-	private List<PropertyDefinition> getPropertyDefinitions(URI activityURI,
-			Class<?> configurationClass) {
-		List<PropertyDefinition> propertyDefinitions = new ArrayList<PropertyDefinition>();
-		Method[] methods = configurationClass.getMethods();
-		for (Method method : methods) {
-			ConfigurationProperty property = method.getAnnotation(ConfigurationProperty.class);
-			if (property != null && method.getParameterTypes().length == 1) {
-				Type[] parameterTypes = method.getGenericParameterTypes();
-				if (parameterTypes.length == 1) {
-					Type type = parameterTypes[0];
-					String name = property.name();
-					String label = property.label();
-					String description = property.description();
-					boolean required = property.required();
-
-					if (type instanceof ParameterizedType) {
-						ParameterizedType parameterizedType = (ParameterizedType) type;
-						Type rawType = parameterizedType.getRawType();
-						if (rawType instanceof Class) {
-							Class<?> rawClass = (Class<?>) rawType;
-							if (Collection.class.isAssignableFrom(rawClass)) {
-								Type[] actualTypeArguments = parameterizedType
-										.getActualTypeArguments();
-								if (actualTypeArguments.length == 1) {
-									Type actualTypeArgument = actualTypeArguments[0];
-									if (actualTypeArgument instanceof Class) {
-										propertyDefinitions.add(createPropertyDefinition(
-												activityURI, name, label, description, required,
-												true, List.class.isAssignableFrom(rawClass),
-												(Class<?>) actualTypeArgument));
-									}
-								}
-							} else {
-								propertyDefinitions.add(createPropertyDefinition(activityURI, name,
-										label, description, required, false, false, rawClass));
-							}
-						}
-					} else if (type instanceof GenericArrayType) {
-						GenericArrayType genericArrayType = (GenericArrayType) type;
-						Type componentType = genericArrayType.getGenericComponentType();
-						if (componentType instanceof ParameterizedType) {
-							ParameterizedType parameterizedType = (ParameterizedType) componentType;
-							Type rawType = parameterizedType.getRawType();
-							if (rawType instanceof Class) {
-								propertyDefinitions.add(createPropertyDefinition(activityURI, name,
-										label, description, required, true, true, (Class<?>) rawType));
-							}
-							// TODO else case
-						} else if (componentType instanceof TypeVariable) {
-							// TODO can't really support this case - throw an exception?
-							propertyDefinitions.add(createPropertyDefinition(activityURI, name,
-									label, description, required, true, true, Object.class));
-						}
-					} else if (type instanceof Class) {
-						Class<?> classType = (Class<?>) type;
-						if (classType.isArray()) {
-							propertyDefinitions.add(createPropertyDefinition(activityURI, name,
-									label, description, required, true, true,
-									classType.getComponentType()));
-						} else {
-							propertyDefinitions.add(createPropertyDefinition(activityURI, name,
-									label, description, required, false, false, classType));
-						}
-					}
-					//TODO else case
-				}
-
-			}
-		}
-		return propertyDefinitions;
-	}
-
-	private PropertyDefinition createPropertyDefinition(URI activityURI, String name, String label,
-			String description, boolean required, boolean multiple, boolean ordered, Class<?> type) {
-		URI predicate = activityURI.resolve("#" + name);
-		if (type.isEnum()) {
-			return new PropertyLiteralDefinition(predicate, PropertyLiteral.XSD_STRING, name, label,
-					description, required, multiple, ordered, getOptions(type));
-		} else if (type.equals(String.class)) {
-			return new PropertyLiteralDefinition(predicate, PropertyLiteral.XSD_STRING, name, label,
-					description, required, multiple, ordered);
-		} else if (type.equals(Integer.class) || type.equals(Integer.TYPE)) {
-			return new PropertyLiteralDefinition(predicate, PropertyLiteral.XSD_INT, name, label,
-					description, required, multiple, ordered);
-		} else if (type.equals(Long.class) || type.equals(Long.TYPE)) {
-			return new PropertyLiteralDefinition(predicate, PropertyLiteral.XSD_LONG, name, label,
-					description, required, multiple, ordered);
-		} else if (type.equals(Float.class) || type.equals(Float.TYPE)) {
-			return new PropertyLiteralDefinition(predicate, PropertyLiteral.XSD_FLOAT, name, label,
-					description, required, multiple, ordered);
-		} else if (type.equals(Double.class) || type.equals(Double.TYPE)) {
-			return new PropertyLiteralDefinition(predicate, PropertyLiteral.XSD_DOUBLE, name, label,
-					description, required, multiple, ordered);
-		} else if (type.equals(Boolean.class) || type.equals(Boolean.TYPE)) {
-			return new PropertyLiteralDefinition(predicate, PropertyLiteral.XSD_BOOLEAN, name, label,
-					description, required, multiple, ordered);
-		} else {
-			ConfigurationBean configurationBean = type.getAnnotation(ConfigurationBean.class);
-			if (configurationBean == null) {
-				// TODO special cases
-				URI objectClass = URI.create("java:" + type.getName());
-				return new PropertyResourceDefinition(predicate, objectClass, name, label,
-						description, required, multiple, ordered);
+	private Class<?> getCollectionImplementation(Class<?> collectionClass) {
+		if (collectionClass.isInterface() || Modifier.isAbstract(collectionClass.getModifiers())) {
+			if (SortedSet.class.isAssignableFrom(collectionClass)) {
+				return TreeSet.class;
+			} else if (Set.class.isAssignableFrom(collectionClass)) {
+				return HashSet.class;
 			} else {
-				URI objectClass = URI.create(configurationBean.uri());
-				return new PropertyResourceDefinition(predicate, objectClass, name, label,
-						description, required, multiple, ordered, getPropertyDefinitions(activityURI, type));
+				return LinkedList.class;
 			}
 		}
+		return collectionClass;
 	}
 
 	private String[] getOptions(Class<?> enumType) {
@@ -512,19 +536,6 @@ public class ActivityServiceImpl implements ActivityService {
 			}
 		}
 		throw new ActivityNotFoundException("Could not find an activity for " + uri);
-	}
-
-	@Override
-	public void setEdits(Edits edits) {
-		this.edits = edits;
-	}
-
-	@Override
-	public void addDynamicPorts(uk.org.taverna.scufl2.api.activity.Activity activity,
-			Configuration configuration) throws ActivityNotFoundException,
-			ActivityConfigurationException {
-		createActivity(activity.getConfigurableType(), configuration);
-
 	}
 
 }
