@@ -29,59 +29,33 @@ public class RunProfile {
 	 * 
 	 * @param workflowBundle
 	 *            the <code>WorkflowBundle</code> containing the workflow to run
-	 * @param profile
-	 *            the <code>Profile</code> to use when running the <code>Workflow</code>
 	 * @param referenceService
 	 *            the <code>ReferenceService</code> used to register the inputs and outputs
 	 * @param executionService
 	 *            the <code>ExecutionService</code> used to execute the <code>Workflow</code>
 	 */
-	public RunProfile(WorkflowBundle workflowBundle, Profile profile,
-			ReferenceService referenceService, ExecutionService executionService) {
-		this(workflowBundle, null, profile, null, referenceService, executionService);
-	}
-
-	/**
-	 * Constructs a <code>RunProfile</code> that specifies the parameters required to run a
-	 * <code>Workflow</code>.
-	 * 
-	 * @param workflowBundle
-	 *            the <code>WorkflowBundle</code> containing the workflow to run
-	 * @param workflow
-	 *            the <code>Workflow</code> to run
-	 * @param profile
-	 *            the <code>Profile</code> to use when running the <code>Workflow</code>
-	 * @param inputs
-	 *            the inputs for the <code>Workflow</code>
-	 * @param referenceService
-	 *            the <code>ReferenceService</code> used to register the inputs and outputs
-	 * @param executionService
-	 *            the <code>ExecutionService</code> used to execute the <code>Workflow</code>
-	 */
-	public RunProfile(WorkflowBundle workflowBundle, Workflow workflow, Profile profile,
-			ReferenceService referenceService, ExecutionService executionService) {
-		this(workflowBundle, workflow, profile, null, referenceService, executionService);
-	}
-
-	/**
-	 * Constructs a <code>RunProfile</code> that specifies the parameters required to run a
-	 * <code>Workflow</code>.
-	 * 
-	 * @param workflowBundle
-	 *            the <code>WorkflowBundle</code> containing the workflow to run
-	 * @param profile
-	 *            the <code>Profile</code> to use when running the <code>Workflow</code>
-	 * @param inputs
-	 *            the inputs for the <code>Workflow</code>
-	 * @param referenceService
-	 *            the <code>ReferenceService</code> used to register the inputs and outputs
-	 * @param executionService
-	 *            the <code>ExecutionService</code> used to execute the <code>Workflow</code>
-	 */
-	public RunProfile(WorkflowBundle workflowBundle, Profile profile,
-			Map<String, T2Reference> inputs, ReferenceService referenceService,
+	public RunProfile(WorkflowBundle workflowBundle, ReferenceService referenceService,
 			ExecutionService executionService) {
-		this(workflowBundle, null, profile, inputs, referenceService, executionService);
+		this(workflowBundle, null, null, null, referenceService, executionService);
+	}
+
+	/**
+	 * Constructs a <code>RunProfile</code> that specifies the parameters required to run a
+	 * <code>Workflow</code>.
+	 * 
+	 * @param workflowBundle
+	 *            the <code>WorkflowBundle</code> containing the workflow to run
+	 * @param inputs
+	 *            the inputs for the <code>Workflow</code>. Can be <code>null</code> if there are no
+	 *            inputs
+	 * @param referenceService
+	 *            the <code>ReferenceService</code> used to register the inputs and outputs
+	 * @param executionService
+	 *            the <code>ExecutionService</code> used to execute the <code>Workflow</code>
+	 */
+	public RunProfile(WorkflowBundle workflowBundle, Map<String, T2Reference> inputs,
+			ReferenceService referenceService, ExecutionService executionService) {
+		this(workflowBundle, null, null, inputs, referenceService, executionService);
 	}
 
 	/**
@@ -91,11 +65,14 @@ public class RunProfile {
 	 * @param workflowBundle
 	 *            the <code>WorkflowBundle</code> containing the workflow to run
 	 * @param workflow
-	 *            the <code>Workflow</code> to run
+	 *            the <code>Workflow</code> to run. If <code>null</code> uses the main
+	 *            <code>Workflow</code> from the <code>WorkflowBundle</code>
 	 * @param profile
-	 *            the <code>Profile</code> to use when running the <code>Workflow</code>
+	 *            the <code>Profile</code> to use when running the <code>Workflow</code>. If null
+	 *            uses the main <code>Profile</code> from the <code>WorkflowBundle</code>
 	 * @param inputs
-	 *            the inputs for the <code>Workflow</code>
+	 *            the inputs for the <code>Workflow</code>. Can be <code>null</code> if there are no
+	 *            inputs
 	 * @param referenceService
 	 *            the <code>ReferenceService</code> used to register the inputs and outputs
 	 * @param executionService
