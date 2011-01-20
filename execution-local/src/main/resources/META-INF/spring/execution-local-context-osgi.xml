@@ -11,4 +11,6 @@
     
     <reference id="workflowModelEdits" interface="net.sf.taverna.t2.workflowmodel.Edits" />
   
+    <reference id="activityService" interface="uk.org.taverna.platform.activity.ActivityService" />
+  
 </beans:beans>

@@ -42,6 +42,7 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 
 import org.apache.log4j.Logger;
 
+import uk.org.taverna.platform.activity.ActivityService;
 import uk.org.taverna.platform.execution.api.AbstractExecution;
 import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
 import uk.org.taverna.platform.report.WorkflowReport;
@@ -58,8 +59,6 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 
 	private static Logger logger = Logger.getLogger(LocalExecution.class);
 
-	private Edits edits;
-
 	private WorkflowToDataflowMapper mapping;
 
 	private WorkflowInstanceFacade facade;
@@ -67,12 +66,11 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 	private LocalExecutionMonitor executionMonitor;
 
 	public LocalExecution(WorkflowBundle workflowBundle, Workflow workflow, Profile profile,
-			Map<String, T2Reference> inputs, ReferenceService referenceService, Edits edits)
+			Map<String, T2Reference> inputs, ReferenceService referenceService, Edits edits, ActivityService activityService)
 			throws InvalidWorkflowException {
 		super(workflowBundle, workflow, profile, inputs, referenceService);
-		this.edits = edits;
 		try {
-			mapping = new WorkflowToDataflowMapper(workflowBundle, workflow, profile, edits);
+			mapping = new WorkflowToDataflowMapper(workflowBundle, workflow, profile, edits, activityService);
 			Dataflow dataflow = mapping.getDataflow();
 			printDataflow(dataflow);
 			facade = edits.createWorkflowInstanceFacade(dataflow, createContext(), "");

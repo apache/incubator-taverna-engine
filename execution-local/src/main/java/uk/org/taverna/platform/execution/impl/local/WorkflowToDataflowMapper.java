@@ -20,15 +20,14 @@
  ******************************************************************************/
 package uk.org.taverna.platform.execution.impl.local;
 
-import java.util.ArrayList;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import net.sf.taverna.t2.activities.beanshell.BeanshellActivity;
-import net.sf.taverna.t2.activities.beanshell.BeanshellActivityConfigurationBean;
+import net.sf.taverna.t2.workflowmodel.Configurable;
+import net.sf.taverna.t2.workflowmodel.ConfigurationException;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
 import net.sf.taverna.t2.workflowmodel.DataflowInputPort;
 import net.sf.taverna.t2.workflowmodel.DataflowOutputPort;
@@ -39,16 +38,13 @@ import net.sf.taverna.t2.workflowmodel.EventForwardingOutputPort;
 import net.sf.taverna.t2.workflowmodel.EventHandlingInputPort;
 import net.sf.taverna.t2.workflowmodel.ProcessorInputPort;
 import net.sf.taverna.t2.workflowmodel.ProcessorOutputPort;
-import net.sf.taverna.t2.workflowmodel.processor.activity.config.ActivityInputPortDefinitionBean;
-import net.sf.taverna.t2.workflowmodel.processor.activity.config.ActivityOutputPortDefinitionBean;
+import uk.org.taverna.platform.activity.ActivityConfigurationException;
+import uk.org.taverna.platform.activity.ActivityNotFoundException;
+import uk.org.taverna.platform.activity.ActivityService;
 import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
 import uk.org.taverna.scufl2.api.activity.Activity;
-import uk.org.taverna.scufl2.api.activity.InputActivityPort;
-import uk.org.taverna.scufl2.api.activity.OutputActivityPort;
-import uk.org.taverna.scufl2.api.common.NamedSet;
+import uk.org.taverna.scufl2.api.common.Scufl2Tools;
 import uk.org.taverna.scufl2.api.configurations.Configuration;
-import uk.org.taverna.scufl2.api.configurations.DataProperty;
-import uk.org.taverna.scufl2.api.configurations.Property;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.DataLink;
 import uk.org.taverna.scufl2.api.core.Processor;
@@ -56,8 +52,10 @@ import uk.org.taverna.scufl2.api.core.RunAfterCondition;
 import uk.org.taverna.scufl2.api.core.StartCondition;
 import uk.org.taverna.scufl2.api.core.Workflow;
 import uk.org.taverna.scufl2.api.dispatchstack.DispatchStack;
+import uk.org.taverna.scufl2.api.port.InputActivityPort;
 import uk.org.taverna.scufl2.api.port.InputProcessorPort;
 import uk.org.taverna.scufl2.api.port.InputWorkflowPort;
+import uk.org.taverna.scufl2.api.port.OutputActivityPort;
 import uk.org.taverna.scufl2.api.port.OutputProcessorPort;
 import uk.org.taverna.scufl2.api.port.OutputWorkflowPort;
 import uk.org.taverna.scufl2.api.port.Port;
@@ -67,6 +65,7 @@ import uk.org.taverna.scufl2.api.profiles.ProcessorBinding;
 import uk.org.taverna.scufl2.api.profiles.ProcessorInputPortBinding;
 import uk.org.taverna.scufl2.api.profiles.ProcessorOutputPortBinding;
 import uk.org.taverna.scufl2.api.profiles.Profile;
+import uk.org.taverna.scufl2.api.property.PropertyNotFoundException;
 
 /**
  * Translates a scufl2 {@link Workflow} into a {@link Dataflow}.
@@ -76,6 +75,8 @@ import uk.org.taverna.scufl2.api.profiles.Profile;
 public class WorkflowToDataflowMapper {
 
 	private Edits edits;
+
+	private Scufl2Tools scufl2Tools;
 
 	private Map<Port, EventHandlingInputPort> inputPorts;
 
@@ -92,7 +93,7 @@ public class WorkflowToDataflowMapper {
 	private Map<Activity, net.sf.taverna.t2.workflowmodel.processor.activity.Activity<?>> workflowToDataflowActivities;
 
 	private Map<net.sf.taverna.t2.workflowmodel.processor.activity.Activity<?>, Activity> dataflowToWorkflowActivities;
-	
+
 	private final WorkflowBundle workflowBundle;
 
 	private final Workflow workflow;
@@ -101,11 +102,18 @@ public class WorkflowToDataflowMapper {
 
 	private final Dataflow dataflow;
 
-	public WorkflowToDataflowMapper(WorkflowBundle workflowBundle, Workflow workflow, Profile profile, Edits edits) throws InvalidWorkflowException {
+	private final ActivityService activityService;
+
+	public WorkflowToDataflowMapper(WorkflowBundle workflowBundle, Workflow workflow,
+			Profile profile, Edits edits, ActivityService activityService)
+			throws InvalidWorkflowException {
+		// TODO inject Scufl2Tools as a service
+		scufl2Tools = new Scufl2Tools();
 		this.workflowBundle = workflowBundle;
 		this.workflow = workflow;
 		this.profile = profile;
 		this.edits = edits;
+		this.activityService = activityService;
 		workflowToDataflow = new HashMap<Workflow, Dataflow>();
 		dataflowToWorkflow = new HashMap<Dataflow, Workflow>();
 		inputPorts = new IdentityHashMap<Port, EventHandlingInputPort>();
@@ -117,6 +125,12 @@ public class WorkflowToDataflowMapper {
 		try {
 			dataflow = createDataflow();
 		} catch (EditException e) {
+			throw new InvalidWorkflowException(e);
+		} catch (ActivityNotFoundException e) {
+			throw new InvalidWorkflowException(e);
+		} catch (ActivityConfigurationException e) {
+			throw new InvalidWorkflowException(e);
+		} catch (PropertyNotFoundException e) {
 			throw new InvalidWorkflowException(e);
 		}
 	}
@@ -157,7 +171,8 @@ public class WorkflowToDataflowMapper {
 		return workflowToDataflowActivities.get(workflowActivity);
 	}
 
-	protected Dataflow createDataflow() throws EditException {
+	protected Dataflow createDataflow() throws EditException, ActivityNotFoundException,
+			ActivityConfigurationException, PropertyNotFoundException, InvalidWorkflowException {
 		// create the dataflow
 		Dataflow dataflow = edits.createDataflow();
 		// set the dataflow name
@@ -167,13 +182,13 @@ public class WorkflowToDataflowMapper {
 		dataflowToWorkflow.put(dataflow, workflow);
 
 		addInputPorts(dataflow);
-		
+
 		addOutputPorts(dataflow);
-		
+
 		addProcessors(dataflow);
 
 		addDataLinks();
-		
+
 		// add start conditions
 		for (Entry<Processor, net.sf.taverna.t2.workflowmodel.Processor> entry : workflowToDataflowProcessors
 				.entrySet()) {
@@ -211,7 +226,7 @@ public class WorkflowToDataflowMapper {
 				edits.getAddProcessorInputPortEdit(dataflowProcessor, processorInputPort).doEdit();
 				inputPorts.put(inputProcessorPort, processorInputPort);
 			}
-			//add output ports
+			// add output ports
 			for (OutputProcessorPort outputProcessorPort : processor.getOutputPorts()) {
 				ProcessorOutputPort processorOutputPort = edits.createProcessorOutputPort(
 						dataflowProcessor, outputProcessorPort.getName(),
@@ -226,7 +241,7 @@ public class WorkflowToDataflowMapper {
 			// TODO dispatchStack not finished so add default for now
 			edits.getDefaultDispatchStackEdit(dataflowProcessor).doEdit();
 
-//			addDefaultIterationStrategy(dataflowProcessor);
+			// addDefaultIterationStrategy(dataflowProcessor);
 
 			// add iteration strategy
 			// List<IterationStrategy> iterationStrategyStack =
@@ -237,62 +252,54 @@ public class WorkflowToDataflowMapper {
 		}
 	}
 
-	private void addActivities() throws EditException {
+	private void addActivities() throws EditException, ActivityNotFoundException,
+			PropertyNotFoundException, ActivityConfigurationException, InvalidWorkflowException {
 		for (ProcessorBinding processorBinding : profile.getProcessorBindings()) {
-			net.sf.taverna.t2.workflowmodel.Processor processor = workflowToDataflowProcessors.get(processorBinding.getBoundProcessor());
-			Activity activity = processorBinding.getBoundActivity();
-			String activityType = activity.getType().getName();
-			// TODO decide how to map activities properly
-			if (activityType.equals("http://ns.taverna.org.uk/2010/activity/beanshell")) {
-				BeanshellActivity beanshellActivity = new BeanshellActivity();
-				beanshellActivity.setEdits(edits);
-				BeanshellActivityConfigurationBean configurationBean = new BeanshellActivityConfigurationBean();
-				NamedSet<Configuration> configurations = profile.getConfigurations();
-				for (Configuration configuration : configurations) {
-					if (configuration.getConfigures().equals(activity)) {
-						List<Property> properties = configuration.getProperties();
-						for (Property property : properties) {
-							if (property.getPredicate().getFragment().equals("script")) {
-								if (property instanceof DataProperty) {
-									DataProperty dataProperty = (DataProperty) property;
-									configurationBean.setScript(dataProperty.getDataValue());
-								}
-							}
-						}
-					}
+			net.sf.taverna.t2.workflowmodel.Processor processor = workflowToDataflowProcessors
+					.get(processorBinding.getBoundProcessor());
+			Activity scufl2Activity = processorBinding.getBoundActivity();
+			URI activityType = scufl2Activity.getConfigurableType();
+			Configuration configuration = scufl2Tools.configurationFor(scufl2Activity, profile);
+
+			// create the activity
+			net.sf.taverna.t2.workflowmodel.processor.activity.Activity<?> activity = null;
+			if (activityType.equals(URI.create("http://ns.taverna.org.uk/2010/activity/dataflow"))) {
+				activity = activityService.createActivity(activityType, null);
+				URI dataflowURI = configuration.getPropertyResource().getResourceURI();
+				Workflow workflow = null;// find workflow in bundle
+				// same profile?
+				WorkflowToDataflowMapper mapper = new WorkflowToDataflowMapper(workflowBundle, workflow, profile, edits, activityService);
+				Dataflow dataflow = mapper.createDataflow();
+				try {
+					((Configurable) activity).configure(dataflow);
+				} catch (ConfigurationException e) {
+					throw new ActivityConfigurationException(e);
 				}
-				List<ActivityInputPortDefinitionBean> inputPortDefinitionBeans = new ArrayList<ActivityInputPortDefinitionBean>();
-				for (InputActivityPort inputActivityPort : activity.getInputPorts()) {
-					ActivityInputPortDefinitionBean inputPortDefinitionBean = new ActivityInputPortDefinitionBean();
-					inputPortDefinitionBean.setName(inputActivityPort.getName());
-					inputPortDefinitionBean.setDepth(/*inputActivityPort.getDepth()*/0);
-					inputPortDefinitionBean.setTranslatedElementType(String.class);
-					inputPortDefinitionBeans.add(inputPortDefinitionBean);
-				}
-				configurationBean.setInputPortDefinitions(inputPortDefinitionBeans);
-				List<ActivityOutputPortDefinitionBean> outputPortDefinitionBeans = new ArrayList<ActivityOutputPortDefinitionBean>();
-				for (OutputActivityPort outputActivityPort : activity.getOutputPorts()) {
-					ActivityOutputPortDefinitionBean outputPortDefinitionBean = new ActivityOutputPortDefinitionBean();
-					outputPortDefinitionBean.setName(outputActivityPort.getName());
-					outputPortDefinitionBean.setDepth(/*outputActivityPort.getDepth()*/processor.getLocalName().equals("ListGenerator")?1:0);
-					outputPortDefinitionBeans.add(outputPortDefinitionBean);
-				}
-				configurationBean.setOutputPortDefinitions(outputPortDefinitionBeans);
-				edits.getConfigureActivityEdit(beanshellActivity, configurationBean).doEdit();
-				edits.getAddActivityEdit(processor, beanshellActivity).doEdit();
-				for (ProcessorInputPortBinding processorInputPortBinding : processorBinding.getInputPortBindings()) {
-					EventHandlingInputPort inputPort = inputPorts.get(processorInputPortBinding.getBoundProcessorPort());
-					edits.getAddActivityInputPortMappingEdit(beanshellActivity, inputPort.getName(), inputPort.getName()).doEdit();
-				}
-				for (ProcessorOutputPortBinding processorOutputPortBinding : processorBinding.getOutputPortBindings()) {
-					EventForwardingOutputPort outputPort = outputPorts.get(processorOutputPortBinding.getBoundProcessorPort());
-					edits.getAddActivityOutputPortMappingEdit(beanshellActivity, outputPort.getName(), outputPort.getName()).doEdit();
-				}
-				workflowToDataflowActivities.put(activity, beanshellActivity);
-				dataflowToWorkflowActivities.put(beanshellActivity, activity);
 			} else {
-				throw new RuntimeException("Unknown activity : " + activity.getType().getName());
+				activity = activityService.createActivity(activityType, configuration);
 			}
+			
+			// add the activity to the processor
+			edits.getAddActivityEdit(processor, activity).doEdit();
+
+			// map input ports
+			for (ProcessorInputPortBinding portBinding : processorBinding
+					.getInputPortBindings()) {
+				InputProcessorPort processorPort = portBinding.getBoundProcessorPort();
+				InputActivityPort activityPort = portBinding.getBoundActivityPort();
+				edits.getAddActivityInputPortMappingEdit(activity, processorPort.getName(),
+						activityPort.getName()).doEdit();
+			}
+			// map output ports
+			for (ProcessorOutputPortBinding portBinding : processorBinding
+					.getOutputPortBindings()) {
+				OutputProcessorPort processorPort = portBinding.getBoundProcessorPort();
+				OutputActivityPort activityPort = portBinding.getBoundActivityPort();
+				edits.getAddActivityOutputPortMappingEdit(activity, processorPort.getName(),
+						activityPort.getName()).doEdit();
+			}
+			workflowToDataflowActivities.put(scufl2Activity, activity);
+			dataflowToWorkflowActivities.put(activity, scufl2Activity);
 		}
 	}
 
@@ -330,15 +337,15 @@ public class WorkflowToDataflowMapper {
 		}
 	}
 
-//	private void addDefaultIterationStrategy(
-//			net.sf.taverna.t2.workflowmodel.Processor dataflowProcessor) {
-//		IterationStrategyImpl iterationStrategy = (IterationStrategyImpl) dataflowProcessor
-//				.getIterationStrategy().getStrategies().get(0);
-//		for (InputPort inputPort : dataflowProcessor.getInputPorts()) {
-//			NamedInputPortNode inputPortNode = new NamedInputPortNode(inputPort.getName(),
-//					inputPort.getDepth());
-//			iterationStrategy.connectDefault(inputPortNode);
-//		}
-//	}
+	// private void addDefaultIterationStrategy(
+	// net.sf.taverna.t2.workflowmodel.Processor dataflowProcessor) {
+	// IterationStrategyImpl iterationStrategy = (IterationStrategyImpl) dataflowProcessor
+	// .getIterationStrategy().getStrategies().get(0);
+	// for (InputPort inputPort : dataflowProcessor.getInputPorts()) {
+	// NamedInputPortNode inputPortNode = new NamedInputPortNode(inputPort.getName(),
+	// inputPort.getDepth());
+	// iterationStrategy.connectDefault(inputPortNode);
+	// }
+	// }
 
 }
