@@ -31,10 +31,12 @@ public class PlatformTest extends AbstractConfigurableBundleCreatorTests {
 				"javax.servlet, com.springsource.javax.servlet, 2.5.0",
 				"org.beanshell, com.springsource.bsh, 2.0.0.b4",
 				"net.sf.taverna.t2.activities, beanshell-activity, 2.0-SNAPSHOT",
+				"net.sf.taverna.t2.activities, stringconstant-activity, 2.0-SNAPSHOT",
+				"uk.org.taverna.platform, activity, 0.0.1-SNAPSHOT",
 				"uk.org.taverna.platform, execution-local, 0.0.1-SNAPSHOT",
 				"uk.org.taverna.platform, run, 0.0.1-SNAPSHOT" };
 	}
-	
+
 	public void waitForResult(Map<String, T2Reference> results, String port, WorkflowReport report)
 			throws InterruptedException {
 		int wait = 0;

@@ -16,7 +16,6 @@ import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.platform.run.api.RunProfile;
 import uk.org.taverna.platform.run.api.RunService;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
-import uk.org.taverna.scufl2.api.profiles.Profile;
 import uk.org.taverna.scufl2.translator.t2flow.T2FlowParser;
 
 public class RunTest extends PlatformTest {
@@ -29,14 +28,13 @@ public class RunTest extends PlatformTest {
 		setup();
 
 		WorkflowBundle workflowBundle = loadWorkflow("/t2flow/in-out.t2flow");
-		Profile profile = workflowBundle.getProfiles().iterator().next();
 
 		T2Reference reference = referenceService.register("test-input", 0, true, null);
 
 		Map<String, T2Reference> inputs = new HashMap<String, T2Reference>();
 		inputs.put("in", reference);
 
-		String runId = runService.createRun(new RunProfile(workflowBundle, profile, inputs, referenceService,
+		String runId = runService.createRun(new RunProfile(workflowBundle, inputs, referenceService,
 				executionService));
 		assertEquals(State.CREATED, runService.getState(runId));
 		runService.start(runId);
@@ -52,17 +50,16 @@ public class RunTest extends PlatformTest {
 		System.out.println( runService.getWorkflowReport(runId));
 	}
 
-	public void testRun2() throws Exception {
+	public void testRunBeanshell() throws Exception {
 		setup();
 
 		WorkflowBundle workflowBundle = loadWorkflow("/t2flow/beanshell.t2flow");
-		Profile profile = workflowBundle.getProfiles().iterator().next();
 
 		T2Reference reference = referenceService.register("test-input", 0, true, null);
 		Map<String, T2Reference> inputs = new HashMap<String, T2Reference>();
 		inputs.put("in", reference);
 
-		String runId = runService.createRun(new RunProfile(workflowBundle, profile, inputs, referenceService,
+		String runId = runService.createRun(new RunProfile(workflowBundle, inputs, referenceService,
 				executionService));
 		WorkflowReport report = runService.getWorkflowReport(runId);
 		assertEquals(State.CREATED, runService.getState(runId));
@@ -88,6 +85,33 @@ public class RunTest extends PlatformTest {
 		System.out.println(report);
 	}
 
+	public void testRunStringConstant() throws Exception {
+		setup();
+
+		WorkflowBundle workflowBundle = loadWorkflow("/t2flow/stringconstant.t2flow");
+
+		String runId = runService.createRun(new RunProfile(workflowBundle, referenceService,
+				executionService));
+		WorkflowReport report = runService.getWorkflowReport(runId);
+		assertEquals(State.CREATED, runService.getState(runId));
+
+		runService.start(runId);
+		assertEquals(State.RUNNING, runService.getState(runId));
+
+		Map<String, T2Reference> results = runService.getOutputs(runId);
+		waitForResult(results, "out", report);
+
+		T2Reference resultReference = results.get("out");
+		// if (resultReference.containsErrors()) {
+		// printErrors(referenceService, resultReference);
+		// }
+		assertFalse(resultReference.containsErrors());
+		String result = (String) referenceService.renderIdentifier(
+				(T2Reference) results.get("out"), String.class, null);
+		assertEquals("Test Value", result);
+		assertEquals(State.COMPLETED, runService.getState(runId));		
+	}
+	
 	private void setup() {
 		ServiceReference referenceServiceReference = bundleContext
 				.getServiceReference("net.sf.taverna.t2.reference.ReferenceService");

@@ -109,6 +109,33 @@ public class LocalExecutionTest extends PlatformTest {
 		assertEquals(State.COMPLETED, report.getState());
 		System.out.println(report);
 	}
+	
+	public void testLocalExecution3() throws Exception {
+		URL wfResource = getClass().getResource("/t2flow/beanshell.t2flow");
+		assertNotNull(wfResource);
+		T2FlowParser t2FlowParser = new T2FlowParser();
+		t2FlowParser.setStrict(true);
+		WorkflowBundle workflowBundle = t2FlowParser.parseT2Flow(wfResource.openStream());
+		Workflow workflow = workflowBundle.getMainWorkflow();
+		Profile profile = workflowBundle.getProfiles().iterator().next();
+
+		ServiceReference referenceServiceReference = bundleContext
+				.getServiceReference("net.sf.taverna.t2.reference.ReferenceService");
+		ReferenceService referenceService = (ReferenceService) bundleContext
+				.getService(referenceServiceReference);
+
+		ServiceReference executionServiceReference = bundleContext
+				.getServiceReference("uk.org.taverna.platform.execution.api.ExecutionService");
+		ExecutionService executionService = (ExecutionService) bundleContext
+				.getService(executionServiceReference);
+
+		T2Reference reference = referenceService.register("test-input", 0, true, null);
+		Map<String, T2Reference> inputs = new HashMap<String, T2Reference>();
+		inputs.put("in", reference);
+
+		String executionId = executionService.createExecution(workflowBundle, workflow, profile, inputs,
+				referenceService);
+	}
 
 	private void printErrors(ReferenceService referenceService, T2Reference resultReference) {
 		if (resultReference.getDepth() > 0) {
