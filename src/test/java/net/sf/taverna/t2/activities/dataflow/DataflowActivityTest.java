@@ -46,6 +46,7 @@ public class DataflowActivityTest {
 	public void setUp() throws Exception {
 		activity = new DataflowActivity();
 		Edits edits = new EditsImpl();
+		activity.setEdits(edits);
 		dataflow = edits.createDataflow();
 		edits.getCreateDataflowInputPortEdit(dataflow, "input", 0, 0).doEdit();
 		edits.getCreateDataflowOutputPortEdit(dataflow, "output").doEdit();
