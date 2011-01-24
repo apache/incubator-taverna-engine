@@ -37,15 +37,13 @@ import net.sf.taverna.t2.workflowmodel.ProcessorInputPort;
 import net.sf.taverna.t2.workflowmodel.ProcessorOutputPort;
 import net.sf.taverna.t2.workflowmodel.serialization.DeserializationException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 import org.jdom.Element;
 
 public class DatalinksXMLDeserializer extends AbstractXMLDeserializer {
 	private static DatalinksXMLDeserializer instance = new DatalinksXMLDeserializer();
 	
-	private Log logger = LogFactory.getLog(DatalinksXMLDeserializer.class);
-
+	private Logger logger = Logger.getLogger(DatalinksXMLDeserializer.class);
 
 	private DatalinksXMLDeserializer() {
 
