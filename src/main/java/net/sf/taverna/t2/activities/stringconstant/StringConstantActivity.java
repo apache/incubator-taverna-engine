@@ -45,7 +45,7 @@ import org.apache.log4j.Logger;
  */
 public class StringConstantActivity extends AbstractAsynchronousActivity<StringConstantConfigurationBean>{
 
-	public static final String URI = "http://ns.taverna.org.uk/2010/activity/stringconstant";
+	public static final String URI = "http://ns.taverna.org.uk/2010/activity/constant";
 
 	private static final Logger logger = Logger.getLogger(StringConstantActivity.class);
 			
