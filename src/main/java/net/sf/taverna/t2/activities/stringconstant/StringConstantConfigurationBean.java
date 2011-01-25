@@ -38,7 +38,7 @@ public class StringConstantConfigurationBean {
 		return value;
 	}
 
-	@ConfigurationProperty(name = "value", label = "Constant Value", description = "The value of the string constant")
+	@ConfigurationProperty(name = "string", label = "Constant String Value", description = "The value of the string constant")
 	public void setValue(String value) {
 		this.value = value;
 	}
