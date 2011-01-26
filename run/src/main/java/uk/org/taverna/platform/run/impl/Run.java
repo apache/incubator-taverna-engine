@@ -98,9 +98,14 @@ public class Run {
 			workflow = runProfile.getWorkflow();
 		}
 		if (runProfile.getProfile() == null) {
-			String message = "No Profile specified in the RunProfile";
-			logger.warn(message);
-			throw new RunProfileException(message);
+			if (workflowBundle.getMainProfile() == null) {
+				String message = "No Profile specified in either the RunProfile or the WorkflowBundle";
+				logger.warn(message);
+				throw new RunProfileException(message);
+			} else {
+				logger.info("No Profile specified - using the main Profile from the WorkflowBundle");
+				profile = workflowBundle.getMainProfile();
+			}
 		} else {
 			profile = runProfile.getProfile();
 		}
