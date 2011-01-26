@@ -13,6 +13,21 @@
 		<spring.dm.version>1.2.1</spring.dm.version>
 	</properties>
 	<dependencies>
+
+		<!--================================================================================= -->
+		<!-- Work around for java compiler bug : -->
+		<!-- An exception has occurred in the compiler (1.6.0_22) -->
+		<!-- com.sun.tools.javac.code.Symbol$CompletionFailure: -->
+		<!-- class file for org.springframework.transaction.annotation.Propagation not found -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>org.springframework.transaction</artifactId>
+			<version>3.0.5.RELEASE</version>
+			<optional>true</optional>
+		</dependency>
+		<!--================================================================================= -->
+
+		<!-- Spring OSGI testing framework -->
 		<dependency>
 			<groupId>org.springframework.osgi</groupId>
 			<artifactId>org.springframework.osgi.test</artifactId>
@@ -26,17 +41,184 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- declared as provided by com.thoughtworks.xstream:com.springsource.com.thoughtworks.xstream -->
+		<!-- Dependencies declared as provided by some poms - specified here to ensure that they are in the 
+			local repository for the testing framework -->
+		<!--<dependency>
+			<groupId>javax.activation</groupId>
+			<artifactId>com.springsource.javax.activation</artifactId>
+			<version>1.1.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.jms</groupId>
+			<artifactId>com.springsource.javax.jms</artifactId>
+			<version>1.1.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.mail</groupId>
+			<artifactId>com.springsource.javax.mail</artifactId>
+			<version>1.4.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.xml.rpc</groupId>
+			<artifactId>com.springsource.javax.xml.rpc</artifactId>
+			<version>1.1.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.xml.soap</groupId>
+			<artifactId>com.springsource.javax.xml.soap</artifactId>
+			<version>1.3.0</version>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>javax.xml.stream</groupId>
 			<artifactId>com.springsource.javax.xml.stream</artifactId>
 			<version>1.0.1</version>
+			<scope>test</scope>
 		</dependency>
-		<!-- declared as provided by javax.servlet:com.springsource.javax.servlet -->
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>com.springsource.javax.servlet</artifactId>
 			<version>2.5.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.wsdl</groupId>
+			<artifactId>com.springsource.javax.wsdl</artifactId>
+			<version>1.6.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>com.springsource.org.apache.commons.discovery</artifactId>
+			<version>0.4.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>com.springsource.org.apache.commons.httpclient</artifactId>
+			<version>3.1.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>com.springsource.org.apache.commons.logging</artifactId>
+			<version>1.1.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>com.springsource.org.apache.commons.net</artifactId>
+			<version>1.4.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.ws</groupId>
+			<artifactId>com.springsource.org.apache.ws.security</artifactId>
+			<version>1.5.8</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.xalan</groupId>
+			<artifactId>com.springsource.org.apache.xalan</artifactId>
+			<version>2.7.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.xalan</groupId>
+			<artifactId>com.springsource.org.apache.xml.serializer</artifactId>
+			<version>2.7.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.xerces</groupId>
+			<artifactId>com.springsource.org.apache.xerces</artifactId>
+			<version>2.9.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.xml</groupId>
+			<artifactId>com.springsource.org.apache.xml.resolver</artifactId>
+			<version>1.2.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.xml</groupId>
+			<artifactId>com.springsource.org.apache.xml.security</artifactId>
+			<version>1.4.2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.xmlcommons</groupId>
+			<artifactId>com.springsource.org.apache.xmlcommons</artifactId>
+			<version>1.3.4</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.opensaml</groupId>
+			<artifactId>com.springsource.org.opensaml</artifactId>
+			<version>1.1.0</version>
+			<scope>test</scope>
+		</dependency>-->
+		
+		<!-- Taverna -->
+		<dependency>
+			<groupId>net.sf.taverna.t2.core</groupId>
+			<artifactId>workflowmodel-api</artifactId>
+			<version>2.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.taverna.t2.core</groupId>
+			<artifactId>reference-api</artifactId>
+			<version>2.0-SNAPSHOT</version>
+		</dependency>
+
+		<!-- Taverna Platform -->
+		<dependency>
+			<groupId>uk.org.taverna.platform</groupId>
+			<artifactId>activity</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>uk.org.taverna.platform</groupId>
+			<artifactId>execution</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>uk.org.taverna.platform</groupId>
+			<artifactId>run</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>uk.org.taverna.platform</groupId>
+			<artifactId>execution-local</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>uk.org.taverna.platform</groupId>
+			<artifactId>report</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+		<!-- Scufl2 -->
+		<dependency>
+			<groupId>uk.org.taverna.scufl2</groupId>
+			<artifactId>scufl2-api</artifactId>
+			<version>0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>uk.org.taverna.scufl2</groupId>
+			<artifactId>scufl2-t2flow</artifactId>
+			<version>0.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.log4j</groupId>
+			<artifactId>com.springsource.org.apache.log4j</artifactId>
+			<version>1.2.16</version>
 		</dependency>
 
 		<dependency>
@@ -45,61 +227,14 @@
 			<version>3.8.2</version>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- Equinox OSGI Framework -->
 		<dependency>
 			<groupId>org.eclipse.osgi</groupId>
 			<artifactId>org.eclipse.osgi</artifactId>
 			<version>3.6.0.v20100517</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>net.sf.taverna.t2.core</groupId>
-			<artifactId>workflowmodel-api</artifactId>
-			<version>2.0-SNAPSHOT</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.taverna.t2.core</groupId>
-			<artifactId>reference-api</artifactId>
-			<version>2.0-SNAPSHOT</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>uk.org.taverna.platform</groupId>
-			<artifactId>execution</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>uk.org.taverna.platform</groupId>
-			<artifactId>run</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>uk.org.taverna.platform</groupId>
-			<artifactId>execution-local</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>uk.org.taverna.platform</groupId>
-			<artifactId>report</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>uk.org.taverna.scufl2</groupId>
-			<artifactId>scufl2-api</artifactId>
-			<version>0.1-SNAPSHOT</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>uk.org.taverna.scufl2</groupId>
-			<artifactId>scufl2-t2flow</artifactId>
-			<version>0.1-SNAPSHOT</version>
-			<scope>test</scope>
-		</dependency>
-
 
 	</dependencies>
 </project>
