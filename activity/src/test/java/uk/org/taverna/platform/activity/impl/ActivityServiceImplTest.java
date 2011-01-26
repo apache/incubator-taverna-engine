@@ -48,6 +48,8 @@ import uk.org.taverna.scufl2.api.configurations.ConfigurationDefinition;
 import uk.org.taverna.scufl2.api.configurations.PropertyDefinition;
 import uk.org.taverna.scufl2.api.configurations.PropertyLiteralDefinition;
 import uk.org.taverna.scufl2.api.configurations.PropertyResourceDefinition;
+import uk.org.taverna.scufl2.api.container.WorkflowBundle;
+import uk.org.taverna.scufl2.api.profiles.Profile;
 import uk.org.taverna.scufl2.api.property.PropertyList;
 import uk.org.taverna.scufl2.api.property.PropertyLiteral;
 import uk.org.taverna.scufl2.api.property.PropertyResource;
@@ -126,6 +128,9 @@ public class ActivityServiceImplTest {
 		
 		configuration = new Configuration();
 		configuration.setConfigures(activity);
+		Profile profile = new Profile();
+		profile.setParent(new WorkflowBundle());
+		configuration.setParent(profile);
 		
 		PropertyResource propertyResource = configuration.getPropertyResource();
 		propertyResource.setTypeURI(URI.create(annotatedBeanURI + "#ConfigType"));
@@ -158,6 +163,9 @@ public class ActivityServiceImplTest {
 		propertyList.add(new PropertyLiteral("3"));
 		propertyList.add(new PropertyLiteral("4"));
 		propertyResource.addProperty(URI.create(annotatedBeanURI + "#listType"), propertyList);
+		propertyResource.addProperty(URI.create(annotatedBeanURI + "#unorderedListType"), new PropertyLiteral("a"));
+		propertyResource.addProperty(URI.create(annotatedBeanURI + "#unorderedListType"), new PropertyLiteral("b"));
+		propertyResource.addProperty(URI.create(annotatedBeanURI + "#unorderedListType"), new PropertyLiteral("c"));
 		propertyResource.addProperty(URI.create(annotatedBeanURI + "#setType"), new PropertyLiteral("x"));
 		propertyResource.addProperty(URI.create(annotatedBeanURI + "#setType"), new PropertyLiteral("y"));
 		propertyResource.addProperty(URI.create(annotatedBeanURI + "#setType"), new PropertyLiteral("z"));
@@ -442,6 +450,21 @@ public class ActivityServiceImplTest {
 		assertTrue(definition.isRequired());
 
 		definition = propertyResourceDefinition.getPropertyDefinition(URI.create(annotatedBeanURI
+				+ "#unorderedListType"));
+		definitionCount++;
+		assertNotNull(definition);
+		assertTrue(definition instanceof PropertyLiteralDefinition);
+		assertEquals(URI.create(annotatedBeanURI + "#unorderedListType"),
+				definition.getPredicate());
+		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
+		assertEquals("", definition.getDescription());
+		assertEquals("", definition.getLabel());
+		assertArrayEquals(new String[0], definition.getOptions());
+		assertTrue(definition.isMultiple());
+		assertFalse(definition.isOrdered());
+		assertTrue(definition.isRequired());
+
+		definition = propertyResourceDefinition.getPropertyDefinition(URI.create(annotatedBeanURI
 				+ "#setType"));
 		definitionCount++;
 		assertNotNull(definition);
@@ -633,6 +656,7 @@ public class ActivityServiceImplTest {
 		assertEquals(Arrays.asList("1","2","3","4"), testBean.listType);
 		assertEquals(new HashSet<String>(Arrays.asList("x","y","z")), testBean.setType);
 		assertEquals(Arrays.asList("1","2","3","4"), testBean.listType);
+		assertEquals(new HashSet<String>(Arrays.asList("a","b","c")), new HashSet<String>(testBean.unorderedListType));
 		assertArrayEquals(new ActivityTestBean2[] {testBean2, testBean3,testBean4}, testBean.arrayOfBeanType);
 		assertEquals(Arrays.asList(testBean3,testBean4), testBean.listOfBeanType);
 		assertEquals(new HashSet<ActivityTestBean2>(Arrays.asList(testBean2,testBean3)), testBean.setOfBeanType);

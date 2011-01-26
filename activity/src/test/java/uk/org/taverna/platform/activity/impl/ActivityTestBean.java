@@ -44,7 +44,7 @@ public class ActivityTestBean {
 	public ActivityTestEnum enumType;
 	public ActivityTestBean2 beanType, beanType2;
 	public String[] arrayType;
-	public List<String> listType;
+	public List<String> listType, unorderedListType;
 	public HashSet<String> setType;
 	public ActivityTestBean2[] arrayOfBeanType;
 	public List<ActivityTestBean2> listOfBeanType;
@@ -111,6 +111,11 @@ public class ActivityTestBean {
 	@ConfigurationProperty(name = "listType")
 	public void setListType(List<String> parameter) {
 		listType = parameter;
+	}
+
+	@ConfigurationProperty(name = "unorderedListType", ordering = ConfigurationProperty.OrderPolicy.NON_ORDERED)
+	public void setUnorderedListType(List<String> parameter) {
+		unorderedListType = parameter;
 	}
 
 	@ConfigurationProperty(name = "setType")
