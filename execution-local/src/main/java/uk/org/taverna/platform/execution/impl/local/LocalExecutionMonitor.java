@@ -77,7 +77,7 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 	}
 
 	private void mapReports(LocalWorkflowReport workflowReport, WorkflowToDataflowMapper mapping) {
-		workflowReports.put(mapping.getDataflow(workflowReport.getWorkflow()), workflowReport);
+		workflowReports.put(mapping.getDataflow(), workflowReport);
 		for (ProcessorReport processorReport : workflowReport.getProcessorReports()) {
 			Processor processor = mapping.getDataflowProcessor(processorReport.getProcessor());
 			processorReports.put(processor, (LocalProcessorReport) processorReport);

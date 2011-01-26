@@ -24,7 +24,6 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import net.sf.taverna.t2.workflowmodel.Configurable;
 import net.sf.taverna.t2.workflowmodel.ConfigurationException;
@@ -44,14 +43,14 @@ import uk.org.taverna.platform.activity.ActivityService;
 import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
 import uk.org.taverna.scufl2.api.activity.Activity;
 import uk.org.taverna.scufl2.api.common.Scufl2Tools;
+import uk.org.taverna.scufl2.api.common.URITools;
 import uk.org.taverna.scufl2.api.configurations.Configuration;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
+import uk.org.taverna.scufl2.api.core.BlockingControlLink;
+import uk.org.taverna.scufl2.api.core.ControlLink;
 import uk.org.taverna.scufl2.api.core.DataLink;
 import uk.org.taverna.scufl2.api.core.Processor;
-import uk.org.taverna.scufl2.api.core.RunAfterCondition;
-import uk.org.taverna.scufl2.api.core.StartCondition;
 import uk.org.taverna.scufl2.api.core.Workflow;
-import uk.org.taverna.scufl2.api.dispatchstack.DispatchStack;
 import uk.org.taverna.scufl2.api.port.InputActivityPort;
 import uk.org.taverna.scufl2.api.port.InputProcessorPort;
 import uk.org.taverna.scufl2.api.port.InputWorkflowPort;
@@ -78,13 +77,11 @@ public class WorkflowToDataflowMapper {
 
 	private Scufl2Tools scufl2Tools;
 
+	private URITools uriTools;
+
 	private Map<Port, EventHandlingInputPort> inputPorts;
 
 	private Map<Port, EventForwardingOutputPort> outputPorts;
-
-	private Map<Workflow, Dataflow> workflowToDataflow;
-
-	private Map<Dataflow, Workflow> dataflowToWorkflow;
 
 	private Map<Processor, net.sf.taverna.t2.workflowmodel.Processor> workflowToDataflowProcessors;
 
@@ -109,13 +106,12 @@ public class WorkflowToDataflowMapper {
 			throws InvalidWorkflowException {
 		// TODO inject Scufl2Tools as a service
 		scufl2Tools = new Scufl2Tools();
+		uriTools = new URITools();
 		this.workflowBundle = workflowBundle;
 		this.workflow = workflow;
 		this.profile = profile;
 		this.edits = edits;
 		this.activityService = activityService;
-		workflowToDataflow = new HashMap<Workflow, Dataflow>();
-		dataflowToWorkflow = new HashMap<Dataflow, Workflow>();
 		inputPorts = new IdentityHashMap<Port, EventHandlingInputPort>();
 		outputPorts = new IdentityHashMap<Port, EventForwardingOutputPort>();
 		workflowToDataflowProcessors = new IdentityHashMap<Processor, net.sf.taverna.t2.workflowmodel.Processor>();
@@ -141,14 +137,6 @@ public class WorkflowToDataflowMapper {
 
 	public Dataflow getDataflow() {
 		return dataflow;
-	}
-
-	public Workflow getWorkflow(Dataflow datafow) {
-		return dataflowToWorkflow.get(datafow);
-	}
-
-	public Dataflow getDataflow(Workflow workflow) {
-		return workflowToDataflow.get(workflow);
 	}
 
 	public Processor getWorkflowProcessor(
@@ -177,9 +165,6 @@ public class WorkflowToDataflowMapper {
 		Dataflow dataflow = edits.createDataflow();
 		// set the dataflow name
 		edits.getUpdateDataflowNameEdit(dataflow, new String(workflow.getName())).doEdit();
-		// map the workflow
-		workflowToDataflow.put(workflow, dataflow);
-		dataflowToWorkflow.put(dataflow, workflow);
 
 		addInputPorts(dataflow);
 
@@ -189,21 +174,7 @@ public class WorkflowToDataflowMapper {
 
 		addDataLinks();
 
-		// add start conditions
-		for (Entry<Processor, net.sf.taverna.t2.workflowmodel.Processor> entry : workflowToDataflowProcessors
-				.entrySet()) {
-			Processor processor = entry.getKey();
-			net.sf.taverna.t2.workflowmodel.Processor dataflowProcessor = entry.getValue();
-			for (StartCondition startCondition : processor.getStartConditions()) {
-				if (startCondition instanceof RunAfterCondition) {
-					RunAfterCondition runAfterCondition = (RunAfterCondition) startCondition;
-					Processor controllingProcessor = runAfterCondition.getControllingProcessor();
-					edits.getCreateConditionEdit(
-							workflowToDataflowProcessors.get(controllingProcessor),
-							dataflowProcessor).doEdit();
-				}
-			}
-		}
+		addControlLinks();
 
 		addActivities();
 
@@ -237,7 +208,12 @@ public class WorkflowToDataflowMapper {
 			}
 
 			// add dispatch stack
-			DispatchStack dispatchStack = processor.getDispatchStack();
+//			net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchStack dataflowDispatchStack = dataflowProcessor.getDispatchStack();
+//			DispatchStack dispatchStack = processor.getDispatchStack();
+//			int layer = 0;
+//			for (DispatchStackLayer dispatchStackLayer : dispatchStack) {
+//				edits.getAddDispatchLayerEdit(dataflowDispatchStack, null, 0).doEdit();
+//			}			
 			// TODO dispatchStack not finished so add default for now
 			edits.getDefaultDispatchStackEdit(dataflowProcessor).doEdit();
 
@@ -263,13 +239,15 @@ public class WorkflowToDataflowMapper {
 
 			// create the activity
 			net.sf.taverna.t2.workflowmodel.processor.activity.Activity<?> activity = null;
+			// check if we have a nested workflow
 			if (activityType.equals(URI.create("http://ns.taverna.org.uk/2010/activity/dataflow"))) {
 				activity = activityService.createActivity(activityType, null);
 				URI dataflowURI = configuration.getPropertyResource().getResourceURI();
-				Workflow workflow = null;// find workflow in bundle
-				// same profile?
-				WorkflowToDataflowMapper mapper = new WorkflowToDataflowMapper(workflowBundle, workflow, profile, edits, activityService);
-				Dataflow dataflow = mapper.createDataflow();
+				Workflow workflow = (Workflow) uriTools.resolveUri(dataflowURI, workflowBundle);
+				// TODO check that we can use the same profile
+				WorkflowToDataflowMapper mapper = new WorkflowToDataflowMapper(workflowBundle,
+						workflow, profile, edits, activityService);
+				Dataflow dataflow = mapper.getDataflow();
 				try {
 					((Configurable) activity).configure(dataflow);
 				} catch (ConfigurationException e) {
@@ -278,21 +256,19 @@ public class WorkflowToDataflowMapper {
 			} else {
 				activity = activityService.createActivity(activityType, configuration);
 			}
-			
+
 			// add the activity to the processor
 			edits.getAddActivityEdit(processor, activity).doEdit();
 
 			// map input ports
-			for (ProcessorInputPortBinding portBinding : processorBinding
-					.getInputPortBindings()) {
+			for (ProcessorInputPortBinding portBinding : processorBinding.getInputPortBindings()) {
 				InputProcessorPort processorPort = portBinding.getBoundProcessorPort();
 				InputActivityPort activityPort = portBinding.getBoundActivityPort();
 				edits.getAddActivityInputPortMappingEdit(activity, processorPort.getName(),
 						activityPort.getName()).doEdit();
 			}
 			// map output ports
-			for (ProcessorOutputPortBinding portBinding : processorBinding
-					.getOutputPortBindings()) {
+			for (ProcessorOutputPortBinding portBinding : processorBinding.getOutputPortBindings()) {
 				OutputProcessorPort processorPort = portBinding.getBoundProcessorPort();
 				OutputActivityPort activityPort = portBinding.getBoundActivityPort();
 				edits.getAddActivityOutputPortMappingEdit(activity, processorPort.getName(),
@@ -304,7 +280,7 @@ public class WorkflowToDataflowMapper {
 	}
 
 	private void addDataLinks() throws EditException {
-		for (DataLink dataLink : workflow.getDatalinks()) {
+		for (DataLink dataLink : workflow.getDataLinks()) {
 			ReceiverPort receiverPort = dataLink.getSendsTo();
 			SenderPort senderPort = dataLink.getReceivesFrom();
 			Integer mergePosition = dataLink.getMergePosition();
@@ -315,6 +291,18 @@ public class WorkflowToDataflowMapper {
 			EventHandlingInputPort sink = inputPorts.get(receiverPort);
 			Datalink datalink = edits.createDatalink(source, sink);
 			edits.getConnectDatalinkEdit(datalink).doEdit();
+		}
+	}
+
+	private void addControlLinks() throws EditException {
+		for (ControlLink controlLink : workflow.getControlLinks()) {
+			if (controlLink instanceof BlockingControlLink) {
+				BlockingControlLink blockingControlLink = (BlockingControlLink) controlLink;
+				Processor untilFinished = blockingControlLink.getUntilFinished();
+				Processor block = blockingControlLink.getBlock();
+				edits.getCreateConditionEdit(workflowToDataflowProcessors.get(untilFinished),
+						workflowToDataflowProcessors.get(block)).doEdit();
+			}
 		}
 	}
 
