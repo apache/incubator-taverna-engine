@@ -40,8 +40,7 @@ import net.sf.taverna.t2.reference.ReferenceSetAugmentationException;
 import net.sf.taverna.t2.reference.ReferenceSetAugmentor;
 import net.sf.taverna.t2.reference.ReferenceSetAugmentorCallback;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 
 /**
  * Implementation of ReferenceSetAugmentor using Dijkstra's shortest path algorithm over a type
@@ -52,7 +51,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 
-	private final Log log = LogFactory.getLog(ReferenceSetAugmentorImpl.class);
+	private final Logger log = Logger.getLogger(ReferenceSetAugmentorImpl.class);
 
 	// A list of ExternalReferenceBuilderSPI instances used to
 	// construct ExternalReferenceSPI instances from byte streams

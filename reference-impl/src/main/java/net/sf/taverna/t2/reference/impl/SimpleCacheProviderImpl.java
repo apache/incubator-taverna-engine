@@ -27,8 +27,7 @@ import net.sf.taverna.t2.reference.Identified;
 import net.sf.taverna.t2.reference.ReferenceServiceCacheProvider;
 import net.sf.taverna.t2.reference.T2Reference;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 
 /**
  * Completely naive cache provider that just stores everything in a map. This
@@ -40,7 +39,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class SimpleCacheProviderImpl implements ReferenceServiceCacheProvider {
 
-	private final Log log = LogFactory.getLog(SimpleCacheProviderImpl.class);
+	private final Logger log = Logger.getLogger(SimpleCacheProviderImpl.class);
 
 	private Map<T2Reference, Identified> cache = new HashMap<T2Reference, Identified>();
 
