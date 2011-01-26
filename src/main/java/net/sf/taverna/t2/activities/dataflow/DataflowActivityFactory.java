@@ -22,6 +22,7 @@ package net.sf.taverna.t2.activities.dataflow;
 
 import java.net.URI;
 
+import net.sf.taverna.t2.workflowmodel.Edits;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityFactory;
 
 /**
@@ -31,6 +32,8 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityFactory;
  */
 public class DataflowActivityFactory implements ActivityFactory {
 
+	private Edits edits;
+	
 	@Override
 	public DataflowActivity createActivity() {
 		return new DataflowActivity();
@@ -43,7 +46,16 @@ public class DataflowActivityFactory implements ActivityFactory {
 
 	@Override
 	public Object createActivityConfiguration() {
-		return null;
+		return edits.createDataflow();
+	}
+
+	/**
+	 * Sets the edits.
+	 * 
+	 * @param edits the edits to set
+	 */
+	public void setEdits(Edits edits) {
+		this.edits = edits;
 	}
 
 }
