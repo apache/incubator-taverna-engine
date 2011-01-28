@@ -126,7 +126,7 @@ public class CMUtil {
 	/**
 	 * Get the configuration directory where the security stuff will be/is saved to.
 	 */
-	public static File getSecurityConfigurationDirectory() {
+	public static File getCredentialManagerDefaultDirectory() {
 		
 		File home = ApplicationRuntime.getInstance().getApplicationHomeDir();
 //		File configDirectory = new File(home,"conf");
