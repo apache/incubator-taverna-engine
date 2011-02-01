@@ -385,23 +385,16 @@ public class ActivityServiceImpl implements ActivityService {
 		PropertyResourceDefinition propertyResourceDefinition = configurationDefinition
 				.getPropertyResourceDefinition();
 
-		ConfigurationBean configurationBean = configurationClass
-				.getAnnotation(ConfigurationBean.class);
+		ConfigurationBean configurationBean = configurationClass.getAnnotation(ConfigurationBean.class);
 		if (configurationBean == null) {
-			if (configurationClass.equals(Dataflow.class)) {
+			if (Dataflow.class.isAssignableFrom(configurationClass)) {
 				// TODO dataflow activity
 				propertyResourceDefinition.setPredicate(uri.resolve("#dataflow"));
 				propertyResourceDefinition
 						.setTypeURI(URI.create("java:" + Dataflow.class.getName()));
 				propertyResourceDefinition.setName("dataflow");
 				propertyResourceDefinition.setLabel("Nested Workflow");
-
-				// PropertyResourceDefinition definition = new
-				// PropertyResourceDefinition(uri.resolve("#dataflow"), null, "dataflow",
-				// "Dataflow", "",
-				// true, false, false);
-				// propertyResourceDefinition.setPropertyDefinitions(Collections.<PropertyDefinition>singletonList(definition));
-			} else if (configurationClass.equals(Element.class)) {
+			} else if (Element.class.isAssignableFrom(configurationClass)) {
 				// TODO biomart activity
 			} else {
 				throw new ActivityConfigurationException("Configuration bean is not annotated");
