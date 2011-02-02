@@ -112,6 +112,12 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	//public static final String SERVICE_URLS_FILE = "t2serviceURLs.txt";
 	public static final String T2KEYSTORE_FILE = "t2keystore.jceks";
 	
+	// For Taverna 2.2 and older - Keystore was BC-type with user-set password
+	// and Truststore was JKS-type with the default password
+	public static final String OLD_TRUSTSTORE_PASSWORD = "Tu/Ap%2_$dJt6*+Rca9v";
+	public static final String OLD_T2TRUSTSTORE_FILE = "t2truststore.jks";
+	public static final String OLD_T2KEYSTORE_FILE = "t2keystore.ubr";
+	
 	// ASCII NUL character - for separating the username from the rest of the string 
 	// when saving it in the Keystore. Seems like a good separator as it will highly 
 	// unlikely feature in a username.
@@ -447,6 +453,8 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 			//		keystoreFile.getAbsolutePath());
 			//System.setProperty(PROPERTY_KEYSTORE_PASSWORD, masterPassword);
 			System.setProperty(PROPERTY_KEYSTORE_TYPE, "JCEKS");
+			System.clearProperty(PROPERTY_KEYSTORE); // "javax.net.ssl.keyStore"
+			System.clearProperty(PROPERTY_KEYSTORE_PASSWORD); // "javax.net.ssl.keyStorePassword"	
 		}
 	}
 
@@ -647,6 +655,8 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 			//		.getAbsolutePath());
 			//System.setProperty(PROPERTY_TRUSTSTORE_PASSWORD, masterPassword);
 			System.setProperty(PROPERTY_TRUSTSTORE_TYPE, "JCEKS"); // "javax.net.ssl.trustStoreType"
+			System.clearProperty(PROPERTY_TRUSTSTORE); // "javax.net.ssl.trustStore"
+			System.clearProperty(PROPERTY_TRUSTSTORE_PASSWORD); // "javax.net.ssl.trustStorePassword"
 
 			/*
 			 * HttpsURLConnection

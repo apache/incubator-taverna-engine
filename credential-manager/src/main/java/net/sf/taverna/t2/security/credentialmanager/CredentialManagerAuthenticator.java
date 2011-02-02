@@ -43,7 +43,7 @@ public class CredentialManagerAuthenticator extends Authenticator {
 			try {
 				credManager = CredentialManager.getInstance();
 			} catch (CMException e) {
-				logger.warn("Could not find credential manager", e);
+				logger.warn("Could not obtain Credential Manager instance.", e);
 			}
 		}
 		return credManager;
