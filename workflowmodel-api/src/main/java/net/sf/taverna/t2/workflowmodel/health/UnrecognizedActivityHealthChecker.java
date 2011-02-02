@@ -7,7 +7,6 @@ import java.util.List;
 
 import net.sf.taverna.t2.visit.VisitReport;
 import net.sf.taverna.t2.visit.VisitReport.Status;
-import net.sf.taverna.t2.workflowmodel.Processor;
 import net.sf.taverna.t2.workflowmodel.processor.activity.UnrecognizedActivity;
 
 /**

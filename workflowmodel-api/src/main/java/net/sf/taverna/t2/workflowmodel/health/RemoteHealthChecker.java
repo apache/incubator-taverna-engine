@@ -13,6 +13,8 @@ import java.net.URLConnection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.net.ssl.SSLException;
+
 import net.sf.taverna.t2.visit.VisitReport;
 import net.sf.taverna.t2.visit.VisitReport.Status;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
@@ -159,6 +161,12 @@ public abstract class RemoteHealthChecker implements HealthChecker<Object> {
 			message = "Timed out";
 			resultId = HealthCheck.TIME_OUT;
 			ex = e;
+		}  catch (SSLException e){
+				// Some kind of error when trying to establish an HTTPS connection to the endpoint
+				status = Status.SEVERE;
+				message = "HTTPS connection problem";
+				resultId = HealthCheck.IO_PROBLEM; // SSLException is an IOException
+				ex = e;
 		} catch (IOException e) {
 			status = Status.SEVERE;
 			message = "Read problem";

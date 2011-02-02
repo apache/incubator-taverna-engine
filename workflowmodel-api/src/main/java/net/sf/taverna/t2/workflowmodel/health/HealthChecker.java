@@ -20,7 +20,6 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.health;
 
-import net.sf.taverna.t2.visit.VisitReport;
 import net.sf.taverna.t2.visit.Visitor;
 
 /**
