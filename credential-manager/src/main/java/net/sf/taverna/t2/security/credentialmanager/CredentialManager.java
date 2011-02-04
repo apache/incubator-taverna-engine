@@ -1736,6 +1736,9 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	 * to be used for HTTPS connections from Taverna.
 	 * It has to initialize the Credential Manager (Keystore and Truststore) 
 	 * in the process (from the files in the given directory) and using the given master password. 
+	 * 
+	 * This method is to be used from the Command Line Tool when you need to have the 
+	 * master password in advance and use a special location for Credential Manager's files.
 	 * @throws CMException
 	 */
 	public static void initialiseSSL(String credentialManagerDirPath, String masterPassword) throws CMException {
