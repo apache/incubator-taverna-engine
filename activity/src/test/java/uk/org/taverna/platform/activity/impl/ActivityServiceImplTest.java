@@ -31,6 +31,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import net.sf.taverna.t2.workflowmodel.impl.EditsImpl;
@@ -47,6 +48,7 @@ import uk.org.taverna.scufl2.api.configurations.Configuration;
 import uk.org.taverna.scufl2.api.configurations.ConfigurationDefinition;
 import uk.org.taverna.scufl2.api.configurations.PropertyDefinition;
 import uk.org.taverna.scufl2.api.configurations.PropertyLiteralDefinition;
+import uk.org.taverna.scufl2.api.configurations.PropertyReferenceDefinition;
 import uk.org.taverna.scufl2.api.configurations.PropertyResourceDefinition;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.profiles.Profile;
@@ -134,11 +136,14 @@ public class ActivityServiceImplTest {
 		
 		PropertyResource propertyResource = configuration.getPropertyResource();
 		propertyResource.setTypeURI(URI.create(annotatedBeanURI + "#ConfigType"));
-		PropertyResource propertyResource2 = new PropertyResource(URI.create(annotatedBeanURI + "/configuration2"));
+		PropertyResource propertyResource2 = new PropertyResource();
+		propertyResource2.setTypeURI(URI.create(annotatedBeanURI + "/configuration2"));
 		propertyResource2.addProperty(URI.create(annotatedBeanURI + "#stringType2"), new PropertyLiteral("string value 2"));
-		PropertyResource propertyResource3 = new PropertyResource(URI.create(annotatedBeanURI + "/configuration2"));
+		PropertyResource propertyResource3 = new PropertyResource();
+		propertyResource3.setTypeURI(URI.create(annotatedBeanURI + "/configuration2"));
 		propertyResource3.addProperty(URI.create(annotatedBeanURI + "#stringType2"), new PropertyLiteral("string value 3"));
-		PropertyResource propertyResource4 = new PropertyResource(URI.create(annotatedBeanURI + "/configuration2"));
+		PropertyResource propertyResource4 = new PropertyResource();
+		propertyResource4.setTypeURI(URI.create(annotatedBeanURI + "/configuration2"));
 		propertyResource4.addProperty(URI.create(annotatedBeanURI + "#stringType2"), new PropertyLiteral("string value 4"));
 		
 		propertyResource.addProperty(URI.create(annotatedBeanURI + "#stringType"), new PropertyLiteral("string value"));
@@ -192,6 +197,8 @@ public class ActivityServiceImplTest {
 		propertyResource.addProperty(URI.create(annotatedBeanURI + "#listOfEnumType"), propertyList);
 		propertyResource.addProperty(URI.create(annotatedBeanURI + "#setOfEnumType"), new PropertyLiteral("A"));
 		propertyResource.addProperty(URI.create(annotatedBeanURI + "#setOfEnumType"), new PropertyLiteral("B"));
+		
+		propertyResource.addPropertyReference(URI.create(annotatedBeanURI + "#uriType"), URI.create("http://www.example.com/"));
 	}
 
 	/**
@@ -251,7 +258,7 @@ public class ActivityServiceImplTest {
 		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
 		assertEquals("", definition.getDescription());
 		assertEquals("", definition.getLabel());
-		assertArrayEquals(new String[0], definition.getOptions());
+		assertEquals(new HashSet<String>(), ((PropertyLiteralDefinition) definition).getOptions());
 		assertFalse(definition.isMultiple());
 		assertFalse(definition.isOrdered());
 		assertTrue(definition.isRequired());
@@ -266,7 +273,7 @@ public class ActivityServiceImplTest {
 		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
 		assertEquals("", definition.getDescription());
 		assertEquals("", definition.getLabel());
-		assertArrayEquals(new String[0], definition.getOptions());
+		assertEquals(new HashSet<String>(), ((PropertyLiteralDefinition) definition).getOptions());
 		assertFalse(definition.isMultiple());
 		assertFalse(definition.isOrdered());
 		assertFalse(definition.isRequired());
@@ -281,7 +288,7 @@ public class ActivityServiceImplTest {
 		assertEquals(PropertyLiteral.XSD_INT, ((PropertyLiteralDefinition) definition).getLiteralType());
 		assertEquals("", definition.getDescription());
 		assertEquals("", definition.getLabel());
-		assertArrayEquals(new String[0], definition.getOptions());
+		assertEquals(new HashSet(), ((PropertyLiteralDefinition) definition).getOptions());
 		assertFalse(definition.isMultiple());
 		assertFalse(definition.isOrdered());
 		assertTrue(definition.isRequired());
@@ -296,7 +303,7 @@ public class ActivityServiceImplTest {
 		assertEquals(PropertyLiteral.XSD_LONG, ((PropertyLiteralDefinition) definition).getLiteralType());
 		assertEquals("", definition.getDescription());
 		assertEquals("", definition.getLabel());
-		assertArrayEquals(new String[0], definition.getOptions());
+		assertEquals(new HashSet<String>(), ((PropertyLiteralDefinition) definition).getOptions());
 		assertFalse(definition.isMultiple());
 		assertFalse(definition.isOrdered());
 		assertTrue(definition.isRequired());
@@ -311,7 +318,7 @@ public class ActivityServiceImplTest {
 		assertEquals(PropertyLiteral.XSD_FLOAT, ((PropertyLiteralDefinition) definition).getLiteralType());
 		assertEquals("", definition.getDescription());
 		assertEquals("", definition.getLabel());
-		assertArrayEquals(new String[0], definition.getOptions());
+		assertEquals(new HashSet<String>(), ((PropertyLiteralDefinition) definition).getOptions());
 		assertFalse(definition.isMultiple());
 		assertFalse(definition.isOrdered());
 		assertTrue(definition.isRequired());
@@ -326,7 +333,7 @@ public class ActivityServiceImplTest {
 		assertEquals(PropertyLiteral.XSD_DOUBLE, ((PropertyLiteralDefinition) definition).getLiteralType());
 		assertEquals("", definition.getDescription());
 		assertEquals("", definition.getLabel());
-		assertArrayEquals(new String[0], definition.getOptions());
+		assertEquals(new HashSet<String>(), ((PropertyLiteralDefinition) definition).getOptions());
 		assertFalse(definition.isMultiple());
 		assertFalse(definition.isOrdered());
 		assertTrue(definition.isRequired());
@@ -341,7 +348,7 @@ public class ActivityServiceImplTest {
 		assertEquals(PropertyLiteral.XSD_BOOLEAN, ((PropertyLiteralDefinition) definition).getLiteralType());
 		assertEquals("", definition.getDescription());
 		assertEquals("", definition.getLabel());
-		assertArrayEquals(new String[0], definition.getOptions());
+		assertEquals(new HashSet<String>(), ((PropertyLiteralDefinition) definition).getOptions());
 		assertFalse(definition.isMultiple());
 		assertFalse(definition.isOrdered());
 		assertTrue(definition.isRequired());
@@ -356,7 +363,7 @@ public class ActivityServiceImplTest {
 		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
 		assertEquals("", definition.getDescription());
 		assertEquals("", definition.getLabel());
-		assertArrayEquals(new String[] { "A", "B" }, definition.getOptions());
+		assertEquals(new LinkedHashSet<String>(Arrays.asList("A", "B")), ((PropertyLiteralDefinition) definition).getOptions());
 		assertFalse(definition.isMultiple());
 		assertFalse(definition.isOrdered());
 		assertTrue(definition.isRequired());
@@ -371,7 +378,6 @@ public class ActivityServiceImplTest {
 		assertEquals(URI.create(annotatedBeanURI + "/configuration2"), ((PropertyResourceDefinition) definition).getTypeURI());
 		assertEquals("", definition.getDescription());
 		assertEquals("", definition.getLabel());
-		assertArrayEquals(new String[0], definition.getOptions());
 		assertFalse(definition.isMultiple());
 		assertFalse(definition.isOrdered());
 		assertTrue(definition.isRequired());
@@ -385,7 +391,7 @@ public class ActivityServiceImplTest {
 		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
 		assertEquals("", definition.getDescription());
 		assertEquals("", definition.getLabel());
-		assertArrayEquals(new String[0], definition.getOptions());
+		assertEquals(new HashSet<String>(), ((PropertyLiteralDefinition) definition).getOptions());
 		assertFalse(definition.isMultiple());
 		assertFalse(definition.isOrdered());
 		assertTrue(definition.isRequired());
@@ -400,7 +406,6 @@ public class ActivityServiceImplTest {
 		assertEquals(URI.create(annotatedBeanURI + "/configuration2"), ((PropertyResourceDefinition) definition).getTypeURI());
 		assertEquals("", definition.getDescription());
 		assertEquals("", definition.getLabel());
-		assertArrayEquals(new String[0], definition.getOptions());
 		assertFalse(definition.isMultiple());
 		assertFalse(definition.isOrdered());
 		assertTrue(definition.isRequired());
@@ -414,7 +419,7 @@ public class ActivityServiceImplTest {
 		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
 		assertEquals("", definition.getDescription());
 		assertEquals("", definition.getLabel());
-		assertArrayEquals(new String[0], definition.getOptions());
+		assertEquals(new HashSet<String>(), ((PropertyLiteralDefinition) definition).getOptions());
 		assertFalse(definition.isMultiple());
 		assertFalse(definition.isOrdered());
 		assertTrue(definition.isRequired());
@@ -429,7 +434,7 @@ public class ActivityServiceImplTest {
 		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
 		assertEquals("", definition.getDescription());
 		assertEquals("", definition.getLabel());
-		assertArrayEquals(new String[0], definition.getOptions());
+		assertEquals(new HashSet<String>(), ((PropertyLiteralDefinition) definition).getOptions());
 		assertTrue(definition.isMultiple());
 		assertTrue(definition.isOrdered());
 		assertTrue(definition.isRequired());
@@ -444,7 +449,7 @@ public class ActivityServiceImplTest {
 		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
 		assertEquals("", definition.getDescription());
 		assertEquals("", definition.getLabel());
-		assertArrayEquals(new String[0], definition.getOptions());
+		assertEquals(new HashSet<String>(), ((PropertyLiteralDefinition) definition).getOptions());
 		assertTrue(definition.isMultiple());
 		assertTrue(definition.isOrdered());
 		assertTrue(definition.isRequired());
@@ -459,7 +464,7 @@ public class ActivityServiceImplTest {
 		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
 		assertEquals("", definition.getDescription());
 		assertEquals("", definition.getLabel());
-		assertArrayEquals(new String[0], definition.getOptions());
+		assertEquals(new HashSet<String>(), ((PropertyLiteralDefinition) definition).getOptions());
 		assertTrue(definition.isMultiple());
 		assertFalse(definition.isOrdered());
 		assertTrue(definition.isRequired());
@@ -474,7 +479,7 @@ public class ActivityServiceImplTest {
 		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
 		assertEquals("", definition.getDescription());
 		assertEquals("", definition.getLabel());
-		assertArrayEquals(new String[0], definition.getOptions());
+		assertEquals(new HashSet<String>(), ((PropertyLiteralDefinition) definition).getOptions());
 		assertTrue(definition.isMultiple());
 		assertFalse(definition.isOrdered());
 		assertTrue(definition.isRequired());
@@ -489,7 +494,6 @@ public class ActivityServiceImplTest {
 		assertEquals(URI.create(annotatedBeanURI + "/configuration2"), ((PropertyResourceDefinition) definition).getTypeURI());
 		assertEquals("", definition.getDescription());
 		assertEquals("", definition.getLabel());
-		assertArrayEquals(new String[0], definition.getOptions());
 		assertTrue(definition.isMultiple());
 		assertTrue(definition.isOrdered());
 		assertTrue(definition.isRequired());
@@ -502,7 +506,7 @@ public class ActivityServiceImplTest {
 		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
 		assertEquals("", definition.getDescription());
 		assertEquals("", definition.getLabel());
-		assertArrayEquals(new String[0], definition.getOptions());
+		assertEquals(new HashSet<String>(), ((PropertyLiteralDefinition) definition).getOptions());
 		assertFalse(definition.isMultiple());
 		assertFalse(definition.isOrdered());
 		assertTrue(definition.isRequired());
@@ -517,7 +521,6 @@ public class ActivityServiceImplTest {
 		assertEquals(URI.create(annotatedBeanURI + "/configuration2"), ((PropertyResourceDefinition) definition).getTypeURI());
 		assertEquals("", definition.getDescription());
 		assertEquals("", definition.getLabel());
-		assertArrayEquals(new String[0], definition.getOptions());
 		assertTrue(definition.isMultiple());
 		assertTrue(definition.isOrdered());
 		assertTrue(definition.isRequired());
@@ -530,7 +533,7 @@ public class ActivityServiceImplTest {
 		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
 		assertEquals("", definition.getDescription());
 		assertEquals("", definition.getLabel());
-		assertArrayEquals(new String[0], definition.getOptions());
+		assertEquals(new HashSet<String>(), ((PropertyLiteralDefinition) definition).getOptions());
 		assertFalse(definition.isMultiple());
 		assertFalse(definition.isOrdered());
 		assertTrue(definition.isRequired());
@@ -545,7 +548,6 @@ public class ActivityServiceImplTest {
 		assertEquals(URI.create(annotatedBeanURI + "/configuration2"), ((PropertyResourceDefinition) definition).getTypeURI());
 		assertEquals("", definition.getDescription());
 		assertEquals("", definition.getLabel());
-		assertArrayEquals(new String[0], definition.getOptions());
 		assertTrue(definition.isMultiple());
 		assertFalse(definition.isOrdered());
 		assertTrue(definition.isRequired());
@@ -558,7 +560,7 @@ public class ActivityServiceImplTest {
 		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
 		assertEquals("", definition.getDescription());
 		assertEquals("", definition.getLabel());
-		assertArrayEquals(new String[0], definition.getOptions());
+		assertEquals(new HashSet<String>(), ((PropertyLiteralDefinition) definition).getOptions());
 		assertFalse(definition.isMultiple());
 		assertFalse(definition.isOrdered());
 		assertTrue(definition.isRequired());
@@ -573,7 +575,7 @@ public class ActivityServiceImplTest {
 		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
 		assertEquals("", definition.getDescription());
 		assertEquals("", definition.getLabel());
-		assertArrayEquals(new String[] {"A", "B"}, definition.getOptions());
+		assertEquals(new LinkedHashSet<String>(Arrays.asList("A", "B")), ((PropertyLiteralDefinition) definition).getOptions());
 		assertTrue(definition.isMultiple());
 		assertTrue(definition.isOrdered());
 		assertTrue(definition.isRequired());
@@ -588,7 +590,7 @@ public class ActivityServiceImplTest {
 		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
 		assertEquals("", definition.getDescription());
 		assertEquals("", definition.getLabel());
-		assertArrayEquals(new String[] {"A", "B"}, definition.getOptions());
+		assertEquals(new LinkedHashSet<String>(Arrays.asList("A", "B")), ((PropertyLiteralDefinition) definition).getOptions());
 		assertTrue(definition.isMultiple());
 		assertTrue(definition.isOrdered());
 		assertTrue(definition.isRequired());
@@ -603,11 +605,23 @@ public class ActivityServiceImplTest {
 		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
 		assertEquals("", definition.getDescription());
 		assertEquals("", definition.getLabel());
-		assertArrayEquals(new String[] {"A", "B"}, definition.getOptions());
+		assertEquals(new LinkedHashSet<String>(Arrays.asList("A", "B")), ((PropertyLiteralDefinition) definition).getOptions());
 		assertTrue(definition.isMultiple());
 		assertFalse(definition.isOrdered());
 		assertTrue(definition.isRequired());
 
+		definition = propertyResourceDefinition.getPropertyDefinition(URI.create(annotatedBeanURI
+				+ "#uriType"));
+		definitionCount++;
+		assertNotNull(definition);
+		assertTrue(definition instanceof PropertyReferenceDefinition);
+		assertEquals(URI.create(annotatedBeanURI + "#uriType"),
+				definition.getPredicate());
+		assertEquals("", definition.getDescription());
+		assertEquals("", definition.getLabel());
+		assertFalse(definition.isMultiple());
+		assertFalse(definition.isOrdered());
+		assertTrue(definition.isRequired());
 
 		assertEquals(definitionCount, propertyResourceDefinition.getPropertyDefinitions().size());
 	}
@@ -663,6 +677,7 @@ public class ActivityServiceImplTest {
 		assertArrayEquals(new ActivityTestEnum[] {ActivityTestEnum.A, ActivityTestEnum.B}, testBean.arrayOfEnumType);
 		assertEquals(Arrays.asList(ActivityTestEnum.B, ActivityTestEnum.A), testBean.listOfEnumType);
 		assertEquals(new HashSet<ActivityTestEnum>(Arrays.asList(ActivityTestEnum.B, ActivityTestEnum.A)), testBean.setOfEnumType);
+		assertEquals(URI.create("http://www.example.com/"), testBean.uriType);
 	}
 
 	/**

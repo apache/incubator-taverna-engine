@@ -32,6 +32,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -63,6 +64,7 @@ import uk.org.taverna.scufl2.api.configurations.Configuration;
 import uk.org.taverna.scufl2.api.configurations.ConfigurationDefinition;
 import uk.org.taverna.scufl2.api.configurations.PropertyDefinition;
 import uk.org.taverna.scufl2.api.configurations.PropertyLiteralDefinition;
+import uk.org.taverna.scufl2.api.configurations.PropertyReferenceDefinition;
 import uk.org.taverna.scufl2.api.configurations.PropertyResourceDefinition;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.port.InputActivityPort;
@@ -73,6 +75,7 @@ import uk.org.taverna.scufl2.api.property.PropertyList;
 import uk.org.taverna.scufl2.api.property.PropertyLiteral;
 import uk.org.taverna.scufl2.api.property.PropertyNotFoundException;
 import uk.org.taverna.scufl2.api.property.PropertyObject;
+import uk.org.taverna.scufl2.api.property.PropertyReference;
 import uk.org.taverna.scufl2.api.property.PropertyResource;
 import uk.org.taverna.scufl2.api.property.UnexpectedPropertyException;
 
@@ -251,10 +254,9 @@ public class ActivityServiceImpl implements ActivityService {
 					}
 
 					List<Object> propertyValues = new ArrayList<Object>();
-					URI type = null;
 					if (propertyDefinition instanceof PropertyLiteralDefinition) {
 						PropertyLiteralDefinition dataPropertyDefinition = (PropertyLiteralDefinition) propertyDefinition;
-						type = dataPropertyDefinition.getLiteralType();
+						URI type = dataPropertyDefinition.getLiteralType();
 						List<PropertyLiteral> literals = getProperties(predicate,
 								propertyDefinition, resource, PropertyLiteral.class);
 						for (PropertyLiteral literal : literals) {
@@ -293,7 +295,6 @@ public class ActivityServiceImpl implements ActivityService {
 						}
 					} else if (propertyDefinition instanceof PropertyResourceDefinition) {
 						PropertyResourceDefinition propertyResourceDefinition = (PropertyResourceDefinition) propertyDefinition;
-						type = propertyResourceDefinition.getTypeURI();
 						List<PropertyResource> resources = getProperties(predicate,
 								propertyDefinition, resource, PropertyResource.class);
 						for (PropertyResource resourceElement : resources) {
@@ -301,6 +302,13 @@ public class ActivityServiceImpl implements ActivityService {
 							setConfigurationProperties(configurationObject, configuration, resourceElement,
 									propertyResourceDefinition, uri, bundle);
 							propertyValues.add(configurationObject);
+						}
+					} else if (propertyDefinition instanceof PropertyReferenceDefinition) {
+						List<PropertyReference> references = getProperties(predicate,
+								propertyDefinition, resource, PropertyReference.class);
+						for (PropertyReference referenceElement : references) {
+							URI resourceURI = referenceElement.getResourceURI();
+							propertyValues.add(resourceURI);
 						}
 					}
 
@@ -461,17 +469,22 @@ public class ActivityServiceImpl implements ActivityService {
 		} else if (type.equals(Boolean.class) || type.equals(Boolean.TYPE)) {
 			return new PropertyLiteralDefinition(predicate, PropertyLiteral.XSD_BOOLEAN, name,
 					label, description, required, multiple, ordered);
+		} else if (type.equals(URI.class)) {
+			return new PropertyReferenceDefinition(predicate, name,
+					label, description, required, multiple, ordered);
 		} else {
 			ConfigurationBean configurationBean = type.getAnnotation(ConfigurationBean.class);
 			if (configurationBean == null) {
 				List<PropertyDefinition> propertyDefinitions = new ArrayList<PropertyDefinition>();
 				URI typeURI = null;
 				if (type.equals(ActivityInputPortDefinitionBean.class)) {
+					typeURI = activityURI.resolve("#InputPortDefinition");
 					propertyDefinitions.add(new PropertyResourceDefinition(activityURI
 							.resolve("#definesInputPort"), null, "definesInputPort",
 							"Activity Input Ports", "", true, true, false));
 
 				} else if (type.equals(ActivityOutputPortDefinitionBean.class)) {
+					typeURI = activityURI.resolve("#OutputPortDefinition");
 					propertyDefinitions.add(new PropertyResourceDefinition(activityURI
 							.resolve("#definesOutputPort"), null, "definesOutputPort",
 							"Activity Output Ports", "", true, true, false));
@@ -549,12 +562,12 @@ public class ActivityServiceImpl implements ActivityService {
 		return collectionClass;
 	}
 
-	private String[] getOptions(Class<?> enumType) {
+	private LinkedHashSet<String> getOptions(Class<?> enumType) {
 		List<String> options = new ArrayList<String>();
 		for (Object option : enumType.getEnumConstants()) {
 			options.add(option.toString());
 		}
-		return options.toArray(new String[options.size()]);
+		return new LinkedHashSet<String>(options);
 	}
 
 	private ActivityFactory getActivityFactory(URI uri) throws ActivityNotFoundException {

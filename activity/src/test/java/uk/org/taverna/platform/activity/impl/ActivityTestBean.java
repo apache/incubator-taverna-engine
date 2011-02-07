@@ -20,6 +20,7 @@
  ******************************************************************************/
 package uk.org.taverna.platform.activity.impl;
 
+import java.net.URI;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -52,6 +53,7 @@ public class ActivityTestBean {
 	public ActivityTestEnum[] arrayOfEnumType;
 	public List<ActivityTestEnum> listOfEnumType;
 	public SortedSet<ActivityTestEnum> setOfEnumType;
+	public URI uriType;
 	
 	@ConfigurationProperty(name = "stringType")
 	public void setStringType(String parameter) {
@@ -151,6 +153,11 @@ public class ActivityTestBean {
 	@ConfigurationProperty(name = "setOfEnumType")
 	public void setSetOfEnumType(SortedSet<ActivityTestEnum> parameter) {
 		setOfEnumType = parameter;
+	}
+
+	@ConfigurationProperty(name = "uriType")
+	public void setURIType(URI parameter) {
+		uriType = parameter;
 	}
 
 }
