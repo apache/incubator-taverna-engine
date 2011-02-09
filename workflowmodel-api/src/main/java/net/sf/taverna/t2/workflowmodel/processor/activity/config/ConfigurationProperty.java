@@ -16,5 +16,9 @@ public @interface ConfigurationProperty {
 	String description() default "";
 
 	boolean required() default true;
+	
+	OrderPolicy ordering() default OrderPolicy.DEFAULT;
+	
+	enum OrderPolicy {DEFAULT, NON_ORDERED}
 		
 }
