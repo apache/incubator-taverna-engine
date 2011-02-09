@@ -51,7 +51,6 @@ import net.sf.taverna.t2.workflowmodel.Processor;
 import net.sf.taverna.t2.workflowmodel.ProcessorInputPort;
 import net.sf.taverna.t2.workflowmodel.ProcessorOutputPort;
 import net.sf.taverna.t2.workflowmodel.TokenProcessingEntity;
-import net.sf.taverna.t2.workflowmodel.impl.EditsImpl;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityConfigurationException;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityInputPort;
@@ -72,7 +71,7 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.NestedDataflow;
  */
 public class Tools {
 
-	private static Edits edits = new EditsImpl();
+//	private static Edits edits = new EditsImpl();
 
 	/**
 	 * Find (and possibly create) an EventHandlingInputPort.
@@ -96,7 +95,7 @@ public class Tools {
 	 */
 	@SuppressWarnings("unchecked")
 	protected static EventHandlingInputPort findEventHandlingInputPort(
-			List<Edit<?>> editList, Dataflow dataflow, InputPort inputPort) {
+			List<Edit<?>> editList, Dataflow dataflow, InputPort inputPort, Edits edits) {
 		if (inputPort instanceof EventHandlingInputPort) {
 			return (EventHandlingInputPort) inputPort;
 		} else if (!(inputPort instanceof ActivityInputPort)) {
@@ -163,7 +162,7 @@ public class Tools {
 	 */
 	@SuppressWarnings("unchecked")
 	protected static EventForwardingOutputPort findEventHandlingOutputPort(
-			List<Edit<?>> editList, Dataflow dataflow, OutputPort outputPort) {
+			List<Edit<?>> editList, Dataflow dataflow, OutputPort outputPort, Edits edits) {
 		if (outputPort instanceof EventForwardingOutputPort) {
 			return (EventForwardingOutputPort) outputPort;
 		} else if (!(outputPort instanceof ActivityOutputPort)) {
@@ -228,7 +227,7 @@ public class Tools {
 	 *         and connects the Datalink
 	 */
 	public static Edit<?> getCreateAndConnectDatalinkEdit(Dataflow dataflow,
-			EventForwardingOutputPort source, EventHandlingInputPort sink) {
+			EventForwardingOutputPort source, EventHandlingInputPort sink, Edits edits) {
 		Edit<?> edit = null;
 
 		Datalink incomingLink = sink.getIncomingLink();
@@ -300,14 +299,14 @@ public class Tools {
 	 *         neccessary processor ports and mappings
 	 */
 	public static Edit<?> getCreateAndConnectDatalinkEdit(Dataflow dataflow,
-			OutputPort outputPort, InputPort inputPort) {
+			OutputPort outputPort, InputPort inputPort, Edits edits) {
 
 		List<Edit<?>> editList = new ArrayList<Edit<?>>();
 		EventHandlingInputPort sink = findEventHandlingInputPort(editList,
-				dataflow, inputPort);
+				dataflow, inputPort, edits);
 		EventForwardingOutputPort source = findEventHandlingOutputPort(
-				editList, dataflow, outputPort);
-		editList.add(getCreateAndConnectDatalinkEdit(dataflow, source, sink));
+				editList, dataflow, outputPort, edits);
+		editList.add(getCreateAndConnectDatalinkEdit(dataflow, source, sink, edits));
 		return new CompoundEdit(editList);
 	}
 
@@ -344,21 +343,21 @@ public class Tools {
 	}
 
 	public static Edit<?> getMoveDatalinkSinkEdit(Dataflow dataflow,
-			Datalink datalink, EventHandlingInputPort sink) {
+			Datalink datalink, EventHandlingInputPort sink, Edits edits) {
 		List<Edit<?>> editList = new ArrayList<Edit<?>>();
 		editList.add(edits.getDisconnectDatalinkEdit(datalink));
 		if (datalink.getSink() instanceof ProcessorInputPort) {
 			editList
 					.add(getRemoveProcessorInputPortEdit((ProcessorInputPort) datalink
-							.getSink()));
+							.getSink(), edits));
 		}
 		editList.add(getCreateAndConnectDatalinkEdit(dataflow, datalink
-				.getSource(), sink));
+				.getSource(), sink, edits));
 		return new CompoundEdit(editList);
 	}
 
 	public static Edit<?> getDisconnectDatalinkAndRemovePortsEdit(
-			Datalink datalink) {
+			Datalink datalink, Edits edits) {
 		List<Edit<?>> editList = new ArrayList<Edit<?>>();
 		editList.add(edits.getDisconnectDatalinkEdit(datalink));
 		if (datalink.getSource() instanceof ProcessorOutputPort) {
@@ -366,19 +365,19 @@ public class Tools {
 					.getSource();
 			if (processorOutputPort.getOutgoingLinks().size() == 1) {
 				editList
-						.add(getRemoveProcessorOutputPortEdit(processorOutputPort));
+						.add(getRemoveProcessorOutputPortEdit(processorOutputPort, edits));
 			}
 		}
 		if (datalink.getSink() instanceof ProcessorInputPort) {
 			editList
 					.add(getRemoveProcessorInputPortEdit((ProcessorInputPort) datalink
-							.getSink()));
+							.getSink(), edits));
 		}
 		return new CompoundEdit(editList);
 	}
 
 	public static Edit<?> getRemoveProcessorOutputPortEdit(
-			ProcessorOutputPort port) {
+			ProcessorOutputPort port, Edits edits) {
 		List<Edit<?>> editList = new ArrayList<Edit<?>>();
 		Processor processor = port.getProcessor();
 		editList.add(edits.getRemoveProcessorOutputPortEdit(
@@ -391,7 +390,7 @@ public class Tools {
 	}
 
 	public static Edit<?> getRemoveProcessorInputPortEdit(
-			ProcessorInputPort port) {
+			ProcessorInputPort port, Edits edits) {
 		List<Edit<?>> editList = new ArrayList<Edit<?>>();
 		Processor processor = port.getProcessor();
 		editList.add(edits.getRemoveProcessorInputPortEdit(port.getProcessor(),
@@ -403,7 +402,7 @@ public class Tools {
 		return new CompoundEdit(editList);
 	}
 	
-	public static Edit<?> getEnableDisabledActivityEdit(Processor processor, DisabledActivity disabledActivity) {
+	public static Edit<?> getEnableDisabledActivityEdit(Processor processor, DisabledActivity disabledActivity, Edits edits) {
 		List<Edit<?>> editList = new ArrayList<Edit<?>>();
 		Activity<?> brokenActivity = disabledActivity.getActivity();
 		try {
@@ -927,15 +926,14 @@ public class Tools {
 	 * 
 	 * @return Whether an identification needed to be added
 	 */
-	public static boolean addDataflowIdentification(Dataflow dataflow, String internalId) {
+	public static boolean addDataflowIdentification(Dataflow dataflow, String internalId, Edits edits) {
 		boolean added = false;
-		AnnotationTools at = new AnnotationTools();
-		IdentificationAssertion ia = (IdentificationAssertion) (at.getAnnotation(dataflow, IdentificationAssertion.class));
+		IdentificationAssertion ia = (IdentificationAssertion) (AnnotationTools.getAnnotation(dataflow, IdentificationAssertion.class));
 		if ((ia == null) || !ia.getIdentification().equals(internalId)) {
 			IdentificationAssertion newIa = new IdentificationAssertion();
 			newIa.setIdentification(internalId);
 			try {
-				at.addAnnotation(dataflow, newIa).doEdit();
+				AnnotationTools.addAnnotation(dataflow, newIa, edits).doEdit();
 			} catch (EditException e) {
 				added = false;
 			}

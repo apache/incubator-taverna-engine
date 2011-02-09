@@ -9,7 +9,6 @@ import net.sf.taverna.t2.annotation.AnnotationChain;
 import net.sf.taverna.t2.annotation.annotationbeans.AbstractTextualValueAssertion;
 import net.sf.taverna.t2.workflowmodel.Edit;
 import net.sf.taverna.t2.workflowmodel.Edits;
-import net.sf.taverna.t2.workflowmodel.impl.EditsImpl;
 
 import org.apache.log4j.Logger;
 
@@ -20,36 +19,12 @@ public class AnnotationTools {
 //	@SuppressWarnings("unchecked")
 //	private Iterable<Class> annotationBeanRegistry;
 
-	private Edits edits;
-
-	public AnnotationTools() {
-//		setAnnotationBeanRegistry(getSpiRegistry());
-		setEdits(new EditsImpl());
-	}
-
-//	protected static Iterable<Class> getSpiRegistry() {
-//		return new SpiRegistry(ApplicationRuntime
-//				.getInstance().getRavenRepository(), AnnotationBeanSPI.class
-//				.getCanonicalName(), AnnotationTools.class.getClassLoader());
-//	}
-
-	@SuppressWarnings("unchecked")
-	public AnnotationTools(Iterable<Class> annotationBeanRegistry, Edits edits) {
-//		setAnnotationBeanRegistry(annotationBeanRegistry);
-		setEdits(edits);
-	}
-
-	public Edit<?> addAnnotation(Annotated<?> annotated, AnnotationBeanSPI a) {
-		return getEdits().getAddAnnotationChainEdit(annotated, a);
-	}
-
-	private Edits getEdits() {
-		return edits;
+	public static Edit<?> addAnnotation(Annotated<?> annotated, AnnotationBeanSPI a, Edits edits) {
+		return edits.getAddAnnotationChainEdit(annotated, a);
 	}
 
 	@SuppressWarnings("unchecked")
-	public AnnotationBeanSPI getAnnotation(Annotated<?> annotated,
-			Class annotationClass) {
+	public static AnnotationBeanSPI getAnnotation(Annotated<?> annotated, Class annotationClass) {
 		AnnotationBeanSPI result = null;
 		Date latestDate = null;
 		for (AnnotationChain chain : annotated.getAnnotations()) {
@@ -105,8 +80,8 @@ public class AnnotationTools {
 //		return result;
 //	}
 
-	public Edit<?> setAnnotationString(Annotated<?> annotated, Class<?> c,
-			String value) {
+	public static Edit<?> setAnnotationString(Annotated<?> annotated, Class<?> c,
+			String value, Edits edits) {
 		AbstractTextualValueAssertion a = null;
 		try {
 			logger.info("Setting " + c.getCanonicalName() + " to " + value);
@@ -119,11 +94,11 @@ public class AnnotationTools {
 			logger.error(e);
 		}
 		a.setText(value);
-		return (addAnnotation(annotated, a));
+		return (addAnnotation(annotated, a, edits));
 	}
 
 	@SuppressWarnings("unchecked")
-	public String getAnnotationString(Annotated<?> annotated,
+	public static String getAnnotationString(Annotated<?> annotated,
 			Class annotationClass, String missingValue) {
 		AbstractTextualValueAssertion a = (AbstractTextualValueAssertion) getAnnotation(
 				annotated, annotationClass);
@@ -131,10 +106,6 @@ public class AnnotationTools {
 			return missingValue;
 		}
 		return a.getText();
-	}
-
-	public void setEdits(Edits edits) {
-		this.edits = edits;
 	}
 
 //	public void setAnnotationBeanRegistry(Iterable<Class> annotationBeanRegistry) {
