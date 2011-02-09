@@ -779,7 +779,7 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 	}
 	
 	public String recordIdentifier() {
-	    net.sf.taverna.t2.workflowmodel.utils.Tools.addDataflowIdentification(this, internalIdentifier);
+	    net.sf.taverna.t2.workflowmodel.utils.Tools.addDataflowIdentification(this, internalIdentifier, new EditsImpl());
 		return internalIdentifier;
 	}
 	
