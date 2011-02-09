@@ -34,7 +34,7 @@ public class ParallelizeConfig {
 
 	public ParallelizeConfig() {
 		super();
-		this.maxJobs = 5;
+		this.maxJobs = 1;
 	}
 
 	public void setMaximumJobs(int maxJobs) {
