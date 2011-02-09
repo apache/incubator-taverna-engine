@@ -36,6 +36,7 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
  * @author Stuart Owen
  *
  */
+@ConfigurationBean(uri = "http://ns.taverna.org.uk/2010/scufl2/ActivityPortsDefinition")
 public class ActivityPortsDefinitionBean {
 
 	private List<ActivityInputPortDefinitionBean> inputs = new ArrayList<ActivityInputPortDefinitionBean>();
@@ -59,6 +60,7 @@ public class ActivityPortsDefinitionBean {
 	/**
 	 * @param portDefinitions a list of {@link ActivityInputPortDefinitionBean} that describes each input port
 	 */
+	@ConfigurationProperty(name = "inputPortDefinition", label = "Input Ports", description = "", required = false, ordering = ConfigurationProperty.OrderPolicy.NON_ORDERED)
 	public void setInputPortDefinitions(
 			List<ActivityInputPortDefinitionBean> portDefinitions) {
 		inputs=portDefinitions;
@@ -67,6 +69,7 @@ public class ActivityPortsDefinitionBean {
 	/**
 	 * @param portDefinitions a list of {@link ActivityOutputPortDefinitionBean} that describes each output port
 	 */
+	@ConfigurationProperty(name = "outputPortDefinition", label = "Output Ports", description = "", required = false, ordering = ConfigurationProperty.OrderPolicy.NON_ORDERED)
 	public void setOutputPortDefinitions(
 			List<ActivityOutputPortDefinitionBean> portDefinitions) {
 		outputs=portDefinitions;
