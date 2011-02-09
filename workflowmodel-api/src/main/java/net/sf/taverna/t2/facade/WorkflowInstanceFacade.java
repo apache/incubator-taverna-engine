@@ -226,4 +226,11 @@ public interface WorkflowInstanceFacade {
 	 */
 	public State getState();
 	
+	/**
+	 * An identifier that is unique to this facade.
+	 * 
+	 * @return a String representing a unique internal identifier.
+	 */
+	public String getIdentifier();
+
 }

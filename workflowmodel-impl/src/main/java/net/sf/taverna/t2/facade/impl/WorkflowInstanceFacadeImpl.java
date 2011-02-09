@@ -569,4 +569,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 		return false;
 	}
 
+	public String getIdentifier() {
+		return localName;
+	}
 }
