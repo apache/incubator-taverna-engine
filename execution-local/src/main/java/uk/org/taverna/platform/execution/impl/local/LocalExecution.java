@@ -51,7 +51,7 @@ import uk.org.taverna.scufl2.api.core.Workflow;
 import uk.org.taverna.scufl2.api.profiles.Profile;
 
 /**
- * An Execution for executing a Taverna workflow using a local Taverna Dataflow Engine.
+ * An {@link uk.org.taverna.platform.execution.api.Execution Execution} for executing Taverna workflows on a local Taverna Dataflow Engine.
  * 
  * @author David Withers
  */
