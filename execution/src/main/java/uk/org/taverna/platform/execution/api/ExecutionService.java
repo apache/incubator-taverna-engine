@@ -65,11 +65,11 @@ public interface ExecutionService {
 	 * @param workflowBundle
 	 *            the <code>WorkflowBundle</code> containing the workflows required for execution
 	 * @param workflow
-	 *            the top level workflow to execute
+	 *            the workflow to execute
 	 * @param profile
-	 *            the profile to use to execute the workflow
+	 *            the profile to use when executing the workflow
 	 * @param inputs
-	 *            the inputs of the workflow
+	 *            the inputs to the workflow
 	 * @param referenceService
 	 *            the reference service used to register the workflow inputs and outputs
 	 * @return the ID of the created workflow execution

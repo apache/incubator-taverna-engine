@@ -34,7 +34,7 @@ import uk.org.taverna.scufl2.api.core.Workflow;
 import uk.org.taverna.scufl2.api.profiles.Profile;
 
 /**
- * An Execution Service for executing Taverna workflows using a local Taverna Dataflow Engine.
+ * An Execution Service for executing Taverna workflows on a local Taverna Dataflow Engine.
  * 
  * @author David Withers
  */
