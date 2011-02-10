@@ -41,35 +41,26 @@ public class CMException
 
     /**
      * Creates a new CMException with the specified message.
-     *
-     * @param sMessage Exception message
      */
-    public CMException(String sMessage)
+    public CMException(String message)
     {
-        super(sMessage);
+        super(message);
     }
 
     /**
-     * Creates a new CMException with the specified message and cause
-     * throwable.
+     * Creates a new CMException with the specified message and cause.
      *
-     * @param causeThrowable The throwable that caused this exception to be
-     * thrown
-     * @param sMessage Exception message
      */
-    public CMException(String sMessage, Throwable causeThrowable)
+    public CMException(String message, Throwable cause)
     {
-        super(sMessage, causeThrowable);
+        super(message, cause);
     }
 
     /**
      * Creates a new CMException with the specified cause throwable.
-     *
-     * @param causeThrowable The throwable that caused this exception to be
-     * thrown
      */
-    public CMException(Throwable causeThrowable)
+    public CMException(Throwable cause)
     {
-        super(causeThrowable);
+        super(cause);
     }
 }

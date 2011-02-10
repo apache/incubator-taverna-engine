@@ -86,16 +86,6 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class CredentialManager implements Observable<KeystoreChangedEvent> {
 
-	public class ClearCachesObserver implements Observer<KeystoreChangedEvent> {
-		public void notify(Observable<KeystoreChangedEvent> sender,
-				KeystoreChangedEvent message) throws Exception {
-			synchronized (Security.class) {
-				cachedServiceMap = null;
-				cachedServiceURIs = null;
-			}
-		}
-	}
-
 	private static final String UTF_8 = "UTF-8";
 
 	private static final String PROPERTY_TRUSTSTORE = "javax.net.ssl.trustStore";
@@ -132,12 +122,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	private MultiCaster<KeystoreChangedEvent> multiCaster = new MultiCaster<KeystoreChangedEvent>(
 			this);
 
-	private HashMap<URI, URI> cachedServiceMap = null;
-
-	private ClearCachesObserver cachedServiceMapObserver = new ClearCachesObserver();
-
-	private List<URI> cachedServiceURIs = null;
-
 	// A directory containing Credential Manager's Keystore/Truststore/etc. files.
 	private static File credentialManagerDirectory = null;
 	
@@ -173,6 +157,16 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 
 	// Whether SSLSocketFactory has been initialised with Taverna's Keystore/Truststore.
 	private static boolean sslInitialised = false;
+	
+	// Cached list of all services that have a username/password entry in the Keystore
+	private List<URI> cachedServiceURIsList = null;
+	// Cached map of all URI fragments to their original URIs for services that have a username/password 
+	// entry in the Keystore. This is normally used to recursively discover the realm of the service 
+	// for HTTP authentication so we do not have to ask user for their username and password for 
+	// every service in the same realm.
+	private HashMap<URI, URI> cachedServiceURIsMap = null;
+	// Observer that clears the above list and map on any change to the Keystore
+	private ClearCachedServiceURIsObserver clearCachedServiceURIsObserver = new ClearCachedServiceURIsObserver();
 	
 	// Credential Manager singleton
 	private static CredentialManager INSTANCE;
@@ -341,7 +335,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	 */
 	private void init() throws CMException {
 
-		this.addObserver(cachedServiceMapObserver);
+		this.addObserver(clearCachedServiceURIsObserver);
 
 		// Make sure we have BouncyCastle provider installed, just in case (needed for some tests and reading PKCS#12 keystores)
         Security.addProvider(new BouncyCastleProvider()); 
@@ -746,32 +740,27 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	 * If the parameter <code>usePathRecursion</code> is true, then the
 	 * credential manager will also attempt to look for stored credentials for
 	 * each of the parents in the URI.
-	 * 
-	 * @param serviceURI
-	 * @param usePathRecursion
-	 * @param requestingPrompt
-	 * @return
-	 * @throws CMException
 	 */
 	public UsernamePassword getUsernameAndPasswordForService(URI serviceURI,
 			boolean usePathRecursion, String requestingPrompt)
 			throws CMException {
 
 		synchronized (keystore) {
-			/* Alias for the username and password entry */
+
 			SecretKeySpec passwordKey = null;
-			LinkedHashSet<URI> possibles = possibleLookups(serviceURI,
+			LinkedHashSet<URI> possibleServiceURIsToLookup = getPossibleServiceURIsToLookup(serviceURI,
 					usePathRecursion);
 
-			Map<URI, URI> mappedServiceURIs = getFragmentMappedURIsForUsernamePassword();
+			Map<URI, URI> allServiceURIs = getFragmentMappedURIsForAllUsernameAndPasswordPairs();
 
 			try {
-				for (URI lookupURI : possibles) {
-					URI mappedURI = mappedServiceURIs.get(lookupURI);
+				for (URI lookupURI : possibleServiceURIsToLookup) {
+					URI mappedURI = allServiceURIs.get(lookupURI);
 					if (mappedURI == null) {
 						continue;
 					}
-					// Get it
+					// We found it - get the username and password in the 
+					// Keystrote associated with this service URI
 					String alias = null;
 					alias = "password#" + mappedURI.toASCIIString();
 					passwordKey = (((SecretKeySpec) keystore
@@ -838,12 +827,14 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 		}
 	}
 
-	protected Map<URI, URI> getFragmentMappedURIsForUsernamePassword()
+	protected Map<URI, URI> getFragmentMappedURIsForAllUsernameAndPasswordPairs()
 			throws CMException {
 		synchronized (Security.class) {
-			if (cachedServiceMap == null) {
+			if (cachedServiceURIsMap == null) {
 				HashMap<URI, URI> map = new HashMap<URI, URI>();
-				for (URI serviceURI : getServiceURIsForUsernamePassword()) {
+				// Get all service URIs that have username and password in the Keystore
+				List<URI> serviceURIs = getServiceURIsForAllUsernameAndPasswordPairs();
+				for (URI serviceURI : serviceURIs) {
 					// Always store 1-1, with or without fragment
 					map.put(serviceURI, serviceURI);
 					if (serviceURI.getFragment() == null) {
@@ -869,20 +860,36 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 						map.put(noFragment, serviceURI);
 					}
 				}
-				cachedServiceMap = map;
+				cachedServiceURIsMap = map;
 			}
-			return cachedServiceMap;
+			return cachedServiceURIsMap;
 		}
 	}
 
-	protected static LinkedHashSet<URI> possibleLookups(URI serviceURI,
+	/*
+	 * Creates a list of possible URIs to look up when searching for username and password 
+	 * for a service with a given URI. This is mainly useful for HTTP AuthN when we save the 
+	 * realm URI rather than the exact service URI as we want that username and password pair 
+	 * to be used for the whole realm and not bother user for credentials every time them access
+	 * a URL from that realm.
+	 */
+	protected static LinkedHashSet<URI> getPossibleServiceURIsToLookup(URI serviceURI,
 			boolean usePathRecursion) {
-		serviceURI = serviceURI.normalize();
+		// JCEKE-type keystores ignore case for aliases (all aliases are lowercase) 
+		// and that is a problem as we store URIs in the alias so just convert everything 
+		// to lower case or we won't be able to find anything in the Keystore.
 		try {
+			serviceURI = new URI(serviceURI.toASCIIString().toLowerCase());
+		} catch (URISyntaxException ex) {
+			// Should not really happen
+			logger.warn("Could not convert the URI " + serviceURI + " to lowercase." , ex);
+		}
+		try {
+			serviceURI = serviceURI.normalize();
 			serviceURI = setUserInfoForURI(serviceURI, null);
 		} catch (URISyntaxException ex) {
 			logger.warn("Could not strip userinfo from " + serviceURI, ex);
-		}
+		}	
 
 		/*
 		 * We'll use a LinkedHashSet to avoid checking for duplicates, like if
@@ -948,12 +955,12 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	 * the Keystore.
 	 * 
 	 * @deprecated
-	 * @see #getServiceURIsForUsernamePassword()
+	 * @see #getServiceURIsForAllUsernameAndPasswordPairs()
 	 */
 	@Deprecated
-	public ArrayList<String> getServiceURLsforUsernameAndPasswords()
+	public ArrayList<String> getServiceURLsforAllUsernameAndPasswordPairs()
 			throws CMException {
-		List<URI> uris = getServiceURIsForUsernamePassword();
+		List<URI> uris = getServiceURIsForAllUsernameAndPasswordPairs();
 		ArrayList<String> serviceURLs = new ArrayList<String>();
 		for (URI uri : uris) {
 			serviceURLs.add(uri.toASCIIString());
@@ -1016,15 +1023,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	 * @deprecated Use
 	 *             {@link #saveUsernameAndPasswordForService(UsernamePassword, URI)}
 	 *             instead
-	 * @param username
-	 *            Username to store
-	 * @param password
-	 *            Password to store
-	 * @param serviceURL
-	 *            serviceURI The (possibly normalized) URI to store the
-	 *            credentials under
-	 * @throws CMException
-	 *             If the credentials could not be stored
 	 */
 	@Deprecated
 	public void saveUsernameAndPasswordForService(String username,
@@ -1033,6 +1031,9 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 		synchronized (keystore) {
 
 			// Alias for the username and password entry
+			// Since we switched from BouncyCastle to JCEKS type keystores - aliases
+			// are case insensitive!!!  This is a major blow as we use service URLs in
+			// aliases!
 			String alias = "password#" + serviceURL;
 			/*
 			 * Password (together with its related username) is wrapped as a
@@ -1101,7 +1102,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 			// as "keypair#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<CERT_SERIAL_NUMBER>
 			String ownerDN = ((X509Certificate) certs[0])
 					.getSubjectX500Principal().getName(X500Principal.RFC2253);
-			CMX509Util util = new CMX509Util();
+			CMUtils util = new CMUtils();
 			util.parseDN(ownerDN);
 			String ownerCN = util.getCN(); // owner's common name
 
@@ -1148,7 +1149,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 			// as "keypair#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<CERT_SERIAL_NUMBER>
 			String ownerDN = ((X509Certificate) certs[0])
 					.getSubjectX500Principal().getName(X500Principal.RFC2253);
-			CMX509Util util = new CMX509Util();
+			CMUtils util = new CMUtils();
 			util.parseDN(ownerDN);
 			String ownerCN = util.getCN(); // owner's common name
 
@@ -1254,7 +1255,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 				String sDN = ((X509Certificate) certChain[0])
 						.getSubjectX500Principal().getName(
 								X500Principal.RFC2253);
-				CMX509Util util = new CMX509Util();
+				CMUtils util = new CMUtils();
 				util.parseDN(sDN);
 				String sCN = util.getCN();
 
@@ -1375,7 +1376,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	private static String createX509CertificateAlias(X509Certificate cert) {
 		String ownerDN = cert.getSubjectX500Principal().getName(
 				X500Principal.RFC2253);
-		CMX509Util util = new CMX509Util();
+		CMUtils util = new CMUtils();
 		util.parseDN(ownerDN);
 		String owner;
 		String ownerCN = util.getCN(); // owner's common name
@@ -1531,14 +1532,14 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	}
 
 	/**
-	 * Get service URLs associated with all username/password pairs currently in
+	 * Get service URIs associated with all username/password pairs currently in
 	 * the Keystore.
 	 * 
 	 * @see #hasUsernamePasswordForService(URI)
 	 */
-	public List<URI> getServiceURIsForUsernamePassword() throws CMException {
+	public List<URI> getServiceURIsForAllUsernameAndPasswordPairs() throws CMException {
 		synchronized (keystore) {
-			if (cachedServiceURIs == null) {
+			if (cachedServiceURIsList == null) {
 				List<URI> serviceURIs = new ArrayList<URI>();
 				for (String alias : getAliases(CredentialManager.KEYSTORE)) {
 					/*
@@ -1559,44 +1560,11 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 					URI uri = URI.create(uriStr);
 					serviceURIs.add(uri);
 				}
-				cachedServiceURIs = serviceURIs;
+				cachedServiceURIsList = serviceURIs;
 			}
-			return cachedServiceURIs;
+			return cachedServiceURIsList;
 		}
 	}
-
-	/**
-	 * Gets the creation date of an entry in the specified keystore.
-	 * 
-	 * Note that not all keystores support 'creation date' property, but Bouncy
-	 * Castle 'UBER'-type keystores do.
-	 */
-//	public Date getEntryCreationDate(String ksType, String alias)
-//			throws CMException {
-//
-//		synchronized (Security.class) {
-//			ArrayList<Provider> oldBCProviders = unregisterOldBCProviders();
-//			Security.addProvider(bcProvider);
-//			try {
-//				if (ksType.equals(KEYSTORE)) {
-//					return keystore.getCreationDate(alias);
-//				} else if (ksType.equals(TRUSTSTORE)) {
-//					return truststore.getCreationDate(alias);
-//				} else {
-//					return null;
-//				}
-//			} catch (Exception ex) {
-//				String exMessage = "Credential Manager: Failed to get the creation date for the entry from the "
-//						+ ksType + ".";
-//				logger.error(exMessage);
-//				throw new CMException(exMessage);
-//			} finally {
-//				// Add the old BC providers back and remove the one we have
-//				// added
-//				restoreOldBCProviders(oldBCProviders);
-//			}
-//		}
-//	}
 
 	/**
 	 * Check if Keystore/Truststore file already exists on disk.
@@ -2241,8 +2209,8 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	}
 
 	public boolean hasUsernamePasswordForService(URI uri) throws CMException {
-		Map<URI, URI> mappedServiceURIs = getFragmentMappedURIsForUsernamePassword();
-		for (URI possible : possibleLookups(uri, true)) {
+		Map<URI, URI> mappedServiceURIs = getFragmentMappedURIsForAllUsernameAndPasswordPairs();
+		for (URI possible : getPossibleServiceURIsToLookup(uri, true)) {
 			if (mappedServiceURIs.containsKey(possible)) {
 				return true;
 			}
@@ -2252,7 +2220,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	
 	private static void loadDefaultConfigurationFiles() {
 		if (credentialManagerDirectory == null){
-			credentialManagerDirectory = CMUtil.getCredentialManagerDefaultDirectory();
+			credentialManagerDirectory = net.sf.taverna.t2.security.credentialmanager.CMUtils.getCredentialManagerDefaultDirectory();
 		}
 		if (keystoreFile == null){
 			keystoreFile = new File(credentialManagerDirectory, T2KEYSTORE_FILE);
@@ -2282,4 +2250,21 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 		}
 	}
 
+	// Clear the cached service URIs that have username and password associated with them.
+	// Basically we keep the list of all service URIs (and a map of servce URIs to their URIs fragments
+	// to find the realm for HTTP AuthN) that have a password entry in the Keystore.
+	public class ClearCachedServiceURIsObserver implements Observer<KeystoreChangedEvent> {
+		public void notify(Observable<KeystoreChangedEvent> sender,
+				KeystoreChangedEvent message) throws Exception {
+			// If Keystore has changed - possibly some password entries have changed 
+			// (could be key entries that have chabged but we do not know) - so
+			// empty the service URI caches just in case.
+			if (message.keystoreType.equals(KEYSTORE)){
+				synchronized (keystore) {
+					cachedServiceURIsMap = null;
+					cachedServiceURIsList = null;
+				}
+			}
+		}
+	}
 }

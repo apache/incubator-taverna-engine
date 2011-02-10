@@ -27,7 +27,7 @@ public class PossibleLookupsTest {
 	@Test
 	public void possibleLookupsNoRecursion() throws Exception {
 		URI uri = URI.create(NASTY_URI);
-		LinkedHashSet<URI> lookups = CredentialManager.possibleLookups(uri,
+		LinkedHashSet<URI> lookups = CredentialManager.getPossibleServiceURIsToLookup(uri,
 				false);
 		assertTrue("Did not contain " + uri, lookups.remove(uri));
 		assertTrue("Unexpected lookups:" + lookups, lookups.isEmpty());
@@ -45,7 +45,7 @@ public class PossibleLookupsTest {
 						URI.create("http://www.taverna.org.uk/"));
 
 		ArrayList<URI> lookups = new ArrayList<URI>(CredentialManager
-				.possibleLookups(uri, true));
+				.getPossibleServiceURIsToLookup(uri, true));
 
 		assertEquals("Did not match expected URIs", expected, lookups);
 	}
@@ -63,7 +63,7 @@ public class PossibleLookupsTest {
 								.create("http://www.taverna.org.uk/"));
 
 		ArrayList<URI> lookups = new ArrayList<URI>(CredentialManager
-				.possibleLookups(uri, true));
+				.getPossibleServiceURIsToLookup(uri, true));
 
 		assertEquals("Did not match expected URIs", expected, lookups);
 	}
@@ -91,7 +91,7 @@ public class PossibleLookupsTest {
 				);
 
 		ArrayList<URI> lookups = new ArrayList<URI>(CredentialManager
-				.possibleLookups(uri, true));
+				.getPossibleServiceURIsToLookup(uri, true));
 
 		assertEquals("Did not match expected URIs", expected, lookups);
 	}
@@ -106,7 +106,7 @@ public class PossibleLookupsTest {
 				.create("http://www.taverna.org.uk/"));
 
 		ArrayList<URI> lookups = new ArrayList<URI>(CredentialManager
-				.possibleLookups(uri, true));
+				.getPossibleServiceURIsToLookup(uri, true));
 
 		assertEquals("Did not match expected URIs", expected, lookups);
 	}
@@ -119,7 +119,7 @@ public class PossibleLookupsTest {
 				.create("http://www.taverna.org.uk/"));
 
 		ArrayList<URI> lookups = new ArrayList<URI>(CredentialManager
-				.possibleLookups(uri, true));
+				.getPossibleServiceURIsToLookup(uri, true));
 
 		assertEquals("Did not match expected URIs", expected, lookups);
 	}
@@ -131,7 +131,7 @@ public class PossibleLookupsTest {
 				.create("http://www.taverna.org.uk/"));
 
 		ArrayList<URI> lookups = new ArrayList<URI>(CredentialManager
-				.possibleLookups(uri, true));
+				.getPossibleServiceURIsToLookup(uri, true));
 
 		assertEquals("Did not match expected URIs", expected, lookups);
 	}
@@ -144,7 +144,7 @@ public class PossibleLookupsTest {
 				.create("http://www.taverna.org.uk/"));
 
 		ArrayList<URI> lookups = new ArrayList<URI>(CredentialManager
-				.possibleLookups(uri, true));
+				.getPossibleServiceURIsToLookup(uri, true));
 
 		assertEquals("Did not match expected URIs", expected, lookups);
 	}

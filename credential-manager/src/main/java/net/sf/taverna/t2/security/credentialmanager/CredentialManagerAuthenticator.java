@@ -100,7 +100,7 @@ public class CredentialManagerAuthenticator extends Authenticator {
 			usePathRecursion = true;
 			if (realm != null && realm.length() > 0) {
 				try {
-					uri = CMUtil.resolveUriFragment(uri, realm);
+					uri = CMUtils.resolveUriFragment(uri, realm);
 				} catch (URISyntaxException e) {
 					logger.warn("Could not URI-encode fragment for realm: "
 							+ realm);
