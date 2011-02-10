@@ -40,6 +40,7 @@ public class HealthCheck extends VisitKind {
 	public static final int DISABLED = 19;
         public static final int DATATYPE_SOURCE = 20;
         public static final int UNRECOGNIZED = 21;
+    public static final int LOOP_CONNECTION = 22;
 
 	/**
 	 * Sub-classes of HealthChecker are used to perform HealthCheck visits.
