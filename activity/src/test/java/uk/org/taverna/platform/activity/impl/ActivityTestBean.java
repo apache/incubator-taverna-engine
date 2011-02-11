@@ -26,8 +26,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 
-import net.sf.taverna.t2.workflowmodel.processor.activity.config.ConfigurationBean;
-import net.sf.taverna.t2.workflowmodel.processor.activity.config.ConfigurationProperty;
+import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationBean;
+import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationProperty;
 
 /**
  * 

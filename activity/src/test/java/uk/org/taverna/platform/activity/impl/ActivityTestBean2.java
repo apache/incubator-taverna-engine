@@ -20,8 +20,8 @@
  ******************************************************************************/
 package uk.org.taverna.platform.activity.impl;
 
-import net.sf.taverna.t2.workflowmodel.processor.activity.config.ConfigurationBean;
-import net.sf.taverna.t2.workflowmodel.processor.activity.config.ConfigurationProperty;
+import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationBean;
+import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationProperty;
 
 /**
  * 
