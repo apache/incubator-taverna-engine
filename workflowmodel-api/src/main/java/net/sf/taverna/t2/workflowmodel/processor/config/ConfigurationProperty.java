@@ -1,4 +1,4 @@
-package net.sf.taverna.t2.workflowmodel.processor.activity.config;
+package net.sf.taverna.t2.workflowmodel.processor.config;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
