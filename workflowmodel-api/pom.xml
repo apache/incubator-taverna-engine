@@ -48,19 +48,6 @@
 			<artifactId>com.springsource.org.apache.log4j</artifactId>
 			<version>1.2.16</version>
 		</dependency>
-		<!--================================================================================= -->
-		<!-- Work around for java compiler bug : -->
-		<!-- An exception has occurred in the compiler (1.6.0_22) -->
-		<!-- com.sun.tools.javac.code.Symbol$CompletionFailure: -->
-		<!-- class file for org.springframework.transaction.annotation.Propagation not found -->
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>org.springframework.transaction</artifactId>
-			<version>${spring.version}</version>
-			<optional>true</optional>
-		</dependency>
-		<!--================================================================================= -->
-
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
