@@ -32,7 +32,7 @@ public class ActivityReport extends StatusReport {
 	
 	private final ProcessorReport parentReport;
 	
-	private final WorkflowReport nestedWorkflowReport;
+	private WorkflowReport nestedWorkflowReport;
 		
 	public ActivityReport(Activity activity, ProcessorReport parentReport) {
 		this(activity, parentReport, null);
@@ -60,6 +60,15 @@ public class ActivityReport extends StatusReport {
 
 	public WorkflowReport getNestedWorkflowReport() {
 		return nestedWorkflowReport;
+	}
+
+	/**
+	 * Sets the nestedWorkflowReport.
+	 * 
+	 * @param nestedWorkflowReport the nestedWorkflowReport to set
+	 */
+	public void setNestedWorkflowReport(WorkflowReport nestedWorkflowReport) {
+		this.nestedWorkflowReport = nestedWorkflowReport;
 	}
 
 }

@@ -20,6 +20,7 @@
  ******************************************************************************/
 package uk.org.taverna.platform.execution.api;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -31,6 +32,9 @@ import uk.org.taverna.platform.report.ActivityReport;
 import uk.org.taverna.platform.report.ProcessorReport;
 import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.scufl2.api.activity.Activity;
+import uk.org.taverna.scufl2.api.common.Scufl2Tools;
+import uk.org.taverna.scufl2.api.common.URITools;
+import uk.org.taverna.scufl2.api.configurations.Configuration;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.Processor;
 import uk.org.taverna.scufl2.api.core.Workflow;
@@ -38,7 +42,7 @@ import uk.org.taverna.scufl2.api.profiles.ProcessorBinding;
 import uk.org.taverna.scufl2.api.profiles.Profile;
 
 /**
- * Abstract implementation of an <code>Execution</code>.
+ * Abstract implementation of an {@link Execution}.
  * 
  * @author David Withers
  */
@@ -51,6 +55,8 @@ public abstract class AbstractExecution implements Execution {
 	private final Map<String, T2Reference> inputs;
 	private final ReferenceService referenceService;
 	private final WorkflowReport workflowReport;
+	private final Scufl2Tools scufl2Tools = new Scufl2Tools();
+	private final URITools uriTools = new URITools();
 
 	public AbstractExecution(WorkflowBundle workflowBundle, Workflow workflow, Profile profile,
 			Map<String, T2Reference> inputs, ReferenceService referenceService) {
@@ -79,6 +85,13 @@ public abstract class AbstractExecution implements Execution {
 			Processor boundProcessor = processorBinding.getBoundProcessor();
 			ProcessorReport processorReport = processorReports.get(boundProcessor);
 			ActivityReport activityReport = workflowReport.createActivityReport(boundActivity, processorReport);
+			URI activityType = boundActivity.getConfigurableType();
+			if (activityType.equals(URI.create("http://ns.taverna.org.uk/2010/activity/dataflow"))) {
+				Configuration configuration = scufl2Tools.configurationFor(boundActivity, profile);
+				URI dataflowURI = configuration.getPropertyResource().getResourceURI();
+				Workflow subWorkflow = (Workflow) uriTools.resolveUri(dataflowURI, workflowBundle);
+				activityReport.setNestedWorkflowReport(generateWorkflowReport(subWorkflow));
+			}
 			processorReport.addActivityReport(activityReport);
 		}
 		return workflowReport;
