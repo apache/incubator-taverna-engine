@@ -26,7 +26,6 @@ import java.util.Set;
 
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayer;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayerFactory;
-import net.sf.taverna.t2.workflowmodel.processor.dispatch.Stop;
 
 /**
  * Factory for creating core dispatch layers.
