@@ -37,6 +37,11 @@
 					<target>1.6</target>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+			</plugin>
 		</plugins>
 	</build>
 	<modules>
@@ -46,5 +51,6 @@
 		<module>execution-local</module>
 		<module>integration-tests</module>
 		<module>activity</module>
+		<module>execution-remote</module>
 	</modules>
 </project>

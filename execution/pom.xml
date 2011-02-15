@@ -12,15 +12,6 @@
 	<packaging>bundle</packaging>
 	<name>Taverna Workflow Execution Service API</name>
 	<description>A Service for executing Taverna workflows</description>
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<extensions>true</extensions>
-			</plugin>
-		</plugins>
-	</build>
 	<dependencies>
 		<dependency>
 			<groupId>net.sf.taverna.t2.core</groupId>

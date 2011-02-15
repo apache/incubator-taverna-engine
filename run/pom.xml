@@ -11,15 +11,6 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>bundle</packaging>
 	<name>Taverna Workflow Run Service</name>
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<extensions>true</extensions>
-			</plugin>
-		</plugins>
-	</build>
 	<dependencies>
 		<dependency>
 			<groupId>net.sf.taverna.t2.core</groupId>

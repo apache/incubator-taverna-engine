@@ -11,15 +11,6 @@
 	<packaging>bundle</packaging>
 	<name>Taverna Workflow Report Service</name>
 	<version>0.0.1-SNAPSHOT</version>
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<extensions>true</extensions>
-			</plugin>
-		</plugins>
-	</build>
 	<dependencies>
 		<dependency>
 			<groupId>uk.org.taverna.scufl2</groupId>
