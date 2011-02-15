@@ -10,6 +10,10 @@
 
 	<list id="activityFactories" interface="net.sf.taverna.t2.workflowmodel.processor.activity.ActivityFactory" cardinality="0..N" />
 
+	<service ref="dispatchLayerService" interface="uk.org.taverna.platform.dispatch.DispatchLayerService" />
+
+	<list id="dispatchLayerFactories" interface="net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayerFactory" cardinality="0..N" />
+
     <reference id="workflowModelEdits" interface="net.sf.taverna.t2.workflowmodel.Edits" />
 
 </beans:beans>

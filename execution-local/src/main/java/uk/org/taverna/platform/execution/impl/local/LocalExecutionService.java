@@ -26,6 +26,7 @@ import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.workflowmodel.Edits;
 import uk.org.taverna.platform.activity.ActivityService;
+import uk.org.taverna.platform.dispatch.DispatchLayerService;
 import uk.org.taverna.platform.execution.api.AbstractExecutionService;
 import uk.org.taverna.platform.execution.api.Execution;
 import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
@@ -43,7 +44,9 @@ public class LocalExecutionService extends AbstractExecutionService {
 	private Edits edits;
 	
 	private ActivityService activityService;
-
+	
+	private DispatchLayerService dispatchLayerService;
+	
 	/**
 	 * Constructs an execution service that executes workflows using the T2 dataflow engine.
 	 */
@@ -63,12 +66,21 @@ public class LocalExecutionService extends AbstractExecutionService {
 	}
 
 	/**
-	 * Sets the ActivityService for creating activities.
+	 * Sets the service for creating activities.
 	 * 
-	 * @param activityService the ActivityService for creating activities
+	 * @param activityService the service for creating activities
 	 */
 	public void setActivityService(ActivityService activityService) {
 		this.activityService = activityService;
+	}
+
+	/**
+	 * Sets the service for creating dispatch layers.
+	 * 
+	 * @param dispatchLayerService the service for creating dispatch layers
+	 */
+	public void setDispatchLayerService(DispatchLayerService dispatchLayerService) {
+		this.dispatchLayerService = dispatchLayerService;
 	}
 
 	@Override
@@ -76,7 +88,7 @@ public class LocalExecutionService extends AbstractExecutionService {
 			Profile profile, Map<String, T2Reference> inputs, ReferenceService referenceService)
 			throws InvalidWorkflowException {
 		return new LocalExecution(workflowBundle, workflow, profile, inputs, referenceService,
-				edits, activityService);
+				edits, activityService, dispatchLayerService);
 	}
 
 }

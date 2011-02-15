@@ -6,6 +6,7 @@
 	<bean id="localExecution" class="uk.org.taverna.platform.execution.impl.local.LocalExecutionService">
 		<property name="edits" ref="workflowModelEdits" />
 		<property name="activityService" ref="activityService" />
+		<property name="dispatchLayerService" ref="dispatchLayerService" />
 	</bean>
 
 </beans>

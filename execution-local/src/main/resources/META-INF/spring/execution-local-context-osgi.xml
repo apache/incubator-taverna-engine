@@ -13,4 +13,6 @@
   
     <reference id="activityService" interface="uk.org.taverna.platform.activity.ActivityService" />
   
+    <reference id="dispatchLayerService" interface="uk.org.taverna.platform.dispatch.DispatchLayerService" />
+  
 </beans:beans>

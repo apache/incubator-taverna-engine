@@ -23,6 +23,7 @@ package uk.org.taverna.platform.execution.impl.local;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 
 import net.sf.taverna.t2.workflowmodel.Configurable;
@@ -35,11 +36,16 @@ import net.sf.taverna.t2.workflowmodel.EditException;
 import net.sf.taverna.t2.workflowmodel.Edits;
 import net.sf.taverna.t2.workflowmodel.EventForwardingOutputPort;
 import net.sf.taverna.t2.workflowmodel.EventHandlingInputPort;
+import net.sf.taverna.t2.workflowmodel.Merge;
+import net.sf.taverna.t2.workflowmodel.MergeInputPort;
 import net.sf.taverna.t2.workflowmodel.ProcessorInputPort;
 import net.sf.taverna.t2.workflowmodel.ProcessorOutputPort;
 import uk.org.taverna.platform.activity.ActivityConfigurationException;
 import uk.org.taverna.platform.activity.ActivityNotFoundException;
 import uk.org.taverna.platform.activity.ActivityService;
+import uk.org.taverna.platform.dispatch.DispatchLayerConfigurationException;
+import uk.org.taverna.platform.dispatch.DispatchLayerNotFoundException;
+import uk.org.taverna.platform.dispatch.DispatchLayerService;
 import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
 import uk.org.taverna.scufl2.api.activity.Activity;
 import uk.org.taverna.scufl2.api.common.Scufl2Tools;
@@ -51,6 +57,7 @@ import uk.org.taverna.scufl2.api.core.ControlLink;
 import uk.org.taverna.scufl2.api.core.DataLink;
 import uk.org.taverna.scufl2.api.core.Processor;
 import uk.org.taverna.scufl2.api.core.Workflow;
+import uk.org.taverna.scufl2.api.dispatchstack.DispatchStack;
 import uk.org.taverna.scufl2.api.port.InputActivityPort;
 import uk.org.taverna.scufl2.api.port.InputProcessorPort;
 import uk.org.taverna.scufl2.api.port.InputWorkflowPort;
@@ -75,21 +82,23 @@ public class WorkflowToDataflowMapper {
 
 	private Edits edits;
 
-	private Scufl2Tools scufl2Tools;
+	private final Scufl2Tools scufl2Tools = new Scufl2Tools();
 
-	private URITools uriTools;
+	private final URITools uriTools = new URITools();
 
-	private Map<Port, EventHandlingInputPort> inputPorts;
+	private final Map<Port, EventHandlingInputPort> inputPorts;
 
-	private Map<Port, EventForwardingOutputPort> outputPorts;
+	private final Map<Port, EventForwardingOutputPort> outputPorts;
 
-	private Map<Processor, net.sf.taverna.t2.workflowmodel.Processor> workflowToDataflowProcessors;
+	private final Map<Port, Merge> merges;
 
-	private Map<net.sf.taverna.t2.workflowmodel.Processor, Processor> dataflowToWorkflowProcessors;
+	private final Map<Processor, net.sf.taverna.t2.workflowmodel.Processor> workflowToDataflowProcessors;
 
-	private Map<Activity, net.sf.taverna.t2.workflowmodel.processor.activity.Activity<?>> workflowToDataflowActivities;
+	private final Map<net.sf.taverna.t2.workflowmodel.Processor, Processor> dataflowToWorkflowProcessors;
 
-	private Map<net.sf.taverna.t2.workflowmodel.processor.activity.Activity<?>, Activity> dataflowToWorkflowActivities;
+	private final Map<Activity, net.sf.taverna.t2.workflowmodel.processor.activity.Activity<?>> workflowToDataflowActivities;
+
+	private final Map<net.sf.taverna.t2.workflowmodel.processor.activity.Activity<?>, Activity> dataflowToWorkflowActivities;
 
 	private final WorkflowBundle workflowBundle;
 
@@ -101,19 +110,20 @@ public class WorkflowToDataflowMapper {
 
 	private final ActivityService activityService;
 
+	private final DispatchLayerService dispatchLayerService;
+
 	public WorkflowToDataflowMapper(WorkflowBundle workflowBundle, Workflow workflow,
-			Profile profile, Edits edits, ActivityService activityService)
+			Profile profile, Edits edits, ActivityService activityService, DispatchLayerService dispatchLayerService)
 			throws InvalidWorkflowException {
-		// TODO inject Scufl2Tools as a service
-		scufl2Tools = new Scufl2Tools();
-		uriTools = new URITools();
 		this.workflowBundle = workflowBundle;
 		this.workflow = workflow;
 		this.profile = profile;
 		this.edits = edits;
 		this.activityService = activityService;
+		this.dispatchLayerService = dispatchLayerService;
 		inputPorts = new IdentityHashMap<Port, EventHandlingInputPort>();
 		outputPorts = new IdentityHashMap<Port, EventForwardingOutputPort>();
+		merges = new IdentityHashMap<Port, Merge>();
 		workflowToDataflowProcessors = new IdentityHashMap<Processor, net.sf.taverna.t2.workflowmodel.Processor>();
 		dataflowToWorkflowProcessors = new HashMap<net.sf.taverna.t2.workflowmodel.Processor, Processor>();
 		workflowToDataflowActivities = new IdentityHashMap<Activity, net.sf.taverna.t2.workflowmodel.processor.activity.Activity<?>>();
@@ -127,6 +137,10 @@ public class WorkflowToDataflowMapper {
 		} catch (ActivityConfigurationException e) {
 			throw new InvalidWorkflowException(e);
 		} catch (PropertyNotFoundException e) {
+			throw new InvalidWorkflowException(e);
+		} catch (DispatchLayerNotFoundException e) {
+			throw new InvalidWorkflowException(e);
+		} catch (DispatchLayerConfigurationException e) {
 			throw new InvalidWorkflowException(e);
 		}
 	}
@@ -160,7 +174,7 @@ public class WorkflowToDataflowMapper {
 	}
 
 	protected Dataflow createDataflow() throws EditException, ActivityNotFoundException,
-			ActivityConfigurationException, PropertyNotFoundException, InvalidWorkflowException {
+			ActivityConfigurationException, PropertyNotFoundException, InvalidWorkflowException, DispatchLayerNotFoundException, DispatchLayerConfigurationException {
 		// create the dataflow
 		Dataflow dataflow = edits.createDataflow();
 		// set the dataflow name
@@ -176,12 +190,11 @@ public class WorkflowToDataflowMapper {
 
 		addControlLinks();
 
-		addActivities();
-
 		return dataflow;
 	}
 
-	private void addProcessors(Dataflow dataflow) throws EditException {
+	private void addProcessors(Dataflow dataflow) throws EditException, PropertyNotFoundException,
+			ActivityNotFoundException, ActivityConfigurationException, InvalidWorkflowException, DispatchLayerNotFoundException, DispatchLayerConfigurationException {
 		for (Processor processor : workflow.getProcessors()) {
 			net.sf.taverna.t2.workflowmodel.Processor dataflowProcessor = edits
 					.createProcessor(processor.getName());
@@ -208,14 +221,12 @@ public class WorkflowToDataflowMapper {
 			}
 
 			// add dispatch stack
-//			net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchStack dataflowDispatchStack = dataflowProcessor.getDispatchStack();
-//			DispatchStack dispatchStack = processor.getDispatchStack();
-//			int layer = 0;
-//			for (DispatchStackLayer dispatchStackLayer : dispatchStack) {
-//				edits.getAddDispatchLayerEdit(dataflowDispatchStack, null, 0).doEdit();
-//			}			
-			// TODO dispatchStack not finished so add default for now
-			edits.getDefaultDispatchStackEdit(dataflowProcessor).doEdit();
+			 net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchStack dataflowDispatchStack = dataflowProcessor.getDispatchStack();
+			 DispatchStack dispatchStack = processor.getDispatchStack();
+			 for (int layer = 0; layer < dispatchStack.size(); layer++) {
+				 URI uri = dispatchStack.get(layer).getConfigurableType();
+				 edits.getAddDispatchLayerEdit(dataflowDispatchStack, dispatchLayerService.createDispatchLayer(uri, null), layer).doEdit();
+			 }
 
 			// addDefaultIterationStrategy(dataflowProcessor);
 
@@ -225,72 +236,110 @@ public class WorkflowToDataflowMapper {
 			// for (IterationStrategy iterationStrategy : iterationStrategyStack) {
 			// iterationStrategy.
 			// }
+
+			// add bound activities
+			List<ProcessorBinding> processorBindings = scufl2Tools.processorBindingsForProcessor(
+					processor, profile);
+			for (ProcessorBinding processorBinding : processorBindings) {
+				addActivity(processorBinding);
+			}
 		}
 	}
 
-	private void addActivities() throws EditException, ActivityNotFoundException,
-			PropertyNotFoundException, ActivityConfigurationException, InvalidWorkflowException {
-		for (ProcessorBinding processorBinding : profile.getProcessorBindings()) {
-			net.sf.taverna.t2.workflowmodel.Processor processor = workflowToDataflowProcessors
-					.get(processorBinding.getBoundProcessor());
-			Activity scufl2Activity = processorBinding.getBoundActivity();
-			URI activityType = scufl2Activity.getConfigurableType();
-			Configuration configuration = scufl2Tools.configurationFor(scufl2Activity, profile);
+	private void addActivity(ProcessorBinding processorBinding) throws EditException,
+			ActivityNotFoundException, PropertyNotFoundException, ActivityConfigurationException,
+			InvalidWorkflowException {
+		net.sf.taverna.t2.workflowmodel.Processor processor = workflowToDataflowProcessors
+				.get(processorBinding.getBoundProcessor());
+		Activity scufl2Activity = processorBinding.getBoundActivity();
+		URI activityType = scufl2Activity.getConfigurableType();
+		Configuration configuration = scufl2Tools.configurationFor(scufl2Activity, profile);
 
-			// create the activity
-			net.sf.taverna.t2.workflowmodel.processor.activity.Activity<?> activity = null;
-			// check if we have a nested workflow
-			if (activityType.equals(URI.create("http://ns.taverna.org.uk/2010/activity/dataflow"))) {
-				activity = activityService.createActivity(activityType, null);
-				URI dataflowURI = configuration.getPropertyResource().getResourceURI();
-				Workflow workflow = (Workflow) uriTools.resolveUri(dataflowURI, workflowBundle);
-				// TODO check that we can use the same profile
-				WorkflowToDataflowMapper mapper = new WorkflowToDataflowMapper(workflowBundle,
-						workflow, profile, edits, activityService);
-				Dataflow dataflow = mapper.getDataflow();
-				try {
-					((Configurable) activity).configure(dataflow);
-				} catch (ConfigurationException e) {
-					throw new ActivityConfigurationException(e);
-				}
-			} else {
-				activity = activityService.createActivity(activityType, configuration);
+		// create the activity
+		net.sf.taverna.t2.workflowmodel.processor.activity.Activity<?> activity = null;
+		// check if we have a nested workflow
+		if (activityType.equals(URI.create("http://ns.taverna.org.uk/2010/activity/dataflow"))) {
+			activity = activityService.createActivity(activityType, null);
+			URI dataflowURI = configuration.getPropertyResource().getResourceURI();
+			Workflow workflow = (Workflow) uriTools.resolveUri(dataflowURI, workflowBundle);
+			WorkflowToDataflowMapper mapper = new WorkflowToDataflowMapper(workflowBundle,
+					workflow, profile, edits, activityService, dispatchLayerService);
+			Dataflow dataflow = mapper.getDataflow();
+			try {
+				((Configurable) activity).configure(dataflow);
+			} catch (ConfigurationException e) {
+				throw new ActivityConfigurationException(e);
 			}
-
-			// add the activity to the processor
-			edits.getAddActivityEdit(processor, activity).doEdit();
-
-			// map input ports
-			for (ProcessorInputPortBinding portBinding : processorBinding.getInputPortBindings()) {
-				InputProcessorPort processorPort = portBinding.getBoundProcessorPort();
-				InputActivityPort activityPort = portBinding.getBoundActivityPort();
-				edits.getAddActivityInputPortMappingEdit(activity, processorPort.getName(),
-						activityPort.getName()).doEdit();
-			}
-			// map output ports
-			for (ProcessorOutputPortBinding portBinding : processorBinding.getOutputPortBindings()) {
-				OutputProcessorPort processorPort = portBinding.getBoundProcessorPort();
-				OutputActivityPort activityPort = portBinding.getBoundActivityPort();
-				edits.getAddActivityOutputPortMappingEdit(activity, processorPort.getName(),
-						activityPort.getName()).doEdit();
-			}
-			workflowToDataflowActivities.put(scufl2Activity, activity);
-			dataflowToWorkflowActivities.put(activity, scufl2Activity);
+		} else {
+			activity = activityService.createActivity(activityType, configuration);
 		}
+
+		// add the activity to the processor
+		edits.getAddActivityEdit(processor, activity).doEdit();
+
+		// map input ports
+		for (ProcessorInputPortBinding portBinding : processorBinding.getInputPortBindings()) {
+			InputProcessorPort processorPort = portBinding.getBoundProcessorPort();
+			InputActivityPort activityPort = portBinding.getBoundActivityPort();
+			edits.getAddActivityInputPortMappingEdit(activity, processorPort.getName(),
+					activityPort.getName()).doEdit();
+		}
+		// map output ports
+		for (ProcessorOutputPortBinding portBinding : processorBinding.getOutputPortBindings()) {
+			OutputProcessorPort processorPort = portBinding.getBoundProcessorPort();
+			OutputActivityPort activityPort = portBinding.getBoundActivityPort();
+			edits.getAddActivityOutputPortMappingEdit(activity, processorPort.getName(),
+					activityPort.getName()).doEdit();
+		}
+		workflowToDataflowActivities.put(scufl2Activity, activity);
+		dataflowToWorkflowActivities.put(activity, scufl2Activity);
 	}
 
 	private void addDataLinks() throws EditException {
 		for (DataLink dataLink : workflow.getDataLinks()) {
 			ReceiverPort receiverPort = dataLink.getSendsTo();
 			SenderPort senderPort = dataLink.getReceivesFrom();
-			Integer mergePosition = dataLink.getMergePosition();
-			if (mergePosition != null) {
-				// TODO add merge
-			}
 			EventForwardingOutputPort source = outputPorts.get(senderPort);
 			EventHandlingInputPort sink = inputPorts.get(receiverPort);
-			Datalink datalink = edits.createDatalink(source, sink);
-			edits.getConnectDatalinkEdit(datalink).doEdit();
+			Integer mergePosition = dataLink.getMergePosition();
+			if (mergePosition != null) {
+				if (!merges.containsKey(receiverPort)) {
+					Merge merge = edits.createMerge(dataflow);
+					edits.getAddMergeEdit(dataflow, merge).doEdit();
+					merges.put(receiverPort, merge);
+				}
+				Merge merge = merges.get(receiverPort);
+				// create merge input port
+				MergeInputPort mergeInputPort = edits.createMergeInputPort(merge, "input"
+						+ mergePosition, sink.getDepth());
+				// add it to the correct position in the merge
+				List<MergeInputPort> mergeInputPorts = (List<MergeInputPort>) merge.getInputPorts();
+				if (mergePosition > mergeInputPorts.size()) {
+					mergeInputPorts.add(mergeInputPort);
+				} else {
+					mergeInputPorts.add(mergePosition, mergeInputPort);
+				}
+				// connect a datalink into the merge
+				Datalink datalinkIn = edits.createDatalink(source, mergeInputPort);
+				edits.getConnectDatalinkEdit(datalinkIn).doEdit();
+				// check if the merge output has been connected
+				EventForwardingOutputPort mergeOutputPort = merge.getOutputPort();
+				if (mergeOutputPort.getOutgoingLinks().size() == 0) {
+					Datalink datalinkOut = edits.createDatalink(merge.getOutputPort(), sink);
+					edits.getConnectDatalinkEdit(datalinkOut).doEdit();
+				} else if (mergeOutputPort.getOutgoingLinks().size() == 1) {
+					if (mergeOutputPort.getOutgoingLinks().iterator().next().getSink() != sink) {
+						throw new EditException(
+								"Cannot add a different sinkPort to a Merge that already has one defined");
+					}
+				} else {
+					throw new EditException(
+							"The merge instance cannot have more that 1 outgoing Datalink");
+				}
+			} else {
+				Datalink datalink = edits.createDatalink(source, sink);
+				edits.getConnectDatalinkEdit(datalink).doEdit();
+			}
 		}
 	}
 

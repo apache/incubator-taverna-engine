@@ -43,6 +43,7 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 import org.apache.log4j.Logger;
 
 import uk.org.taverna.platform.activity.ActivityService;
+import uk.org.taverna.platform.dispatch.DispatchLayerService;
 import uk.org.taverna.platform.execution.api.AbstractExecution;
 import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
 import uk.org.taverna.platform.report.WorkflowReport;
@@ -51,7 +52,8 @@ import uk.org.taverna.scufl2.api.core.Workflow;
 import uk.org.taverna.scufl2.api.profiles.Profile;
 
 /**
- * An {@link uk.org.taverna.platform.execution.api.Execution Execution} for executing Taverna workflows on a local Taverna Dataflow Engine.
+ * An {@link uk.org.taverna.platform.execution.api.Execution Execution} for executing Taverna
+ * workflows on a local Taverna Dataflow Engine.
  * 
  * @author David Withers
  */
@@ -66,11 +68,13 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 	private LocalExecutionMonitor executionMonitor;
 
 	public LocalExecution(WorkflowBundle workflowBundle, Workflow workflow, Profile profile,
-			Map<String, T2Reference> inputs, ReferenceService referenceService, Edits edits, ActivityService activityService)
+			Map<String, T2Reference> inputs, ReferenceService referenceService, Edits edits,
+			ActivityService activityService, DispatchLayerService dispatchLayerService)
 			throws InvalidWorkflowException {
 		super(workflowBundle, workflow, profile, inputs, referenceService);
 		try {
-			mapping = new WorkflowToDataflowMapper(workflowBundle, workflow, profile, edits, activityService);
+			mapping = new WorkflowToDataflowMapper(workflowBundle, workflow, profile, edits,
+					activityService, dispatchLayerService);
 			Dataflow dataflow = mapping.getDataflow();
 			printDataflow(dataflow);
 			facade = edits.createWorkflowInstanceFacade(dataflow, createContext(), "");
