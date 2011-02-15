@@ -132,7 +132,8 @@ public class RunTest extends PlatformTest {
 		assertFalse(resultReference.containsErrors());
 		String result = (String) referenceService.renderIdentifier(
 				(T2Reference) results.get("out"), String.class, null);
-		assertEquals("????", result);
+		System.out.println(result);
+		assertEquals("Apache Axis version: 1.4\nBuilt on Apr 22, 2006 (06:55:48 PDT)", result);
 		assertEquals(State.COMPLETED, runService.getState(runId));
 		System.out.println(report);
 	}
