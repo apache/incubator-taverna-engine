@@ -78,7 +78,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
  * methods for managing user's credentials (passwords, private/proxy key pairs) 
  * and trusted services and CAs' public key certificates.
  * 
- * Keystore and Truststore are standard JCEKS-type keystores.
+ * Keystore and Truststore are Bouncy Castle UBER-type keystores.
  * 
  * @author Alex Nenadic
  * @author Stian Soiland-Reyes
@@ -102,14 +102,13 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 			System.getProperty(PROPERTY_TRUSTSTORE_PASSWORD, ""), "changeit",
 			"changeme", "");
 
-	public static final String T2TRUSTSTORE_FILE = "t2truststore.jceks";
-	public static final String T2KEYSTORE_FILE = "t2keystore.jceks";
+	public static final String T2TRUSTSTORE_FILE = "t2truststore.ubr";
+	public static final String T2KEYSTORE_FILE = "t2keystore.ubr";
 	
 	// For Taverna 2.2 and older - Keystore was BC-type with user-set password
 	// and Truststore was JKS-type with the default password
 	public static final String OLD_TRUSTSTORE_PASSWORD = "Tu/Ap%2_$dJt6*+Rca9v";
 	public static final String OLD_T2TRUSTSTORE_FILE = "t2truststore.jks";
-	public static final String OLD_T2KEYSTORE_FILE = "t2keystore.ubr";
 	
 	// ASCII NUL character - for separating the username from the rest of the string 
 	// when saving it in the Keystore. Seems like a good separator as it will highly 
@@ -136,13 +135,9 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	
 	// Keystore containing user's passwords and private keys with corresponding public key certificate chains.
 	private static KeyStore keystore;
-	// Indicates that the content of the Keystore has changed
-	private static boolean keystoreChanged = false;
 	
 	// Truststore containing trusted certificates of CA authorities and services (servers).
 	private static KeyStore truststore;
-	// Indicates that the content of the Truststore has changed
-	private static boolean truststoreChanged = false;
 	
 	// Constants denoting which of the two keystores (Keystore or Truststore) we are currently performing
 	// an operation on.
@@ -157,6 +152,10 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 
 	// Whether SSLSocketFactory has been initialised with Taverna's Keystore/Truststore.
 	private static boolean sslInitialised = false;
+	// Observer of changes to the Keystore and Truststore that 
+	// updates the default SSLContext and SSLSocketFactory at the single location rather than
+	// all over the code when changes to the keystores occur.
+	private KeystoresChangedObserver keystoresChangedObserver = new KeystoresChangedObserver();
 	
 	// Cached list of all services that have a username/password entry in the Keystore
 	private List<URI> cachedServiceURIsList = null;
@@ -178,11 +177,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 			throws CMException {
 		if (INSTANCE == null) {
 			INSTANCE = new CredentialManager();
-			// We have just loaded the Keystore/Truststore - mark them as changed
-			// so that SSL KeyManager and TrustManager will pick up the changes  an refresh
-			// their internal stuff
-			keystoreChanged = true;
-			truststoreChanged = true;
 		}
 		return INSTANCE;
 	}
@@ -201,11 +195,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 			String masterPassword) throws CMException {
 		if (INSTANCE == null) {
 			INSTANCE = new CredentialManager(masterPassword);
-			// We have just loaded the Keystore/Truststore - mark them as changed
-			// so that SSL KeyManager and TrustManager will pick up the changes  an refresh
-			// their internal stuff
-			keystoreChanged = true;
-			truststoreChanged = true;
 		} else {
 			if (!confirmMasterPassword(masterPassword)) {
 				String exMessage = "Incorrect master password for Credential Manager.";
@@ -226,11 +215,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 			String masterPassword) throws CMException {
 		if (INSTANCE == null) {
 			INSTANCE = new CredentialManager(credentialManagerDirPath, masterPassword);
-			// We have just loaded the Keystore/Truststore - mark them as changed
-			// so that SSL KeyManager and TrustManager will pick up the changes  an refresh
-			// their internal stuff
-			keystoreChanged = true;
-			truststoreChanged = true;
 		}
 		return INSTANCE;
 	}
@@ -336,6 +320,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	private void init() throws CMException {
 
 		this.addObserver(clearCachedServiceURIsObserver);
+		this.addObserver(keystoresChangedObserver);
 
 		// Make sure we have BouncyCastle provider installed, just in case (needed for some tests and reading PKCS#12 keystores)
         Security.addProvider(new BouncyCastleProvider()); 
@@ -360,24 +345,18 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	}
 
 	/**
-	 * Load Taverna's JCEKS-type Keystore from a file on the disk.
+	 * Load Taverna's Keystore from a file on the disk.
 	 */
 	protected static void loadKeystore()
 			throws CMException {
 
 		if (keystore == null){
 			try {
-				/*
-				 * Try to create the Taverna's Keystore - has to be JKS- or JCEKS-type
-				 * keystore because we use it to set the system property
-				 * "javax.net.ssl.keyStore"
-				 */
-				keystore = KeyStore.getInstance("JCEKS");
+				// Try to create Taverna's Keystore as Bouncy Castle UBER-type keystore.
+				keystore = KeyStore.getInstance("UBER", "BC");
 			} catch (Exception ex) {
-				// The requested keystore type is not available from security
-				// provider
-				String exMessage = "Failed to instantiate Taverna's 'JCEKS'-type Keystore.";
-				//logger.error(exMessage, ex);
+				// The requested keystore type is not available from security providers.
+				String exMessage = "Failed to instantiate Taverna's Keystore.";
 				throw new CMException(exMessage, ex);
 			}
 
@@ -431,7 +410,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 			 * system properties set to use the Keychain which clashes with what
 			 * we are setting here so we need to clear them
 			 */
-			//System.clearProperty(PROPERTY_KEYSTORE_TYPE); // "javax.net.ssl.keyStoreType"
+			System.clearProperty(PROPERTY_KEYSTORE_TYPE); // "javax.net.ssl.keyStoreType"
 			System.clearProperty(PROPERTY_KEYSTORE_PROVIDER); // "javax.net.ssl.keyStoreProvider"
 
 			/*
@@ -449,7 +428,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 			//System.setProperty(PROPERTY_KEYSTORE,
 			//		keystoreFile.getAbsolutePath());
 			//System.setProperty(PROPERTY_KEYSTORE_PASSWORD, masterPassword);
-			System.setProperty(PROPERTY_KEYSTORE_TYPE, "JCEKS");
 			System.clearProperty(PROPERTY_KEYSTORE); // "javax.net.ssl.keyStore"
 			System.clearProperty(PROPERTY_KEYSTORE_PASSWORD); // "javax.net.ssl.keyStorePassword"	
 		}
@@ -464,23 +442,13 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	private static void loadTruststore()
 			throws CMException {
 
-		if (truststore == null) { // since truststore can also be initialised
-									// from initaliseSSL() method, check if it
-									// already is
-			/*
-			 * Try to create the Taverna's Truststore - has to be JKS- or JCEKS-type
-			 * keystore because we use it to set the system property
-			 * "javax.net.ssl.trustStore"
-			 */
+		if (truststore == null){
 			try {
-				truststore = KeyStore.getInstance("JCEKS");
+				// Try to create Taverna's Truststore as Bouncy Castle UBER-type keystore.
+				truststore = KeyStore.getInstance("UBER", "BC");
 			} catch (Exception ex) {
-				/*
-				 * The requested keystore type is not available from the
-				 * provider
-				 */
-				String exMessage = "Failed to instantiate Taverna's 'JCEKS'-type Truststore.";
-				//logger.error(exMessage, ex);
+				// The requested keystore type is not available from security providers.
+				String exMessage = "Failed to instantiate Taverna's Truststore.";
 				throw new CMException(exMessage, ex);
 			}
 
@@ -632,7 +600,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 			 * system properties set to use the Keychain which clashes with what
 			 * we are setting here so we need to clear them.
 			 */
-			//System.clearProperty(PROPERTY_TRUSTSTORE_TYPE_MACOS); // "javax.net.ssl.trustStoreType"
+			System.clearProperty(PROPERTY_TRUSTSTORE_TYPE); // "javax.net.ssl.trustStoreType"
 			System.clearProperty(PROPERTY_TRUSTSTORE_PROVIDER);// "javax.net.ssl.trustStoreProvider"
 
 			/*
@@ -651,18 +619,10 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 			//System.setProperty(PROPERTY_TRUSTSTORE, truststoreFile
 			//		.getAbsolutePath());
 			//System.setProperty(PROPERTY_TRUSTSTORE_PASSWORD, masterPassword);
-			System.setProperty(PROPERTY_TRUSTSTORE_TYPE, "JCEKS"); // "javax.net.ssl.trustStoreType"
 			System.clearProperty(PROPERTY_TRUSTSTORE); // "javax.net.ssl.trustStore"
 			System.clearProperty(PROPERTY_TRUSTSTORE_PASSWORD); // "javax.net.ssl.trustStorePassword"
-
-			/*
-			 * HttpsURLConnection
-			 * .setDefaultSSLSocketFactory(createTavernaSSLSocketFactory());
-			 * 
-			 * sslInitialised = true;
-			 */
-
-		}	
+	
+		}
 	}
 
 	private static boolean copyPasswordFromGUI(KeyStore javaTruststore,
@@ -875,15 +835,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	 */
 	protected static LinkedHashSet<URI> getPossibleServiceURIsToLookup(URI serviceURI,
 			boolean usePathRecursion) {
-		// JCEKE-type keystores ignore case for aliases (all aliases are lowercase) 
-		// and that is a problem as we store URIs in the alias so just convert everything 
-		// to lower case or we won't be able to find anything in the Keystore.
-		try {
-			serviceURI = new URI(serviceURI.toASCIIString().toLowerCase());
-		} catch (URISyntaxException ex) {
-			// Should not really happen
-			logger.warn("Could not convert the URI " + serviceURI + " to lowercase." , ex);
-		}
+
 		try {
 			serviceURI = serviceURI.normalize();
 			serviceURI = setUserInfoForURI(serviceURI, null);
@@ -1031,9 +983,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 		synchronized (keystore) {
 
 			// Alias for the username and password entry
-			// Since we switched from BouncyCastle to JCEKS type keystores - aliases
-			// are case insensitive!!!  This is a major blow as we use service URLs in
-			// aliases!
 			String alias = "password#" + serviceURL;
 			/*
 			 * Password (together with its related username) is wrapped as a
@@ -1126,10 +1075,9 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 				multiCaster.notify(new KeystoreChangedEvent(
 						CredentialManager.KEYSTORE));
 				
-				keystoreChanged = true;
+				// This is now done from the KeystoresChangedObserver's notify method.
 				// Update the default SSLSocketFactory used by the HttpsURLConnectionS
-				HttpsURLConnection.setDefaultSSLSocketFactory(createTavernaSSLSocketFactory());
-
+				//HttpsURLConnection.setDefaultSSLSocketFactory(createTavernaSSLSocketFactory());				
 				logger.info("Credential Manager: Updating SSLSocketFactory after inserting a key pair.");
 			} catch (Exception ex) {
 				String exMessage = "Credential Manager: Failed to insert the key pair entry in the Keystore.";
@@ -1214,9 +1162,9 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 			saveKeystore(KEYSTORE);
 			multiCaster.notify(new KeystoreChangedEvent(CredentialManager.KEYSTORE));
 
-			keystoreChanged = true;
+			// This is now done from the KeyManager's nad TrustManager's notify methods
 			// Update the default SSLSocketFactory used by the HttpsURLConnectionS
-			HttpsURLConnection.setDefaultSSLSocketFactory(createTavernaSSLSocketFactory());
+			//HttpsURLConnection.setDefaultSSLSocketFactory(createTavernaSSLSocketFactory());
 			
 			logger.info("Credential Manager: Updating SSLSocketFactory "
 					+ "after deleting a keypair.");	
@@ -1354,10 +1302,10 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 				multiCaster.notify(new KeystoreChangedEvent(
 						CredentialManager.TRUSTSTORE));
 
-				truststoreChanged = true;
+				// This is now done from the KeystoresChangedObserver's notify method.
 				// Update the default SSLSocketFactory used by the HttpsURLConnectionS
-				HttpsURLConnection.setDefaultSSLSocketFactory(createTavernaSSLSocketFactory());
-
+				//HttpsURLConnection.setDefaultSSLSocketFactory(createTavernaSSLSocketFactory());
+				
 				logger.info("Credential Manager: Updating SSLSocketFactory after inserting a trusted certificate.");
 			}
 			catch (Exception ex) {
@@ -1432,10 +1380,10 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 			multiCaster.notify(new KeystoreChangedEvent(
 					CredentialManager.TRUSTSTORE));
 
-			truststoreChanged = true;
+			// This is now done from the KeyManager's nad TrustManager's notify methods
 			// Update the default SSLSocketFactory used by the HttpsURLConnectionS
-			HttpsURLConnection.setDefaultSSLSocketFactory(createTavernaSSLSocketFactory());
-
+			//HttpsURLConnection.setDefaultSSLSocketFactory(createTavernaSSLSocketFactory());
+			
 			logger.info("Credential Manager: Updating SSLSocketFactory "
 					+ "after deleting a trusted certificate.");	
 		}
@@ -1831,21 +1779,23 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 		// e.g. REST activity that uses Apache HTTP client library
 		return sc.getSocketFactory();
 	}
-
+	
 	/**
 	 * Taverna's Key Manager is a customised X509KeyManager 
 	 * that initilises Credential Manager only if certain methods on it 
 	 * are invoked, i.e. if acces to Keystore is actually needed to 
 	 * authenticate the user.
 	 */
-	private static class TavernaKeyManager extends X509ExtendedKeyManager{
-		/*
-		 * The default X509KeyManager returned by SunX509 provider. We will 
-		 * delegate decisions to it, and re-intialise it every time the Keystore is updated.
-		 */
+	private static class TavernaKeyManager extends X509ExtendedKeyManager {
+		// The X509KeyManager as returned by the SunX509 provider, initialised with the Keystore. 
 		X509KeyManager sunJSSEX509KeyManager = null;
 		
+		// Lazy initialisation - unless we are actually asked to do some SSL stuff -
+		// do not initialise Credential Manager as it will most probably result in popping
+		// the master password window, which we want to avoid early on while Taverna is 
+		// starting, unless we need to contact a secure service early, e.g. to populate Service Panel.
 		private void init() throws Exception {
+						
 			logger.info("Credential Manager: inside TavernaKeyManager.init()");
 
 			// Create a "default" JSSE X509KeyManager.
@@ -1857,35 +1807,35 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 				// If we have not initialised the Credential Manager so far - now is the time to do it
 				try{
 					getInstance();
+					logger.info("Credential Manager: inside TavernaKeyManager.init() - Credential Manager instantiated.");
 				}
 				catch (CMException cme) {
 					throw new Exception("Could not initialize Taverna's KeyManager for SSLSocketFactory: failed to initialise Credential Manager.");
 				}
 			}
-			logger.info("Credential Manager: inside TavernaKeyManager.init() - Credential Manager instantiated.");
-			if (keystoreChanged || sunJSSEX509KeyManager==null){ // not sure why sunJSSEX509KeyManager sometimes is null - it should neved be null here???
-				logger.info("Credential Manager: inside TavernaKeyManager.init() - Keystore changed - updating Key Manager.");
-				// Keystore and master password should not be null as we have just initalised Credential Manager
-				synchronized (keystore) {
-					kmf.init(keystore, masterPassword.toCharArray()); 
-					keystoreChanged = false; // we have picked up the changes
 
-					KeyManager kms[] = kmf.getKeyManagers();
-					/*
-					 * Iterate over the returned KeyManagers, look for an instance of
-					 * X509KeyManager. If found, use that as our "default" key
-					 * manager.
-					 */
-					for (int i = 0; i < kms.length; i++) {
-						if (kms[i] instanceof X509KeyManager) {
-							sunJSSEX509KeyManager = (X509KeyManager) kms[i];
-							return;
-						}
+			// Keystore and master password should not be null as we have just
+			// initalised Credential Manager
+			synchronized (keystore) {
+				logger.info("Credential Manager: inside TavernaKeyManager.init() - Reinitialising the KeyManager.");
+
+				kmf.init(keystore, masterPassword.toCharArray());
+
+				KeyManager kms[] = kmf.getKeyManagers();
+				/*
+				 * Iterate over the returned KeyManagers, look for an instance
+				 * of X509KeyManager. If found, use that as our "default" key
+				 * manager.
+				 */
+				for (int i = 0; i < kms.length; i++) {
+					if (kms[i] instanceof X509KeyManager) {
+						sunJSSEX509KeyManager = (X509KeyManager) kms[i];
+						return;
 					}
-
-					// X509KeyManager not found - we have to fail the constructor.
-					throw new Exception("Could not initialize Taverna's KeyManager for SSLSocketFactory: could not find a SunJSSE X509 KeyManager.");
-				}	
+				}
+				// X509KeyManager not found - we have to fail the constructor.
+				throw new Exception(
+						"Could not initialize Taverna's KeyManager for SSLSocketFactory: could not find a SunJSSE X509 KeyManager.");
 			}
 		}
 		
@@ -1895,14 +1845,16 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 			logger.info("Credential Manager: inside chooseClientAlias()");
 
 			// We have postponed initialisation until we are actually asked to do something
-			try {
-				init();
-			} catch (Exception e) {
-				e.printStackTrace();
-				logger.error(e);
-				return null;
+			if (sunJSSEX509KeyManager == null){
+				try {
+					init();
+				} catch (Exception e) {
+					e.printStackTrace();
+					logger.error(e);
+					return null;
+				}
 			}
-			// Delegate to the default key manager
+			// Delegate the decision to the default key manager
 			return sunJSSEX509KeyManager.chooseClientAlias(keyType, issuers, socket);
 		}
 
@@ -1917,13 +1869,16 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 		public X509Certificate[] getCertificateChain(String alias) {
 			logger.info("Credential Manager: inside getCertificateChain()");
 			// We have postponed initialisation until we are actually asked to do something
-			try {
-				init();
-			} catch (Exception e) {
-				logger.error(e);
-				return null;
+			if (sunJSSEX509KeyManager == null){
+				try {
+					init();
+				} catch (Exception e) {
+					e.printStackTrace();
+					logger.error(e);
+					return null;
+				}
 			}
-			// Delegate to the default key manager
+			// Delegate the decision to the default key manager
 			return sunJSSEX509KeyManager.getCertificateChain(alias);
 		}
 
@@ -1931,13 +1886,16 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 		public String[] getClientAliases(String keyType, Principal[] issuers) {
 			logger.info("Credential Manager: inside getClientAliases()");
 			// We have postponed initialisation until we are actually asked to do something
-			try {
-				init();
-			} catch (Exception e) {
-				logger.error(e);
-				return null;
+			if (sunJSSEX509KeyManager == null){
+				try {
+					init();
+				} catch (Exception e) {
+					e.printStackTrace();
+					logger.error(e);
+					return null;
+				}
 			}
-			// Delegate to the default key manager
+			// Delegate the decision to the default key manager
 			return sunJSSEX509KeyManager.getClientAliases(keyType, issuers);	
 			}
 
@@ -1945,13 +1903,16 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 		public PrivateKey getPrivateKey(String alias) {
 			logger.info("Credential Manager: inside getPrivateKey()");
 			// We have postponed initialisation until we are actually asked to do something
-			try {
-				init();
-			} catch (Exception e) {
-				logger.error(e);
-				return null;
+			if (sunJSSEX509KeyManager == null){
+				try {
+					init();
+				} catch (Exception e) {
+					e.printStackTrace();
+					logger.error(e);
+					return null;
+				}
 			}
-			// Delegate to the default key manager
+			// Delegate the decision to the default key manager
 			return sunJSSEX509KeyManager.getPrivateKey(alias);
 		}
 
@@ -1968,54 +1929,62 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	 * are invoked, i.e. if acces to Truststore is actually needed to 
 	 * authenticate the remote service.
 	 */
-	private static class TavernaTrustManager implements X509TrustManager {
+	private static class TavernaTrustManager implements X509TrustManager{
 
 		/*
-		 * The default X509TrustManager returned by SunX509 provider. We will 
-		 * delegate decisions to it, and fall back to ask the user if the
+		 * The default X509TrustManager as returned by SunX509 provider, initialised with the Truststore. 
+		 * We delegate decisions to it, and fall back to ask the user if the
 		 * default X509TrustManager does not trust the server's certificate. 
-		 * It will be re-intialised every time the Truststore is updated.
 		 */
 		X509TrustManager sunJSSEX509TrustManager = null;
 
+		// Lazy initialisation - unless we are actually asked to do some SSL stuff -
+		// do not initialise Credential Manager as it will most probably result in popping
+		// the master password window, which we want to avoid early on while Taverna is 
+		// starting, unless we need to contact a secure service early, e.g. to populate Service Panel.
 		private void init() throws Exception {
-			
+
+			logger.info("Credential Manager: inside TavernaTrustManager.init()");
+
 			// Create a "default" JSSE X509TrustManager.
 			TrustManagerFactory tmf = TrustManagerFactory.getInstance(
 					"SunX509", "SunJSSE");
 
 			if (INSTANCE == null){ 
+				logger.info("Credential Manager: inside TavernaTrustManager.init() - Credential Manager has not been instantiated yet.");
 				// If we have not initialised the Credential Manager so far - now is the time to do it
 				try{
 					getInstance();
+					logger.info("Credential Manager: inside Taverna TrustManager.init() - Credential Manager instantiated.");
 				}
 				catch (CMException cme) {
 					throw new Exception("Could not initialize Taverna's TrustManager for SSLSocketFactory: failed to initialise Credential Manager.");
 				}
 			}
 
-			if (truststoreChanged || sunJSSEX509TrustManager==null){// not sure why sunJSSEX509TrustManager sometimes is null - it should neved be null here???
-				// Truststore should not be null as we have just initalised Credential Manager above
-				synchronized (truststore) {
-					tmf.init(truststore); 
-					truststoreChanged = false; // we have picked up the changes
-					
-					TrustManager tms[] = tmf.getTrustManagers();
-					/*
-					 * Iterate over the returned TrustManagers, look for an instance of
-					 * X509TrustManager. If found, use that as our "default" trust
-					 * manager.
-					 */
-					for (int i = 0; i < tms.length; i++) {
-						if (tms[i] instanceof X509TrustManager) {
-							sunJSSEX509TrustManager = (X509TrustManager) tms[i];
-							return;
-						}
-					}
+			// Truststore should not be null as we have just initalised
+			// Credential Manager above
+			synchronized (truststore) {
+				logger.info("Credential Manager: inside TavernaTrustManager.init() - Reinitialising the TrustManager.");
+				SSLSocketFactory.getDefault();
+				tmf.init(truststore);
 
-					// X509TrustManager not found - we have to fail the constructor.
-					throw new Exception("Could not initialize Taverna's TrustManager for SSLSocketFactory.");
+				TrustManager tms[] = tmf.getTrustManagers();
+				/*
+				 * Iterate over the returned TrustManagers, look for an instance
+				 * of X509TrustManager. If found, use that as our "default"
+				 * trust manager.
+				 */
+				for (int i = 0; i < tms.length; i++) {
+					if (tms[i] instanceof X509TrustManager) {
+						sunJSSEX509TrustManager = (X509TrustManager) tms[i];
+						return;
+					}
 				}
+
+				// X509TrustManager not found - we have to fail the constructor.
+				throw new Exception(
+						"Could not initialize Taverna's TrustManager for SSLSocketFactory.");
 			}
 		}
 
@@ -2035,12 +2004,15 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 				throws CertificateException {
 			
 			// We have postponed initialisation until we are actually asked to do something
-			try {
-				init();
-			} catch (Exception e) {
-				throw new CertificateException(e);
+			if (sunJSSEX509TrustManager == null){
+				try {
+					init();
+				} catch (Exception e) {
+					e.printStackTrace();
+					logger.error(e);
+				}
 			}
-			// Delegate to the default key manager		
+			// Delegate the decision to the default trust manager		
 			try {
 				sunJSSEX509TrustManager.checkServerTrusted(chain, authType);
 			} catch (CertificateException excep) {
@@ -2052,16 +2024,16 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 			}
 		}
 
-		/*
-		 * Merely pass this through.
-		 */
 		public X509Certificate[] getAcceptedIssuers() {
 			// We have postponed initialisation until we are actually asked to do something
-			try {
-				init();
-			} catch (Exception e) {
-				logger.error(e);
-				return null;
+			if (sunJSSEX509TrustManager == null){
+				try {
+					init();
+				} catch (Exception e) {
+					e.printStackTrace();
+					logger.error(e);
+					return null;
+				}
 			}
 			return sunJSSEX509TrustManager.getAcceptedIssuers();
 		}
@@ -2265,6 +2237,17 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 					cachedServiceURIsList = null;
 				}
 			}
+		}
+	}
+	
+	// If any change to the Keystore or Truststore occurs - 
+	// create the new SSLSocketFactory and set the new default SSLContext 
+	// which is initialised with the updated Keystore and Truststore material
+	public class KeystoresChangedObserver implements Observer<KeystoreChangedEvent> {
+		public void notify(Observable<KeystoreChangedEvent> sender,
+				KeystoreChangedEvent message) throws Exception {
+			// Create the new SSLSocketFactory and set the default SSLContext
+			HttpsURLConnection.setDefaultSSLSocketFactory(createTavernaSSLSocketFactory());
 		}
 	}
 }
