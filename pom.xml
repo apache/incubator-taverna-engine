@@ -11,15 +11,6 @@
 	<artifactId>dataflow-activity</artifactId>
 	<packaging>bundle</packaging>
 	<name>Taverna 2 Dataflow Activity</name>
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<extensions>true</extensions>
-			</plugin>
-		</plugins>
-	</build>
 	<dependencies>
 		<dependency>
 			<groupId>net.sf.taverna.t2.core</groupId>
@@ -32,18 +23,20 @@
 			<version>${t2.core.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>net.sf.taverna.t2.activities</groupId>
-			<artifactId>activity-test-utils</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
+			<groupId>org.apache.log4j</groupId>
+			<artifactId>com.springsource.org.apache.log4j</artifactId>
+			<version>1.2.16</version>
 		</dependency>
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-		</dependency>
+		
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.taverna.t2.activities</groupId>
+			<artifactId>activity-test-utils</artifactId>
+			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
