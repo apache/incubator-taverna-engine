@@ -51,7 +51,7 @@ import org.apache.log4j.Logger;
 public class DataflowActivity extends
 		AbstractAsynchronousActivity<Dataflow> implements NestedDataflow{
 
-	public static final String URI = "http://ns.taverna.org.uk/2010/activity/dataflow";
+	public static final String URI = "http://ns.taverna.org.uk/2010/activity/nested-workflow";
 
 	@SuppressWarnings("unused")
 	private static final Logger logger = Logger
