@@ -21,7 +21,6 @@ import javax.swing.text.Document;
 import javax.swing.text.Element;
 import javax.swing.text.JTextComponent;
 
-import org.syntax.jedit.JEditTextArea;
 
 /**
  * @author alanrw
@@ -67,36 +66,19 @@ public class LineEnabledTextPanel extends JPanel {
 	}
 	
 	private void updateDocument() {
-		if (textComponent instanceof JTextComponent) {
-			document = ((JTextComponent) textComponent).getDocument();
-		} else if (textComponent instanceof JEditTextArea) {
-			document = ((JEditTextArea) textComponent).getDocument();
-		}
+	    document = ((JTextComponent) textComponent).getDocument();
 	}
 	
 	private void setCaretListener(CaretListener listener) {
-		if (textComponent instanceof JTextComponent) {
-			((JTextComponent) textComponent).addCaretListener(listener);
-		} else if (textComponent instanceof JEditTextArea) {
-			((JEditTextArea) textComponent).addCaretListener(listener);
-		}
+	    ((JTextComponent) textComponent).addCaretListener(listener);
 	}
 	
 	private int getCaretPosition() {
-		if (textComponent instanceof JTextComponent) {
-			return ((JTextComponent) textComponent).getCaretPosition();
-		} else if (textComponent instanceof JEditTextArea) {
-			return ((JEditTextArea) textComponent).getCaretPosition();
-		}
-		return 0;
+	    return ((JTextComponent) textComponent).getCaretPosition();
 	}
 	
 	private void setCaretPosition(int position) {
-		if (textComponent instanceof JTextComponent) {
-			((JTextComponent) textComponent).setCaretPosition(position);
-		} else if (textComponent instanceof JEditTextArea) {
-			((JEditTextArea) textComponent).setCaretPosition(position);
-		}
+	    ((JTextComponent) textComponent).setCaretPosition(position);
 	}
 	
 	class GotoLineAction extends AbstractAction
