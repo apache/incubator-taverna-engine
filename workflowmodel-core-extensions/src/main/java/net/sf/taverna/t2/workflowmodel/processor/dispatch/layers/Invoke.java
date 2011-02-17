@@ -343,6 +343,7 @@ public class Invoke extends AbstractDispatchLayer<Object> {
 		public void requestRun(Runnable runMe) {
 			String newThreadName = jobEvent.toString();
 			Thread thread = new Thread(runMe, newThreadName);
+			thread.setContextClassLoader(asyncActivity.getClass().getClassLoader() );
 			thread.setUncaughtExceptionHandler(new UncaughtExceptionHandler(){
 				public void uncaughtException(Thread t, Throwable e) {
 					fail("Uncaught exception while invoking " + asyncActivity, e);
