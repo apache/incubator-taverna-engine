@@ -88,6 +88,8 @@ public class ActivityServiceImpl implements ActivityService {
 	private Edits edits;
 
 	private URITools uriTools = new URITools();
+	
+	private static URI SCUFL2 = URI.create("http://ns.taverna.org.uk/2010/scufl2#");
 
 	@Override
 	public List<URI> getActivityURIs() {
@@ -202,6 +204,7 @@ public class ActivityServiceImpl implements ActivityService {
 			for (PropertyDefinition propertyDefinition : resourceDefinition
 					.getPropertyDefinitions()) {
 				URI predicate = propertyDefinition.getPredicate();
+				propertyDefinition.getPredicate().equals(SCUFL2.resolve("definesInputPort"));
 				String propertyDefinitionName = propertyDefinition.getName();
 				if ("definesInputPort".equals(propertyDefinitionName)) {
 					URI resourceURI = resource.getPropertyAsResourceURI(predicate);
@@ -209,7 +212,7 @@ public class ActivityServiceImpl implements ActivityService {
 					WorkflowBean workflowBean = uriTools.resolveUri(configUri.resolve(resourceURI), bundle);
 					if (!(workflowBean instanceof InputActivityPort)) {
 						throw new UnexpectedPropertyException("Expected reference to input port",
-								uri.resolve("#definesInputPort"), resource);
+								SCUFL2.resolve("#definesInputPort"), resource);
 					}
 					if (!(configurationBean instanceof ActivityInputPortDefinitionBean)) {
 						throw new ActivityConfigurationException(
@@ -226,7 +229,7 @@ public class ActivityServiceImpl implements ActivityService {
 					WorkflowBean workflowBean = uriTools.resolveUri(configUri.resolve(resourceURI), bundle);
 					if (!(workflowBean instanceof OutputActivityPort)) {
 						throw new UnexpectedPropertyException("Expected reference to output port",
-								uri.resolve("#definesOutputPort"), resource);
+								SCUFL2.resolve("#definesOutputPort"), resource);
 					}
 					if (!(configurationBean instanceof ActivityOutputPortDefinitionBean)) {
 						throw new ActivityConfigurationException(
@@ -236,8 +239,8 @@ public class ActivityServiceImpl implements ActivityService {
 					OutputActivityPort outputActivityPort = (OutputActivityPort) workflowBean;
 					outputPortDefinitionBean.setName(outputActivityPort.getName());
 					outputPortDefinitionBean.setDepth(outputActivityPort.getDepth());
-				} else {
-					Method method = getPropertySetMethod(configurationClass, propertyDefinitionName);
+				} else {					
+					Method method = getPropertySetMethod(configurationClass, predicate);
 					Class<?>[] parameterTypes = method.getParameterTypes();
 					Type[] genericParameterTypes = method.getGenericParameterTypes();
 					if (parameterTypes.length != 1 || genericParameterTypes.length != 1) {
@@ -392,6 +395,8 @@ public class ActivityServiceImpl implements ActivityService {
 		ConfigurationDefinition configurationDefinition = new ConfigurationDefinition(uri);
 		PropertyResourceDefinition propertyResourceDefinition = configurationDefinition
 				.getPropertyResourceDefinition();
+		
+		
 
 		ConfigurationBean configurationBean = configurationClass.getAnnotation(ConfigurationBean.class);
 		if (configurationBean == null) {
@@ -408,15 +413,16 @@ public class ActivityServiceImpl implements ActivityService {
 				throw new ActivityConfigurationException("Configuration bean is not annotated");
 			}
 		} else {
-			propertyResourceDefinition.setPropertyDefinitions(createPropertyDefinitions(uri,
+			uri = URI.create(configurationBean.uri());
+			propertyResourceDefinition.setTypeURI(uri);
+			propertyResourceDefinition.setPropertyDefinitions(createPropertyDefinitions(
 					configurationClass));
 		}
 
 		return configurationDefinition;
 	}
 
-	private List<PropertyDefinition> createPropertyDefinitions(URI activityURI,
-			Class<?> configurationClass) {
+	private List<PropertyDefinition> createPropertyDefinitions(Class<?> configurationClass) {
 		List<PropertyDefinition> propertyDefinitions = new ArrayList<PropertyDefinition>();
 		Method[] methods = configurationClass.getMethods();
 		for (Method method : methods) {
@@ -425,6 +431,8 @@ public class ActivityServiceImpl implements ActivityService {
 				Class<?>[] parameterTypes = method.getParameterTypes();
 				Type[] genericParameterTypes = method.getGenericParameterTypes();
 				if (parameterTypes.length == 1 && genericParameterTypes.length == 1) {
+					ConfigurationBean parentConfigBean = method.getDeclaringClass().getAnnotation(ConfigurationBean.class);
+					URI typeURI = URI.create(parentConfigBean.uri());
 					Class<?> type = parameterTypes[0];
 					Class<?> elementType = getElementType(genericParameterTypes[0]);
 					String name = property.name();
@@ -434,10 +442,11 @@ public class ActivityServiceImpl implements ActivityService {
 					boolean multiple = elementType != null;
 					boolean ordered = (type.isArray() || List.class.isAssignableFrom(type))
 							&& property.ordering() == ConfigurationProperty.OrderPolicy.DEFAULT;
-
+					String uri = property.uri();
+					
 					propertyDefinitions
-							.add(createPropertyDefinition(activityURI, name, label, description,
-									required, multiple, ordered, multiple ? elementType : type));
+							.add(createPropertyDefinition(typeURI, name, label, description,
+									required, multiple, ordered, multiple ? elementType : type, uri));
 				}
 
 			}
@@ -445,9 +454,14 @@ public class ActivityServiceImpl implements ActivityService {
 		return propertyDefinitions;
 	}
 
-	private PropertyDefinition createPropertyDefinition(URI activityURI, String name, String label,
-			String description, boolean required, boolean multiple, boolean ordered, Class<?> type) {
-		URI predicate = activityURI.resolve("#" + name);
+	private PropertyDefinition createPropertyDefinition(URI baseUri, String name, String label,
+			String description, boolean required, boolean multiple, boolean ordered, Class<?> type, String uri) {
+		URI predicate;
+		if (uri.isEmpty()) {
+			predicate = baseUri.resolve("#" + name);
+		} else {
+			predicate = URI.create(uri);
+		}
 		if (type.isEnum()) {
 			return new PropertyLiteralDefinition(predicate, PropertyLiteral.XSD_STRING, name,
 					label, description, required, multiple, ordered, getOptions(type));
@@ -478,14 +492,14 @@ public class ActivityServiceImpl implements ActivityService {
 				List<PropertyDefinition> propertyDefinitions = new ArrayList<PropertyDefinition>();
 				URI typeURI = null;
 				if (type.equals(ActivityInputPortDefinitionBean.class)) {
-					typeURI = activityURI.resolve("#InputPortDefinition");
-					propertyDefinitions.add(new PropertyResourceDefinition(activityURI
+					typeURI = SCUFL2.resolve("#InputPortDefinition");
+					propertyDefinitions.add(new PropertyResourceDefinition(SCUFL2
 							.resolve("#definesInputPort"), null, "definesInputPort",
 							"Activity Input Ports", "", true, true, false));
 
 				} else if (type.equals(ActivityOutputPortDefinitionBean.class)) {
-					typeURI = activityURI.resolve("#OutputPortDefinition");
-					propertyDefinitions.add(new PropertyResourceDefinition(activityURI
+					typeURI = SCUFL2.resolve("#OutputPortDefinition");
+					propertyDefinitions.add(new PropertyResourceDefinition(SCUFL2
 							.resolve("#definesOutputPort"), null, "definesOutputPort",
 							"Activity Output Ports", "", true, true, false));
 				} else {
@@ -497,7 +511,7 @@ public class ActivityServiceImpl implements ActivityService {
 			} else {
 				URI typeURI = URI.create(configurationBean.uri());
 				return new PropertyResourceDefinition(predicate, typeURI, name, label, description,
-						required, multiple, ordered, createPropertyDefinitions(activityURI, type));
+						required, multiple, ordered, createPropertyDefinitions(type));
 			}
 		}
 	}
@@ -537,11 +551,19 @@ public class ActivityServiceImpl implements ActivityService {
 		return null;
 	}
 
-	private Method getPropertySetMethod(Class<?> configurationClass, String name) {
+	private Method getPropertySetMethod(Class<?> configurationClass, URI predicate) {
 		for (Method method : configurationClass.getMethods()) {
 			ConfigurationProperty property = method.getAnnotation(ConfigurationProperty.class);
 			if (property != null) {
-				if (property.name().equals(name)) {
+				URI uri;
+				if (! property.uri().isEmpty()) {
+					uri = URI.create(property.uri());
+				} else {
+					ConfigurationBean configBean = method.getDeclaringClass().getAnnotation(ConfigurationBean.class);					
+					uri = URI.create(configBean.uri()).resolve("#"+property.name());
+				}
+				
+				if (uri.equals(predicate)) {
 					return method;
 				}
 			}

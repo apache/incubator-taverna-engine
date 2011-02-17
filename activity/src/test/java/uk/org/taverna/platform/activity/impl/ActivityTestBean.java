@@ -33,7 +33,7 @@ import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationProperty;
  * 
  * @author David Withers
  */
-@ConfigurationBean(uri = ActivityServiceImplTest.annotatedBeanURI + "/configuration")
+@ConfigurationBean(uri = ActivityServiceImplTest.annotatedBeanURI + "#Configuration")
 public class ActivityTestBean {
 
 	public String stringType, optionalStringType;
@@ -54,6 +54,7 @@ public class ActivityTestBean {
 	public List<ActivityTestEnum> listOfEnumType;
 	public SortedSet<ActivityTestEnum> setOfEnumType;
 	public URI uriType;
+	public SubclassActivityTestBean subclass;
 	
 	@ConfigurationProperty(name = "stringType")
 	public void setStringType(String parameter) {
@@ -105,6 +106,12 @@ public class ActivityTestBean {
 		beanType2 = parameter;
 	}
 
+	@ConfigurationProperty(name = "subclass")
+	public void setBeanType2(SubclassActivityTestBean parameter) {
+		subclass = parameter;
+	}
+
+	
 	@ConfigurationProperty(name = "arrayType")
 	public void setArrayType(String[] parameter) {
 		arrayType = parameter;

@@ -24,6 +24,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -65,6 +66,10 @@ public class ActivityServiceImplTest {
 	public static final String annotatedBeanURI = "test://ns.taverna.org.uk/activity/annotated";
 
 	public static final String nonAnnotatedBeanURI = "test://ns.taverna.org.uk/activity/nonannotated";
+	
+	public static final URI activityTestBeanURI = URI.create(annotatedBeanURI + "#Configuration");
+	public static final URI activityTestBean2URI = URI.create(annotatedBeanURI + "/configuration2");
+	public static final URI subclassTestBeanURI = URI.create(annotatedBeanURI + "/subclass");
 
 	private ActivityServiceImpl activityServiceImpl;
 	
@@ -135,70 +140,84 @@ public class ActivityServiceImplTest {
 		configuration.setParent(profile);
 		
 		PropertyResource propertyResource = configuration.getPropertyResource();
-		propertyResource.setTypeURI(URI.create(annotatedBeanURI + "#ConfigType"));
+		propertyResource.setTypeURI(activityTestBeanURI.resolve("#Configuration"));
 		PropertyResource propertyResource2 = new PropertyResource();
-		propertyResource2.setTypeURI(URI.create(annotatedBeanURI + "/configuration2"));
-		propertyResource2.addProperty(URI.create(annotatedBeanURI + "#stringType2"), new PropertyLiteral("string value 2"));
+		propertyResource2.setTypeURI(activityTestBean2URI);
+		propertyResource2.addProperty(activityTestBean2URI.resolve("#stringType"), new PropertyLiteral("string value 2.1"));
+		propertyResource2.addProperty(activityTestBean2URI.resolve("#stringType2"), new PropertyLiteral("string value 2.2"));
+
 		PropertyResource propertyResource3 = new PropertyResource();
-		propertyResource3.setTypeURI(URI.create(annotatedBeanURI + "/configuration2"));
-		propertyResource3.addProperty(URI.create(annotatedBeanURI + "#stringType2"), new PropertyLiteral("string value 3"));
+		propertyResource3.setTypeURI(activityTestBean2URI);
+		propertyResource3.addProperty(activityTestBean2URI.resolve("#stringType"), new PropertyLiteral("string value 3.1"));
+		propertyResource3.addProperty(activityTestBean2URI.resolve("#stringType2"), new PropertyLiteral("string value 3.2"));
+
 		PropertyResource propertyResource4 = new PropertyResource();
-		propertyResource4.setTypeURI(URI.create(annotatedBeanURI + "/configuration2"));
-		propertyResource4.addProperty(URI.create(annotatedBeanURI + "#stringType2"), new PropertyLiteral("string value 4"));
+		propertyResource4.setTypeURI(activityTestBean2URI);
+		propertyResource4.addProperty(activityTestBean2URI.resolve("#stringType"), new PropertyLiteral("string value 4.1"));
+		propertyResource4.addProperty(activityTestBean2URI.resolve("#stringType2"), new PropertyLiteral("string value 4.2"));
 		
-		propertyResource.addProperty(URI.create(annotatedBeanURI + "#stringType"), new PropertyLiteral("string value"));
-		propertyResource.addProperty(URI.create(annotatedBeanURI + "#optionalStringType"), new PropertyLiteral("optional string value"));
-		propertyResource.addProperty(URI.create(annotatedBeanURI + "#integerType"), new PropertyLiteral(5));
-		propertyResource.addProperty(URI.create(annotatedBeanURI + "#longType"), new PropertyLiteral(12l));
-		propertyResource.addProperty(URI.create(annotatedBeanURI + "#floatType"), new PropertyLiteral(1.2f));
-		propertyResource.addProperty(URI.create(annotatedBeanURI + "#doubleType"), new PropertyLiteral(36.2d));
-		propertyResource.addProperty(URI.create(annotatedBeanURI + "#booleanType"), new PropertyLiteral(false));
-		propertyResource.addProperty(URI.create(annotatedBeanURI + "#enumType"), new PropertyLiteral("A"));
+		PropertyResource propertyResource5 = new PropertyResource();
+		propertyResource5.setTypeURI(subclassTestBeanURI);
+		propertyResource5.addProperty(activityTestBean2URI.resolve("#stringType2"), new PropertyLiteral("string value 5.1"));
+		propertyResource5.addProperty(subclassTestBeanURI.resolve("#stringType2"), new PropertyLiteral("string value 5.2"));
+		propertyResource5.addProperty(subclassTestBeanURI.resolve("#overriding"), new PropertyLiteral("string value 5.3"));
 		
-		propertyResource.addProperty(URI.create(annotatedBeanURI + "#beanType"), propertyResource2);
-		propertyResource.addProperty(URI.create(annotatedBeanURI + "#beanType2"), propertyResource4);
+		
+		propertyResource.addProperty(activityTestBeanURI.resolve("#stringType"), new PropertyLiteral("string value"));
+		propertyResource.addProperty(activityTestBeanURI.resolve("#optionalStringType"), new PropertyLiteral("optional string value"));
+		propertyResource.addProperty(activityTestBeanURI.resolve("#integerType"), new PropertyLiteral(5));
+		propertyResource.addProperty(activityTestBeanURI.resolve("#longType"), new PropertyLiteral(12l));
+		propertyResource.addProperty(activityTestBeanURI.resolve("#floatType"), new PropertyLiteral(1.2f));
+		propertyResource.addProperty(activityTestBeanURI.resolve("#doubleType"), new PropertyLiteral(36.2d));
+		propertyResource.addProperty(activityTestBeanURI.resolve("#booleanType"), new PropertyLiteral(false));
+		propertyResource.addProperty(activityTestBeanURI.resolve("#enumType"), new PropertyLiteral("A"));
+		
+		propertyResource.addProperty(activityTestBeanURI.resolve("#beanType"), propertyResource2);
+		propertyResource.addProperty(activityTestBeanURI.resolve("#beanType2"), propertyResource4);
+		propertyResource.addProperty(activityTestBeanURI.resolve("#subclass"), propertyResource5);
+		
 
 		PropertyList propertyList = new PropertyList();
 		propertyList.add(new PropertyLiteral("array element 1"));
 		propertyList.add(new PropertyLiteral("array element 2"));
-		propertyResource.addProperty(URI.create(annotatedBeanURI + "#arrayType"), propertyList);
+		propertyResource.addProperty(activityTestBeanURI.resolve("#arrayType"), propertyList);
 		propertyList = new PropertyList();
 		propertyList.add(new PropertyLiteral("1"));
 		propertyList.add(new PropertyLiteral("2"));
 		propertyList.add(new PropertyLiteral("3"));
 		propertyList.add(new PropertyLiteral("4"));
-		propertyResource.addProperty(URI.create(annotatedBeanURI + "#listType"), propertyList);
-		propertyResource.addProperty(URI.create(annotatedBeanURI + "#unorderedListType"), new PropertyLiteral("a"));
-		propertyResource.addProperty(URI.create(annotatedBeanURI + "#unorderedListType"), new PropertyLiteral("b"));
-		propertyResource.addProperty(URI.create(annotatedBeanURI + "#unorderedListType"), new PropertyLiteral("c"));
-		propertyResource.addProperty(URI.create(annotatedBeanURI + "#setType"), new PropertyLiteral("x"));
-		propertyResource.addProperty(URI.create(annotatedBeanURI + "#setType"), new PropertyLiteral("y"));
-		propertyResource.addProperty(URI.create(annotatedBeanURI + "#setType"), new PropertyLiteral("z"));
+		propertyResource.addProperty(activityTestBeanURI.resolve("#listType"), propertyList);
+		propertyResource.addProperty(activityTestBeanURI.resolve("#unorderedListType"), new PropertyLiteral("a"));
+		propertyResource.addProperty(activityTestBeanURI.resolve("#unorderedListType"), new PropertyLiteral("b"));
+		propertyResource.addProperty(activityTestBeanURI.resolve("#unorderedListType"), new PropertyLiteral("c"));
+		propertyResource.addProperty(activityTestBeanURI.resolve("#setType"), new PropertyLiteral("x"));
+		propertyResource.addProperty(activityTestBeanURI.resolve("#setType"), new PropertyLiteral("y"));
+		propertyResource.addProperty(activityTestBeanURI.resolve("#setType"), new PropertyLiteral("z"));
 
 		propertyList = new PropertyList();
 		propertyList.add(propertyResource2);
 		propertyList.add(propertyResource3);
 		propertyList.add(propertyResource4);
-		propertyResource.addProperty(URI.create(annotatedBeanURI + "#arrayOfBeanType"), propertyList);
+		propertyResource.addProperty(activityTestBeanURI.resolve("#arrayOfBeanType"), propertyList);
 		propertyList = new PropertyList();
 		propertyList.add(propertyResource3);
 		propertyList.add(propertyResource4);
-		propertyResource.addProperty(URI.create(annotatedBeanURI + "#listOfBeanType"), propertyList);
-		propertyResource.addProperty(URI.create(annotatedBeanURI + "#setOfBeanType"), propertyResource2);
-		propertyResource.addProperty(URI.create(annotatedBeanURI + "#setOfBeanType"), propertyResource3);
+		propertyResource.addProperty(activityTestBeanURI.resolve("#listOfBeanType"), propertyList);
+		propertyResource.addProperty(activityTestBeanURI.resolve("#setOfBeanType"), propertyResource2);
+		propertyResource.addProperty(activityTestBeanURI.resolve("#setOfBeanType"), propertyResource3);
 		
 		propertyList = new PropertyList();
 		propertyList.add(new PropertyLiteral("A"));
 		propertyList.add(new PropertyLiteral("B"));
-		propertyResource.addProperty(URI.create(annotatedBeanURI + "#arrayOfEnumType"), propertyList);
+		propertyResource.addProperty(activityTestBeanURI.resolve("#arrayOfEnumType"), propertyList);
 		propertyList = new PropertyList();
 		propertyList.add(new PropertyLiteral("B"));
 		propertyList.add(new PropertyLiteral("A"));
-		propertyResource.addProperty(URI.create(annotatedBeanURI + "#listOfEnumType"), propertyList);
-		propertyResource.addProperty(URI.create(annotatedBeanURI + "#setOfEnumType"), new PropertyLiteral("A"));
-		propertyResource.addProperty(URI.create(annotatedBeanURI + "#setOfEnumType"), new PropertyLiteral("B"));
+		propertyResource.addProperty(activityTestBeanURI.resolve("#listOfEnumType"), propertyList);
+		propertyResource.addProperty(activityTestBeanURI.resolve("#setOfEnumType"), new PropertyLiteral("A"));
+		propertyResource.addProperty(activityTestBeanURI.resolve("#setOfEnumType"), new PropertyLiteral("B"));
 		
-		propertyResource.addPropertyReference(URI.create(annotatedBeanURI + "#uriType"), URI.create("http://www.example.com/"));
+		propertyResource.addPropertyReference(activityTestBeanURI.resolve("#uriType"), URI.create("http://www.example.com/"));
 	}
 
 	/**
@@ -244,16 +263,16 @@ public class ActivityServiceImplTest {
 		PropertyResourceDefinition propertyResourceDefinition = configurationDefinition.getPropertyResourceDefinition();
 
 		assertEquals(URI.create(annotatedBeanURI), configurationDefinition.getConfigurableType());
-		assertEquals(URI.create(annotatedBeanURI + "#ConfigType"), propertyResourceDefinition.getTypeURI());
+		assertEquals(activityTestBeanURI, propertyResourceDefinition.getTypeURI());
 
 		int definitionCount = 0;
 
-		PropertyDefinition definition = propertyResourceDefinition.getPropertyDefinition(URI
-				.create(annotatedBeanURI + "#stringType"));
+		PropertyDefinition definition = propertyResourceDefinition.getPropertyDefinition(
+				activityTestBeanURI.resolve("#stringType"));
 		definitionCount++;
 		assertNotNull(definition);
 		assertTrue(definition instanceof PropertyLiteralDefinition);
-		assertEquals(URI.create(annotatedBeanURI + "#stringType"),
+		assertEquals(activityTestBeanURI.resolve("#stringType"),
 				definition.getPredicate());
 		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
 		assertEquals("", definition.getDescription());
@@ -263,12 +282,11 @@ public class ActivityServiceImplTest {
 		assertFalse(definition.isOrdered());
 		assertTrue(definition.isRequired());
 
-		definition = propertyResourceDefinition.getPropertyDefinition(URI.create(annotatedBeanURI
-				+ "#optionalStringType"));
+		definition = propertyResourceDefinition.getPropertyDefinition(activityTestBeanURI.resolve("#optionalStringType"));
 		definitionCount++;
 		assertNotNull(definition);
 		assertTrue(definition instanceof PropertyLiteralDefinition);
-		assertEquals(URI.create(annotatedBeanURI + "#optionalStringType"),
+		assertEquals(activityTestBeanURI.resolve("#optionalStringType"),
 				definition.getPredicate());
 		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
 		assertEquals("", definition.getDescription());
@@ -278,12 +296,12 @@ public class ActivityServiceImplTest {
 		assertFalse(definition.isOrdered());
 		assertFalse(definition.isRequired());
 
-		definition = propertyResourceDefinition.getPropertyDefinition(URI.create(annotatedBeanURI
-				+ "#integerType"));
+		definition = propertyResourceDefinition.getPropertyDefinition(activityTestBeanURI.resolve(
+				"#integerType"));
 		definitionCount++;
 		assertNotNull(definition);
 		assertTrue(definition instanceof PropertyLiteralDefinition);
-		assertEquals(URI.create(annotatedBeanURI + "#integerType"),
+		assertEquals(activityTestBeanURI.resolve("#integerType"),
 				definition.getPredicate());
 		assertEquals(PropertyLiteral.XSD_INT, ((PropertyLiteralDefinition) definition).getLiteralType());
 		assertEquals("", definition.getDescription());
@@ -293,12 +311,12 @@ public class ActivityServiceImplTest {
 		assertFalse(definition.isOrdered());
 		assertTrue(definition.isRequired());
 
-		definition = propertyResourceDefinition.getPropertyDefinition(URI.create(annotatedBeanURI
-				+ "#longType"));
+		definition = propertyResourceDefinition.getPropertyDefinition(activityTestBeanURI.resolve(
+				"#longType"));
 		definitionCount++;
 		assertNotNull(definition);
 		assertTrue(definition instanceof PropertyLiteralDefinition);
-		assertEquals(URI.create(annotatedBeanURI + "#longType"),
+		assertEquals(activityTestBeanURI.resolve("#longType"),
 				definition.getPredicate());
 		assertEquals(PropertyLiteral.XSD_LONG, ((PropertyLiteralDefinition) definition).getLiteralType());
 		assertEquals("", definition.getDescription());
@@ -308,12 +326,12 @@ public class ActivityServiceImplTest {
 		assertFalse(definition.isOrdered());
 		assertTrue(definition.isRequired());
 
-		definition = propertyResourceDefinition.getPropertyDefinition(URI.create(annotatedBeanURI
-				+ "#floatType"));
+		definition = propertyResourceDefinition.getPropertyDefinition(activityTestBeanURI.resolve(
+				"#floatType"));
 		definitionCount++;
 		assertNotNull(definition);
 		assertTrue(definition instanceof PropertyLiteralDefinition);
-		assertEquals(URI.create(annotatedBeanURI + "#floatType"),
+		assertEquals(activityTestBeanURI.resolve("#floatType"),
 				definition.getPredicate());
 		assertEquals(PropertyLiteral.XSD_FLOAT, ((PropertyLiteralDefinition) definition).getLiteralType());
 		assertEquals("", definition.getDescription());
@@ -323,12 +341,12 @@ public class ActivityServiceImplTest {
 		assertFalse(definition.isOrdered());
 		assertTrue(definition.isRequired());
 
-		definition = propertyResourceDefinition.getPropertyDefinition(URI.create(annotatedBeanURI
-				+ "#doubleType"));
+		definition = propertyResourceDefinition.getPropertyDefinition(activityTestBeanURI.resolve(
+				"#doubleType"));
 		definitionCount++;
 		assertNotNull(definition);
 		assertTrue(definition instanceof PropertyLiteralDefinition);
-		assertEquals(URI.create(annotatedBeanURI + "#doubleType"),
+		assertEquals(activityTestBeanURI.resolve("#doubleType"),
 				definition.getPredicate());
 		assertEquals(PropertyLiteral.XSD_DOUBLE, ((PropertyLiteralDefinition) definition).getLiteralType());
 		assertEquals("", definition.getDescription());
@@ -338,12 +356,12 @@ public class ActivityServiceImplTest {
 		assertFalse(definition.isOrdered());
 		assertTrue(definition.isRequired());
 
-		definition = propertyResourceDefinition.getPropertyDefinition(URI.create(annotatedBeanURI
-				+ "#booleanType"));
+		definition = propertyResourceDefinition.getPropertyDefinition(activityTestBeanURI.resolve(
+				"#booleanType"));
 		definitionCount++;
 		assertNotNull(definition);
 		assertTrue(definition instanceof PropertyLiteralDefinition);
-		assertEquals(URI.create(annotatedBeanURI + "#booleanType"),
+		assertEquals(activityTestBeanURI.resolve("#booleanType"),
 				definition.getPredicate());
 		assertEquals(PropertyLiteral.XSD_BOOLEAN, ((PropertyLiteralDefinition) definition).getLiteralType());
 		assertEquals("", definition.getDescription());
@@ -353,12 +371,12 @@ public class ActivityServiceImplTest {
 		assertFalse(definition.isOrdered());
 		assertTrue(definition.isRequired());
 
-		definition = propertyResourceDefinition.getPropertyDefinition(URI.create(annotatedBeanURI
-				+ "#enumType"));
+		definition = propertyResourceDefinition.getPropertyDefinition(activityTestBeanURI.resolve(
+				"#enumType"));
 		definitionCount++;
 		assertNotNull(definition);
 		assertTrue(definition instanceof PropertyLiteralDefinition);
-		assertEquals(URI.create(annotatedBeanURI + "#enumType"),
+		assertEquals(activityTestBeanURI.resolve("#enumType"),
 				definition.getPredicate());
 		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
 		assertEquals("", definition.getDescription());
@@ -368,194 +386,26 @@ public class ActivityServiceImplTest {
 		assertFalse(definition.isOrdered());
 		assertTrue(definition.isRequired());
 
-		definition = propertyResourceDefinition.getPropertyDefinition(URI.create(annotatedBeanURI
-				+ "#beanType"));
+		PropertyResourceDefinition beanType = (PropertyResourceDefinition) propertyResourceDefinition.getPropertyDefinition(activityTestBeanURI.resolve(
+				"#beanType"));
 		definitionCount++;
-		assertNotNull(definition);
-		assertTrue(definition instanceof PropertyResourceDefinition);
-		assertEquals(URI.create(annotatedBeanURI + "#beanType"),
-				definition.getPredicate());
-		assertEquals(URI.create(annotatedBeanURI + "/configuration2"), ((PropertyResourceDefinition) definition).getTypeURI());
-		assertEquals("", definition.getDescription());
-		assertEquals("", definition.getLabel());
-		assertFalse(definition.isMultiple());
-		assertFalse(definition.isOrdered());
-		assertTrue(definition.isRequired());
-		assertEquals(1, ((PropertyResourceDefinition) definition).getPropertyDefinitions().size());
-		definition = ((PropertyResourceDefinition) definition).getPropertyDefinition(URI
-				.create(annotatedBeanURI + "#stringType2"));
-		assertNotNull(definition);
-		assertTrue(definition instanceof PropertyLiteralDefinition);
-		assertEquals(URI.create(annotatedBeanURI + "#stringType2"),
-				definition.getPredicate());
-		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
-		assertEquals("", definition.getDescription());
-		assertEquals("", definition.getLabel());
-		assertEquals(new HashSet<String>(), ((PropertyLiteralDefinition) definition).getOptions());
-		assertFalse(definition.isMultiple());
-		assertFalse(definition.isOrdered());
-		assertTrue(definition.isRequired());
+		assertNotNull(beanType);
+		assertTrue(beanType instanceof PropertyResourceDefinition);
+		assertEquals(activityTestBeanURI.resolve("#beanType"),
+				beanType.getPredicate());
+		assertEquals(URI.create(annotatedBeanURI + "/configuration2"), beanType.getTypeURI());
+		assertEquals("", beanType.getDescription());
+		assertEquals("", beanType.getLabel());
+		assertFalse(beanType.isMultiple());
+		assertFalse(beanType.isOrdered());
+		assertTrue(beanType.isRequired());
+		assertEquals(2, beanType.getPropertyDefinitions().size());
+		
 
-		definition = propertyResourceDefinition.getPropertyDefinition(URI.create(annotatedBeanURI
-				+ "#beanType2"));
-		definitionCount++;
-		assertNotNull(definition);
-		assertTrue(definition instanceof PropertyResourceDefinition);
-		assertEquals(URI.create(annotatedBeanURI + "#beanType2"),
-				definition.getPredicate());
-		assertEquals(URI.create(annotatedBeanURI + "/configuration2"), ((PropertyResourceDefinition) definition).getTypeURI());
-		assertEquals("", definition.getDescription());
-		assertEquals("", definition.getLabel());
-		assertFalse(definition.isMultiple());
-		assertFalse(definition.isOrdered());
-		assertTrue(definition.isRequired());
-		assertEquals(1, ((PropertyResourceDefinition) definition).getPropertyDefinitions().size());
-		definition = ((PropertyResourceDefinition) definition).getPropertyDefinition(URI
-				.create(annotatedBeanURI + "#stringType2"));
+		definition = beanType.getPropertyDefinition(activityTestBean2URI.resolve("#stringType"));
 		assertNotNull(definition);
 		assertTrue(definition instanceof PropertyLiteralDefinition);
-		assertEquals(URI.create(annotatedBeanURI + "#stringType2"),
-				definition.getPredicate());
-		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
-		assertEquals("", definition.getDescription());
-		assertEquals("", definition.getLabel());
-		assertEquals(new HashSet<String>(), ((PropertyLiteralDefinition) definition).getOptions());
-		assertFalse(definition.isMultiple());
-		assertFalse(definition.isOrdered());
-		assertTrue(definition.isRequired());
-
-		definition = propertyResourceDefinition.getPropertyDefinition(URI.create(annotatedBeanURI
-				+ "#arrayType"));
-		definitionCount++;
-		assertNotNull(definition);
-		assertTrue(definition instanceof PropertyLiteralDefinition);
-		assertEquals(URI.create(annotatedBeanURI + "#arrayType"),
-				definition.getPredicate());
-		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
-		assertEquals("", definition.getDescription());
-		assertEquals("", definition.getLabel());
-		assertEquals(new HashSet<String>(), ((PropertyLiteralDefinition) definition).getOptions());
-		assertTrue(definition.isMultiple());
-		assertTrue(definition.isOrdered());
-		assertTrue(definition.isRequired());
-
-		definition = propertyResourceDefinition.getPropertyDefinition(URI.create(annotatedBeanURI
-				+ "#listType"));
-		definitionCount++;
-		assertNotNull(definition);
-		assertTrue(definition instanceof PropertyLiteralDefinition);
-		assertEquals(URI.create(annotatedBeanURI + "#listType"),
-				definition.getPredicate());
-		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
-		assertEquals("", definition.getDescription());
-		assertEquals("", definition.getLabel());
-		assertEquals(new HashSet<String>(), ((PropertyLiteralDefinition) definition).getOptions());
-		assertTrue(definition.isMultiple());
-		assertTrue(definition.isOrdered());
-		assertTrue(definition.isRequired());
-
-		definition = propertyResourceDefinition.getPropertyDefinition(URI.create(annotatedBeanURI
-				+ "#unorderedListType"));
-		definitionCount++;
-		assertNotNull(definition);
-		assertTrue(definition instanceof PropertyLiteralDefinition);
-		assertEquals(URI.create(annotatedBeanURI + "#unorderedListType"),
-				definition.getPredicate());
-		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
-		assertEquals("", definition.getDescription());
-		assertEquals("", definition.getLabel());
-		assertEquals(new HashSet<String>(), ((PropertyLiteralDefinition) definition).getOptions());
-		assertTrue(definition.isMultiple());
-		assertFalse(definition.isOrdered());
-		assertTrue(definition.isRequired());
-
-		definition = propertyResourceDefinition.getPropertyDefinition(URI.create(annotatedBeanURI
-				+ "#setType"));
-		definitionCount++;
-		assertNotNull(definition);
-		assertTrue(definition instanceof PropertyLiteralDefinition);
-		assertEquals(URI.create(annotatedBeanURI + "#setType"),
-				definition.getPredicate());
-		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
-		assertEquals("", definition.getDescription());
-		assertEquals("", definition.getLabel());
-		assertEquals(new HashSet<String>(), ((PropertyLiteralDefinition) definition).getOptions());
-		assertTrue(definition.isMultiple());
-		assertFalse(definition.isOrdered());
-		assertTrue(definition.isRequired());
-
-		definition = propertyResourceDefinition.getPropertyDefinition(URI.create(annotatedBeanURI
-				+ "#arrayOfBeanType"));
-		definitionCount++;
-		assertNotNull(definition);
-		assertTrue(definition instanceof PropertyResourceDefinition);
-		assertEquals(URI.create(annotatedBeanURI + "#arrayOfBeanType"),
-				definition.getPredicate());
-		assertEquals(URI.create(annotatedBeanURI + "/configuration2"), ((PropertyResourceDefinition) definition).getTypeURI());
-		assertEquals("", definition.getDescription());
-		assertEquals("", definition.getLabel());
-		assertTrue(definition.isMultiple());
-		assertTrue(definition.isOrdered());
-		assertTrue(definition.isRequired());
-		definition = ((PropertyResourceDefinition) definition).getPropertyDefinition(URI
-				.create(annotatedBeanURI + "#stringType2"));
-		assertNotNull(definition);
-		assertTrue(definition instanceof PropertyLiteralDefinition);
-		assertEquals(URI.create(annotatedBeanURI + "#stringType2"),
-				definition.getPredicate());
-		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
-		assertEquals("", definition.getDescription());
-		assertEquals("", definition.getLabel());
-		assertEquals(new HashSet<String>(), ((PropertyLiteralDefinition) definition).getOptions());
-		assertFalse(definition.isMultiple());
-		assertFalse(definition.isOrdered());
-		assertTrue(definition.isRequired());
-
-		definition = propertyResourceDefinition.getPropertyDefinition(URI.create(annotatedBeanURI
-				+ "#listOfBeanType"));
-		definitionCount++;
-		assertNotNull(definition);
-		assertTrue(definition instanceof PropertyResourceDefinition);
-		assertEquals(URI.create(annotatedBeanURI + "#listOfBeanType"),
-				definition.getPredicate());
-		assertEquals(URI.create(annotatedBeanURI + "/configuration2"), ((PropertyResourceDefinition) definition).getTypeURI());
-		assertEquals("", definition.getDescription());
-		assertEquals("", definition.getLabel());
-		assertTrue(definition.isMultiple());
-		assertTrue(definition.isOrdered());
-		assertTrue(definition.isRequired());
-		definition = ((PropertyResourceDefinition) definition).getPropertyDefinition(URI
-				.create(annotatedBeanURI + "#stringType2"));
-		assertNotNull(definition);
-		assertTrue(definition instanceof PropertyLiteralDefinition);
-		assertEquals(URI.create(annotatedBeanURI + "#stringType2"),
-				definition.getPredicate());
-		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
-		assertEquals("", definition.getDescription());
-		assertEquals("", definition.getLabel());
-		assertEquals(new HashSet<String>(), ((PropertyLiteralDefinition) definition).getOptions());
-		assertFalse(definition.isMultiple());
-		assertFalse(definition.isOrdered());
-		assertTrue(definition.isRequired());
-
-		definition = propertyResourceDefinition.getPropertyDefinition(URI.create(annotatedBeanURI
-				+ "#setOfBeanType"));
-		definitionCount++;
-		assertNotNull(definition);
-		assertTrue(definition instanceof PropertyResourceDefinition);
-		assertEquals(URI.create(annotatedBeanURI + "#setOfBeanType"),
-				definition.getPredicate());
-		assertEquals(URI.create(annotatedBeanURI + "/configuration2"), ((PropertyResourceDefinition) definition).getTypeURI());
-		assertEquals("", definition.getDescription());
-		assertEquals("", definition.getLabel());
-		assertTrue(definition.isMultiple());
-		assertFalse(definition.isOrdered());
-		assertTrue(definition.isRequired());
-		definition = ((PropertyResourceDefinition) definition).getPropertyDefinition(URI
-				.create(annotatedBeanURI + "#stringType2"));
-		assertNotNull(definition);
-		assertTrue(definition instanceof PropertyLiteralDefinition);
-		assertEquals(URI.create(annotatedBeanURI + "#stringType2"),
+		assertEquals(activityTestBean2URI.resolve("#stringType"),
 				definition.getPredicate());
 		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
 		assertEquals("", definition.getDescription());
@@ -565,12 +415,273 @@ public class ActivityServiceImplTest {
 		assertFalse(definition.isOrdered());
 		assertTrue(definition.isRequired());
 		
-		definition = propertyResourceDefinition.getPropertyDefinition(URI.create(annotatedBeanURI
-				+ "#arrayOfEnumType"));
+		definition = beanType.getPropertyDefinition(activityTestBean2URI.resolve("#stringType2"));
+		assertNotNull(definition);
+		assertTrue(definition instanceof PropertyLiteralDefinition);
+		assertEquals(activityTestBean2URI.resolve("#stringType2"),
+				definition.getPredicate());
+		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
+		assertEquals("", definition.getDescription());
+		assertEquals("", definition.getLabel());
+		assertEquals(new HashSet<String>(), ((PropertyLiteralDefinition) definition).getOptions());
+		assertFalse(definition.isMultiple());
+		assertFalse(definition.isOrdered());
+		assertTrue(definition.isRequired());
+		
+
+		// Test ActivTestBean2
+		PropertyResourceDefinition beanType2 = (PropertyResourceDefinition) propertyResourceDefinition.getPropertyDefinition(activityTestBeanURI.resolve(
+				"#beanType2"));
+		definitionCount++;
+		assertNotNull(beanType2);
+		assertTrue(beanType2 instanceof PropertyResourceDefinition);
+		assertEquals(activityTestBeanURI.resolve("#beanType2"),
+				beanType2.getPredicate());
+		assertEquals(activityTestBean2URI, beanType2.getTypeURI());
+		assertEquals("", beanType2.getDescription());
+		assertEquals("", beanType2.getLabel());
+		assertFalse(beanType2.isMultiple());
+		assertFalse(beanType2.isOrdered());
+		assertTrue(beanType2.isRequired());
+		assertEquals(2, beanType2.getPropertyDefinitions().size());
+		
+		definition = beanType2.getPropertyDefinition(activityTestBean2URI.resolve("#stringType"));
+		assertNotNull(definition);
+		assertTrue(definition instanceof PropertyLiteralDefinition);
+		assertEquals(activityTestBean2URI.resolve("#stringType"),
+				definition.getPredicate());
+		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
+		assertEquals("", definition.getDescription());
+		assertEquals("", definition.getLabel());
+		assertEquals(new HashSet<String>(), ((PropertyLiteralDefinition) definition).getOptions());
+		assertFalse(definition.isMultiple());
+		assertFalse(definition.isOrdered());
+		assertTrue(definition.isRequired());
+		
+		definition = beanType2.getPropertyDefinition(activityTestBean2URI.resolve("#stringType2"));
+		assertNotNull(definition);
+		assertTrue(definition instanceof PropertyLiteralDefinition);
+		assertEquals(activityTestBean2URI.resolve("#stringType2"),
+				definition.getPredicate());
+		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
+		assertEquals("", definition.getDescription());
+		assertEquals("", definition.getLabel());
+		assertEquals(new HashSet<String>(), ((PropertyLiteralDefinition) definition).getOptions());
+		assertFalse(definition.isMultiple());
+		assertFalse(definition.isOrdered());
+		assertTrue(definition.isRequired());
+		
+		
+
+		PropertyResourceDefinition subclass = (PropertyResourceDefinition) propertyResourceDefinition.getPropertyDefinition(activityTestBeanURI.resolve(
+				"#subclass"));
+		definitionCount++;
+		assertNotNull(subclass);
+		assertTrue(subclass instanceof PropertyResourceDefinition);
+		assertEquals(activityTestBeanURI.resolve("#subclass"),
+				subclass.getPredicate());
+		assertEquals(URI.create(annotatedBeanURI + "/subclass"), ((PropertyResourceDefinition) subclass).getTypeURI());
+		assertEquals("", subclass.getDescription());
+		assertEquals("", subclass.getLabel());
+		assertFalse(subclass.isMultiple());
+		assertFalse(subclass.isOrdered());
+		assertTrue(subclass.isRequired());
+		assertEquals(3, ((PropertyResourceDefinition) subclass).getPropertyDefinitions().size());
+		
+		definition = subclass.getPropertyDefinition(activityTestBean2URI.resolve("#stringType"));
+		assertNull(definition);
+		definition = subclass.getPropertyDefinition(subclassTestBeanURI.resolve("#stringType"));
+		assertNull(definition);
+		definition = subclass.getPropertyDefinition(subclassTestBeanURI.resolve("#overriding"));
+		assertNotNull(definition);
+		assertTrue(definition instanceof PropertyLiteralDefinition);
+		assertEquals(subclassTestBeanURI.resolve("#overriding"),
+				definition.getPredicate());
+		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
+		assertEquals("", definition.getDescription());
+		assertEquals("", definition.getLabel());
+		assertEquals(new HashSet<String>(), ((PropertyLiteralDefinition) definition).getOptions());
+		assertFalse(definition.isMultiple());
+		assertFalse(definition.isOrdered());
+		assertTrue(definition.isRequired());
+		
+		
+		definition = ((PropertyResourceDefinition) subclass).getPropertyDefinition(activityTestBean2URI.resolve("#stringType2"));		
+		assertNotNull(definition);
+		assertTrue(definition instanceof PropertyLiteralDefinition);
+		assertEquals(activityTestBean2URI.resolve("#stringType2"),
+				definition.getPredicate());
+		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
+		assertEquals("", definition.getDescription());
+		assertEquals("", definition.getLabel());
+		assertEquals(new HashSet<String>(), ((PropertyLiteralDefinition) definition).getOptions());
+		assertFalse(definition.isMultiple());
+		assertFalse(definition.isOrdered());
+		assertTrue(definition.isRequired());
+
+
+		definition = ((PropertyResourceDefinition) subclass).getPropertyDefinition(subclassTestBeanURI.resolve("#stringType2"));		
+		assertNotNull(definition);
+		assertTrue(definition instanceof PropertyLiteralDefinition);
+		assertEquals(subclassTestBeanURI.resolve("#stringType2"),
+				definition.getPredicate());
+		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
+		assertEquals("", definition.getDescription());
+		assertEquals("", definition.getLabel());
+		assertEquals(new HashSet<String>(), ((PropertyLiteralDefinition) definition).getOptions());
+		assertFalse(definition.isMultiple());
+		assertFalse(definition.isOrdered());
+		assertTrue(definition.isRequired());
+
+		
+		
+		definition = propertyResourceDefinition.getPropertyDefinition(activityTestBeanURI.resolve(
+				"#arrayType"));
 		definitionCount++;
 		assertNotNull(definition);
 		assertTrue(definition instanceof PropertyLiteralDefinition);
-		assertEquals(URI.create(annotatedBeanURI + "#arrayOfEnumType"),
+		assertEquals(activityTestBeanURI.resolve("#arrayType"),
+				definition.getPredicate());
+		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
+		assertEquals("", definition.getDescription());
+		assertEquals("", definition.getLabel());
+		assertEquals(new HashSet<String>(), ((PropertyLiteralDefinition) definition).getOptions());
+		assertTrue(definition.isMultiple());
+		assertTrue(definition.isOrdered());
+		assertTrue(definition.isRequired());
+
+		definition = propertyResourceDefinition.getPropertyDefinition(activityTestBeanURI.resolve(
+				"#listType"));
+		definitionCount++;
+		assertNotNull(definition);
+		assertTrue(definition instanceof PropertyLiteralDefinition);
+		assertEquals(activityTestBeanURI.resolve("#listType"),
+				definition.getPredicate());
+		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
+		assertEquals("", definition.getDescription());
+		assertEquals("", definition.getLabel());
+		assertEquals(new HashSet<String>(), ((PropertyLiteralDefinition) definition).getOptions());
+		assertTrue(definition.isMultiple());
+		assertTrue(definition.isOrdered());
+		assertTrue(definition.isRequired());
+
+		definition = propertyResourceDefinition.getPropertyDefinition(activityTestBeanURI.resolve(
+				"#unorderedListType"));
+		definitionCount++;
+		assertNotNull(definition);
+		assertTrue(definition instanceof PropertyLiteralDefinition);
+		assertEquals(activityTestBeanURI.resolve("#unorderedListType"),
+				definition.getPredicate());
+		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
+		assertEquals("", definition.getDescription());
+		assertEquals("", definition.getLabel());
+		assertEquals(new HashSet<String>(), ((PropertyLiteralDefinition) definition).getOptions());
+		assertTrue(definition.isMultiple());
+		assertFalse(definition.isOrdered());
+		assertTrue(definition.isRequired());
+
+		definition = propertyResourceDefinition.getPropertyDefinition(activityTestBeanURI.resolve(
+				"#setType"));
+		definitionCount++;
+		assertNotNull(definition);
+		assertTrue(definition instanceof PropertyLiteralDefinition);
+		assertEquals(activityTestBeanURI.resolve("#setType"),
+				definition.getPredicate());
+		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
+		assertEquals("", definition.getDescription());
+		assertEquals("", definition.getLabel());
+		assertEquals(new HashSet<String>(), ((PropertyLiteralDefinition) definition).getOptions());
+		assertTrue(definition.isMultiple());
+		assertFalse(definition.isOrdered());
+		assertTrue(definition.isRequired());
+
+		definition = propertyResourceDefinition.getPropertyDefinition(activityTestBeanURI.resolve(
+				"#arrayOfBeanType"));
+		definitionCount++;
+		assertNotNull(definition);
+		assertTrue(definition instanceof PropertyResourceDefinition);
+		assertEquals(activityTestBeanURI.resolve("#arrayOfBeanType"),
+				definition.getPredicate());
+		assertEquals(activityTestBean2URI, ((PropertyResourceDefinition) definition).getTypeURI());
+		assertEquals("", definition.getDescription());
+		assertEquals("", definition.getLabel());
+		assertTrue(definition.isMultiple());
+		assertTrue(definition.isOrdered());
+		assertTrue(definition.isRequired());
+		definition = ((PropertyResourceDefinition) definition).getPropertyDefinition(
+				activityTestBean2URI.resolve("#stringType2"));
+		assertNotNull(definition);
+		assertTrue(definition instanceof PropertyLiteralDefinition);
+		assertEquals(activityTestBean2URI.resolve("#stringType2"),
+				definition.getPredicate());
+		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
+		assertEquals("", definition.getDescription());
+		assertEquals("", definition.getLabel());
+		assertEquals(new HashSet<String>(), ((PropertyLiteralDefinition) definition).getOptions());
+		assertFalse(definition.isMultiple());
+		assertFalse(definition.isOrdered());
+		assertTrue(definition.isRequired());
+
+		definition = propertyResourceDefinition.getPropertyDefinition(activityTestBeanURI.resolve(
+				"#listOfBeanType"));
+		definitionCount++;
+		assertNotNull(definition);
+		assertTrue(definition instanceof PropertyResourceDefinition);
+		assertEquals(activityTestBeanURI.resolve("#listOfBeanType"),
+				definition.getPredicate());
+		assertEquals(activityTestBean2URI, ((PropertyResourceDefinition) definition).getTypeURI());
+		assertEquals("", definition.getDescription());
+		assertEquals("", definition.getLabel());
+		assertTrue(definition.isMultiple());
+		assertTrue(definition.isOrdered());
+		assertTrue(definition.isRequired());
+		definition = ((PropertyResourceDefinition) definition).getPropertyDefinition(
+				activityTestBean2URI.resolve("#stringType2"));
+		assertNotNull(definition);
+		assertTrue(definition instanceof PropertyLiteralDefinition);
+		assertEquals(activityTestBean2URI.resolve("#stringType2"),
+				definition.getPredicate());
+		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
+		assertEquals("", definition.getDescription());
+		assertEquals("", definition.getLabel());
+		assertEquals(new HashSet<String>(), ((PropertyLiteralDefinition) definition).getOptions());
+		assertFalse(definition.isMultiple());
+		assertFalse(definition.isOrdered());
+		assertTrue(definition.isRequired());
+
+		definition = propertyResourceDefinition.getPropertyDefinition(activityTestBeanURI.resolve(
+				"#setOfBeanType"));
+		definitionCount++;
+		assertNotNull(definition);
+		assertTrue(definition instanceof PropertyResourceDefinition);
+		assertEquals(activityTestBeanURI.resolve("#setOfBeanType"),
+				definition.getPredicate());
+		assertEquals(activityTestBean2URI, ((PropertyResourceDefinition) definition).getTypeURI());
+		assertEquals("", definition.getDescription());
+		assertEquals("", definition.getLabel());
+		assertTrue(definition.isMultiple());
+		assertFalse(definition.isOrdered());
+		assertTrue(definition.isRequired());
+		definition = ((PropertyResourceDefinition) definition).getPropertyDefinition(
+				activityTestBean2URI.resolve("#stringType2"));
+		assertNotNull(definition);
+		assertTrue(definition instanceof PropertyLiteralDefinition);
+		assertEquals(activityTestBean2URI.resolve("#stringType2"),
+				definition.getPredicate());
+		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
+		assertEquals("", definition.getDescription());
+		assertEquals("", definition.getLabel());
+		assertEquals(new HashSet<String>(), ((PropertyLiteralDefinition) definition).getOptions());
+		assertFalse(definition.isMultiple());
+		assertFalse(definition.isOrdered());
+		assertTrue(definition.isRequired());
+		
+		definition = propertyResourceDefinition.getPropertyDefinition(activityTestBeanURI.resolve(
+				"#arrayOfEnumType"));
+		definitionCount++;
+		assertNotNull(definition);
+		assertTrue(definition instanceof PropertyLiteralDefinition);
+		assertEquals(activityTestBeanURI.resolve("#arrayOfEnumType"),
 				definition.getPredicate());
 		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
 		assertEquals("", definition.getDescription());
@@ -580,12 +691,12 @@ public class ActivityServiceImplTest {
 		assertTrue(definition.isOrdered());
 		assertTrue(definition.isRequired());
 
-		definition = propertyResourceDefinition.getPropertyDefinition(URI.create(annotatedBeanURI
-				+ "#listOfEnumType"));
+		definition = propertyResourceDefinition.getPropertyDefinition(activityTestBeanURI.resolve(
+				"#listOfEnumType"));
 		definitionCount++;
 		assertNotNull(definition);
 		assertTrue(definition instanceof PropertyLiteralDefinition);
-		assertEquals(URI.create(annotatedBeanURI + "#listOfEnumType"),
+		assertEquals(activityTestBeanURI.resolve("#listOfEnumType"),
 				definition.getPredicate());
 		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
 		assertEquals("", definition.getDescription());
@@ -595,12 +706,12 @@ public class ActivityServiceImplTest {
 		assertTrue(definition.isOrdered());
 		assertTrue(definition.isRequired());
 
-		definition = propertyResourceDefinition.getPropertyDefinition(URI.create(annotatedBeanURI
-				+ "#setOfEnumType"));
+		definition = propertyResourceDefinition.getPropertyDefinition(activityTestBeanURI.resolve(
+				"#setOfEnumType"));
 		definitionCount++;
 		assertNotNull(definition);
 		assertTrue(definition instanceof PropertyLiteralDefinition);
-		assertEquals(URI.create(annotatedBeanURI + "#setOfEnumType"),
+		assertEquals(activityTestBeanURI.resolve("#setOfEnumType"),
 				definition.getPredicate());
 		assertEquals(PropertyLiteral.XSD_STRING, ((PropertyLiteralDefinition) definition).getLiteralType());
 		assertEquals("", definition.getDescription());
@@ -610,12 +721,12 @@ public class ActivityServiceImplTest {
 		assertFalse(definition.isOrdered());
 		assertTrue(definition.isRequired());
 
-		definition = propertyResourceDefinition.getPropertyDefinition(URI.create(annotatedBeanURI
-				+ "#uriType"));
+		definition = propertyResourceDefinition.getPropertyDefinition(activityTestBeanURI.resolve(
+				"#uriType"));
 		definitionCount++;
 		assertNotNull(definition);
 		assertTrue(definition instanceof PropertyReferenceDefinition);
-		assertEquals(URI.create(annotatedBeanURI + "#uriType"),
+		assertEquals(activityTestBeanURI.resolve("#uriType"),
 				definition.getPredicate());
 		assertEquals("", definition.getDescription());
 		assertEquals("", definition.getLabel());
@@ -651,11 +762,20 @@ public class ActivityServiceImplTest {
 		assertTrue(configuration2 instanceof ActivityTestBean);
 		ActivityTestBean testBean = (ActivityTestBean) configuration2;
 		ActivityTestBean2 testBean2 = new ActivityTestBean2();
-		testBean2.stringType2 = "string value 2";
+		testBean2.stringType = "string value 2.1";
+		testBean2.stringType2 = "string value 2.2";
 		ActivityTestBean2 testBean3 = new ActivityTestBean2();
-		testBean3.stringType2 = "string value 3";
+		testBean3.stringType = "string value 3.1";
+		testBean3.stringType2 = "string value 3.2";
 		ActivityTestBean2 testBean4 = new ActivityTestBean2();
-		testBean4.stringType2 = "string value 4";
+		testBean4.stringType = "string value 4.1";
+		testBean4.stringType2 = "string value 4.2";
+		SubclassActivityTestBean testBean5 = new SubclassActivityTestBean();
+		testBean5.stringType2 = "string value 5.1";
+		testBean5.conflicting = "string value 5.2";
+		testBean5.stringType = null;
+		testBean5.subclassStringType = "string value 5.3";
+		
 		assertEquals("string value", testBean.stringType);
 		assertEquals("optional string value", testBean.optionalStringType);
 		assertEquals(5, testBean.integerType);
@@ -666,6 +786,7 @@ public class ActivityServiceImplTest {
 		assertEquals(ActivityTestEnum.A, testBean.enumType);
 		assertEquals(testBean2, testBean.beanType);
 		assertEquals(testBean4, testBean.beanType2);
+		assertEquals(testBean5, testBean.subclass);
 		assertArrayEquals(new String[] {"array element 1", "array element 2"}, testBean.arrayType);
 		assertEquals(Arrays.asList("1","2","3","4"), testBean.listType);
 		assertEquals(new HashSet<String>(Arrays.asList("x","y","z")), testBean.setType);
@@ -715,7 +836,7 @@ public class ActivityServiceImplTest {
 					}
 
 				} }));
-		assertFalse(activityServiceImpl.activityExists(URI.create(annotatedBeanURI)));
+		assertFalse(activityServiceImpl.activityExists(activityTestBeanURI));
 		assertFalse(activityServiceImpl.activityExists(URI.create(nonAnnotatedBeanURI)));
 		assertTrue(activityServiceImpl.activityExists(URI.create("test://newBean")));
 	}

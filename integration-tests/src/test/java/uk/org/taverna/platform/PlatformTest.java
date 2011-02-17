@@ -5,6 +5,7 @@ import java.util.Properties;
 
 import net.sf.taverna.t2.reference.T2Reference;
 
+import org.eclipse.osgi.framework.internal.core.Constants;
 import org.springframework.osgi.test.AbstractConfigurableBundleCreatorTests;
 import org.springframework.osgi.test.platform.OsgiPlatform;
 
@@ -60,7 +61,7 @@ public class PlatformTest extends AbstractConfigurableBundleCreatorTests {
 				"org.jdom, com.springsource.org.jdom, 1.1.0",
 				"org.opensaml, com.springsource.org.opensaml, 1.1.0",
 				"org.xmlpull, com.springsource.org.xmlpull, 1.1.3.4-O",
-				"net.sf.taverna, wsdl-generic, 1.7-SNAPSHOT",
+				"net.sf.taverna, wsdl-generic, 1.9-SNAPSHOT",
 				"net.sf.taverna.jedit, jedit-syntax, 2.2.4-SNAPSHOT",
 				"net.sf.taverna.t2.activities, beanshell-activity, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.activities, biomart-activity, 2.0-SNAPSHOT",
@@ -86,9 +87,19 @@ public class PlatformTest extends AbstractConfigurableBundleCreatorTests {
 				"uk.org.taverna.platform, execution-local, 0.0.1-SNAPSHOT",
 				"uk.org.taverna.platform, report, 0.0.1-SNAPSHOT",
 				"uk.org.taverna.platform, run, 0.0.1-SNAPSHOT",
+				// FIXME: Add the other scufl2 modules
 				"uk.org.taverna.scufl2, scufl2-api, 0.1-SNAPSHOT",
+				"uk.org.taverna.scufl2, scufl2-ucfpackage, 0.1-SNAPSHOT",
 				"uk.org.taverna.scufl2, scufl2-t2flow, 0.1-SNAPSHOT"};
 	}
+	
+
+	public void testOsgiPlatformStarts() throws Exception {
+		System.out.println(bundleContext.getProperty(Constants.FRAMEWORK_VENDOR));
+		System.out.println(bundleContext.getProperty(Constants.FRAMEWORK_VERSION));
+		System.out.println(bundleContext.getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT));
+	}
+
 
 	public void waitForResult(Map<String, T2Reference> results, String port, WorkflowReport report)
 			throws InterruptedException {

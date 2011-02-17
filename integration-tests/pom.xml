@@ -8,11 +8,58 @@
 	</parent>
 	<groupId>uk.org.taverna</groupId>
 	<artifactId>integration-tests</artifactId>
+	<name>Taverna Platform integration tests</name>
 	<version>0.0.1-SNAPSHOT</version>
 	<properties>
 		<spring.dm.version>2.0.0.M1</spring.dm.version>
 		<spring.version>3.0.0.RC1</spring.version>
 	</properties>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<!-- <version>2.3</version> -->
+				<configuration>
+					<forkMode>pertest</forkMode>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy</id>
+						<phase>generate-test-resources</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<!-- xerces and xalan are required for the tests but the test framework -->
+								<!-- fails to run if they are put on the test classpath by maven -->
+								<!-- This ensures they are pulled into the local repository -->
+								<artifactItem>
+									<groupId>org.apache.xalan</groupId>
+									<artifactId>com.springsource.org.apache.xalan</artifactId>
+									<version>2.7.1</version>
+
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.xerces</groupId>
+									<artifactId>com.springsource.org.apache.xerces</artifactId>
+									<version>2.9.1</version>
+								</artifactItem>
+							</artifactItems>
+							<outputDirectory>${project.build.directory}/tmp</outputDirectory>
+							<overWriteReleases>false</overWriteReleases>
+							<overWriteSnapshots>true</overWriteSnapshots>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 	<repositories>
 		<repository>
 			<id>spring-maven-milestone</id>
@@ -192,8 +239,8 @@
 			<version>0.1-SNAPSHOT</version>
 		</dependency>
 
-		<!-- Dependencies declared as provided by some poms - specified here to ensure that they are in the 
-			local repository for the testing framework -->
+		<!-- Dependencies declared as provided by some poms - specified here to 
+			ensure that they are in the local repository for the testing framework -->
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>com.springsource.javax.servlet</artifactId>
@@ -346,22 +393,5 @@
 			<version>1.4.1</version>
 			<scope>test</scope>
 		</dependency>
-
-		<!-- xerces and xalan are required for the tests but the test framework -->
-		<!-- fails to run if they are put on the test classpath by maven -->
-		<!-- un-comment to pull them into a local repository if needed -->
-		<!--<dependency>
-			<groupId>org.apache.xalan</groupId>
-			<artifactId>com.springsource.org.apache.xalan</artifactId>
-			<version>2.7.1</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.xerces</groupId>
-			<artifactId>com.springsource.org.apache.xerces</artifactId>
-			<version>2.9.1</version>
-			<scope>test</scope>
-		</dependency>-->
-
 	</dependencies>
 </project>

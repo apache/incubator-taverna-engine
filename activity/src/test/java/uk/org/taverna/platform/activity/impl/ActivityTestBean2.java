@@ -30,20 +30,41 @@ import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationProperty;
 @ConfigurationBean(uri = ActivityServiceImplTest.annotatedBeanURI + "/configuration2")
 public class ActivityTestBean2 {
 
-	public String stringType2;
 
-	@ConfigurationProperty(name = "stringType2")
-	public void setStringType(String stringType) {
-		stringType2 = stringType;
+	public String stringType;
+	public String stringType2;
+	
+	@Override
+	public String toString() {
+		return "ActivityTestBean2 [stringType=" + stringType + ", stringType2="
+				+ stringType2 + "]";
 	}
+
+
+
+	@ConfigurationProperty(name = "stringType")
+	public void setStringType(String stringType) {
+		this.stringType = stringType;
+	}
+
+	
+	@ConfigurationProperty(name = "stringType2")
+	public void setStringType2(String stringType2) {
+		this.stringType2 = stringType2;
+	}
+
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((stringType2 == null) ? 0 : stringType2.hashCode());
+		result = prime * result
+				+ ((stringType == null) ? 0 : stringType.hashCode());
+		result = prime * result
+				+ ((stringType2 == null) ? 0 : stringType2.hashCode());
 		return result;
 	}
+
 
 	@Override
 	public boolean equals(Object obj) {
@@ -54,6 +75,11 @@ public class ActivityTestBean2 {
 		if (getClass() != obj.getClass())
 			return false;
 		ActivityTestBean2 other = (ActivityTestBean2) obj;
+		if (stringType == null) {
+			if (other.stringType != null)
+				return false;
+		} else if (!stringType.equals(other.stringType))
+			return false;
 		if (stringType2 == null) {
 			if (other.stringType2 != null)
 				return false;

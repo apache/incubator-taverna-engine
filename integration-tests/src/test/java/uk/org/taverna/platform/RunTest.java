@@ -74,6 +74,7 @@ public class RunTest extends PlatformTest {
 
 		T2Reference resultReference = results.get("out");
 		assertFalse(resultReference.containsErrors());
+		@SuppressWarnings("unchecked")
 		List<String> result = (List<String>) referenceService.renderIdentifier(
 				(T2Reference) results.get("out"), String.class, null);
 		assertEquals(1000, result.size());

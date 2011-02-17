@@ -102,6 +102,7 @@ public class LocalExecutionTest extends PlatformTest {
 			printErrors(referenceService, resultReference);
 		}
 		assertFalse(resultReference.containsErrors());
+		@SuppressWarnings("unchecked")
 		List<String> result = (List<String>) referenceService.renderIdentifier(
 				(T2Reference) results.get("out"), String.class, null);
 		assertEquals(1000, result.size());
@@ -133,6 +134,7 @@ public class LocalExecutionTest extends PlatformTest {
 		Map<String, T2Reference> inputs = new HashMap<String, T2Reference>();
 		inputs.put("in", reference);
 
+		@SuppressWarnings("unused")
 		String executionId = executionService.createExecution(workflowBundle, workflow, profile, inputs,
 				referenceService);
 	}
