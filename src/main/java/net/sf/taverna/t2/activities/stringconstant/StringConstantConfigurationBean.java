@@ -30,7 +30,7 @@ import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationProperty;
  * @author Stuart Owen
  * @see StringConstantActivity
  */
-@ConfigurationBean(uri = StringConstantActivity.URI + "/configuration")
+@ConfigurationBean(uri = StringConstantActivity.URI + "#Config")
 public class StringConstantConfigurationBean {
 	private String value;
 
