@@ -20,5 +20,7 @@ public @interface ConfigurationProperty {
 	OrderPolicy ordering() default OrderPolicy.DEFAULT;
 	
 	enum OrderPolicy {DEFAULT, NON_ORDERED}
+	
+	String uri() default "";
 		
 }

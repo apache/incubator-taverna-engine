@@ -38,7 +38,7 @@ import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationProperty;
  * @author Stuart Owen
  *
  */
-@ConfigurationBean(uri = "http://ns.taverna.org.uk/2010/scufl2/ActivityPortsDefinition")
+@ConfigurationBean(uri = "http://ns.taverna.org.uk/2010/scufl2#ActivityPortsDefinition")
 public class ActivityPortsDefinitionBean {
 
 	private List<ActivityInputPortDefinitionBean> inputs = new ArrayList<ActivityInputPortDefinitionBean>();
