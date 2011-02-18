@@ -31,6 +31,7 @@ import java.net.URI;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -204,9 +205,9 @@ public class ActivityServiceImpl implements ActivityService {
 			for (PropertyDefinition propertyDefinition : resourceDefinition
 					.getPropertyDefinitions()) {
 				URI predicate = propertyDefinition.getPredicate();
-				propertyDefinition.getPredicate().equals(SCUFL2.resolve("definesInputPort"));
 				String propertyDefinitionName = propertyDefinition.getName();
-				if ("definesInputPort".equals(propertyDefinitionName)) {
+//				if ("definesInputPort".equals(propertyDefinitionName)) {
+				if (predicate.equals(SCUFL2.resolve("#definesInputPort"))) {
 					URI resourceURI = resource.getPropertyAsResourceURI(predicate);
 					URI configUri = uriTools.uriForBean(configuration);
 					WorkflowBean workflowBean = uriTools.resolveUri(configUri.resolve(resourceURI), bundle);
@@ -222,8 +223,10 @@ public class ActivityServiceImpl implements ActivityService {
 					InputActivityPort inputActivityPort = (InputActivityPort) workflowBean;
 					inputPortDefinitionBean.setName(inputActivityPort.getName());
 					inputPortDefinitionBean.setDepth(inputActivityPort.getDepth());
+					// TODO TranslatedElementType should be set from the property
 					inputPortDefinitionBean.setTranslatedElementType(String.class);
-				} else if ("definesOutputPort".equals(propertyDefinitionName)) {
+//				} else if ("definesOutputPort".equals(propertyDefinitionName)) {
+				} else if (predicate.equals(SCUFL2.resolve("#definesOutputPort"))) {
 					URI resourceURI = resource.getPropertyAsResourceURI(predicate);
 					URI configUri = uriTools.uriForBean(configuration);
 					WorkflowBean workflowBean = uriTools.resolveUri(configUri.resolve(resourceURI), bundle);
@@ -263,12 +266,15 @@ public class ActivityServiceImpl implements ActivityService {
 						List<PropertyLiteral> literals = getProperties(predicate,
 								propertyDefinition, resource, PropertyLiteral.class);
 						for (PropertyLiteral literal : literals) {
-							if (!literal.getLiteralType().equals(type)) {
+							URI literalType = literal.getLiteralType();
+							if (!literalType.equals(type)) {
+								if (!literalType.equals(PropertyLiteral.XML_LITERAL) && !type.equals(PropertyLiteral.XSD_STRING)) {
 								throw new ActivityConfigurationException(MessageFormat.format(
 										"Expected property {0} to have type {1} but was {2}",
 										propertyDefinitionName,
 										dataPropertyDefinition.getLiteralType(),
 										literal.getLiteralType()));
+								}
 							}
 							if (type.equals(PropertyLiteral.XSD_STRING)) {
 								if (propertyType.isEnum()) {
@@ -292,6 +298,9 @@ public class ActivityServiceImpl implements ActivityService {
 								propertyValues.add(literal.getLiteralValueAsDouble());
 							} else if (type.equals(PropertyLiteral.XSD_BOOLEAN)) {
 								propertyValues.add(literal.getLiteralValueAsBoolean());
+							} else if (type.equals(PropertyLiteral.XML_LITERAL)) {
+								// TODO support for jdom Element?
+								propertyValues.add(literal.getLiteralValueAsElement());
 							} else {
 								// TODO
 							}
@@ -401,12 +410,9 @@ public class ActivityServiceImpl implements ActivityService {
 		ConfigurationBean configurationBean = configurationClass.getAnnotation(ConfigurationBean.class);
 		if (configurationBean == null) {
 			if (Dataflow.class.isAssignableFrom(configurationClass)) {
-				// TODO dataflow activity
-				propertyResourceDefinition.setPredicate(uri.resolve("#dataflow"));
-				propertyResourceDefinition
-						.setTypeURI(URI.create("java:" + Dataflow.class.getName()));
-				propertyResourceDefinition.setName("dataflow");
-				propertyResourceDefinition.setLabel("Nested Workflow");
+				PropertyDefinition referenceDefinition = new PropertyReferenceDefinition(uri.resolve("#workflow"), "workflow",
+						"Nested workflow", "", true, false, false);
+				propertyResourceDefinition.setPropertyDefinitions(Collections.singletonList(referenceDefinition));
 			} else if (Element.class.isAssignableFrom(configurationClass)) {
 				// TODO biomart activity
 			} else {
@@ -483,14 +489,21 @@ public class ActivityServiceImpl implements ActivityService {
 		} else if (type.equals(Boolean.class) || type.equals(Boolean.TYPE)) {
 			return new PropertyLiteralDefinition(predicate, PropertyLiteral.XSD_BOOLEAN, name,
 					label, description, required, multiple, ordered);
+		} else if (type.equals(org.w3c.dom.Element.class) || type.equals(org.jdom.Element.class)) {
+			return new PropertyLiteralDefinition(predicate, PropertyLiteral.XML_LITERAL, name,
+					label, description, required, multiple, ordered);
 		} else if (type.equals(URI.class)) {
 			return new PropertyReferenceDefinition(predicate, name,
 					label, description, required, multiple, ordered);
 		} else {
 			ConfigurationBean configurationBean = type.getAnnotation(ConfigurationBean.class);
+			List<PropertyDefinition> propertyDefinitions = new ArrayList<PropertyDefinition>();
+			URI typeURI = null;
 			if (configurationBean == null) {
-				List<PropertyDefinition> propertyDefinitions = new ArrayList<PropertyDefinition>();
-				URI typeURI = null;
+				// should throw an exception ? or XSD_ANY ?
+				typeURI = URI.create("java:" + type.getName());
+			} else {
+				typeURI = URI.create(configurationBean.uri());
 				if (type.equals(ActivityInputPortDefinitionBean.class)) {
 					typeURI = SCUFL2.resolve("#InputPortDefinition");
 					propertyDefinitions.add(new PropertyResourceDefinition(SCUFL2
@@ -502,17 +515,11 @@ public class ActivityServiceImpl implements ActivityService {
 					propertyDefinitions.add(new PropertyResourceDefinition(SCUFL2
 							.resolve("#definesOutputPort"), null, "definesOutputPort",
 							"Activity Output Ports", "", true, true, false));
-				} else {
-					// should throw an exception ? or XSD_ANY ?
-					typeURI = URI.create("java:" + type.getName());
 				}
-				return new PropertyResourceDefinition(predicate, typeURI, name, label, description,
-						required, multiple, ordered, propertyDefinitions);
-			} else {
-				URI typeURI = URI.create(configurationBean.uri());
-				return new PropertyResourceDefinition(predicate, typeURI, name, label, description,
-						required, multiple, ordered, createPropertyDefinitions(type));
+				propertyDefinitions.addAll(createPropertyDefinitions(type));
 			}
+			return new PropertyResourceDefinition(predicate, typeURI, name, label, description,
+					required, multiple, ordered, propertyDefinitions);
 		}
 	}
 

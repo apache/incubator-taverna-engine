@@ -39,8 +39,10 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 
 import org.apache.log4j.Logger;
 
+import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
 import uk.org.taverna.platform.report.ActivityReport;
 import uk.org.taverna.platform.report.ProcessorReport;
+import uk.org.taverna.platform.report.WorkflowReport;
 
 /**
  * A workflow monitor for local executions.
@@ -65,7 +67,7 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 
 	private final String facadeId;
 
-	public LocalExecutionMonitor(LocalWorkflowReport workflowReport, WorkflowToDataflowMapper mapping, String facadeId) {
+	public LocalExecutionMonitor(LocalWorkflowReport workflowReport, WorkflowToDataflowMapper mapping, String facadeId) throws InvalidWorkflowException {
 		this.facadeId = facadeId;
 		dataflowObjects = new HashMap<String, Object>();
 		workflowReports = new HashMap<Dataflow, LocalWorkflowReport>();
@@ -76,8 +78,8 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 		mapReports(workflowReport, mapping);
 	}
 
-	private void mapReports(LocalWorkflowReport workflowReport, WorkflowToDataflowMapper mapping) {
-		workflowReports.put(mapping.getDataflow(), workflowReport);
+	private void mapReports(LocalWorkflowReport workflowReport, WorkflowToDataflowMapper mapping) throws InvalidWorkflowException {
+		workflowReports.put(mapping.getDataflow(workflowReport.getWorkflow()), workflowReport);
 		for (ProcessorReport processorReport : workflowReport.getProcessorReports()) {
 			Processor processor = mapping.getDataflowProcessor(processorReport.getProcessor());
 			processorReports.put(processor, (LocalProcessorReport) processorReport);
@@ -86,6 +88,10 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 				Activity<?> activity = mapping.getDataflowActivity(activityReport.getActivity());
 				activityReports.put(activity, activityReport);
 				activityInvocations.put(activity, new AtomicInteger());
+				WorkflowReport nestedWorkflowReport = activityReport.getNestedWorkflowReport();
+				if (nestedWorkflowReport != null) {
+					mapReports((LocalWorkflowReport) nestedWorkflowReport, mapping);
+				}
 			}
 		}
 	}

@@ -21,9 +21,7 @@
 package uk.org.taverna.platform.execution.api;
 
 import java.net.URI;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import net.sf.taverna.t2.reference.ReferenceService;
@@ -40,6 +38,10 @@ import uk.org.taverna.scufl2.api.core.Processor;
 import uk.org.taverna.scufl2.api.core.Workflow;
 import uk.org.taverna.scufl2.api.profiles.ProcessorBinding;
 import uk.org.taverna.scufl2.api.profiles.Profile;
+import uk.org.taverna.scufl2.api.property.MultiplePropertiesException;
+import uk.org.taverna.scufl2.api.property.PropertyNotFoundException;
+import uk.org.taverna.scufl2.api.property.PropertyReference;
+import uk.org.taverna.scufl2.api.property.UnexpectedPropertyException;
 
 /**
  * Abstract implementation of an {@link Execution}.
@@ -48,6 +50,7 @@ import uk.org.taverna.scufl2.api.profiles.Profile;
  */
 public abstract class AbstractExecution implements Execution {
 
+	private static final URI NESTED_WORKFLOW_URI = URI.create("http://ns.taverna.org.uk/2010/activity/nested-workflow");
 	private final String ID;
 	private final WorkflowBundle workflowBundle;
 	private final Workflow workflow;
@@ -70,27 +73,33 @@ public abstract class AbstractExecution implements Execution {
 	}
 
 	protected abstract WorkflowReport createWorkflowReport(Workflow workflow);
-	
+
 	public WorkflowReport generateWorkflowReport(Workflow workflow) {
 		WorkflowReport workflowReport = createWorkflowReport(workflow);
-		Map<Processor, ProcessorReport> processorReports = new HashMap<Processor, ProcessorReport>();
 		for (Processor processor : workflow.getProcessors()) {
-			ProcessorReport processorReport = workflowReport.createProcessorReport(processor, workflowReport);
-			processorReports.put(processor, processorReport);
+			ProcessorReport processorReport = workflowReport.createProcessorReport(processor,
+					workflowReport);
 			workflowReport.addProcessorReport(processorReport);
-		}
-		Set<ProcessorBinding> processorBindings = profile.getProcessorBindings();
-		for (ProcessorBinding processorBinding : processorBindings) {
+			ProcessorBinding processorBinding = scufl2Tools.processorBindingForProcessor(processor,
+					profile);
 			Activity boundActivity = processorBinding.getBoundActivity();
-			Processor boundProcessor = processorBinding.getBoundProcessor();
-			ProcessorReport processorReport = processorReports.get(boundProcessor);
-			ActivityReport activityReport = workflowReport.createActivityReport(boundActivity, processorReport);
+			ActivityReport activityReport = workflowReport.createActivityReport(boundActivity,
+					processorReport);
 			URI activityType = boundActivity.getConfigurableType();
-			if (activityType.equals(URI.create("http://ns.taverna.org.uk/2010/activity/dataflow"))) {
+			if (activityType.equals(NESTED_WORKFLOW_URI)) {
 				Configuration configuration = scufl2Tools.configurationFor(boundActivity, profile);
-				URI dataflowURI = configuration.getPropertyResource().getResourceURI();
-				Workflow subWorkflow = (Workflow) uriTools.resolveUri(dataflowURI, workflowBundle);
-				activityReport.setNestedWorkflowReport(generateWorkflowReport(subWorkflow));
+				try {
+					PropertyReference propertyReference = configuration.getPropertyResource().getPropertyAsReference(NESTED_WORKFLOW_URI.resolve("#workflow"));
+					URI dataflowURI = propertyReference.getResourceURI();
+					Workflow subWorkflow = (Workflow) uriTools.resolveUri(dataflowURI, workflowBundle);
+					activityReport.setNestedWorkflowReport(generateWorkflowReport(subWorkflow));
+				} catch (UnexpectedPropertyException e) {
+					e.printStackTrace();
+				} catch (PropertyNotFoundException e) {
+					e.printStackTrace();
+				} catch (MultiplePropertiesException e) {
+					e.printStackTrace();
+				}
 			}
 			processorReport.addActivityReport(activityReport);
 		}

@@ -58,6 +58,8 @@ import uk.org.taverna.scufl2.api.core.DataLink;
 import uk.org.taverna.scufl2.api.core.Processor;
 import uk.org.taverna.scufl2.api.core.Workflow;
 import uk.org.taverna.scufl2.api.dispatchstack.DispatchStack;
+import uk.org.taverna.scufl2.api.iterationstrategy.IterationStrategyStack;
+import uk.org.taverna.scufl2.api.iterationstrategy.IterationStrategyTopNode;
 import uk.org.taverna.scufl2.api.port.InputActivityPort;
 import uk.org.taverna.scufl2.api.port.InputProcessorPort;
 import uk.org.taverna.scufl2.api.port.InputWorkflowPort;
@@ -71,7 +73,10 @@ import uk.org.taverna.scufl2.api.profiles.ProcessorBinding;
 import uk.org.taverna.scufl2.api.profiles.ProcessorInputPortBinding;
 import uk.org.taverna.scufl2.api.profiles.ProcessorOutputPortBinding;
 import uk.org.taverna.scufl2.api.profiles.Profile;
+import uk.org.taverna.scufl2.api.property.MultiplePropertiesException;
 import uk.org.taverna.scufl2.api.property.PropertyNotFoundException;
+import uk.org.taverna.scufl2.api.property.PropertyReference;
+import uk.org.taverna.scufl2.api.property.UnexpectedPropertyException;
 
 /**
  * Translates a scufl2 {@link Workflow} into a {@link Dataflow}.
@@ -79,6 +84,9 @@ import uk.org.taverna.scufl2.api.property.PropertyNotFoundException;
  * @author David Withers
  */
 public class WorkflowToDataflowMapper {
+
+	private static final URI NESTED_WORKFLOW_URI = URI
+			.create("http://ns.taverna.org.uk/2010/activity/nested-workflow");
 
 	private Edits edits;
 
@@ -92,6 +100,10 @@ public class WorkflowToDataflowMapper {
 
 	private final Map<Port, Merge> merges;
 
+	private final Map<Workflow, Dataflow> workflowToDataflow;
+
+	private final Map<Dataflow, Workflow> dataflowToWorkflow;
+
 	private final Map<Processor, net.sf.taverna.t2.workflowmodel.Processor> workflowToDataflowProcessors;
 
 	private final Map<net.sf.taverna.t2.workflowmodel.Processor, Processor> dataflowToWorkflowProcessors;
@@ -102,21 +114,16 @@ public class WorkflowToDataflowMapper {
 
 	private final WorkflowBundle workflowBundle;
 
-	private final Workflow workflow;
-
 	private final Profile profile;
-
-	private final Dataflow dataflow;
 
 	private final ActivityService activityService;
 
 	private final DispatchLayerService dispatchLayerService;
 
-	public WorkflowToDataflowMapper(WorkflowBundle workflowBundle, Workflow workflow,
-			Profile profile, Edits edits, ActivityService activityService, DispatchLayerService dispatchLayerService)
-			throws InvalidWorkflowException {
+	public WorkflowToDataflowMapper(WorkflowBundle workflowBundle, Profile profile, Edits edits,
+			ActivityService activityService, DispatchLayerService dispatchLayerService) {
 		this.workflowBundle = workflowBundle;
-		this.workflow = workflow;
+		// this.workflow = workflow;
 		this.profile = profile;
 		this.edits = edits;
 		this.activityService = activityService;
@@ -124,33 +131,39 @@ public class WorkflowToDataflowMapper {
 		inputPorts = new IdentityHashMap<Port, EventHandlingInputPort>();
 		outputPorts = new IdentityHashMap<Port, EventForwardingOutputPort>();
 		merges = new IdentityHashMap<Port, Merge>();
+		workflowToDataflow = new IdentityHashMap<Workflow, Dataflow>();
+		dataflowToWorkflow = new HashMap<Dataflow, Workflow>();
 		workflowToDataflowProcessors = new IdentityHashMap<Processor, net.sf.taverna.t2.workflowmodel.Processor>();
 		dataflowToWorkflowProcessors = new HashMap<net.sf.taverna.t2.workflowmodel.Processor, Processor>();
 		workflowToDataflowActivities = new IdentityHashMap<Activity, net.sf.taverna.t2.workflowmodel.processor.activity.Activity<?>>();
 		dataflowToWorkflowActivities = new HashMap<net.sf.taverna.t2.workflowmodel.processor.activity.Activity<?>, Activity>();
-		try {
-			dataflow = createDataflow();
-		} catch (EditException e) {
-			throw new InvalidWorkflowException(e);
-		} catch (ActivityNotFoundException e) {
-			throw new InvalidWorkflowException(e);
-		} catch (ActivityConfigurationException e) {
-			throw new InvalidWorkflowException(e);
-		} catch (PropertyNotFoundException e) {
-			throw new InvalidWorkflowException(e);
-		} catch (DispatchLayerNotFoundException e) {
-			throw new InvalidWorkflowException(e);
-		} catch (DispatchLayerConfigurationException e) {
-			throw new InvalidWorkflowException(e);
+	}
+
+	public Workflow getWorkflow(Dataflow dataflow) {
+		return dataflowToWorkflow.get(dataflow);
+	}
+
+	public Dataflow getDataflow(Workflow workflow) throws InvalidWorkflowException {
+		if (!workflowToDataflow.containsKey(workflow)) {
+			try {
+				Dataflow dataflow = createDataflow(workflow);
+				workflowToDataflow.put(workflow, dataflow);
+				dataflowToWorkflow.put(dataflow, workflow);
+			} catch (EditException e) {
+				throw new InvalidWorkflowException(e);
+			} catch (ActivityNotFoundException e) {
+				throw new InvalidWorkflowException(e);
+			} catch (ActivityConfigurationException e) {
+				throw new InvalidWorkflowException(e);
+			} catch (PropertyNotFoundException e) {
+				throw new InvalidWorkflowException(e);
+			} catch (DispatchLayerNotFoundException e) {
+				throw new InvalidWorkflowException(e);
+			} catch (DispatchLayerConfigurationException e) {
+				throw new InvalidWorkflowException(e);
+			}
 		}
-	}
-
-	public Workflow getWorkflow() {
-		return workflow;
-	}
-
-	public Dataflow getDataflow() {
-		return dataflow;
+		return workflowToDataflow.get(workflow);
 	}
 
 	public Processor getWorkflowProcessor(
@@ -173,28 +186,32 @@ public class WorkflowToDataflowMapper {
 		return workflowToDataflowActivities.get(workflowActivity);
 	}
 
-	protected Dataflow createDataflow() throws EditException, ActivityNotFoundException,
-			ActivityConfigurationException, PropertyNotFoundException, InvalidWorkflowException, DispatchLayerNotFoundException, DispatchLayerConfigurationException {
+	protected Dataflow createDataflow(Workflow workflow) throws EditException,
+			ActivityNotFoundException, ActivityConfigurationException, PropertyNotFoundException,
+			InvalidWorkflowException, DispatchLayerNotFoundException,
+			DispatchLayerConfigurationException {
 		// create the dataflow
 		Dataflow dataflow = edits.createDataflow();
 		// set the dataflow name
 		edits.getUpdateDataflowNameEdit(dataflow, new String(workflow.getName())).doEdit();
 
-		addInputPorts(dataflow);
+		addInputPorts(workflow, dataflow);
 
-		addOutputPorts(dataflow);
+		addOutputPorts(workflow, dataflow);
 
-		addProcessors(dataflow);
+		addProcessors(workflow, dataflow);
 
-		addDataLinks();
+		addDataLinks(workflow, dataflow);
 
-		addControlLinks();
+		addControlLinks(workflow);
 
 		return dataflow;
 	}
 
-	private void addProcessors(Dataflow dataflow) throws EditException, PropertyNotFoundException,
-			ActivityNotFoundException, ActivityConfigurationException, InvalidWorkflowException, DispatchLayerNotFoundException, DispatchLayerConfigurationException {
+	private void addProcessors(Workflow workflow, Dataflow dataflow) throws EditException,
+			PropertyNotFoundException, ActivityNotFoundException, ActivityConfigurationException,
+			InvalidWorkflowException, DispatchLayerNotFoundException,
+			DispatchLayerConfigurationException {
 		for (Processor processor : workflow.getProcessors()) {
 			net.sf.taverna.t2.workflowmodel.Processor dataflowProcessor = edits
 					.createProcessor(processor.getName());
@@ -221,21 +238,27 @@ public class WorkflowToDataflowMapper {
 			}
 
 			// add dispatch stack
-			 net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchStack dataflowDispatchStack = dataflowProcessor.getDispatchStack();
-			 DispatchStack dispatchStack = processor.getDispatchStack();
-			 for (int layer = 0; layer < dispatchStack.size(); layer++) {
-				 URI uri = dispatchStack.get(layer).getConfigurableType();
-				 edits.getAddDispatchLayerEdit(dataflowDispatchStack, dispatchLayerService.createDispatchLayer(uri, null), layer).doEdit();
-			 }
+			net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchStack dataflowDispatchStack = dataflowProcessor
+					.getDispatchStack();
+			DispatchStack dispatchStack = processor.getDispatchStack();
+			for (int layer = 0; layer < dispatchStack.size(); layer++) {
+				URI uri = dispatchStack.get(layer).getConfigurableType();
+				edits.getAddDispatchLayerEdit(dataflowDispatchStack,
+						dispatchLayerService.createDispatchLayer(uri, null), layer).doEdit();
+			}
 
 			// addDefaultIterationStrategy(dataflowProcessor);
 
 			// add iteration strategy
-			// List<IterationStrategy> iterationStrategyStack =
-			// processor.getIterationStrategyStack();
-			// for (IterationStrategy iterationStrategy : iterationStrategyStack) {
-			// iterationStrategy.
-			// }
+			net.sf.taverna.t2.workflowmodel.processor.iteration.IterationStrategyStack dataflowIterationStrategyStack = dataflowProcessor
+					.getIterationStrategy();
+			IterationStrategyStack iterationStrategyStack = processor.getIterationStrategyStack();
+			for (IterationStrategyTopNode iterationStrategyTopNode : iterationStrategyStack) {
+				// iterationStrategyTopNode.
+
+			}
+			edits.getSetIterationStrategyStackEdit(dataflowProcessor,
+					dataflowIterationStrategyStack).doEdit();
 
 			// add bound activities
 			List<ProcessorBinding> processorBindings = scufl2Tools.processorBindingsForProcessor(
@@ -258,16 +281,20 @@ public class WorkflowToDataflowMapper {
 		// create the activity
 		net.sf.taverna.t2.workflowmodel.processor.activity.Activity<?> activity = null;
 		// check if we have a nested workflow
-		if (activityType.equals(URI.create("http://ns.taverna.org.uk/2010/activity/dataflow"))) {
+		if (activityType.equals(NESTED_WORKFLOW_URI)) {
 			activity = activityService.createActivity(activityType, null);
-			URI dataflowURI = configuration.getPropertyResource().getResourceURI();
-			Workflow workflow = (Workflow) uriTools.resolveUri(dataflowURI, workflowBundle);
-			WorkflowToDataflowMapper mapper = new WorkflowToDataflowMapper(workflowBundle,
-					workflow, profile, edits, activityService, dispatchLayerService);
-			Dataflow dataflow = mapper.getDataflow();
 			try {
+				PropertyReference propertyReference = configuration.getPropertyResource()
+						.getPropertyAsReference(NESTED_WORKFLOW_URI.resolve("#workflow"));
+				URI dataflowURI = propertyReference.getResourceURI();
+				Workflow workflow = (Workflow) uriTools.resolveUri(dataflowURI, workflowBundle);
+				Dataflow dataflow = getDataflow(workflow);
 				((Configurable) activity).configure(dataflow);
 			} catch (ConfigurationException e) {
+				throw new ActivityConfigurationException(e);
+			} catch (UnexpectedPropertyException e) {
+				throw new ActivityConfigurationException(e);
+			} catch (MultiplePropertiesException e) {
 				throw new ActivityConfigurationException(e);
 			}
 		} else {
@@ -295,7 +322,7 @@ public class WorkflowToDataflowMapper {
 		dataflowToWorkflowActivities.put(activity, scufl2Activity);
 	}
 
-	private void addDataLinks() throws EditException {
+	private void addDataLinks(Workflow workflow, Dataflow dataflow) throws EditException {
 		for (DataLink dataLink : workflow.getDataLinks()) {
 			ReceiverPort receiverPort = dataLink.getSendsTo();
 			SenderPort senderPort = dataLink.getReceivesFrom();
@@ -343,7 +370,7 @@ public class WorkflowToDataflowMapper {
 		}
 	}
 
-	private void addControlLinks() throws EditException {
+	private void addControlLinks(Workflow workflow) throws EditException {
 		for (ControlLink controlLink : workflow.getControlLinks()) {
 			if (controlLink instanceof BlockingControlLink) {
 				BlockingControlLink blockingControlLink = (BlockingControlLink) controlLink;
@@ -355,7 +382,7 @@ public class WorkflowToDataflowMapper {
 		}
 	}
 
-	private void addOutputPorts(Dataflow dataflow) throws EditException {
+	private void addOutputPorts(Workflow workflow, Dataflow dataflow) throws EditException {
 		for (OutputWorkflowPort outputWorkflowPort : workflow.getOutputPorts()) {
 			DataflowOutputPort dataflowOutputPort = edits.createDataflowOutputPort(
 					outputWorkflowPort.getName(), dataflow);
@@ -364,7 +391,7 @@ public class WorkflowToDataflowMapper {
 		}
 	}
 
-	private void addInputPorts(Dataflow dataflow) throws EditException {
+	private void addInputPorts(Workflow workflow, Dataflow dataflow) throws EditException {
 		for (InputWorkflowPort inputWorkflowPort : workflow.getInputPorts()) {
 			DataflowInputPort dataflowInputPort = edits.createDataflowInputPort(
 					inputWorkflowPort.getName(), inputWorkflowPort.getDepth(),

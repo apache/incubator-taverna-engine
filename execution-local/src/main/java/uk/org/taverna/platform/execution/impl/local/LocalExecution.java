@@ -73,9 +73,9 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 			throws InvalidWorkflowException {
 		super(workflowBundle, workflow, profile, inputs, referenceService);
 		try {
-			mapping = new WorkflowToDataflowMapper(workflowBundle, workflow, profile, edits,
+			mapping = new WorkflowToDataflowMapper(workflowBundle, profile, edits,
 					activityService, dispatchLayerService);
-			Dataflow dataflow = mapping.getDataflow();
+			Dataflow dataflow = mapping.getDataflow(workflow);
 			printDataflow(dataflow);
 			facade = edits.createWorkflowInstanceFacade(dataflow, createContext(), "");
 			executionMonitor = new LocalExecutionMonitor((LocalWorkflowReport) getWorkflowReport(),
