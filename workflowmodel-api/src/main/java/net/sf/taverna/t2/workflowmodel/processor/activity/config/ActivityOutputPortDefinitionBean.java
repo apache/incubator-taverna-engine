@@ -21,6 +21,7 @@
 package net.sf.taverna.t2.workflowmodel.processor.activity.config;
 
 import net.sf.taverna.t2.workflowmodel.OutputPort;
+import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationBean;
 
 /**
  * A bean that describes properties of an Output port.
@@ -28,6 +29,7 @@ import net.sf.taverna.t2.workflowmodel.OutputPort;
  * @author Stuart Owen
  *
  */
+@ConfigurationBean(uri = "http://ns.taverna.org.uk/2010/scufl2#OutputPortDefinition")
 public class ActivityOutputPortDefinitionBean extends ActivityPortDefinitionBean {
 	private int granularDepth;
 

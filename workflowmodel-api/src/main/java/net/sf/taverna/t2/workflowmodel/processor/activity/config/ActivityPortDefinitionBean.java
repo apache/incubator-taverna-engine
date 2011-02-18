@@ -20,8 +20,14 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.processor.activity.config;
 
+import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+
+import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationBean;
+import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationProperty;
 
 /**
  * A generic bean that describes the shared properties of input and output ports.
@@ -29,6 +35,7 @@ import java.util.List;
  * @author Stuart Owen
  *
  */
+@ConfigurationBean(uri = "http://ns.taverna.org.uk/2010/scufl2#PortDefinition")
 public abstract class ActivityPortDefinitionBean {
 	private String name;
 	private int depth;
@@ -78,4 +85,16 @@ public abstract class ActivityPortDefinitionBean {
 	public void setMimeTypes(List<String> mimeTypes) {
 		this.mimeTypes = mimeTypes;
 	}
+	
+	/**
+	 * @param mimeTypes the list of MIME-types that describe the port
+	 */
+	@ConfigurationProperty(name = "expectedMimeType", label = "Mime Types", description = "The MIME-types that describe the port", required = false)
+	public void setMimeTypes(Set<URI> mimeTypes) {
+		this.mimeTypes = new ArrayList<String>();
+		for (URI uri : mimeTypes) {
+			this.mimeTypes.add("'" + URI.create("http://purl.org/NET/mediatypes/").relativize(uri) + "'");
+		}
+	}
+	
 }

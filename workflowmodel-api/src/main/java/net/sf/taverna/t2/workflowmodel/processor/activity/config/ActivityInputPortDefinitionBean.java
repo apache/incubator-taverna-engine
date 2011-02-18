@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 
 import net.sf.taverna.t2.reference.ExternalReferenceSPI;
+import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationBean;
 
 /**
  * A bean that describes properties of an Input port.
@@ -32,6 +33,7 @@ import net.sf.taverna.t2.reference.ExternalReferenceSPI;
  * @author Stian Soiland-Reyes
  * 
  */
+@ConfigurationBean(uri = "http://ns.taverna.org.uk/2010/scufl2#InputPortDefinition")
 public class ActivityInputPortDefinitionBean extends ActivityPortDefinitionBean {
 
 	private List<Class<? extends ExternalReferenceSPI>> handledReferenceSchemes;
