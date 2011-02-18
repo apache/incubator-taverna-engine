@@ -68,70 +68,70 @@ for (int i = 0; i &lt; 1000; i++) {
   <initialDelay>1000</initialDelay>
   <maxDelay>5000</maxDelay>
   <maxRetries>0</maxRetries>
-</net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.RetryConfig></configBean></dispatchLayer><dispatchLayer><raven><group>net.sf.taverna.t2.core</group><artifact>workflowmodel-impl</artifact><version>1.2</version></raven><class>net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.Invoke</class><configBean encoding="xstream"><null xmlns="" /></configBean></dispatchLayer></dispatchStack><iterationStrategyStack><iteration><strategy><cross><port name="in" depth="0" /></cross></strategy></iteration></iterationStrategyStack></processor></processors><conditions /><datalinks><datalink><sink type="processor"><processor>Echo</processor><port>in</port></sink><source type="processor"><processor>ListGenerator</processor><port>out</port></source></datalink><datalink><sink type="processor"><processor>ListGenerator</processor><port>in</port></sink><source type="dataflow"><port>in</port></source></datalink><datalink><sink type="dataflow"><port>out</port></sink><source type="processor"><processor>Echo</processor><port>out</port></source></datalink></datalinks><annotations><annotation_chain_2_2 encoding="xstream"><net.sf.taverna.t2.annotation.impl.AnnotationChainImpl xmlns="">
+</net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.RetryConfig></configBean></dispatchLayer><dispatchLayer><raven><group>net.sf.taverna.t2.core</group><artifact>workflowmodel-impl</artifact><version>1.2</version></raven><class>net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.Invoke</class><configBean encoding="xstream"><null xmlns="" /></configBean></dispatchLayer></dispatchStack><iterationStrategyStack><iteration><strategy><cross><port name="in" depth="0" /></cross></strategy></iteration></iterationStrategyStack></processor></processors><conditions /><datalinks><datalink><sink type="processor"><processor>Echo</processor><port>in</port></sink><source type="processor"><processor>ListGenerator</processor><port>out</port></source></datalink><datalink><sink type="processor"><processor>ListGenerator</processor><port>in</port></sink><source type="dataflow"><port>in</port></source></datalink><datalink><sink type="dataflow"><port>out</port></sink><source type="processor"><processor>Echo</processor><port>out</port></source></datalink></datalinks><annotations><annotation_chain_2_2 encoding="xstream"><net.sf.taverna.t2.annotation.AnnotationChainImpl xmlns="">
   <annotationAssertions>
-    <net.sf.taverna.t2.annotation.impl.AnnotationAssertionImpl>
-      <annotationBean class="net.sf.taverna.t2.annotation.impl.annotationbeans.IdentificationAssertion">
+    <net.sf.taverna.t2.annotation.AnnotationAssertionImpl>
+      <annotationBean class="net.sf.taverna.t2.annotation.annotationbeans.IdentificationAssertion">
         <identification>13c70169-dfaa-4ea6-b6ab-3551dae7fa84</identification>
       </annotationBean>
       <date>2010-08-19 12:28:57.881 BST</date>
       <creators />
       <curationEventList />
-    </net.sf.taverna.t2.annotation.impl.AnnotationAssertionImpl>
+    </net.sf.taverna.t2.annotation.AnnotationAssertionImpl>
   </annotationAssertions>
-</net.sf.taverna.t2.annotation.impl.AnnotationChainImpl></annotation_chain_2_2><annotation_chain_2_2 encoding="xstream"><net.sf.taverna.t2.annotation.impl.AnnotationChainImpl xmlns="">
+</net.sf.taverna.t2.annotation.AnnotationChainImpl></annotation_chain_2_2><annotation_chain_2_2 encoding="xstream"><net.sf.taverna.t2.annotation.AnnotationChainImpl xmlns="">
   <annotationAssertions>
-    <net.sf.taverna.t2.annotation.impl.AnnotationAssertionImpl>
-      <annotationBean class="net.sf.taverna.t2.annotation.impl.annotationbeans.IdentificationAssertion">
+    <net.sf.taverna.t2.annotation.AnnotationAssertionImpl>
+      <annotationBean class="net.sf.taverna.t2.annotation.annotationbeans.IdentificationAssertion">
         <identification>7ef10e93-7376-41a9-9255-552149094142</identification>
       </annotationBean>
       <date>2010-08-31 13:06:57.536 BST</date>
       <creators />
       <curationEventList />
-    </net.sf.taverna.t2.annotation.impl.AnnotationAssertionImpl>
+    </net.sf.taverna.t2.annotation.AnnotationAssertionImpl>
   </annotationAssertions>
-</net.sf.taverna.t2.annotation.impl.AnnotationChainImpl></annotation_chain_2_2><annotation_chain_2_2 encoding="xstream"><net.sf.taverna.t2.annotation.impl.AnnotationChainImpl xmlns="">
+</net.sf.taverna.t2.annotation.AnnotationChainImpl></annotation_chain_2_2><annotation_chain_2_2 encoding="xstream"><net.sf.taverna.t2.annotation.AnnotationChainImpl xmlns="">
   <annotationAssertions>
-    <net.sf.taverna.t2.annotation.impl.AnnotationAssertionImpl>
-      <annotationBean class="net.sf.taverna.t2.annotation.impl.annotationbeans.IdentificationAssertion">
+    <net.sf.taverna.t2.annotation.AnnotationAssertionImpl>
+      <annotationBean class="net.sf.taverna.t2.annotation.annotationbeans.IdentificationAssertion">
         <identification>3b7c0b9c-572d-466b-af6d-0fb40699e8a5</identification>
       </annotationBean>
       <date>2010-08-31 12:50:40.306 BST</date>
       <creators />
       <curationEventList />
-    </net.sf.taverna.t2.annotation.impl.AnnotationAssertionImpl>
+    </net.sf.taverna.t2.annotation.AnnotationAssertionImpl>
   </annotationAssertions>
-</net.sf.taverna.t2.annotation.impl.AnnotationChainImpl></annotation_chain_2_2><annotation_chain_2_2 encoding="xstream"><net.sf.taverna.t2.annotation.impl.AnnotationChainImpl xmlns="">
+</net.sf.taverna.t2.annotation.AnnotationChainImpl></annotation_chain_2_2><annotation_chain_2_2 encoding="xstream"><net.sf.taverna.t2.annotation.AnnotationChainImpl xmlns="">
   <annotationAssertions>
-    <net.sf.taverna.t2.annotation.impl.AnnotationAssertionImpl>
-      <annotationBean class="net.sf.taverna.t2.annotation.impl.annotationbeans.IdentificationAssertion">
+    <net.sf.taverna.t2.annotation.AnnotationAssertionImpl>
+      <annotationBean class="net.sf.taverna.t2.annotation.annotationbeans.IdentificationAssertion">
         <identification>eb6a550d-f34e-4de9-b0fc-1b3df8ab36c4</identification>
       </annotationBean>
       <date>2010-08-31 14:32:44.634 BST</date>
       <creators />
       <curationEventList />
-    </net.sf.taverna.t2.annotation.impl.AnnotationAssertionImpl>
+    </net.sf.taverna.t2.annotation.AnnotationAssertionImpl>
   </annotationAssertions>
-</net.sf.taverna.t2.annotation.impl.AnnotationChainImpl></annotation_chain_2_2><annotation_chain_2_2 encoding="xstream"><net.sf.taverna.t2.annotation.impl.AnnotationChainImpl xmlns="">
+</net.sf.taverna.t2.annotation.AnnotationChainImpl></annotation_chain_2_2><annotation_chain_2_2 encoding="xstream"><net.sf.taverna.t2.annotation.AnnotationChainImpl xmlns="">
   <annotationAssertions>
-    <net.sf.taverna.t2.annotation.impl.AnnotationAssertionImpl>
-      <annotationBean class="net.sf.taverna.t2.annotation.impl.annotationbeans.IdentificationAssertion">
+    <net.sf.taverna.t2.annotation.AnnotationAssertionImpl>
+      <annotationBean class="net.sf.taverna.t2.annotation.annotationbeans.IdentificationAssertion">
         <identification>78cb1427-d57f-42c2-a385-1d20c1580f3b</identification>
       </annotationBean>
       <date>2010-08-31 14:36:00.297 BST</date>
       <creators />
       <curationEventList />
-    </net.sf.taverna.t2.annotation.impl.AnnotationAssertionImpl>
+    </net.sf.taverna.t2.annotation.AnnotationAssertionImpl>
   </annotationAssertions>
-</net.sf.taverna.t2.annotation.impl.AnnotationChainImpl></annotation_chain_2_2><annotation_chain_2_2 encoding="xstream"><net.sf.taverna.t2.annotation.impl.AnnotationChainImpl xmlns="">
+</net.sf.taverna.t2.annotation.AnnotationChainImpl></annotation_chain_2_2><annotation_chain_2_2 encoding="xstream"><net.sf.taverna.t2.annotation.AnnotationChainImpl xmlns="">
   <annotationAssertions>
-    <net.sf.taverna.t2.annotation.impl.AnnotationAssertionImpl>
-      <annotationBean class="net.sf.taverna.t2.annotation.impl.annotationbeans.IdentificationAssertion">
+    <net.sf.taverna.t2.annotation.AnnotationAssertionImpl>
+      <annotationBean class="net.sf.taverna.t2.annotation.annotationbeans.IdentificationAssertion">
         <identification>ad638364-a6e0-4852-abca-9f609c9553d2</identification>
       </annotationBean>
       <date>2010-08-19 13:43:43.797 BST</date>
       <creators />
       <curationEventList />
-    </net.sf.taverna.t2.annotation.impl.AnnotationAssertionImpl>
+    </net.sf.taverna.t2.annotation.AnnotationAssertionImpl>
   </annotationAssertions>
-</net.sf.taverna.t2.annotation.impl.AnnotationChainImpl></annotation_chain_2_2></annotations></dataflow></workflow>
+</net.sf.taverna.t2.annotation.AnnotationChainImpl></annotation_chain_2_2></annotations></dataflow></workflow>

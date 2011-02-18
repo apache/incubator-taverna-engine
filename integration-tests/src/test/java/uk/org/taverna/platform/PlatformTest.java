@@ -1,8 +1,33 @@
+/*******************************************************************************
+ * Copyright (C) 2010 The University of Manchester   
+ * 
+ *  Modifications to the initial code base are copyright of their
+ *  respective authors, or their employers as appropriate.
+ * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public License
+ *  as published by the Free Software Foundation; either version 2.1 of
+ *  the License, or (at your option) any later version.
+ *    
+ *  This program is distributed in the hope that it will be useful, but
+ *  WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *    
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ ******************************************************************************/
 package uk.org.taverna.platform;
 
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
+import net.sf.taverna.t2.reference.ErrorDocument;
+import net.sf.taverna.t2.reference.IdentifiedList;
+import net.sf.taverna.t2.reference.ReferenceService;
+import net.sf.taverna.t2.reference.StackTraceElementBean;
 import net.sf.taverna.t2.reference.T2Reference;
 
 import org.eclipse.osgi.framework.internal.core.Constants;
@@ -101,6 +126,36 @@ public class PlatformTest extends AbstractConfigurableBundleCreatorTests {
 	}
 
 
+	public void printErrors(ReferenceService referenceService, T2Reference resultReference) {
+		if (resultReference.getDepth() > 0) {
+			IdentifiedList<T2Reference> list = referenceService.getListService().getList(
+					resultReference);
+			for (T2Reference t2Reference : list) {
+				printErrors(referenceService, t2Reference);
+			}
+		} else if (resultReference.containsErrors()) {
+			ErrorDocument error = referenceService.getErrorDocumentService().getError(
+					resultReference);
+			String message = error.getMessage();
+			if (message != null) {
+				System.out.println(message);
+			}
+			String exceptionMessage = error.getExceptionMessage();
+			if (exceptionMessage != null) {
+				System.out.println(exceptionMessage);
+			}
+			for (StackTraceElementBean stackTraceElementBean : error.getStackTraceStrings()) {
+				System.out.println(stackTraceElementBean.getClassName());
+				System.out.println(stackTraceElementBean.getMethodName());
+				System.out.println(stackTraceElementBean.getLineNumber());
+			}
+			Set<T2Reference> errorReferences = error.getErrorReferences();
+			for (T2Reference t2Reference : errorReferences) {
+				printErrors(referenceService, t2Reference);
+			}
+		}
+	}
+	
 	public void waitForResult(Map<String, T2Reference> results, String port, WorkflowReport report)
 			throws InterruptedException {
 		int wait = 0;
