@@ -98,6 +98,17 @@ public class IterationStrategyStackImpl implements IterationStrategyStack {
 		}
 	}
 
+	public void removeStrategy(IterationStrategy is) {
+		if (is instanceof IterationStrategyImpl) {
+			IterationStrategyImpl isi = (IterationStrategyImpl) is;
+			strategies.remove(isi);
+			isi.setIterationStrategyStack(null);
+		} else {
+			throw new WorkflowStructureException(
+					"IterationStrategyStackImpl can only hold IterationStrategyImpl objects");
+		}
+	}
+
 	public List<IterationStrategyImpl> getStrategies() {
 		return Collections.unmodifiableList(this.strategies);
 	}

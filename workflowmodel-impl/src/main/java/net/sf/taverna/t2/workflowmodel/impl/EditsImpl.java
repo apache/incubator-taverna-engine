@@ -64,7 +64,10 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayer;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchStack;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.impl.AddDispatchLayerEdit;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.impl.DeleteDispatchLayerEdit;
+import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationStrategy;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationStrategyStack;
+import net.sf.taverna.t2.workflowmodel.processor.iteration.NamedInputPortNode;
+import net.sf.taverna.t2.workflowmodel.processor.iteration.impl.IterationStrategyImpl;
 
 /**
  * Implementation of {@link Edits}
@@ -266,6 +269,10 @@ public class EditsImpl implements Edits {
 		return processor;
 	}
 
+	public IterationStrategy createIterationStrategy() {
+		return new IterationStrategyImpl();
+	}
+	
 	/**
 	 * Builds an instance of {@link ActivityInputPortImpl}
 	 */
@@ -486,6 +493,22 @@ public class EditsImpl implements Edits {
 	public Edit<Processor> getRemoveActivityEdit(Processor processor,
 			Activity<?> activity) {
 		return new RemoveActivityEdit(processor, activity);
+	}
+
+	public Edit<IterationStrategyStack> getAddIterationStrategyEdit(
+			IterationStrategyStack iterationStrategyStack, IterationStrategy iterationStrategy) {
+		return new AddIterationStrategyEdit(iterationStrategyStack, iterationStrategy);
+	}
+
+	public Edit<IterationStrategy> getAddIterationStrategyInputNodeEdit(
+			IterationStrategy iterationStrategy, NamedInputPortNode namedInputPortNode) {
+		return new AddIterationStrategyInputPortEdit(iterationStrategy, namedInputPortNode);
+	}
+
+	@Override
+	public Edit<IterationStrategyStack> getClearIterationStrategyStackEdit(
+			IterationStrategyStack iterationStrategyStack) {
+		return new ClearIterationStrategyStackEdit(iterationStrategyStack);
 	}
 
 }

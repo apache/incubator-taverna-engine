@@ -37,7 +37,9 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityInputPort;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayer;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchStack;
+import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationStrategy;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationStrategyStack;
+import net.sf.taverna.t2.workflowmodel.processor.iteration.NamedInputPortNode;
 
 /**
  * Defines the set of all available edit actions over a workflow model. This is
@@ -129,6 +131,13 @@ public interface Edits {
 	 *            local name for the processor.
 	 */
 	public Processor createProcessor(String name);
+
+	/**
+	 * Builds a new instance of a IterationStrategy.
+	 * 
+	 * @return a new IterationStrategy
+	 */
+	public IterationStrategy createIterationStrategy();
 
 	/**
 	 * Build a new WorkflowInstanceFacade using the supplied Dataflow
@@ -742,6 +751,15 @@ public interface Edits {
 	 */
 	public Edit<Processor> getSetIterationStrategyStackEdit(
 			Processor processor, IterationStrategyStack iterationStrategyStack);
+
+	public Edit<IterationStrategyStack> getClearIterationStrategyStackEdit(
+			IterationStrategyStack iterationStrategyStack);
+
+	public Edit<IterationStrategyStack> getAddIterationStrategyEdit(
+			IterationStrategyStack iterationStrategyStack, IterationStrategy iterationStrategy);
+
+	public Edit<IterationStrategy> getAddIterationStrategyInputNodeEdit(
+			IterationStrategy iterationStrategy, NamedInputPortNode namedInputPortNode);
 
 	public Edit<Dataflow> getUpdateDataflowInternalIdentifierEdit(
 			Dataflow dataflow, String newId);
