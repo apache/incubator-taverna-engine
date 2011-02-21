@@ -111,6 +111,40 @@ public class RunTest extends PlatformTest {
 		System.out.println(report);
 	}
 
+	public void testRunLocalworker() throws Exception {
+		setup();
+
+		WorkflowBundle workflowBundle = loadWorkflow("/t2flow/localworker.t2flow");
+
+		T2Reference reference = referenceService.register("Tom", 0, true, null);
+		Map<String, T2Reference> inputs = new HashMap<String, T2Reference>();
+		inputs.put("in", reference);
+
+		String runId = runService.createRun(new RunProfile(workflowBundle, inputs,
+				referenceService, executionService));
+		WorkflowReport report = runService.getWorkflowReport(runId);
+		assertEquals(State.CREATED, runService.getState(runId));
+		System.out.println(report);
+
+		runService.start(runId);
+		assertEquals(State.RUNNING, runService.getState(runId));
+		System.out.println(report);
+
+		Map<String, T2Reference> results = runService.getOutputs(runId);
+		waitForResult(results, "out", report);
+
+		T2Reference resultReference = results.get("out");
+		if (resultReference.containsErrors()) {
+			printErrors(referenceService, resultReference);
+		}
+		assertFalse(resultReference.containsErrors());
+		String result = (String) referenceService.renderIdentifier(resultReference, String.class,
+				null);
+		assertEquals("Hello Tom", result);
+		assertEquals(State.COMPLETED, runService.getState(runId));
+		System.out.println(report);
+	}
+
 	public void testRunStringConstant() throws Exception {
 		setup();
 
