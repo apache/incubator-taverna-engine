@@ -20,6 +20,7 @@
  ******************************************************************************/
 package uk.org.taverna.platform.execution.impl.local;
 
+import java.util.Enumeration;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -39,6 +40,12 @@ import net.sf.taverna.t2.workflowmodel.Edits;
 import net.sf.taverna.t2.workflowmodel.InvalidDataflowException;
 import net.sf.taverna.t2.workflowmodel.Processor;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
+import net.sf.taverna.t2.workflowmodel.processor.iteration.CrossProduct;
+import net.sf.taverna.t2.workflowmodel.processor.iteration.DotProduct;
+import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationStrategy;
+import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationStrategyNode;
+import net.sf.taverna.t2.workflowmodel.processor.iteration.NamedInputPortNode;
+import net.sf.taverna.t2.workflowmodel.processor.iteration.TerminalNode;
 
 import org.apache.log4j.Logger;
 
@@ -171,6 +178,9 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 			System.out.println("  " + processor);
 			System.out.println("    " + processor.getInputPorts());
 			System.out.println("    " + processor.getOutputPorts());
+			for (IterationStrategy iterationStrategy : processor.getIterationStrategy().getStrategies()) {
+				printNode("    ", iterationStrategy.getTerminalNode());
+			}
 			for (Activity<?> activity : processor.getActivityList()) {
 				System.out.println("    " + activity);
 				System.out.println("    " + activity.getInputPorts());
@@ -183,4 +193,29 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 		System.out.println(dataflow.getLinks());
 	}
 
+	private void printNode(String indent, IterationStrategyNode node) {
+		if (node instanceof TerminalNode) {
+			System.out.println(indent + "Terminal");
+			Enumeration<IterationStrategyNode> children = node.children();
+			while (children.hasMoreElements()) {
+				printNode(indent + "  ", children.nextElement());
+			}
+		} else if (node instanceof CrossProduct) {
+			System.out.println(indent + "Cross Product");
+			Enumeration<IterationStrategyNode> children = node.children();
+			while (children.hasMoreElements()) {
+				printNode(indent + "  ", children.nextElement());
+			}
+		} else if (node instanceof DotProduct) {
+			System.out.println(indent + "Dot Product");
+			Enumeration<IterationStrategyNode> children = node.children();
+			while (children.hasMoreElements()) {
+				printNode(indent + "  ", children.nextElement());
+			}
+		} else if (node instanceof NamedInputPortNode) {
+			NamedInputPortNode inputPortNode = (NamedInputPortNode) node;
+			System.out.println(indent + inputPortNode.getPortName() + "(" + inputPortNode.getCardinality() + ")");
+		}
+	}
+	
 }
