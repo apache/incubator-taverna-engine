@@ -5,7 +5,7 @@
 	<parent>
 		<artifactId>taverna-parent</artifactId>
 		<groupId>net.sf.taverna</groupId>
-	    <version>3.0-SNAPSHOT</version>
+		<version>3.0-SNAPSHOT</version>
 	</parent>
 
 	<groupId>net.sf.taverna.t2</groupId>
@@ -16,10 +16,16 @@
 	<name>Taverna 2 Core</name>
 	<build>
 		<plugins>
-<plugin>
-        <artifactId>maven-release-plugin</artifactId>
-        <version>2.0-beta-9</version>
-      </plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<version>2.3.4</version>
+				<extensions>true</extensions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.0-beta-9</version>
+			</plugin>
 
 			<plugin>
 				<artifactId>maven-clover-plugin</artifactId>
@@ -40,22 +46,21 @@
 			</plugin>
 		</plugins>
 	</build>
-	
+
 	<properties>
 		<t2.infrastructure.version>3.0-SNAPSHOT</t2.infrastructure.version>
 		<t2.lang.version>2.0-SNAPSHOT</t2.lang.version>
-        <spring.version>3.0.5.RELEASE</spring.version>
+		<spring.version>3.0.5.RELEASE</spring.version>
 	</properties>
-	
+
 	<modules>
 		<module>reference-api</module>
-	   	<module>reference-impl</module>
-	   	<module>reference-testhelpers</module>
+		<module>reference-impl</module>
+		<module>reference-testhelpers</module>
 		<module>workflowmodel-api</module>
-		<module>workflowmodel-impl</module>   
-	   	<module>workflowmodel-core-extensions</module>
-		<!--<module>provenanceconnector</module>		
-        -->
+		<module>workflowmodel-impl</module>
+		<module>workflowmodel-core-extensions</module>
+		<!--<module>provenanceconnector</module> -->
 	</modules>
 	<repositories>
 		<repository>
@@ -124,9 +129,9 @@
 				<scope>test</scope>
 			</dependency>
 			<dependency>
-				<groupId>log4j</groupId>
-				<artifactId>log4j</artifactId>
-				<version>1.2.13</version>
+				<groupId>org.apache.log4j</groupId>
+				<artifactId>com.springsource.org.apache.log4j</artifactId>
+				<version>1.2.16</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-io</groupId>
@@ -149,9 +154,9 @@
 				<version>1.0</version>
 			</dependency>
 			<dependency>
-				<groupId>jdom</groupId>
-				<artifactId>jdom</artifactId>
-				<version>1.0</version>
+				<groupId>org.jdom</groupId>
+				<artifactId>com.springsource.org.jdom</artifactId>
+				<version>1.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>uk.org.mygrid.taverna.processors

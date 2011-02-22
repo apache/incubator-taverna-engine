@@ -28,19 +28,8 @@
 					</instructions>
 				</configuration>
 			</plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                </configuration>
-            </plugin>
 		</plugins>
 	</build>
-	<properties>
-		<spring.osgi.version>1.2.1</spring.osgi.version>
-	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>net.sf.taverna.t2.core</groupId>
@@ -50,35 +39,27 @@
 		<dependency>
 			<groupId>org.jdom</groupId>
 			<artifactId>com.springsource.org.jdom</artifactId>
-			<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.thoughtworks.xstream</groupId>
 			<artifactId>com.springsource.com.thoughtworks.xstream</artifactId>
 			<version>1.2.2</version>
 		</dependency>
+		<dependency>
+			<groupId>net.sf.taverna.t2.core</groupId>
+			<artifactId>workflowmodel-core-extensions</artifactId>
+			<version>${project.version}</version>
+			<!--<scope>test</scope> -->
+		</dependency>
 
 		<dependency>
 			<groupId>org.apache.log4j</groupId>
 			<artifactId>com.springsource.org.apache.log4j</artifactId>
-			<version>1.2.16</version>
 		</dependency>
 
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.taverna.t2.core</groupId>
-			<artifactId>workflowmodel-core-extensions</artifactId>
-			<version>${project.version}</version>
-			<!--<scope>test</scope>-->
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.osgi</groupId>
-			<artifactId>spring-osgi-test</artifactId>
-			<version>${spring.osgi.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

@@ -10,15 +10,6 @@
 	<artifactId>workflowmodel-core-extensions</artifactId>
 	<packaging>bundle</packaging>
 	<name>Implementation of core extension points to the workflow model</name>
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<extensions>true</extensions>
-			</plugin>
-		</plugins>
-	</build>
 	<dependencies>
 		<dependency>
 			<groupId>net.sf.taverna.t2.core</groupId>

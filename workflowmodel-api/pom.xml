@@ -17,15 +17,6 @@
 		platform for applications using Taverna APIs as well as the core
 		for the new enactor and model.
 	</description>
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<extensions>true</extensions>
-			</plugin>
-		</plugins>
-	</build>
 	<dependencies>
 		<dependency>
 			<groupId>net.sf.taverna.t2.core</groupId>
@@ -40,14 +31,13 @@
 		<dependency>
 			<groupId>org.jdom</groupId>
 			<artifactId>com.springsource.org.jdom</artifactId>
-			<version>1.0.0</version>
 		</dependency>
 		
 		<dependency>
 			<groupId>org.apache.log4j</groupId>
 			<artifactId>com.springsource.org.apache.log4j</artifactId>
-			<version>1.2.16</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
