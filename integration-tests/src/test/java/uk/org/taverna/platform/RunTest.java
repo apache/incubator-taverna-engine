@@ -49,10 +49,8 @@ public class RunTest extends PlatformTest {
 
 		WorkflowBundle workflowBundle = loadWorkflow("/t2flow/in-out.t2flow");
 
-		T2Reference reference = referenceService.register("test-input", 0, true, null);
-
 		Map<String, T2Reference> inputs = new HashMap<String, T2Reference>();
-		inputs.put("in", reference);
+		inputs.put("in", referenceService.register("test-input", 0, true, null));
 
 		String runId = runService.createRun(new RunProfile(workflowBundle, inputs,
 				referenceService, executionService));
@@ -80,9 +78,8 @@ public class RunTest extends PlatformTest {
 
 		WorkflowBundle workflowBundle = loadWorkflow("/t2flow/beanshell.t2flow");
 
-		T2Reference reference = referenceService.register("test-input", 0, true, null);
 		Map<String, T2Reference> inputs = new HashMap<String, T2Reference>();
-		inputs.put("in", reference);
+		inputs.put("in", referenceService.register("test-input", 0, true, null));
 
 		String runId = runService.createRun(new RunProfile(workflowBundle, inputs,
 				referenceService, executionService));
@@ -116,9 +113,8 @@ public class RunTest extends PlatformTest {
 
 		WorkflowBundle workflowBundle = loadWorkflow("/t2flow/localworker.t2flow");
 
-		T2Reference reference = referenceService.register("Tom", 0, true, null);
 		Map<String, T2Reference> inputs = new HashMap<String, T2Reference>();
-		inputs.put("in", reference);
+		inputs.put("in", referenceService.register("Tom", 0, true, null));
 
 		String runId = runService.createRun(new RunProfile(workflowBundle, inputs,
 				referenceService, executionService));
@@ -172,16 +168,106 @@ public class RunTest extends PlatformTest {
 		assertEquals(State.COMPLETED, runService.getState(runId));
 	}
 
+	@SuppressWarnings("unchecked")
+	public void testRunIteration() throws Exception {
+		setup();
+
+		WorkflowBundle workflowBundle = loadWorkflow("/t2flow/iteration.t2flow");
+
+		Map<String, T2Reference> inputs = new HashMap<String, T2Reference>();
+		inputs.put("in", referenceService.register("test", 0, true, null));
+
+		String runId = runService.createRun(new RunProfile(workflowBundle, inputs,
+				referenceService, executionService));
+		WorkflowReport report = runService.getWorkflowReport(runId);
+		assertEquals(State.CREATED, runService.getState(runId));
+		System.out.println(report);
+
+		runService.start(runId);
+		assertEquals(State.RUNNING, runService.getState(runId));
+		System.out.println(report);
+
+		Map<String, T2Reference> results = runService.getOutputs(runId);
+		
+		waitForResult(results, "cross", report);
+		T2Reference resultReference = results.get("cross");
+		if (resultReference.containsErrors()) {
+			printErrors(referenceService, resultReference);
+		}
+		assertFalse(resultReference.containsErrors());
+		List<List<String>> crossResult = (List<List<String>>) referenceService.renderIdentifier(resultReference,
+				String.class, null);
+		assertEquals(10, crossResult.size());
+		assertEquals(10, crossResult.get(0).size());
+		assertEquals(10, crossResult.get(5).size());
+		assertEquals("test:0test:0", crossResult.get(0).get(0));
+		assertEquals("test:0test:1", crossResult.get(0).get(1));
+		assertEquals("test:4test:2", crossResult.get(4).get(2));
+		assertEquals("test:7test:6", crossResult.get(7).get(6));
+
+		waitForResult(results, "dot", report);
+		resultReference = results.get("dot");
+		if (resultReference.containsErrors()) {
+			printErrors(referenceService, resultReference);
+		}
+		assertFalse(resultReference.containsErrors());
+		List<String> dotResult = (List<String>) referenceService.renderIdentifier(resultReference,
+				String.class, null);
+		assertEquals(10, dotResult.size());
+		assertEquals("test:0test:0", dotResult.get(0));
+		assertEquals("test:5test:5", dotResult.get(5));
+
+
+		waitForResult(results, "crossdot", report);
+		resultReference = results.get("crossdot");
+		if (resultReference.containsErrors()) {
+			printErrors(referenceService, resultReference);
+		}
+		assertFalse(resultReference.containsErrors());
+		List<List<String>> crossdotResult = (List<List<String>>) referenceService.renderIdentifier(resultReference,
+				String.class, null);
+		assertEquals(10, crossdotResult.size());
+		assertEquals(10, crossdotResult.get(0).size());
+		assertEquals(10, crossdotResult.get(5).size());
+		assertEquals("test:0test:0test", crossdotResult.get(0).get(0));
+		assertEquals("test:0test:1test", crossdotResult.get(0).get(1));
+		assertEquals("test:4test:2test", crossdotResult.get(4).get(2));
+		assertEquals("test:7test:6test", crossdotResult.get(7).get(6));
+
+		waitForResult(results, "dotcross", report);
+		resultReference = results.get("dotcross");
+		if (resultReference.containsErrors()) {
+			printErrors(referenceService, resultReference);
+		}
+		assertFalse(resultReference.containsErrors());
+		List<String> dotcrossResult = (List<String>) referenceService.renderIdentifier(resultReference,
+				String.class, null);
+		assertEquals(10, dotResult.size());
+		assertEquals("test:0test:0test", dotcrossResult.get(0));
+		assertEquals("test:5test:5test", dotcrossResult.get(5));
+
+		waitForResult(results, "dotdot", report);
+		resultReference = results.get("dotdot");
+		if (resultReference.containsErrors()) {
+			printErrors(referenceService, resultReference);
+		}
+		assertFalse(resultReference.containsErrors());
+		List<String> dotdotResult = (List<String>) referenceService.renderIdentifier(resultReference,
+				String.class, null);
+		assertEquals(10, dotResult.size());
+		assertEquals("test:0test:0test:0", dotdotResult.get(0));
+		assertEquals("test:5test:5test:5", dotdotResult.get(5));
+
+		assertEquals(State.COMPLETED, runService.getState(runId));
+		System.out.println(report);
+	}
+
 	public void testRunWSDL() throws Exception {
 		setup();
 
 		WorkflowBundle workflowBundle = loadWorkflow("/t2flow/wsdl.t2flow");
 
-		T2Reference reference = referenceService.register("in", 0, true, null);
-		Map<String, T2Reference> inputs = new HashMap<String, T2Reference>();
-		inputs.put("in", reference);
-
-		String runId = runService.createRun(new RunProfile(workflowBundle, inputs,
+		String runId = runService.createRun(new RunProfile(workflowBundle,
 				referenceService, executionService));
 		WorkflowReport report = runService.getWorkflowReport(runId);
 		assertEquals(State.CREATED, runService.getState(runId));
@@ -248,9 +334,8 @@ public class RunTest extends PlatformTest {
 
 		WorkflowBundle workflowBundle = loadWorkflow("/t2flow/dataflow.t2flow");
 
-		T2Reference reference = referenceService.register("test input", 0, true, null);
 		Map<String, T2Reference> inputs = new HashMap<String, T2Reference>();
-		inputs.put("in", reference);
+		inputs.put("in", referenceService.register("test input", 0, true, null));
 
 		String runId = runService.createRun(new RunProfile(workflowBundle, inputs,
 				referenceService, executionService));
