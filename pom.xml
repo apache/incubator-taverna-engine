@@ -14,32 +14,6 @@
 	<packaging>pom</packaging>
 
 	<name>Taverna 2 Core</name>
-	<build>
-		<plugins>
-			<plugin>
-				<artifactId>maven-release-plugin</artifactId>
-				<version>2.0-beta-9</version>
-			</plugin>
-
-			<plugin>
-				<artifactId>maven-clover-plugin</artifactId>
-				<executions>
-					<execution>
-						<phase>pre-site</phase>
-						<goals>
-							<goal>instrument</goal>
-							<goal>aggregate</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<jdk>1.5</jdk>
-					<targetPercentage>50%</targetPercentage>
-					<failOnViolation>false</failOnViolation>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
 
 	<properties>
 		<t2.infrastructure.version>3.0-SNAPSHOT</t2.infrastructure.version>
@@ -76,48 +50,6 @@
 			<url>http://www.mygrid.org.uk/maven/snapshot-repository</url>
 		</repository>
 	</repositories>
-	<reporting>
-		<plugins>
-			<plugin>
-				<artifactId>maven-checkstyle-plugin</artifactId>
-				<configuration>
-					<configLocation>
-						${basedir}/../checkstyle.xml
-					</configLocation>
-				</configuration>
-			</plugin>
-			<plugin>
-				<artifactId>maven-clover-plugin</artifactId>
-				<configuration>
-					<generatePdf>true</generatePdf>
-					<generateXml>true</generateXml>
-				</configuration>
-			</plugin>
-			<plugin>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<configuration>
-					<minmemory>128m</minmemory>
-					<maxmemory>512</maxmemory>
-					<aggregate>true</aggregate>
-					<links>
-						<link>
-							http://www.mygrid.org.uk/taverna/api/
-						</link>
-						<link>
-							http://java.sun.com/j2se/1.5.0/docs/api/
-						</link>
-					</links>
-				</configuration>
-			</plugin>
-			<plugin>
-				<artifactId>maven-surefire-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>jxr-maven-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</reporting>
 	<scm>
 		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/engine/net.sf.taverna.t2.core/trunk/</connection>
 		<developerConnection>scm:svn:https://taverna.googlecode.com/svn/taverna/engine/net.sf.taverna.t2.core/trunk/</developerConnection>
