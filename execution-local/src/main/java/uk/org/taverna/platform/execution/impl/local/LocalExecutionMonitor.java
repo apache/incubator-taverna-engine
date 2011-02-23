@@ -122,7 +122,6 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 		} else if (dataflowObject instanceof Processor) {
 			Processor dataflowProcessor = (Processor) dataflowObject;
 			if (processorInvocations.get(dataflowProcessor).getAndIncrement() == 0) {
-				System.out.println("Adding " + dataflowProcessor.getLocalName());
 				LocalProcessorReport processorReport = processorReports.get(dataflowProcessor);
 				processorReport.addProperties(properties);
 			}
@@ -145,7 +144,6 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 		} else if (dataflowObject instanceof Processor) {
 			Processor dataflowProcessor = (Processor) dataflowObject;
 			if (processorInvocations.get(dataflowProcessor).decrementAndGet() == 0) {
-				System.out.println("Removing " + dataflowProcessor.getLocalName());
 				LocalProcessorReport processorReport = processorReports.get(dataflowProcessor);
 				processorReport.saveProperties();
 				processorReport.setCompletedDate(new Date());

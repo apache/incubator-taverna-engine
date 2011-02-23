@@ -35,7 +35,6 @@ import net.sf.taverna.t2.provenance.reporter.ProvenanceReporter;
 import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
-import net.sf.taverna.t2.workflowmodel.DataflowValidationReport;
 import net.sf.taverna.t2.workflowmodel.Edits;
 import net.sf.taverna.t2.workflowmodel.InvalidDataflowException;
 import net.sf.taverna.t2.workflowmodel.Processor;
@@ -83,14 +82,10 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 			mapping = new WorkflowToDataflowMapper(workflowBundle, profile, edits,
 					activityService, dispatchLayerService);
 			Dataflow dataflow = mapping.getDataflow(workflow);
-			printDataflow(dataflow);
 			facade = edits.createWorkflowInstanceFacade(dataflow, createContext(), "");
 			executionMonitor = new LocalExecutionMonitor((LocalWorkflowReport) getWorkflowReport(),
 					mapping, facade.getIdentifier());
 		} catch (InvalidDataflowException e) {
-			// TODO do something with the validation report
-			DataflowValidationReport report = e.getDataflowValidationReport();
-			System.out.println("Workflow incomplete = " + report.isWorkflowIncomplete());
 			throw new InvalidWorkflowException(e);
 		}
 	}

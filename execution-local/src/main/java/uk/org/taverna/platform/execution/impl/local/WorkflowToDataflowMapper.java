@@ -264,18 +264,19 @@ public class WorkflowToDataflowMapper {
 	}
 
 	private void addIterationStrategy(Processor processor, net.sf.taverna.t2.workflowmodel.Processor dataflowProcessor) throws EditException, InvalidWorkflowException {
+		// get the iteration strategy from the processor
 		net.sf.taverna.t2.workflowmodel.processor.iteration.IterationStrategyStack dataflowIterationStrategyStack = dataflowProcessor.getIterationStrategy();
+		// clear the  iteration strategy
 		edits.getClearIterationStrategyStackEdit(dataflowIterationStrategyStack).doEdit();
 		IterationStrategyStack iterationStrategyStack = processor.getIterationStrategyStack();
 		for (IterationStrategyTopNode iterationStrategyTopNode : iterationStrategyStack) {
 			// create iteration strategy
 			IterationStrategy dataflowIterationStrategy = edits.createIterationStrategy();
-			// add iteration strategy to stack
+			// add iteration strategy to the stack
 			edits.getAddIterationStrategyEdit(dataflowIterationStrategyStack, dataflowIterationStrategy).doEdit();
+			// add the node to the iteration strategy
 			addIterationStrategyNode(dataflowIterationStrategy, dataflowIterationStrategy.getTerminalNode(), iterationStrategyTopNode);
 		}
-		// set the iteration strategy stack on the processor
-		edits.getSetIterationStrategyStackEdit(dataflowProcessor, dataflowIterationStrategyStack).doEdit();
 	}
 
 	private void addIterationStrategyNode(IterationStrategy dataflowIterationStrategy,
