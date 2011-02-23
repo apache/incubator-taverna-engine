@@ -4,12 +4,11 @@
 	<parent>
 		<artifactId>platform</artifactId>
 		<groupId>uk.org.taverna</groupId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>0.1.0-SNAPSHOT</version>
 	</parent>
 	<groupId>uk.org.taverna</groupId>
 	<artifactId>integration-tests</artifactId>
 	<name>Taverna Platform integration tests</name>
-	<version>0.0.1-SNAPSHOT</version>
 	<properties>
 		<spring.dm.version>2.0.0.M1</spring.dm.version>
 		<spring.version>3.0.0.RC1</spring.version>
@@ -19,7 +18,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<!-- <version>2.3</version> -->
 				<configuration>
 					<forkMode>pertest</forkMode>
 				</configuration>
@@ -60,20 +58,7 @@
 			</plugin>
 		</plugins>
 	</build>
-	<repositories>
-		<repository>
-			<id>spring-maven-milestone</id>
-			<name>Springframework Maven Repository</name>
-			<url>http://maven.springframework.org/milestone</url>
-		</repository>
-		<repository>
-			<id>com.springsource.repository.bundles.milestone</id>
-			<name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Milestones</name>
-			<url>http://repository.springsource.com/maven/bundles/milestone</url>
-		</repository>
-	</repositories>
 	<dependencies>
-
 		<!-- Spring OSGI testing framework -->
 		<dependency>
 			<groupId>org.springframework.osgi</groupId>
@@ -150,7 +135,6 @@
 		<dependency>
 			<groupId>org.apache.log4j</groupId>
 			<artifactId>com.springsource.org.apache.log4j</artifactId>
-			<version>1.2.15</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -172,71 +156,76 @@
 		<dependency>
 			<groupId>net.sf.taverna.t2.core</groupId>
 			<artifactId>workflowmodel-api</artifactId>
-			<version>2.0-SNAPSHOT</version>
+			<version>${t2.core.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.taverna.t2.core</groupId>
 			<artifactId>workflowmodel-core-extensions</artifactId>
-			<version>2.0-SNAPSHOT</version>
+			<version>${t2.core.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.taverna.t2.core</groupId>
 			<artifactId>workflowmodel-impl</artifactId>
-			<version>2.0-SNAPSHOT</version>
+			<version>${t2.core.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.taverna.t2.core</groupId>
 			<artifactId>reference-api</artifactId>
-			<version>2.0-SNAPSHOT</version>
+			<version>${t2.core.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.taverna.t2.core</groupId>
 			<artifactId>reference-core-extensions</artifactId>
-			<version>2.0-SNAPSHOT</version>
+			<version>${t2.core.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.taverna.t2.core</groupId>
 			<artifactId>reference-impl</artifactId>
-			<version>2.0-SNAPSHOT</version>
+			<version>${t2.core.version}</version>
 		</dependency>
 
 		<!-- Taverna Platform -->
 		<dependency>
 			<groupId>uk.org.taverna.platform</groupId>
 			<artifactId>activity</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>uk.org.taverna.platform</groupId>
 			<artifactId>execution</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>uk.org.taverna.platform</groupId>
 			<artifactId>run</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>uk.org.taverna.platform</groupId>
 			<artifactId>execution-local</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>uk.org.taverna.platform</groupId>
 			<artifactId>report</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<!-- Scufl2 -->
 		<dependency>
 			<groupId>uk.org.taverna.scufl2</groupId>
 			<artifactId>scufl2-api</artifactId>
-			<version>0.1-SNAPSHOT</version>
+			<version>${scufl2.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>uk.org.taverna.scufl2</groupId>
 			<artifactId>scufl2-t2flow</artifactId>
-			<version>0.1-SNAPSHOT</version>
+			<version>${scufl2.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>uk.org.taverna.scufl2</groupId>
+			<artifactId>scufl2-ucfpackage</artifactId>
+			<version>${scufl2.version}</version>
 		</dependency>
 
 		<!-- Dependencies declared as provided by some poms - specified here to ensure that they are in the 
