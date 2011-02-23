@@ -239,8 +239,8 @@
 			<version>0.1-SNAPSHOT</version>
 		</dependency>
 
-		<!-- Dependencies declared as provided by some poms - specified here to 
-			ensure that they are in the local repository for the testing framework -->
+		<!-- Dependencies declared as provided by some poms - specified here to ensure that they are in the 
+			local repository for the testing framework -->
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>com.springsource.javax.servlet</artifactId>
