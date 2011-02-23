@@ -38,7 +38,7 @@ import uk.org.taverna.platform.run.api.RunService;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.translator.t2flow.T2FlowParser;
 
-public class RunTest extends PlatformTest {
+public class RunIT extends PlatformIT {
 
 	private ReferenceService referenceService;
 	private ExecutionService executionService;

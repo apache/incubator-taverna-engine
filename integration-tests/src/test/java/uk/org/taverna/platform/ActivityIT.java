@@ -28,7 +28,7 @@ import org.osgi.framework.ServiceReference;
 import uk.org.taverna.platform.activity.ActivityService;
 import uk.org.taverna.scufl2.api.configurations.ConfigurationDefinition;
 
-public class ActivityTest extends PlatformTest {
+public class ActivityIT extends PlatformIT {
 
 	public void testGetActivityURIs() {
 		ServiceReference activityServiceReference = bundleContext.getServiceReference("uk.org.taverna.platform.activity.ActivityService");

@@ -26,7 +26,7 @@ import org.osgi.framework.Bundle;
 import org.springframework.core.io.Resource;
 import org.springframework.osgi.util.OsgiStringUtils;
 
-public class OSGIFrameworkTest extends PlatformTest {
+public class OSGIFrameworkIT extends PlatformIT {
 
 	public void testOsgiEnvironment() throws Exception {
 		Bundle[] bundles = bundleContext.getBundles();

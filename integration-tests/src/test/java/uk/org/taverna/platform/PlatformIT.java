@@ -36,7 +36,7 @@ import org.springframework.osgi.test.platform.OsgiPlatform;
 
 import uk.org.taverna.platform.report.WorkflowReport;
 
-public class PlatformTest extends AbstractConfigurableBundleCreatorTests {
+public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 
 	protected OsgiPlatform createPlatform() {
 		OsgiPlatform platform = super.createPlatform();

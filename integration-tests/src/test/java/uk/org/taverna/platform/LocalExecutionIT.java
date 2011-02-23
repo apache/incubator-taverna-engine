@@ -38,7 +38,7 @@ import uk.org.taverna.scufl2.api.core.Workflow;
 import uk.org.taverna.scufl2.api.profiles.Profile;
 import uk.org.taverna.scufl2.translator.t2flow.T2FlowParser;
 
-public class LocalExecutionTest extends PlatformTest {
+public class LocalExecutionIT extends PlatformIT {
 
 	public void testLocalExecution() throws Exception {
 		URL wfResource = getClass().getResource("/t2flow/in-out.t2flow");
