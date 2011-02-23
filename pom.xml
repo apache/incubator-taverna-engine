@@ -17,12 +17,6 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<version>2.3.4</version>
-				<extensions>true</extensions>
-			</plugin>
-			<plugin>
 				<artifactId>maven-release-plugin</artifactId>
 				<version>2.0-beta-9</version>
 			</plugin>
@@ -73,14 +67,13 @@
 			<url>http://www.mygrid.org.uk/maven/repository</url>
 		</repository>
 		<repository>
-			<id>com.springsource.repository.bundles.release</id>
-			<name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name>
-			<url>http://repository.springsource.com/maven/bundles/release</url>
-		</repository>
-		<repository>
-			<id>com.springsource.repository.bundles.external</id>
-			<name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
-			<url>http://repository.springsource.com/maven/bundles/external</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots />
+			<id>mygrid-snapshot-repository</id>
+			<name>myGrid Snapshot Repository</name>
+			<url>http://www.mygrid.org.uk/maven/snapshot-repository</url>
 		</repository>
 	</repositories>
 	<reporting>
