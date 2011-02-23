@@ -36,9 +36,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.sql.rowset.serial.SerialBlob;
@@ -73,7 +73,7 @@ import net.sf.taverna.t2.workflowmodel.ProcessorInputPort;
 import net.sf.taverna.t2.workflowmodel.ProcessorOutputPort;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.NestedDataflow;
-import net.sf.taverna.t2.workflowmodel.serialization.xml.XMLSerializerRegistry;
+import net.sf.taverna.t2.workflowmodel.serialization.xml.XMLSerializerImpl;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Level;
@@ -248,7 +248,7 @@ public class EventProcessor {
 			if (! alreadyInDb) {
 				String parentDataflow;
 				if ((parentDataflow = wfNestingMap.get(dataflowID)) == null) {
-					Element serializeDataflow = XMLSerializerRegistry.getInstance().getSerializer().serializeDataflow(df);
+					Element serializeDataflow = new XMLSerializerImpl().serializeDataflow(df);
 					String dataflowString = null;
 					try {
 					    XMLOutputter outputter = new XMLOutputter();
@@ -264,7 +264,7 @@ public class EventProcessor {
 					pw.addWFId(dataflowID, null, externalName, blob); // set its dataflowID with no parent
 	
 				} else {
-					Element serializeDataflow = XMLSerializerRegistry.getInstance().getSerializer().serializeDataflow(df);
+					Element serializeDataflow = new XMLSerializerImpl().serializeDataflow(df);
 					String dataflowString = null;
 					try {
 					    XMLOutputter outputter = new XMLOutputter();

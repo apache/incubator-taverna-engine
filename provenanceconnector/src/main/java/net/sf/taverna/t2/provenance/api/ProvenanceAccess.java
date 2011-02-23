@@ -26,37 +26,33 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import net.sf.taverna.platform.spring.RavenAwareClassPathXmlApplicationContext;
 import net.sf.taverna.t2.invocation.InvocationContext;
 import net.sf.taverna.t2.invocation.impl.InvocationContextImpl;
 import net.sf.taverna.t2.provenance.ProvenanceConnectorFactory;
-import net.sf.taverna.t2.provenance.ProvenanceConnectorFactoryRegistry;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector;
-import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.ProcessorEnactmentTable;
 import net.sf.taverna.t2.provenance.lineageservice.Dependencies;
 import net.sf.taverna.t2.provenance.lineageservice.LineageQueryResultRecord;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceAnalysis;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceQuery;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceWriter;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DataflowInvocation;
-import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Port;
-import net.sf.taverna.t2.provenance.lineageservice.utils.Workflow;
+import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 import net.sf.taverna.t2.provenance.lineageservice.utils.WorkflowRun;
 import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.T2Reference;
-import net.sf.taverna.t2.reference.impl.T2ReferenceImpl;
 
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.log4j.Logger;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * @author Paolo Missier
@@ -71,6 +67,8 @@ import org.springframework.context.ApplicationContext;
 public class ProvenanceAccess {
 
 	private static Logger logger = Logger.getLogger(ProvenanceAccess.class);
+	private final Set<ProvenanceConnectorFactory> provenanceConnectorFactories;
+
 	ProvenanceConnector provenanceConnector = null;
 	ProvenanceAnalysis pa = null;
 	ProvenanceQuery pq;
@@ -79,8 +77,9 @@ public class ProvenanceAccess {
 	private String connectorType;
 	//private boolean computeOPMGraph;
 
-	public ProvenanceAccess(String connectorType) {
+	public ProvenanceAccess(String connectorType, Set<ProvenanceConnectorFactory> provenanceConnectorFactories) {
 		this.connectorType = connectorType;
+		this.provenanceConnectorFactories = provenanceConnectorFactories;
 		init();
 	}
 
@@ -155,7 +154,7 @@ public class ProvenanceAccess {
 	 * @param hibernateContext
 	 */
 	public InvocationContext initReferenceService(String hibernateContext) {
-		ApplicationContext appContext = new RavenAwareClassPathXmlApplicationContext(hibernateContext);
+		ApplicationContext appContext = new ClassPathXmlApplicationContext(hibernateContext);
 
 		final ReferenceService referenceService = (ReferenceService) appContext
 		.getBean("t2reference.service.referenceService");
@@ -177,7 +176,7 @@ public class ProvenanceAccess {
 
 	public void init() {
 
-		for (ProvenanceConnectorFactory factory : ProvenanceConnectorFactoryRegistry.getInstance().getInstances()) {
+		for (ProvenanceConnectorFactory factory : provenanceConnectorFactories) {
 			if (connectorType.equalsIgnoreCase(factory.getConnectorType())) {
 				provenanceConnector = factory.getProvenanceConnector();
 			}
