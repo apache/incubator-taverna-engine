@@ -20,7 +20,10 @@
  ******************************************************************************/
 package uk.org.taverna.platform;
 
+import java.io.IOException;
+
 import org.osgi.framework.Bundle;
+import org.springframework.core.io.Resource;
 import org.springframework.osgi.util.OsgiStringUtils;
 
 public class OSGIFrameworkTest extends PlatformTest {
@@ -33,4 +36,47 @@ public class OSGIFrameworkTest extends PlatformTest {
 		System.out.println();
 	}
 
+	protected String[] getTestFrameworkBundlesNames() {
+		String[] frameworkBundles = super.getTestFrameworkBundlesNames();
+		System.out.println("Test Framework bundles:");
+		for (String bundle : frameworkBundles) {
+			System.out.println("  " + bundle);
+		}
+		return frameworkBundles;
+	}
+	
+	protected String[] getTestBundlesNames() {
+		String[] frameworkBundles = super.getTestBundlesNames();
+		System.out.println("Framework bundles:");
+		for (String bundle : frameworkBundles) {
+			System.out.println("  " + bundle);
+		}
+		return frameworkBundles;
+	}
+	
+	public void testPrintConfig() throws IOException {
+		Resource[] bundles = getTestBundles();
+		Resource[] testBundles = getTestFrameworkBundles();
+		System.out.print("osgi.bundles=");
+		boolean printComma = false;
+		for (Resource resource : bundles) {
+			if (printComma) {
+				System.out.print(", ");
+			}
+			System.out.print(resource.getFile());
+			System.out.print("@start");
+			printComma = true;
+		}
+		for (Resource resource : testBundles) {
+			if (printComma) {
+				System.out.print(", ");
+			}
+			System.out.print(resource.getFile());
+			System.out.print("@start");
+			printComma = true;
+		}
+		System.out.println("");
+		System.out.println("eclipse.ignoreApp=true");
+	}
+	
 }

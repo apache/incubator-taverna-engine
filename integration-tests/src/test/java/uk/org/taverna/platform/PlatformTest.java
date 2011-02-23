@@ -45,15 +45,6 @@ public class PlatformTest extends AbstractConfigurableBundleCreatorTests {
 		return platform;
 	}
 
-	protected String[] getTestFrameworkBundlesNames() {
-		String[] frameworkBundles = super.getTestFrameworkBundlesNames();
-		System.out.println("Framework bundles");
-		for (String bundle : frameworkBundles) {
-			System.out.println("  " + bundle);
-		}
-		return frameworkBundles;
-	}
-	
 	protected String[] getTestBundlesNames() {
 		return new String[] {
 				"com.thoughtworks.xstream, com.springsource.com.thoughtworks.xstream, 1.2.2",
