@@ -5,6 +5,7 @@ package net.sf.taverna.t2.reference.impl.external.object;
 
 import java.io.InputStream;
 
+import net.sf.taverna.t2.reference.ReferencedDataNature;
 import net.sf.taverna.t2.reference.StreamToValueConverterSPI;
 
 /**
@@ -17,11 +18,13 @@ public class StreamToBooleanConverter implements StreamToValueConverterSPI<Boole
 		return Boolean.class;
 	}
 
-	public Boolean renderFrom(InputStream stream) {
+	public Boolean renderFrom(InputStream stream,
+			ReferencedDataNature dataNature, String charset) {
 		StreamToStringConverter stringConverter = new StreamToStringConverter();
-		String s = stringConverter.renderFrom(stream);
+		String s = stringConverter.renderFrom(stream, dataNature, charset);
 		Boolean result  = Boolean.valueOf(s);
 		return result;
+		
 	}
 
 }

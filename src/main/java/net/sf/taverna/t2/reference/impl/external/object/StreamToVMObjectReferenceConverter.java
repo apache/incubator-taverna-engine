@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 
+import net.sf.taverna.t2.reference.ReferencedDataNature;
 import net.sf.taverna.t2.reference.StreamToValueConverterSPI;
 
 /**
@@ -40,8 +41,8 @@ public class StreamToVMObjectReferenceConverter implements
 		return VMObjectReference.class;
 	}
 
-	public VMObjectReference renderFrom(InputStream stream) {
-
+	public VMObjectReference renderFrom(InputStream stream,
+			ReferencedDataNature dataNature, String charset) {
 	     VMObjectReference vmRef = new VMObjectReference();
 	     try
 	     {

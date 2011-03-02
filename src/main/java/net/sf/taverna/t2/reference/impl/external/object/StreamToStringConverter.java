@@ -25,7 +25,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.Charset;
 
+import net.sf.taverna.t2.reference.ReferencedDataNature;
 import net.sf.taverna.t2.reference.StreamToValueConverterSPI;
 
 /**
@@ -58,8 +60,20 @@ public class StreamToStringConverter implements
 		return String.class;
 	}
 
-	public String renderFrom(InputStream stream) {
-		BufferedReader in = new BufferedReader(new InputStreamReader(stream));
+	public String renderFrom(InputStream stream,
+			ReferencedDataNature dataNature, String charset) {
+		BufferedReader in;
+		if ((charset == null) || !dataNature.equals(ReferencedDataNature.TEXT)){
+			in = new BufferedReader(new InputStreamReader(stream));
+		} else {
+			try {
+				Charset c = Charset.forName(charset);
+				in = new BufferedReader(new InputStreamReader(stream, c));
+			}
+			catch (IllegalArgumentException e1) {
+				in = new BufferedReader(new InputStreamReader(stream));
+			}					
+		}
 		try {
 			return readFile(in);
 		} catch (IOException e) {

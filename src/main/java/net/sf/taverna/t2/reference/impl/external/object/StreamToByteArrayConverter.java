@@ -24,6 +24,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import net.sf.taverna.t2.reference.ReferencedDataNature;
 import net.sf.taverna.t2.reference.StreamToValueConverterSPI;
 
 /**
@@ -51,12 +52,12 @@ public class StreamToByteArrayConverter implements
 		return byte[].class;
 	}
 
-	public byte[] renderFrom(InputStream stream) {
-		try {
-			return readFile(stream);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-
+	public byte[] renderFrom(InputStream stream,
+			ReferencedDataNature dataNature, String charset) {
+			try {
+				return readFile(stream);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
 	}
 }
