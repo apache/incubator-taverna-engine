@@ -20,7 +20,6 @@ import net.sf.taverna.t2.workflowmodel.ProcessorPort;
 public class DatalinkComparator implements
 		Comparator<Datalink> {
 
-	@Override
 	public int compare(Datalink link1, Datalink link2) {
 		// Text for link1
 		EventForwardingOutputPort source1 = link1.getSource();
