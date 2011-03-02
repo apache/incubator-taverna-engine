@@ -40,8 +40,10 @@ public interface StreamToValueConverterSPI<T> {
 	 * 
 	 * @param stream
 	 *            input stream of data to render to the object
+	 * @param charset 
+	 * @param dataNature 
 	 * @return the newly created object
 	 */
-	public T renderFrom(InputStream stream);
+	public T renderFrom(InputStream stream, ReferencedDataNature dataNature, String charset);
 
 }
