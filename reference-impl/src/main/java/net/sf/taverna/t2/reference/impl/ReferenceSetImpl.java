@@ -45,6 +45,12 @@ public class ReferenceSetImpl extends AbstractEntityImpl implements
 	
 	private Long approximateSizeInBytes = new Long(-1);
 	
+	private boolean allMutable = true;
+	
+	private boolean anyDeletable = true;
+	
+	private boolean allDeletable = false;
+	
 	/**
 	 * Construct a new ReferenceSetImpl with the given set of external
 	 * references and identifier.
@@ -68,7 +74,7 @@ public class ReferenceSetImpl extends AbstractEntityImpl implements
 			ExternalReferenceSPI externalReferenceSPI = externalReferences.toArray(new ExternalReferenceSPI[0])[0];
 			approximateSizeInBytes = externalReferenceSPI.getApproximateSizeInBytes();
 		}
-	
+		updateSummary();	
 	}
 
 	/**
@@ -123,6 +129,62 @@ public class ReferenceSetImpl extends AbstractEntityImpl implements
 
 	public Long getApproximateSizeInBytes() {
 		return approximateSizeInBytes;
+	}
+
+	public boolean isAllMutable() {
+		return allMutable;
+	}
+
+	/**
+	 * @param allMutable the allMutable to set
+	 */
+	public void setAllMutable(boolean allMutable) {
+		this.allMutable = allMutable;
+	}
+
+	public void updateSummary() {
+		allMutable = true;
+		for (ExternalReferenceSPI ref : externalReferences) {
+			if (!ref.isReferencingMutableData()) {
+				allMutable = false;
+				break;
+			}
+		}
+		anyDeletable = false;
+		allDeletable = true;
+		for (ExternalReferenceSPI ref : externalReferences) {
+			if (ref.isReferencingDeletableData()) {
+				anyDeletable = true;
+			} else {
+				allDeletable = false;
+			}
+		}
+
+	}
+
+	public boolean isAnyDeletable() {
+		return anyDeletable;
+	}
+
+	/**
+	 * @param anyDeletable the anyDeletable to set
+	 */
+	public void setAnyDeletable(boolean anyDeletable) {
+		this.anyDeletable = anyDeletable;
+	}
+
+	/**
+	 * @return the allDeletable
+	 */
+	public boolean isAllDeletable() {
+		return allDeletable;
+	}
+
+	/**
+	 * @param allDeletable the allDeletable to set
+	 */
+	public void setAllDeletable(boolean allDeletable) {
+		this.allDeletable = allDeletable;
 	}
 
 }
