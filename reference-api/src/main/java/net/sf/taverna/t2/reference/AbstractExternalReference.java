@@ -80,4 +80,37 @@ public abstract class AbstractExternalReference implements ExternalReferenceSPI 
 	public float getResolutionCost() {
 		return 0.0f;
 	}
+	
+	private boolean referencingMutableData = false;
+	
+	private boolean referencingDeletableData = false;
+
+	/**
+	 * @return the referencingMutableData
+	 */
+	public boolean isReferencingMutableData() {
+		return referencingMutableData;
+	}
+
+	/**
+	 * @param referencingMutableData the referencingMutableData to set
+	 */
+	public void setReferencingMutableData(boolean referencingMutableData) {
+		this.referencingMutableData = referencingMutableData;
+	}
+
+	/**
+	 * @return the referencingDeletableData
+	 */
+	public boolean isReferencingDeletableData() {
+		return referencingDeletableData;
+	}
+
+	/**
+	 * @param referencingDeletableData the referencingDeletableData to set
+	 */
+	public void setReferencingDeletableData(boolean referencingDeletableData) {
+		this.referencingDeletableData = referencingDeletableData;
+	}
+	
 }
