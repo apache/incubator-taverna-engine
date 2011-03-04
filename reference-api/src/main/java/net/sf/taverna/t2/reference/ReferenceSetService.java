@@ -177,5 +177,16 @@ public interface ReferenceSetService {
 	 */
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = false)
 	public void deleteReferenceSetsForWorkflowRun(String workflowRunId) throws ReferenceServiceException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public Set<T2Reference> getMutableIdentifiersForWorkflowRun(
+			String workflowRunId);
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public Set<T2Reference> getTidiableIdentifiersForWorkflowRun(
+			String workflowRunId);
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = false)
+	public void tidyIdentifier(T2Reference ref);
 	
 }
