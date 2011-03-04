@@ -244,6 +244,18 @@ public interface ReferenceService {
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = false)
 	public void deleteReferencesForWorkflowRun(String workflowRunId) throws ReferenceServiceException;
 	
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = false)
+	public void snapshotWorkflowRun(Set desiredClasses, String workflowRunId);
+	
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public Set <T2Reference> getMutableIdentifiersForWorkflowRun(String workflowRunId);
+	
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public Set <T2Reference> getTidiableIdentifiersForWorkflowRun(String workflowRunId);
+	
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = false)
+	public void tidyWorkflowRun(String workflowRunId);
+	
 	/**
 	 * Returns the {@link ErrorDocumentService} this ReferenceService uses, use
 	 * this when you need functionality from that service explicitly.
