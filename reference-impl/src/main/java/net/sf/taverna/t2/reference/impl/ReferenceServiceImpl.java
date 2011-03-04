@@ -737,4 +737,29 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 		}
 	}
 
+	public void snapshotWorkflowRun(Set desiredClasses,
+			String workflowRunId) {
+		Set<T2Reference> mutableIdentifiers = getMutableIdentifiersForWorkflowRun(workflowRunId);
+		for (T2Reference ref : mutableIdentifiers) {
+			resolveIdentifier(ref, desiredClasses, null);
+		}
+	}
+
+	public Set<T2Reference> getMutableIdentifiersForWorkflowRun(
+			String workflowRunId) {
+		return referenceSetService.getMutableIdentifiersForWorkflowRun(workflowRunId);
+	}
+
+	public Set<T2Reference> getTidiableIdentifiersForWorkflowRun(
+			String workflowRunId) {
+		return referenceSetService.getTidiableIdentifiersForWorkflowRun(workflowRunId);
+	}
+
+	public void tidyWorkflowRun(String workflowRunId) {
+		Set<T2Reference> tidiableIdentifiers = getTidiableIdentifiersForWorkflowRun(workflowRunId);
+		for (T2Reference ref : tidiableIdentifiers) {
+			referenceSetService.tidyIdentifier(ref);
+		}
+	}
+
 }
