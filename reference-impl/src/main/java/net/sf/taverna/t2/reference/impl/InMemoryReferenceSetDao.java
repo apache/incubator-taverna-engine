@@ -20,10 +20,14 @@
  ******************************************************************************/
 package net.sf.taverna.t2.reference.impl;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.sf.taverna.t2.reference.DaoException;
+import net.sf.taverna.t2.reference.ExternalReferenceSPI;
 import net.sf.taverna.t2.reference.ReferenceSet;
 import net.sf.taverna.t2.reference.ReferenceSetDao;
 import net.sf.taverna.t2.reference.T2Reference;
@@ -53,6 +57,7 @@ public class InMemoryReferenceSetDao implements ReferenceSetDao {
 	}
 
 	public synchronized void update(ReferenceSet refSet) throws DaoException {
+		refSet.updateSummary();
 		store.put(refSet.getId(), refSet);		
 	}
 	
@@ -68,4 +73,31 @@ public class InMemoryReferenceSetDao implements ReferenceSetDao {
 		}
 	}
 
+	public synchronized Set<T2Reference> getMutableIdentifiersForWorkflowRun(
+			String workflowRunId) {
+		Set<T2Reference> result = new HashSet<T2Reference>();
+		for (T2Reference reference : store.keySet()) {
+			if (reference.getNamespacePart().equals(workflowRunId)) {
+				ReferenceSet rs = store.get(reference);
+				if (rs.isAllMutable()) {
+					result.add(reference);
+				}
+			}
+		}
+		return result;
+	}
+
+	public Set<T2Reference> getTidibleIdentifiersForWorkflowRun(
+			String workflowRunId) {
+		Set<T2Reference> result = new HashSet<T2Reference>();
+		for (T2Reference reference : store.keySet()) {
+			if (reference.getNamespacePart().equals(workflowRunId)) {
+				ReferenceSet rs = store.get(reference);
+				if (rs.isAnyDeletable() && !rs.isAllDeletable()) {
+					result.add(reference);
+				}
+			}
+		}
+		return result;
+	}
 }
