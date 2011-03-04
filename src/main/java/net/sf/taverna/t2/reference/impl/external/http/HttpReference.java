@@ -59,6 +59,7 @@ public class HttpReference extends AbstractExternalReference implements
 	 */
 	public HttpReference() {
 		super();
+		this.setReferencingMutableData(true);
 	}
 
 	/**
@@ -187,6 +188,10 @@ public class HttpReference extends AbstractExternalReference implements
 	@Override
 	public float getResolutionCost() {
 		return (float) 200.0;
+	}
+
+	public void deleteData() {
+		throw new UnsupportedOperationException("Cannot delete data referenced by a URL");
 	}
 
 }
