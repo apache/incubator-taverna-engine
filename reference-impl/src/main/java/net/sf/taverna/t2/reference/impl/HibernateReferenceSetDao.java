@@ -20,9 +20,12 @@
  ******************************************************************************/
 package net.sf.taverna.t2.reference.impl;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import net.sf.taverna.t2.reference.DaoException;
+import net.sf.taverna.t2.reference.ExternalReferenceSPI;
 import net.sf.taverna.t2.reference.ReferenceSet;
 import net.sf.taverna.t2.reference.ReferenceSetDao;
 import net.sf.taverna.t2.reference.T2Reference;
@@ -108,6 +111,7 @@ public class HibernateReferenceSetDao extends HibernateDaoSupport implements
 		}
 		if (rs instanceof ReferenceSetImpl) {
 			try {
+				rs.updateSummary();
 				getHibernateTemplate().update(rs);
 			} catch (Exception ex) {
 				throw new DaoException(ex);
@@ -184,6 +188,12 @@ public class HibernateReferenceSetDao extends HibernateDaoSupport implements
 		try{
 			// Select all ReferenceSets for this wf run
 			Session session = getSession();
+			Query refQuery = session.createQuery("SELECT ref FROM ReferenceSetImpl AS rs INNER JOIN rs.externalReferences AS ref WHERE (namespacePart=:workflow_run_id) AND (ref.referencingDeletableData=true)");
+			refQuery.setString("workflow_run_id", workflowRunId);
+			List<ExternalReferenceSPI> refs = refQuery.list();
+//			for (ExternalReferenceSPI ref : refs) {
+//				System.err.println("In run:" + workflowRunId + " has reference " + ref );
+//			}
 			Query selectQuery= session.createQuery("FROM ReferenceSetImpl WHERE namespacePart=:workflow_run_id");
 			selectQuery.setString("workflow_run_id", workflowRunId);
 			List<ReferenceSet> referenceSets = selectQuery.list();
@@ -194,6 +204,29 @@ public class HibernateReferenceSetDao extends HibernateDaoSupport implements
 			throw new DaoException(ex);
 		}
 		
+	}
+
+	@GetIdentifiedOperation
+	public synchronized Set<T2Reference> getMutableIdentifiersForWorkflowRun(
+			String workflowRunId) {
+			Set<T2Reference> result = new HashSet<T2Reference>();
+			Session session = getSession();
+			Query selectQuery= session.createQuery("SELECT typedId FROM ReferenceSetImpl WHERE (namespacePart=:workflow_run_id) AND (allMutable=true)");
+			selectQuery.setString("workflow_run_id", workflowRunId);
+			result.addAll(selectQuery.list());
+			session.close();
+			return result;
+	}
+
+	public Set<T2Reference> getTidibleIdentifiersForWorkflowRun(
+			String workflowRunId) {
+			Set<T2Reference> result = new HashSet<T2Reference>();
+			Session session = getSession();
+			Query selectQuery= session.createQuery("SELECT typedId FROM ReferenceSetImpl WHERE (namespacePart=:workflow_run_id) AND (anyDeletable=true) AND (allDeletable=false)");
+			selectQuery.setString("workflow_run_id", workflowRunId);
+			result.addAll(selectQuery.list());
+			session.close();
+			return result;
 	}
 
 }
