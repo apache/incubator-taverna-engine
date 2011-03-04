@@ -107,12 +107,11 @@ public interface ExternalReferenceSPI {
 	public InputStream openStream(ReferenceContext context)
 			throws DereferenceException;
 
-	
 	/**
 	 * Approximate size of the stored data or -1 if we do not know.
 	 */
 	public Long getApproximateSizeInBytes();
-	
+
 	/**
 	 * Resolution cost is an informal guide to how costly the process of
 	 * de-referencing this reference would be. It's used when assessing which
@@ -129,5 +128,25 @@ public interface ExternalReferenceSPI {
 	 *         represent cheaper de-reference paths.
 	 */
 	public float getResolutionCost();
+
+	/**
+	 * Indicate if the ExternalReferenceSPI is referencing data that is likely
+	 * to change e.g. it is at a URL or in a file system. If so then there is no
+	 * guarantee that the referenced data remains the same.
+	 * 
+	 * @return
+	 */
+	public boolean isReferencingMutableData();
+
+	/**
+	 * Indicate if the ExternalReferenceSPI is referencing data that is temporary and so should be deleted 
+	 * @return
+	 */
+	public boolean isReferencingDeletableData();
+	
+	/**
+	 * Method to delete data associated with the ExternalReferenceSPI.
+	 */
+	public void deleteData();
 
 }
