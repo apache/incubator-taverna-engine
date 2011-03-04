@@ -20,7 +20,9 @@
  ******************************************************************************/
 package net.sf.taverna.t2.reference.impl;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import net.sf.taverna.t2.reference.DaoException;
 import net.sf.taverna.t2.reference.ReferenceSet;
@@ -116,6 +118,7 @@ public class TransactionalHibernateReferenceSetDao implements ReferenceSetDao {
 		}
 		if (rs instanceof ReferenceSetImpl) {
 			try {
+				rs.updateSummary();
 				sessionFactory.getCurrentSession().update(rs);
 			} catch (Exception ex) {
 				throw new DaoException(ex);
@@ -202,6 +205,24 @@ public class TransactionalHibernateReferenceSetDao implements ReferenceSetDao {
 			throw new DaoException(ex);
 		}
 		
+	}
+
+	public Set<T2Reference> getMutableIdentifiersForWorkflowRun(
+			String workflowRunId) {
+		Set<T2Reference> result = new HashSet<T2Reference>();
+		Query selectQuery= sessionFactory.getCurrentSession().createQuery("SELECT typedId FROM ReferenceSetImpl WHERE (namespacePart=:workflow_run_id) AND (allMutable=true)");
+		selectQuery.setString("workflow_run_id", workflowRunId);
+		result.addAll(selectQuery.list());
+		return result;
+	}
+
+	public Set<T2Reference> getTidibleIdentifiersForWorkflowRun(
+			String workflowRunId) {
+		Set<T2Reference> result = new HashSet<T2Reference>();
+		Query selectQuery= sessionFactory.getCurrentSession().createQuery("SELECT typedId FROM ReferenceSetImpl WHERE (namespacePart=:workflow_run_id) AND (anyDeletable=true) AND (allDeletable=false)");
+		selectQuery.setString("workflow_run_id", workflowRunId);
+		result.addAll(selectQuery.list());
+		return result;
 	}
 
 }
