@@ -11,5 +11,7 @@
 		<id name="primaryKey" unsaved-value="0" column="bean_id">
 			<generator class="native" />
 		</id>
+		<property name="referencingMutableData" type="boolean"/>
+		<property name="referencingDeletableData" type="boolean"/>
 	</class>
 </hibernate-mapping>
