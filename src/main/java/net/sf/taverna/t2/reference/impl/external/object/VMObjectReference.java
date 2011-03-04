@@ -108,5 +108,10 @@ public class VMObjectReference extends AbstractExternalReference implements
 		return new Long(-1);
 	}
 
+	public void deleteData() {
+		throw new UnsupportedOperationException ("Cannot delete associated data from a VMObjectReference");
+
+	}
+
 }
 

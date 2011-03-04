@@ -93,4 +93,8 @@ public class InlineByteArrayReference extends AbstractExternalReference
 	public Long getApproximateSizeInBytes() {
 		return new Long(bytes.length);
 	}
+
+	public void deleteData() {
+		throw new UnsupportedOperationException ("Cannot delete associated data from database except as part of deleting the InlineByteArrayReference");
+	}
 }
