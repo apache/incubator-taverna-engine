@@ -47,7 +47,7 @@ public class FileReference extends AbstractExternalReference implements
 	private String charset = null;
 	private File file = null;
 	
-	private ReferencedDataNature dataNature = ReferencedDataNature.UNKNOWN;
+	private String dataNatureName = ReferencedDataNature.UNKNOWN.name();
 
 	/**
 	 * Explicitly declare default constructor, will be used by hibernate when
@@ -55,6 +55,9 @@ public class FileReference extends AbstractExternalReference implements
 	 */
 	public FileReference() {
 		super();
+		// Assume files are mutable unless told otherwise
+		this.setReferencingMutableData(true);
+//		this.setReferencingDeletableData(true);
 	}
 
 	/**
@@ -63,6 +66,8 @@ public class FileReference extends AbstractExternalReference implements
 	 */
 	public FileReference(File theFile) {
 		super();
+		this.setReferencingMutableData(true);
+//		this.setReferencingDeletableData(true);
 		this.file = theFile.getAbsoluteFile();
 		this.filePathString = this.file.getPath();
 		this.charset = Charset.defaultCharset().name();
@@ -152,15 +157,15 @@ public class FileReference extends AbstractExternalReference implements
 	/**
 	 * @return the dataNature
 	 */
-	public final ReferencedDataNature getDataNature() {
-		return dataNature;
+	public ReferencedDataNature getDataNature() {
+		return ReferencedDataNature.valueOf(ReferencedDataNature.class, getDataNatureName());
 	}
 
 	/**
 	 * @param dataNature the dataNature to set
 	 */
-	public final void setDataNature(ReferencedDataNature dataNature) {
-		this.dataNature = dataNature;
+	public void setDataNature(ReferencedDataNature dataNature) {
+		setDataNatureName(dataNature.name());
 	}
 
 	/**
@@ -176,6 +181,28 @@ public class FileReference extends AbstractExternalReference implements
 	@Override
 	public float getResolutionCost() {
 		return (float) 100.0;
+	}
+
+	/**
+	 * @return the dataNatureName
+	 */
+	public String getDataNatureName() {
+		return dataNatureName;
+	}
+
+	/**
+	 * @param dataNatureName the dataNatureName to set
+	 */
+	public void setDataNatureName(String dataNatureName) {
+		this.dataNatureName = dataNatureName;
+	}
+
+	public void deleteData() {
+		try {
+			getFile().delete();
+		} catch (SecurityException e) {
+			// TODO
+		}
 	}
 
 }
