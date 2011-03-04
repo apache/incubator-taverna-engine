@@ -28,5 +28,8 @@
 				class="net.sf.taverna.t2.reference.AbstractExternalReference" />
 		</set>
 		<property name="approximateSizeInBytes" />
+		<property name="allMutable" type="boolean"/>
+		<property name="anyDeletable" type="boolean"/>
+		<property name="allDeletable" type="boolean"/>
 	</class>
 </hibernate-mapping>
