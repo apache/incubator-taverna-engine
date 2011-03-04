@@ -52,5 +52,16 @@ public interface ReferenceSet extends Identified {
 	 * Get approximate size of the data pointed to by this ReferenceSet.
 	 */
 	public Long getApproximateSizeInBytes();
+	
+	/**
+	 * @return whether all the references in the ReferenceSet are mutable. This could be derived all the time but it is easier to keep.
+	 */
+	public boolean isAllMutable();
+	
+	public void updateSummary();
+	
+	public boolean isAnyDeletable();
+	
+	public boolean isAllDeletable();
 
 }
