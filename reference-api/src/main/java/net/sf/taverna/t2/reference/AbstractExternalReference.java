@@ -113,4 +113,8 @@ public abstract class AbstractExternalReference implements ExternalReferenceSPI 
 		this.referencingDeletableData = referencingDeletableData;
 	}
 	
+	public void deleteData() {
+		throw new UnsupportedOperationException("Cannot delete associated data");
+	}
+	
 }
