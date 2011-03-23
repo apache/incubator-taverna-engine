@@ -14,7 +14,7 @@
     <repositories>
         <repository>
             <snapshots>
-                <enabled>true</enabled>
+                <enabled>false</enabled>
             </snapshots>
             <id>tupelo2</id>
             <name>tupelo2</name>
@@ -22,7 +22,7 @@
         </repository>
         <repository>
             <snapshots>
-                <enabled>true</enabled>
+                <enabled>false</enabled>
             </snapshots>
             <id>opm</id>
             <name>opm</name>
