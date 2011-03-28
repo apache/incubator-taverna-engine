@@ -83,7 +83,8 @@ public class HttpReference extends AbstractExternalReference implements
 			return charsetName;
 		}
 		charsetFetched = true;
-		if (!httpUrl.getProtocol().equals("http")) {
+		if (!httpUrl.getProtocol().equals("http") &&
+				!httpUrl.getProtocol().equals("https")) {
 			charsetName = null;
 			return null;
 		}
