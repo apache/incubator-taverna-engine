@@ -43,5 +43,11 @@ public @interface AppliesTo {
 	 * Can you have more than one of these metadata objects in the resolved set?
 	 */
 	boolean many() default true;
+	
+   /**
+     * Should the annotation be pruned, i.e. only most recent kept, when saving?
+     */
+    boolean pruned() default true;
+
 
 }
