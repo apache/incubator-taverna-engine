@@ -31,6 +31,7 @@ import net.sf.taverna.t2.annotation.AnnotationChain;
 import net.sf.taverna.t2.annotation.annotationbeans.IdentificationAssertion;
 import net.sf.taverna.t2.annotation.annotationbeans.SemanticAnnotation;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
+import net.sf.taverna.t2.workflowmodel.utils.AnnotationTools;
 
 import org.apache.log4j.Logger;
 import org.jdom.Element;
@@ -119,6 +120,7 @@ public abstract class AbstractXMLSerializer implements XMLSerializationConstants
 	}
 	
 	protected Element annotationsToXML(Annotated<?> annotated) throws JDOMException, IOException {
+		AnnotationTools.pruneAnnotations(annotated);
 		Element result = new Element(ANNOTATIONS, T2_WORKFLOW_NAMESPACE);
 		for (AnnotationChain a : annotated.getAnnotations()) {
 			Element annotationChainElement;
