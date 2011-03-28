@@ -2,7 +2,11 @@ package net.sf.taverna.t2.workflowmodel.utils;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import net.sf.taverna.raven.appconfig.ApplicationRuntime;
 import net.sf.taverna.raven.spi.SpiRegistry;
@@ -10,6 +14,7 @@ import net.sf.taverna.t2.annotation.Annotated;
 import net.sf.taverna.t2.annotation.AnnotationAssertion;
 import net.sf.taverna.t2.annotation.AnnotationBeanSPI;
 import net.sf.taverna.t2.annotation.AnnotationChain;
+import net.sf.taverna.t2.annotation.AnnotationChainImpl;
 import net.sf.taverna.t2.annotation.AppliesTo;
 import net.sf.taverna.t2.annotation.annotationbeans.AbstractTextualValueAssertion;
 import net.sf.taverna.t2.workflowmodel.Edit;
@@ -148,6 +153,47 @@ public class AnnotationTools {
 
 	public Iterable<Class> getAnnotationBeanRegistry() {
 		return annotationBeanRegistry;
+	}
+
+    /**
+     * Remove out of date annotations unless many of that class are allowed, or it is explicitly not pruned
+     */
+	public static void pruneAnnotations(Annotated<?> annotated) {
+		Map<Class<AnnotationBeanSPI>, AnnotationAssertion> remainder = new HashMap<Class<AnnotationBeanSPI>, AnnotationAssertion>();
+		Set<AnnotationChain> newChains = new HashSet<AnnotationChain>();
+		for (AnnotationChain chain : annotated.getAnnotations()) {
+			AnnotationChainImpl newChain = new AnnotationChainImpl();
+			for (AnnotationAssertion assertion : chain.getAssertions()) {
+				AnnotationBeanSPI annotation = assertion.getDetail();
+				Class annotationClass = annotation.getClass();
+				AppliesTo appliesToAnnotation = (AppliesTo) annotationClass
+						.getAnnotation(AppliesTo.class);
+				if ((appliesToAnnotation == null) || appliesToAnnotation.many()
+						|| !appliesToAnnotation.pruned()) {
+					newChain.addAnnotationAssertion(assertion);
+				} else {
+					if (remainder.containsKey(annotationClass)) {
+						AnnotationAssertion currentAssertion = remainder
+								.get(annotationClass);
+						if (assertion.getCreationDate().compareTo(
+								currentAssertion.getCreationDate()) > 0) {
+							remainder.put(annotationClass, assertion);
+						}
+					} else {
+						remainder.put(annotationClass, assertion);
+					}
+				}
+			}
+			if (!newChain.getAssertions().isEmpty()) {
+				newChains.add(newChain);
+			}
+		}
+		for (AnnotationAssertion assertion : remainder.values()) {
+			AnnotationChainImpl newChain = new AnnotationChainImpl();
+			newChain.addAnnotationAssertion(assertion);
+			newChains.add(newChain);
+		}
+		annotated.setAnnotations(newChains);
 	}
 
 }
