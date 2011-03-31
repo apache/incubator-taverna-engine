@@ -25,6 +25,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Vector;
 
+import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 
@@ -41,8 +42,8 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Job;
  * @author Stian Soiland-Reyes
  * 
  */
-public abstract class AbstractIterationStrategyNode implements
-		IterationStrategyNode {
+public abstract class AbstractIterationStrategyNode extends DefaultMutableTreeNode implements
+		IterationStrategyNode  {
 
 	private List<IterationStrategyNode> children = new ArrayList<IterationStrategyNode>();
 

@@ -49,4 +49,6 @@ public interface IterationStrategy {
 
 	public TerminalNode getTerminalNode();
 
+	public void normalize();
+
 }
