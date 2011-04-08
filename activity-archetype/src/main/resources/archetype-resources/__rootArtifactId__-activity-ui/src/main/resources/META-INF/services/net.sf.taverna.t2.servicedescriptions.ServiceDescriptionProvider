@@ -1,1 +1,1 @@
-${package}.ui.serviceprovider.ExampleServiceProvider
+${package}.ui.serviceprovider.${classPrefix}ServiceProvider

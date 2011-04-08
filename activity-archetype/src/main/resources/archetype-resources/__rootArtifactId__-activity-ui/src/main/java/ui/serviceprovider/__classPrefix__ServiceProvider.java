@@ -12,10 +12,10 @@ import javax.swing.Icon;
 import net.sf.taverna.t2.servicedescriptions.ServiceDescription;
 import net.sf.taverna.t2.servicedescriptions.ServiceDescriptionProvider;
 
-public class ExampleServiceProvider implements ServiceDescriptionProvider {
+public class ${classPrefix}ServiceProvider implements ServiceDescriptionProvider {
 	
 	private static final URI providerId = URI
-		.create("http://example.com/2010/service-provider/example-activity-ui");
+		.create("http://example.com/2011/service-provider/${rootArtifactId}");
 	
 	/**
 	 * Do the actual search for services. Return using the callBack parameter.
@@ -31,7 +31,7 @@ public class ExampleServiceProvider implements ServiceDescriptionProvider {
 		// FIXME: Implement the actual service search/lookup instead
 		// of dummy for-loop
 		for (int i = 1; i <= 5; i++) {
-			ExampleServiceDesc service = new ExampleServiceDesc();
+			${classPrefix}ServiceDesc service = new ${classPrefix}ServiceDesc();
 			// Populate the service description bean
 			service.setExampleString("Example " + i);
 			service.setExampleUri(URI.create("http://localhost:8192/service"));
@@ -53,7 +53,7 @@ public class ExampleServiceProvider implements ServiceDescriptionProvider {
 	 * Icon for service provider
 	 */
 	public Icon getIcon() {
-		return ExampleServiceIcon.getIcon();
+		return ${classPrefix}ServiceIcon.getIcon();
 	}
 
 	/**

@@ -9,17 +9,17 @@ import java.util.List;
 import net.sf.taverna.t2.workbench.ui.views.contextualviews.ContextualView;
 import net.sf.taverna.t2.workbench.ui.views.contextualviews.activity.ContextualViewFactory;
 
-import ${package}.ExampleActivity;
+import ${package}.${classPrefix}Activity;
 
-public class ExampleActivityContextViewFactory implements
-		ContextualViewFactory<ExampleActivity> {
+public class ${classPrefix}ActivityContextViewFactory implements
+		ContextualViewFactory<${classPrefix}Activity> {
 
 	public boolean canHandle(Object selection) {
-		return selection instanceof ExampleActivity;
+		return selection instanceof ${classPrefix}Activity;
 	}
 
-	public List<ContextualView> getViews(ExampleActivity selection) {
-		return Arrays.<ContextualView>asList(new ExampleContextualView(selection));
+	public List<ContextualView> getViews(${classPrefix}Activity selection) {
+		return Arrays.<ContextualView>asList(new ${classPrefix}ContextualView(selection));
 	}
 	
 }

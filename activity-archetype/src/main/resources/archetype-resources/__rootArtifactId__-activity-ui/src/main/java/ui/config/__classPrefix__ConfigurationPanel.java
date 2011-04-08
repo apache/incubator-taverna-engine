@@ -12,22 +12,23 @@ import javax.swing.JTextField;
 
 import net.sf.taverna.t2.workbench.ui.views.contextualviews.activity.ActivityConfigurationPanel;
 
-import ${package}.ExampleActivity;
-import ${package}.ExampleActivityConfigurationBean;
+import ${package}.${classPrefix}Activity;
+import ${package}.${classPrefix}ActivityConfigurationBean;
 
 
 @SuppressWarnings("serial")
-public class ExampleConfigurationPanel
+public class ${classPrefix}ConfigurationPanel
 		extends
-		ActivityConfigurationPanel<ExampleActivity, ExampleActivityConfigurationBean> {
+		ActivityConfigurationPanel<${classPrefix}Activity, 
+        ${classPrefix}ActivityConfigurationBean> {
 
-	private ExampleActivity activity;
-	private ExampleActivityConfigurationBean configBean;
+	private ${classPrefix}Activity activity;
+	private ${classPrefix}ActivityConfigurationBean configBean;
 	
 	private JTextField fieldString;
 	private JTextField fieldURI;
 
-	public ExampleConfigurationPanel(ExampleActivity activity) {
+	public ${classPrefix}ConfigurationPanel(${classPrefix}Activity activity) {
 		this.activity = activity;
 		initGui();
 	}
@@ -75,7 +76,7 @@ public class ExampleConfigurationPanel
 	 * noteConfiguration() was called.
 	 */
 	@Override
-	public ExampleActivityConfigurationBean getConfiguration() {
+	public ${classPrefix}ActivityConfigurationBean getConfiguration() {
 		// Should already have been made by noteConfiguration()
 		return configBean;
 	}
@@ -98,7 +99,7 @@ public class ExampleConfigurationPanel
 	 */
 	@Override
 	public void noteConfiguration() {
-		configBean = new ExampleActivityConfigurationBean();
+		configBean = new ${classPrefix}ActivityConfigurationBean();
 		
 		// FIXME: Update bean fields from your UI elements
 		configBean.setExampleString(fieldString.getText());

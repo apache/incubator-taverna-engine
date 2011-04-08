@@ -12,16 +12,16 @@ import javax.swing.JPanel;
 
 import net.sf.taverna.t2.workbench.ui.views.contextualviews.ContextualView;
 
-import ${package}.ExampleActivity;
-import ${package}.ExampleActivityConfigurationBean;
-import ${package}.ui.config.ExampleConfigureAction;
+import ${package}.${classPrefix}Activity;
+import ${package}.${classPrefix}ActivityConfigurationBean;
+import ${package}.ui.config.${classPrefix}ConfigureAction;
 
 @SuppressWarnings("serial")
-public class ExampleContextualView extends ContextualView {
-	private final ExampleActivity activity;
+public class ${classPrefix}ContextualView extends ContextualView {
+	private final ${classPrefix}Activity activity;
 	private JLabel description = new JLabel("ads");
 
-	public ExampleContextualView(ExampleActivity activity) {
+	public ${classPrefix}ContextualView(${classPrefix}Activity activity) {
 		this.activity = activity;
 		initView();
 	}
@@ -36,9 +36,9 @@ public class ExampleContextualView extends ContextualView {
 
 	@Override
 	public String getViewTitle() {
-		ExampleActivityConfigurationBean configuration = activity
+		${classPrefix}ActivityConfigurationBean configuration = activity
 				.getConfiguration();
-		return "Example service " + configuration.getExampleString();
+		return "${classPrefix} service " + configuration.getExampleString();
 	}
 
 	/**
@@ -46,9 +46,9 @@ public class ExampleContextualView extends ContextualView {
 	 */
 	@Override
 	public void refreshView() {
-		ExampleActivityConfigurationBean configuration = activity
+		${classPrefix}ActivityConfigurationBean configuration = activity
 				.getConfiguration();
-		description.setText("Example service " + configuration.getExampleUri()
+		description.setText("${classPrefix} service " + configuration.getExampleUri()
 				+ " - " + configuration.getExampleString());
 		// TODO: Might also show extra service information looked
 		// up dynamically from endpoint/registry
@@ -65,7 +65,7 @@ public class ExampleContextualView extends ContextualView {
 	
 	@Override
 	public Action getConfigureAction(final Frame owner) {
-		return new ExampleConfigureAction(activity, owner);
+		return new ${classPrefix}ConfigureAction(activity, owner);
 	}
 
 }

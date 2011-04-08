@@ -16,9 +16,9 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityConfigurationE
 import net.sf.taverna.t2.workflowmodel.processor.activity.AsynchronousActivity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.AsynchronousActivityCallback;
 
-public class ExampleActivity extends
-		AbstractAsynchronousActivity<ExampleActivityConfigurationBean>
-		implements AsynchronousActivity<ExampleActivityConfigurationBean> {
+public class ${classPrefix}Activity extends
+		AbstractAsynchronousActivity<${classPrefix}ActivityConfigurationBean>
+		implements AsynchronousActivity<${classPrefix}ActivityConfigurationBean> {
 
 	/*
 	 * Best practice: Keep port names as constants to avoid misspelling. This
@@ -31,10 +31,10 @@ public class ExampleActivity extends
 	private static final String OUT_SIMPLE_OUTPUT = "simpleOutput";
 	private static final String OUT_REPORT = "report";
 	
-	private ExampleActivityConfigurationBean configBean;
+	private ${classPrefix}ActivityConfigurationBean configBean;
 
 	@Override
-	public void configure(ExampleActivityConfigurationBean configBean)
+	public void configure(${classPrefix}ActivityConfigurationBean configBean)
 			throws ActivityConfigurationException {
 
 		// Any pre-config sanity checks
@@ -115,7 +115,7 @@ public class ExampleActivity extends
 //				try {
 //					results = this.service.invoke(firstInput, special)
 //				} catch (ServiceException ex) {
-//					callback.fail("Could not invoke Example service " + configBean.getExampleUri(),
+//					callback.fail("Could not invoke ${classPrefix} service " + configBean.getExampleUri(),
 //							ex);
 //					// Make sure we don't call callback.receiveResult later 
 //					return;
@@ -151,7 +151,7 @@ public class ExampleActivity extends
 	}
 
 	@Override
-	public ExampleActivityConfigurationBean getConfiguration() {
+	public ${classPrefix}ActivityConfigurationBean getConfiguration() {
 		return this.configBean;
 	}
 

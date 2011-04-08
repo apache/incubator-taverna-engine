@@ -12,18 +12,18 @@ import net.sf.taverna.t2.workflowmodel.health.HealthCheck;
 import net.sf.taverna.t2.workflowmodel.health.HealthChecker;
 
 /**
- * Example health checker
+ * ${classPrefix} health checker
  * 
  */
-public class ExampleActivityHealthChecker implements
-		HealthChecker<ExampleActivity> {
+public class ${classPrefix}ActivityHealthChecker implements
+		HealthChecker<${classPrefix}Activity> {
 
 	public boolean canVisit(Object o) {
 		// Return True if we can visit the object. We could do
 		// deeper (but not time consuming) checks here, for instance
-		// if the health checker only deals with ExampleActivity where
+		// if the health checker only deals with ${classPrefix}Activity where
 		// a certain configuration option is enabled.
-		return o instanceof ExampleActivity;
+		return o instanceof ${classPrefix}Activity;
 	}
 
 	public boolean isTimeConsuming() {
@@ -34,8 +34,8 @@ public class ExampleActivityHealthChecker implements
 		return false;
 	}
 
-	public VisitReport visit(ExampleActivity activity, List<Object> ancestry) {
-		ExampleActivityConfigurationBean config = activity.getConfiguration();
+	public VisitReport visit(${classPrefix}Activity activity, List<Object> ancestry) {
+		${classPrefix}ActivityConfigurationBean config = activity.getConfiguration();
 
 		// We'll build a list of subreports
 		List<VisitReport> subReports = new ArrayList<VisitReport>();
@@ -58,7 +58,7 @@ public class ExampleActivityHealthChecker implements
 		// The default explanation here will be used if the subreports list is
 		// empty
 		return new VisitReport(HealthCheck.getInstance(), activity,
-				"Example service OK", HealthCheck.NO_PROBLEM, subReports);
+				"${classPrefix} service OK", HealthCheck.NO_PROBLEM, subReports);
 	}
 
 }

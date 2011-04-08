@@ -7,10 +7,10 @@ import java.io.Serializable;
 import java.net.URI;
 
 /**
- * Example activity configuration bean.
+ * ${classPrefix} activity configuration bean.
  * 
  */
-public class ExampleActivityConfigurationBean implements Serializable {
+public class ${classPrefix}ActivityConfigurationBean implements Serializable {
 
 	/*
 	 * TODO: Remove this comment.

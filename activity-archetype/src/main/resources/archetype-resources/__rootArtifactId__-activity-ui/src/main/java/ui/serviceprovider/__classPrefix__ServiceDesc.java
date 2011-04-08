@@ -12,18 +12,18 @@ import javax.swing.Icon;
 import net.sf.taverna.t2.servicedescriptions.ServiceDescription;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 
-import ${package}.ExampleActivity;
-import ${package}.ExampleActivityConfigurationBean;
+import ${package}.${classPrefix}Activity;
+import ${package}.${classPrefix}ActivityConfigurationBean;
 
-public class ExampleServiceDesc extends ServiceDescription<ExampleActivityConfigurationBean> {
+public class ${classPrefix}ServiceDesc extends ServiceDescription<${classPrefix}ActivityConfigurationBean> {
 
 	/**
 	 * The subclass of Activity which should be instantiated when adding a service
 	 * for this description 
 	 */
 	@Override
-	public Class<? extends Activity<ExampleActivityConfigurationBean>> getActivityClass() {
-		return ExampleActivity.class;
+	public Class<? extends Activity<${classPrefix}ActivityConfigurationBean>> getActivityClass() {
+		return ${classPrefix}Activity.class;
 	}
 
 	/**
@@ -33,8 +33,8 @@ public class ExampleServiceDesc extends ServiceDescription<ExampleActivityConfig
 	 * 
 	 */
 	@Override
-	public ExampleActivityConfigurationBean getActivityConfiguration() {
-		ExampleActivityConfigurationBean bean = new ExampleActivityConfigurationBean();
+	public ${classPrefix}ActivityConfigurationBean getActivityConfiguration() {
+		${classPrefix}ActivityConfigurationBean bean = new ${classPrefix}ActivityConfigurationBean();
 		bean.setExampleString(exampleString);
 		bean.setExampleUri(exampleUri);
 		return bean;
@@ -45,7 +45,7 @@ public class ExampleServiceDesc extends ServiceDescription<ExampleActivityConfig
 	 */
 	@Override
 	public Icon getIcon() {
-		return ExampleServiceIcon.getIcon();
+		return ${classPrefix}ServiceIcon.getIcon();
 	}
 
 	/**
@@ -64,7 +64,7 @@ public class ExampleServiceDesc extends ServiceDescription<ExampleActivityConfig
 	@Override
 	public List<String> getPath() {
 		// For deeper paths you may return several strings
-		return Arrays.asList("Examples " + exampleUri);
+		return Arrays.asList("${classPrefix}s " + exampleUri);
 	}
 
 	/**

@@ -1,1 +1,1 @@
-${package}.ExampleActivityHealthChecker
+${package}.${classPrefix}ActivityHealthChecker

@@ -6,21 +6,21 @@ package ${package}.ui.menu;
 import javax.swing.Action;
 
 import net.sf.taverna.t2.workbench.activitytools.AbstractConfigureActivityMenuAction;
-import ${package}.ExampleActivity;
-import ${package}.ui.config.ExampleConfigureAction;
+import ${package}.${classPrefix}Activity;
+import ${package}.ui.config.${classPrefix}ConfigureAction;
 
-public class ExampleConfigureMenuAction extends
-		AbstractConfigureActivityMenuAction<ExampleActivity> {
+public class ${classPrefix}ConfigureMenuAction extends
+		AbstractConfigureActivityMenuAction<${classPrefix}Activity> {
 
-	public ExampleConfigureMenuAction() {
-		super(ExampleActivity.class);
+	public ${classPrefix}ConfigureMenuAction() {
+		super(${classPrefix}Activity.class);
 	}
 
 	@Override
 	protected Action createAction() {
-		ExampleActivity a = findActivity();
+		${classPrefix}Activity a = findActivity();
 		Action result = null;
-		result = new ExampleConfigureAction(findActivity(),
+		result = new ${classPrefix}ConfigureAction(findActivity(),
 				getParentFrame());
 		result.putValue(Action.NAME, "Configure example service");
 		addMenuDots(result);

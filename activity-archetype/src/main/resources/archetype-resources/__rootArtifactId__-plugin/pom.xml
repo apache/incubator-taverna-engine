@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>${groupId}</groupId>
@@ -7,23 +8,23 @@
 		<version>${version}</version>
 	</parent>
 	<artifactId>${artifactId}</artifactId>
-    <packaging>taverna-plugin</packaging>
-	<name>Example Taverna plugin</name>
+	<packaging>taverna-plugin</packaging>
+	<name>${classPrefix} Taverna plugin</name>
 
-    <build>
-        <plugins>
-            <plugin>
-            <groupId>net.sf.taverna.t2.maven.plugins</groupId>
-            <artifactId>maven-taverna-plugin</artifactId>
-            <version>0.1.1</version>
-            <extensions>true</extensions>
-            <configuration>
-                  <provider>${groupId}</provider>
-                  <tavernaVersion>${t2.workbench.version}</tavernaVersion>
-            </configuration>
-          </plugin>
-        </plugins>
-    </build>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>net.sf.taverna.t2.maven.plugins</groupId>
+				<artifactId>maven-taverna-plugin</artifactId>
+				<version>0.1.1</version>
+				<extensions>true</extensions>
+				<configuration>
+					<provider>${groupId}</provider>
+					<tavernaVersion>${t2.workbench.version}</tavernaVersion>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 
 	<dependencies>
 		<dependency>

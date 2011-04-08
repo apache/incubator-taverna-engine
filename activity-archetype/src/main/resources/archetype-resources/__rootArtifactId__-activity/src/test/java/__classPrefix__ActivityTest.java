@@ -21,15 +21,15 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityInputPort;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ExampleActivityTest {
+public class ${classPrefix}ActivityTest {
 
-	private ExampleActivityConfigurationBean configBean;
+	private ${classPrefix}ActivityConfigurationBean configBean;
 
-	private ExampleActivity activity = new ExampleActivity();
+	private ${classPrefix}Activity activity = new ${classPrefix}Activity();
 
 	@Before
 	public void makeConfigBean() throws Exception {
-		configBean = new ExampleActivityConfigurationBean();
+		configBean = new ${classPrefix}ActivityConfigurationBean();
 		configBean.setExampleString("something");
 		configBean
 				.setExampleUri(URI.create("http://localhost:8080/myEndPoint"));
@@ -37,7 +37,7 @@ public class ExampleActivityTest {
 
 	@Test(expected = ActivityConfigurationException.class)
 	public void invalidConfiguration() throws ActivityConfigurationException {
-		ExampleActivityConfigurationBean invalidBean = new ExampleActivityConfigurationBean();
+		${classPrefix}ActivityConfigurationBean invalidBean = new ${classPrefix}ActivityConfigurationBean();
 		invalidBean.setExampleString("invalidExample");
 		// Should throw ActivityConfigurationException
 		activity.configure(invalidBean);
@@ -83,7 +83,7 @@ public class ExampleActivityTest {
 	public void reConfiguredSpecialPorts() throws Exception {
 		activity.configure(configBean);
 
-		ExampleActivityConfigurationBean specialBean = new ExampleActivityConfigurationBean();
+		${classPrefix}ActivityConfigurationBean specialBean = new ${classPrefix}ActivityConfigurationBean();
 		specialBean.setExampleString("specialCase");
 		specialBean.setExampleUri(URI
 				.create("http://localhost:8080/myEndPoint"));
