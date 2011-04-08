@@ -12,8 +12,7 @@
 	<packaging>maven-archetype</packaging>
 	<name>Taverna activity archetype</name>
 	<description>Archetype to build a Taverna service activity. 
-	Includes engine and UI bits, and a test class to run the 
-	workbench with the new activity.
+	Includes engine and UI bits, and a test class to run the workbench with the new activity.
 	</description>
 	<build>
 		<extensions>
