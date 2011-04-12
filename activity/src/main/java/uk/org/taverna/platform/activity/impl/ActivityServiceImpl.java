@@ -32,10 +32,12 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -86,10 +88,12 @@ public class ActivityServiceImpl implements ActivityService {
 
 	private List<ActivityFactory> activityFactories;
 
+	private Map<Class<?>, List<PropertyDefinition>> propertyDefinitionsMap = new HashMap<Class<?>, List<PropertyDefinition>>();
+
 	private Edits edits;
 
 	private URITools uriTools = new URITools();
-	
+
 	private static URI SCUFL2 = URI.create("http://ns.taverna.org.uk/2010/scufl2#");
 
 	@Override
@@ -152,7 +156,8 @@ public class ActivityServiceImpl implements ActivityService {
 			WorkflowBundle workflowBundle = configuration.getParent().getParent();
 			try {
 				// set the properties on the configuration bean
-				setConfigurationProperties(configurationBean, configuration, configuration.getPropertyResource(),
+				setConfigurationProperties(configurationBean, configuration,
+						configuration.getPropertyResource(),
 						definition.getPropertyResourceDefinition(), uri, workflowBundle);
 				// configure the activity with the configuration bean
 				((Configurable) activity).configure(configurationBean);
@@ -195,9 +200,9 @@ public class ActivityServiceImpl implements ActivityService {
 		this.activityFactories = activityFactories;
 	}
 
-	private void setConfigurationProperties(Object configurationBean, Configuration configuration, PropertyResource resource,
-			PropertyResourceDefinition resourceDefinition, URI uri, WorkflowBundle bundle)
-			throws ActivityConfigurationException, PropertyException {
+	private void setConfigurationProperties(Object configurationBean, Configuration configuration,
+			PropertyResource resource, PropertyResourceDefinition resourceDefinition, URI uri,
+			WorkflowBundle bundle) throws ActivityConfigurationException, PropertyException {
 		try {
 			// special cases
 			Class<?> configurationClass = configurationBean.getClass();
@@ -206,11 +211,12 @@ public class ActivityServiceImpl implements ActivityService {
 					.getPropertyDefinitions()) {
 				URI predicate = propertyDefinition.getPredicate();
 				String propertyDefinitionName = propertyDefinition.getName();
-//				if ("definesInputPort".equals(propertyDefinitionName)) {
+				// if ("definesInputPort".equals(propertyDefinitionName)) {
 				if (predicate.equals(SCUFL2.resolve("#definesInputPort"))) {
 					URI resourceURI = resource.getPropertyAsResourceURI(predicate);
 					URI configUri = uriTools.uriForBean(configuration);
-					WorkflowBean workflowBean = uriTools.resolveUri(configUri.resolve(resourceURI), bundle);
+					WorkflowBean workflowBean = uriTools.resolveUri(configUri.resolve(resourceURI),
+							bundle);
 					if (!(workflowBean instanceof InputActivityPort)) {
 						throw new UnexpectedPropertyException("Expected reference to input port",
 								SCUFL2.resolve("#definesInputPort"), resource);
@@ -225,11 +231,12 @@ public class ActivityServiceImpl implements ActivityService {
 					inputPortDefinitionBean.setDepth(inputActivityPort.getDepth());
 					// TODO TranslatedElementType should be set from the property
 					inputPortDefinitionBean.setTranslatedElementType(String.class);
-//				} else if ("definesOutputPort".equals(propertyDefinitionName)) {
+					// } else if ("definesOutputPort".equals(propertyDefinitionName)) {
 				} else if (predicate.equals(SCUFL2.resolve("#definesOutputPort"))) {
 					URI resourceURI = resource.getPropertyAsResourceURI(predicate);
 					URI configUri = uriTools.uriForBean(configuration);
-					WorkflowBean workflowBean = uriTools.resolveUri(configUri.resolve(resourceURI), bundle);
+					WorkflowBean workflowBean = uriTools.resolveUri(configUri.resolve(resourceURI),
+							bundle);
 					if (!(workflowBean instanceof OutputActivityPort)) {
 						throw new UnexpectedPropertyException("Expected reference to output port",
 								SCUFL2.resolve("#definesOutputPort"), resource);
@@ -242,7 +249,7 @@ public class ActivityServiceImpl implements ActivityService {
 					OutputActivityPort outputActivityPort = (OutputActivityPort) workflowBean;
 					outputPortDefinitionBean.setName(outputActivityPort.getName());
 					outputPortDefinitionBean.setDepth(outputActivityPort.getDepth());
-				} else {					
+				} else {
 					Method method = getPropertySetMethod(configurationClass, predicate);
 					Class<?>[] parameterTypes = method.getParameterTypes();
 					Type[] genericParameterTypes = method.getGenericParameterTypes();
@@ -268,12 +275,13 @@ public class ActivityServiceImpl implements ActivityService {
 						for (PropertyLiteral literal : literals) {
 							URI literalType = literal.getLiteralType();
 							if (!literalType.equals(type)) {
-								if (!literalType.equals(PropertyLiteral.XML_LITERAL) && !type.equals(PropertyLiteral.XSD_STRING)) {
-								throw new ActivityConfigurationException(MessageFormat.format(
-										"Expected property {0} to have type {1} but was {2}",
-										propertyDefinitionName,
-										dataPropertyDefinition.getLiteralType(),
-										literal.getLiteralType()));
+								if (!literalType.equals(PropertyLiteral.XML_LITERAL)
+										&& !type.equals(PropertyLiteral.XSD_STRING)) {
+									throw new ActivityConfigurationException(MessageFormat.format(
+											"Expected property {0} to have type {1} but was {2}",
+											propertyDefinitionName,
+											dataPropertyDefinition.getLiteralType(),
+											literal.getLiteralType()));
 								}
 							}
 							if (type.equals(PropertyLiteral.XSD_STRING)) {
@@ -311,8 +319,8 @@ public class ActivityServiceImpl implements ActivityService {
 								propertyDefinition, resource, PropertyResource.class);
 						for (PropertyResource resourceElement : resources) {
 							Object configurationObject = propertyType.newInstance();
-							setConfigurationProperties(configurationObject, configuration, resourceElement,
-									propertyResourceDefinition, uri, bundle);
+							setConfigurationProperties(configurationObject, configuration,
+									resourceElement, propertyResourceDefinition, uri, bundle);
 							propertyValues.add(configurationObject);
 						}
 					} else if (propertyDefinition instanceof PropertyReferenceDefinition) {
@@ -404,15 +412,16 @@ public class ActivityServiceImpl implements ActivityService {
 		ConfigurationDefinition configurationDefinition = new ConfigurationDefinition(uri);
 		PropertyResourceDefinition propertyResourceDefinition = configurationDefinition
 				.getPropertyResourceDefinition();
-		
-		
 
-		ConfigurationBean configurationBean = configurationClass.getAnnotation(ConfigurationBean.class);
+		ConfigurationBean configurationBean = configurationClass
+				.getAnnotation(ConfigurationBean.class);
 		if (configurationBean == null) {
 			if (Dataflow.class.isAssignableFrom(configurationClass)) {
-				PropertyDefinition referenceDefinition = new PropertyReferenceDefinition(uri.resolve("#workflow"), "workflow",
-						"Nested workflow", "", true, false, false);
-				propertyResourceDefinition.setPropertyDefinitions(Collections.singletonList(referenceDefinition));
+				PropertyDefinition referenceDefinition = new PropertyReferenceDefinition(
+						uri.resolve("#workflow"), "workflow", "Nested workflow", "", true, false,
+						false);
+				propertyResourceDefinition.setPropertyDefinitions(Collections
+						.singletonList(referenceDefinition));
 			} else if (Element.class.isAssignableFrom(configurationClass)) {
 				// TODO biomart activity
 			} else {
@@ -421,47 +430,52 @@ public class ActivityServiceImpl implements ActivityService {
 		} else {
 			uri = URI.create(configurationBean.uri());
 			propertyResourceDefinition.setTypeURI(uri);
-			propertyResourceDefinition.setPropertyDefinitions(createPropertyDefinitions(
-					configurationClass));
+			propertyResourceDefinition
+					.setPropertyDefinitions(createPropertyDefinitions(configurationClass));
 		}
 
 		return configurationDefinition;
 	}
 
 	private List<PropertyDefinition> createPropertyDefinitions(Class<?> configurationClass) {
-		List<PropertyDefinition> propertyDefinitions = new ArrayList<PropertyDefinition>();
-		Method[] methods = configurationClass.getMethods();
-		for (Method method : methods) {
-			ConfigurationProperty property = method.getAnnotation(ConfigurationProperty.class);
-			if (property != null && method.getParameterTypes().length == 1) {
-				Class<?>[] parameterTypes = method.getParameterTypes();
-				Type[] genericParameterTypes = method.getGenericParameterTypes();
-				if (parameterTypes.length == 1 && genericParameterTypes.length == 1) {
-					ConfigurationBean parentConfigBean = method.getDeclaringClass().getAnnotation(ConfigurationBean.class);
-					URI typeURI = URI.create(parentConfigBean.uri());
-					Class<?> type = parameterTypes[0];
-					Class<?> elementType = getElementType(genericParameterTypes[0]);
-					String name = property.name();
-					String label = property.label();
-					String description = property.description();
-					boolean required = property.required();
-					boolean multiple = elementType != null;
-					boolean ordered = (type.isArray() || List.class.isAssignableFrom(type))
-							&& property.ordering() == ConfigurationProperty.OrderPolicy.DEFAULT;
-					String uri = property.uri();
-					
-					propertyDefinitions
-							.add(createPropertyDefinition(typeURI, name, label, description,
-									required, multiple, ordered, multiple ? elementType : type, uri));
-				}
+		if (!propertyDefinitionsMap.containsKey(configurationClass)) {
+			List<PropertyDefinition> propertyDefinitions = new ArrayList<PropertyDefinition>();
+			propertyDefinitionsMap.put(configurationClass, propertyDefinitions);
+			Method[] methods = configurationClass.getMethods();
+			for (Method method : methods) {
+				ConfigurationProperty property = method.getAnnotation(ConfigurationProperty.class);
+				if (property != null && method.getParameterTypes().length == 1) {
+					Class<?>[] parameterTypes = method.getParameterTypes();
+					Type[] genericParameterTypes = method.getGenericParameterTypes();
+					if (parameterTypes.length == 1 && genericParameterTypes.length == 1) {
+						ConfigurationBean parentConfigBean = method.getDeclaringClass()
+								.getAnnotation(ConfigurationBean.class);
+						URI typeURI = URI.create(parentConfigBean.uri());
+						Class<?> type = parameterTypes[0];
+						Class<?> elementType = getElementType(genericParameterTypes[0]);
+						String name = property.name();
+						String label = property.label();
+						String description = property.description();
+						boolean required = property.required();
+						boolean multiple = elementType != null;
+						boolean ordered = (type.isArray() || List.class.isAssignableFrom(type))
+								&& property.ordering() == ConfigurationProperty.OrderPolicy.DEFAULT;
+						String uri = property.uri();
 
-			}
+						propertyDefinitions.add(createPropertyDefinition(typeURI, name, label,
+								description, required, multiple, ordered, multiple ? elementType
+										: type, uri));
+					}
+
+				}
+			} 
 		}
-		return propertyDefinitions;
+		return propertyDefinitionsMap.get(configurationClass);
 	}
 
 	private PropertyDefinition createPropertyDefinition(URI baseUri, String name, String label,
-			String description, boolean required, boolean multiple, boolean ordered, Class<?> type, String uri) {
+			String description, boolean required, boolean multiple, boolean ordered, Class<?> type,
+			String uri) {
 		URI predicate;
 		if (uri.isEmpty()) {
 			predicate = baseUri.resolve("#" + name);
@@ -493,8 +507,8 @@ public class ActivityServiceImpl implements ActivityService {
 			return new PropertyLiteralDefinition(predicate, PropertyLiteral.XML_LITERAL, name,
 					label, description, required, multiple, ordered);
 		} else if (type.equals(URI.class)) {
-			return new PropertyReferenceDefinition(predicate, name,
-					label, description, required, multiple, ordered);
+			return new PropertyReferenceDefinition(predicate, name, label, description, required,
+					multiple, ordered);
 		} else {
 			ConfigurationBean configurationBean = type.getAnnotation(ConfigurationBean.class);
 			List<PropertyDefinition> propertyDefinitions = new ArrayList<PropertyDefinition>();
@@ -563,13 +577,14 @@ public class ActivityServiceImpl implements ActivityService {
 			ConfigurationProperty property = method.getAnnotation(ConfigurationProperty.class);
 			if (property != null) {
 				URI uri;
-				if (! property.uri().isEmpty()) {
+				if (!property.uri().isEmpty()) {
 					uri = URI.create(property.uri());
 				} else {
-					ConfigurationBean configBean = method.getDeclaringClass().getAnnotation(ConfigurationBean.class);					
-					uri = URI.create(configBean.uri()).resolve("#"+property.name());
+					ConfigurationBean configBean = method.getDeclaringClass().getAnnotation(
+							ConfigurationBean.class);
+					uri = URI.create(configBean.uri()).resolve("#" + property.name());
 				}
-				
+
 				if (uri.equals(predicate)) {
 					return method;
 				}
