@@ -71,6 +71,12 @@ public class RunServiceImpl implements RunService {
 		return run.getID();
 	}
 
+	@Override
+	public void delete(String runID) throws InvalidRunIdException, InvalidExecutionIdException {
+		getRun(runID).delete();
+		runMap.remove(runID);
+	}
+	
 	/* (non-Javadoc)
 	 * @see uk.org.taverna.platform.run.RunService#start(java.lang.String)
 	 */

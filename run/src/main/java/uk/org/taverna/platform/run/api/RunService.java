@@ -40,6 +40,17 @@ public interface RunService {
 	public List<String> getRuns();
 
 	/**
+	 * Deletes a run.
+	 * 
+	 * @param runID
+	 *            the ID of the run
+	 * @throws InvalidRunIdException
+	 *             if the run ID is not valid
+	 * @throws InvalidExecutionIdException
+	 */
+	public void delete(String runID) throws InvalidRunIdException, InvalidExecutionIdException;
+
+	/**
 	 * Starts a run.
 	 * 
 	 * @param runID
@@ -96,8 +107,8 @@ public interface RunService {
 			InvalidExecutionIdException;
 
 	/**
-	 * Returns the current state of the run. A run's state can be CREATED, RUNNING, COMPLETED,
-	 * PAUSED, CANCELLED or FAILED.
+	 * Returns the current state of the run. A run's state can be CREATED,
+	 * RUNNING, COMPLETED, PAUSED, CANCELLED or FAILED.
 	 * 
 	 * @param runID
 	 *            the ID of the run

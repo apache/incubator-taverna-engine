@@ -139,7 +139,6 @@ public class Run {
 			logger.error(message);
 			throw new RuntimeException(message, e);
 		}
-		workflowReport.setCreatedDate(new Date());
 	}
 
 	public String getID() {
@@ -160,6 +159,12 @@ public class Run {
 
 	public WorkflowReport getWorkflowReport() {
 		return workflowReport;
+	}
+
+	public void delete() throws InvalidExecutionIdException {
+		synchronized (workflowReport) {
+			executionService.delete(executionID);
+		}
 	}
 
 	public void start() throws RunStateException, InvalidExecutionIdException {
