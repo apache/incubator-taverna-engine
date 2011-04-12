@@ -4,10 +4,11 @@
 	<parent>
 		<artifactId>platform</artifactId>
 		<groupId>uk.org.taverna</groupId>
-		<version>0.1.0-SNAPSHOT</version>
+		<version>0.1.1-SNAPSHOT</version>
 	</parent>
-	<groupId>uk.org.taverna</groupId>
+	<groupId>uk.org.taverna.platform</groupId>
 	<artifactId>integration-tests</artifactId>
+	<packaging>bundle</packaging>
 	<name>Taverna Platform integration tests</name>
 	<properties>
 		<spring.dm.version>2.0.0.M1</spring.dm.version>
@@ -41,7 +42,6 @@
 									<groupId>org.apache.xalan</groupId>
 									<artifactId>com.springsource.org.apache.xalan</artifactId>
 									<version>2.7.1</version>
-
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.apache.xerces</groupId>
@@ -86,6 +86,12 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.osgi</groupId>
+			<artifactId>spring-osgi-core</artifactId>
+			<version>${spring.dm.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.osgi</groupId>
 			<artifactId>spring-osgi-extender</artifactId>
 			<version>${spring.dm.version}</version>
 			<scope>test</scope>
@@ -121,6 +127,12 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.aopalliance</groupId>
+			<artifactId>com.springsource.org.aopalliance</artifactId>
+			<version>1.0.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.objectweb.asm</groupId>
 			<artifactId>com.springsource.org.objectweb.asm</artifactId>
 			<version>2.2.3</version>
@@ -142,12 +154,6 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>com.springsource.slf4j.org.apache.commons.logging</artifactId>
 			<version>1.5.6</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.log4j</groupId>
-			<artifactId>com.springsource.org.apache.log4j</artifactId>
-			<version>1.2.15</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -196,11 +202,26 @@
 			<artifactId>reference-impl</artifactId>
 			<version>${t2.core.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>net.sf.taverna.t2.lang</groupId>
+			<artifactId>observer</artifactId>
+			<version>${t2.lang.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.taverna.t2.lang</groupId>
+			<artifactId>ui</artifactId>
+			<version>${t2.lang.version}</version>
+		</dependency>
 
 		<!-- Taverna Platform -->
 		<dependency>
 			<groupId>uk.org.taverna.platform</groupId>
 			<artifactId>activity</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>uk.org.taverna.platform</groupId>
+			<artifactId>data</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -244,9 +265,15 @@
 		<!-- Dependencies declared as provided by some poms - specified here to ensure that they are in the 
 			local repository for the testing framework -->
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>com.springsource.javax.servlet</artifactId>
-			<version>2.5.0</version>
+			<groupId>com.thoughtworks.xstream</groupId>
+			<artifactId>com.springsource.com.thoughtworks.xstream</artifactId>
+			<version>1.2.2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.activation</groupId>
+			<artifactId>com.springsource.javax.activation</artifactId>
+			<version>1.1.1</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -262,15 +289,115 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>com.springsource.javax.servlet</artifactId>
+			<version>2.5.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.wsdl</groupId>
+			<artifactId>com.springsource.javax.wsdl</artifactId>
+			<version>1.6.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>javax.xml.soap</groupId>
 			<artifactId>com.springsource.javax.xml.soap</artifactId>
 			<version>1.3.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>javax.xml.rpc</groupId>
+			<artifactId>com.springsource.javax.xml.rpc</artifactId>
+			<version>1.1.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>javax.xml.stream</groupId>
 			<artifactId>com.springsource.javax.xml.stream</artifactId>
 			<version>1.0.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.sourceforge.javacsv</groupId>
+			<artifactId>javacsv.bundle</artifactId>
+			<version>2.0.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.axis</groupId>
+			<artifactId>com.springsource.org.apache.axis</artifactId>
+			<version>1.4.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>com.springsource.org.apache.commons.codec</artifactId>
+			<version>1.3.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>com.springsource.org.apache.commons.discovery</artifactId>
+			<version>0.4.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>com.springsource.org.apache.commons.httpclient</artifactId>
+			<version>3.1.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>com.springsource.org.apache.commons.io</artifactId>
+			<version>1.4.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>com.springsource.org.apache.commons.lang</artifactId>
+			<version>2.5.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>com.springsource.org.apache.commons.logging</artifactId>
+			<version>1.1.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>com.springsource.org.apache.commons.net</artifactId>
+			<version>1.4.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.log4j</groupId>
+			<artifactId>com.springsource.org.apache.log4j</artifactId>
+			<version>1.2.16</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>ooxml-schemas.bundle</artifactId>
+			<version>1.0.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi.bundle</artifactId>
+			<version>3.5.0.FINAL</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml.bundle</artifactId>
+			<version>3.5.0.FINAL</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-scratchpad.bundle</artifactId>
+			<version>3.5.0.FINAL</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -322,16 +449,14 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>org.opensaml</groupId>
-			<artifactId>com.springsource.org.opensaml</artifactId>
-			<version>1.1.0</version>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.apache.xalan</groupId>
-					<artifactId>com.springsource.org.apache.xalan</artifactId>
-				</exclusion>
-			</exclusions>
+			<groupId>org.beanshell</groupId>
+			<artifactId>com.springsource.bsh</artifactId>
+			<version>2.0.0.b4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.biomart</groupId>
+			<artifactId>martservice</artifactId>
+			<version>2.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.dom4j</groupId>
@@ -344,56 +469,32 @@
 			<version>1.1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>javax.activation</groupId>
-			<artifactId>com.springsource.javax.activation</artifactId>
+			<groupId>org.odftoolkit</groupId>
+			<artifactId>odfdom-java.bundle</artifactId>
+			<version>0.7.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.xerces</groupId>
+					<artifactId>com.springsource.org.apache.xerces</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.opensaml</groupId>
+			<artifactId>com.springsource.org.opensaml</artifactId>
 			<version>1.1.0</version>
 			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.xalan</groupId>
+					<artifactId>com.springsource.org.apache.xalan</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>javax.xml.rpc</groupId>
-			<artifactId>com.springsource.javax.xml.rpc</artifactId>
-			<version>1.1.0</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.wsdl</groupId>
-			<artifactId>com.springsource.javax.wsdl</artifactId>
-			<version>1.6.1</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>com.springsource.org.apache.commons.discovery</artifactId>
-			<version>0.4.0</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>com.springsource.org.apache.commons.httpclient</artifactId>
-			<version>3.1.0</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>com.springsource.org.apache.commons.io</artifactId>
-			<version>1.4.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>com.springsource.org.apache.commons.lang</artifactId>
-			<version>2.5.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>com.springsource.org.apache.commons.logging</artifactId>
-			<version>1.1.1</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>com.springsource.org.apache.commons.net</artifactId>
-			<version>1.4.1</version>
-			<scope>test</scope>
+			<groupId>org.xmlpull</groupId>
+			<artifactId>com.springsource.org.xmlpull</artifactId>
+			<version>1.1.3.4-O</version>
 		</dependency>
 	</dependencies>
 </project>

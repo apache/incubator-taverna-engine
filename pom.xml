@@ -8,7 +8,7 @@
 	</parent>
 	<groupId>uk.org.taverna</groupId>
 	<artifactId>platform</artifactId>
-	<version>0.1.0-SNAPSHOT</version>
+	<version>0.1.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Taverna Platform</name>
 	<scm>
@@ -18,7 +18,27 @@
 	</scm>
 	<properties>
 		<scufl2.version>0.1-SNAPSHOT</scufl2.version>
+		<tycho-version>0.10.0</tycho-version>
 	</properties>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.sonatype.tycho</groupId>
+				<artifactId>tycho-maven-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<extensions>true</extensions>
+			</plugin>
+			<plugin>
+				<groupId>org.sonatype.tycho</groupId>
+				<artifactId>target-platform-configuration</artifactId>
+				<version>${tycho-version}</version>
+				<configuration>
+					<resolver>p2</resolver>
+					<pomDependencies>consider</pomDependencies>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 	<repositories>
 		<repository>
 			<releases />
@@ -44,10 +64,10 @@
 		<module>activity</module>
 		<module>execution</module>
 		<module>execution-local</module>
-		<module>execution-remote</module>
+		<!--<module>execution-remote</module>-->
 		<module>run</module>
 		<module>report</module>
-		<module>integration-tests</module>
+		<!--<module>integration-tests</module>-->
 	</modules>
 	<dependencyManagement>
 		<dependencies>
