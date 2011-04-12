@@ -44,7 +44,7 @@ public class OSGIFrameworkIT extends PlatformIT {
 		}
 		return frameworkBundles;
 	}
-	
+
 	protected String[] getTestBundlesNames() {
 		String[] frameworkBundles = super.getTestBundlesNames();
 		System.out.println("Framework bundles:");
@@ -53,30 +53,41 @@ public class OSGIFrameworkIT extends PlatformIT {
 		}
 		return frameworkBundles;
 	}
-	
+
 	public void testPrintConfig() throws IOException {
 		Resource[] bundles = getTestBundles();
 		Resource[] testBundles = getTestFrameworkBundles();
-		System.out.print("osgi.bundles=");
+		StringBuilder sb = new StringBuilder();
+		StringBuilder sb2 = new StringBuilder();
+		System.out.println("mkdir platform");
+		System.out.println("mkdir platform/configuration");
+		sb2.append("cp ");
+		sb.append("osgi.bundles=");
 		boolean printComma = false;
 		for (Resource resource : bundles) {
 			if (printComma) {
-				System.out.print(", ");
+				sb.append(", ");
+				sb2.append(" ");
 			}
-			System.out.print(resource.getFile());
-			System.out.print("@start");
+			sb.append(resource.getFilename() + "@start");
+			sb2.append(resource.getFile());
 			printComma = true;
 		}
 		for (Resource resource : testBundles) {
-			if (printComma) {
-				System.out.print(", ");
+			if (!resource.getFilename().contains("test")) {
+				if (printComma) {
+					sb.append(", ");
+					sb2.append(" ");
+				}
+				sb.append(resource.getFilename() + "@start");
+				sb2.append(resource.getFile());
+				printComma = true;
 			}
-			System.out.print(resource.getFile());
-			System.out.print("@start");
-			printComma = true;
 		}
-		System.out.println("");
-		System.out.println("eclipse.ignoreApp=true");
+		sb2.append(" platform");
+		System.out.println("echo \"" + sb.toString() + "\" > platform/configuration/config.ini");
+		System.out.println(sb2.toString());
+		System.out.println("zip platform.zip platform/*");
 	}
-	
+
 }

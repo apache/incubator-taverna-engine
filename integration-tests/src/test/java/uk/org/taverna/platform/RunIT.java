@@ -152,7 +152,7 @@ public class RunIT extends PlatformIT {
 		assertEquals(State.CREATED, runService.getState(runId));
 
 		runService.start(runId);
-		assertEquals(State.RUNNING, runService.getState(runId));
+		assertFalse(runService.getState(runId).equals(State.CREATED));
 
 		Map<String, T2Reference> results = runService.getOutputs(runId);
 		waitForResult(results, "out", report);
@@ -293,6 +293,37 @@ public class RunIT extends PlatformIT {
 		System.out.println(report);
 	}
 
+	public void testRunSoaplab() throws Exception {
+		setup();
+
+		WorkflowBundle workflowBundle = loadWorkflow("/t2flow/soaplab.t2flow");
+
+		String runId = runService.createRun(new RunProfile(workflowBundle,
+				referenceService, executionService));
+		WorkflowReport report = runService.getWorkflowReport(runId);
+		assertEquals(State.CREATED, runService.getState(runId));
+		System.out.println(report);
+
+		runService.start(runId);
+		assertEquals(State.RUNNING, runService.getState(runId));
+		System.out.println(report);
+
+		Map<String, T2Reference> results = runService.getOutputs(runId);
+		waitForResult(results, "sequence", report);
+
+		T2Reference resultReference = results.get("sequence");
+		if (resultReference.containsErrors()) {
+			printErrors(referenceService, resultReference);
+		}
+		assertFalse(resultReference.containsErrors());
+		String result = (String) referenceService.renderIdentifier(resultReference, String.class,
+				null);
+		System.out.println(result);
+		assertTrue(result.startsWith("ID   X52524; SV 1; linear; genomic DNA; STD; INV; 4507 BP."));
+		assertEquals(State.COMPLETED, runService.getState(runId));
+		System.out.println(report);
+	}
+
 	public void testRunXMLSplitter() throws Exception {
 		setup();
 
@@ -344,7 +375,7 @@ public class RunIT extends PlatformIT {
 		System.out.println(report);
 
 		runService.start(runId);
-		assertEquals(State.RUNNING, runService.getState(runId));
+		assertFalse(runService.getState(runId).equals(State.CREATED));
 		System.out.println(report);
 
 		Map<String, T2Reference> results = runService.getOutputs(runId);

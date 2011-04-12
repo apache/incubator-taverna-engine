@@ -53,5 +53,6 @@ public class ActivityIT extends PlatformIT {
 			System.out.println(configurationDefinition);
 		}
 		System.out.println("==========================================================");
-	}
+	}	
+	
 }
