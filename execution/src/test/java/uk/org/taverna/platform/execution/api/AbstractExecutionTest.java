@@ -71,16 +71,25 @@ public class AbstractExecutionTest {
 		inputs = new HashMap<String, T2Reference>();
 		referenceService = new ReferenceServiceImpl();
 		execution = new AbstractExecution(workflowBundle, workflow, profile, inputs, referenceService) {
+			@Override
 			public void start() {}
+			@Override
 			public void resume() {}
+			@Override
 			public void pause() {}
+			@Override
 			public void cancel() {}
+			@Override
+			public void delete() {}
+			@Override
 			protected WorkflowReport createWorkflowReport(Workflow workflow) {
 				return new WorkflowReport(workflow) {
+					@Override
 					public ProcessorReport createProcessorReport(Processor processor,
 							WorkflowReport parentReport) {
 						return null;
 					}
+					@Override
 					public ActivityReport createActivityReport(Activity activity,
 							ProcessorReport parentReport) {
 						return null;

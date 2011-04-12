@@ -99,6 +99,15 @@ public abstract class AbstractExecutionService implements ExecutionService {
 	}
 
 	/* (non-Javadoc)
+	 * @see uk.org.taverna.platform.execution.ExecutionService#delete(java.lang.String)
+	 */
+	@Override
+	public void delete(String executionID) throws InvalidExecutionIdException {
+		getExecution(executionID).delete();
+		executionMap.remove(executionID);
+	}
+
+	/* (non-Javadoc)
 	 * @see uk.org.taverna.platform.execution.ExecutionService#start(java.lang.String)
 	 */
 	@Override

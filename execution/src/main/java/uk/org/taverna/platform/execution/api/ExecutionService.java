@@ -89,6 +89,16 @@ public interface ExecutionService {
 	public WorkflowReport getWorkflowReport(String executionID) throws InvalidExecutionIdException;
 
 	/**
+	 * Deletes the execution of a workflow.
+	 * 
+	 * @param executionID
+	 *            the ID of the execution to delete
+	 * @throws InvalidExecutionIdException
+	 *             if the execution ID is not valid
+	 */
+	public void delete(String executionID) throws InvalidExecutionIdException;
+
+	/**
 	 * Starts the execution of a workflow.
 	 * 
 	 * @param executionID

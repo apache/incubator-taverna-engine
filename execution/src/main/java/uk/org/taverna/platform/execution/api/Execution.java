@@ -37,7 +37,9 @@ import uk.org.taverna.scufl2.api.profiles.Profile;
 public interface Execution {
 
 	/**
-	 * @return
+	 * Returns the identifier for this execution.
+	 * 
+	 * @return the identifier for this execution
 	 */
 	public abstract String getID();
 
@@ -87,6 +89,11 @@ public interface Execution {
 	 * @return the <code>WorkflowReport</code> for the execution
 	 */
 	public abstract WorkflowReport getWorkflowReport();
+
+	/**
+	 * Deletes the execution.
+	 */
+	public abstract void delete();
 
 	/**
 	 * Starts the execution.

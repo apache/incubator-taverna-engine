@@ -73,4 +73,10 @@ public class RemoteExecution extends AbstractExecution {
 
 	}
 
+	@Override
+	public void delete() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

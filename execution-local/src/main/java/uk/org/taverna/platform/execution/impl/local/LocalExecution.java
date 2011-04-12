@@ -90,6 +90,12 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 		}
 	}
 
+	@Override
+	public void delete() {
+		cancel();
+	}
+	
+	@Override
 	public void start() {
 		MonitorManager.getInstance().addObserver(executionMonitor);
 		facade.addResultListener(this);
@@ -110,14 +116,17 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 		}
 	}
 
+	@Override
 	public void pause() {
 		facade.pauseWorkflowRun();
 	}
 
+	@Override
 	public void resume() {
 		facade.resumeWorkflowRun();
 	}
 
+	@Override
 	public void cancel() {
 		facade.cancelWorkflowRun();
 		facade.removeResultListener(this);
@@ -160,6 +169,7 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 		return context;
 	}
 
+	@Override
 	public void resultTokenProduced(WorkflowDataToken token, String portName) {
 		if (token.getIndex().length == 0) {
 			getWorkflowReport().getOutputs().put(portName, token.getData());
