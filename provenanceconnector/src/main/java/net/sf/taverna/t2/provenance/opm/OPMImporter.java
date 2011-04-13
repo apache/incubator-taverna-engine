@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.xml.bind.JAXBException;
+//import javax.xml.bind.JAXBException;
 
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceWriter;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Port;
@@ -111,7 +111,7 @@ public class OPMImporter {
 	}
 
 
-	public void importGraph(String XMLOPMGraphFilename) throws JAXBException, SQLException  {
+	public void importGraph(String XMLOPMGraphFilename) throws Exception, SQLException  {
 
 		try {
 			logger.info("Importing OPM XML from file "+XMLOPMGraphFilename);

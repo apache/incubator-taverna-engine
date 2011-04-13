@@ -6,7 +6,7 @@ public class Collection {
 	
 	private String parentIdentifier;
 	
-	private String workflowIdentifier;
+	private String workflowRunIdentifier;
 	
 	private String processorName;
 	
@@ -32,12 +32,12 @@ public class Collection {
 		this.parentIdentifier = parentIdentifier;
 	}
 
-	public String getWorkflowIdentifier() {
-		return workflowIdentifier;
+	public String getWorkflowRunIdentifier() {
+		return workflowRunIdentifier;
 	}
 
-	public void setWorkflowIdentifier(String workflowIdentifier) {
-		this.workflowIdentifier = workflowIdentifier;
+	public void setWorkflowRunIdentifier(String workflowRunIdentifier) {
+		this.workflowRunIdentifier = workflowRunIdentifier;
 	}
 
 	public String getProcessorName() {

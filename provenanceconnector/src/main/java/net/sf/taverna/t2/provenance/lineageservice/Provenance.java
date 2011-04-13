@@ -218,7 +218,7 @@ public class Provenance {
 			
 		} else {  // all other event types (iteration etc.)
 			
-//			logger.debug("processEvent of type "+provenanceItem.getEventType()+" for item of type "+provenanceItem.getClass().getName());
+			logger.debug("processEvent of type "+provenanceItem.getEventType()+" for item of type "+provenanceItem.getClass().getName());
 			String currentWorkflowID = provenanceItem.getWorkflowId();
 //			String currentWorkflowID = workflowIDMap.get(provenanceItem.getParentId());
 

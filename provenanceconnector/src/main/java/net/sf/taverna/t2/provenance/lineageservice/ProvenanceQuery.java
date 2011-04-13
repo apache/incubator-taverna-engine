@@ -37,8 +37,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import net.sf.taverna.t2.invocation.InvocationContext;
 import net.sf.taverna.t2.provenance.connector.JDBCConnector;
+import net.sf.taverna.t2.provenance.lineageservice.utils.Collection;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector;
+import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.CollectionTable;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataBindingTable;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataflowInvocationTable;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DDRecord;
@@ -50,6 +53,10 @@ import net.sf.taverna.t2.provenance.lineageservice.utils.PortBinding;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProcessorEnactment;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Workflow;
+import net.sf.taverna.t2.provenance.lineageservice.utils.WorkflowTree;
+import net.sf.taverna.t2.reference.ReferenceService;
+import net.sf.taverna.t2.reference.T2Reference;
+import net.sf.taverna.t2.reference.impl.T2ReferenceImpl;
 import net.sf.taverna.t2.provenance.lineageservice.utils.WorkflowRun;
 
 import org.apache.log4j.Logger;
@@ -126,6 +133,29 @@ public abstract class ProvenanceQuery {
 		return q.toString();
 	}
 
+
+
+
+	/**
+	 * pass-through query method
+	 * @param q valid JDBC query string for the T2provenance schema
+	 * @return the executed Statement if successull, null otherwise
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 * @throws ClassNotFoundException
+	 * @throws SQLException
+	 */
+	public Statement execQuery(String q) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
+
+		Statement stmt = null;
+		Connection connection = null;
+		connection = getConnection();
+		stmt = connection.createStatement();
+		boolean success = stmt.execute(q);
+		if (success) return stmt;
+		return null;
+	}
+
 	/**
 	 * select Port records that satisfy constraints
 	 */
@@ -135,19 +165,20 @@ public abstract class ProvenanceQuery {
 
 		String q0 = "SELECT DISTINCT V.*, W.workflowId FROM Port V JOIN WorkflowRun W ON W.workflowId = V.workflowId";
 
-		String q = addWhereClauseToQuery(q0, queryConstraints, true);
+		String q = null;
+		q= addWhereClauseToQuery(q0, queryConstraints, true);
 
 		List<String> orderAttr = new ArrayList<String>();
 		orderAttr.add("V.iterationStrategyOrder");
 
-		String q1 = addOrderByToQuery(q, orderAttr, true);
+		String qOrder = addOrderByToQuery(q, orderAttr, true);
 
 		Statement stmt = null;
 		Connection connection = null;
 		try {
 			connection = getConnection();
 			stmt = connection.createStatement();
-			boolean success = stmt.execute(q1.toString());
+			boolean success = stmt.execute(qOrder.toString());
 
 			if (success) {
 				ResultSet rs = stmt.getResultSet();
@@ -274,8 +305,6 @@ public abstract class ProvenanceQuery {
 				connection.close();
 			}
 		}
-		
-		q = q + " ORDER BY timestamp desc ";
 
 		return result;
 	}
@@ -359,6 +388,35 @@ public abstract class ProvenanceQuery {
 
 
 
+	public String getLatestRunID() throws SQLException {
+
+		PreparedStatement ps = null;
+		Connection connection = null;
+
+		String q = "SELECT * FROM WfInstance order by timestamp desc";
+
+		try {
+			connection = getConnection();
+			ps = connection.prepareStatement(q);
+			boolean success = ps.execute();
+
+			if (success) {
+				ResultSet rs = ps.getResultSet();
+				if (rs.next()) {
+					return rs.getString("instanceID");
+				}
+			}
+		} catch (Exception e) {
+			logger.warn("Could not execute query: " + e);
+		} finally {
+			if (connection != null) {
+				connection.close();
+			}
+		}
+		return null;
+	}
+
+
 	/**
 	 * @param dataflowID
 	 * @param conditions currently only understands "from" and "to" as timestamps for range queries
@@ -387,7 +445,7 @@ public abstract class ProvenanceQuery {
 			q = q + " and '"+conds.get(0)+"'"; 
 			conds.remove(0); 
 		}
-		
+
 		q = q + " ORDER BY timestamp desc ";
 
 		try {
@@ -395,7 +453,7 @@ public abstract class ProvenanceQuery {
 			ps = connection.prepareStatement(q);
 
 			logger.debug(q);
-			
+
 			boolean success = ps.execute();
 
 			if (success) {
@@ -991,6 +1049,43 @@ public abstract class ProvenanceQuery {
 		return result;
 	}
 
+
+
+
+	public String getDataValue(String valueRef) {
+
+		String q = "SELECT * FROM Data where dataReference = '"+valueRef+"';";
+
+		Statement stmt = null;
+		Connection connection = null;
+		try {
+			connection = getConnection();
+			stmt = connection.createStatement();
+			boolean success = stmt.execute(q);
+
+			if (success) {
+				ResultSet rs = stmt.getResultSet();
+
+				if (rs.next()) {					
+					return rs.getString("data");
+				}
+			} else return null;
+		} catch (Exception e) {
+			logger.warn("Could not execute query: " + e);
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		return null;
+	}
+
+
 	/**
 	 * generic method to fetch processors subject to additional query constraints
 	 * @param constraints
@@ -1023,6 +1118,7 @@ public abstract class ProvenanceQuery {
 					proc.setProcessorName(rs.getString("processorName"));
 					proc.setFirstActivityClassName(rs.getString("firstActivityClass"));
 					proc.setWorkflowId(rs.getString("workflowId"));
+					proc.setTopLevelProcessor(rs.getBoolean("isTopLevel"));
 					result.add(proc);
 
 				}
@@ -1041,21 +1137,33 @@ public abstract class ProvenanceQuery {
 		return result;
 	}
 
-	
-	public String getProcessorForWorkflow(String workflowID) {
-	
+
+	public List<ProvenanceProcessor> getProcessorsForWorkflow(String workflowID) {
+
 		PreparedStatement ps = null;
 		Connection connection = null;
+
+		List<ProvenanceProcessor> result = new ArrayList<ProvenanceProcessor>();
+
 		try {
 			connection = getConnection();
 			ps = connection.prepareStatement(
-					"SELECT processorName from Processor WHERE workflowId=?");
+					"SELECT * from Processor WHERE workflowId=?");
 			ps.setString(1, workflowID);
 
 			boolean success = ps.execute();
 			if (success) {
 				ResultSet rs = ps.getResultSet();
-				if (rs.next()) {  return rs.getString("processorName"); }
+
+				while (rs.next()) {  
+					ProvenanceProcessor proc = new ProvenanceProcessor();
+					proc.setIdentifier(rs.getString("processorId"));
+					proc.setProcessorName(rs.getString("processorName"));
+					proc.setFirstActivityClassName(rs.getString("firstActivityClass"));
+					proc.setWorkflowId(rs.getString("workflowId"));					
+					proc.setTopLevelProcessor(rs.getBoolean("isTopLevel"));
+					result.add(proc);
+				}
 			}
 		} catch (SQLException e) {
 			logger.error("Problem getting processor for workflow: " + workflowID, e);
@@ -1074,9 +1182,9 @@ public abstract class ProvenanceQuery {
 				}
 			}
 		}
-		return null;
+		return result;
 	}
-	
+
 	/**
 	 * simplest possible pinpoint query. Uses iteration info straight away. Assumes result is in PortBinding not in Collection
 	 *
@@ -1353,6 +1461,7 @@ public abstract class ProvenanceQuery {
 					String it = rs.getString("iteration");
 					String coll = rs.getString("collID");
 					String parentColl = rs.getString("parentCollIDRef");
+					boolean isInput = (rs.getInt("inputOrOutput") == 1 ? true : false);
 
 					lqr.addLineageQueryResultRecord(workflowId, proc, var, workflowRun,
 							it, coll, parentColl, null, null, type, false, true);  // true -> is a collection
@@ -1372,7 +1481,7 @@ public abstract class ProvenanceQuery {
 		return lqr;
 	}
 
-	
+
 	/**
 	 * 
 	 * @param lq
@@ -1412,7 +1521,7 @@ public abstract class ProvenanceQuery {
 					boolean isInput = (rs.getInt("isInputPort") == 1) ? true
 							: false;
 
-					
+
 					// FIXME there is no D and no VB - this is in generateSQL,
 					// not simpleLineageQuery
 					// commented out as D table no longer available. Need to replace this with deref from DataManager
@@ -1646,8 +1755,31 @@ public abstract class ProvenanceQuery {
 		}
 		return null;
 	}
-
 	
+	
+	
+	/**
+	 * retrieve a tree structure starting from the top parent
+	 * @param workflowID
+	 * @return
+	 * @throws SQLException 
+	 */
+	public WorkflowTree getWorkflowNestingStructure(String workflowID) throws SQLException {
+		
+		WorkflowTree tree = new WorkflowTree();
+		
+	    Workflow wf = getWorkflow(workflowID);
+	    tree.setNode(wf);
+	
+	    List<String> children = getChildrenOfWorkflow(workflowID);
+	    for (String childWfName:children) {
+	    	
+	    	WorkflowTree childStructure = getWorkflowNestingStructure(childWfName);
+	    	tree.addChild(childStructure);
+	    }	    
+	    return tree;
+	}
+
 	/**
 	 * returns the internal ID of a dataflow given its external name
 	 * @param externalName
@@ -2206,11 +2338,11 @@ public abstract class ProvenanceQuery {
 		return false;
 	}
 
-/**
- * returns a Workflow record from the DB given the workflow internal ID
- * @param dataflowID
- * @return
- */
+	/**
+	 * returns a Workflow record from the DB given the workflow internal ID
+	 * @param dataflowID
+	 * @return
+	 */
 	public Workflow getWorkflow(String dataflowID) {
 
 		PreparedStatement ps = null;
@@ -2257,9 +2389,8 @@ public abstract class ProvenanceQuery {
 			}
 		}
 		return null;
-
 	}
-	
+
 	/**
 	 * @param record a record representing a single value -- possibly within a list hierarchy
 	 * @return the URI for topmost containing collection when the input record is within a list hierarchy, or null otherwise
@@ -2284,7 +2415,7 @@ public abstract class ProvenanceQuery {
 			stmt.setString(4, record.getPortName());
 
 			String tmp = stmt.toString();
-			
+
 			boolean success = stmt.execute();
 
 			if (success) {
@@ -2311,16 +2442,16 @@ public abstract class ProvenanceQuery {
 				}
 			}
 		}
-		
+
 		while (parentCollIDRef != null) {  // INITIALLY not null -- would be TOP if the initial had no parent
-			
+
 			String oldParentCollIDRef = parentCollIDRef;
-			
+
 			// query Collection again for parent collection
 			try {
 				connection = getConnection();
 				stmt = connection.prepareStatement(q);
-				
+
 				stmt.setString(1, oldParentCollIDRef);
 				stmt.setString(2, record.getWorkflowRunId());
 				stmt.setString(3, record.getProcessorName());
@@ -2897,8 +3028,47 @@ ProvenanceConnector.ProcessorEnactmentTable ProcEnact = ProvenanceConnector.Proc
 		return invocations;
 	}
 
-	
+	public List<Collection> getCollectionsForRun(String wfInstanceID) {
 
+		PreparedStatement ps = null;
+		Connection c = null;
+
+		ArrayList<Collection> result = new ArrayList<Collection>();
+
+		try {
+			c = getConnection();
+			ps = c.prepareStatement(
+			"SELECT * FROM Collection C WHERE wfInstanceRef = ?");
+			ps.setString(1, wfInstanceID);
+
+			boolean success = ps.execute();
+			if (success) {
+				ResultSet rs = ps.getResultSet();
+
+				while (rs.next()) {
+					Collection coll = new Collection();
+					coll.setCollId(rs.getString(CollectionTable.collID.name()));
+					coll.setParentIdentifier(rs.getString(CollectionTable.parentCollIDRef.name()));
+					coll.setWorkflowRunIdentifier(rs.getString(CollectionTable.workflowRunId.name()));
+					coll.setProcessorName(rs.getString(CollectionTable.processorNameRef.name()));
+					coll.setPortName(rs.getString(CollectionTable.portName.name()));
+					coll.setIteration(rs.getString(CollectionTable.iteration.name()));
+					result.add(coll);
+				}
+			}				
+		} catch (Exception e) {
+			logger.warn("Could not execute query: " + e);
+		} finally {
+			if (c != null) {
+				try {
+					c.close();
+				} catch (SQLException ex) {
+					logger.error("There was an error closing the database connection", ex);
+				}
+			}
+		}
+		return result;		
+	}
 
 
 }

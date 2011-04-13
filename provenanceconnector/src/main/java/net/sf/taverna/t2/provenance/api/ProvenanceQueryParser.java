@@ -94,7 +94,7 @@ public class ProvenanceQueryParser {
 		q.setRunIDList(parseWorkflowAndRuns(d));  // sets the set of runs 
 		q.setWorkflowName(mainWorkflowExternalName);
 		q.setTargetPorts(parsePortSelection(d));
-		q.setSelectedProcessors(parseProcessorFocus(d));
+		q.setFocus(parseProcessorFocus(d));
 
 		return q;
 	}
@@ -118,7 +118,7 @@ public class ProvenanceQueryParser {
 		q.setRunIDList(parseWorkflowAndRuns(d));  // sets the set of runs 
 		q.setWorkflowName(mainWorkflowExternalName);
 		q.setTargetPorts(parsePortSelection(d));
-		q.setSelectedProcessors(parseProcessorFocus(d));
+		q.setFocus(parseProcessorFocus(d));
 
 		return q;
 	}

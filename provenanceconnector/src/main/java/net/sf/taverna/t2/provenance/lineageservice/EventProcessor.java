@@ -106,6 +106,10 @@ public class EventProcessor {
 	private static final String INPUT_CONTAINER_PROCESSOR = "_INPUT_";
 	private static final String TEST_EVENTS_FOLDER = "/tmp/TEST-EVENTS";
 
+	private static final String DATAFLOW_PROCESSOR_TYPE = "net.sf.taverna.t2.activities.dataflow.DataflowActivity";
+
+	private static final String DUMMY_INSTANCE_ID = "dummyInstanceID";
+
 	private int eventCnt = 0; // for events logging
 	private volatile boolean workflowStructureDone = false; // used to inhibit processing of multiple workflow events -- we only need the first
 	private volatile String workflowRunId = null; // unique run ID. set when we see the first event of type "process"
@@ -114,7 +118,7 @@ public class EventProcessor {
 	String topLevelDataflowID   = null;
 
 	Map<String, String> wfNestingMap = new ConcurrentHashMap<String, String>(); 
-	
+
 	// all input bindings are accumulated here so they can be "backpatched" (see backpatching() )
 	List<PortBinding> allInputVarBindings = Collections.synchronizedList(new ArrayList<PortBinding>()); 
 
@@ -153,6 +157,7 @@ public class EventProcessor {
 	}
 
 
+
 	/**
 	 * this is the new version that makes use of the T2 deserializer
 	 * populate static portion of the DB<br/>
@@ -169,15 +174,19 @@ public class EventProcessor {
 		// the processing of all nested workflows is done as part of the very first workflowProvenanceItem that we receive,
 		// which is self-consistent. so we ignore all others
 		if (workflowStructureDone)  { return null; }
-
-		WorkflowProvenanceItem workflowProvenanceItem = (WorkflowProvenanceItem)provenanceItem;
-		setWorkflowRunId(workflowProvenanceItem.getIdentifier());
-//		logger.debug("Workflow instance is: " + getWorkflowRunID());
-		Dataflow df = null;
-
-		df = workflowProvenanceItem.getDataflow();
+		setWorkflowRunId(((WorkflowProvenanceItem)provenanceItem).getIdentifier());
+		//		logger.debug("Workflow instance is: " + getWfInstanceID());
+		
+		Dataflow df = ((WorkflowProvenanceItem)provenanceItem).getDataflow();
 
 		workflowStructureDone = true;
+
+		return processWorkflowStructure(df);
+	}
+
+
+
+	public String processWorkflowStructure(Dataflow df) {
 
 		topLevelDataflowName = df.getLocalName();
 		topLevelDataflowID   = df.getIdentifier();
@@ -208,7 +217,7 @@ public class EventProcessor {
 			}
 		}
 
-//		logger.info("top level wf name: "+topLevelDataflowName);
+		//		logger.info("top level wf name: "+topLevelDataflowName);
 		return processDataflowStructure(df, topLevelDataflowID, df.getLocalName());  // null: no external name given to top level dataflow
 	}		
 
@@ -299,7 +308,7 @@ public class EventProcessor {
 			List<Port> vars = new ArrayList<Port>();
 			for (Processor p : processors) {
 
-//				logger.info("adding processor "+p.getLocalName());
+				//				logger.info("adding processor "+p.getLocalName());
 
 				String pName = p.getLocalName();
 
@@ -339,7 +348,7 @@ public class EventProcessor {
 					inputVar.setDepth(ip.getDepth());
 					inputVar.setInputPort(true);
 
-//					logger.info("processDataflowStructure: adding input var "+pName+":"+ip.getName());
+					//					logger.info("processDataflowStructure: adding input var "+pName+":"+ip.getName());
 
 					vars.add(inputVar);
 				}
@@ -385,9 +394,9 @@ public class EventProcessor {
 						processDataflowStructure(nested, nested.getIdentifier(), p.getLocalName());
 						
 						//List<? extends Processor> procs = nested.getProcessors();						
-//						for (Processor nestedP:procs) {
-//						System.out.println("recursion on nested processor: "+nestedP.getLocalName());
-//						}
+						//						for (Processor nestedP:procs) {
+						//						System.out.println("recursion on nested processor: "+nestedP.getLocalName());
+						//						}
 
 					}
 				}
@@ -500,7 +509,7 @@ public class EventProcessor {
 					}
 				}
 			}
-//			logger.info("completed processing dataflow " + dataflowID);
+			//			logger.info("completed processing dataflow " + dataflowID);
 
 		} catch (Exception e) {
 			logger.error("Problem processing provenance for dataflow", e);
@@ -689,27 +698,29 @@ public class EventProcessor {
 			getWfdp().processTrees(completeEvent, getWorkflowRunId());
 
 			
+			reconcileLocalOutputs(provenanceItem.getWorkflowId());  
+
 			if (! provenanceItem.getProcessId().contains(":")) {
 				// Top-level workflow finished
 				
 				// No longer needed, done by processTrees()
-				//patchTopLevelnputs();
+//				patchTopLevelnputs();
 
-				// PM changed 23/4/09
-				reconcileTopLevelOutputs();  // patchTopLevelOutputs		
 				workflowStructureDone = false; // CHECK reset for next run... 
+//				reconcileTopLevelOutputs(); // Done by reconcileLocalOutputs
+				getPw().closeCurrentModel();  // only real impl is for RDF
 			}
 
 
 		} else if (provenanceItem.getEventType().equals(SharedVocabulary.WORKFLOW_DATA_EVENT_TYPE)) {
 			// give this event to a WorkflowDataProcessor object for pre-processing
-//			try {
+			//			try {
 			// TODO may generate an exception when the data is an error CHECK
 			getWfdp().addWorkflowDataItem(provenanceItem);
-//			} catch (NumberFormatException e) {
-//			logger.error(e);
-//			}
-//			logger.info("Received workflow data - not processing");
+			//			} catch (NumberFormatException e) {
+			//			logger.error(e);
+			//			}
+			//			logger.info("Received workflow data - not processing");
 			//FIXME not sure  - needs to be stored somehow
 
 		} else if (provenanceItem.getEventType().equals((SharedVocabulary.INVOCATION_STARTED_EVENT_TYPE))) {
@@ -796,7 +807,7 @@ public class EventProcessor {
 
 		// get all global input vars
 
-//		logger.info("\n\n BACKPATCHING GLOBAL INPUTS with dataflowDepth = "+dataflowDepth+"*******\n");
+		//		logger.info("\n\n BACKPATCHING GLOBAL INPUTS with dataflowDepth = "+dataflowDepth+"*******\n");
 
 		List<Port> inputs=null;
 		try {
@@ -804,7 +815,7 @@ public class EventProcessor {
 
 			for (Port input:inputs)  {
 
-//				logger.info("global input: "+input.getVName());
+				//				logger.info("global input: "+input.getVName());
 
 				Map<String,String> queryConstraints = new HashMap<String,String>();
 
@@ -842,7 +853,7 @@ public class EventProcessor {
 						logger.info("Already logged port binding", ex);
 					}
 
-//					logger.info("added");
+					//					logger.info("added");
 
 				}
 
@@ -856,6 +867,10 @@ public class EventProcessor {
 	}
 
 
+	public void reconcileTopLevelOutputs() {		
+		reconcileLocalOutputs(topLevelDataflowID);
+	}
+
 	// PM added 23/4/09
 	/**
 	 * reconcile the top level outputs with the results from its immediate precedessors in the graph.<br/>
@@ -866,7 +881,7 @@ public class EventProcessor {
 	 * NOTE: if we assume that data values (URIs) are <em>always</em> unique then this is greatly simplified by just
 	 * comparing two sets of value records by their URIs and reconciling them. But this is not the way it is done here
 	 */
-	public void reconcileTopLevelOutputs() {
+	public void reconcileLocalOutputs(String dataflowID) {
 		/*
 	for each output O
 
@@ -954,7 +969,7 @@ public class EventProcessor {
 					}
 					List<PortBinding> matchingOValues = pq.getPortBindings(queryConstraints);
 
-//					System.out.println("querying for matching oValues: ");
+					//					System.out.println("querying for matching oValues: ");
 
 					// result at most size 1
 					if (matchingOValues.size() > 0) {
@@ -970,10 +985,10 @@ public class EventProcessor {
 
 						pw.updatePortBinding(yValue);
 
-//						System.out.println("oValue copied to yValue");
+						//						System.out.println("oValue copied to yValue");
 					} else {
 
-//						System.out.println("no match found");
+						//						System.out.println("no match found");
 
 						// copy the yValue to O 
 						// insert PortBinding back into VB with the global output portName
@@ -996,7 +1011,7 @@ public class EventProcessor {
 
 				// insert back as collection refs for Y -- catch duplicates
 				for (NestedListNode nln:oCollections) {
-//					System.out.println("collection: "+nln.getCollId());
+					//					System.out.println("collection: "+nln.getCollId());
 
 					nln.setProcessorName(sourcePname);
 					nln.setProcessorName(sourceVname);
@@ -1083,7 +1098,7 @@ public class EventProcessor {
 			List<PortBinding> VBs = pq.getPortBindings(queryConstraints);
 
 			if (VBs.size() == 0) { logger.debug("nothing to reconcile"); }
-			
+
 			// reconcile
 			for (PortBinding b:VBs) {
 
@@ -1153,8 +1168,8 @@ public class EventProcessor {
 			if (valueElements != null && valueElements.size() > 0) {
 
 				Element valueEl = valueElements.get(0); // expect only 1 child
-//				processVarBinding(valueEl, processor, portName, iterationVector,
-//				dataflow);
+				//				processVarBinding(valueEl, processor, portName, iterationVector,
+				//				dataflow);
 
 				List<PortBinding> newBindings = 
 					processPortBinding(valueEl, procBinding.getProcessorName(), portName, procBinding.getIterationVector(),
@@ -1163,8 +1178,8 @@ public class EventProcessor {
 				// processes all values within the collection, and generates one PortBinding record for each of them
 
 				allInputVarBindings.addAll(newBindings);
-				
-//				logger.debug("newBindings now has "+newBindings.size()+" elements");
+
+				//				logger.debug("newBindings now has "+newBindings.size()+" elements");
 
 				//				// if the new binding involves list values, then check to see if they need to be propagated back to 
 //				// results of iterations
@@ -1182,8 +1197,8 @@ public class EventProcessor {
 				}
 
 			} else {
-				  if (valueElements != null)  logger.debug("port name "+portName+"  "+valueElements.size());
-				  else logger.debug("valueElements is null for port name "+portName);
+				if (valueElements != null)  logger.debug("port name "+portName+"  "+valueElements.size());
+				else logger.debug("valueElements is null for port name "+portName);
 			}
 		}
 
@@ -1230,8 +1245,8 @@ public class EventProcessor {
 		List<PortBinding> newBindings = new ArrayList<PortBinding>();
 
 		String valueType = valueEl.getName();
-//		logger.info("value element for " + processorId + ": "
-//		+ valueType);
+		//		logger.info("value element for " + processorId + ": "
+		//		+ valueType);
 
 		String iterationVector = null;
 
@@ -1250,10 +1265,10 @@ public class EventProcessor {
 		vb.setPositionInColl(positionInCollection);
 
 		newBindings.add(vb);
-		
+
 		if (valueType.equals("literal")) {
 
-//			logger.warn("input of type literal");
+			//			logger.warn("input of type literal");
 
 			try {
 
@@ -1401,7 +1416,7 @@ public class EventProcessor {
 			return;
 		}
 
-//		System.out.println("saveEvent: start");
+		//		System.out.println("saveEvent: start");
 
 		File f1 = null;
 
@@ -1411,7 +1426,7 @@ public class EventProcessor {
 		String fname = "event_" + eventCnt++ + "_" + eventType + ".xml";
 		File f = new File(f1, fname);
 
-//		FileWriter fw = new FileWriter(f);
+		//		FileWriter fw = new FileWriter(f);
 
 		XMLEncoder en = new XMLEncoder(new BufferedOutputStream(
 				new FileOutputStream(f)));
@@ -1434,22 +1449,21 @@ public class EventProcessor {
 		en.close();
 		logger.debug("closed");
 
-//		fw.write(content);
-//		fw.flush();
-//		fw.close();
+		//		fw.write(content);
+		//		fw.flush();
+		//		fw.close();
 
-//		FileWriter fw = new FileWriter(f);
-//		fw.write(content);
-//		fw.flush();
-//		fw.close();
+		//		FileWriter fw = new FileWriter(f);
+		//		fw.write(content);
+		//		fw.flush();
+		//		fw.close();
 
-//		System.out.println("saved as file " + fname);
+		//		System.out.println("saved as file " + fname);
 
 
 	}
 
 	/**
->>>>>>> Stashed changes
 	 * silly class to hold pairs of strings. any better way??
 	 * @author paolo
 	 *
@@ -1502,23 +1516,23 @@ public class EventProcessor {
 //		List<String> procList = pq.getContainedProcessors(dataflowName, workflowRunId);
 		List<String> procList = pq.getContainedProcessors(dataflowName);
 
-//		logger.debug("toposort on "+dataflowName);
+		//		logger.debug("toposort on "+dataflowName);
 
-//		logger.debug("contained procs: ");
+		//		logger.debug("contained procs: ");
 		for (String s:procList) { 
 
 			List<String> successors = getPq().getSuccProcessors(s, workflowId, workflowRunId);
 			successorsOf.put(s, successors);
 
-//			logger.debug(s+" with "+predecessorsCount.get(s)+" predecessors and successors:");
+			//			logger.debug(s+" with "+predecessorsCount.get(s)+" predecessors and successors:");
 
-//			for (String s1:successors) { logger.debug(s1); }
+			//			for (String s1:successors) { logger.debug(s1); }
 		}
 
 		List<Pair>  sorted = tsort(procList, dataflowName, predecessorsCount, successorsOf, workflowId, workflowRunId);
 
-//		logger.debug("tsort:");
-//		for (String p : sorted) { logger.debug(p); }
+		//		logger.debug("tsort:");
+		//		for (String p : sorted) { logger.debug(p); }
 
 		for (int i=0; i< sorted.size(); i++) {
 
@@ -1541,7 +1555,6 @@ public class EventProcessor {
 
 
 	/**
-	 * STUB
 	 * @param procList
 	 * @param predecessorsCount 
 	 * @param successorsOf 
@@ -1557,36 +1570,35 @@ public class EventProcessor {
 
 		List<Pair> L = new ArrayList<Pair>();		// holds sorted elements
 		List<String> Q = new ArrayList<String>(); 		// temp queue
-		Set<String> visited = new HashSet<String>();
 
-//		logger.debug("queue init with procList");
+		//		logger.debug("queue init with procList");
 		// init queue with procList processors that have no predecessors
 		for (String proc:procList) {			
 
-//			logger.debug("dataflowName: "+dataflowName+" proc: "+proc);
+			//			logger.debug("dataflowName: "+dataflowName+" proc: "+proc);
 
 			if (predecessorsCount.get(proc) == null || predecessorsCount.get(proc) == 0 &&
 					!proc.equals(dataflowName)) {
 
 				Q.add(proc);				
 			}
-//			logger.debug(proc + " added to queue");
-//			} else 
-//			logger.debug(proc+" not added to queue");
+			//			logger.debug(proc + " added to queue");
+			//			} else 
+			//			logger.debug(proc+" not added to queue");
 		}
 
-//		logger.debug("queue has "+Q.size()+" elements");
+		//		logger.debug("queue has "+Q.size()+" elements");
 		while (!Q.isEmpty()) {
 
 			String current = Q.remove(0);
 //			logger.debug("extracted "+current+" and added to L");
 			L.add(new Pair(current,workflowId));
 
-//			for (String s:L) logger.debug(s);
+			//			for (String s:L) logger.debug(s);
 
 			List<String> successors = successorsOf.get(current);
 
-//			logger.debug("\n****successors of "+current);
+			//			logger.debug("\n****successors of "+current);
 
 			if (successors == null) continue;
 
@@ -1594,17 +1606,17 @@ public class EventProcessor {
 			// NB we must traverse an additional datalink through a nested workflow input if the successor is a dataflow!!
 			for (String succ : successors) {
 
-//				logger.debug(succ);
+				//				logger.debug(succ);
 
 				// decrease edge count for each successor processor
 				Integer cnt = predecessorsCount.get(succ);
 				predecessorsCount.put(succ, new Integer(cnt.intValue() - 1));
 
-//				logger.debug("now "+succ+" has "+predecessorsCount.get(succ)+" predecessors");
+				//				logger.debug("now "+succ+" has "+predecessorsCount.get(succ)+" predecessors");
 
 				if (predecessorsCount.get(succ) == 0 && !succ.equals(dataflowName)) {
 					Q.add(succ);
-//					logger.debug("adding "+succ+" to queue");
+					//					logger.debug("adding "+succ+" to queue");
 				}
 			}
 		} // end loop on Q
@@ -1621,6 +1633,10 @@ public class EventProcessor {
 		// //////////////////////
 		List<Pair> sorted = toposort(top, workflowRunId);
 
+		List<String> sortedProcessors = new ArrayList<String>();
+
+		for (Pair p:sorted) { sortedProcessors.add(p.getV1()); }
+
 		logger.debug("final sorted list of processors");
 		for (Pair p:sorted) {  logger.debug(p.getV1()+"  in workflowId "+p.getV2()); }
 
@@ -1628,23 +1644,23 @@ public class EventProcessor {
 		// PHASE II: traverse and set anl on each port
 		// //////////////////////
 
-//		logger.debug("***** STARTING ANL *****");
+		//		logger.debug("***** STARTING ANL *****");
 
-//		// sorted processor names in L at this point
-//		// process them in order
+		//		// sorted processor names in L at this point
+		//		// process them in order
 		for (Pair pnameInContext : sorted) {
 
-//			logger.debug("setting ANL for "+pnameInContext.getV1()+" input vars");
+			//			logger.debug("setting ANL for "+pnameInContext.getV1()+" input vars");
 
-//			// process pname's inputs -- set ANL to be the DNL if not set in prior steps
+			//			// process pname's inputs -- set ANL to be the DNL if not set in prior steps
 			String pname     = pnameInContext.getV1();
 			String workflowId = pnameInContext.getV2();
 
-//			logger.debug("processor "+pname);
+			//			logger.debug("processor "+pname);
 
 			List<Port> inputs = getPq().getInputPorts(pname, workflowId); // null -> do not use instance (??) CHECK
 
-//			logger.debug(inputs.size()+" inputs for "+pnameInContext.getV1());
+			//			logger.debug(inputs.size()+" inputs for "+pnameInContext.getV1());
 
 			int totalANL = 0;
 			for (Port iv : inputs) {
@@ -1668,16 +1684,16 @@ public class EventProcessor {
 				// propagate this through all the links from this var
 //				List<Port> successors = getPq().getSuccVars(pname, iv.getVName(), workflowRunId);
 
-//				logger.debug(successors.size()+ " successors for var "+iv.getVName());
+				//				logger.debug(successors.size()+ " successors for var "+iv.getVName());
 
 //				for (Port v : successors) {
 //				v.setresolvedDepth(iv.getresolvedDepth());
 //				getPw().updateVar(v);
 //				}
 			}
-//			logger.debug("total anl: "+totalANL);
+			//			logger.debug("total anl: "+totalANL);
 
-//			logger.debug("now setting ANL for "+pname+" output vars");
+			//			logger.debug("now setting ANL for "+pname+" output vars");
 
 			// process pname's outputs -- set ANL based on the sum formula (see
 			// paper)
@@ -1692,7 +1708,7 @@ public class EventProcessor {
 				// propagate this through all the links from this var
 				List<Port> successors = getPq().getSuccPorts(pname, ov.getPortName(), workflowId);
 
-//				logger.debug(successors.size()+ " successors for var "+ov.getVName());
+				//				logger.debug(successors.size()+ " successors for var "+ov.getVName());
 
 				for (Port v : successors) {
 
@@ -1705,7 +1721,7 @@ public class EventProcessor {
 						String tempWorkflowId = pq.getWorkflowIdForExternalName(v.getProcessorName());
 						List<Port> realSuccessors = getPq().getSuccPorts(v.getProcessorName(), v.getPortName(), tempWorkflowId);	
 
-//						logger.debug("realSuccessors size = "+realSuccessors.size());
+						//						logger.debug("realSuccessors size = "+realSuccessors.size());
 
 						toBeProcessed.remove(0);
 						toBeProcessed.addAll(realSuccessors);
@@ -1716,7 +1732,7 @@ public class EventProcessor {
 						String tempWorkflowId = pq.getWorkflowIdForExternalName(v.getProcessorName());
 						List<Port> realSuccessors = getPq().getSuccPorts(v.getProcessorName(), v.getPortName(), null);	
 
-//						logger.debug("realSuccessors size = "+realSuccessors.size());
+						//						logger.debug("realSuccessors size = "+realSuccessors.size());
 
 						toBeProcessed.remove(0);
 						toBeProcessed.addAll(realSuccessors);

@@ -28,9 +28,20 @@
             <name>opm</name>
             <url>http://openprovenance.org/java/maven-releases</url>
         </repository>
-    </repositories>
-
-    <dependencies>
+        <repository>
+            <id>Jena</id>
+            <url>http://openjena.org/repo/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+     </repositories>
+     <dependencies>
+         <dependency>
+            <groupId>com.hp.hpl.jena</groupId>
+            <artifactId>jena</artifactId>
+            <version>2.6.2</version>
+        </dependency>
 
         <dependency>
             <groupId>junit</groupId>
@@ -119,6 +130,5 @@
         
         
     </dependencies>
-    
 </project>
 

@@ -27,6 +27,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+// import javax.xml.bind.JAXBException;
+
+import net.sf.taverna.t2.invocation.InvocationContext;
 import net.sf.taverna.t2.provenance.api.NativeAnswer;
 import net.sf.taverna.t2.provenance.api.QueryAnswer;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DataLink;
@@ -36,6 +39,9 @@ import net.sf.taverna.t2.provenance.lineageservice.utils.Port;
 import net.sf.taverna.t2.provenance.lineageservice.utils.PortBinding;
 import net.sf.taverna.t2.provenance.lineageservice.utils.WorkflowRun;
 import net.sf.taverna.t2.provenance.opm.OPMManager;
+import net.sf.taverna.t2.reference.ExternalReferenceSPI;
+import net.sf.taverna.t2.reference.T2Reference;
+import net.sf.taverna.t2.reference.impl.ReferenceSetImpl;
 
 import org.apache.log4j.Logger;
 import org.tupeloproject.kernel.OperatorException;
@@ -79,6 +85,8 @@ public class ProvenanceAnalysis {
 	private OPMManager aOPMManager = null;
 
 	private boolean recordArtifactValues = false;
+
+	private InvocationContext ic = null;
 
 	public ProvenanceAnalysis() { ; }
 
@@ -130,12 +138,12 @@ public class ProvenanceAnalysis {
 	 * @throws IOException
 	 * @throws JAXBException
 	 */
-//	public String OPMRdf2Xml() throws OperatorException, IOException, JAXBException {
-//	if (isReady()) {
-//	return aOPMManager.Rdf2Xml();
-//	}  
-//	return null;
-//	}
+	//	public String OPMRdf2Xml() throws OperatorException, IOException, JAXBException {
+	//	if (isReady()) {
+	//	return aOPMManager.Rdf2Xml();
+	//	}  
+	//	return null;
+	//	}
 
 	/**
 	 * asks the OPM manager to create a dot file representing its current RDF OPMGraph<br/>
@@ -247,22 +255,22 @@ public class ProvenanceAnalysis {
 		completeAnswer.setNativeAnswer(nativeAnswer);
 
 		if (aOPMManager != null && aOPMManager.isActive())  {
-//			String _OPM_asXML_File;
-//			try {
+			//			String _OPM_asXML_File;
+			//			try {
 
-//			_OPM_asXML_File = aOPMManager.Rdf2Xml();
+			//			_OPM_asXML_File = aOPMManager.Rdf2Xml();
 			String _OPM_asRDF_File = aOPMManager.writeGraph();
 
 			completeAnswer.setOPMAnswer_AsRDF(_OPM_asRDF_File);
-//			completeAnswer.setOPMAnswer_AsXML(_OPM_asXML_File);
+			//			completeAnswer.setOPMAnswer_AsXML(_OPM_asXML_File);
 
-//			} catch (OperatorException e) {
-//			logger.error("Problem running query: " + e);
-//			} catch (IOException e) {
-//			logger.error("Problem running query: " + e);
-//			} catch (JAXBException e) {
-//			logger.error("Problem running query: " + e);
-//			}
+			//			} catch (OperatorException e) {
+			//			logger.error("Problem running query: " + e);
+			//			} catch (IOException e) {
+			//			logger.error("Problem running query: " + e);
+			//			} catch (JAXBException e) {
+			//			logger.error("Problem running query: " + e);
+			//			}
 		}
 		return completeAnswer;
 	}
@@ -296,7 +304,7 @@ public class ProvenanceAnalysis {
 		}
 
 		// are we returning all outputs in addition to the inputs?
-		logger.info("return outputs: "+isReturnOutputs());
+		logger.debug("return outputs: "+isReturnOutputs());
 
 		Map<String, List<Dependencies>> qa = new HashMap<String, List<Dependencies>>();
 
@@ -357,7 +365,7 @@ public class ProvenanceAnalysis {
 
 //		Map<String, LineageSQLQuery>  portName2lqList =  new HashMap<String, LineageSQLQuery>();
 
-//		System.out.println("timing starts...");
+		//		System.out.println("timing starts...");
 		long start = System.currentTimeMillis();
 
 		List<LineageSQLQuery>  lqList =  searchDataflowGraph(wfID, workflowId, var, proc, path, selectedProcessors);
@@ -366,15 +374,15 @@ public class ProvenanceAnalysis {
 		long gst = stop-start;
 
 		// execute queries in the LineageSQLQuery list
-		logger.info("\n****************  executing lineage queries:  (includeDataValue is "+ isIncludeDataValue() +"**************\n");
+		logger.debug("\n****************  executing lineage queries:  (includeDataValue is "+ isIncludeDataValue() +"**************\n");
 		start = System.currentTimeMillis();
 
 		List<Dependencies> results =  getPq().runLineageQueries(lqList, isIncludeDataValue());
 		stop = System.currentTimeMillis();
 
 		long qrt = stop-start;
-		logger.info("search time: "+gst+"ms\nlineage query response time: "+qrt+" ms");
-		logger.info("total exec time "+(gst+qrt)+"ms");
+		logger.debug("search time: "+gst+"ms\nlineage query response time: "+qrt+" ms");
+		logger.debug("total exec time "+(gst+qrt)+"ms");
 
 		return results;
 	}
@@ -522,7 +530,7 @@ public class ProvenanceAnalysis {
 				int delta = resolvedDepth - inputVar.getDepth();
 				var2delta.put(inputVar, delta);
 				minPathLength += delta;
-//				System.out.println("xform() from ["+proc+"] upwards to ["+inputVar.getPName()+":"+inputVar.getVName()+"]");
+				//				System.out.println("xform() from ["+proc+"] upwards to ["+inputVar.getPName()+":"+inputVar.getVName()+"]");
 			}
 
 			String iterationVector[] = path.split(",");
@@ -648,8 +656,18 @@ public class ProvenanceAnalysis {
 						role = vb.getProcessorName()+"/"+vb.getPortName();
 
 					if (aOPMManager!=null && !pq.isDataflow(proc)) {
-						if (isRecordArtifactValues())
-							aOPMManager.addArtifact(vb.getValue(), vb.getResolvedValue());
+						if (isRecordArtifactValues()) {
+
+							T2Reference ref = getInvocationContext().getReferenceService().referenceFromString(vb.getValue());
+
+							Object data = ic.getReferenceService().renderIdentifier(ref, Object.class, ic); 
+
+							//							ReferenceSetImpl o = (ReferenceSetImpl) ic.getReferenceService().resolveIdentifier(ref, null, ic);
+							logger.debug("deref value for ref: "+ref+" "+data+" of class "+data.getClass().getName());
+
+							aOPMManager.addArtifact(vb.getValue(), data);
+
+						}
 						else 
 							aOPMManager.addArtifact(vb.getValue());
 
@@ -678,7 +696,7 @@ public class ProvenanceAnalysis {
 				// if OPM is on, execute the query so we get the value we need for the Artifact node
 				Dependencies inputs = getPq().runLineageQuery(lq, isIncludeDataValue());
 
-				if (doOPM && inputs.getRecords().size()>0 && !pq.isDataflow(proc)) {
+				if (doOPM && inputs.getRecords().size()>0) { // && !pq.isDataflow(proc)) {
 
 					//	update OPM graph with inputs and used properties
 					for (LineageQueryResultRecord resultRecord: inputs.getRecords()) {
@@ -698,9 +716,14 @@ public class ProvenanceAnalysis {
 						//
 						// create OPM artifact and role for the input var obtained by path projection
 						//
-						if (isRecordArtifactValues())							
-							aOPMManager.addArtifact(resultRecord.getValue(), resultRecord.getResolvedValue());
-						else 
+						if (resultRecord.isCollection())  {
+							aOPMManager.addArtifact(resultRecord.getCollectionT2Reference());
+						}	else if (isRecordArtifactValues())	{
+							T2Reference ref = getInvocationContext().getReferenceService().referenceFromString(resultRecord.getValue());
+							Object data = ic.getReferenceService().renderIdentifier(ref, Object.class, ic); 
+							logger.debug("deref value for ref: "+ref+" "+data+" of class "+data.getClass().getName());
+							aOPMManager.addArtifact(resultRecord.getValue(), data);
+						}  else { 
 							aOPMManager.addArtifact(resultRecord.getValue());
 						var2Artifact.put(resultRecord.getPortName(), aOPMManager.getCurrentArtifact());
 
@@ -727,12 +750,13 @@ public class ProvenanceAnalysis {
 					}
 				}
 			}
-//			END OPM update section
+			//			END OPM update section
 		}
 
 		// recursion -- xfer path is next up
 		for (Port inputVar: inputVars) {
 			xferStep(wfID, workflowId, inputVar, var2Path.get(inputVar), selectedProcessors, lqList);	
+		}
 		}
 		currentPath.remove(currentPath.size()-1);  // CHECK	
 	}  // end xformStep
@@ -1151,5 +1175,12 @@ public class ProvenanceAnalysis {
 		if (aOPMManager != null) { aOPMManager.setActive(generateOPMGraph); }
 	}
 
+	public void setInvocationContext(InvocationContext context) {
+		this.ic  = context;
+	}
+
+	public InvocationContext getInvocationContext() {
+		return this.ic;
+	}
 
 }

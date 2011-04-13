@@ -58,10 +58,17 @@ public class ProvenanceWriter {
 
 	protected static Logger logger = Logger.getLogger(ProvenanceWriter.class);    
 	protected int cnt; // counts number of calls to PortBinding
+    protected ProvenanceQuery pq = null;
 
 	public Connection getConnection() throws SQLException {
 		return JDBCConnector.getConnection();
 	}
+		
+	public void closeCurrentModel() {
+		
+	}	
+
+
 
 	/**
 	 * add each Port as a row into the Port DB table
@@ -409,9 +416,77 @@ public class ProvenanceWriter {
 		return newParentCollectionId;
 	}
 
+	public void addData(String dataRef, String wfInstanceId, Object data)
+	throws SQLException {
+		
+		Connection connection = null;
+
+		try {
+			connection = getConnection();
+			PreparedStatement ps = null;
+			ps = connection.prepareStatement(
+			"INSERT INTO Data (dataReference,wfInstanceID,data) VALUES (?,?,?)");
+			ps.setString(1, dataRef);
+			ps.setString(2, wfInstanceId);
+			ps.setString(3, (String) data);
+
+			ps.executeUpdate();
+
+			cnt++;
+
+			logger.debug("addData executed on data value from char: "+String.valueOf(data));
+			
+		} catch (SQLException e) {
+			// the same ID will come in several times -- duplications are
+			// expected, don't panic		
+		} finally {
+			if (connection != null) {
+				connection.close();
+			}
+		}
+	}
+
+
+		
+	/**
+	 * OBSOLETE<p/>
+	 * adds (dataRef, data) pairs to the Data table (only for string data)
+	 */
+	public void addData(String dataRef, String wfInstanceId, byte[] data)
+	throws SQLException {
+
+		Connection connection = null;
+
+		try {
+			connection = getConnection();
+			PreparedStatement ps = null;
+			ps = connection.prepareStatement(
+			"INSERT INTO Data (dataReference,wfInstanceID,data) VALUES (?,?,?)");
+			ps.setString(1, dataRef);
+			ps.setString(2, wfInstanceId);
+			ps.setBytes(3, data);
+
+			ps.executeUpdate();
+
+			cnt++;
+
+			logger.debug("addData executed on data value from char: "+String.valueOf(data));
+			
+		} catch (SQLException e) {
+			// the same ID will come in several times -- duplications are
+			// expected, don't panic	
+		} finally {
+			if (connection != null) {
+				connection.close();
+			}
+		}
+	}
+
 	public void addPortBinding(PortBinding vb) throws SQLException {
 		PreparedStatement ps = null;
 		Connection connection = null;
+
+		logger.debug("START addVarBinding proc "+vb.getProcessorName()+" port "+vb.getPortName());
 
 		try {
 			connection = getConnection();
@@ -429,9 +504,12 @@ public class ProvenanceWriter {
 			ps.setString(9, vb.getIteration());
 			ps.setInt(10, vb.getPositionInColl());
 
+			
 			logger.debug("addVarBinding query: \n"+ps.toString());
 			ps.executeUpdate();
 			logger.debug("insert done");
+
+			logger.debug("COMPLETE addVarBinding proc "+vb.getProcessorName()+" port "+vb.getPortName());
 
 			cnt++;  // who uses this?
 
@@ -882,7 +960,10 @@ public class ProvenanceWriter {
 		}
 	}
 
-	
+   public void setQuery(ProvenanceQuery query) { this.pq  = query; }
+
+   public ProvenanceQuery getQuery() { return this.pq; }
+
 
 }
 

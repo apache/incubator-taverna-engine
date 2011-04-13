@@ -13,8 +13,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import javax.xml.bind.JAXBException;
+// import javax.xml.bind.JAXBException;
 
+import net.sf.taverna.t2.provenance.lineageservice.ProvenanceAnalysis;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DataValueExtractor;
 
 import org.apache.log4j.Logger;
@@ -104,7 +105,7 @@ public class OPMManager {
 	 * depends on the settings, see {@link OPMManager.addValueTriple}.
 	 * This also sets the currentArtifact to the newly created artifact
 	 */
-	public void addArtifact(String aName, String aValue) {
+	public void addArtifact(String aName, Object aValue) {
 
 		String artID=aName;
 		// make sure artifact name is a good URI
@@ -123,33 +124,31 @@ public class OPMManager {
 		currentArtifact = graph.newArtifact(artID, r);
 		graph.assertArtifact(currentArtifact);
 
-		if (false) {
-// following fragment commented out  
-//		if (aValue != null) {
-//			System.out.println("OPMManager::addArtifact: aValue is NOT NULL");
+		if (aValue != null) {
+			logger.debug("OPMManager::addArtifact: aValue is NOT NULL");
 
 			// if we have a valid DataValueExtractor, use it here
 			List<DataValueExtractor> dveList;
-			String extractedValue = aValue;  // default is same value
+			String extractedValue = (String) aValue;  // default is same value
 			if ((dveList = getDataValueExtractor()) != null) {
 
 				// try all available extractors... UGLY but data comes with NO TYPE at all!
 				for (DataValueExtractor dve: dveList) {
 					try {
 
-//						System.out.println("OPMManager::addArtifact: trying extractor "+dve.getClass().getName());
+						logger.debug("OPMManager::addArtifact: trying extractor "+dve.getClass().getName());
 						extractedValue = dve.extractString(aValue);						
-//						System.out.println("OPMManager::addArtifact: - extracted value = "+extractedValue);
+						logger.debug("OPMManager::addArtifact: - extracted value = "+extractedValue);
 						break; // extractor worked
 					} catch (Exception e) {
 						// no panic, reset value and try another extractor
-//						System.out.println("OPMManager::addArtifact: extractor failed");
-						extractedValue = aValue;
+						logger.warn("OPMManager::addArtifact: extractor failed");
+						extractedValue = (String) aValue;
 					}
 				}
 			}
 
-//			System.out.println("OPMManager::addArtifact: using value "+extractedValue);
+			logger.debug("OPMManager::addArtifact: using value "+extractedValue);
 			try {
 				Literal lValue = Resource.literal(extractedValue);
 				context.addTriple(r, Resource.uriRef(OPM_TAVERNA_NAMESPACE+VALUE_PROP), lValue);
@@ -157,7 +156,7 @@ public class OPMManager {
 				logger.warn("OPM iteration triple creation exception", e);
 			}
 		}  else {
-//			System.out.println("OPMManager::addArtifact: aValue for ["+aName+"] is NULL");
+			logger.debug("OPMManager::addArtifact: aValue for ["+aName+"] is NULL");
 		}
 	}
 
@@ -250,6 +249,8 @@ public class OPMManager {
 
 		boolean found = false;
 
+//		logger.debug("assertUsed: for process: "+process.getName()+"  and role "+role.getName());
+		
 		if (noDuplicates) {
 			Collection<ProvenanceUsedArc> used = graph.getUsed(process);
 
@@ -390,5 +391,6 @@ public class OPMManager {
 	public void setActive(boolean active) { isActive = active; }
 
 	public boolean isActive()  { return isActive; }
+
 
 }
