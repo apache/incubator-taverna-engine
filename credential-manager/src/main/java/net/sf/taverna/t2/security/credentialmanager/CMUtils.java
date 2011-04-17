@@ -32,13 +32,13 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.HashMap;
+//import java.util.HashMap;
 
 import org.apache.log4j.Logger;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.misc.NetscapeCertType;
+//import org.bouncycastle.asn1.ASN1OctetString;
+//import org.bouncycastle.asn1.DERBitString;
+//import org.bouncycastle.asn1.DEROctetString;
+//import org.bouncycastle.asn1.misc.NetscapeCertType;
 
 import net.sf.taverna.raven.appconfig.ApplicationRuntime;
 
@@ -48,16 +48,6 @@ import net.sf.taverna.raven.appconfig.ApplicationRuntime;
  * @author Alex Nenadic
  */
 public class CMUtils {
-
-	
-    /** PKCS #7 encoding name */
-    public static final String PKCS7_ENCODING = "PKCS7";
-
-    /** PkiPath encoding name */
-    public static final String PKIPATH_ENCODING = "PkiPath";
-
-    /** OpenSSL PEM encoding name */
-    public static final String OPENSSL_PEM_ENCODING = "OpenSSL_PEM";
 
 	private static Logger logger = Logger.getLogger(CMUtils.class);
     
@@ -93,7 +83,7 @@ public class CMUtils {
 	}
   
     /**
-     * Convert the supplied certificate object into an X509Certificate object.
+     * Convert the certificate object into an X509Certificate object.
      */
     public static X509Certificate convertCertificate(Certificate cert)
         throws CMException
@@ -109,187 +99,102 @@ public class CMUtils {
             return (X509Certificate) cf.generateCertificate(bais);
         }
         catch (CertificateException ex) {
-            throw new CMException("Failed to convert certificate", ex);
+            throw new CMException("Failed to convert the certificate object into X.509 certificate.", ex);
         }
     }
+      
     
     /**
-     * Convert the given array of certificate objects into
-     * X509Certificate objects.
+     * Get the message digest of the given byte array 
+     * as a string of hexadecimal characters in the form XX:XX:XX...
+     * using the given digest algorithm.
      */
-    public static X509Certificate[] convertCertificates(Certificate[] certsIn)
-        throws CMException
-    {
-        X509Certificate[] certsOut = new X509Certificate[certsIn.length];
-
-        for (int i = 0; i < certsIn.length; i++) {
-            certsOut[i] = convertCertificate(certsIn[i]);
-        }
-        return certsOut;
-    }   
-    
-    /**
-     * Get the message digest as a string using the given digest algorithm.
-     */
-	public static String getMessageDigest(byte[] messageInBytes, String digestType) {
-		// Create message digest object using the supplied algorithm
+	public static String getMessageDigestAsFormattedString(byte[] messageBytes, String digestAlgorithm) {
+		
 		MessageDigest messageDigest;
-		try {
-			messageDigest = MessageDigest.getInstance(digestType);
-		} catch (NoSuchAlgorithmException ex) {
+		byte[] digestBytes;
+		try
+        {
+			messageDigest = MessageDigest.getInstance(digestAlgorithm);
+            digestBytes = messageDigest.digest(messageBytes);
+        }
+        catch(NoSuchAlgorithmException ex)
+        {
 			logger.error("Failed to create message digest.", ex);
 			return "";
 		}
 
-		// Create raw message digest
-		byte[] bFingerPrint = messageDigest.digest(messageInBytes);
+        // Create the integer value from the digest bytes
+        BigInteger number = new BigInteger(1,digestBytes);
+        // Convert the integer from decimal to hexadecimal representation
+        String hexValueString = number.toString(16).toUpperCase();
 
-		// Place the raw message digest into a StringBuffer as a Hex number
-		StringBuffer strBuff = new StringBuffer(new BigInteger(1, bFingerPrint)
-				.toString(16).toUpperCase());
-
-		// Odd number of characters so add in a padding "0"
+		StringBuffer strBuff = new StringBuffer(hexValueString);
+		// If the hex number contains odd number of characters - 
+		// insert a padding "0" at the front of the string
 		if ((strBuff.length() % 2) != 0) {
 			strBuff.insert(0, '0');
 		}
 
-		// Place colons at every two hex characters
+		// Insert colons after every two hex characters - start form the end of the hex string
 		if (strBuff.length() > 2) {
-			for (int iCnt = 2; iCnt < strBuff.length(); iCnt += 3) {
-				strBuff.insert(iCnt, ':');
+			for (int i = 2; i < strBuff.length(); i += 3) {
+				strBuff.insert(i, ':');
 			}
 		}
 
-		// Return the formatted message digest
 		return strBuff.toString();
 	}
 	
-	/**
-	 * Gets the intended certificate uses, i.e. Netscape Certificate Type
-	 * extension (2.16.840.1.113730.1.1) as a string.
-	 */
-	public static String getIntendedUses(byte[] value) {
-
-		// Netscape Certificate Types (2.16.840.1.113730.1.1)
-		int[] INTENDED_USES = new int[] { NetscapeCertType.sslClient,
-				NetscapeCertType.sslServer, NetscapeCertType.smime,
-				NetscapeCertType.objectSigning, NetscapeCertType.reserved,
-				NetscapeCertType.sslCA, NetscapeCertType.smimeCA,
-				NetscapeCertType.objectSigningCA, };
-
-		// Netscape Certificate Type strings (2.16.840.1.113730.1.1)
-		HashMap<String, String> INTENDED_USES_STRINGS = new HashMap<String, String>();
-		INTENDED_USES_STRINGS.put("128", "SSL Client");
-		INTENDED_USES_STRINGS.put("64", "SSL Server");
-		INTENDED_USES_STRINGS.put("32", "S/MIME");
-		INTENDED_USES_STRINGS.put("16", "Object Signing");
-		INTENDED_USES_STRINGS.put("8", "Reserved");
-		INTENDED_USES_STRINGS.put("4", "SSL CA");
-		INTENDED_USES_STRINGS.put("2", "S/MIME CA");
-		INTENDED_USES_STRINGS.put("1", "Object Signing CA");
-
-		// Get octet string from extension value
-		ASN1OctetString fromByteArray = new DEROctetString(value);
-		byte[] octets = fromByteArray.getOctets();
-		DERBitString fromByteArray2 = new DERBitString(octets);
-		int val = new NetscapeCertType(fromByteArray2).intValue();
-		StringBuffer strBuff = new StringBuffer();
-		for (int i = 0, len = INTENDED_USES.length; i < len; i++) {
-			int use = INTENDED_USES[i];
-			if ((val & use) == use) {
-				strBuff.append(INTENDED_USES_STRINGS.get(String.valueOf(use))
-						+ ", \n");
-			}
-		}
-		// remove the last ", \n" from the end of the buffer
-		String str = strBuff.toString();
-		str = str.substring(0, str.length() - 3);
-		return str;
-	}
+//	/**
+//	 * Gets the intended certificate uses, i.e. Netscape Certificate Type
+//	 * extension (2.16.840.1.113730.1.1) as a string.
+//	 */
+//    // From openssl's documentation: "The [above] extension is non standard, Netscape 
+//    // specific and largely obsolete. Their use in new applications is discouraged."
+//    // TODO replace with "basicConstraints, keyUsage and extended key usage extensions 
+//    // which are now used instead."
+//	public static String getIntendedCertificateUses(byte[] value) {
+//
+//		// Netscape Certificate Types (2.16.840.1.113730.1.1) denoting the
+//		// intended uses of a certificate
+//		int[] INTENDED_USES = new int[] { NetscapeCertType.sslClient,
+//				NetscapeCertType.sslServer, NetscapeCertType.smime,
+//				NetscapeCertType.objectSigning, NetscapeCertType.reserved,
+//				NetscapeCertType.sslCA, NetscapeCertType.smimeCA,
+//				NetscapeCertType.objectSigningCA, };
+//
+//		// Netscape Certificate Type strings (2.16.840.1.113730.1.1)
+//		HashMap<String, String> INTENDED_USES_STRINGS = new HashMap<String, String>();
+//		INTENDED_USES_STRINGS.put("128", "SSL Client");
+//		INTENDED_USES_STRINGS.put("64", "SSL Server");
+//		INTENDED_USES_STRINGS.put("32", "S/MIME");
+//		INTENDED_USES_STRINGS.put("16", "Object Signing");
+//		INTENDED_USES_STRINGS.put("8", "Reserved");
+//		INTENDED_USES_STRINGS.put("4", "SSL CA");
+//		INTENDED_USES_STRINGS.put("2", "S/MIME CA");
+//		INTENDED_USES_STRINGS.put("1", "Object Signing CA");
+//
+//		// Get DER octet string from extension value
+//		ASN1OctetString derOctetString = new DEROctetString(value);
+//		byte[] octets = derOctetString.getOctets();
+//		// Get DER bit string
+//		DERBitString derBitString = new DERBitString(octets);
+//		int val = new NetscapeCertType(derBitString).intValue();
+//		StringBuffer strBuff = new StringBuffer();
+//		for (int i = 0, len = INTENDED_USES.length; i < len; i++) {
+//			int use = INTENDED_USES[i];
+//			if ((val & use) == use) {
+//				strBuff.append(INTENDED_USES_STRINGS.get(String.valueOf(use))
+//						+ ", \n");
+//			}
+//		}
+//		// remove the last ", \n" from the end of the buffer
+//		String str = strBuff.toString();
+//		str = str.substring(0, str.length() - 3);
+//		return str;
+//	}
 	
-//    /**
-//     * Load one or more certificates from the specified file.
-//     *
-//     * @param certFile The file to load certificates from
-//     * @param encoding The certification path encoding. If null, treat as a
-//     * normal certificate, not certification path.  Use one of the
-//     * <code>*_ENCODING</code> constants here.
-//     * @return The array of certificates
-//     * @throws CMException Problem encountered while loading the
-//     * certificate(s)
-//     */
-//	public static X509Certificate[] loadCertificates(File certFile,
-//			String encoding) throws CMException
-//        {
-//        ArrayList<X509Certificate> certsList = new ArrayList<X509Certificate>();
-//
-//        FileInputStream fis = null;
-//
-//        try {
-//            CertificateFactory cf = CertificateFactory.getInstance("X.509");
-//            fis = new FileInputStream(certFile);
-//            Collection<? extends Certificate> coll = null;
-//
-//            if (OPENSSL_PEM_ENCODING.equals(encoding)) {
-//                // Special case; this is not a real JCE supported encoding.
-//                PEMReader pr = new PEMReader(new InputStreamReader(fis), null,
-//                    cf.getProvider().getName());
-//                /* These can contain just about anything, and
-//                 unfortunately the PEMReader API (as of BC 1.25 to 1.31)
-//                 won't allow us to really skip things we're not interested
-//                 in; stuff happens already in readObject().  This may cause
-//                 some weird exception messages for non-certificate objects in
-//                 the "stream", for example passphrase related ones for
-//                 protected private keys. */
-//                Object cert;
-//                while ((cert = pr.readObject()) != null) {
-//                    if (cert instanceof X509Certificate) {
-//                        // "Short-circuit" into vCerts, not using coll.
-//                        certsList.add((X509Certificate) cert);
-//                    }
-//                    // Skip other stuff, at least for now.
-//                }
-//            }
-//            else if (encoding != null) {
-//                // Try it as a certification path of the specified type
-//                coll = cf.generateCertPath(fis, encoding).getCertificates();
-//            }
-//            else {
-//                // "Normal" certificate(s)
-//                coll = cf.generateCertificates(fis);
-//            }
-//
-//            if (coll != null) {
-//                for (Iterator<? extends Certificate> iter = (Iterator<? extends Certificate>) coll.iterator(); iter.hasNext();) {
-//                    X509Certificate cert = (X509Certificate) iter.next();
-//                    if (cert != null) {
-//                        certsList.add(cert);
-//                    }
-//                }
-//            }
-//        }
-//        // Some RuntimeExceptions which really ought to be
-//        // CertificateExceptions may be thrown from cf.generateCert* above,
-//        // for example Sun's PKCS #7 parser tends to throw them.
-//        catch (Exception ex) {
-//            // TODO: don't throw if vCerts non-empty (eg. OpenSSL PEM above)?
-//            throw new CMException("Failed to load certificate", ex);
-//        }
-//        finally {
-//            if (fis != null) {
-//                try {
-//                    fis.close();
-//                }
-//                catch (IOException ex) {
-//                    // Ignore
-//                }
-//            }
-//        }
-//
-//        return (X509Certificate[]) certsList.toArray(new X509Certificate[certsList.size()]);
-//    }
-    
-    
     // FROM RFC 2253:	
     //                    CN      commonName
     //                    L       localityName

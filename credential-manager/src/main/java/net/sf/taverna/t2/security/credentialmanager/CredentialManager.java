@@ -155,7 +155,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	// Observer of changes to the Keystore and Truststore that 
 	// updates the default SSLContext and SSLSocketFactory at the single location rather than
 	// all over the code when changes to the keystores occur.
-	private KeystoresChangedObserver keystoresChangedObserver = new KeystoresChangedObserver();
+	private KeystoreChangedObserver keystoresChangedObserver = new KeystoreChangedObserver();
 	
 	// Cached list of all services that have a username/password entry in the Keystore
 	private List<URI> cachedServiceURIsList = null;
@@ -1564,16 +1564,16 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	}
 
 	/**
-	 * Loads a PKCS12 keystore from the given file using the supplied password.
+	 * Loads a PKCS12-type keystore from a file using the supplied password.
 	 */
-	public KeyStore loadPKCS12Keystore(File importFile, String pkcs12Password)
+	public KeyStore loadPKCS12Keystore(File pkcs12File, String pkcs12Password)
 			throws CMException {
 
 		// Load the PKCS #12 keystore from the file
 		KeyStore pkcs12;
 		try {
 			pkcs12 = KeyStore.getInstance("PKCS12", "BC");
-			pkcs12.load(new FileInputStream(importFile), pkcs12Password
+			pkcs12.load(new FileInputStream(pkcs12File), pkcs12Password
 					.toCharArray());
 			return pkcs12;
 		} catch (Exception ex) {
@@ -2243,7 +2243,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	// If any change to the Keystore or Truststore occurs - 
 	// create the new SSLSocketFactory and set the new default SSLContext 
 	// which is initialised with the updated Keystore and Truststore material
-	public class KeystoresChangedObserver implements Observer<KeystoreChangedEvent> {
+	public class KeystoreChangedObserver implements Observer<KeystoreChangedEvent> {
 		public void notify(Observable<KeystoreChangedEvent> sender,
 				KeystoreChangedEvent message) throws Exception {
 			// Create the new SSLSocketFactory and set the default SSLContext
