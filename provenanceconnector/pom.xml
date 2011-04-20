@@ -35,18 +35,31 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
-     </repositories>
+     </repositories>     
      <dependencies>
+     <!-- 
          <dependency>
             <groupId>com.hp.hpl.jena</groupId>
             <artifactId>jena</artifactId>
-            <version>2.6.2</version>
+            <version>${jena.version}</version>
         </dependency>
+      -->
 
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>net.sf.taverna.t2.core</groupId>
+            <artifactId>reference-api</artifactId>
+            <version>${project.version}</version>
         </dependency>
 		
         <dependency>
@@ -83,28 +96,30 @@
             <artifactId>commons-io</artifactId>
         </dependency>
 
+<!-- 
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
         </dependency>
+ -->
 
         <dependency>
             <groupId>org.tupeloproject</groupId>
             <artifactId>tupelo-cet</artifactId>
             <version>2.4.3</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.openprovenance</groupId>
+            <artifactId>toolbox</artifactId>
+            <version>${opm.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.openprovenance</groupId>
             <artifactId>opm</artifactId>
             <version>${opm.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.openprovenance</groupId>
-            <artifactId>toolbox</artifactId>
-            <version>${opm.version}</version>
-        </dependency>
+<!-- 
 
         <dependency>
             <groupId>simple-jndi</groupId>
@@ -121,6 +136,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
+ -->
 
         <dependency>
             <groupId>commons-dbcp</groupId>
