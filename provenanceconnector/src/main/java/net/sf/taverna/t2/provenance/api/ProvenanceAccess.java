@@ -47,6 +47,7 @@ import net.sf.taverna.t2.provenance.lineageservice.ProvenanceAnalysis;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceQuery;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceWriter;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Collection;
+import net.sf.taverna.t2.provenance.lineageservice.utils.DataLink;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DataflowInvocation;
 import net.sf.taverna.t2.provenance.lineageservice.utils.PortBinding;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
@@ -384,12 +385,22 @@ public class ProvenanceAccess {
 	}
 
 
+	public List<Workflow> getWorkflowsForRun(String runID) {
+		try {
+			return pq.getWorkflowsForRun(runID);
+		} catch (SQLException e) {
+			logger.error("Problem getting workflows for run:" + runID, e);
+			return null;
+		}
+	}
+	
 	/**
 	 * 
 	 * @return a list of {@link WorkflowRun} beans, each representing the complete description of a workflow run (note that this is 
 	 * not just the ID of the run)
 	 */
 	public List<WorkflowRun> getAllWorkflowIDs() {
+		
 		try {
 			return pq.getRuns(null, null);
 		} catch (SQLException e) {
@@ -399,6 +410,8 @@ public class ProvenanceAccess {
 
 	}
 
+	
+	
 
 //	/ access static workflow structure
 
@@ -431,7 +444,14 @@ public class ProvenanceAccess {
 		return pq.getPortsForDataflow(workflowID);
 	}
 
-
+	/**
+	 * lists all ports for a workflow
+	 * @param workflowID
+	 * @return a list of {@link Port} beans, each representing an input or output port for the workflow or a processor in the workflow
+	 */
+	public List<Port> getAllPortsInDataflow(String workflowID) {
+		return pq.getAllPortsInDataflow(workflowID);
+	}
 
 	/**
 	 * list all ports for a specific processor within a workflow 
@@ -630,6 +650,17 @@ public class ProvenanceAccess {
 	
 	public List<DataflowInvocation> getDataflowInvocations(String workflowRunId) {
 		return pq.getDataflowInvocations(workflowRunId);
+	}
+
+	public List<DataLink> getDataLinks(String workflowId) {
+		Map<String, String> queryConstraints = new HashMap<String, String>();
+		queryConstraints.put("workflowId", workflowId);
+		try {
+			return pq.getDataLinks(queryConstraints);
+		} catch (SQLException e) {
+			logger.error("Problem getting datalinks for workflow:" + workflowId, e);
+			return null;
+		}
 	}
 
 	
