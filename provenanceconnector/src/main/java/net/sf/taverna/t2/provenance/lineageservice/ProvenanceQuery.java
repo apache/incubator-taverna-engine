@@ -2805,6 +2805,20 @@ ProvenanceConnector.ProcessorEnactmentTable ProcEnact = ProvenanceConnector.Proc
 		}
 		return dataBindings;		
 	}
+	
+
+	public List<Port> getAllPortsInDataflow(String workflowID) {
+		Workflow w = getWorkflow(workflowID);
+
+		Map<String, String> queryConstraints = new HashMap<String, String>();
+		queryConstraints.put("V.workflowId", workflowID);
+		try {
+			return getPorts(queryConstraints);
+		} catch (SQLException e) {
+			logger.error("Problem getting ports for dataflow: " + workflowID, e);
+		}
+		return null;
+	}
 
 	public List<Port> getPortsForDataflow(String workflowID) {
 		Workflow w = getWorkflow(workflowID);
