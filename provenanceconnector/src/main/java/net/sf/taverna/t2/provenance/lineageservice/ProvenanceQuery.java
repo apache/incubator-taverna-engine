@@ -393,7 +393,7 @@ public abstract class ProvenanceQuery {
 		PreparedStatement ps = null;
 		Connection connection = null;
 
-		String q = "SELECT * FROM WfInstance order by timestamp desc";
+		String q = "SELECT workflowRunId FROM WorkflowRun ORDER BY timestamp DESC";
 
 		try {
 			connection = getConnection();
@@ -403,11 +403,11 @@ public abstract class ProvenanceQuery {
 			if (success) {
 				ResultSet rs = ps.getResultSet();
 				if (rs.next()) {
-					return rs.getString("instanceID");
+					return rs.getString("workflowRunId");
 				}
 			}
 		} catch (Exception e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -1071,7 +1071,7 @@ public abstract class ProvenanceQuery {
 				}
 			} else return null;
 		} catch (Exception e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} finally {
 			if (connection != null) {
 				try {
@@ -3052,7 +3052,7 @@ ProvenanceConnector.ProcessorEnactmentTable ProcEnact = ProvenanceConnector.Proc
 		try {
 			c = getConnection();
 			ps = c.prepareStatement(
-			"SELECT * FROM Collection C WHERE wfInstanceRef = ?");
+			"SELECT * FROM Collection C WHERE workflowRunId = ?");
 			ps.setString(1, wfInstanceID);
 
 			boolean success = ps.execute();
@@ -3071,7 +3071,7 @@ ProvenanceConnector.ProcessorEnactmentTable ProcEnact = ProvenanceConnector.Proc
 				}
 			}				
 		} catch (Exception e) {
-			logger.warn("Could not execute query: " + e);
+			logger.warn("Could not execute query", e);
 		} finally {
 			if (c != null) {
 				try {
