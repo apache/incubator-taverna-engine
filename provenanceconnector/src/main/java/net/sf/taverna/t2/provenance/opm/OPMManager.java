@@ -31,6 +31,7 @@ import org.tupeloproject.kernel.impl.MemoryContext;
 import org.tupeloproject.kernel.impl.ResourceContext;
 import org.tupeloproject.provenance.ProvenanceAccount;
 import org.tupeloproject.provenance.ProvenanceArtifact;
+import org.tupeloproject.provenance.ProvenanceException;
 import org.tupeloproject.provenance.ProvenanceGeneratedArc;
 import org.tupeloproject.provenance.ProvenanceProcess;
 import org.tupeloproject.provenance.ProvenanceRole;
@@ -89,8 +90,9 @@ public class OPMManager {
 	 * 	create new account to hold the causality graph
 	 *  and give it a Resource name
 	 * @param accountName
+	 * @throws ProvenanceException 
 	 */
-	public void createAccount(String accountName) {
+	public void createAccount(String accountName) throws ProvenanceException {
 
 		currentAccount = graph.newAccount("OPM-"+
 				accountName, Resource.uriRef(OPM_TAVERNA_NAMESPACE+accountName));
@@ -104,8 +106,9 @@ public class OPMManager {
 	 * @param aValue  actual value can be used optionally as part of a separate triple. Whether this is used or not 
 	 * depends on the settings, see {@link OPMManager.addValueTriple}.
 	 * This also sets the currentArtifact to the newly created artifact
+	 * @throws ProvenanceException 
 	 */
-	public void addArtifact(String aName, Object aValue) {
+	public void addArtifact(String aName, Object aValue) throws ProvenanceException {
 
 		String artID=aName;
 		// make sure artifact name is a good URI
@@ -164,8 +167,9 @@ public class OPMManager {
 	/**
 	 * no actual value is recorded
 	 * @param aName
+	 * @throws ProvenanceException 
 	 */
-	public void addArtifact(String aName) {
+	public void addArtifact(String aName) throws ProvenanceException {
 
 		Resource r = Resource.uriRef(aName);
 		currentArtifact = graph.newArtifact(aName, r);
@@ -181,7 +185,7 @@ public class OPMManager {
 	}
 
 
-	public void addProcess(String proc, String iterationVector, String URIfriendlyIterationVector) {
+	public void addProcess(String proc, String iterationVector, String URIfriendlyIterationVector) throws ProvenanceException {
 
 		String processID;
 
@@ -223,7 +227,7 @@ public class OPMManager {
 			ProvenanceProcess process, 
 			ProvenanceRole role, 
 			ProvenanceAccount account,
-			boolean noDuplicates) {
+			boolean noDuplicates) throws ProvenanceException {
 
 		boolean found = false;
 		if (noDuplicates && artifact != null) {
@@ -245,7 +249,7 @@ public class OPMManager {
 			ProvenanceProcess process, 
 			ProvenanceRole role,
 			ProvenanceAccount account, 
-			boolean noDuplicates) {
+			boolean noDuplicates) throws ProvenanceException {
 
 		boolean found = false;
 
