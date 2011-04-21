@@ -308,7 +308,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	private CredentialManager(String credentialManagerDirPath, String password) throws CMException {
 		
 		// Open the files stored in the Credential Manager's directory passed in
-		loadConfigurationFiles(credentialManagerDirPath);
+		loadSecurityFiles(credentialManagerDirPath);
 		masterPassword = password;
 		// Load the files
 		init();
@@ -2192,7 +2192,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	
 	private static void loadDefaultConfigurationFiles() {
 		if (credentialManagerDirectory == null){
-			credentialManagerDirectory = net.sf.taverna.t2.security.credentialmanager.CMUtils.getCredentialManagerDefaultDirectory();
+			credentialManagerDirectory = CMUtils.getCredentialManagerDefaultDirectory();
 		}
 		if (keystoreFile == null){
 			keystoreFile = new File(credentialManagerDirectory, T2KEYSTORE_FILE);
@@ -2202,8 +2202,14 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 		}
 	}
 
-	private void loadConfigurationFiles(String credentialManagerDirPath)
+	private void loadSecurityFiles(String credentialManagerDirPath)
 			throws CMException {
+		
+		// If credentialManagerDirPath is null (e.g. user did not specify -cmdir on the command line)
+		// - try with Taverna's default one
+		if (credentialManagerDirPath == null){
+			credentialManagerDirectory = CMUtils.getCredentialManagerDefaultDirectory();
+		}
 		
 		if (credentialManagerDirectory == null) {
 			try {
