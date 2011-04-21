@@ -163,7 +163,7 @@ public abstract class ProvenanceQuery {
 	throws SQLException {
 		List<Port> result = new ArrayList<Port>();
 
-		String q0 = "SELECT DISTINCT V.*, W.workflowId FROM Port V JOIN WorkflowRun W ON W.workflowId = V.workflowId";
+		String q0 = "SELECT DISTINCT V.* FROM Port V JOIN WorkflowRun W ON W.workflowId = V.workflowId";
 
 		String q = null;
 		q= addWhereClauseToQuery(q0, queryConstraints, true);
@@ -1033,16 +1033,25 @@ public abstract class ProvenanceQuery {
 
 		try {
 			currentProcs = getProcessorsShallow(null, workflowId);
-			List<ProvenanceProcessor> matchingProcessors = result.put(workflowId, new ArrayList<ProvenanceProcessor>());
+			List<ProvenanceProcessor> matchingProcessors = new ArrayList<ProvenanceProcessor>();
+			result.put(workflowId, matchingProcessors);
 			for (ProvenanceProcessor pp:currentProcs) {
 				if (firstActivityClass==null || pp.getFirstActivityClassName().equals(firstActivityClass)) {
 					matchingProcessors.add(pp);
 				}				
 				if (pp.getFirstActivityClassName().equals(ProvenanceProcessor.DATAFLOW_ACTIVITY)) {
-					// recurse 
-					result.putAll(getProcessorsDeep(firstActivityClass, pp.getWorkflowId()));					
+					// Can't recurse as there's no way to find ID of nested workflow
+					continue;
+					//result.putAll(getProcessorsDeep(firstActivityClass, NESTED_WORKFLOW_ID));					
 				}
 			}
+			
+			// Silly fallback - use the broken getChildrenOfWorkflow() assuming that no other workflows
+			// have used the same nested workflow
+			for (String childWf : getChildrenOfWorkflow(workflowId)) {
+				result.putAll(getProcessorsDeep(firstActivityClass, childWf));
+			}
+			
 		} catch (SQLException e) {
 			logger.error("Problem getting nested workflow processors for: " + workflowId, e);
 		}
@@ -1289,7 +1298,10 @@ public abstract class ProvenanceQuery {
 		Map<String, String> collQueryConstraints = new HashMap<String, String>();
 
 		// base Collection query
-		String collQuery = "SELECT * FROM Collection C JOIN WorkflowRun W ON " + "C.workflowRunId = W.workflowRunId " + "JOIN Port V on " + "V.workflowRunId = W.workflowId and C.processorNameRef = V.processorNameRef and C.portName = V.portName ";
+		String collQuery = "SELECT C.*,W.workflowId,V.isInputPort FROM Collection C JOIN WorkflowRun W ON "
+				+ "C.workflowRunId = W.workflowRunId "
+				+ "JOIN Port V on "
+				+ "V.workflowId = W.workflowId and C.processorNameRef = V.processorName and C.portName = V.portName ";
 
 		collQueryConstraints.put("W.workflowRunId", workflowRun);
 		collQueryConstraints.put("C.processorNameRef", proc);
@@ -1314,10 +1326,10 @@ public abstract class ProvenanceQuery {
 		Map<String, String> vbQueryConstraints = new HashMap<String, String>();
 
 		// base PortBinding query
-		String vbQuery = "SELECT * FROM PortBinding VB JOIN WorkflowRun W ON " + 
+		String vbQuery = "SELECT VB.*,V.isInputPort FROM PortBinding VB JOIN WorkflowRun W ON " + 
 						 "VB.workflowRunId = W.workflowRunId " + 
 						 "JOIN Port V on " + 
-						 "V.workflowRunId = W.workflowId and VB.processorNameRef = V.processorNameRef and VB.portName = V.portName "; 
+						 "V.workflowId = W.workflowId and VB.processorNameRef = V.processorName and VB.portName = V.portName "; 
 
 		vbQueryConstraints.put("W.workflowRunId", workflowRun);
 		vbQueryConstraints.put("VB.processorNameRef", proc);
@@ -1337,7 +1349,7 @@ public abstract class ProvenanceQuery {
 		vbQuery = addWhereClauseToQuery(vbQuery, vbQueryConstraints, false);
 
 		List<String> orderAttr = new ArrayList<String>();
-		orderAttr.add("portName");
+		orderAttr.add("V.portName");
 		orderAttr.add("iteration");
 
 		vbQuery = addOrderByToQuery(vbQuery, orderAttr, true);
@@ -1461,7 +1473,7 @@ public abstract class ProvenanceQuery {
 					String it = rs.getString("iteration");
 					String coll = rs.getString("collID");
 					String parentColl = rs.getString("parentCollIDRef");
-					boolean isInput = (rs.getInt("inputOrOutput") == 1 ? true : false);
+					boolean isInput = rs.getBoolean("isInputPort");
 
 					lqr.addLineageQueryResultRecord(workflowId, proc, var, workflowRun,
 							it, coll, parentColl, null, null, type, false, true);  // true -> is a collection
@@ -1493,7 +1505,7 @@ public abstract class ProvenanceQuery {
 
 		String q = lq.getVbQuery();
 
-		logger.debug("running VB query: " + q);
+		logger.info("running VB query: " + q);
 
 		Statement stmt = null;
 		Connection connection = null;
@@ -1518,8 +1530,7 @@ public abstract class ProvenanceQuery {
 					String it = rs.getString("iteration");
 					String coll = rs.getString("collIDRef");
 					String value = rs.getString("value");
-					boolean isInput = (rs.getInt("isInputPort") == 1) ? true
-							: false;
+					boolean isInput = rs.getBoolean("isInputPort");
 
 
 					// FIXME there is no D and no VB - this is in generateSQL,
@@ -1829,6 +1840,18 @@ public abstract class ProvenanceQuery {
 		return null;
 	}
 
+	/**
+	 * This method is deprecated as parent workflow ID is not correctly
+	 * recorded. If two workflows both contain the same nested workflow, only
+	 * one of them (the most recently added) will return that nested workflow
+	 * from this method.
+	 * 
+	 * @deprecated
+	 * @param parentWorkflowId
+	 * @return
+	 * @throws SQLException
+	 */
+	@Deprecated
 	public List<String> getChildrenOfWorkflow(String parentWorkflowId)
 	throws SQLException {
 

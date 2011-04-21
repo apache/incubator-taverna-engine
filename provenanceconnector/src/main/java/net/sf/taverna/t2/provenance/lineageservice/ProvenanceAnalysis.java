@@ -342,7 +342,7 @@ public class ProvenanceAnalysis {
 	/**
 	 * main lineage query method. queries the provenance DB 
 	 * with a single originating proc/var/path and a set of selected Processors
-	 * @param wfID
+	 * @param workflowRunId
 	 * @param var
 	 * @param proc
 	 * @param path
@@ -355,7 +355,7 @@ public class ProvenanceAnalysis {
 	 * @throws SQLException
 	 */
 	public List<Dependencies> computeLineageSingleBinding(
-			String wfID,   // dynamic scope
+			String workflowRunId,   // dynamic scope
 			String workflowId,  // static scope
 			String var,   // target var
 			String proc,   // qualified with its processor name
@@ -368,7 +368,7 @@ public class ProvenanceAnalysis {
 		//		System.out.println("timing starts...");
 		long start = System.currentTimeMillis();
 
-		List<LineageSQLQuery>  lqList =  searchDataflowGraph(wfID, workflowId, var, proc, path, selectedProcessors);
+		List<LineageSQLQuery>  lqList =  searchDataflowGraph(workflowRunId, workflowId, var, proc, path, selectedProcessors);
 		long stop = System.currentTimeMillis();
 
 		long gst = stop-start;
@@ -390,7 +390,7 @@ public class ProvenanceAnalysis {
 
 	/**
 	 * compute lineage queries using path projections
-	 * @param wfID the (single) instance defines the scope of a query<br/>
+	 * @param workflowRunId the (single) instance defines the scope of a query<br/>
 	 * added 2/9: collect a list of paths in the process to be used by the naive query. In practice
 	 * we use this as the graph search phase that is needed by the naive query anyway
 	 * @param var
@@ -400,7 +400,7 @@ public class ProvenanceAnalysis {
 	 * @throws SQLException
 	 */
 	public List<LineageSQLQuery> searchDataflowGraph(
-			String wfID,   // dymamic scope
+			String workflowRunId,   // dymamic scope
 			String workflowId,  // static scope
 			String var,   // target var
 			String proc,   // qualified with its processor name
@@ -422,7 +422,6 @@ public class ProvenanceAnalysis {
 
 		// get (var, proc) from Port  to see if it's input/output
 		Map<String, String>  varQueryConstraints = new HashMap<String, String>();
-		varQueryConstraints.put("W.workflowRunId", wfID);
 		varQueryConstraints.put("V.processorName", proc);  
 		varQueryConstraints.put("V.portName", var);  
 		varQueryConstraints.put("V.workflowId", workflowId);  
@@ -430,8 +429,10 @@ public class ProvenanceAnalysis {
 		List<Port> vars = getPq().getPorts(varQueryConstraints);
 
 		if (vars.isEmpty())  {
-			logger.info("variable ("+var+","+proc+") not found, lineage query terminated");
+			logger.info("variable ("+var+","+proc+") not found, lineage query terminated, constraints: " + varQueryConstraints);
 			return null;
+		} else {
+			logger.info("Found " + vars);
 		}
 
 		Port v = vars.get(0); 		// expect exactly one record
@@ -441,12 +442,12 @@ public class ProvenanceAnalysis {
 		if (v.isInputPort() || v.getProcessorId()==null) { // if vName is input, then do a xfer() step
 
 			// rec. accumulates SQL queries into lqList
-			xferStep(wfID, workflowId, v, path, selectedProcessors, lqList);
+			xferStep(workflowRunId, workflowId, v, path, selectedProcessors, lqList);
 
 		} else { // start with xform
 
 			// rec. accumulates SQL queries into lqList
-			xformStep(wfID, workflowId, v, proc, path, selectedProcessors, lqList);			
+			xformStep(workflowRunId, workflowId, v, proc, path, selectedProcessors, lqList);			
 		}
 
 		return lqList;
@@ -503,7 +504,7 @@ public class ProvenanceAnalysis {
 
 		} else {
 
-			varsQueryConstraints.put("W.workflowRunId", wfID);
+			varsQueryConstraints.put("W.workflowId", wfID);
 			varsQueryConstraints.put("processorName", proc);  
 			varsQueryConstraints.put("isInputPort", "1");  
 
@@ -800,7 +801,7 @@ public class ProvenanceAnalysis {
 		// retrieve input vars for current processor 
 		Map<String, String>  varsQueryConstraints = new HashMap<String, String>();
 
-//		varsQueryConstraints.put("W.workflowRunId", workflowRunId);
+//		varsQueryConstraints.put("W.workflowId", workflowRunId);
 		varsQueryConstraints.put("portId", a.getSourcePortId());
 //		varsQueryConstraints.put("processorNameRef", sourceProcName);  
 //		varsQueryConstraints.put("portName", sourcePortName);  
