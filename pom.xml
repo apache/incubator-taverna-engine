@@ -6,6 +6,7 @@
 		<groupId>net.sf.taverna</groupId>
 		<artifactId>taverna-parent</artifactId>
 		<version>2.3-SNAPSHOT</version>
+        <relativePath>../../taverna-parent/pom.xml</relativePath>
 	</parent>
 	<groupId>net.sf.taverna.t2.core</groupId>
 	<artifactId>reference-core-extensions</artifactId>
