@@ -148,30 +148,4 @@ public class ReferenceSetServiceImpl extends AbstractReferenceSetServiceImpl
 		checkDao();
 		referenceSetDao.deleteReferenceSetsForWFRun(workflowRunId);
 	}
-
-	public Set<T2Reference> getMutableIdentifiersForWorkflowRun(
-			String workflowRunId) {
-		checkDao();
-		return referenceSetDao.getMutableIdentifiersForWorkflowRun(workflowRunId);
-	}
-
-	public Set<T2Reference> getTidiableIdentifiersForWorkflowRun(
-			String workflowRunId) {
-		checkDao();
-		return referenceSetDao.getTidibleIdentifiersForWorkflowRun(workflowRunId);
-	}
-
-	public void tidyIdentifier(T2Reference ref) {
-		checkDao();
-		ReferenceSet rs = referenceSetDao.get(ref);
-		Set<ExternalReferenceSPI> toRemove = new HashSet<ExternalReferenceSPI>();
-		for (ExternalReferenceSPI spi : rs.getExternalReferences()) {
-			if (spi.isReferencingDeletableData()) {
-				spi.deleteData();
-				toRemove.add(spi);
-			}
-		}
-		rs.getExternalReferences().removeAll(toRemove);
-		referenceSetDao.update(rs);
-	}
 }
