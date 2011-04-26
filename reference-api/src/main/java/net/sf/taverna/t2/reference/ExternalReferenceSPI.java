@@ -129,24 +129,5 @@ public interface ExternalReferenceSPI {
 	 */
 	public float getResolutionCost();
 
-	/**
-	 * Indicate if the ExternalReferenceSPI is referencing data that is likely
-	 * to change e.g. it is at a URL or in a file system. If so then there is no
-	 * guarantee that the referenced data remains the same.
-	 * 
-	 * @return
-	 */
-	public boolean isReferencingMutableData();
-
-	/**
-	 * Indicate if the ExternalReferenceSPI is referencing data that is temporary and so should be deleted 
-	 * @return
-	 */
-	public boolean isReferencingDeletableData();
-	
-	/**
-	 * Method to delete data associated with the ExternalReferenceSPI.
-	 */
-	public void deleteData();
 
 }

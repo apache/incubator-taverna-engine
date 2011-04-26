@@ -20,8 +20,6 @@
  ******************************************************************************/
 package net.sf.taverna.t2.reference;
 
-import java.util.Set;
-
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -81,12 +79,4 @@ public interface ReferenceSetDao {
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = false)
 	public void deleteReferenceSetsForWFRun(String workflowRunId) throws DaoException;
-
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public Set<T2Reference> getMutableIdentifiersForWorkflowRun(String workflowRunId);
-
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public Set<T2Reference> getTidibleIdentifiersForWorkflowRun(
-			String workflowRunId);
-
 }
