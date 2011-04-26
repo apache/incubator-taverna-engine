@@ -55,9 +55,6 @@ public class FileReference extends AbstractExternalReference implements
 	 */
 	public FileReference() {
 		super();
-		// Assume files are mutable unless told otherwise
-		this.setReferencingMutableData(true);
-//		this.setReferencingDeletableData(true);
 	}
 
 	/**
@@ -66,8 +63,6 @@ public class FileReference extends AbstractExternalReference implements
 	 */
 	public FileReference(File theFile) {
 		super();
-		this.setReferencingMutableData(true);
-//		this.setReferencingDeletableData(true);
 		this.file = theFile.getAbsoluteFile();
 		this.filePathString = this.file.getPath();
 		this.charset = Charset.defaultCharset().name();

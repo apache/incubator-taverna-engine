@@ -59,7 +59,6 @@ public class HttpReference extends AbstractExternalReference implements
 	 */
 	public HttpReference() {
 		super();
-		this.setReferencingMutableData(true);
 	}
 
 	/**

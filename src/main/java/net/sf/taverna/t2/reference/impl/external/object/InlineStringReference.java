@@ -118,9 +118,4 @@ public class InlineStringReference extends AbstractExternalReference implements
 		return new Long(contents.getBytes().length);
 	}
 
-	public void deleteData() {
-		throw new UnsupportedOperationException ("Cannot delete associated data from database except as part of deleting the InlineStringReference");
-
-	}
-
 }
