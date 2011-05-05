@@ -9,7 +9,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.AbstractAction;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -28,11 +27,11 @@ import javax.swing.text.JTextComponent;
  */
 public class LineEnabledTextPanel extends JPanel {
 	
-	private JComponent textComponent = null;
+	private JTextComponent textComponent = null;
 	private Document document;
 	private GotoLineAction gotoLineAction = null;
 
-	public LineEnabledTextPanel(final JComponent component) {
+	public LineEnabledTextPanel(final JTextComponent component) {
 		
 		this.setLayout(new BorderLayout());
 		textComponent = component;
@@ -79,6 +78,7 @@ public class LineEnabledTextPanel extends JPanel {
 	
 	private void setCaretPosition(int position) {
 	    ((JTextComponent) textComponent).setCaretPosition(position);
+	    textComponent.requestFocus();
 	}
 	
 	class GotoLineAction extends AbstractAction
