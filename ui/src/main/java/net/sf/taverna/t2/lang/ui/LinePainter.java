@@ -117,12 +117,15 @@ public class LinePainter
 					int offset =  component.getCaretPosition();
 					Rectangle currentView = component.modelToView(offset);
 
-					//  Remove the highlighting from the previously highlighted line
-
-					if (lastView.y != currentView.y)
-					{
-						component.repaint(0, lastView.y, component.getWidth(), lastView.height);
+					if (lastView == null) {
 						lastView = currentView;
+					} else {
+						//  Remove the highlighting from the previously highlighted line
+						if (lastView.y != currentView.y)
+						{
+							component.repaint(0, lastView.y, component.getWidth(), lastView.height);
+							lastView = currentView;
+						}
 					}
 				}
 				catch(BadLocationException ble) {}
