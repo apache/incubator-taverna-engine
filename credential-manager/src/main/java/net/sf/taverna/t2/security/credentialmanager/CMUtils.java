@@ -46,6 +46,7 @@ import net.sf.taverna.raven.appconfig.ApplicationRuntime;
  * Utility methods for Credential Manager and security-related stuff.
  * 
  * @author Alex Nenadic
+ * @author Stian Soiland-Reyes
  */
 public class CMUtils {
 
