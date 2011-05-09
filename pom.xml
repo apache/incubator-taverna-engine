@@ -45,19 +45,7 @@
 			<name>myGrid Snapshot Repository</name>
 			<url>http://www.mygrid.org.uk/maven/snapshot-repository</url>
 		</repository>
-		<repository>
-			<id>jboss</id>
-			<name>JBoss repository</name>
-			<url>http://repository.jboss.org/maven2/</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-		</repository>
-		<repository>
-			<id>javanet</id>
-			<name>java.net</name>
-			<url>http://download.java.net/maven/2/</url>
-		</repository>
+		
 	</repositories>
 	<scm>
 		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/engine/net.sf.taverna.t2.security/trunk/</connection>
