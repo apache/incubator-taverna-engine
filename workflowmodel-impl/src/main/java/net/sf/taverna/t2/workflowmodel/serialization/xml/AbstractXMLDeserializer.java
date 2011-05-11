@@ -138,6 +138,13 @@ public abstract class AbstractXMLDeserializer implements
 		String version = ravenElement.getChildTextTrim(VERSION,
 				T2_WORKFLOW_NAMESPACE);
 		
+		// Hack to load REST and XPath activities from T2.2 wfs into T2.3
+		// which had a different(wrong) group id but the same activity class and package name
+		if ((groupId.equals("net.sf.taverna.t2.ui-activities") && artifactId.equals("rest-activity")) ||
+				(groupId.equals("net.sf.taverna.t2.ui-activities") && artifactId.equals("xpath-activity"))){
+			groupId = "net.sf.taverna.t2.activities";
+		}
+		
 		Artifact artifact;
 		// Always use the version of the profile
 		Profile profile = ProfileFactory.getInstance().getProfile();

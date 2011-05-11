@@ -58,7 +58,8 @@ public class ActivityXMLDeserializer extends AbstractXMLDeserializer {
 		if (ravenElement != null) {
 			try {
 				cl = getRavenLoader(ravenElement);
-			} catch (Exception ex) {
+			}
+			catch (Exception ex) {
 				logger.warn("Could not load raven classloader " + ravenElement + " for activity", ex);
 				// TODO - handle this properly, either by logging correctly or
 				// by going back to the repository and attempting to fetch the
@@ -78,19 +79,21 @@ public class ActivityXMLDeserializer extends AbstractXMLDeserializer {
 		    Element configElement = element.getChild(CONFIG_BEAN,
 							     T2_WORKFLOW_NAMESPACE);
 		    Object configObject=null;
-		    if (DATAFLOW_ENCODING.equals(configElement.getAttributeValue(BEAN_ENCODING))) {
-			String ref = configElement.getChild(DATAFLOW,T2_WORKFLOW_NAMESPACE).getAttributeValue(DATAFLOW_REFERENCE);
-			configObject = resolveDataflowReference(ref,innerDataflowElements);
-		    }
-		    else {
-			configObject = createBean(configElement, cl);
-		    }
-		    try {
-			activity.configure(configObject);
-		    } catch (ActivityConfigurationException e) {
-			activity = new DisabledActivity(c, configObject);
-		    }
-
+			if (DATAFLOW_ENCODING.equals(configElement
+					.getAttributeValue(BEAN_ENCODING))) {
+				String ref = configElement.getChild(DATAFLOW,
+						T2_WORKFLOW_NAMESPACE).getAttributeValue(
+						DATAFLOW_REFERENCE);
+				configObject = resolveDataflowReference(ref,
+						innerDataflowElements);
+			} else {
+				configObject = createBean(configElement, cl);
+			}
+			try {
+				activity.configure(configObject);
+			} catch (ActivityConfigurationException e) {
+				activity = new DisabledActivity(c, configObject);
+			}
 		}
 		catch (ClassNotFoundException e) {
 		    activity = new UnrecognizedActivity((Element) (element.clone()));
