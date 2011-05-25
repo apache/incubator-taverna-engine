@@ -13,8 +13,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-//import javax.xml.bind.JAXBException;
-
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceWriter;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Port;
 import net.sf.taverna.t2.provenance.lineageservice.utils.PortBinding;
@@ -22,15 +20,15 @@ import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 
 import org.apache.log4j.Logger;
 import org.openprovenance.model.Account;
-import org.openprovenance.model.AccountId;
+import org.openprovenance.model.AccountRef;
 import org.openprovenance.model.Accounts;
 import org.openprovenance.model.Artifact;
-import org.openprovenance.model.ArtifactId;
+import org.openprovenance.model.ArtifactRef;
 import org.openprovenance.model.Artifacts;
 import org.openprovenance.model.CausalDependencies;
 import org.openprovenance.model.OPMDeserialiser;
 import org.openprovenance.model.OPMGraph;
-import org.openprovenance.model.ProcessId;
+import org.openprovenance.model.ProcessRef;
 import org.openprovenance.model.Role;
 import org.openprovenance.model.Used;
 import org.openprovenance.model.WasControlledBy;
@@ -202,12 +200,15 @@ public class OPMImporter {
 		// complete the induced graph by building datalinks using the Artifact -> [Port] maps
 		// *********
 
+		
 		List<String>  accountNames = new ArrayList<String>();
 
 		accountNames.add(OPM_DEF_ACCOUNT);
-
+		
+		/* Disabled as allAccounts is never assigned to
 		if (allAccounts != null)  
 			for (Account acc:allAccounts) { accountNames.add(acc.getId()); }
+		*/
 
 		for (String acc:accountNames) {
 
@@ -312,12 +313,12 @@ public class OPMImporter {
 	 * @param workflowRun
 	 * @param artifactIsInput
 	 */
-	private Port processProcessArtifactDep(ProcessId procID, ArtifactId artId, Role role, 
+	private Port processProcessArtifactDep(ProcessRef procID, ArtifactRef artId, Role role, 
 			String workflowId, String workflowRun, boolean artifactIsInput) {
 
-		String procName = ((org.openprovenance.model.Process) procID.getId()).getId();
+		String procName = ((org.openprovenance.model.Process) procID.getRef()).getId();
 		String portName  = role.getValue();
-		String value    = ((Artifact) artId.getId()).getId();
+		String value    = ((Artifact) artId.getRef()).getId();
 
 		portName = removeBlanks(portName);
 
@@ -339,15 +340,15 @@ public class OPMImporter {
 	private void processUsed(Used dep) {
 
 		// Acc determines the scope -- this dep may belong to > 1 account, deal with all of them
-		List<AccountId> accountIDs = dep.getAccount();
-		ProcessId procID = dep.getEffect();
-		ArtifactId artId = dep.getCause();
+		List<AccountRef> accountIDs = dep.getAccount();
+		ProcessRef procID = dep.getEffect();
+		ArtifactRef artId = dep.getCause();
 		Role role = dep.getRole();
 
 		List<String>  accNames = new ArrayList<String>();
 
-		for (AccountId accId:accountIDs) {
-			accNames.add(((Account) accId.getId()).getId());
+		for (AccountRef accId:accountIDs) {
+			accNames.add(((Account) accId.getRef()).getId());
 		}
 
 		accNames.add(OPM_DEF_ACCOUNT);
@@ -364,11 +365,11 @@ public class OPMImporter {
 				usedVars = new HashMap<String, List<Port>>();
 				usedVarsByAccount.put(workflowId, usedVars);
 			}
-			List<Port> vars = usedVars.get(((Artifact) artId.getId()).getId());
+			List<Port> vars = usedVars.get(((Artifact) artId.getRef()).getId());
 
 			if (vars == null) {
 				vars = new ArrayList<Port>();
-				usedVars.put(((Artifact) artId.getId()).getId(), vars);
+				usedVars.put(((Artifact) artId.getRef()).getId(), vars);
 			}
 			vars.add(v);
 
@@ -379,13 +380,13 @@ public class OPMImporter {
 				usedArtifactsByAccount.put(accName, usedArtifacts);
 			}
 
-			String artifactName = ((Artifact) artId.getId()).getId();
+			String artifactName = ((Artifact) artId.getRef()).getId();
 			List<String> processes = usedArtifacts.get(artifactName);
 			if (processes == null) {
 				processes = new ArrayList<String>();
 				usedArtifacts.put(artifactName, processes);
 			}
-			processes.add(((org.openprovenance.model.Process) procID.getId()).getId());
+			processes.add(((org.openprovenance.model.Process) procID.getRef()).getId());
 		}
 	}
 
@@ -401,15 +402,15 @@ public class OPMImporter {
 	private void processWGBy(WasGeneratedBy dep)  {
 
 		// Acc determines the scope -- this dep may belong to > 1 account, deal with all of them
-		List<AccountId> accountIDs = dep.getAccount();
-		ProcessId procID = dep.getCause();
-		ArtifactId artId = dep.getEffect();
+		List<AccountRef> accountIDs = dep.getAccount();
+		ProcessRef procID = dep.getCause();
+		ArtifactRef artId = dep.getEffect();
 		Role role = dep.getRole();
 
 		List<String>  accNames = new ArrayList<String>();
 
-		for (AccountId accId:accountIDs) {
-			accNames.add(((Account) accId.getId()).getId());
+		for (AccountRef accId:accountIDs) {
+			accNames.add(((Account) accId.getRef()).getId());
 		}
 
 		accNames.add(OPM_DEF_ACCOUNT);
@@ -427,10 +428,10 @@ public class OPMImporter {
 				wgbVarsByAccount.put(workflowId, wgbVars);
 			}
 
-			List<Port> vars = wgbVars.get(((Artifact) artId.getId()).getId());
+			List<Port> vars = wgbVars.get(((Artifact) artId.getRef()).getId());
 			if (vars == null) {
 				vars = new ArrayList<Port>();
-				wgbVars.put(((Artifact) artId.getId()).getId(), vars);
+				wgbVars.put(((Artifact) artId.getRef()).getId(), vars);
 			}
 			vars.add(v);
 
@@ -441,13 +442,13 @@ public class OPMImporter {
 				wgbArtifactsByAccount.put(accName, wgbArtifacts);
 			}
 
-			String artifactName = ((Artifact) artId.getId()).getId();
+			String artifactName = ((Artifact) artId.getRef()).getId();
 			List<String> processes = wgbArtifacts.get(artifactName);
 			if (processes == null) {
 				processes = new ArrayList<String>();
 				wgbArtifacts.put(artifactName, processes);
 			}
-			processes.add(((org.openprovenance.model.Process) procID.getId()).getId());
+			processes.add(((org.openprovenance.model.Process) procID.getRef()).getId());
 		}
 	}
 
@@ -463,14 +464,14 @@ public class OPMImporter {
 	 * @param dep
 	 */
 	private void processWDF(WasDerivedFrom dep) {
-		List<AccountId> accountIDs = dep.getAccount();
-		ArtifactId fromArtId = dep.getCause();
-		ArtifactId toArtId = dep.getEffect();
+		List<AccountRef> accountIDs = dep.getAccount();
+		ArtifactRef fromArtId = dep.getCause();
+		ArtifactRef toArtId = dep.getEffect();
 
 		List<String>  accNames = new ArrayList<String>();
 
-		for (AccountId accId:accountIDs) {
-			accNames.add(((Account) accId.getId()).getId());
+		for (AccountRef accId:accountIDs) {
+			accNames.add(((Account) accId.getRef()).getId());
 		}
 
 		accNames.add(OPM_DEF_ACCOUNT);
@@ -488,7 +489,7 @@ public class OPMImporter {
 			Map<String, List<String>> wgbArtifacts = wgbArtifactsByAccount.get(accName);
 
 			if (wgbArtifacts != null) {
-				String toArtifactName = ((Artifact) toArtId.getId()).getId();
+				String toArtifactName = ((Artifact) toArtId.getRef()).getId();
 				generatingProcesses = wgbArtifacts.get(toArtifactName);
 				if (generatingProcesses != null) {
 					logger.debug("artifact "+toArtifactName+" wgby one or more processes...");
@@ -501,7 +502,7 @@ public class OPMImporter {
 			Map<String, List<String>> usedArtifacts = usedArtifactsByAccount.get(accName);
 
 			if (usedArtifacts != null) {
-				String fromArtifactName = ((Artifact) fromArtId.getId()).getId();
+				String fromArtifactName = ((Artifact) fromArtId.getRef()).getId();
 				usingProcesses = usedArtifacts.get(fromArtifactName);
 				if (usingProcesses != null) {
 					logger.debug("artifact "+fromArtifactName+" was used by one or more processes...");
@@ -533,14 +534,14 @@ public class OPMImporter {
 
 			// create a role for fromArtId from the procName
 			String inputPortName = procName+"_"+varCounter++;
-			String inputValue = ((Artifact) fromArtId.getId()).getId();
+			String inputValue = ((Artifact) fromArtId.getRef()).getId();
 
 			// add to DB
 			processProcessArtifactDep(procName, inputValue, inputPortName, workflowId, workflowRun, true);
 
 			// create a role for toArtId
 			String outputPortName = procName+"_"+varCounter++;
-			String outputValue = ((Artifact) toArtId.getId()).getId();
+			String outputValue = ((Artifact) toArtId.getRef()).getId();
 
 			// add to DB
 			processProcessArtifactDep(procName, outputValue, outputPortName, workflowId, workflowRun, false);

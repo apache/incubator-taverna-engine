@@ -22,12 +22,6 @@
       -->
 
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        
-        <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
         </dependency>
@@ -54,6 +48,12 @@
             <groupId>org.jdom</groupId>
             <artifactId>jdom</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+
 
         <dependency>
             <groupId>net.sf.taverna.t2.infrastructure</groupId>
@@ -85,15 +85,29 @@
             <version>${tupelo.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.tupeloproject</groupId>
+            <artifactId>tupelo-kernel</artifactId>
+            <version>${tupelo.version}</version>
+        </dependency>
+
+        <!-- 
+        <dependency>
             <groupId>org.openprovenance</groupId>
             <artifactId>toolbox</artifactId>
             <version>${opm.version}</version>
         </dependency>
+         -->
         <dependency>
             <groupId>org.openprovenance</groupId>
-            <artifactId>opm</artifactId>
+            <artifactId>opm-core</artifactId>
             <version>${opm.version}</version>
         </dependency>
+         <dependency>
+            <groupId>org.openprovenance</groupId>
+            <artifactId>opm-tupelo</artifactId>
+            <version>${opm.version}</version>
+        </dependency>
+        
 
 <!-- 
 

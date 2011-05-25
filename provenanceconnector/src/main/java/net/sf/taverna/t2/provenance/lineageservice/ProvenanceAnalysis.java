@@ -27,26 +27,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// import javax.xml.bind.JAXBException;
-
 import net.sf.taverna.t2.invocation.InvocationContext;
 import net.sf.taverna.t2.provenance.api.NativeAnswer;
 import net.sf.taverna.t2.provenance.api.QueryAnswer;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DataLink;
-import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
-import net.sf.taverna.t2.provenance.lineageservice.utils.QueryPort;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Port;
 import net.sf.taverna.t2.provenance.lineageservice.utils.PortBinding;
+import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
+import net.sf.taverna.t2.provenance.lineageservice.utils.QueryPort;
 import net.sf.taverna.t2.provenance.lineageservice.utils.WorkflowRun;
 import net.sf.taverna.t2.provenance.opm.OPMManager;
-import net.sf.taverna.t2.reference.ExternalReferenceSPI;
 import net.sf.taverna.t2.reference.T2Reference;
-import net.sf.taverna.t2.reference.impl.ReferenceSetImpl;
 
 import org.apache.log4j.Logger;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.provenance.ProvenanceArtifact;
-import org.tupeloproject.provenance.ProvenanceException;
 import org.tupeloproject.provenance.ProvenanceRole;
 
 /**
@@ -128,8 +123,6 @@ public class ProvenanceAnalysis {
 			aOPMManager.createAccount(getWorkflowRunIds().get(0).getWorkflowRunId());
 		} catch (SQLException e) {
 			logger.error("Could not initialise OPM Manager: ", e);
-		} catch (ProvenanceException e) {
-			logger.error("Could not create OPM account", e);
 		}
 	}
 
@@ -669,43 +662,28 @@ public class ProvenanceAnalysis {
 							//							ReferenceSetImpl o = (ReferenceSetImpl) ic.getReferenceService().resolveIdentifier(ref, null, ic);
 							logger.debug("deref value for ref: "+ref+" "+data+" of class "+data.getClass().getName());
 
-							try {
-								aOPMManager.addArtifact(vb.getValue(), data);
-							} catch (ProvenanceException e) {
-								logger.warn("Could not log artifact for " + ref, e);
-							}
+							
+							aOPMManager.addArtifact(vb.getValue(), data);
+							
 
 						} else
-							try {
-								aOPMManager.addArtifact(vb.getValue());
-							} catch (ProvenanceException e) {
-								logger.warn("Could not log artifact", e);
-							}
-
+							aOPMManager.addArtifact(vb.getValue());
 						aOPMManager.createRole(role);
 					}
 
 					// assert proc as Process -- include iteration vector to separate different activations of the same process					
-					try {
 						aOPMManager.addProcess(proc, vb.getIteration(), URIFriendlyIterationVector);
-					} catch (ProvenanceException e) {
-						logger.warn("Could not add process for " + proc, e);
-					}
 
 					//
 					// create OPM generatedBy property between output value and this process node
 					// avoid the pathological case where a dataflow generates its own inputs
 					//
-					try {
 						aOPMManager.assertGeneratedBy(
 								aOPMManager.getCurrentArtifact(), 
 								aOPMManager.getCurrentProcess(), 
 								aOPMManager.getCurrentRole(), 
 								aOPMManager.getCurrentAccount(),
 								true);
-					} catch (ProvenanceException e) {
-						logger.warn("Could not add generatedBy", e);
-					}   // true -> prevent duplicates CHECK
 				}
 			}
 			// 
@@ -736,27 +714,15 @@ public class ProvenanceAnalysis {
 						// create OPM artifact and role for the input var obtained by path projection
 						//
 						if (resultRecord.isCollection())  {
-							try {
 								aOPMManager.addArtifact(resultRecord.getCollectionT2Reference());
-							} catch (ProvenanceException e) {
-								logger.warn("Could not add artifact", e);
-							}
 						}	else if (isRecordArtifactValues())	{
 							T2Reference ref = getInvocationContext().getReferenceService().referenceFromString(resultRecord.getValue());
 							Object data = ic.getReferenceService().renderIdentifier(ref, Object.class, ic); 
 							logger.debug("deref value for ref: "+ref+" "+data+" of class "+data.getClass().getName());
-							try {
 							aOPMManager.addArtifact(resultRecord.getValue(), data);
-							} catch (ProvenanceException e) {
-								logger.warn("Could not add artifact", e);
-							}
 						}  else { 
-							try {
 								aOPMManager
 										.addArtifact(resultRecord.getValue());
-							} catch (ProvenanceException e) {
-								logger.warn("Could not add artifact", e);
-							}
 						var2Artifact.put(resultRecord.getPortName(), aOPMManager.getCurrentArtifact());
 
 						if (URIFriendlyIterationVector.length()>0) {
@@ -773,7 +739,7 @@ public class ProvenanceAnalysis {
 						//
 						// avoid output variables, it would assert that P used one of its outputs!
 
-						try {
+						
 							aOPMManager.assertUsed(
 									aOPMManager.getCurrentArtifact(), 
 									aOPMManager.getCurrentProcess(), 
@@ -781,9 +747,7 @@ public class ProvenanceAnalysis {
 									aOPMManager.getCurrentAccount(),
 									true);
 							// true -> prevent duplicates CHECK	
-						} catch (ProvenanceException e) {
-							logger.warn("Could not add artifact", e);
-						}
+						
 					}
 				}
 			}
