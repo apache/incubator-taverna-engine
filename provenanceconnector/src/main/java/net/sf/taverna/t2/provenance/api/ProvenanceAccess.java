@@ -88,6 +88,11 @@ public class ProvenanceAccess {
 		this.connectorType = connectorType;
 		init();
 	}
+	
+	public ProvenanceAccess(String connectorType, InvocationContext context) {
+		this.connectorType = connectorType;
+		init(context);
+	}
 
 	/**
 	 * The recommended data source intitialisation method, where only a driver name and jdbc url are required.<br/>
@@ -181,6 +186,11 @@ public class ProvenanceAccess {
 	}
 
 	public void init() {
+		InvocationContext context = initDefaultReferenceService();
+		init(context);
+	}
+	
+	public void init(InvocationContext context) {
 
 		for (ProvenanceConnectorFactory factory : ProvenanceConnectorFactoryRegistry.getInstance().getInstances()) {
 			if (connectorType.equalsIgnoreCase(factory.getConnectorType())) {
@@ -192,8 +202,7 @@ public class ProvenanceAccess {
 		//slight change, the init is outside but it also means that the init call has to ensure that the dbURL
 		//is set correctly
 		provenanceConnector.init();
-
-		InvocationContext context = initDefaultReferenceService();
+		
 		provenanceConnector.setReferenceService(context.getReferenceService()); // CHECK context.getReferenceService());
 		provenanceConnector.setInvocationContext(context);
 
