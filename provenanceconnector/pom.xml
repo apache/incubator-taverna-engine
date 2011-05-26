@@ -20,7 +20,6 @@
             <version>${jena.version}</version>
         </dependency>
       -->
-
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
@@ -97,14 +96,16 @@
             <version>${opm.version}</version>
         </dependency>
          -->
+         <!-- 
         <dependency>
             <groupId>org.openprovenance</groupId>
             <artifactId>opm-core</artifactId>
             <version>${opm.version}</version>
         </dependency>
+          -->
          <dependency>
             <groupId>org.openprovenance</groupId>
-            <artifactId>opm-tupelo</artifactId>
+            <artifactId>opm-core</artifactId>
             <version>${opm.version}</version>
         </dependency>
         

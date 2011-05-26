@@ -25,7 +25,7 @@ import org.openprovenance.model.Accounts;
 import org.openprovenance.model.Artifact;
 import org.openprovenance.model.ArtifactRef;
 import org.openprovenance.model.Artifacts;
-import org.openprovenance.model.CausalDependencies;
+import org.openprovenance.model.Dependencies;
 import org.openprovenance.model.OPMDeserialiser;
 import org.openprovenance.model.OPMGraph;
 import org.openprovenance.model.ProcessRef;
@@ -155,9 +155,8 @@ public class OPMImporter {
 
 		// what have we got?
 		// retrieve all OPM relations from the graph		
-		CausalDependencies cd = graph.getCausalDependencies();
-		allDeps = cd.getUsedOrWasGeneratedByOrWasTriggeredBy();
-
+		Dependencies dependencies = graph.getDependencies();
+		allDeps = dependencies.getUsedOrWasGeneratedByOrWasTriggeredBy();
 		// make sure these are processed in the right order: used, wgby, THEN wdf because this latter is derived from the first 2!
 		// so collect them into sets and process them separately
 
