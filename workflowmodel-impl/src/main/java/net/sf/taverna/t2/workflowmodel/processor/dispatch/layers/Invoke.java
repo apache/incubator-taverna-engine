@@ -26,6 +26,7 @@ import static net.sf.taverna.t2.workflowmodel.processor.dispatch.description.Dis
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.sql.Date;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -45,6 +46,7 @@ import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.workflowmodel.ControlBoundary;
 import net.sf.taverna.t2.workflowmodel.OutputPort;
+import net.sf.taverna.t2.workflowmodel.Processor;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.AsynchronousActivity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.AsynchronousActivityCallback;
@@ -307,7 +309,16 @@ public class Invoke extends AbstractDispatchLayer<Object> {
 				String processorOutputName = asyncActivity
 						.getOutputPortMapping().get(outputName);
 				if (processorOutputName != null) {
-					resultMap.put(processorOutputName, data.get(outputName));
+					T2Reference ref = data.get(outputName);
+					if (ref.containsErrors()) {
+						Processor p = getProcessor();
+						String message = "Processor '" + getProcessor().getLocalName() + "' - Port '" + processorOutputName + "'";
+						resultMap.put (processorOutputName,
+								refService.getErrorDocumentService()
+						.registerError(message , Collections.singleton(ref), ref.getDepth(), null).getId());
+					} else {
+						resultMap.put(processorOutputName, data.get(outputName));
+					}
 				}
 			}
 			// Construct a new index array if the specified index is
