@@ -28,8 +28,10 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityConfigurationException;
 import net.sf.taverna.t2.workflowmodel.processor.activity.DisabledActivity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.NonExecutableActivity;
+import net.sf.taverna.t2.workflowmodel.processor.activity.SupersededActivity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.UnrecognizedActivity;
 import net.sf.taverna.t2.workflowmodel.serialization.DeserializationException;
+import net.sf.taverna.t2.workflowmodel.utils.Tools;
 
 import org.apache.log4j.Logger;
 import org.jdom.Element;
@@ -98,6 +100,16 @@ public class ActivityXMLDeserializer extends AbstractXMLDeserializer {
 		catch (ClassNotFoundException e) {
 		    activity = new UnrecognizedActivity((Element) (element.clone()));
 		}
+		
+		boolean wasSuperseded = false;
+		if (activity instanceof SupersededActivity) {
+			try {
+				activity = ((SupersededActivity) activity).getReplacementActivity();
+				wasSuperseded = true;
+			} catch (ActivityConfigurationException e) {
+				activity = new UnrecognizedActivity((Element) (element.clone()));
+			}
+		}
 		//port mappings
 		Element ipElement = element.getChild(INPUT_MAP, T2_WORKFLOW_NAMESPACE);
 		for (Element mapElement : (List<Element>) (ipElement.getChildren(MAP,
@@ -115,6 +127,9 @@ public class ActivityXMLDeserializer extends AbstractXMLDeserializer {
 							}
 						}
 				((NonExecutableActivity) activity).addProxyInput(activityInputName, depth);
+			}
+			if (wasSuperseded) {
+				activityInputName = Tools.sanitiseName(activityInputName);
 			}
 			activity.getInputPortMapping().put(processorInputName,
 					activityInputName);
@@ -136,6 +151,9 @@ public class ActivityXMLDeserializer extends AbstractXMLDeserializer {
 					}
 				}
 				((NonExecutableActivity) activity).addProxyOutput(activityOutputName, depth);
+			}
+			if (wasSuperseded) {
+				activityOutputName = Tools.sanitiseName(activityOutputName);
 			}
 			activity.getOutputPortMapping().put(activityOutputName,
 					processorOutputName);
