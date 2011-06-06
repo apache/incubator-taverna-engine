@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 
 import net.sf.taverna.t2.annotation.annotationbeans.IdentificationAssertion;
 import net.sf.taverna.t2.workflowmodel.CompoundEdit;
@@ -914,12 +915,42 @@ public class Tools {
 				.getEntities(NamedWorkflowEntity.class)) {
 			existingNames.add(entity.getLocalName().toLowerCase());
 		}
+		return uniqueObjectName(preferredName, existingNames);
+	}
+	
+	/**
+	 * Checks that the name does not have any characters that are invalid for a
+	 * Taverna name.
+	 * 
+	 * The name must contain only the chars[A-Za-z_0-9].
+	 * 
+	 * @param name
+	 *            the original name
+	 * @return the sanitised name
+	 */
+	public static String sanitiseName(String name) {
+		String result = name;
+		if (Pattern.matches("\\w++", name) == false) {
+			result = "";
+			for (char c : name.toCharArray()) {
+				if (Character.isLetterOrDigit(c) || c == '_') {
+					result += c;
+				} else {
+					result += "_";
+				}
+			}
+		}
+		return result;
+	}
+	
+	public static String uniqueObjectName(String preferredName, Set<String> existingNames) {
 		String uniqueName = preferredName;
 		long suffix = 2;
 		while (existingNames.contains(uniqueName.toLowerCase())) {
 			uniqueName = preferredName + "_" + suffix++;
 		}
 		return uniqueName;
+		
 	}
 	
 	/**
