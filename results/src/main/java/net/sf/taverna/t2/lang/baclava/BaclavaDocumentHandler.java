@@ -48,7 +48,7 @@ public class BaclavaDocumentHandler {
 	
 	
 	/**
-	 * Reads a baclava document from an InputStream and returns a map of DataThings
+	 * Reads a baclava document from an InputStream and returns a map of DataThings mapped to the portName
 	 * 
 	 * @throws IOException, JDOMException
 	 */
