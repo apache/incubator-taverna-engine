@@ -4,19 +4,13 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import net.sf.taverna.t2.invocation.InvocationContext;
 import net.sf.taverna.t2.lang.results.ResultsUtils;
-import net.sf.taverna.t2.reference.ErrorDocument;
-import net.sf.taverna.t2.reference.IdentifiedList;
 import net.sf.taverna.t2.reference.ReferenceService;
-import net.sf.taverna.t2.reference.ReferenceServiceException;
 import net.sf.taverna.t2.reference.T2Reference;
-import net.sf.taverna.t2.reference.T2ReferenceType;
 
 import org.apache.log4j.Logger;
 import org.embl.ebi.escience.baclava.DataThing;
@@ -96,61 +90,17 @@ public class BaclavaDocumentHandler {
 		this.context = context;
 	}
 	
-	
-	/**
-	 * Converts a T2Reference pointing to results to 
-	 * a list of (lists of ...) dereferenced result object.
-	 */
-	private Object convertReferenceToObject(T2Reference reference) {				
-	
-			if (reference.getReferenceType() == T2ReferenceType.ReferenceSet){
-				// Dereference the object
-				Object dataValue;
-				try{
-					try {
-						dataValue = referenceService.renderIdentifier(reference, String.class, context);
-					}
-					catch (ReferenceServiceException e) {
-						dataValue = referenceService.renderIdentifier(reference, byte[].class, context);
-					}
-				}
-				catch(ReferenceServiceException rse){
-					String message = "Problem rendering T2Reference in convertReferencesToObjects().";
-					logger.error("BaclavaDocumentHandler Error: "+ message, rse);
-					throw rse;
-				}
-				return dataValue;
-			}
-			else if (reference.getReferenceType() == T2ReferenceType.ErrorDocument){
-				// Dereference the ErrorDocument and convert it to some string representation
-				ErrorDocument errorDocument = (ErrorDocument)referenceService.resolveIdentifier(reference, null, context);
-				String errorString = ResultsUtils.buildErrorDocumentString(errorDocument, context);
-				return errorString;
-			}
-			else { // it is an IdentifiedList<T2Reference> - go recursively
-				IdentifiedList<T2Reference> identifiedList = referenceService.getListService().getList(reference);
-				List<Object> list = new ArrayList<Object>();
-				
-				for (int j=0; j<identifiedList.size(); j++){
-					T2Reference ref = identifiedList.get(j);
-					list.add(convertReferenceToObject(ref));
-				}
-				return list;
-			}	
-	}	
-	
 	protected Object getObjectForName(String name) {
 		Object result = null;
 		if (getChosenReferences().containsKey(name)) {
-			result = convertReferenceToObject(getChosenReferences().get(name));
+			result = ResultsUtils.convertReferenceToObject(getChosenReferences().get(name),referenceService,context);
 		}
 		if (result == null) {
 			result = "null";
 		}
 		return result;	
 	}
-		
-	
+			
 	private Map<String,T2Reference> getChosenReferences() {
 		return chosenReferences;
 	}

@@ -36,6 +36,7 @@ import net.sf.taverna.t2.reference.ExternalReferenceSPI;
 import net.sf.taverna.t2.reference.IdentifiedList;
 import net.sf.taverna.t2.reference.ListService;
 import net.sf.taverna.t2.reference.ReferenceService;
+import net.sf.taverna.t2.reference.ReferenceServiceException;
 import net.sf.taverna.t2.reference.StackTraceElementBean;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.reference.T2ReferenceType;
@@ -57,6 +58,50 @@ import eu.medsea.mimeutil.MimeUtil2;
 public class ResultsUtils {
 
 	private static Logger logger = Logger.getLogger(ResultsUtils.class);
+	
+	/**
+	 * Converts a T2Reference pointing to results to 
+	 * a list of (lists of ...) dereferenced result object.
+	 * @param context 
+	 * @param referenceService 
+	 */
+	public static Object convertReferenceToObject(T2Reference reference, ReferenceService referenceService, InvocationContext context) {				
+	
+			if (reference.getReferenceType() == T2ReferenceType.ReferenceSet){
+				// Dereference the object
+				Object dataValue;
+				try{
+					try {
+						dataValue = referenceService.renderIdentifier(reference, String.class, context);
+					}
+					catch (ReferenceServiceException e) {
+						dataValue = referenceService.renderIdentifier(reference, byte[].class, context);
+					}
+				}
+				catch(ReferenceServiceException rse){
+					String message = "Problem rendering T2Reference in convertReferencesToObjects().";
+					logger.error("BaclavaDocumentHandler Error: "+ message, rse);
+					throw rse;
+				}
+				return dataValue;
+			}
+			else if (reference.getReferenceType() == T2ReferenceType.ErrorDocument){
+				// Dereference the ErrorDocument and convert it to some string representation
+				ErrorDocument errorDocument = (ErrorDocument)referenceService.resolveIdentifier(reference, null, context);
+				String errorString = ResultsUtils.buildErrorDocumentString(errorDocument, context);
+				return errorString;
+			}
+			else { // it is an IdentifiedList<T2Reference> - go recursively
+				IdentifiedList<T2Reference> identifiedList = referenceService.getListService().getList(reference);
+				List<Object> list = new ArrayList<Object>();
+				
+				for (int j=0; j<identifiedList.size(); j++){
+					T2Reference ref = identifiedList.get(j);
+					list.add(convertReferenceToObject(ref,referenceService,context));
+				}
+				return list;
+			}	
+	}	
 
 	/**
 	 * Creates a string representation of the ErrorDocument.
