@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.HashMap;
 import java.util.Map;
 
 import net.sf.taverna.t2.invocation.InvocationContext;
@@ -12,7 +11,6 @@ import net.sf.taverna.t2.lang.results.ResultsUtils;
 import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.T2Reference;
 
-import org.apache.log4j.Logger;
 import org.embl.ebi.escience.baclava.DataThing;
 import org.embl.ebi.escience.baclava.factory.DataThingFactory;
 import org.jdom.Document;
@@ -38,7 +36,7 @@ public class BaclavaDocumentHandler {
 	
 	protected InvocationContext context;
 	
-	private static Logger logger = Logger.getLogger(BaclavaDocumentHandler.class);
+	//private static Logger logger = Logger.getLogger(BaclavaDocumentHandler.class);
 
 	/**
 	 * Saves the result data to an XML Baclava file. 
@@ -63,8 +61,7 @@ public class BaclavaDocumentHandler {
 		Element rootElement = new Element("dataThingMap", namespace);
 		Document theDocument = new Document(rootElement);
 		// Build the DataThing map from the chosenReferences
-		// First convert map of references to objects into a map of real result objects
-		Map<String, Object> resultMap = new HashMap<String, Object>();
+		// First convert map of references to objects into a map of real result objects		
 		for (String portName : getChosenReferences().keySet()) {
 			DataThing thing = DataThingFactory.bake(getObjectForName(portName));
  			Element dataThingElement = new Element("dataThing", namespace);
