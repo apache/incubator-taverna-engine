@@ -7,6 +7,7 @@
 		<version>2.3-SNAPSHOT</version>
         <relativePath>../../taverna-parent/pom.xml</relativePath>
 	</parent>
+	
 	<modelVersion>4.0.0</modelVersion>
 	<name>Taverna 2 language extensions</name>
 	<groupId>net.sf.taverna.t2</groupId>
