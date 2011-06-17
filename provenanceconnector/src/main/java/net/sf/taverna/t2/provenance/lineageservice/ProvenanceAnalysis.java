@@ -459,7 +459,7 @@ public class ProvenanceAnalysis {
 
 	/**
 	 * accounts for an inverse transformation from one output to all inputs of a processor
-	 * @param wfID
+	 * @param workflowRunId
 	 * @param var  the output var
 	 * @param proc  the processor
 	 * @param selectedProcessors  the processors for which we are interested in producing lineage 
@@ -468,7 +468,7 @@ public class ProvenanceAnalysis {
 	 * @throws SQLException 
 	 */
 	private void xformStep(
-			String wfID,
+			String workflowRunId,
 			String workflowId, 				
 			Port outputVar, // we need the dnl from this output var
 			String proc,
@@ -505,7 +505,7 @@ public class ProvenanceAnalysis {
 
 		} else {
 
-			varsQueryConstraints.put("W.workflowId", wfID);
+			varsQueryConstraints.put("W.workflowId", workflowId);
 			varsQueryConstraints.put("processorName", proc);  
 			varsQueryConstraints.put("isInputPort", "1");  
 
@@ -607,7 +607,7 @@ public class ProvenanceAnalysis {
 		// if this transformation is important to the user, produce an output and also an OPM graph fragment
 		if (selectedProcessors.isEmpty() || isSelected) {
 
-			List<LineageSQLQuery> newLqList = getPq().lineageQueryGen(wfID, proc, var2Path, outputVar, path, isReturnOutputs() || var2Path.isEmpty());
+			List<LineageSQLQuery> newLqList = getPq().lineageQueryGen(workflowRunId, proc, var2Path, outputVar, path, isReturnOutputs() || var2Path.isEmpty());
 			lqList.addAll(newLqList);
 
 			// BEGIN OPM update section
@@ -625,7 +625,7 @@ public class ProvenanceAnalysis {
 				Map<String, String> vbConstraints = new HashMap<String, String>();
 				vbConstraints.put("VB.processorNameRef", outputVar.getProcessorName());
 				vbConstraints.put("VB.portName", outputVar.getPortName());
-				vbConstraints.put("VB.workflowRunId", wfID);
+				vbConstraints.put("VB.workflowRunId", workflowRunId);
 
 				if (path != null) { 
 
@@ -797,7 +797,7 @@ public class ProvenanceAnalysis {
 
 		// recursion -- xfer path is next up
 		for (Port inputVar: inputVars) {
-			xferStep(wfID, workflowId, inputVar, var2Path.get(inputVar), selectedProcessors, lqList);	
+			xferStep(workflowRunId, workflowId, inputVar, var2Path.get(inputVar), selectedProcessors, lqList);	
 		}
 		}
 		currentPath.remove(currentPath.size()-1);  // CHECK	
