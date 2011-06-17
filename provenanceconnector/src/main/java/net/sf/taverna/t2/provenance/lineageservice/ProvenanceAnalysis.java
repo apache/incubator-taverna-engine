@@ -618,7 +618,6 @@ public class ProvenanceAnalysis {
 
 			String role = null;
 			PortBinding vb = null;
-			String URIFriendlyIterationVector =null;
 
 			if (doOPM) {
 				// fetch value for this variable and assert it as an Artifact in the OPM graph
@@ -649,14 +648,6 @@ public class ProvenanceAnalysis {
 				}  else {
 					vb = vbList.get(0);
 
-					URIFriendlyIterationVector = vb.getIteration().
-					replace(',', '-').replace('[', ' ').replace(']', ' ').trim();
-
-					if (URIFriendlyIterationVector.length()>0) {
-						role = vb.getProcessorName()+"/"+vb.getPortName()+"?it="+URIFriendlyIterationVector;
-					} else
-						role = vb.getProcessorName()+"/"+vb.getPortName();
-
 					if (aOPMManager!=null && !pq.isDataflow(proc)) {
 						if (isRecordArtifactValues()) {
 
@@ -673,8 +664,6 @@ public class ProvenanceAnalysis {
 							} catch (ProvenanceException e) {
 								logger.warn("Could not add artifact", e);
 							}
-							
-
 						} else {
 							try {
 							aOPMManager.addArtifact(vb.getValue());
@@ -682,12 +671,12 @@ public class ProvenanceAnalysis {
 								logger.warn("Could not add artifact", e);
 							}
 						}
-						aOPMManager.createRole(role);
+						aOPMManager.createRole(vb.getWorkflowRunId(), vb.getWorkflowId(), vb.getProcessorName(), vb.getIteration());
 					}
 
 					// assert proc as Process -- include iteration vector to separate different activations of the same process					
 					try {
-						aOPMManager.addProcess(proc, vb.getIteration(), URIFriendlyIterationVector);
+						aOPMManager.addProcess(proc, vb.getIteration(), workflowId, vb.getWorkflowRunId());
 					} catch (ProvenanceException e) {
 						logger.warn("Could not add process", e);
 					}
@@ -725,9 +714,6 @@ public class ProvenanceAnalysis {
 						// process inputs only
 						if (!resultRecord.isInputPort()) continue;
 
-						URIFriendlyIterationVector = resultRecord.getIteration().
-						replace(',', '-').replace('[', ' ').replace(']', ' ').trim();
-
 						boolean found = false;  // used to avoid duplicate process resources
 
 						// map each input var in the resultRecord to an Artifact
@@ -762,12 +748,7 @@ public class ProvenanceAnalysis {
 								}
 						var2Artifact.put(resultRecord.getPortName(), aOPMManager.getCurrentArtifact());
 
-						if (URIFriendlyIterationVector.length()>0) {
-							role = resultRecord.getProcessorName()+"/"+resultRecord.getPortName()+"?it="+URIFriendlyIterationVector;
-						} else
-							role = resultRecord.getProcessorName()+"/"+resultRecord.getPortName();
-
-						aOPMManager.createRole(role);	// this also sets currentRole to role				
+						aOPMManager.createRole(resultRecord.getWorkflowRunId(), resultRecord.getworkflowId(), resultRecord.getProcessorName(), resultRecord.getIteration());
 						var2ArtifactRole.put(resultRecord.getPortName(), aOPMManager.getCurrentRole());
 
 

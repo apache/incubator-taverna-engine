@@ -533,7 +533,8 @@ public abstract class ProvenanceQuery {
 					vb.setIteration(rs.getString("iteration"));
 					vb.setProcessorName(rs.getString("processorNameRef"));
 					vb.setPositionInColl(rs.getInt("positionInColl"));
-
+					vb.setPortId(rs.getString("portId"));
+					vb.setIsInputPort(rs.getBoolean("isInputPort"));
 					result.add(vb);
 				}
 

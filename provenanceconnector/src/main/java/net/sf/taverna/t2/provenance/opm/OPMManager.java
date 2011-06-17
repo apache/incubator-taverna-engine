@@ -3,7 +3,6 @@
  */
 package net.sf.taverna.t2.provenance.opm;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URI;
@@ -12,14 +11,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import net.sf.taverna.t2.provenance.lineageservice.URIGenerator;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DataValueExtractor;
 
 import org.apache.log4j.Logger;
-import org.openprovenance.model.Artifact;
-import org.openprovenance.model.OPMGraph;
-import org.openprovenance.model.OPMToDot;
-import org.openprovenance.model.Process;
-//import org.openprovenance.rdf.OPMRdf2Xml;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.UnionContext;
@@ -48,8 +43,6 @@ public class OPMManager {
 	private static Logger logger = Logger.getLogger(OPMManager.class);
 
 	public static final String OPM_TAVERNA_NAMESPACE = "http://taverna.opm.org/";
-	private static final String OPM_RDF_GRAPH_FILE = "src/test/resources/provenance-testing/OPM/OPMGraph.rdf";
-	private static final String  OPM_DOT_FILE = "src/test/resources/provenance-testing/OPM/OPMGraph.dot";
 	private static final String VALUE_PROP = "value";
 	
 	ProvenanceContextFacade graph = null;
@@ -92,7 +85,7 @@ public class OPMManager {
 	public void createAccount(String accountName) throws ProvenanceException  {
 
 		currentAccount = graph.newAccount("OPM-"+
-				accountName, Resource.uriRef(OPM_TAVERNA_NAMESPACE+accountName));
+				accountName, Resource.uriRef(uriGenerator.makeRunUri(accountName)));
 		graph.assertAccount(currentAccount);
 	}
 
@@ -176,42 +169,43 @@ public class OPMManager {
 	}
 
 
-
-	public void createRole(String aRole) {
-
-		Resource r = Resource.uriRef(OPM_TAVERNA_NAMESPACE+aRole);		
+	public void createRole(String workflowRunId, String workflowId, String processorName, String iteration) {
+		String aRole = uriGenerator.makeIteration(workflowRunId, workflowId, processorName, iteration);
+		Resource r = Resource.uriRef(aRole);
 		currentRole = graph.newRole(aRole, r);
 	}
 
 
-	public void addProcess(String proc, String iterationVector, String URIfriendlyIterationVector) throws ProvenanceException  {
+	private URIGenerator uriGenerator = new URIGenerator();
+	
+	public void addProcess(String processorName, String iterationVector, String workflowId, String workflowRunId) throws ProvenanceException  {
 
 		String processID;
 
 		// PM added 5/09 -- a process name may already be a URI -- this happens for example when we export back OPM
 		// after importing a workflow from our own OPM... in this case, do not pre-pend a new URI scheme
-
+		
 		try {
-			URI procURI = new URI(proc);
+			URI procURI = new URI(processorName);
 
 			if (procURI.getAuthority() == null) {
-				processID = OPM_TAVERNA_NAMESPACE+proc;				
+				processID = uriGenerator.makeProcessorURI(processorName, workflowId);
 			} else {
-				processID = proc;
+				processID = processorName;
 			}
 		} catch (URISyntaxException e1) {
-			processID = OPM_TAVERNA_NAMESPACE+proc;
+			processID = uriGenerator.makeProcessorURI(processorName, workflowId);
 		}
-		if (URIfriendlyIterationVector.length()>0) {
-			processID = processID+"?it="+URIfriendlyIterationVector;
-		}
-
-		Resource processResource = Resource.uriRef(processID);					
+		
+		uriGenerator.makeIteration(workflowRunId, workflowId, processorName, iterationVector);
+		
+		
+				Resource processResource = Resource.uriRef(processID);					
 		currentProcess = graph.newProcess(processID, processResource);
 		graph.assertProcess(currentProcess );
 
 		// add a triple to specify the iteration vector for this occurrence of Process, if it is available
-		if (URIfriendlyIterationVector.length() > 0) {
+		if (! iterationVector.equals("[]")) {
 //			Resource inputProcessSubject = ((RdfProvenanceProcess) process).getSubject();
 			try {
 				context.addTriple(processResource, Resource.uriRef(OPM_TAVERNA_NAMESPACE+"iteration"), iterationVector);
