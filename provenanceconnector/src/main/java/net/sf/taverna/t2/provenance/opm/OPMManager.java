@@ -148,24 +148,22 @@ public class OPMManager {
 	 * @ 
 	 */
 	public Resource addArtifact(String aName) throws ProvenanceException  {
-		String artID=aName;
+		String artID;
 		// make sure artifact name is a good URI				
 		try {
 			URI artURI = new URI(aName);
 			if (artURI.getScheme() == null) {
-				String nameEscaped = new URI(null, null, aName, null).getRawPath();
-				artID = OPM_TAVERNA_NAMESPACE + "artifact/"+nameEscaped;					
+				artID = null; // generate later
 			} else if (artURI.getScheme().equals("t2")) {
 				artID = uriGenerator.makeT2ReferenceURI(aName);
+			} else {				
+				artID = aName;
 			}
 		} catch (URISyntaxException e1) {
-			String nameEscaped;
-			try {
-				nameEscaped = new URI(null, null, aName, null).getRawPath();
-			} catch (URISyntaxException e) {
-				throw new RuntimeException("Can't URI escape artifact ID " + aName, e);
-			}
-			artID = OPM_TAVERNA_NAMESPACE + "artifact/"+nameEscaped;				
+			artID = null;  // generate later
+		}
+		if (artID == null) {
+			artID = OPM_TAVERNA_NAMESPACE + "artifact/"+uriGenerator.escape(aName);
 		}
 
 

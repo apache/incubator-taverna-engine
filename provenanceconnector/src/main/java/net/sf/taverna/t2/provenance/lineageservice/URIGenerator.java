@@ -26,13 +26,24 @@ public class URIGenerator {
 	}
 
 	public String makePortURI(String wfId, String pName, String vName,
-			boolean inputPort) {
+			boolean inputPort) {		
 		return makeProcessorURI(pName, wfId) + (inputPort ? "in/" : "out/")
-				+ vName;
+				+ escape(vName);
 	}
 
+	public String escape(String part) {
+		String pathEscaped = part.replace("/", "%47");
+		String uriEscaped;
+		try {
+			uriEscaped = new URI(null, null, pathEscaped, null).getRawPath();
+		} catch (URISyntaxException e) {
+			throw new RuntimeException("Can't escape URI part " + part, e);
+		}
+		return uriEscaped;
+	}
+	
 	public String makeProcessorURI(String pName, String wfId) {
-		return makeWorkflowURI(wfId) + "processor/" + pName + "/";
+		return makeWorkflowURI(wfId) + "processor/" + escape(pName) + "/";
 	}
 
 	public String makeIteration(String workflowRunId, String workflowId,
