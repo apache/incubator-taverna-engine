@@ -5,13 +5,16 @@ import java.net.URISyntaxException;
 
 public class URIGenerator {
 
-	public String makeCollectionURI(String collId) {
+	public String makeT2ReferenceURI(String collId) {
 
 		// collId is of the form t2:list//<UUID>
 		// map to a proper URI
-
+		
 		String[] tokens = collId.split("//");
-		return makeURI(tokens[1]);
+		String type = tokens[0].split(":")[1];
+		String namespace = tokens[1].split("/")[0].split("\\?")[0];
+		String dataId = tokens[1].split("\\?")[1];
+		return "http://ns.taverna.org.uk/2011/data/" + namespace + "/" + type + "/" + dataId;
 	}
 
 	public String makeWFInstanceURI(String workflowRunId) {
@@ -19,7 +22,7 @@ public class URIGenerator {
 	}
 
 	public String makeWorkflowURI(String wfId) {
-		return "http://ns.taverna.org.uk/2010/scufl2/workflow/" + wfId + "/";
+		return "http://ns.taverna.org.uk/2010/workflow/" + wfId + "/";
 	}
 
 	public String makePortURI(String wfId, String pName, String vName,
@@ -30,18 +33,6 @@ public class URIGenerator {
 
 	public String makeProcessorURI(String pName, String wfId) {
 		return makeWorkflowURI(wfId) + "processor/" + pName + "/";
-	}
-
-	public String makeURI(String s) {
-
-		URI u;
-		try {
-			u = new URI("http://ns.taverna.org.uk/2011/provenance/" + s);
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
-			return null;
-		}
-		return u.toASCIIString();
 	}
 
 	public String makeIteration(String workflowRunId, String workflowId,

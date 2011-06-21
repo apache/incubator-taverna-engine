@@ -101,22 +101,7 @@ public class OPMManager {
 	 */
 	public void addArtifact(String aName, Object aValue) throws ProvenanceException  {
 
-		String artID=aName;
-		// make sure artifact name is a good URI
-		try {
-			URI artURI = new URI(aName);
-
-			if (artURI.getAuthority() == null) {
-				artID = OPM_TAVERNA_NAMESPACE+aName;				
-			}
-		} catch (URISyntaxException e1) {
-			artID = OPM_TAVERNA_NAMESPACE+aName;
-		}
-
-
-		Resource r = Resource.uriRef(artID);
-		currentArtifact = graph.newArtifact(artID, r);
-		graph.assertArtifact(currentArtifact);
+		Resource r = addArtifact(aName);
 
 		if (aValue != null) {
 			logger.debug("OPMManager::addArtifact: aValue is NOT NULL");
@@ -158,14 +143,36 @@ public class OPMManager {
 	/**
 	 * no actual value is recorded
 	 * @param aName
+	 * @return 
 	 * @throws ProvenanceException 
 	 * @ 
 	 */
-	public void addArtifact(String aName) throws ProvenanceException  {
+	public Resource addArtifact(String aName) throws ProvenanceException  {
+		String artID=aName;
+		// make sure artifact name is a good URI				
+		try {
+			URI artURI = new URI(aName);
+			if (artURI.getScheme() == null) {
+				String nameEscaped = new URI(null, null, aName, null).getRawPath();
+				artID = OPM_TAVERNA_NAMESPACE + "artifact/"+nameEscaped;					
+			} else if (artURI.getScheme().equals("t2")) {
+				artID = uriGenerator.makeT2ReferenceURI(aName);
+			}
+		} catch (URISyntaxException e1) {
+			String nameEscaped;
+			try {
+				nameEscaped = new URI(null, null, aName, null).getRawPath();
+			} catch (URISyntaxException e) {
+				throw new RuntimeException("Can't URI escape artifact ID " + aName, e);
+			}
+			artID = OPM_TAVERNA_NAMESPACE + "artifact/"+nameEscaped;				
+		}
 
-		Resource r = Resource.uriRef(aName);
-		currentArtifact = graph.newArtifact(aName, r);
-		graph.assertArtifact(currentArtifact);		
+
+		Resource r = Resource.uriRef(artID);
+		currentArtifact = graph.newArtifact(artID, r);
+		graph.assertArtifact(currentArtifact);
+		return r;
 	}
 
 
