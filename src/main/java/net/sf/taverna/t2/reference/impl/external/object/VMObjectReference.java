@@ -22,6 +22,7 @@ package net.sf.taverna.t2.reference.impl.external.object;
 
 import java.io.InputStream;
 import java.io.Serializable;
+import java.io.StringBufferInputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -63,8 +64,8 @@ public class VMObjectReference extends AbstractExternalReference implements
 	private static Map<UUID, Object> uuidToObject = new HashMap<UUID, Object>();
 
 	public InputStream openStream(ReferenceContext context)
-			throws DereferenceException {
-		throw new DereferenceException("Can't dereference VM objects");
+			 {
+		return new StringBufferInputStream(getObject().toString());
 
 	}
 
