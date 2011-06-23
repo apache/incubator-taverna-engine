@@ -370,6 +370,8 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 					// Load the Keystore from the file
 					keystore.load(fis, masterPassword.toCharArray());
 				} catch (Exception ex) {
+					keystore = null; // make it null as it was just created but failed to load so it is not null
+					masterPassword = null; // it is probably the wrong password so do not remember it just in case
 					String exMessage = "Failed to load Taverna's Keystore. Possible reason: incorrect password or corrupted file.";
 					logger.error(exMessage, ex);
 					throw new CMException(exMessage, ex);
@@ -462,6 +464,8 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 					// Load the Truststore from the file
 					truststore.load(fis, masterPassword.toCharArray());
 				} catch (Exception ex) {
+					truststore = null;// make it null as it was just created but failed to load so it is not null
+					masterPassword = null; // it is probably the wrong password so do not remember it just in case
 					String exMessage = "Failed to load Taverna's Truststore. Possible reason: incorrect password or corrupted file.";
 					//logger.error(exMessage, ex);
 					throw new CMException(exMessage, ex);
@@ -581,6 +585,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 					fos = new FileOutputStream(truststoreFile);
 					truststore.store(fos, masterPassword.toCharArray());
 				} catch (Exception ex) {
+					truststore = null;// make it null as it was just created but failed to save so we should retry next time
 					String exMessage = "Failed to generate new empty Taverna's Truststore.";
 					//logger.error(exMessage, ex);
 					throw new CMException(exMessage, ex);
