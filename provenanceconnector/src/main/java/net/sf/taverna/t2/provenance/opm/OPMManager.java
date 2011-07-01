@@ -42,7 +42,7 @@ public class OPMManager {
 
 	private static Logger logger = Logger.getLogger(OPMManager.class);
 
-	public static final String OPM_TAVERNA_NAMESPACE = "http://taverna.opm.org/";
+	public static final String OPM_TAVERNA_NAMESPACE = "http://ns.taverna.org.uk/2011/provenance/opm/";
 	private static final String VALUE_PROP = "value";
 	
 	ProvenanceContextFacade graph = null;
