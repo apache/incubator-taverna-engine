@@ -29,6 +29,8 @@ import java.util.Set;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
+
 import net.sf.taverna.t2.annotation.annotationbeans.IdentificationAssertion;
 import net.sf.taverna.t2.workflowmodel.CompoundEdit;
 import net.sf.taverna.t2.workflowmodel.Condition;
@@ -72,6 +74,10 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.NestedDataflow;
  * 
  */
 public class Tools {
+	
+	private static Logger logger = Logger.getLogger(Tools.class);
+
+
 
 	private static Edits edits = EditsRegistry.getEdits();
 
@@ -441,7 +447,7 @@ public class Tools {
 		    editList.add(edits.getAddActivityEdit(processor, ra));
 		}
 		catch (ActivityConfigurationException ex) {
-		    System.err.println("Configuration exception " + ex.getMessage());
+		    logger.error("Configuration exception ", ex);
 		    return null;
 		} catch (InstantiationException e) {
 			return null;
