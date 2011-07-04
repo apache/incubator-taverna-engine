@@ -6,16 +6,11 @@
 	<parent>
 		<groupId>net.sf.taverna.t2</groupId>
 		<artifactId>lang</artifactId>
-		<version>1.3-SNAPSHOT</version>
+		<version>1.3</version>
 	</parent>
 	<name>Common Results handling utilities</name>
 	<description>Common utilities for handling results, in particular Baclava document handling and de-referencing T2References</description>
 	<dependencies>
-		<dependency>
-			<groupId>uk.org.mygrid.taverna.baclava</groupId>
-			<artifactId>baclava-core</artifactId>
-			<version>${taverna.version}</version>
-		</dependency>
 		<dependency>
 			<groupId>uk.org.mygrid.taverna.baclava</groupId>
 			<artifactId>baclava-core</artifactId>
