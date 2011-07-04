@@ -22,7 +22,13 @@ package net.sf.taverna.t2.lang.ui.icons;
 
 import javax.swing.ImageIcon;
 
+import org.apache.log4j.Logger;
+
 public class Icons {
+	
+	private static Logger logger = Logger.getLogger(Icons.class);
+
+
 
 	public static ImageIcon okIcon;
 	public static ImageIcon severeIcon;
@@ -36,8 +42,7 @@ public class Icons {
 			warningIcon = new ImageIcon(c.getResource("warning.png"));
 
 		} catch (Exception ex) {
-			ex.printStackTrace();
-			System.out.println(ex.toString());
+			logger.error("Unable to load standard icons", ex);
 		}
 	}
 }
