@@ -37,9 +37,12 @@ import net.sf.taverna.t2.reference.IdentifiedList;
 import net.sf.taverna.t2.reference.ListService;
 import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.ReferenceServiceException;
+import net.sf.taverna.t2.reference.ReferenceSet;
+import net.sf.taverna.t2.reference.ReferencedDataNature;
 import net.sf.taverna.t2.reference.StackTraceElementBean;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.reference.T2ReferenceType;
+import net.sf.taverna.t2.reference.ValueCarryingExternalReference;
 
 import org.apache.log4j.Logger;
 import org.clapper.util.misc.MIMETypeUtil;
@@ -68,13 +71,31 @@ public class ResultsUtils {
 	public static Object convertReferenceToObject(T2Reference reference, ReferenceService referenceService, InvocationContext context) {				
 	
 			if (reference.getReferenceType() == T2ReferenceType.ReferenceSet){
+				
+				ReferenceSet rs = referenceService.getReferenceSetService().getReferenceSet(reference);
+				if (rs == null) {
+					throw new ReferenceServiceException("Could not find ReferenceSet " + reference);
+				}
+				// Check that there are references in the set
+				if (rs.getExternalReferences().isEmpty()) {
+					throw new ReferenceServiceException(
+							"Can't render an empty reference set to a POJO");
+				}
+
+				ReferencedDataNature dataNature = ReferencedDataNature.UNKNOWN;
+				for (ExternalReferenceSPI ers : rs.getExternalReferences()) {
+					if (dataNature.equals(ReferencedDataNature.UNKNOWN)) {
+						dataNature = ers.getDataNature();
+						break;
+					}
+				}
+
 				// Dereference the object
 				Object dataValue;
 				try{
-					try {
+					if (dataNature.equals(ReferencedDataNature.TEXT)) {
 						dataValue = referenceService.renderIdentifier(reference, String.class, context);
-					}
-					catch (ReferenceServiceException e) {
+					} else {
 						dataValue = referenceService.renderIdentifier(reference, byte[].class, context);
 					}
 				}
