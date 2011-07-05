@@ -84,8 +84,9 @@ public class ResultsUtils {
 
 				ReferencedDataNature dataNature = ReferencedDataNature.UNKNOWN;
 				for (ExternalReferenceSPI ers : rs.getExternalReferences()) {
-					if (dataNature.equals(ReferencedDataNature.UNKNOWN)) {
-						dataNature = ers.getDataNature();
+					ReferencedDataNature erDataNature = ers.getDataNature();
+					if (!erDataNature.equals(ReferencedDataNature.UNKNOWN)) {
+						dataNature = erDataNature;
 						break;
 					}
 				}
