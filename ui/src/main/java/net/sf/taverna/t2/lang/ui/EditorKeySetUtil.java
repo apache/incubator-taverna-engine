@@ -1,5 +1,6 @@
 /*******************************************************************************
- * Copyright (C) 2007 The University of Manchester   
+ * Copyright (C) 2009 Ingo Wassink of University of Twente, Netherlands and
+ * The University of Manchester   
  * 
  *  Modifications to the initial code base are copyright of their
  *  respective authors, or their employers as appropriate.
@@ -18,31 +19,49 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package net.sf.taverna.t2.lang.ui.icons;
 
-import javax.swing.ImageIcon;
+/**
+ * @author Ingo Wassink
+ * @author Ian Dunlop
+ * @author Alan R Williams
+ */
+package net.sf.taverna.t2.lang.ui;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
-public class Icons {
+/**
+ * Manager for reading key set file
+ * 
+ * @author WassinkI
+ * @author alanrw
+ * 
+ */
+public class EditorKeySetUtil {
 	
-	private static Logger logger = Logger.getLogger(Icons.class);
+	private static Logger logger = Logger.getLogger(EditorKeySetUtil.class);
 
 
-
-	public static ImageIcon okIcon;
-	public static ImageIcon severeIcon;
-	public static ImageIcon warningIcon;
-
-	static {
-		try {
-			Class c = Icons.class;
-			okIcon = new ImageIcon(c.getResource("ok.png"));
-			severeIcon = new ImageIcon(c.getResource("severe.png"));
-			warningIcon = new ImageIcon(c.getResource("warning.png"));
-
-		} catch (Exception ex) {
-			logger.error("Unable to load standard icons", ex);
+	public static Set<String> loadKeySet(InputStream stream) {
+		Set<String> result = new TreeSet<String>();
+				try {
+			BufferedReader reader = new BufferedReader(
+					new InputStreamReader(stream));
+			                                                     
+			String line;
+			while ((line = reader.readLine()) != null) {
+				result.add(line.trim());
+			}
+			reader.close();
+		} catch (Exception e) {
+			logger.error(e);
 		}
+		return result;
 	}
 }

@@ -31,7 +31,7 @@ public class FileTools {
 		fileChooser.setDialogTitle(dialogTitle);
 
 		fileChooser.resetChoosableFileFilters();
-		fileChooser.setAcceptAllFileFilterUsed(false);
+		fileChooser.setAcceptAllFileFilterUsed(true);
 		
 		fileChooser.setFileFilter(new ExtensionFileFilter(new String[] { extension }));
 
@@ -90,9 +90,13 @@ public class FileTools {
 		return false;
 	}
 	
-	public static String readStringFromFile(Component parent) {
+    public static String readStringFromFile(Component parent, String dialogTitle, String extension) {
 		JFileChooser fileChooser = new JFileChooser();
+		fileChooser.setDialogTitle(dialogTitle);
+		fileChooser.resetChoosableFileFilters();
 		fileChooser.setAcceptAllFileFilterUsed(true);
+		
+		fileChooser.setFileFilter(new ExtensionFileFilter(new String[] { extension }));
 		
 		Preferences prefs = Preferences.userNodeForPackage(FileTools.class);
 		String curDir = prefs
