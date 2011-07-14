@@ -24,10 +24,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 
 import net.sf.taverna.t2.reference.AbstractExternalReference;
 import net.sf.taverna.t2.reference.ExternalReferenceSPI;
 import net.sf.taverna.t2.reference.ReferenceContext;
+import net.sf.taverna.t2.reference.ReferencedDataNature;
 
 /**
  * Implementation of ExternalReference used to refer to data held in a locally
@@ -44,6 +46,8 @@ public class FileReference extends AbstractExternalReference implements
 	private String filePathString = null;
 	private String charset = null;
 	private File file = null;
+	
+	private String dataNatureName = ReferencedDataNature.UNKNOWN.name();
 
 	/**
 	 * Explicitly declare default constructor, will be used by hibernate when
@@ -61,7 +65,7 @@ public class FileReference extends AbstractExternalReference implements
 		super();
 		this.file = theFile.getAbsoluteFile();
 		this.filePathString = this.file.getPath();
-		this.charset = null;
+		this.charset = Charset.defaultCharset().name();
 	}
 
 	/**
@@ -143,6 +147,57 @@ public class FileReference extends AbstractExternalReference implements
 
 	public Long getApproximateSizeInBytes() {
 		return new Long(file.length());
+	}
+
+	/**
+	 * @return the dataNature
+	 */
+	public ReferencedDataNature getDataNature() {
+		return ReferencedDataNature.valueOf(ReferencedDataNature.class, getDataNatureName());
+	}
+
+	/**
+	 * @param dataNature the dataNature to set
+	 */
+	public void setDataNature(ReferencedDataNature dataNature) {
+		setDataNatureName(dataNature.name());
+	}
+
+	/**
+	 * @return the file
+	 */
+	public final File getFile() {
+		return file;
+	}
+
+	/* (non-Javadoc)
+	 * @see net.sf.taverna.t2.reference.AbstractExternalReference#getResolutionCost()
+	 */
+	@Override
+	public float getResolutionCost() {
+		return (float) 100.0;
+	}
+
+	/**
+	 * @return the dataNatureName
+	 */
+	public String getDataNatureName() {
+		return dataNatureName;
+	}
+
+	/**
+	 * @param dataNatureName the dataNatureName to set
+	 */
+	public void setDataNatureName(String dataNatureName) {
+		this.dataNatureName = dataNatureName;
+	}
+
+	public void deleteData() {
+		try {
+			getFile().delete();
+		} catch (SecurityException e) {
+			// TODO
+		}
 	}
 
 }

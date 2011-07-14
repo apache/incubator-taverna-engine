@@ -11,6 +11,7 @@
 		<key column="bean_id" />
 		<!-- FileReference specific properties below here -->
 		<property name="filePath" type="string" />
+		<property name="dataNatureName" type="string"/>
 		<property name="charset" type="string" />
 	</joined-subclass>
 </hibernate-mapping>

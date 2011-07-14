@@ -49,6 +49,9 @@ public class HttpReference extends AbstractExternalReference implements
 
 	private String httpUrlString = null;
 	private URL httpUrl = null;
+	
+	private String charsetName = null;
+	private boolean charsetFetched = false;
 
 	/**
 	 * Explicitly declare default constructor, will be used by hibernate when
@@ -75,21 +78,30 @@ public class HttpReference extends AbstractExternalReference implements
 	 */
 	@Override
 	public String getCharset() throws DereferenceException {
-		if (!httpUrl.getProtocol().equals("http")) {
-			return null; // Don't know
+		if (charsetFetched) {
+			return charsetName;
+		}
+		charsetFetched = true;
+		if (!httpUrl.getProtocol().equals("http") &&
+				!httpUrl.getProtocol().equals("https")) {
+			charsetName = null;
+			return null;
 		}
 		HeadMethod method = new HeadMethod(httpUrl.toExternalForm());
 		HttpClient httpClient = new HttpClient();
 		try {
 			httpClient.executeMethod(method);
-			return method.getResponseCharSet();
+			charsetName = method.getResponseCharSet();
+			return charsetName;
 		} catch (HttpException e) {
-			throw new DereferenceException(e);
+			// throw new DereferenceException(e);
 		} catch (IOException e) {
-			throw new DereferenceException(e);
+			// throw new DereferenceException(e);
 		} finally {
 			method.releaseConnection();
 		}
+		charsetName = null;
+		return null;
 	}
 
 	/**
@@ -161,6 +173,25 @@ public class HttpReference extends AbstractExternalReference implements
 		} catch (Exception e) {
 			return new Long(-1);
 		}
+	}
+
+	/**
+	 * @return the httpUrl
+	 */
+	public final URL getHttpUrl() {
+		return httpUrl;
+	}
+
+	/* (non-Javadoc)
+	 * @see net.sf.taverna.t2.reference.AbstractExternalReference#getResolutionCost()
+	 */
+	@Override
+	public float getResolutionCost() {
+		return (float) 200.0;
+	}
+
+	public void deleteData() {
+		throw new UnsupportedOperationException("Cannot delete data referenced by a URL");
 	}
 
 }

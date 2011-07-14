@@ -5,6 +5,7 @@ package net.sf.taverna.t2.reference.impl.external.object;
 
 import java.io.InputStream;
 
+import net.sf.taverna.t2.reference.ReferencedDataNature;
 import net.sf.taverna.t2.reference.StreamToValueConverterSPI;
 
 /**
@@ -17,11 +18,13 @@ public class StreamToIntegerConverter implements StreamToValueConverterSPI<Integ
 		return Integer.class;
 	}
 
-	public Integer renderFrom(InputStream stream) {
+	public Integer renderFrom(InputStream stream,
+			ReferencedDataNature dataNature, String charset) {
 		StreamToStringConverter stringConverter = new StreamToStringConverter();
-		String s = stringConverter.renderFrom(stream);
+		String s = stringConverter.renderFrom(stream, dataNature, charset);
 		Integer result  = Integer.valueOf(s);
 		return result;
+
 	}
 
 }
