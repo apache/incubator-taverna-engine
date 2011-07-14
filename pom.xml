@@ -5,6 +5,7 @@
 		<groupId>net.sf.taverna</groupId>
 		<artifactId>taverna-parent</artifactId>
 	    <version>3.0-SNAPSHOT</version>
+        <relativePath>../../taverna-parent/pom.xml</relativePath>
 	</parent>
 
 	<groupId>net.sf.taverna.t2</groupId>
@@ -17,44 +18,12 @@
 		Security infrastructure for Taverna 2 and Taverna 2 activities.
 	</description>
 
-	<properties>
-		<t2.infrastructure.version>3.0-SNAPSHOT</t2.infrastructure.version>
-		<t2.core.version>2.0-SNAPSHOT</t2.core.version>
-		<t2.lang.version>2.0-SNAPSHOT</t2.lang.version>
-		<bouncycastle.version>136</bouncycastle.version>
-		<wss4j.version>1.5.4</wss4j.version>
-		<axis.version>1.4</axis.version>
-		<xmlsec.version>1.4.0</xmlsec.version>
-		<xmlapis.version>1.3.03</xmlapis.version>
-	</properties>
-
 	<modules>
 		<module>credential-manager</module>
-		<!--<module>security-agents</module>
-		<module>security-profiles</module>-->
+		<!--
+			<module>security-agents</module> <module>security-profiles</module>
+		-->
 	</modules>
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-clover-plugin</artifactId>
-				<configuration>
-					<jdk>1.5</jdk>
-					<targetPercentage>50%</targetPercentage>
-					<failOnViolation>false</failOnViolation>
-				</configuration>
-				<executions>
-					<execution>
-						<phase>pre-site</phase>
-						<goals>
-							<goal>instrument</goal>
-							<goal>aggregate</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
 
 	<repositories>
 		<repository>
@@ -65,20 +34,17 @@
 			<id>mygrid-repository</id>
 			<name>myGrid Repository</name>
 			<url>http://www.mygrid.org.uk/maven/repository</url>
-		</repository>	
-        <repository>
-            <id>jboss</id>
-            <name>JBoss repository</name>
-            <url>http://repository.jboss.org/maven2/</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-        </repository>
-        <repository>
-            <id>javanet</id>
-            <name>java.net</name>
-            <url>http://download.java.net/maven/2/</url>
-        </repository>
+		</repository>
+		<repository>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots />
+			<id>mygrid-snapshot-repository</id>
+			<name>myGrid Snapshot Repository</name>
+			<url>http://www.mygrid.org.uk/maven/snapshot-repository</url>
+		</repository>
+		
 	</repositories>
 	<scm>
 		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/engine/net.sf.taverna.t2.security/trunk/</connection>
@@ -86,47 +52,47 @@
 		<url>http://code.google.com/p/taverna/source/browse/#svn/taverna/engine/net.sf.taverna.t2.security/trunk/</url>
 	</scm>
 	<dependencyManagement>
-		<dependencies>			
+		<dependencies>
 			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
-				<version>4.4</version>
+				<version>${junit.version}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>javax.help</groupId>
 				<artifactId>javahelp</artifactId>
-				<version>2.0.02</version>
+				<version>${javahelp.version}</version>
 			</dependency>
 			<dependency>
-	            <groupId>log4j</groupId>
-	            <artifactId>log4j</artifactId>
-	            <version>1.2.13</version>
-	        </dependency>
-	     		<dependency>
+				<groupId>log4j</groupId>
+				<artifactId>log4j</artifactId>
+				<version>${log4j.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
-				<version>1.3.1</version>
+				<version>${commons.io.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
-				<version>1.3</version>
+				<version>${commons.codec.version}</version>
 			</dependency>
-	       		<dependency>
+			<dependency>
 				<groupId>commons-logging</groupId>
 				<artifactId>commons-logging</artifactId>
-				<version>1.1</version>
+				<version>${commons.logging.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.mail</groupId>
 				<artifactId>mail</artifactId>
-				<version>1.4</version>
+				<version>${mail.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>jdom</groupId>
+				<groupId>org.jdom</groupId>
 				<artifactId>jdom</artifactId>
-				<version>1.0</version>
+				<version>${jdom.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

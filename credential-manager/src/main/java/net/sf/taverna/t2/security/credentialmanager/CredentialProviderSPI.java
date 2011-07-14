@@ -163,22 +163,22 @@ public interface CredentialProviderSPI {
 	public String getJavaTruststorePassword();
 
 	/**
-	 * Get the master password for keychain of the Credential Manager.
+	 * Get the master password for the Credential Manager.
 	 * <p>
 	 * This method will only be called if the provider returned
 	 * <code>true</code> from {@link #canProvideMasterPassword()}.
 	 * <p>
-	 * This master password is used to encrypt the credential manager keychain.
+	 * This master password is used to encrypt the Credential Manager's Keystore/Truststore.
 	 * If the parameter <code>firstTime</code> is <code>true</code>, this is a
-	 * request for <em>setting</em> the master password, as the keychain is not
+	 * request for <em>setting</em> the master password, as the keystores are not
 	 * yet created.
 	 * 
 	 * @see #canProvideMasterPassword()
 	 * @param firstTime
-	 *            <code>true</code> if this is the first time the keychain is
+	 *            <code>true</code> if this is the first time the keystore is
 	 *            accessed, in which case the returned password will be used to
-	 *            encrypt the chain. If <code>false</code>, the returned
-	 *            password will be used to decrypt (unlock) the chain.
+	 *            encrypt the keystore. If <code>false</code>, the returned
+	 *            password will be used to decrypt (unlock) the keystore.
 	 * @return The master password, or <code>null</code> if not available (user
 	 *         cancelled, etc)
 	 */

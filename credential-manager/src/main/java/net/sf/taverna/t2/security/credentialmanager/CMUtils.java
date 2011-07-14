@@ -22,42 +22,180 @@ package net.sf.taverna.t2.security.credentialmanager;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.math.BigInteger;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
+//import java.util.HashMap;
 
+import org.apache.log4j.Logger;
+//import org.bouncycastle.asn1.ASN1OctetString;
+//import org.bouncycastle.asn1.DERBitString;
+//import org.bouncycastle.asn1.DEROctetString;
+//import org.bouncycastle.asn1.misc.NetscapeCertType;
 
-import org.bouncycastle.openssl.PEMReader;
-
+import net.sf.taverna.raven.appconfig.ApplicationRuntime;
 
 /**
- * Provides utility methods relating to X509 certificates.
+ * Utility methods for Credential Manager and security-related stuff.
  * 
- * @author Alexandra Nenadic
+ * @author Alex Nenadic
+ * @author Stian Soiland-Reyes
  */
-public class CMX509Util
-{
+public class CMUtils {
+
+	private static Logger logger = Logger.getLogger(CMUtils.class);
+    
+	/**
+	 * Get the configuration directory where the security stuff will be/is saved to.
+	 */
+	public static File getCredentialManagerDefaultDirectory() {
+		
+		File home = ApplicationRuntime.getInstance().getApplicationHomeDir();
+//		File configDirectory = new File(home,"conf");
+//		if (!configDirectory.exists()) {
+//			configDirectory.mkdir();
+//		}
+		File secConfigDirectory = new File(home,"security");
+		if (!secConfigDirectory.exists()) {
+			secConfigDirectory.mkdir();
+		}
+		return secConfigDirectory;
+	}
+
 	
-    /** PKCS #7 encoding name */
-    public static final String PKCS7_ENCODING = "PKCS7";
-
-    /** PkiPath encoding name */
-    public static final String PKIPATH_ENCODING = "PkiPath";
-
-    /** OpenSSL PEM encoding name */
-    public static final String OPENSSL_PEM_ENCODING = "OpenSSL_PEM";
-
-    /** Type name for X.509 certificates */
-    //private static final String X509_CERT_TYPE = "X.509";
+	public static URI resolveUriFragment(URI uri, String realm) throws URISyntaxException {
+		URI fragment;
+		/*
+		 * Little hack to encode the fragment correctly - why does
+		 * not java.net.URI expose this quoting or have setFragment()?
+		 */
+		fragment = new URI("http", "localhost", "/", realm);
+		fragment = (fragment.resolve(fragment
+				.getPath())).relativize(fragment);
+		uri = uri.resolve(fragment);
+		return uri;
+	}
+  
+    /**
+     * Convert the certificate object into an X509Certificate object.
+     */
+    public static X509Certificate convertCertificate(Certificate cert)
+        throws CMException
+    {
+        try {
+        	// Get the factory for X509 certificates
+            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            // Get the encoded (binary) form of the certificate. 
+            // For an X509 certificate the encoding will be DER.
+            ByteArrayInputStream bais = new ByteArrayInputStream(
+                cert.getEncoded());
+            // Create the X509 certificate object from the stream
+            return (X509Certificate) cf.generateCertificate(bais);
+        }
+        catch (CertificateException ex) {
+            throw new CMException("Failed to convert the certificate object into X.509 certificate.", ex);
+        }
+    }
+      
     
-    
+    /**
+     * Get the message digest of the given byte array 
+     * as a string of hexadecimal characters in the form XX:XX:XX...
+     * using the given digest algorithm.
+     */
+	public static String getMessageDigestAsFormattedString(byte[] messageBytes, String digestAlgorithm) {
+		
+		MessageDigest messageDigest;
+		byte[] digestBytes;
+		try
+        {
+			messageDigest = MessageDigest.getInstance(digestAlgorithm);
+            digestBytes = messageDigest.digest(messageBytes);
+        }
+        catch(NoSuchAlgorithmException ex)
+        {
+			logger.error("Failed to create message digest.", ex);
+			return "";
+		}
+
+        // Create the integer value from the digest bytes
+        BigInteger number = new BigInteger(1,digestBytes);
+        // Convert the integer from decimal to hexadecimal representation
+        String hexValueString = number.toString(16).toUpperCase();
+
+		StringBuffer strBuff = new StringBuffer(hexValueString);
+		// If the hex number contains odd number of characters - 
+		// insert a padding "0" at the front of the string
+		if ((strBuff.length() % 2) != 0) {
+			strBuff.insert(0, '0');
+		}
+
+		// Insert colons after every two hex characters - start form the end of the hex string
+		if (strBuff.length() > 2) {
+			for (int i = 2; i < strBuff.length(); i += 3) {
+				strBuff.insert(i, ':');
+			}
+		}
+
+		return strBuff.toString();
+	}
+	
+//	/**
+//	 * Gets the intended certificate uses, i.e. Netscape Certificate Type
+//	 * extension (2.16.840.1.113730.1.1) as a string.
+//	 */
+//    // From openssl's documentation: "The [above] extension is non standard, Netscape 
+//    // specific and largely obsolete. Their use in new applications is discouraged."
+//    // TODO replace with "basicConstraints, keyUsage and extended key usage extensions 
+//    // which are now used instead."
+//	public static String getIntendedCertificateUses(byte[] value) {
+//
+//		// Netscape Certificate Types (2.16.840.1.113730.1.1) denoting the
+//		// intended uses of a certificate
+//		int[] INTENDED_USES = new int[] { NetscapeCertType.sslClient,
+//				NetscapeCertType.sslServer, NetscapeCertType.smime,
+//				NetscapeCertType.objectSigning, NetscapeCertType.reserved,
+//				NetscapeCertType.sslCA, NetscapeCertType.smimeCA,
+//				NetscapeCertType.objectSigningCA, };
+//
+//		// Netscape Certificate Type strings (2.16.840.1.113730.1.1)
+//		HashMap<String, String> INTENDED_USES_STRINGS = new HashMap<String, String>();
+//		INTENDED_USES_STRINGS.put("128", "SSL Client");
+//		INTENDED_USES_STRINGS.put("64", "SSL Server");
+//		INTENDED_USES_STRINGS.put("32", "S/MIME");
+//		INTENDED_USES_STRINGS.put("16", "Object Signing");
+//		INTENDED_USES_STRINGS.put("8", "Reserved");
+//		INTENDED_USES_STRINGS.put("4", "SSL CA");
+//		INTENDED_USES_STRINGS.put("2", "S/MIME CA");
+//		INTENDED_USES_STRINGS.put("1", "Object Signing CA");
+//
+//		// Get DER octet string from extension value
+//		ASN1OctetString derOctetString = new DEROctetString(value);
+//		byte[] octets = derOctetString.getOctets();
+//		// Get DER bit string
+//		DERBitString derBitString = new DERBitString(octets);
+//		int val = new NetscapeCertType(derBitString).intValue();
+//		StringBuffer strBuff = new StringBuffer();
+//		for (int i = 0, len = INTENDED_USES.length; i < len; i++) {
+//			int use = INTENDED_USES[i];
+//			if ((val & use) == use) {
+//				strBuff.append(INTENDED_USES_STRINGS.get(String.valueOf(use))
+//						+ ", \n");
+//			}
+//		}
+//		// remove the last ", \n" from the end of the buffer
+//		String str = strBuff.toString();
+//		str = str.substring(0, str.length() - 3);
+//		return str;
+//	}
+	
     // FROM RFC 2253:	
     //                    CN      commonName
     //                    L       localityName
@@ -77,133 +215,11 @@ public class CMX509Util
     private String C;
     private String O;
     private String OU;
-    
     /**
-     * Convert the supplied array of certificate objects into
-     * X509Certificate objects.
-     *
-     * @param certsIn The Certificate objects
-     * @return The converted X509Certificate objects
-     * @throws CMException A problem occurred during the conversion
-     */
-    public static X509Certificate[] convertCertificates(Certificate[] certsIn)
-        throws CMException
-    {
-        X509Certificate[] certsOut = new X509Certificate[certsIn.length];
-
-        for (int iCnt = 0; iCnt < certsIn.length; iCnt++) {
-            certsOut[iCnt] = convertCertificate(certsIn[iCnt]);
-        }
-
-        return certsOut;
-    }
-
-    
-    /**
-     * Convert the supplied certificate object into an X509Certificate object.
-     */
-    public static X509Certificate convertCertificate(Certificate certIn)
-        throws CMException
-    {
-        try {
-            CertificateFactory cf = CertificateFactory.getInstance("X.509");
-            ByteArrayInputStream bais = new ByteArrayInputStream(
-                certIn.getEncoded());
-            return (X509Certificate) cf.generateCertificate(bais);
-        }
-        catch (CertificateException ex) {
-            throw new CMException("Failed to convert certificate", ex);
-        }
-    }
-    
-	
-    /**
-     * Load one or more certificates from the specified file.
-     *
-     * @param certFile The file to load certificates from
-     * @param encoding The certification path encoding. If null, treat as a
-     * normal certificate, not certification path.  Use one of the
-     * <code>*_ENCODING</code> constants here.
-     * @return The array of certificates
-     * @throws CMException Problem encountered while loading the
-     * certificate(s)
-     */
-    public static X509Certificate[] loadCertificates(File certFile,
-        String encoding)
-        throws CMException
-    {
-        ArrayList<X509Certificate> certsList = new ArrayList<X509Certificate>();
-
-        FileInputStream fis = null;
-
-        try {
-            CertificateFactory cf = CertificateFactory.getInstance("X.509");
-            fis = new FileInputStream(certFile);
-            Collection<? extends Certificate> coll = null;
-
-            if (OPENSSL_PEM_ENCODING.equals(encoding)) {
-                // Special case; this is not a real JCE supported encoding.
-                PEMReader pr = new PEMReader(new InputStreamReader(fis), null,
-                    cf.getProvider().getName());
-                /* These can contain just about anything, and
-                 unfortunately the PEMReader API (as of BC 1.25 to 1.31)
-                 won't allow us to really skip things we're not interested
-                 in; stuff happens already in readObject().  This may cause
-                 some weird exception messages for non-certificate objects in
-                 the "stream", for example passphrase related ones for
-                 protected private keys. */
-                Object cert;
-                while ((cert = pr.readObject()) != null) {
-                    if (cert instanceof X509Certificate) {
-                        // "Short-circuit" into vCerts, not using coll.
-                        certsList.add((X509Certificate) cert);
-                    }
-                    // Skip other stuff, at least for now.
-                }
-            }
-            else if (encoding != null) {
-                // Try it as a certification path of the specified type
-                coll = cf.generateCertPath(fis, encoding).getCertificates();
-            }
-            else {
-                // "Normal" certificate(s)
-                coll = cf.generateCertificates(fis);
-            }
-
-            if (coll != null) {
-                for (Iterator<? extends Certificate> iter = (Iterator<? extends Certificate>) coll.iterator(); iter.hasNext();) {
-                    X509Certificate cert = (X509Certificate) iter.next();
-                    if (cert != null) {
-                        certsList.add(cert);
-                    }
-                }
-            }
-        }
-        // Some RuntimeExceptions which really ought to be
-        // CertificateExceptions may be thrown from cf.generateCert* above,
-        // for example Sun's PKCS #7 parser tends to throw them.
-        catch (Exception ex) {
-            // TODO: don't throw if vCerts non-empty (eg. OpenSSL PEM above)?
-            throw new CMException("Failed to load certificate", ex);
-        }
-        finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                }
-                catch (IOException ex) {
-                    // Ignore
-                }
-            }
-        }
-
-        return (X509Certificate[]) certsList.toArray(new X509Certificate[certsList.size()]);
-    }
-    
-    
-    /**
-     * Parses a DN string.
-     * Heavily based on DNParser class from omii-security-utils library
+     * Parses a DN string and fills in fields with DN parts.
+     * Heavily based on uk.ac.omii.security.utils.DNParser class from omii-security-utils library.
+     * 
+     * http://maven.omii.ac.uk/maven2/repository/omii/omii-security-utils/
      */
 
     public void parseDN(String DNstr)
@@ -396,6 +412,4 @@ public class CMX509Util
     {
         return C;
     }
-
 }
-

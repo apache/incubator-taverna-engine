@@ -43,7 +43,7 @@ public class CredentialManagerAuthenticator extends Authenticator {
 			try {
 				credManager = CredentialManager.getInstance();
 			} catch (CMException e) {
-				logger.warn("Could not find credential manager", e);
+				logger.warn("Could not obtain Credential Manager instance.", e);
 			}
 		}
 		return credManager;
@@ -100,7 +100,7 @@ public class CredentialManagerAuthenticator extends Authenticator {
 			usePathRecursion = true;
 			if (realm != null && realm.length() > 0) {
 				try {
-					uri = CMUtil.resolveUriFragment(uri, realm);
+					uri = CMUtils.resolveUriFragment(uri, realm);
 				} catch (URISyntaxException e) {
 					logger.warn("Could not URI-encode fragment for realm: "
 							+ realm);
