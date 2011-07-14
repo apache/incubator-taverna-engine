@@ -517,7 +517,7 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 				}
 				if (converter != null) {
 					return converter.renderFrom(cheapestReference
-							.openStream(context));
+							.openStream(context), cheapestReference.getDataNature(), cheapestReference.getCharset());
 				}
 			} catch (Exception e) {
 				throw new ReferenceServiceException(e);

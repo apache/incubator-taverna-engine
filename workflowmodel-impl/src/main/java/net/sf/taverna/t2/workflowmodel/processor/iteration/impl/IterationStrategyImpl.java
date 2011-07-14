@@ -370,4 +370,49 @@ public class IterationStrategyImpl implements IterationStrategy {
 		return result;
 	}
 
+	public void normalize() {
+		boolean finished = false;
+		while (!finished) {
+			finished = true;
+			Enumeration e = getTerminalNode().breadthFirstEnumeration();
+			while (e.hasMoreElements() && finished == true) {
+				AbstractIterationStrategyNode n = (AbstractIterationStrategyNode) e
+						.nextElement();
+				AbstractIterationStrategyNode parent = (AbstractIterationStrategyNode) n
+						.getParent();
+				// Check whether anything needs doing
+
+				// Check for collation nodes with no children
+				if (!(n instanceof NamedInputPortNode) && parent != null
+						&& n.getChildCount() == 0) {
+					// Remove the node from its parent and set finished to false
+					parent.remove(n);
+					finished = false;
+				} else if (!(n.isLeaf()) && parent != null
+						&& n.getChildCount() == 1) {
+					// Is a collation node with a single child, and therefore
+					// pointless.
+					// Replace it with the child node
+					AbstractIterationStrategyNode child = (AbstractIterationStrategyNode) n
+							.getChildAt(0);
+					// Find the index of the collation node in its parent
+					int oldIndex = parent.getIndex(n);
+					parent.remove(n);
+					parent.insert(child, oldIndex);
+					finished = false;
+				}
+				/*
+				 * else if (parent == null && n.getChildCount() == 1) { // Is
+				 * the root node but with only one child, so must // be a
+				 * collation node and have no effect on the iterator
+				 * AbstractIterationStrategyNode child =
+				 * (AbstractIterationStrategyNode) n.getChildAt(0);
+				 * n.remove(child); terminal = (TerminalNodeImpl) child;
+				 * finished = false; }
+				 */
+			}
+		}
+
+	}
+
 }

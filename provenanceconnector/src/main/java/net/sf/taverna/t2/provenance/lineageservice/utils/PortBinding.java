@@ -37,6 +37,9 @@ public class PortBinding {
 	private String reference;
 	private String iteration;
 	private String resolvedValue;
+	private String portId;
+
+	private Boolean isInputPort;
 	
 	
 	public PortBinding(){}
@@ -53,21 +56,28 @@ public class PortBinding {
 		reference = vb.reference;
 		iteration = vb.iteration;
 		resolvedValue = vb.resolvedValue;
+		portId = vb.portId;
+		isInputPort = vb.isInputPort;
 	}
 
 
+	public String getPortId() {
+		return portId;
+	}
+
 	
 	
-	
+
 	@Override
 	public String toString() {
-		return "PortBinding [collIDRef=" + collIDRef + ", iteration="
-				+ iteration + ", portName=" + portName + ", positionInColl="
+		return "PortBinding [workflowId=" + workflowId + ", portName="
+				+ portName + ", workflowRunId=" + workflowRunId + ", value="
+				+ value + ", collIDRef=" + collIDRef + ", positionInColl="
 				+ positionInColl + ", processorName=" + processorName
-				+ ", reference=" + reference + ", resolvedValue="
-				+ resolvedValue + ", value=" + value + ", valueType="
-				+ valueType + ", workflowId=" + workflowId + ", workflowRunId="
-				+ workflowRunId + "]";
+				+ ", valueType=" + valueType + ", reference=" + reference
+				+ ", iteration=" + iteration + ", resolvedValue="
+				+ resolvedValue + ", portId=" + portId + ", isInputPort="
+				+ isInputPort + "]";
 	}
 
 	/**
@@ -209,6 +219,23 @@ public class PortBinding {
 	 */
 	public void setWorkflowId(String workflowId) {
 		this.workflowId = workflowId;
+	}
+
+	public void setPortId(String portId) {
+		this.portId = portId;
+		
+	}
+
+	public void setIsInputPort(boolean isInputPort) {
+		this.setInputPort(isInputPort);
+	}
+
+	public void setInputPort(boolean isInputPort) {
+		this.isInputPort = isInputPort;
+	}
+
+	public Boolean isInputPort() {
+		return isInputPort;
 	}
 	
 	

@@ -26,8 +26,8 @@ import java.util.ListIterator;
 
 /**
  * @author Paolo Missier<p/>
- * Java bean to hold a list of dependencies, all of them associated with a pair (&lt;port name>, &lt;path>), as described in {@link net.sf.taverna.t2.provenance.api.QueryAnswer}.
- * <br/> Each element of the list is a record of type {@link LineageQueryResultRecord} in the provenance DB at the finest possible level of granularity, i.e., 
+ * Java bean to hold a list of {@link LineageQueryResultRecord}, representing one record 
+ * in the provenance DB at the finest possible level of granularity, i.e., 
  * a single value possibly within a collection, bound to a processor port and associated to a specific run of a specific workflow.
  * @see LineageQueryResultRecord   
  */

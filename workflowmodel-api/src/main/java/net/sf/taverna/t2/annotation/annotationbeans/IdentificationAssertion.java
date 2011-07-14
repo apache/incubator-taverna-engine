@@ -14,7 +14,7 @@ import net.sf.taverna.t2.workflowmodel.Dataflow;
  * @author alanrw
  * 
  */
-@AppliesTo(targetObjectType = { Dataflow.class }, many = false)
+@AppliesTo(targetObjectType = { Dataflow.class }, many = false, pruned = false)
 public class IdentificationAssertion implements AnnotationBeanSPI {
 
 	private String identification;

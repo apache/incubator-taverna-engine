@@ -409,7 +409,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 				logger.error("Problem clearing database", e);
 			}
 		} else {
-			System.out.println("clearDB is FALSE: not clearing");
+			logger.error("clearDB is FALSE: not clearing");
 		}
 
 //		String q = null;

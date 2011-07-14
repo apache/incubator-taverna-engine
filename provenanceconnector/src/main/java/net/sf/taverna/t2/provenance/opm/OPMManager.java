@@ -3,8 +3,6 @@
  */
 package net.sf.taverna.t2.provenance.opm;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URI;
@@ -13,16 +11,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import javax.xml.bind.JAXBException;
-
+import net.sf.taverna.t2.provenance.lineageservice.URIGenerator;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DataValueExtractor;
 
 import org.apache.log4j.Logger;
-import org.openprovenance.model.Artifact;
-import org.openprovenance.model.OPMGraph;
-import org.openprovenance.model.OPMToDot;
-import org.openprovenance.model.Process;
-import org.openprovenance.rdf.OPMRdf2Xml;
 import org.tupeloproject.kernel.Context;
 import org.tupeloproject.kernel.OperatorException;
 import org.tupeloproject.kernel.UnionContext;
@@ -30,6 +22,7 @@ import org.tupeloproject.kernel.impl.MemoryContext;
 import org.tupeloproject.kernel.impl.ResourceContext;
 import org.tupeloproject.provenance.ProvenanceAccount;
 import org.tupeloproject.provenance.ProvenanceArtifact;
+import org.tupeloproject.provenance.ProvenanceException;
 import org.tupeloproject.provenance.ProvenanceGeneratedArc;
 import org.tupeloproject.provenance.ProvenanceProcess;
 import org.tupeloproject.provenance.ProvenanceRole;
@@ -49,9 +42,7 @@ public class OPMManager {
 
 	private static Logger logger = Logger.getLogger(OPMManager.class);
 
-	public static final String OPM_TAVERNA_NAMESPACE = "http://taverna.opm.org/";
-	private static final String OPM_RDF_GRAPH_FILE = "src/test/resources/provenance-testing/OPM/OPMGraph.rdf";
-	private static final String  OPM_DOT_FILE = "src/test/resources/provenance-testing/OPM/OPMGraph.dot";
+	public static final String OPM_TAVERNA_NAMESPACE = "http://ns.taverna.org.uk/2011/provenance/opm/";
 	private static final String VALUE_PROP = "value";
 	
 	ProvenanceContextFacade graph = null;
@@ -88,11 +79,13 @@ public class OPMManager {
 	 * 	create new account to hold the causality graph
 	 *  and give it a Resource name
 	 * @param accountName
+	 * @throws ProvenanceException 
+	 * @ 
 	 */
-	public void createAccount(String accountName) {
+	public void createAccount(String accountName) throws ProvenanceException  {
 
 		currentAccount = graph.newAccount("OPM-"+
-				accountName, Resource.uriRef(OPM_TAVERNA_NAMESPACE+accountName));
+				accountName, Resource.uriRef(uriGenerator.makeRunUri(accountName)));
 		graph.assertAccount(currentAccount);
 	}
 
@@ -103,53 +96,38 @@ public class OPMManager {
 	 * @param aValue  actual value can be used optionally as part of a separate triple. Whether this is used or not 
 	 * depends on the settings, see {@link OPMManager.addValueTriple}.
 	 * This also sets the currentArtifact to the newly created artifact
+	 * @throws ProvenanceException 
+	 * @ 
 	 */
-	public void addArtifact(String aName, String aValue) {
+	public void addArtifact(String aName, Object aValue) throws ProvenanceException  {
 
-		String artID=aName;
-		// make sure artifact name is a good URI
-		try {
-			URI artURI = new URI(aName);
+		Resource r = addArtifact(aName);
 
-			if (artURI.getAuthority() == null) {
-				artID = OPM_TAVERNA_NAMESPACE+aName;				
-			}
-		} catch (URISyntaxException e1) {
-			artID = OPM_TAVERNA_NAMESPACE+aName;
-		}
-
-
-		Resource r = Resource.uriRef(artID);
-		currentArtifact = graph.newArtifact(artID, r);
-		graph.assertArtifact(currentArtifact);
-
-		if (false) {
-// following fragment commented out  
-//		if (aValue != null) {
-//			System.out.println("OPMManager::addArtifact: aValue is NOT NULL");
+		if (aValue != null) {
+			logger.debug("OPMManager::addArtifact: aValue is NOT NULL");
 
 			// if we have a valid DataValueExtractor, use it here
 			List<DataValueExtractor> dveList;
-			String extractedValue = aValue;  // default is same value
+			String extractedValue = (String) aValue;  // default is same value
 			if ((dveList = getDataValueExtractor()) != null) {
 
 				// try all available extractors... UGLY but data comes with NO TYPE at all!
 				for (DataValueExtractor dve: dveList) {
 					try {
 
-//						System.out.println("OPMManager::addArtifact: trying extractor "+dve.getClass().getName());
+						logger.debug("OPMManager::addArtifact: trying extractor "+dve.getClass().getName());
 						extractedValue = dve.extractString(aValue);						
-//						System.out.println("OPMManager::addArtifact: - extracted value = "+extractedValue);
+						logger.debug("OPMManager::addArtifact: - extracted value = "+extractedValue);
 						break; // extractor worked
 					} catch (Exception e) {
 						// no panic, reset value and try another extractor
-//						System.out.println("OPMManager::addArtifact: extractor failed");
-						extractedValue = aValue;
+						logger.warn("OPMManager::addArtifact: extractor failed");
+						extractedValue = (String) aValue;
 					}
 				}
 			}
 
-//			System.out.println("OPMManager::addArtifact: using value "+extractedValue);
+			logger.debug("OPMManager::addArtifact: using value "+extractedValue);
 			try {
 				Literal lValue = Resource.literal(extractedValue);
 				context.addTriple(r, Resource.uriRef(OPM_TAVERNA_NAMESPACE+VALUE_PROP), lValue);
@@ -157,7 +135,7 @@ public class OPMManager {
 				logger.warn("OPM iteration triple creation exception", e);
 			}
 		}  else {
-//			System.out.println("OPMManager::addArtifact: aValue for ["+aName+"] is NULL");
+			logger.debug("OPMManager::addArtifact: aValue for ["+aName+"] is NULL");
 		}
 	}
 
@@ -165,51 +143,74 @@ public class OPMManager {
 	/**
 	 * no actual value is recorded
 	 * @param aName
+	 * @return 
+	 * @throws ProvenanceException 
+	 * @ 
 	 */
-	public void addArtifact(String aName) {
+	public Resource addArtifact(String aName) throws ProvenanceException  {
+		String artID;
+		// make sure artifact name is a good URI				
+		try {
+			URI artURI = new URI(aName);
+			if (artURI.getScheme() == null) {
+				artID = null; // generate later
+			} else if (artURI.getScheme().equals("t2")) {
+				artID = uriGenerator.makeT2ReferenceURI(aName);
+			} else {				
+				artID = aName;
+			}
+		} catch (URISyntaxException e1) {
+			artID = null;  // generate later
+		}
+		if (artID == null) {
+			artID = OPM_TAVERNA_NAMESPACE + "artifact/"+uriGenerator.escape(aName);
+		}
 
-		Resource r = Resource.uriRef(aName);
-		currentArtifact = graph.newArtifact(aName, r);
-		graph.assertArtifact(currentArtifact);		
+
+		Resource r = Resource.uriRef(artID);
+		currentArtifact = graph.newArtifact(artID, r);
+		graph.assertArtifact(currentArtifact);
+		return r;
 	}
 
 
-
-	public void createRole(String aRole) {
-
-		Resource r = Resource.uriRef(OPM_TAVERNA_NAMESPACE+aRole);		
+	public void createRole(String workflowRunId, String workflowId, String processorName, String iteration) {
+		String aRole = uriGenerator.makeIteration(workflowRunId, workflowId, processorName, iteration);
+		Resource r = Resource.uriRef(aRole);
 		currentRole = graph.newRole(aRole, r);
 	}
 
 
-	public void addProcess(String proc, String iterationVector, String URIfriendlyIterationVector) {
+	private URIGenerator uriGenerator = new URIGenerator();
+	
+	public void addProcess(String processorName, String iterationVector, String workflowId, String workflowRunId) throws ProvenanceException  {
 
 		String processID;
 
 		// PM added 5/09 -- a process name may already be a URI -- this happens for example when we export back OPM
 		// after importing a workflow from our own OPM... in this case, do not pre-pend a new URI scheme
-
+		
 		try {
-			URI procURI = new URI(proc);
+			URI procURI = new URI(processorName);
 
 			if (procURI.getAuthority() == null) {
-				processID = OPM_TAVERNA_NAMESPACE+proc;				
+				processID = uriGenerator.makeProcessorURI(processorName, workflowId);
 			} else {
-				processID = proc;
+				processID = processorName;
 			}
 		} catch (URISyntaxException e1) {
-			processID = OPM_TAVERNA_NAMESPACE+proc;
+			processID = uriGenerator.makeProcessorURI(processorName, workflowId);
 		}
-		if (URIfriendlyIterationVector.length()>0) {
-			processID = processID+"?it="+URIfriendlyIterationVector;
-		}
-
-		Resource processResource = Resource.uriRef(processID);					
+		
+		uriGenerator.makeIteration(workflowRunId, workflowId, processorName, iterationVector);
+		
+		
+				Resource processResource = Resource.uriRef(processID);					
 		currentProcess = graph.newProcess(processID, processResource);
 		graph.assertProcess(currentProcess );
 
 		// add a triple to specify the iteration vector for this occurrence of Process, if it is available
-		if (URIfriendlyIterationVector.length() > 0) {
+		if (! iterationVector.equals("[]")) {
 //			Resource inputProcessSubject = ((RdfProvenanceProcess) process).getSubject();
 			try {
 				context.addTriple(processResource, Resource.uriRef(OPM_TAVERNA_NAMESPACE+"iteration"), iterationVector);
@@ -224,7 +225,7 @@ public class OPMManager {
 			ProvenanceProcess process, 
 			ProvenanceRole role, 
 			ProvenanceAccount account,
-			boolean noDuplicates) {
+			boolean noDuplicates) throws ProvenanceException  {
 
 		boolean found = false;
 		if (noDuplicates && artifact != null) {
@@ -246,10 +247,12 @@ public class OPMManager {
 			ProvenanceProcess process, 
 			ProvenanceRole role,
 			ProvenanceAccount account, 
-			boolean noDuplicates) {
+			boolean noDuplicates) throws ProvenanceException  {
 
 		boolean found = false;
 
+//		logger.debug("assertUsed: for process: "+process.getName()+"  and role "+role.getName());
+		
 		if (noDuplicates) {
 			Collection<ProvenanceUsedArc> used = graph.getUsed(process);
 
@@ -362,6 +365,7 @@ public class OPMManager {
 	 * @throws IOException 
 	 * @throws OperatorException 
 	 */
+	/*
 	public String Rdf2Dot() throws OperatorException, IOException {
 
 		OPMRdf2Xml converter = new OPMRdf2Xml();
@@ -381,6 +385,7 @@ public class OPMManager {
 
 	}
 
+    */
 
 	/**
 	 * @param graph the graph to set
@@ -390,5 +395,6 @@ public class OPMManager {
 	public void setActive(boolean active) { isActive = active; }
 
 	public boolean isActive()  { return isActive; }
+
 
 }

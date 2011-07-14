@@ -13,6 +13,8 @@ import java.net.URLConnection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.net.ssl.SSLException;
+
 import net.sf.taverna.t2.visit.VisitReport;
 import net.sf.taverna.t2.visit.VisitReport.Status;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
@@ -114,7 +116,23 @@ public abstract class RemoteHealthChecker implements HealthChecker<Object> {
 				httpConnection.connect();
 				responseCode = httpConnection.getResponseCode();
 				if (responseCode != HttpURLConnection.HTTP_OK) {
-					if ((responseCode >= HttpURLConnection.HTTP_INTERNAL_ERROR)) {
+					try {
+						if ((connection != null) && (connection.getInputStream() != null)) {
+							connection.getInputStream().close();
+						}
+					} catch (IOException e) {
+						logger.info("Unable to close connection to " + endpoint, e);
+					}
+					connection = url.openConnection();
+					connection.setReadTimeout(timeout);
+					connection.setConnectTimeout(timeout);
+					httpConnection = (HttpURLConnection) connection;
+					httpConnection.setRequestMethod("GET");
+					httpConnection.connect();
+					responseCode = httpConnection.getResponseCode();
+				}
+ 				if (responseCode != HttpURLConnection.HTTP_OK) {
+					if ((responseCode > HttpURLConnection.HTTP_INTERNAL_ERROR)) {
 						status = Status.WARNING;
 						message = "Unexpected response";
 						resultId = HealthCheck.CONNECTION_PROBLEM;
@@ -143,6 +161,12 @@ public abstract class RemoteHealthChecker implements HealthChecker<Object> {
 			message = "Timed out";
 			resultId = HealthCheck.TIME_OUT;
 			ex = e;
+		}  catch (SSLException e){
+				// Some kind of error when trying to establish an HTTPS connection to the endpoint
+				status = Status.SEVERE;
+				message = "HTTPS connection problem";
+				resultId = HealthCheck.IO_PROBLEM; // SSLException is an IOException
+				ex = e;
 		} catch (IOException e) {
 			status = Status.SEVERE;
 			message = "Read problem";

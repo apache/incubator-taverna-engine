@@ -98,7 +98,7 @@ public class ProcessorXMLSerializer extends AbstractXMLSerializer {
 			ActivityAndBeanWrapper wrapper = ((DisabledActivity) activity).getConfiguration();
 			return ActivityXMLSerializer.getInstance().activityToXML(wrapper.getActivity(), activity, wrapper.getBean());
 		} else if (activity instanceof UnrecognizedActivity) {
-		    return ((UnrecognizedActivity) activity).getConfiguration();
+		    return (Element) ((UnrecognizedActivity) activity).getConfiguration().clone();
 		}
 		return ActivityXMLSerializer.getInstance().activityToXML(activity);
 	}

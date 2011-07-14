@@ -212,6 +212,8 @@ public class MergeImpl implements Merge {
 				throw new IterationTypeMismatchException();
 			}
 		}
+		// Set the granular depth to be the input depth as this will be the granularity of the output
+		output.setGranularDepth(inputDepth);
 		// Got to here so all the input resolved depths match, push depth+1 to
 		// all outgoing links and return true
 		for (DatalinkImpl dli : output.outgoingLinks) {

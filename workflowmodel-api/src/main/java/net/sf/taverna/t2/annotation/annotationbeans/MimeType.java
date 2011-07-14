@@ -31,7 +31,7 @@ import net.sf.taverna.t2.workflowmodel.Port;
  * @author Tom Oinn
  * 
  */
-// @AppliesTo(targetObjectType = { Port.class })
+@AppliesTo(targetObjectType = { Port.class })
 public class MimeType extends AbstractTextualValueAssertion {
 
 	/**
