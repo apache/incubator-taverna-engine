@@ -1,13 +1,19 @@
 package net.sf.taverna.t2.workflowmodel.utils;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import net.sf.taverna.t2.annotation.Annotated;
 import net.sf.taverna.t2.annotation.AnnotationAssertion;
 import net.sf.taverna.t2.annotation.AnnotationBeanSPI;
 import net.sf.taverna.t2.annotation.AnnotationChain;
+import net.sf.taverna.t2.annotation.AppliesTo;
 import net.sf.taverna.t2.annotation.annotationbeans.AbstractTextualValueAssertion;
 import net.sf.taverna.t2.workflowmodel.Edit;
+import net.sf.taverna.t2.workflowmodel.EditException;
 import net.sf.taverna.t2.workflowmodel.Edits;
 
 import org.apache.log4j.Logger;
@@ -61,7 +67,7 @@ public class AnnotationTools {
 //		}
 //		return results;
 //	}
-//
+
 //	@SuppressWarnings("unchecked")
 //	public List<Class> getAnnotatingClasses(Annotated annotated) {
 //		List<Class> result = new ArrayList<Class>();
@@ -115,5 +121,54 @@ public class AnnotationTools {
 //	public Iterable<Class> getAnnotationBeanRegistry() {
 //		return annotationBeanRegistry;
 //	}
+
+    /**
+     * Remove out of date annotations unless many of that class are allowed, or it is explicitly not pruned
+     */
+	public static void pruneAnnotations(Annotated<?> annotated, Edits edits) {
+		Map<Class<AnnotationBeanSPI>, AnnotationAssertion> remainder = new HashMap<Class<AnnotationBeanSPI>, AnnotationAssertion>();
+		Set<AnnotationChain> newChains = new HashSet<AnnotationChain>();
+		for (AnnotationChain chain : annotated.getAnnotations()) {
+			AnnotationChain newChain = edits.createAnnotationChain();
+			for (AnnotationAssertion assertion : chain.getAssertions()) {
+				AnnotationBeanSPI annotation = assertion.getDetail();
+				Class annotationClass = annotation.getClass();
+				AppliesTo appliesToAnnotation = (AppliesTo) annotationClass
+						.getAnnotation(AppliesTo.class);
+				if ((appliesToAnnotation == null) || appliesToAnnotation.many()
+						|| !appliesToAnnotation.pruned()) {
+					try {
+						edits.getAddAnnotationAssertionEdit(newChain, assertion).doEdit();
+					} catch (EditException e) {
+						logger.error("Error while pruning annotations", e);
+					}
+				} else {
+					if (remainder.containsKey(annotationClass)) {
+						AnnotationAssertion currentAssertion = remainder
+								.get(annotationClass);
+						if (assertion.getCreationDate().compareTo(
+								currentAssertion.getCreationDate()) > 0) {
+							remainder.put(annotationClass, assertion);
+						}
+					} else {
+						remainder.put(annotationClass, assertion);
+					}
+				}
+			}
+			if (!newChain.getAssertions().isEmpty()) {
+				newChains.add(newChain);
+			}
+		}
+		for (AnnotationAssertion assertion : remainder.values()) {
+			AnnotationChain newChain = edits.createAnnotationChain();
+			try {
+				edits.getAddAnnotationAssertionEdit(newChain, assertion).doEdit();
+			} catch (EditException e) {
+				logger.error("Error while pruning annotations", e);
+			}
+			newChains.add(newChain);
+		}
+		annotated.setAnnotations(newChains);
+	}
 
 }
