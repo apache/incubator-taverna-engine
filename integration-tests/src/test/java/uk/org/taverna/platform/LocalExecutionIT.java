@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2010 The University of Manchester   
+ * Copyright (C) 2010 The University of Manchester
  * 
  *  Modifications to the initial code base are copyright of their
  *  respective authors, or their employers as appropriate.
@@ -8,12 +8,12 @@
  *  modify it under the terms of the GNU Lesser General Public License
  *  as published by the Free Software Foundation; either version 2.1 of
  *  the License, or (at your option) any later version.
- *    
+ * 
  *  This program is distributed in the hope that it will be useful, but
  *  WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *    
+ * 
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -47,23 +47,29 @@ public class LocalExecutionIT extends PlatformIT {
 		Workflow workflow = workflowBundle.getMainWorkflow();
 		Profile profile = workflowBundle.getProfiles().iterator().next();
 
-		ServiceReference referenceServiceReference = bundleContext
-				.getServiceReference("net.sf.taverna.t2.reference.ReferenceService");
+		ServiceReference[] referenceServiceReferences = bundleContext.getServiceReferences(
+				"net.sf.taverna.t2.reference.ReferenceService",
+				"(org.springframework.osgi.bean.name=inMemoryReferenceService)");
+		assertEquals(1, referenceServiceReferences.length);
 		ReferenceService referenceService = (ReferenceService) bundleContext
-				.getService(referenceServiceReference);
+				.getService(referenceServiceReferences[0]);
 
-		ServiceReference executionServiceReference = bundleContext
-				.getServiceReference("uk.org.taverna.platform.execution.api.ExecutionService");
+		ServiceReference[] executionServiceReferences = bundleContext.getServiceReferences(
+				"uk.org.taverna.platform.execution.api.ExecutionService",
+				"(org.springframework.osgi.bean.name=localExecution)");
+		assertEquals(1, executionServiceReferences.length);
 		ExecutionService executionService = (ExecutionService) bundleContext
-				.getService(executionServiceReference);
+				.getService(executionServiceReferences[0]);
+		assertEquals("uk.org.taverna.platform.execution.impl.local.LocalExecutionService",
+				executionService.getID());
 
 		T2Reference reference = referenceService.register("test-input", 0, true, null);
 
 		Map<String, T2Reference> inputs = new HashMap<String, T2Reference>();
 		inputs.put("in", reference);
 
-		String executionId = executionService.createExecution(workflowBundle, workflow, profile, inputs,
-				referenceService);
+		String executionId = executionService.createExecution(workflowBundle, workflow, profile,
+				inputs, referenceService);
 		WorkflowReport report = executionService.getWorkflowReport(executionId);
 		assertEquals(State.CREATED, report.getState());
 		executionService.start(executionId);
@@ -88,22 +94,28 @@ public class LocalExecutionIT extends PlatformIT {
 		Workflow workflow = workflowBundle.getMainWorkflow();
 		Profile profile = workflowBundle.getProfiles().iterator().next();
 
-		ServiceReference referenceServiceReference = bundleContext
-				.getServiceReference("net.sf.taverna.t2.reference.ReferenceService");
+		ServiceReference[] referenceServiceReferences = bundleContext.getServiceReferences(
+				"net.sf.taverna.t2.reference.ReferenceService",
+				"(org.springframework.osgi.bean.name=inMemoryReferenceService)");
+		assertEquals(1, referenceServiceReferences.length);
 		ReferenceService referenceService = (ReferenceService) bundleContext
-				.getService(referenceServiceReference);
+				.getService(referenceServiceReferences[0]);
 
-		ServiceReference executionServiceReference = bundleContext
-				.getServiceReference("uk.org.taverna.platform.execution.api.ExecutionService");
+		ServiceReference[] executionServiceReferences = bundleContext.getServiceReferences(
+				"uk.org.taverna.platform.execution.api.ExecutionService",
+				"(org.springframework.osgi.bean.name=localExecution)");
+		assertEquals(1, executionServiceReferences.length);
 		ExecutionService executionService = (ExecutionService) bundleContext
-				.getService(executionServiceReference);
+				.getService(executionServiceReferences[0]);
+		assertEquals("uk.org.taverna.platform.execution.impl.local.LocalExecutionService",
+				executionService.getID());
 
 		T2Reference reference = referenceService.register("test-input", 0, true, null);
 		Map<String, T2Reference> inputs = new HashMap<String, T2Reference>();
 		inputs.put("in", reference);
 
-		String executionId = executionService.createExecution(workflowBundle, workflow, profile, inputs,
-				referenceService);
+		String executionId = executionService.createExecution(workflowBundle, workflow, profile,
+				inputs, referenceService);
 		WorkflowReport report = executionService.getWorkflowReport(executionId);
 		System.out.println(report);
 		assertEquals(State.CREATED, report.getState());
@@ -119,14 +131,14 @@ public class LocalExecutionIT extends PlatformIT {
 		}
 		assertFalse(resultReference.containsErrors());
 		@SuppressWarnings("unchecked")
-		List<String> result = (List<String>) referenceService.renderIdentifier(
-				(T2Reference) results.get("out"), String.class, null);
+		List<String> result = (List<String>) referenceService.renderIdentifier(results.get("out"),
+				String.class, null);
 		assertEquals(1000, result.size());
 		assertEquals("test-input:0", result.get(0));
 		assertEquals(State.COMPLETED, report.getState());
 		System.out.println(report);
 	}
-	
+
 	public void testLocalExecution3() throws Exception {
 		URL wfResource = getClass().getResource("/t2flow/beanshell.t2flow");
 		assertNotNull(wfResource);
@@ -136,23 +148,49 @@ public class LocalExecutionIT extends PlatformIT {
 		Workflow workflow = workflowBundle.getMainWorkflow();
 		Profile profile = workflowBundle.getProfiles().iterator().next();
 
-		ServiceReference referenceServiceReference = bundleContext
-				.getServiceReference("net.sf.taverna.t2.reference.ReferenceService");
+		ServiceReference[] referenceServiceReferences = bundleContext.getServiceReferences(
+				"net.sf.taverna.t2.reference.ReferenceService",
+		"(org.springframework.osgi.bean.name=hibernateReferenceService)");
+		assertEquals(1, referenceServiceReferences.length);
 		ReferenceService referenceService = (ReferenceService) bundleContext
-				.getService(referenceServiceReference);
+				.getService(referenceServiceReferences[0]);
 
-		ServiceReference executionServiceReference = bundleContext
-				.getServiceReference("uk.org.taverna.platform.execution.api.ExecutionService");
+		ServiceReference[] executionServiceReferences = bundleContext.getServiceReferences(
+				"uk.org.taverna.platform.execution.api.ExecutionService",
+				"(org.springframework.osgi.bean.name=localExecution)");
+		assertEquals(1, executionServiceReferences.length);
 		ExecutionService executionService = (ExecutionService) bundleContext
-				.getService(executionServiceReference);
+				.getService(executionServiceReferences[0]);
+		assertEquals("uk.org.taverna.platform.execution.impl.local.LocalExecutionService",
+				executionService.getID());
 
 		T2Reference reference = referenceService.register("test-input", 0, true, null);
 		Map<String, T2Reference> inputs = new HashMap<String, T2Reference>();
 		inputs.put("in", reference);
 
-		@SuppressWarnings("unused")
-		String executionId = executionService.createExecution(workflowBundle, workflow, profile, inputs,
-				referenceService);
+		String executionId = executionService.createExecution(workflowBundle, workflow, profile,
+				inputs, referenceService);
+		WorkflowReport report = executionService.getWorkflowReport(executionId);
+		System.out.println(report);
+		assertEquals(State.CREATED, report.getState());
+		executionService.start(executionId);
+		System.out.println(report);
+
+		Map<String, T2Reference> results = report.getOutputs();
+		waitForResult(results, "out", report);
+
+		T2Reference resultReference = results.get("out");
+		if (resultReference.containsErrors()) {
+			printErrors(referenceService, resultReference);
+		}
+		assertFalse(resultReference.containsErrors());
+		@SuppressWarnings("unchecked")
+		List<String> result = (List<String>) referenceService.renderIdentifier(results.get("out"),
+				String.class, null);
+		assertEquals(1000, result.size());
+		assertEquals("test-input:0", result.get(0));
+		assertEquals(State.COMPLETED, report.getState());
+		System.out.println(report);
 	}
 
 }
