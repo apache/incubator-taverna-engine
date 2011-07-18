@@ -31,6 +31,7 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.NonExecutableActivity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.SupersededActivity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.UnrecognizedActivity;
 import net.sf.taverna.t2.workflowmodel.serialization.DeserializationException;
+import net.sf.taverna.t2.workflowmodel.utils.Tools;
 
 import org.apache.log4j.Logger;
 import org.jdom.Element;

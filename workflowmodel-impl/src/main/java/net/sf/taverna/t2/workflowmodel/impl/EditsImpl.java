@@ -201,6 +201,11 @@ public class EditsImpl implements Edits {
 		return new ConnectDatalinkEdit(datalink);
 	}
 
+	public AnnotationChain createAnnotationChain() {
+		return new AnnotationChainImpl();
+	}
+
+	
 	@SuppressWarnings("unchecked")
 	public Edit<AnnotationChain> getAddAnnotationAssertionEdit(
 			AnnotationChain annotationChain,

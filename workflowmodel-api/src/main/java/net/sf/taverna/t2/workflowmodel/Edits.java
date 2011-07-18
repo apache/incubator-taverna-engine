@@ -225,6 +225,13 @@ public interface Edits {
 			String activityPortName);
 
 	/**
+	 * Builds a new AnnotationChain.
+	 * 
+	 * @return a new AnnotationChain
+	 */
+	public AnnotationChain createAnnotationChain();
+	
+	/**
 	 * Add an {@link AnnotationAssertion} to an {@link AnnotationChain}
 	 * 
 	 * @param annotationChain
