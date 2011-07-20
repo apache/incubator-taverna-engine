@@ -1,8 +1,10 @@
 package net.sf.taverna.t2.workflowmodel.utils;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -22,8 +24,8 @@ public class AnnotationTools {
 
 	private static Logger logger = Logger.getLogger(AnnotationTools.class);
 
-//	@SuppressWarnings("unchecked")
-//	private Iterable<Class> annotationBeanRegistry;
+	@SuppressWarnings("unchecked")
+	private Iterable<Class> annotationBeanRegistry;
 
 	public static Edit<?> addAnnotation(Annotated<?> annotated, AnnotationBeanSPI a, Edits edits) {
 		return edits.getAddAnnotationChainEdit(annotated, a);
@@ -49,42 +51,42 @@ public class AnnotationTools {
 		return result;
 	}
 
-//	@SuppressWarnings("unchecked")
-//	public Iterable<Class<? extends AnnotationBeanSPI>> getAnnotationBeanClasses() {
-//		// Mega casting mega trick!
-//		Iterable registry = getAnnotationBeanRegistry();
-//		return (Iterable<Class<? extends AnnotationBeanSPI>>) registry;
-//	}
+	@SuppressWarnings("unchecked")
+	public Iterable<Class<? extends AnnotationBeanSPI>> getAnnotationBeanClasses() {
+		// Mega casting mega trick!
+		Iterable registry = getAnnotationBeanRegistry();
+		return (Iterable<Class<? extends AnnotationBeanSPI>>) registry;
+	}
 
-//	@SuppressWarnings("unchecked")
-//	public <T> List<Class<? extends T>> getAnnotationBeanClasses(
-//			Class<T> superClass) {
-//		List<Class<? extends T>> results = new ArrayList<Class<? extends T>>();
-//		for (Class<? extends AnnotationBeanSPI> annotationBeanClass : getAnnotationBeanClasses()) {
-//			if (superClass.isAssignableFrom(annotationBeanClass)) {
-//				results.add((Class<? extends T>) annotationBeanClass);
-//			}
-//		}
-//		return results;
-//	}
+	@SuppressWarnings("unchecked")
+	public <T> List<Class<? extends T>> getAnnotationBeanClasses(
+			Class<T> superClass) {
+		List<Class<? extends T>> results = new ArrayList<Class<? extends T>>();
+		for (Class<? extends AnnotationBeanSPI> annotationBeanClass : getAnnotationBeanClasses()) {
+			if (superClass.isAssignableFrom(annotationBeanClass)) {
+				results.add((Class<? extends T>) annotationBeanClass);
+			}
+		}
+		return results;
+	}
 
-//	@SuppressWarnings("unchecked")
-//	public List<Class> getAnnotatingClasses(Annotated annotated) {
-//		List<Class> result = new ArrayList<Class>();
-//		for (Class<? extends AbstractTextualValueAssertion> c : getAnnotationBeanClasses(AbstractTextualValueAssertion.class)) {
-//			AppliesTo appliesToAnnotation = (AppliesTo) c
-//					.getAnnotation(AppliesTo.class);
-//			if (appliesToAnnotation == null) {
-//				continue;
-//			}
-//			for (Class<?> target : appliesToAnnotation.targetObjectType()) {
-//				if (target.isInstance(annotated)) {
-//					result.add(c);
-//				}
-//			}
-//		}
-//		return result;
-//	}
+	@SuppressWarnings("unchecked")
+	public List<Class> getAnnotatingClasses(Annotated annotated) {
+		List<Class> result = new ArrayList<Class>();
+		for (Class<? extends AbstractTextualValueAssertion> c : getAnnotationBeanClasses(AbstractTextualValueAssertion.class)) {
+			AppliesTo appliesToAnnotation = (AppliesTo) c
+					.getAnnotation(AppliesTo.class);
+			if (appliesToAnnotation == null) {
+				continue;
+			}
+			for (Class<?> target : appliesToAnnotation.targetObjectType()) {
+				if (target.isInstance(annotated)) {
+					result.add(c);
+				}
+			}
+		}
+		return result;
+	}
 
 	public static Edit<?> setAnnotationString(Annotated<?> annotated, Class<?> c,
 			String value, Edits edits) {
@@ -114,13 +116,13 @@ public class AnnotationTools {
 		return a.getText();
 	}
 
-//	public void setAnnotationBeanRegistry(Iterable<Class> annotationBeanRegistry) {
-//		this.annotationBeanRegistry = annotationBeanRegistry;
-//	}
-//
-//	public Iterable<Class> getAnnotationBeanRegistry() {
-//		return annotationBeanRegistry;
-//	}
+	public void setAnnotationBeanRegistry(Iterable<Class> annotationBeanRegistry) {
+		this.annotationBeanRegistry = annotationBeanRegistry;
+	}
+
+	public Iterable<Class> getAnnotationBeanRegistry() {
+		return annotationBeanRegistry;
+	}
 
     /**
      * Remove out of date annotations unless many of that class are allowed, or it is explicitly not pruned
