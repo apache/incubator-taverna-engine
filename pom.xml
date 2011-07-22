@@ -13,9 +13,9 @@
 
 	<version>1.3</version>
 	<scm>
-		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/dev/archetypes/trunk/</connection>
-		<developerConnection>scm:svn:https://taverna.googlecode.com/svn/taverna/dev/archetypes/trunk/</developerConnection>
-		<url>http://code.google.com/p/taverna/source/browse/#svn/taverna/dev/archetypes/trunk/</url>
+		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/dev/archetypes/branches/maintenance/</connection>
+		<developerConnection>scm:svn:https://taverna.googlecode.com/svn/taverna/dev/archetypes/branches/maintenance/</developerConnection>
+		<url>http://code.google.com/p/taverna/source/browse/#svn/taverna/dev/archetypes/branches/maintenance/</url>
 	</scm>
     <build>
         <pluginManagement>
