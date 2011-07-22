@@ -117,6 +117,16 @@
 					<groupId>net.sf.taverna.t2.activities</groupId>
 					<artifactId>wsdl-activity</artifactId>
 				</exclusion>
+				<!-- Perspectives pulling in too many dependencies -->
+				<exclusion>
+				 	<!--  fails due to direct dependency to WSDL -->
+				 	<groupId>net.sf.taverna.t2.ui-exts</groupId>
+				 	<artifactId>perspective-biocatalogue</artifactId>
+				</exclusion>
+				<exclusion>
+				 	<groupId>net.sf.taverna.t2.ui-exts</groupId>
+				 	<artifactId>perspective-myexperiment</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 	</dependencies>

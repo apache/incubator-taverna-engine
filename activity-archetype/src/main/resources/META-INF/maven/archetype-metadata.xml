@@ -47,11 +47,17 @@
 					<includes>
 						<include>**/*.ServiceDescriptionProvider</include>
 						<include>**/*.ContextualViewFactory</include>
-						<include>**/*.png</include>
 						<include>**/*.MenuComponent</include>
 						<include>**/*.ActivityIconSPI</include>
 					</includes>
 				</fileSet>
+				<fileSet filtered="false">
+					<directory>src/main/resources</directory>
+					<includes>
+						<include>**/*.png</include>
+					</includes>
+				</fileSet>
+
 				<fileSet filtered="true" packaged="true" encoding="UTF-8">
 					<directory>src/test/java</directory>
 					<includes>

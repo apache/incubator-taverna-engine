@@ -3,7 +3,7 @@
 #set( $symbol_escape = '\' )
 package ${package}.ui;
 
-import net.sf.taverna.raven.launcher.Launcher;
+import net.sf.taverna.t2.workbench.dev.DeveloperWorkbench;
 
 /**
  * Run with parameters:
@@ -18,7 +18,7 @@ import net.sf.taverna.raven.launcher.Launcher;
  * 
  */
 public class TavernaWorkbenchWithExamplePlugin {
-	public static void main(String[] args) {
-		Launcher.main(args);
+	public static void main(String[] args) throws Exception {
+		DeveloperWorkbench.main(args);
 	}
 }
