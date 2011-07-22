@@ -11,7 +11,7 @@
 	<name>Archetypes</name>
 	<packaging>pom</packaging>
 
-	<version>1.3</version>
+	<version>1.3-SNAPSHOT</version>
 	<scm>
 		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/dev/archetypes/branches/maintenance/</connection>
 		<developerConnection>scm:svn:https://taverna.googlecode.com/svn/taverna/dev/archetypes/branches/maintenance/</developerConnection>
