@@ -1,19 +1,19 @@
 /*******************************************************************************
- * Copyright (C) 2010 The University of Manchester   
- * 
+ * Copyright (C) 2010 The University of Manchester
+ *
  *  Modifications to the initial code base are copyright of their
  *  respective authors, or their employers as appropriate.
- * 
+ *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public License
  *  as published by the Free Software Foundation; either version 2.1 of
  *  the License, or (at your option) any later version.
- *    
+ *
  *  This program is distributed in the hope that it will be useful, but
  *  WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *    
+ *
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -25,7 +25,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * 
+ *
  * @author David Withers
  */
 public class StatusReport {
@@ -44,10 +44,11 @@ public class StatusReport {
 	}
 
 	/**
-	 * Returns the current state. A state can be CREATED, RUNNING, COMPLETED,
-	 * PAUSED, CANCELLED or FAILED.
-	 * 
-	 * @return the current state
+	 * Returns the current {@link State}.
+	 *
+	 * A state can be CREATED, RUNNING, COMPLETED, PAUSED, CANCELLED or FAILED.
+	 *
+	 * @return the current <code>State</code>
 	 */
 	public State getState() {
 		return state;
@@ -55,7 +56,7 @@ public class StatusReport {
 
 	/**
 	 * Returns the date that the status was set to CREATED.
-	 * 
+	 *
 	 * @return the the date that the status was set to CREATED
 	 */
 	public Date getCreatedDate() {
@@ -64,7 +65,7 @@ public class StatusReport {
 
 	/**
 	 * Sets the date that the status was set to CREATED.
-	 * 
+	 *
 	 * @param createdDate
 	 *            the date that the status was set to CREATED
 	 */
@@ -76,7 +77,7 @@ public class StatusReport {
 	/**
 	 * Returns the date that the status changed to RUNNING. If the status has
 	 * never been RUNNING <code>null</code> is returned.
-	 * 
+	 *
 	 * @return the date that the status changed to started
 	 */
 	public Date getStartedDate() {
@@ -85,7 +86,7 @@ public class StatusReport {
 
 	/**
 	 * Sets the date that the status changed to RUNNING.
-	 * 
+	 *
 	 * @param startedDate
 	 *            the date that the status changed to RUNNING
 	 */
@@ -99,7 +100,7 @@ public class StatusReport {
 	/**
 	 * Returns the date that the status last changed to PAUSED. If the status
 	 * has never been PAUSED <code>null</code> is returned.
-	 * 
+	 *
 	 * @return the date that the status last changed to PAUSED
 	 */
 	public Date getPausedDate() {
@@ -108,7 +109,7 @@ public class StatusReport {
 
 	/**
 	 * Sets the date that the status last changed to PAUSED.
-	 * 
+	 *
 	 * @param pausedDate
 	 *            the date that the status last changed to PAUSED
 	 */
@@ -122,7 +123,7 @@ public class StatusReport {
 	 * Returns the date that the status last changed form PAUSED to RUNNING. If
 	 * the status has never changed form PAUSED to RUNNING <code>null</code> is
 	 * returned.
-	 * 
+	 *
 	 * @return the date that the status last changed form PAUSED to RUNNING
 	 */
 	public Date getResumedDate() {
@@ -131,7 +132,7 @@ public class StatusReport {
 
 	/**
 	 * Sets the date that the status last changed form PAUSED to RUNNING.
-	 * 
+	 *
 	 * @param resumedDate
 	 *            the date that the status last changed form PAUSED to RUNNING
 	 */
@@ -144,7 +145,7 @@ public class StatusReport {
 	/**
 	 * Returns the date that the status changed to CANCELLED. If the status has
 	 * never been CANCELLED <code>null</code> is returned.
-	 * 
+	 *
 	 * @return the date that the status changed to canceled
 	 */
 	public Date getCancelledDate() {
@@ -153,7 +154,7 @@ public class StatusReport {
 
 	/**
 	 * Sets the date that the status changed to CANCELLED.
-	 * 
+	 *
 	 * @param cancelledDate
 	 *            the date that the status changed to CANCELLED
 	 */
@@ -165,7 +166,7 @@ public class StatusReport {
 	/**
 	 * Returns the date that the status changed to COMPLETED. If the status
 	 * never been COMPLETED <code>null</code> is returned.
-	 * 
+	 *
 	 * @return the date that the status changed to COMPLETED
 	 */
 	public Date getCompletedDate() {
@@ -174,7 +175,7 @@ public class StatusReport {
 
 	/**
 	 * Sets the date that the status changed to COMPLETED.
-	 * 
+	 *
 	 * @param completedDate
 	 *            the date that the status changed to COMPLETED
 	 */
@@ -186,7 +187,7 @@ public class StatusReport {
 	/**
 	 * Returns the date that the status changed to FAILED. If the status has
 	 * never been FAILED <code>null</code> is returned.
-	 * 
+	 *
 	 * @return the date that the status changed to failed
 	 */
 	public Date getFailedDate() {
@@ -195,7 +196,7 @@ public class StatusReport {
 
 	/**
 	 * Sets the date that the status changed to FAILED.
-	 * 
+	 *
 	 * @param failedDate
 	 *            the date that the status changed to FAILED
 	 */
@@ -207,7 +208,7 @@ public class StatusReport {
 	/**
 	 * Returns the dates that the status changed to PAUSED. If the status has
 	 * never been PAUSED an empty list is returned.
-	 * 
+	 *
 	 * @return the dates that the status was paused
 	 */
 	public List<Date> getPausedDates() {
@@ -218,7 +219,7 @@ public class StatusReport {
 	 * Returns the dates that the status changed from PAUSED to RUNNING. If the
 	 * status has never changed from PAUSED to RUNNING an empty list is
 	 * returned.
-	 * 
+	 *
 	 * @return the dates that the status was resumed
 	 */
 	public List<Date> getResumedDates() {

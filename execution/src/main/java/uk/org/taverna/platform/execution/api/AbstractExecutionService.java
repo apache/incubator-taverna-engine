@@ -1,25 +1,26 @@
 /*******************************************************************************
- * Copyright (C) 2010 The University of Manchester   
- * 
+ * Copyright (C) 2010 The University of Manchester
+ *
  *  Modifications to the initial code base are copyright of their
  *  respective authors, or their employers as appropriate.
- * 
+ *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public License
  *  as published by the Free Software Foundation; either version 2.1 of
  *  the License, or (at your option) any later version.
- *    
+ *
  *  This program is distributed in the hope that it will be useful, but
  *  WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *    
+ *
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
 package uk.org.taverna.platform.execution.api;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,13 +33,13 @@ import uk.org.taverna.scufl2.api.profiles.Profile;
 
 /**
  * A common super type for concrete implementations of <code>ExecutionService</code>s.
- * 
+ *
  * @author David Withers
  */
 public abstract class AbstractExecutionService implements ExecutionService {
 
 	private final String ID;
-	
+
 	private final String name;
 
 	private final String description;
@@ -49,7 +50,7 @@ public abstract class AbstractExecutionService implements ExecutionService {
 		this.ID = ID;
 		this.name = name;
 		this.description = description;
-		executionMap = new HashMap<String, Execution>();
+		executionMap = Collections.synchronizedMap(new HashMap<String, Execution>());
 	}
 
 	/* (non-Javadoc)
@@ -67,7 +68,7 @@ public abstract class AbstractExecutionService implements ExecutionService {
 	public String getName() {
 		return name;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see uk.org.taverna.platform.execution.ExecutionService#getDescription()
 	 */
@@ -86,7 +87,7 @@ public abstract class AbstractExecutionService implements ExecutionService {
 		executionMap.put(execution.getID(), execution);
 		return execution.getID();
 	}
-	
+
 	protected abstract Execution createExecutionImpl(WorkflowBundle workflowBundle, Workflow workflow, Profile profile, Map<String, T2Reference> inputs,
 			ReferenceService referenceService) throws InvalidWorkflowException;
 

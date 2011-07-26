@@ -59,7 +59,8 @@
 		</plugins>
 		<pluginManagement>
 			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<!--This plugin's configuration is used to store Eclipse m2e settings
+					only. It has no influence on the Maven build itself. -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>
@@ -264,6 +265,11 @@
 			<artifactId>ui</artifactId>
 			<version>${t2.lang.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>net.sf.taverna.t2.security</groupId>
+			<artifactId>credential-manager</artifactId>
+			<version>${t2.security.version}</version>
+		</dependency>
 
 		<!-- Taverna Platform -->
 		<dependency>
@@ -314,8 +320,8 @@
 			<version>${scufl2.version}</version>
 		</dependency>
 
-		<!-- Dependencies declared as provided by some poms - specified here to ensure that they are in the 
-			local repository for the testing framework -->
+		<!-- Dependencies declared as provided by some poms - specified here to
+			ensure that they are in the local repository for the testing framework -->
 		<dependency>
 			<groupId>com.thoughtworks.xstream</groupId>
 			<artifactId>com.springsource.com.thoughtworks.xstream</artifactId>
@@ -385,7 +391,7 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>com.springsource.org.apache.commons.codec</artifactId>
-			<version>1.3.0</version>
+			<version>1.4.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -422,6 +428,18 @@
 			<version>1.4.1</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>com.springsource.org.apache.httpcomponents.httpclient</artifactId>
+			<version>4.1.1</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- <dependency>
+			<groupId>org.apache.httpcore</groupId>
+			<artifactId>com.springsource.org.apache.httpcomponents.httpcore</artifactId>
+			<version>4.1.0</version>
+			<scope>test</scope>
+		</dependency> -->
 		<dependency>
 			<groupId>org.apache.log4j</groupId>
 			<artifactId>com.springsource.org.apache.log4j</artifactId>
@@ -514,6 +532,11 @@
 			<groupId>org.dom4j</groupId>
 			<artifactId>com.springsource.org.dom4j</artifactId>
 			<version>1.6.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jaxen</groupId>
+			<artifactId>com.springsource.org.jaxen</artifactId>
+			<version>1.1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jdom</groupId>

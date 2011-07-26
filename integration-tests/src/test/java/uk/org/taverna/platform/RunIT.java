@@ -1,19 +1,19 @@
 /*******************************************************************************
- * Copyright (C) 2010 The University of Manchester   
- * 
+ * Copyright (C) 2010 The University of Manchester
+ *
  *  Modifications to the initial code base are copyright of their
  *  respective authors, or their employers as appropriate.
- * 
+ *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public License
  *  as published by the Free Software Foundation; either version 2.1 of
  *  the License, or (at your option) any later version.
- *    
+ *
  *  This program is distributed in the hope that it will be useful, but
  *  WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *    
+ *
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -28,6 +28,7 @@ import java.util.Map;
 import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.T2Reference;
 
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
 import uk.org.taverna.platform.execution.api.ExecutionService;
@@ -188,7 +189,7 @@ public class RunIT extends PlatformIT {
 		System.out.println(report);
 
 		Map<String, T2Reference> results = runService.getOutputs(runId);
-		
+
 		waitForResult(results, "cross", report);
 		T2Reference resultReference = results.get("cross");
 		if (resultReference.containsErrors()) {
@@ -394,14 +395,20 @@ public class RunIT extends PlatformIT {
 		System.out.println(report);
 	}
 
-	private void setup() {
-		ServiceReference referenceServiceReference = bundleContext
-				.getServiceReference("net.sf.taverna.t2.reference.ReferenceService");
-		referenceService = (ReferenceService) bundleContext.getService(referenceServiceReference);
+	private void setup() throws InvalidSyntaxException {
+		ServiceReference[] referenceServiceReferences = bundleContext.getServiceReferences(
+				"net.sf.taverna.t2.reference.ReferenceService",
+		"(org.springframework.osgi.bean.name=inMemoryReferenceService)");
+		assertEquals(1, referenceServiceReferences.length);
+		referenceService = (ReferenceService) bundleContext
+				.getService(referenceServiceReferences[0]);
 
-		ServiceReference executionServiceReference = bundleContext
-				.getServiceReference("uk.org.taverna.platform.execution.api.ExecutionService");
-		executionService = (ExecutionService) bundleContext.getService(executionServiceReference);
+		ServiceReference[] executionServiceReferences = bundleContext.getServiceReferences(
+				"uk.org.taverna.platform.execution.api.ExecutionService",
+				"(org.springframework.osgi.bean.name=localExecution)");
+		assertEquals(1, executionServiceReferences.length);
+		executionService = (ExecutionService) bundleContext
+				.getService(executionServiceReferences[0]);
 
 		ServiceReference runServiceReference = bundleContext
 				.getServiceReference("uk.org.taverna.platform.run.api.RunService");

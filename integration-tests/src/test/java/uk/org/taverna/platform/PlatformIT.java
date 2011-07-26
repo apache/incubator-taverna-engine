@@ -1,19 +1,19 @@
 /*******************************************************************************
  * Copyright (C) 2010 The University of Manchester
- * 
+ *
  *  Modifications to the initial code base are copyright of their
  *  respective authors, or their employers as appropriate.
- * 
+ *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public License
  *  as published by the Free Software Foundation; either version 2.1 of
  *  the License, or (at your option) any later version.
- * 
+ *
  *  This program is distributed in the hope that it will be useful, but
  *  WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -61,7 +61,8 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 				"net.sourceforge.javacsv, javacsv.bundle, 2.0.0",
 				"org.antlr, com.springsource.antlr, 2.7.6",
 				"org.apache.axis, com.springsource.org.apache.axis, 1.4.0",
-				"org.apache.commons, com.springsource.org.apache.commons.codec, 1.3.0",
+//				"org.apache.commons, com.springsource.org.apache.commons.codec, 1.3.0",
+				"org.apache.commons, com.springsource.org.apache.commons.codec, 1.4.0",
 				"org.apache.commons, com.springsource.org.apache.commons.collections, 3.2.0",
 				"org.apache.commons, com.springsource.org.apache.commons.discovery, 0.4.0",
 				"org.apache.commons, com.springsource.org.apache.commons.httpclient, 3.1.0",
@@ -69,6 +70,8 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 				"org.apache.commons, com.springsource.org.apache.commons.lang, 2.5.0",
 				"org.apache.commons, com.springsource.org.apache.commons.net, 1.4.1",
 				"org.apache.derby, derby, 10.5.3.0_1",
+//				"org.apache.httpcomponents, com.springsource.org.apache.httpcomponents.httpclient, 4.1.1",
+//				"org.apache.httpcore, com.springsource.org.apache.httpcomponents.httpcore, 4.1.0",
 				"org.apache.log4j, com.springsource.org.apache.log4j, 1.2.16",
 				//				"org.apache.poi, ooxml-schemas.bundle, 1.0.0",
 				//				"org.apache.poi, poi.bundle, 3.5.0.FINAL",
@@ -108,7 +111,7 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 				"net.sf.taverna.t2.activities, dataflow-activity, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.activities, dependency-activity, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.activities, localworker-activity, 2.0-SNAPSHOT",
-				"net.sf.taverna.t2.activities, rshell-activity, 2.0-SNAPSHOT",
+//				"net.sf.taverna.t2.activities, rshell-activity, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.activities, soaplab-activity, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.activities, spreadsheet-import-activity, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.activities, stringconstant-activity, 2.0-SNAPSHOT",
@@ -121,6 +124,7 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 				"net.sf.taverna.t2.core, reference-impl, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.lang, ui, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.lang, observer, 2.0-SNAPSHOT",
+//				"net.sf.taverna.t2.security, credential-manager, 2.0-SNAPSHOT",
 				"net.sourceforge.cglib, com.springsource.net.sf.cglib, 2.1.3",
 				"uk.org.taverna.platform, activity, 0.1.1-SNAPSHOT",
 				"uk.org.taverna.platform, data, 0.1.1-SNAPSHOT",
