@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package net.sf.taverna.t2.visit;
 
@@ -27,13 +27,13 @@ import org.apache.log4j.Logger;
 
 
 /**
- * 
+ *
  * A HierarchyTraverser allows the traversal of the parent -> child hierarchy
  * (as indicated by annotations) and performs visits conforming to the set of
  * VisitKinds.
- * 
+ *
  * @author alanrw
- * 
+ *
  */
 public class HierarchyTraverser {
 
@@ -53,21 +53,13 @@ public class HierarchyTraverser {
 	 */
 	protected Set<Visitor<?>> visitors;
 
-	public HierarchyTraverser() {
-		visitors = new HashSet<Visitor<?>>();
-	}
-	
 	/**
 	 * Create a HierarchyTraverser that can perform visits of the specified set
 	 * of VisitKind.
-	 * 
+	 *
 	 * @param descriptions
 	 */
-	public HierarchyTraverser(Set<Visitor<?>> visitors) {		
-		this.visitors = visitors;
-	}
-	
-	public void setVisitors(Set<Visitor<?>> visitors) {
+	public HierarchyTraverser(Set<Visitor<?>> visitors) {
 		this.visitors = visitors;
 	}
 
@@ -77,7 +69,7 @@ public class HierarchyTraverser {
 	 * VisitReport itself is ignored and the sub-reports added instead. If the
 	 * VisiReport has no sub-reports, or it is a report about a Dataflow, then
 	 * the VisitReport is added to the set.
-	 * 
+	 *
 	 * @param reports
 	 *            The set of reports to which to add the useful VisitReports
 	 *            corresponding to the new VisitReport.
@@ -104,7 +96,7 @@ public class HierarchyTraverser {
 	 * VisitReport about an Activity to be about its containing Processor. If
 	 * the VisitReport has sub-reports then their subject is also patched. It is
 	 * not obvious that this should be done here.
-	 * 
+	 *
 	 * @param vr
 	 *            The VisitReport for which to change the subject
 	 * @param newSubject
@@ -134,7 +126,7 @@ public class HierarchyTraverser {
 	 * Change a VisitReport and its sub-reports (if any) to indicate that the
 	 * visit was time-consuming. This is done to ensure that the time-consuming
 	 * indication of the Visitor is used on the VisitReport.
-	 * 
+	 *
 	 * @param vr
 	 *            The VisitReport for which to set the time-consuming flag.
 	 */
@@ -151,7 +143,7 @@ public class HierarchyTraverser {
 	/**
 	 * Carry out the appropriate visits on an object and then traverse down the
 	 * hierarchy of its children.
-	 * 
+	 *
 	 * @param o
 	 *            The object to visit
 	 * @param ancestry
@@ -183,9 +175,9 @@ public class HierarchyTraverser {
 					logger.error("Visit threw exception", npe);
 				}
 				catch (ClassCastException cce) {
-					logger.error("Visit threw exception", cce);					
+					logger.error("Visit threw exception", cce);
 				}
-				
+
 				if (report == null) {
 					continue;
 				}
@@ -282,7 +274,7 @@ public class HierarchyTraverser {
 	 * is a singleton then a set containing just the object is returned. If the
 	 * object is iterable then the singletons of the elements of the iteration
 	 * are returned.�
-	 * 
+	 *
 	 * @param o
 	 *            The object.
 	 * @return The set of singletons
@@ -301,7 +293,7 @@ public class HierarchyTraverser {
 
 	/**
 	 * Determine the set of names of child-getting methods for a given object
-	 * 
+	 *
 	 * @param o
 	 *            The object to consider.
 	 * @return The set of names of child-getting methods
@@ -314,14 +306,14 @@ public class HierarchyTraverser {
 	/**
 	 * Determine the set of names of child-getting methods for a given Class.
 	 * This includes the names of methods from interfaces and super-classes.
-	 * 
+	 *
 	 * @param c
 	 *            The class to consider
 	 * @return The set of names of child-getting methods for the class
 	 */
 	private static synchronized Set<String> getMethodsForClass(Class c) {
 		if (!childrenMethods.containsKey(c)) {
-			
+
 			Set<String> result = new HashSet<String>();
 			result.addAll(getExplicitMethodsForClass(c));
 			for (Class i : c.getInterfaces()) {
@@ -339,7 +331,7 @@ public class HierarchyTraverser {
 	/**
 	 * Determine the set of names of child-getting methods explicitly identified
 	 * for an Interface or a Class.
-	 * 
+	 *
 	 * @param c
 	 *            The Interface or Class to consider
 	 * @return The set of names of child-getting methods.
