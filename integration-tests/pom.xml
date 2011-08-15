@@ -279,11 +279,6 @@
 		</dependency>
 		<dependency>
 			<groupId>uk.org.taverna.platform</groupId>
-			<artifactId>data</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>uk.org.taverna.platform</groupId>
 			<artifactId>execution</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -376,12 +371,12 @@
 			<version>1.0.1</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
+		<!-- <dependency>
 			<groupId>net.sourceforge.javacsv</groupId>
 			<artifactId>javacsv.bundle</artifactId>
 			<version>2.0.0</version>
 			<scope>test</scope>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>org.apache.axis</groupId>
 			<artifactId>com.springsource.org.apache.axis</artifactId>
@@ -446,7 +441,7 @@
 			<version>1.2.16</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>ooxml-schemas.bundle</artifactId>
 			<version>1.0.0</version>
@@ -469,7 +464,7 @@
 			<artifactId>poi-scratchpad.bundle</artifactId>
 			<version>3.5.0.FINAL</version>
 			<scope>test</scope>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>org.apache.xml</groupId>
 			<artifactId>com.springsource.org.apache.xml.resolver</artifactId>
@@ -543,7 +538,7 @@
 			<artifactId>com.springsource.org.jdom</artifactId>
 			<version>1.1.0</version>
 		</dependency>
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.odftoolkit</groupId>
 			<artifactId>odfdom-java.bundle</artifactId>
 			<version>0.7.0</version>
@@ -553,7 +548,7 @@
 					<artifactId>com.springsource.org.apache.xerces</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>org.opensaml</groupId>
 			<artifactId>com.springsource.org.opensaml</artifactId>
