@@ -68,7 +68,6 @@ import javax.security.auth.x500.X500Principal;
 import net.sf.taverna.t2.lang.observer.MultiCaster;
 import net.sf.taverna.t2.lang.observer.Observable;
 import net.sf.taverna.t2.lang.observer.Observer;
-import net.sf.taverna.t2.spi.SPIRegistry;
 
 import org.apache.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -246,9 +245,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 		init();
 	}
 
-	static SPIRegistry<CredentialProviderSPI> masterPasswordProviderSPI = new SPIRegistry<CredentialProviderSPI>(
-			CredentialProviderSPI.class);
-
 	private String getMasterPassword() throws CMException {
 
 		if (keystoreFile == null){
@@ -276,8 +272,9 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	}
 
 	private static List<CredentialProviderSPI> findMasterPasswordProviders() {
-		List<CredentialProviderSPI> masterPasswordProviders = masterPasswordProviderSPI
-				.getInstances();
+//		List<CredentialProviderSPI> masterPasswordProviders = masterPasswordProviderSPI
+//				.getInstances();
+		List<CredentialProviderSPI> masterPasswordProviders = new ArrayList<CredentialProviderSPI>();
 		Collections.sort(masterPasswordProviders,
 				new Comparator<CredentialProviderSPI>() {
 					public int compare(CredentialProviderSPI o1,
