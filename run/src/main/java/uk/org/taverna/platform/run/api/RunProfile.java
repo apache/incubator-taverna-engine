@@ -137,7 +137,7 @@ public class RunProfile {
 	 */
 	public Workflow getWorkflow() {
 		if (workflow == null) {
-			workflowBundle.getMainWorkflow();
+			return workflowBundle.getMainWorkflow();
 		}
 		return workflow;
 	}
@@ -166,6 +166,9 @@ public class RunProfile {
 	 *         <code>Workflow</code>
 	 */
 	public Profile getProfile() {
+		if (profile == null) {
+			return workflowBundle.getMainProfile();
+		}
 		return profile;
 	}
 
