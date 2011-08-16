@@ -22,7 +22,7 @@
 		<module>workflowmodel-api</module>
 		<module>workflowmodel-impl</module>
 		<module>workflowmodel-core-extensions</module>
-		<module>provenanceconnector</module>
+		<!-- <module>provenanceconnector</module> -->
 	</modules>
 	<repositories>
 		<repository>
