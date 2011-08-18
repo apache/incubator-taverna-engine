@@ -12,6 +12,20 @@
     <packaging>bundle</packaging>
     <name>Database storage and analysis of provenance info</name>
 
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Export-Package>net.sf.taverna.t2.provenance.*,org.openprovenance.model.*,org.tupeloproject.*</Export-Package>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 	<dependencies>
 		<dependency>
 			<groupId>net.sf.taverna.t2.core</groupId>
@@ -33,11 +47,16 @@
 			<groupId>org.jdom</groupId>
 			<artifactId>com.springsource.org.jdom</artifactId>
 		</dependency>
-        <dependency><!--check if required -->
+  		<dependency>
+			<groupId>org.apache.log4j</groupId>
+			<artifactId>com.springsource.org.apache.log4j</artifactId>
+		</dependency>
+
+        <!-- <dependency>check if required
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
             <version>${spring.version}</version>
-        </dependency>
+        </dependency> -->
 
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -96,13 +115,6 @@
             </exclusions>
         </dependency>
  -->
-
-
-		<dependency>
-			<groupId>org.apache.log4j</groupId>
-			<artifactId>com.springsource.org.apache.log4j</artifactId>
-		</dependency>
-
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
