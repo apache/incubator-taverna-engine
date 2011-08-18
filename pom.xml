@@ -14,7 +14,7 @@
 	<version>2.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<name>Taverna 2 Core</name>	
+	<name>Taverna 2 Core</name>
 	<modules>
 		<module>reference-api</module>
 		<module>reference-impl</module>
@@ -22,7 +22,7 @@
 		<module>workflowmodel-api</module>
 		<module>workflowmodel-impl</module>
 		<module>workflowmodel-core-extensions</module>
-		<!-- <module>provenanceconnector</module> -->
+		<module>provenanceconnector</module>
 	</modules>
 	<repositories>
 		<repository>

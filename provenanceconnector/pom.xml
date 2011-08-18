@@ -11,7 +11,7 @@
     <artifactId>provenanceconnector</artifactId>
     <packaging>bundle</packaging>
     <name>Database storage and analysis of provenance info</name>
-         
+
 	<dependencies>
 		<dependency>
 			<groupId>net.sf.taverna.t2.core</groupId>
@@ -28,11 +28,6 @@
 			<artifactId>workflowmodel-impl</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>net.sf.taverna.t2.infrastructure</groupId>
-			<artifactId>spi-discovery-api</artifactId>
-			<version>${t2.infrastructure.version}</version>
-		</dependency>
 
 		<dependency>
 			<groupId>org.jdom</groupId>
@@ -43,7 +38,7 @@
             <artifactId>spring-context</artifactId>
             <version>${spring.version}</version>
         </dependency>
-        
+
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>com.springsource.org.apache.commons.dbcp</artifactId>
@@ -70,28 +65,20 @@
             <version>${tupelo.version}</version>
         </dependency>
 
-        <!-- 
+        <!--
         <dependency>
             <groupId>org.openprovenance</groupId>
             <artifactId>toolbox</artifactId>
             <version>${opm.version}</version>
         </dependency>
          -->
-         <!-- 
-        <dependency>
-            <groupId>org.openprovenance</groupId>
-            <artifactId>opm-core</artifactId>
-            <version>${opm.version}</version>
-        </dependency>
-          -->
          <dependency>
             <groupId>org.openprovenance</groupId>
             <artifactId>opm-core</artifactId>
             <version>${opm.version}</version>
         </dependency>
-        
 
-<!-- 
+<!--
 
         <dependency>
             <groupId>simple-jndi</groupId>

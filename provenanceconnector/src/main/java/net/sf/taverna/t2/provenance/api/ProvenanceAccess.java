@@ -1,23 +1,23 @@
 /*******************************************************************************
- * Copyright (C) 2009 The University of Manchester   
- * 
+ * Copyright (C) 2009 The University of Manchester
+ *
  *  Modifications to the initial code base are copyright of their
  *  respective authors, or their employers as appropriate.
- * 
+ *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public License
  *  as published by the Free Software Foundation; either version 2.1 of
  *  the License, or (at your option) any later version.
- *    
+ *
  *  This program is distributed in the hope that it will be useful, but
  *  WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *    
+ *
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- *  
+ *
  ******************************************************************************/
 package net.sf.taverna.t2.provenance.api;
 
@@ -27,20 +27,17 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import net.sf.taverna.platform.spring.RavenAwareClassPathXmlApplicationContext;
 import net.sf.taverna.t2.invocation.InvocationContext;
 import net.sf.taverna.t2.invocation.impl.InvocationContextImpl;
 import net.sf.taverna.t2.provenance.ProvenanceConnectorFactory;
-import net.sf.taverna.t2.provenance.ProvenanceConnectorFactoryRegistry;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector;
-import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.ProcessorEnactmentTable;
 import net.sf.taverna.t2.provenance.lineageservice.Dependencies;
 import net.sf.taverna.t2.provenance.lineageservice.LineageQueryResultRecord;
 import net.sf.taverna.t2.provenance.lineageservice.ProvenanceAnalysis;
@@ -49,15 +46,14 @@ import net.sf.taverna.t2.provenance.lineageservice.ProvenanceWriter;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Collection;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DataLink;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DataflowInvocation;
+import net.sf.taverna.t2.provenance.lineageservice.utils.Port;
 import net.sf.taverna.t2.provenance.lineageservice.utils.PortBinding;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
-import net.sf.taverna.t2.provenance.lineageservice.utils.Port;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Workflow;
 import net.sf.taverna.t2.provenance.lineageservice.utils.WorkflowRun;
 import net.sf.taverna.t2.provenance.lineageservice.utils.WorkflowTree;
 import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.T2Reference;
-import net.sf.taverna.t2.reference.impl.T2ReferenceImpl;
 
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.log4j.Logger;
@@ -66,10 +62,10 @@ import org.springframework.context.ApplicationContext;
 /**
  * @author Paolo Missier
  * @author Stuart Owen
- * <p/>This API is the single access point into the Taverna provenance database. Its main functionality is to 
- * let clients query the content of the DB, either using dedicated methods that retrieve specific entity values from the 
- * DB, or through a more general XML-based query language. Examples of XML provenance queries can be found in the external package 
- * {@link net.sf.taverna.t2.provenance.apic.client.resources}. Class {@link net.sf.taverna.t2.provenance.api.client.ProvenanceAPISampleClient} 
+ * <p/>This API is the single access point into the Taverna provenance database. Its main functionality is to
+ * let clients query the content of the DB, either using dedicated methods that retrieve specific entity values from the
+ * DB, or through a more general XML-based query language. Examples of XML provenance queries can be found in the external package
+ * {@link net.sf.taverna.t2.provenance.apic.client.resources}. Class {@link net.sf.taverna.t2.provenance.api.client.ProvenanceAPISampleClient}
  * provides an example of API client that third parties would use to interact with this API.<br/>
  * The XML schema for the XML query language is {@code pquery.xsd} in {@link net.sf.taverna.t2.provenance.apic.client.resources}
  */
@@ -80,23 +76,26 @@ public class ProvenanceAccess {
 	ProvenanceAnalysis pa = null;
 	ProvenanceQuery pq;
 	ProvenanceWriter pw;
-	
+
 	private String connectorType;
 	private boolean computeOPMGraph;
+	private final List<ProvenanceConnectorFactory> provenanceConnectorFactories;
 
-	public ProvenanceAccess(String connectorType) {
+	public ProvenanceAccess(String connectorType, List<ProvenanceConnectorFactory> provenanceConnectorFactories) {
 		this.connectorType = connectorType;
+		this.provenanceConnectorFactories = provenanceConnectorFactories;
 		init();
 	}
-	
-	public ProvenanceAccess(String connectorType, InvocationContext context) {
+
+	public ProvenanceAccess(String connectorType, InvocationContext context, List<ProvenanceConnectorFactory> provenanceConnectorFactories) {
 		this.connectorType = connectorType;
+		this.provenanceConnectorFactories = provenanceConnectorFactories;
 		init(context);
 	}
 
 	/**
 	 * The recommended data source intitialisation method, where only a driver name and jdbc url are required.<br/>
-	 * If the driver supports multiple connections, 
+	 * If the driver supports multiple connections,
 	 * then a pool will be created of 10 min idle, 50 max idle, and 50 max active connections.
 	 *
 	 * @param driverClassName
@@ -165,7 +164,8 @@ public class ProvenanceAccess {
 	 * @param hibernateContext
 	 */
 	public InvocationContext initReferenceService(String hibernateContext) {
-		ApplicationContext appContext = new RavenAwareClassPathXmlApplicationContext(hibernateContext);
+//		ApplicationContext appContext = new RavenAwareClassPathXmlApplicationContext(hibernateContext);
+		ApplicationContext appContext = null;
 
 		final ReferenceService referenceService = (ReferenceService) appContext
 		.getBean("t2reference.service.referenceService");
@@ -189,10 +189,10 @@ public class ProvenanceAccess {
 		InvocationContext context = initDefaultReferenceService();
 		init(context);
 	}
-	
+
 	public void init(InvocationContext context) {
 
-		for (ProvenanceConnectorFactory factory : ProvenanceConnectorFactoryRegistry.getInstance().getInstances()) {
+		for (ProvenanceConnectorFactory factory : provenanceConnectorFactories) {
 			if (connectorType.equalsIgnoreCase(factory.getConnectorType())) {
 				provenanceConnector = factory.getProvenanceConnector();
 			}
@@ -202,19 +202,19 @@ public class ProvenanceAccess {
 		//slight change, the init is outside but it also means that the init call has to ensure that the dbURL
 		//is set correctly
 		provenanceConnector.init();
-		
+
 		provenanceConnector.setReferenceService(context.getReferenceService()); // CHECK context.getReferenceService());
 		provenanceConnector.setInvocationContext(context);
 
 		pa = provenanceConnector.getProvenanceAnalysis();
 		pa.setInvocationContext(context);
-		
+
 		pq = provenanceConnector.getQuery();
 		pw = provenanceConnector.getWriter();
 		pw.setQuery(pq);
-		
+
 		logger.info("using writer of type: "+pw.getClass().toString());
-		
+
 	}
 
 
@@ -249,7 +249,7 @@ public class ProvenanceAccess {
 	/**
 	 * Returns individal records from the provenance DB in response to a query that specifies
 	 * specific elements within values associated with a processor port, in the context of a specific run of a workflow.
-	 * <br/>This is used in the workbench to retrieve the "intermediate results" at various points during workflow execution, 
+	 * <br/>This is used in the workbench to retrieve the "intermediate results" at various points during workflow execution,
 	 * as opposed to a set of dependencies in response to a full-fledged provenance query.
 	 * @param workflowRunId lineage scope -- a specific instance
 	 * @param processorName for a specific processor [required]
@@ -306,21 +306,21 @@ public class ProvenanceAccess {
 		}
 	}
 
-	
+
 	public boolean isTopLevelDataflow(String workflowId)  {
 		return pq.isTopLevelDataflow(workflowId);
 	}
-	
+
 	public boolean isTopLevelDataflow(String workflowId, String workflowRunId) {
 		return pq.isTopLevelDataflow(workflowId, workflowRunId);
 	}
 
 
 	public String getLatestRunID() throws SQLException {
-		return pq.getLatestRunID();		
+		return pq.getLatestRunID();
 	}
-	
-	
+
+
 	/**
 	 * Removes all records that pertain to a specific run (but not the static specification of the workflow run)
 	 * @param runID the internal ID of a run. This can be obtained using {@link #listRuns(String, Map)}
@@ -344,14 +344,14 @@ public class ProvenanceAccess {
 		} catch (SQLException e) {
 			logger.error("Problem while removing run : " + runID, e);
 		}
-		return danglingDataRefs; 
+		return danglingDataRefs;
 	}
 
 
 	/**
 	 * removes all records pertaining to the static structure of a workflow.
-	 * 
-	 * @param workflowId the ID (not the external name) of the workflow whose static structure is to be deleted from the DB 
+	 *
+	 * @param workflowId the ID (not the external name) of the workflow whose static structure is to be deleted from the DB
 	 */
 	public void removeWorkflow(String workflowId) {
 
@@ -378,7 +378,7 @@ public class ProvenanceAccess {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * @param runID the internal ID for a specific workflow run
 	 * @return the ID of the top-level workflow that executed during the input run
@@ -402,14 +402,14 @@ public class ProvenanceAccess {
 			return null;
 		}
 	}
-	
+
 	/**
-	 * 
-	 * @return a list of {@link WorkflowRun} beans, each representing the complete description of a workflow run (note that this is 
+	 *
+	 * @return a list of {@link WorkflowRun} beans, each representing the complete description of a workflow run (note that this is
 	 * not just the ID of the run)
 	 */
 	public List<WorkflowRun> getAllWorkflowIDs() {
-		
+
 		try {
 			return pq.getRuns(null, null);
 		} catch (SQLException e) {
@@ -419,8 +419,8 @@ public class ProvenanceAccess {
 
 	}
 
-	
-	
+
+
 
 //	/ access static workflow structure
 
@@ -428,7 +428,7 @@ public class ProvenanceAccess {
 	 *
 	 * @param workflowID
 	 * @return a Map: workflowID -> [ {@ link ProvenanceProcessor} ]
-	 * Each entry in the list pertains to one composing sub-workflow 
+	 * Each entry in the list pertains to one composing sub-workflow
 	 * (if no nesting then this contains only one workflow, namely the top level one)
 	 */
 	public Map<String, List<ProvenanceProcessor>> getProcessorsInWorkflow(String workflowID) {
@@ -437,17 +437,17 @@ public class ProvenanceAccess {
 
 	public List<Collection> getCollectionsForRun(String wfInstanceID) {
 		return pq.getCollectionsForRun(wfInstanceID);
-	}	
-	
+	}
+
 	public List<PortBinding> getPortBindings(Map<String, String> constraints)
 	throws SQLException {
 		return pq.getPortBindings(constraints);
 	}
-	
+
 	/**
 	 * lists all ports for a workflow
 	 * @param workflowID
-	 * @return a list of {@link Port} beans, each representing an input or output port for the workflow 
+	 * @return a list of {@link Port} beans, each representing an input or output port for the workflow
 	 */
 	public List<Port> getPortsForDataflow(String workflowID) {
 		return pq.getPortsForDataflow(workflowID);
@@ -463,7 +463,7 @@ public class ProvenanceAccess {
 	}
 
 	/**
-	 * list all ports for a specific processor within a workflow 
+	 * list all ports for a specific processor within a workflow
 	 * @param workflowID
 	 * @param processorName
 	 * @return a list of {@link Port} beans, each representing an input or output port for the input processor
@@ -475,14 +475,14 @@ public class ProvenanceAccess {
 	// PM added 5/2010
 	public String getWorkflowNameByWorkflowID(String workflowID) {
 		Workflow w = pq.getWorkflow(workflowID);
-		
+
 		return w.getExternalName();
 	}
 
 	public WorkflowTree getWorkflowNestingStructure(String workflowID) throws SQLException {
 		return pq.getWorkflowNestingStructure(workflowID);
 	}
-	
+
 
 //	public List<ProvenanceProcessor> getSuccessors(String workflowID, String processorName, String portName) {
 //	return null; // TODO
@@ -528,7 +528,7 @@ public class ProvenanceAccess {
 	public void toggleOPMGeneration(boolean active) { pa.setGenerateOPMGraph(active); }
 
 	/**
-	 * 
+	 *
 	 * @return true if OPM is set to be generated in response to a query
 	 */
 	public boolean isOPMGenerationActive() {  return pa.isGenerateOPMGraph(); }
@@ -545,9 +545,9 @@ public class ProvenanceAccess {
 
 
 	/**
-	 * 
+	 *
 	 * @return true if the OPM graph artifacts are annotated with actual values
-	 */	
+	 */
 	public  boolean isAttachOPMArtifactValues() {
 		 return pa.isRecordArtifactValues();
 	 }
@@ -562,17 +562,17 @@ public class ProvenanceAccess {
 	public String getWorkflowIDForExternalName(String workflowName) {
 		return pq.getWorkflowIdForExternalName(workflowName);
 	}
-	 
+
 	 public List<ProvenanceProcessor> getProcessorsForWorkflowID(String workflowID) {
 		 return pq.getProcessorsForWorkflow(workflowID);
 	 }
 
 	 /**
 	  * @return the singleton {@link ProvenanceConnector} used by the API to operate on the DB. Currently we support
-	  * MySQL {@link MySQLProvenanceConnector}  and Derby {@link  DerbyProvenanceConnector} connectors. 
-	  * The set of supported connectors is extensible. The available connectors are discovered automatically by the API 
-	  * upon startup, and it includes all the connectors that are mentioned in the &lt;dependencies> section of pom.xml 
-	  * for Maven module {@code net.sf.taverna.t2.core.provenanceconnector}  
+	  * MySQL {@link MySQLProvenanceConnector}  and Derby {@link  DerbyProvenanceConnector} connectors.
+	  * The set of supported connectors is extensible. The available connectors are discovered automatically by the API
+	  * upon startup, and it includes all the connectors that are mentioned in the &lt;dependencies> section of pom.xml
+	  * for Maven module {@code net.sf.taverna.t2.core.provenanceconnector}
 	  */
 	 public ProvenanceConnector getProvenanceConnector() { return provenanceConnector; }
 
@@ -586,7 +586,7 @@ public class ProvenanceAccess {
 
 
 	/**
-	 * @return 
+	 * @return
 	 */
 	public ProvenanceAnalysis getPa() {
 		return pa;
@@ -620,7 +620,7 @@ public class ProvenanceAccess {
 			String workflowRunId, String... processorPath) {
 		return pq.getProcessorEnactments(workflowRunId, processorPath);
 	}
-	
+
 	public net.sf.taverna.t2.provenance.lineageservice.utils.ProcessorEnactment getProcessorEnactmentByProcessId(
 			String workflowRunId, String processIdentifier, String iteration) {
 		return pq.getProcessorEnactmentByProcessId(workflowRunId, processIdentifier, iteration);
@@ -632,15 +632,15 @@ public class ProvenanceAccess {
 	}
 
 	public ProvenanceProcessor getProvenanceProcessor(String workflowId, String processorNameRef) {
-		return pq.getProvenanceProcessorByName(workflowId, processorNameRef);		
+		return pq.getProvenanceProcessorByName(workflowId, processorNameRef);
 	}
 	public ProvenanceProcessor getProvenanceProcessor(String processorId) {
-		return pq.getProvenanceProcessorById(processorId);		
+		return pq.getProvenanceProcessorById(processorId);
 	}
 
 	public Map<Port, T2Reference> getDataBindings(String dataBindingId) {
 		Map<Port, String> dataBindings = pq.getDataBindings(dataBindingId);
-		
+
 		Map<Port, T2Reference> references = new HashMap<Port, T2Reference>();
 		for (Entry<Port,String> entry : dataBindings.entrySet()) {
 			T2Reference t2Ref = getProvenanceConnector().getReferenceService().referenceFromString(entry.getValue());
@@ -656,7 +656,7 @@ public class ProvenanceAccess {
 	public DataflowInvocation getDataflowInvocation(net.sf.taverna.t2.provenance.lineageservice.utils.ProcessorEnactment processorEnactment) {
 		return pq.getDataflowInvocation(processorEnactment);
 	}
-	
+
 	public List<DataflowInvocation> getDataflowInvocations(String workflowRunId) {
 		return pq.getDataflowInvocations(workflowRunId);
 	}
@@ -672,8 +672,8 @@ public class ProvenanceAccess {
 		}
 	}
 
-	
 
-	
+
+
 
 }
