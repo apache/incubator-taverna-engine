@@ -20,7 +20,7 @@
 		<scufl2.version>0.1-SNAPSHOT</scufl2.version>
 		<tycho-version>0.10.0</tycho-version>
 	</properties>
-	<build>
+	<!-- <build>
 		<plugins>
 			<plugin>
 				<groupId>org.sonatype.tycho</groupId>
@@ -38,7 +38,7 @@
 				</configuration>
 			</plugin>
 		</plugins>
-	</build>
+	</build> -->
 	<repositories>
 		<repository>
 			<releases />
