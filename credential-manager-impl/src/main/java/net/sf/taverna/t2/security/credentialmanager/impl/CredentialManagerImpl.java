@@ -527,7 +527,7 @@ public class CredentialManagerImpl implements CredentialManager,
 							Certificate certificate = javaTruststore
 									.getCertificate(alias);
 							if (certificate instanceof X509Certificate) {
-								String trustedCertAlias = createX509CertificateAlias((X509Certificate) certificate);
+								String trustedCertAlias = getX509CertificateAlias((X509Certificate) certificate);
 								truststore.setCertificateEntry(
 										trustedCertAlias, certificate);
 							}
@@ -781,7 +781,7 @@ public class CredentialManagerImpl implements CredentialManager,
 				String exMessage = "Credential Manager: Failed to get the username and password pair for service "
 						+ serviceURI + " from the Keystore.";
 				logger.error(exMessage, ex);
-				throw (new CMException(exMessage));
+				throw new CMException(exMessage, ex);
 			}
 		}
 	}
@@ -1045,7 +1045,7 @@ public class CredentialManagerImpl implements CredentialManager,
 				String exMessage = "Credential Manager: Failed to insert username and password pair for service "
 						+ serviceURL + " in the Keystore.";
 				logger.error(exMessage, ex);
-				throw (new CMException(exMessage));
+				throw new CMException(exMessage, ex);
 			}
 		}
 		
@@ -1198,7 +1198,7 @@ public class CredentialManagerImpl implements CredentialManager,
 			} catch (KeyStoreException ex) {
 				String exMessage = "Credential Manager: Failed to get aliases from the Keystore to check if it contains the given key pair.";
 				logger.error(exMessage, ex);
-				throw (new CMException(exMessage));
+				throw new CMException(exMessage, ex);
 			}
 		}
 	}
@@ -1314,7 +1314,7 @@ public class CredentialManagerImpl implements CredentialManager,
 			} catch (Exception ex) {
 				String exMessage = "Credential Manager: Failed to export the key pair from the Keystore.";
 				logger.error(exMessage, ex);
-				throw (new CMException(exMessage));
+				throw new CMException(exMessage, ex);
 			} finally {
 				if (fos != null) {
 					try {
@@ -1358,7 +1358,7 @@ public class CredentialManagerImpl implements CredentialManager,
 			String exMessage = "Credential Manager: Failed to fetch certificate from the "
 					+ ksType + ".";
 			logger.error(exMessage, ex);
-			throw (new CMException(exMessage));
+			throw new CMException(exMessage, ex);
 		}
 	}
 
@@ -1381,7 +1381,7 @@ public class CredentialManagerImpl implements CredentialManager,
 			} catch (Exception ex) {
 				String exMessage = "Credential Manager: Failed to fetch certificate chain for the keypair from the Keystore";
 				logger.error(exMessage, ex);
-				throw (new CMException(exMessage));
+				throw new CMException(exMessage, ex);
 			}
 		}
 	}
@@ -1407,7 +1407,7 @@ public class CredentialManagerImpl implements CredentialManager,
 		synchronized (truststore) {
 			// Create an alias for the new trusted certificate entry in the Truststore as
 			// "trustedcert#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<CERT_SERIAL_NUMBER>
-			alias = createX509CertificateAlias(cert);
+			alias = getX509CertificateAlias(cert);
 			try {
 				truststore.setCertificateEntry(alias, cert);
 				saveKeystore(KeystoreType.TRUSTSTORE);
@@ -1432,11 +1432,15 @@ public class CredentialManagerImpl implements CredentialManager,
 	}
 
 	/**
-	 * Create a Truststore alias for the trusted certificate as
+	 * Create a Truststore alias that would be used for adding the given 
+	 * trusted X509 certificate to the Truststore. The alias is cretaed as 
 	 * "trustedcert#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<
 	 * CERT_SERIAL_NUMBER>
+	 * 
+	 * @param cert certificate to generate the alias for
+	 * @return the alias for the given certificate
 	 */
-	public static String createX509CertificateAlias(X509Certificate cert) {
+	public String getX509CertificateAlias(X509Certificate cert) {
 		String ownerDN = cert.getSubjectX500Principal().getName(
 				X500Principal.RFC2253);
 		CMUtils util = new CMUtils();
@@ -1503,7 +1507,7 @@ public class CredentialManagerImpl implements CredentialManager,
 			
 			// We are only dealing with X509 certificates so need to cast here which is not 100% safe
 
-			alias = createX509CertificateAlias((X509Certificate)cert);
+			alias = getX509CertificateAlias((X509Certificate)cert);
 			
 			return hasEntryWithAlias(KeystoreType.TRUSTSTORE, alias);
 
@@ -1555,7 +1559,7 @@ public class CredentialManagerImpl implements CredentialManager,
 		} catch (Exception ex) {
 			String exMessage = "Credential Manager: Failed to access the key entry in the Keystore.";
 			logger.error(exMessage, ex);
-			throw (new CMException(exMessage));
+			throw new CMException(exMessage, ex);
 		}
 	}
 
@@ -1587,7 +1591,7 @@ public class CredentialManagerImpl implements CredentialManager,
 			String exMessage = "Credential Manager: Failed to delete the entry with alias "
 					+ alias + "from the " + ksType + ".";
 			logger.error(exMessage, ex);
-			throw (new CMException(exMessage));
+			throw new CMException(exMessage, ex);
 		}
 	}
 
@@ -1618,7 +1622,7 @@ public class CredentialManagerImpl implements CredentialManager,
 			String exMessage = "Credential Manager: Failed to access the "
 					+ ksType + " to check if an alias exists.";
 			logger.error(exMessage, ex);
-			throw (new CMException(exMessage));
+			throw new CMException(exMessage, ex);
 		}
 	}
 
@@ -1649,7 +1653,7 @@ public class CredentialManagerImpl implements CredentialManager,
 			String exMessage = "Credential Manager: Failed to access the "
 					+ ksType + " to get the aliases.";
 			logger.error(exMessage, ex);
-			throw new CMException(exMessage);
+			throw new CMException(exMessage, ex);
 		}
 	}
 
@@ -1712,7 +1716,7 @@ public class CredentialManagerImpl implements CredentialManager,
 		} catch (Exception ex) {
 			String exMessage = "Credential Manager: Failed to open a PKCS12-type keystore.";
 			logger.error(exMessage, ex);
-			throw (new CMException(exMessage));
+			throw new CMException(exMessage, ex);
 		}
 	}
 
@@ -1788,7 +1792,7 @@ public class CredentialManagerImpl implements CredentialManager,
 			String exMessage = "Credential Manager: Failed to save the "
 					+ ksType + ".";
 			logger.error(exMessage, ex);
-			throw (new CMException(exMessage));
+			throw new CMException(exMessage, ex);
 		} finally {
 			if (fos != null) {
 				try {
@@ -2202,7 +2206,7 @@ public class CredentialManagerImpl implements CredentialManager,
 		// method gets called twice.
 		// Well, this is not working - checkServerTrusted() is still called
 		// twice.
-		String alias = createX509CertificateAlias(chain[0]);
+		String alias = getX509CertificateAlias(chain[0]);
 		try {
 			if (truststore.containsAlias(alias)) {
 				return true;

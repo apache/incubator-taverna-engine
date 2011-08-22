@@ -29,6 +29,7 @@ import java.util.Random;
 
 import net.sf.taverna.t2.security.credentialmanager.CMException;
 import net.sf.taverna.t2.security.credentialmanager.CredentialManager;
+import net.sf.taverna.t2.security.credentialmanager.CredentialManager.KeystoreType;
 import net.sf.taverna.t2.security.credentialmanager.MasterPasswordProvider;
 import net.sf.taverna.t2.security.credentialmanager.ServiceUsernameAndPasswordProvider;
 import net.sf.taverna.t2.security.credentialmanager.UsernamePassword;
@@ -50,6 +51,9 @@ public class CredentialManagerImplTest {
 	private DummyMasterPasswordProvider masterPasswordProvider;
 	private File credentialManagerDirectory;
 	
+	private static UsernamePassword usernamePassword;
+	private static URI serviceURI;
+	
 	private static Key privateKey;
 	private static Certificate[] privateKeyCertChain;
 	private static URL privateKeyFileURL = CredentialManagerImplTest.class.getResource(
@@ -59,6 +63,7 @@ public class CredentialManagerImplTest {
 	private static X509Certificate trustedCertficate;
 	private static URL trustedCertficateFileURL = CredentialManagerImplTest.class.getResource(
 			"/security/google-trusted-certificate.pem");
+
 	
 	/**
 	 * @throws java.lang.Exception
@@ -66,6 +71,10 @@ public class CredentialManagerImplTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 
+		// Create a test username and password for a service
+		serviceURI =  new URI("http://someservice");
+		usernamePassword = new UsernamePassword("testuser", "testpasswd");
+		
 		// Load the test private key and its certificate
 		File privateKeyCertFile = new File(privateKeyFileURL.getPath());
 		KeyStore pkcs12Keystore = java.security.KeyStore.getInstance("PKCS12");
@@ -165,17 +174,14 @@ public class CredentialManagerImplTest {
 	@Test
 	public void testGetUsernameAndPasswordForServiceURI() throws URISyntaxException, CMException {
 		// The Credential Manage's Keystore is empty so we should not be able to find anything initially
-		URI serviceURI =  new URI("http://someservice");
+		assertNull(credentialManager.getUsernameAndPasswordForService(serviceURI, false, ""));
+		
+		credentialManager.addUsernameAndPasswordForService(usernamePassword,serviceURI);
+		
 		UsernamePassword testUsernamePassword = credentialManager.getUsernameAndPasswordForService(serviceURI, false, "");
-		assertNull(testUsernamePassword);
-		
-		testUsernamePassword = new UsernamePassword("testuser", "testpasswd");
-		credentialManager.addUsernameAndPasswordForService(testUsernamePassword,serviceURI);
-		
-		UsernamePassword testUsernamePassword2 = credentialManager.getUsernameAndPasswordForService(serviceURI, false, "");
-		assertNotNull(testUsernamePassword2);
-		assertTrue(Arrays.equals(testUsernamePassword.getPassword(), testUsernamePassword2.getPassword()));
-		assertTrue(testUsernamePassword.getUsername().equals(testUsernamePassword2.getUsername()));
+		assertNotNull(testUsernamePassword);
+		assertTrue(Arrays.equals(usernamePassword.getPassword(), testUsernamePassword.getPassword()));
+		assertTrue(usernamePassword.getUsername().equals(testUsernamePassword.getUsername()));
 	}
 
 	/**
@@ -185,15 +191,14 @@ public class CredentialManagerImplTest {
 	 */
 	@Test
 	public void testAddUsernameAndPasswordForService() throws CMException, URISyntaxException {
-		URI serviceURI =  new URI("http://someservice");
-		UsernamePassword testUsernamePassword = new UsernamePassword("testuser", "testpasswd");
-		String alias = credentialManager.addUsernameAndPasswordForService(testUsernamePassword,serviceURI);
+
+		String alias = credentialManager.addUsernameAndPasswordForService(usernamePassword,serviceURI);
 		
-		UsernamePassword testUsernamePassword2 = credentialManager.getUsernameAndPasswordForService(serviceURI, false, "");
-		assertNotNull(testUsernamePassword2);
+		UsernamePassword testUsernamePassword = credentialManager.getUsernameAndPasswordForService(serviceURI, false, "");
+		assertNotNull(testUsernamePassword);
 		assertTrue(credentialManager.hasEntryWithAlias(CredentialManager.KeystoreType.KEYSTORE, alias));
-		assertTrue(Arrays.equals(testUsernamePassword.getPassword(), testUsernamePassword2.getPassword()));
-		assertTrue(testUsernamePassword.getUsername().equals(testUsernamePassword2.getUsername()));
+		assertTrue(Arrays.equals(usernamePassword.getPassword(), testUsernamePassword.getPassword()));
+		assertTrue(usernamePassword.getUsername().equals(testUsernamePassword.getUsername()));
 	}
 
 	/**
@@ -203,18 +208,15 @@ public class CredentialManagerImplTest {
 	 */
 	@Test
 	public void testDeleteUsernameAndPasswordForServiceURI() throws URISyntaxException, CMException {
-		URI serviceURI =  new URI("http://someservice");
 
 		// The Credential Manage's Keystore is empty initially so this should 
 		// have no effect apart from initializing the Keystore/Truststore
 		credentialManager.deleteUsernameAndPasswordForService(serviceURI);
 		
-		UsernamePassword testUsernamePassword = new UsernamePassword("testuser", "testpasswd");
-		credentialManager.addUsernameAndPasswordForService(testUsernamePassword,serviceURI);	
+		credentialManager.addUsernameAndPasswordForService(usernamePassword,serviceURI);	
 		credentialManager.deleteUsernameAndPasswordForService(serviceURI);
 		
-		UsernamePassword testUsernamePassword2 = credentialManager.getUsernameAndPasswordForService(serviceURI, false, "");
-		assertNull(testUsernamePassword2);
+		assertNull(credentialManager.getUsernameAndPasswordForService(serviceURI, false, ""));
 	}
 
 	/**
@@ -363,66 +365,125 @@ public class CredentialManagerImplTest {
 	}
 
 	/**
-	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#createX509CertificateAlias(java.security.cert.X509Certificate)}.
+	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#getX509CertificateAlias(java.security.cert.X509Certificate)}.
+	 * @throws CMException 
 	 */
 	@Test
-	@Ignore
-	public void testCreateX509CertificateAlias() {
-		fail("Not yet implemented");
+	public void testGetX509CertificateAlias() throws CMException {
+
+		String alias = credentialManager.getX509CertificateAlias(trustedCertficate);
+		String alias2 = credentialManager.addTrustedCertificate(trustedCertficate);
+		assertEquals(alias, alias2);
+
 	}
 
 	/**
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#deleteTrustedCertificate(java.lang.String)}.
+	 * @throws CMException 
 	 */
 	@Test
-	@Ignore
-	public void testDeleteTrustedCertificate() {
-		fail("Not yet implemented");
+	public void testDeleteTrustedCertificate() throws CMException {
+		// The Credential Manage's Truststore is empty initially so this should 
+		// have no effect apart from initializing the Keystore/Truststore
+		credentialManager.deleteTrustedCertificate("somealias");
+		
+		String alias = credentialManager.addTrustedCertificate(trustedCertficate);
+		credentialManager.deleteTrustedCertificate(alias);
+		assertFalse(credentialManager.hasTrustedCertificate(trustedCertficate));
+		assertFalse(credentialManager.hasEntryWithAlias(CredentialManager.KeystoreType.TRUSTSTORE, alias));
 	}
 
 	/**
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#isKeyEntry(java.lang.String)}.
+	 * @throws CMException 
 	 */
 	@Test
-	@Ignore
-	public void testIsKeyEntry() {
-		fail("Not yet implemented");
+	public void testIsKeyEntry() throws CMException {
+		// The Credential Manage's Keystore/Truststore is empty initially so this should 
+		// have no effect apart from initializing them
+		// This should throw an exception
+		assertFalse(credentialManager.isKeyEntry("somealias"));
+
+		String aliasPassword = credentialManager.addUsernameAndPasswordForService(usernamePassword, serviceURI);
+		String aliasKeyPair = credentialManager.addKeyPair(privateKey, privateKeyCertChain);
+		String aliasTrustedCert = credentialManager.addTrustedCertificate(trustedCertficate);
+
+		assertTrue(credentialManager.isKeyEntry(aliasPassword)); // passwords are saves as symmetric key entries
+		assertTrue(credentialManager.isKeyEntry(aliasKeyPair));
+		assertFalse(credentialManager.isKeyEntry(aliasTrustedCert));
 	}
 
 	/**
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#hasEntryWithAlias(java.lang.String, java.lang.String)}.
+	 * @throws CMException 
 	 */
 	@Test
-	@Ignore
-	public void testHasEntryWithAlias() {
-		fail("Not yet implemented");
+	public void testHasEntryWithAlias() throws CMException {
+		
+		String aliasTrustedCert = credentialManager.getX509CertificateAlias(trustedCertficate);
+		assertFalse(credentialManager.hasEntryWithAlias(KeystoreType.TRUSTSTORE, aliasTrustedCert));
+		
+		String aliasTrustedCert2 = credentialManager.addTrustedCertificate(trustedCertficate);
+		assertTrue(credentialManager.hasEntryWithAlias(KeystoreType.TRUSTSTORE, aliasTrustedCert2));
 	}
 
 	/**
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#getAliases(net.sf.taverna.t2.security.credentialmanager.CredentialManager.KeystoreType)}.
+	 * @throws CMException 
 	 */
 	@Test
-	@Ignore
-	public void testGetAliases() {
-		fail("Not yet implemented");
+	public void testGetAliases() throws CMException {
+		
+		ArrayList<String> keystoreAliases = credentialManager.getAliases(KeystoreType.KEYSTORE);
+		ArrayList<String> truststoreAliases = credentialManager.getAliases(KeystoreType.TRUSTSTORE);
+		
+		// Initially Keystore/Truststore is empty
+		assertTrue(keystoreAliases.isEmpty());
+		
+		String aliasPassword = credentialManager.addUsernameAndPasswordForService(usernamePassword, serviceURI);
+		String aliasKeyPair = credentialManager.addKeyPair(privateKey, privateKeyCertChain);
+		String aliasTrustedCert = credentialManager.addTrustedCertificate(trustedCertficate);
+		
+		keystoreAliases = credentialManager.getAliases(KeystoreType.KEYSTORE);
+		truststoreAliases = credentialManager.getAliases(KeystoreType.TRUSTSTORE);
+		
+		assertTrue(keystoreAliases.size() == 2);
+		assertTrue(truststoreAliases.size() >= 1); // we at least have the one we inserted but could be more copied from Java's defauls truststore
+		
+		assertTrue(keystoreAliases.contains(aliasPassword));
+		assertTrue(keystoreAliases.contains(aliasKeyPair));
+		assertTrue(truststoreAliases.contains(aliasTrustedCert));
 	}
 
 	/**
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#getServiceURIsForAllUsernameAndPasswordPairs()}.
+	 * @throws CMException 
+	 * @throws URISyntaxException 
 	 */
 	@Test
-	@Ignore
-	public void testGetServiceURIsForAllUsernameAndPasswordPairs() {
-		fail("Not yet implemented");
+	public void testGetServiceURIsForAllUsernameAndPasswordPairs() throws CMException, URISyntaxException {
+		// Initially empty so this
+		assertTrue(credentialManager.getServiceURIsForAllUsernameAndPasswordPairs().isEmpty());
+		
+		credentialManager.addUsernameAndPasswordForService(usernamePassword, serviceURI);
+		
+		URI serviceURI2 = new URI("http://someservice2");
+		UsernamePassword usernamePassword2 = new UsernamePassword("testuser2", "testpasswd2");
+		credentialManager.addUsernameAndPasswordForService(usernamePassword2, serviceURI2);
+		
+		List<URI> serviceURIs = credentialManager.getServiceURIsForAllUsernameAndPasswordPairs();
+		assertTrue(credentialManager.getServiceURIsForAllUsernameAndPasswordPairs().size() == 2);
+		assertTrue(serviceURIs.contains(serviceURI));
+		assertTrue(serviceURIs.contains(serviceURI2));
+
 	}
 
 	/**
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#loadPKCS12Keystore(java.io.File, java.lang.String)}.
 	 */
 	@Test
-	@Ignore
 	public void testLoadPKCS12Keystore() {
-		fail("Not yet implemented");
+		//KeyStore pkcs12Keystore = credentialManager.loadPKCS12Keystore(privateKeyFileURL, pri);
 	}
 
 	/**
