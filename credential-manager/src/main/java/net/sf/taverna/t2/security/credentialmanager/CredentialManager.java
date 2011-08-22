@@ -225,6 +225,17 @@ public interface CredentialManager {
 			throws CMException;
 
 	/**
+	 * Create a Truststore alias that would be used for adding the given 
+	 * trusted X509 certificate to the Truststore. The alias is cretaed as 
+	 * "trustedcert#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<
+	 * CERT_SERIAL_NUMBER>
+	 * 
+	 * @param cert certificate to generate the alias for
+	 * @return the alias for the given certificate
+	 */
+	public String getX509CertificateAlias(X509Certificate cert);
+	
+	/**
 	 * Check if the given alias identifies a key entry in the Keystore.
 	 */
 	public boolean isKeyEntry(String alias) throws CMException;
