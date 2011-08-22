@@ -366,6 +366,7 @@ public class CredentialManagerImplTest {
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#createX509CertificateAlias(java.security.cert.X509Certificate)}.
 	 */
 	@Test
+	@Ignore
 	public void testCreateX509CertificateAlias() {
 		fail("Not yet implemented");
 	}
@@ -374,6 +375,7 @@ public class CredentialManagerImplTest {
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#deleteTrustedCertificate(java.lang.String)}.
 	 */
 	@Test
+	@Ignore
 	public void testDeleteTrustedCertificate() {
 		fail("Not yet implemented");
 	}
@@ -382,6 +384,7 @@ public class CredentialManagerImplTest {
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#isKeyEntry(java.lang.String)}.
 	 */
 	@Test
+	@Ignore
 	public void testIsKeyEntry() {
 		fail("Not yet implemented");
 	}
@@ -390,6 +393,7 @@ public class CredentialManagerImplTest {
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#hasEntryWithAlias(java.lang.String, java.lang.String)}.
 	 */
 	@Test
+	@Ignore
 	public void testHasEntryWithAlias() {
 		fail("Not yet implemented");
 	}
@@ -398,6 +402,7 @@ public class CredentialManagerImplTest {
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#getAliases(net.sf.taverna.t2.security.credentialmanager.CredentialManager.KeystoreType)}.
 	 */
 	@Test
+	@Ignore
 	public void testGetAliases() {
 		fail("Not yet implemented");
 	}
@@ -406,6 +411,7 @@ public class CredentialManagerImplTest {
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#getServiceURIsForAllUsernameAndPasswordPairs()}.
 	 */
 	@Test
+	@Ignore
 	public void testGetServiceURIsForAllUsernameAndPasswordPairs() {
 		fail("Not yet implemented");
 	}
@@ -414,6 +420,7 @@ public class CredentialManagerImplTest {
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#loadPKCS12Keystore(java.io.File, java.lang.String)}.
 	 */
 	@Test
+	@Ignore
 	public void testLoadPKCS12Keystore() {
 		fail("Not yet implemented");
 	}
@@ -422,6 +429,7 @@ public class CredentialManagerImplTest {
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#addObserver(net.sf.taverna.t2.lang.observer.Observer)}.
 	 */
 	@Test
+	@Ignore
 	public void testAddObserver() {
 		fail("Not yet implemented");
 	}
@@ -430,6 +438,7 @@ public class CredentialManagerImplTest {
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#getObservers()}.
 	 */
 	@Test
+	@Ignore
 	public void testGetObservers() {
 		fail("Not yet implemented");
 	}
@@ -438,6 +447,7 @@ public class CredentialManagerImplTest {
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#removeObserver(net.sf.taverna.t2.lang.observer.Observer)}.
 	 */
 	@Test
+	@Ignore
 	public void testRemoveObserver() {
 		fail("Not yet implemented");
 	}
@@ -446,6 +456,7 @@ public class CredentialManagerImplTest {
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#exists(java.lang.String)}.
 	 */
 	@Test
+	@Ignore
 	public void testExists() {
 		fail("Not yet implemented");
 	}
@@ -454,6 +465,7 @@ public class CredentialManagerImplTest {
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#confirmMasterPassword(java.lang.String)}.
 	 */
 	@Test
+	@Ignore
 	public void testConfirmMasterPassword() {
 		fail("Not yet implemented");
 	}
@@ -462,6 +474,7 @@ public class CredentialManagerImplTest {
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#changeMasterPassword(java.lang.String)}.
 	 */
 	@Test
+	@Ignore
 	public void testChangeMasterPassword() {
 		fail("Not yet implemented");
 	}
@@ -470,6 +483,7 @@ public class CredentialManagerImplTest {
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#initializeSSL()}.
 	 */
 	@Test
+	@Ignore
 	public void testInitializeSSL() {
 		fail("Not yet implemented");
 	}
@@ -478,6 +492,7 @@ public class CredentialManagerImplTest {
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#getTavernaSSLSocketFactory()}.
 	 */
 	@Test
+	@Ignore
 	public void testGetTavernaSSLSocketFactory() {
 		fail("Not yet implemented");
 	}
@@ -486,6 +501,7 @@ public class CredentialManagerImplTest {
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#normalizeServiceURI(java.net.URI)}.
 	 */
 	@Test
+	@Ignore
 	public void testNormalizeServiceURI() {
 		fail("Not yet implemented");
 	}
@@ -494,6 +510,7 @@ public class CredentialManagerImplTest {
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#setFragmentForURI(java.net.URI, java.lang.String)}.
 	 */
 	@Test
+	@Ignore
 	public void testSetFragmentForURI() {
 		fail("Not yet implemented");
 	}
@@ -502,6 +519,7 @@ public class CredentialManagerImplTest {
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#setUserInfoForURI(java.net.URI, java.lang.String)}.
 	 */
 	@Test
+	@Ignore
 	public void testSetUserInfoForURI() {
 		fail("Not yet implemented");
 	}
@@ -510,6 +528,7 @@ public class CredentialManagerImplTest {
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#resetAuthCache()}.
 	 */
 	@Test
+	@Ignore
 	public void testResetAuthCache() {
 		fail("Not yet implemented");
 	}
@@ -518,6 +537,7 @@ public class CredentialManagerImplTest {
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#hasUsernamePasswordForService(java.net.URI)}.
 	 */
 	@Test
+	@Ignore
 	public void testHasUsernamePasswordForService() {
 		fail("Not yet implemented");
 	}
@@ -526,6 +546,7 @@ public class CredentialManagerImplTest {
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#setConfigurationDirectoryPath(java.io.File)}.
 	 */
 	@Test
+	@Ignore
 	public void testSetConfigurationDirectoryPath() {
 		fail("Not yet implemented");
 	}
@@ -534,6 +555,7 @@ public class CredentialManagerImplTest {
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#setMasterPasswordProviders(java.util.List)}.
 	 */
 	@Test
+	@Ignore
 	public void testSetMasterPasswordProviders() {
 		fail("Not yet implemented");
 	}
@@ -542,6 +564,7 @@ public class CredentialManagerImplTest {
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#setJavaTruststorePasswordProviders(java.util.List)}.
 	 */
 	@Test
+	@Ignore
 	public void testSetJavaTruststorePasswordProviders() {
 		fail("Not yet implemented");
 	}
@@ -550,6 +573,7 @@ public class CredentialManagerImplTest {
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#setServiceUsernameAndPasswordProviders(java.util.List)}.
 	 */
 	@Test
+	@Ignore
 	public void testSetUsernameAndPasswordForServiceProviders() {
 		fail("Not yet implemented");
 	}
@@ -558,6 +582,7 @@ public class CredentialManagerImplTest {
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#setTrustConfirmationProviders(java.util.List)}.
 	 */
 	@Test
+	@Ignore
 	public void testSetTrustConfirmationProviders() {
 		fail("Not yet implemented");
 	}
