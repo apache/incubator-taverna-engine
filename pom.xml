@@ -20,6 +20,7 @@
 
 	<modules>
 		<module>credential-manager</module>
+		<module>credential-manager-impl</module>
 		<!--
 			<module>security-agents</module> <module>security-profiles</module>
 		-->
