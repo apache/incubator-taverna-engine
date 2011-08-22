@@ -17,7 +17,7 @@ public class HTTPSConnection {
 	public static void main(String[] args){
 		
 		try {
-			CredentialManager.initialiseSSL();
+			CredentialManagerOld.initialiseSSL();
 			//CredentialManager.getInstance();
 			//HttpsURLConnection.setDefaultSSLSocketFactory(CredentialManager.createTavernaSSLSocketFactory());
 			URL url = new URL ("https://rpc103.cs.man.ac.uk:8443/wsrf/services/cagrid/SecureHelloWorld?wsdl");

@@ -20,8 +20,10 @@
  ******************************************************************************/
 package net.sf.taverna.t2.security.credentialmanager;
 
+import net.sf.taverna.t2.security.credentialmanager.CredentialManager.KeystoreType;
+
 /**
- * An event given to {@link CredentialManager} observers registered using
+ * An event given to {@link CredentialManagerOld} observers registered using
  * {@link Observable#addObserver(net.sf.taverna.t2.lang.observer.Observer)}
  * to let them know the Keystore or Truststore have been changed.
  * 
@@ -30,9 +32,9 @@ package net.sf.taverna.t2.security.credentialmanager;
 public class KeystoreChangedEvent {
 	
 	// Whether the change is on the Keystore or the Truststore
-	public String keystoreType;
+	public KeystoreType keystoreType;
 	
-	public KeystoreChangedEvent(String keystoreType){
+	public KeystoreChangedEvent(KeystoreType keystoreType){
 		this.keystoreType = keystoreType;
 	}
 

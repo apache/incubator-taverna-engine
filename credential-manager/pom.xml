@@ -27,16 +27,16 @@
 	 		<artifactId>observer</artifactId>
 	 		<version>${t2.lang.version}</version>
 		</dependency>
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>com.springsource.org.bouncycastle.jce</artifactId>
 			<version>1.39.0</version>
-		</dependency>
-		<!-- <dependency>
+		</dependency> -->
+		<dependency>
 			<groupId>bouncycastle</groupId>
 			<artifactId>bcprov-jdk16</artifactId>
 			<version>${bcprov.jdk16.version}</version>
-		</dependency> -->
+		</dependency>
 		<dependency>
 			<groupId>org.apache.log4j</groupId>
 			<artifactId>com.springsource.org.apache.log4j</artifactId>

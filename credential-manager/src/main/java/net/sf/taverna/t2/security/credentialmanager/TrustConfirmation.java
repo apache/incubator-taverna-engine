@@ -38,10 +38,12 @@ public class TrustConfirmation {
 		this.shouldTrust = shouldTrust;
 	}
 
+	@Deprecated
 	public boolean isShouldSave() {
 		return shouldSave;
 	}
-
+	
+	@Deprecated
 	public void setShouldSave(boolean shouldSave) {
 		this.shouldSave = shouldSave;
 	}

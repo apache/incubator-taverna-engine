@@ -49,7 +49,7 @@ import java.security.cert.X509Certificate;
  * opinion, in which case the Credential Manager would ask a provider with a
  * lower priority that can handle the request.
  * 
- * @see CredentialManager
+ * @see CredentialManagerOld
  * @author Alex Nenadic
  * @author Stian Soiland-Reyes
  * 

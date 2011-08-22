@@ -8,13 +8,13 @@ import java.net.URISyntaxException;
 import org.apache.log4j.Logger;
 
 /**
- * Credential manager backed {@link Authenticator}.
+ * Credential Manager backed {@link Authenticator}.
  * <p>
  * Initialize by using: <code>
  * Authenticator.setDefault(new CredentialManagerAuthenticator());
  * </code>
  * <p>
- * Special case included for proxy authentication
+ * Special case included for proxy authentication.
  * 
  * @author Stian Soiland-Reyes
  * 
@@ -24,24 +24,24 @@ public class CredentialManagerAuthenticator extends Authenticator {
 	private static Logger logger = Logger
 			.getLogger(CredentialManagerAuthenticator.class);
 
-	private CredentialManager credManager;
+	private CredentialManagerOld credManager;
 
 	public CredentialManagerAuthenticator() {
 		this.setCredManager(null); // Discover when first needed
 	}
 
-	public CredentialManagerAuthenticator(CredentialManager credManager) {
+	public CredentialManagerAuthenticator(CredentialManagerOld credManager) {
 		this.setCredManager(credManager);
 	}
 
-	public void setCredManager(CredentialManager credManager) {
+	public void setCredManager(CredentialManagerOld credManager) {
 		this.credManager = credManager;
 	}
 
-	public CredentialManager getCredManager() {
+	public CredentialManagerOld getCredManager() {
 		if (credManager == null) {
 			try {
-				credManager = CredentialManager.getInstance();
+				credManager = CredentialManagerOld.getInstance();
 			} catch (CMException e) {
 				logger.warn("Could not obtain Credential Manager instance.", e);
 			}
@@ -88,7 +88,7 @@ public class CredentialManagerAuthenticator extends Authenticator {
 			uri = URI.create("socket://" + host + ":" + port);
 		}
 
-		CredentialManager cm = getCredManager();
+		CredentialManagerOld cm = getCredManager();
 		if (cm == null) {
 			logger.warn("No credential manager");
 			return null;
