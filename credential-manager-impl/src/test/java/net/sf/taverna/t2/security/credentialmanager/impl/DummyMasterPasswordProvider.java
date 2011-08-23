@@ -24,14 +24,21 @@ import net.sf.taverna.t2.security.credentialmanager.MasterPasswordProvider;
 
 public class DummyMasterPasswordProvider implements MasterPasswordProvider{
 
+	String masterPassword;
+	
 	@Override
 	public String getMasterPassword(boolean firstTime) {
-		return "uber";
+		return masterPassword;
 	}
 
 	@Override
 	public int getProviderPriority() {
 		return 0;
+	}
+	
+	@Override
+	public void setMasterPassword(String password) {
+		masterPassword = password;
 	}
 	
 }

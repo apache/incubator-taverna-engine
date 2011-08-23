@@ -40,5 +40,11 @@ public class AskUserMasterPasswordProvider implements MasterPasswordProvider{
 	public int getProviderPriority() {
 		return 100;
 	}
+
+	@Override
+	public void setMasterPassword(String password) {
+		// TODO Auto-generated method stub
+		
+	}
 	
 }

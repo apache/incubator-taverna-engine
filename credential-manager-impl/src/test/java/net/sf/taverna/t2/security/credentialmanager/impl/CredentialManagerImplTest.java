@@ -1,6 +1,23 @@
-/**
+/*******************************************************************************
+ * Copyright (C) 2008-2010 The University of Manchester   
  * 
- */
+ *  Modifications to the initial code base are copyright of their
+ *  respective authors, or their employers as appropriate.
+ * 
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public License
+ *  as published by the Free Software Foundation; either version 2.1 of
+ *  the License, or (at your option) any later version.
+ *    
+ *  This program is distributed in the hope that it will be useful, but
+ *  WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *    
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ ******************************************************************************/
 package net.sf.taverna.t2.security.credentialmanager.impl;
 
 import static org.junit.Assert.*;
@@ -16,6 +33,7 @@ import java.security.Key;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.Security;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -27,14 +45,18 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Random;
 
+import net.sf.taverna.t2.lang.observer.Observable;
+import net.sf.taverna.t2.lang.observer.Observer;
 import net.sf.taverna.t2.security.credentialmanager.CMException;
 import net.sf.taverna.t2.security.credentialmanager.CredentialManager;
 import net.sf.taverna.t2.security.credentialmanager.CredentialManager.KeystoreType;
+import net.sf.taverna.t2.security.credentialmanager.KeystoreChangedEvent;
 import net.sf.taverna.t2.security.credentialmanager.MasterPasswordProvider;
 import net.sf.taverna.t2.security.credentialmanager.ServiceUsernameAndPasswordProvider;
 import net.sf.taverna.t2.security.credentialmanager.UsernamePassword;
 
 import org.apache.commons.io.FileUtils;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -42,7 +64,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 /**
- * @author alex
+ * @author Alex Nenadic
  *
  */
 public class CredentialManagerImplTest {
@@ -58,7 +80,7 @@ public class CredentialManagerImplTest {
 	private static Certificate[] privateKeyCertChain;
 	private static URL privateKeyFileURL = CredentialManagerImplTest.class.getResource(
 			"/security/test-private-key-cert.p12");
-	private static final String privateKeyAndPKCS12KeystorePassword = "testcert";
+	private static final String privateKeyAndPKCS12KeystorePassword = "test"; // password for the test PKCS#12 keystore in resources
 	
 	private static X509Certificate trustedCertficate;
 	private static URL trustedCertficateFileURL = CredentialManagerImplTest.class.getResource(
@@ -70,6 +92,11 @@ public class CredentialManagerImplTest {
 	 */
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
+		
+		// Just in case, add the BouncyCastle provider
+		// It gets added from the CredentialManagerImpl constructor as well
+		// but we may need some crypto operations before we invoke the Cred. Manager 
+		Security.addProvider(new BouncyCastleProvider());
 
 		// Create a test username and password for a service
 		serviceURI =  new URI("http://someservice");
@@ -77,7 +104,7 @@ public class CredentialManagerImplTest {
 		
 		// Load the test private key and its certificate
 		File privateKeyCertFile = new File(privateKeyFileURL.getPath());
-		KeyStore pkcs12Keystore = java.security.KeyStore.getInstance("PKCS12");
+		KeyStore pkcs12Keystore = java.security.KeyStore.getInstance("PKCS12", "BC"); // We have to use the BC provider here as the certificate chain is not loaded if we use whichever provider is first in Java!!!
 		FileInputStream inStream = new FileInputStream(privateKeyCertFile);
 		pkcs12Keystore.load(inStream, privateKeyAndPKCS12KeystorePassword.toCharArray());
 		// KeyStore pkcs12Keystore = credentialManager.loadPKCS12Keystore(privateKeyCertFile, privateKeyPassword);
@@ -87,8 +114,9 @@ public class CredentialManagerImplTest {
 			// and corresponding certificate entry
 			String alias = aliases.nextElement();
 			if (pkcs12Keystore.isKeyEntry(alias)) { // is it a (private) key entry?
+				System.out.println(alias);
 				privateKey = pkcs12Keystore.getKey(alias,
-						"testcert".toCharArray());
+						privateKeyAndPKCS12KeystorePassword.toCharArray());
 				privateKeyCertChain = pkcs12Keystore.getCertificateChain(alias);
 				break;
 			}
@@ -132,6 +160,7 @@ public class CredentialManagerImplTest {
 
 		// Create the dummy master password provider
 		masterPasswordProvider = new DummyMasterPasswordProvider();
+		masterPasswordProvider.setMasterPassword("uber");
 		List<MasterPasswordProvider> masterPasswordProviders = new ArrayList<MasterPasswordProvider>();
 		masterPasswordProviders.add(masterPasswordProvider);
 		credentialManager.setMasterPasswordProviders(masterPasswordProviders);
@@ -480,28 +509,61 @@ public class CredentialManagerImplTest {
 
 	/**
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#loadPKCS12Keystore(java.io.File, java.lang.String)}.
+	 * @throws CMException 
+	 * @throws KeyStoreException 
+	 * @throws NoSuchAlgorithmException 
+	 * @throws UnrecoverableKeyException 
 	 */
 	@Test
-	public void testLoadPKCS12Keystore() {
-		//KeyStore pkcs12Keystore = credentialManager.loadPKCS12Keystore(privateKeyFileURL, pri);
+	public void testLoadPKCS12Keystore() throws CMException, KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException {
+		KeyStore pkcs12Keystore = credentialManager.loadPKCS12Keystore(new File(privateKeyFileURL.getPath()), privateKeyAndPKCS12KeystorePassword);
+		
+		Key privateKey2 = null;
+		Certificate[] privateKeyCertChain2 = null;
+		
+		Enumeration<String> aliases = pkcs12Keystore.aliases();
+		while (aliases.hasMoreElements()) {
+			// The test-private-key-cert.p12 file contains only one private key
+			// and corresponding certificate entry
+			String alias = aliases.nextElement();
+			if (pkcs12Keystore.isKeyEntry(alias)) { // is it a (private) key entry?
+				privateKey2 = pkcs12Keystore.getKey(alias,
+						privateKeyAndPKCS12KeystorePassword.toCharArray());
+				privateKeyCertChain2 = pkcs12Keystore.getCertificateChain(alias);
+				break;
+			}
+		}
+		assertNotNull(privateKey2);
+		assertNotNull(privateKeyCertChain2);
 	}
-
+	
 	/**
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#addObserver(net.sf.taverna.t2.lang.observer.Observer)}.
 	 */
 	@Test
-	@Ignore
 	public void testAddObserver() {
-		fail("Not yet implemented");
+		Observer<KeystoreChangedEvent> observer = new Observer<KeystoreChangedEvent>() {
+			
+			@Override
+			public void notify(Observable<KeystoreChangedEvent> sender,
+					KeystoreChangedEvent message) throws Exception {
+				// TODO Auto-generated method stub
+				
+			}
+		};
+		
+		credentialManager.addObserver(observer);
+		
+		assertEquals(observer, credentialManager.getObservers().get(0));
 	}
 
 	/**
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#getObservers()}.
 	 */
 	@Test
-	@Ignore
 	public void testGetObservers() {
-		fail("Not yet implemented");
+		// Initially there are no observers
+		assertTrue(credentialManager.getObservers().isEmpty());
 	}
 
 	/**
