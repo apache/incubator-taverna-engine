@@ -1751,18 +1751,18 @@ public class CredentialManagerImpl implements CredentialManager,
 //		return isInitialized;
 //	}
 
-	/**
-	 * Check if Keystore/Truststore file already exists on disk.
-	 */
-	public boolean exists(KeystoreType ksType) {
-
-		if (ksType.equals(KeystoreType.KEYSTORE))
-			return keystoreFile.exists();
-		else if (ksType.equals(KeystoreType.TRUSTSTORE)) {
-			return truststoreFile.exists();
-		} else
-			return false;
-	}
+//	/**
+//	 * Check if Keystore/Truststore file already exists on disk.
+//	 */
+//	private boolean exists(KeystoreType ksType) {
+//
+//		if (ksType.equals(KeystoreType.KEYSTORE))
+//			return keystoreFile.exists();
+//		else if (ksType.equals(KeystoreType.TRUSTSTORE)) {
+//			return truststoreFile.exists();
+//		} else
+//			return false;
+//	}
 
 	/**
 	 * Save the Keystore back to the file it was originally loaded from.
@@ -2472,6 +2472,18 @@ public class CredentialManagerImpl implements CredentialManager,
 			List<MasterPasswordProvider> masterPasswordProviders) {
 		this.masterPasswordProviders = masterPasswordProviders;
 	}
+	
+	/**
+	 * Get the master password providers for providing the master password to
+	 * encrypt/decrypt the Credential Maager's Keystore and Truststore.
+	 * 
+	 * @return the master password providers for providing the master password to
+	 * encrypt/decrypt the Credential Maager's Keystore and Truststore.
+	 * 
+	 */
+	public List<MasterPasswordProvider> getMasterPasswordProviders(){
+		return masterPasswordProviders;
+	}
 
 	/**
 	 * Set the Java truststore password providers for providing the password to
@@ -2483,7 +2495,18 @@ public class CredentialManagerImpl implements CredentialManager,
 			List<JavaTruststorePasswordProvider> javaTruststorePasswordProvider) {
 		this.javaTruststorePasswordProviders = javaTruststorePasswordProvider;
 	}
-
+	
+	/**
+	 * Get the Java truststore password providers for providing the password to
+	 * encrypt/decrypt the Java's default truststore.
+	 * 
+	 * @return Java truststore providers for providing the password to
+	 * encrypt/decrypt the Java's default truststore
+	 */
+	public List<JavaTruststorePasswordProvider> getJavaTruststorePasswordProviders(){
+		return javaTruststorePasswordProviders;
+	}
+	
 	/**
 	 * Set the providers of username and passwords for services.
 	 * <p>
@@ -2495,7 +2518,17 @@ public class CredentialManagerImpl implements CredentialManager,
 	}
 
 	/**
+	 * Get the providers of username and passwords for services.
 	 * 
+	 * @return the providers of username and passwords for services.
+	 *
+	 */
+	public List<ServiceUsernameAndPasswordProvider> getServiceUsernameAndPasswordProviders(){
+		return serviceUsernameAndPasswordProviders;
+	}	
+	
+	/**
+	 * Set the providers of trust confirmation for HTTPS connections to external services/sites.
 	 * <p>
 	 * This is done through the Spring DM.
 	 */
@@ -2503,4 +2536,14 @@ public class CredentialManagerImpl implements CredentialManager,
 			List<TrustConfirmationProvider> trustConfirmationProviders) {
 		this.trustConfirmationProviders = trustConfirmationProviders;
 	}
+	
+	/**
+	 * Get the providers of trust confirmation for HTTPS connections to external services/sites
+	 * 
+	 * @return the providers of trust confirmation for HTTPS connections to external services/sites
+	 *
+	 */
+	public List<TrustConfirmationProvider> getTrustConfirmationProvider(){
+		return trustConfirmationProviders;
+	}	
 }

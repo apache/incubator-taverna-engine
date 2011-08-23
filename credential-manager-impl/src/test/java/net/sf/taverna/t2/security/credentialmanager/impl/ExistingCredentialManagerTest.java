@@ -11,6 +11,7 @@ import java.util.List;
 import net.sf.taverna.t2.security.credentialmanager.CMException;
 import net.sf.taverna.t2.security.credentialmanager.MasterPasswordProvider;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class ExistingCredentialManagerTest {
@@ -19,6 +20,7 @@ public class ExistingCredentialManagerTest {
 	private File credentialManagerDirectory;
 	
 	@Test
+	@Ignore
 	// Tests an existing Credential Manager/keystores
 	public void testExtistingCredentialManager(){
 		

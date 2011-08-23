@@ -26,9 +26,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.security.Key;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -45,14 +48,19 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Random;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLPeerUnverifiedException;
+
 import net.sf.taverna.t2.lang.observer.Observable;
 import net.sf.taverna.t2.lang.observer.Observer;
 import net.sf.taverna.t2.security.credentialmanager.CMException;
 import net.sf.taverna.t2.security.credentialmanager.CredentialManager;
 import net.sf.taverna.t2.security.credentialmanager.CredentialManager.KeystoreType;
+import net.sf.taverna.t2.security.credentialmanager.JavaTruststorePasswordProvider;
 import net.sf.taverna.t2.security.credentialmanager.KeystoreChangedEvent;
 import net.sf.taverna.t2.security.credentialmanager.MasterPasswordProvider;
 import net.sf.taverna.t2.security.credentialmanager.ServiceUsernameAndPasswordProvider;
+import net.sf.taverna.t2.security.credentialmanager.TrustConfirmationProvider;
 import net.sf.taverna.t2.security.credentialmanager.UsernamePassword;
 
 import org.apache.commons.io.FileUtils;
@@ -64,6 +72,18 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 /**
+ * Tests here should not require Java strong/unlimited cryptography policy to be installed, 
+ * although if something goes wrong that is the first thing to be checked for.
+ * 
+ * Java by default comes with the weak policy 
+ * that disables the use of certain cryto algorithms and bigger key sizes. Although 
+ * it is claimed that as of Java 6 the default policy is strong, we have seen otherwise, 
+ * so make sure you install it.
+ * 
+ * For Java 6, strong/unlimited cryptography policy can be downloaded 
+ * (together with the installation instructions) from:
+ * http://www.oracle.com/technetwork/java/javase/downloads/jce-6-download-429243.html
+ * 
  * @author Alex Nenadic
  *
  */
@@ -86,6 +106,7 @@ public class CredentialManagerImplTest {
 	private static URL trustedCertficateFileURL = CredentialManagerImplTest.class.getResource(
 			"/security/google-trusted-certificate.pem");
 
+	private static Observer<KeystoreChangedEvent> keystoreChangedObserver;
 	
 	/**
 	 * @throws java.lang.Exception
@@ -114,7 +135,6 @@ public class CredentialManagerImplTest {
 			// and corresponding certificate entry
 			String alias = aliases.nextElement();
 			if (pkcs12Keystore.isKeyEntry(alias)) { // is it a (private) key entry?
-				System.out.println(alias);
 				privateKey = pkcs12Keystore.getKey(alias,
 						privateKeyAndPKCS12KeystorePassword.toCharArray());
 				privateKeyCertChain = pkcs12Keystore.getCertificateChain(alias);
@@ -128,7 +148,23 @@ public class CredentialManagerImplTest {
 		inStream = new FileInputStream(trustedCertFile);
 		CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
 		trustedCertficate = (X509Certificate) certFactory.generateCertificate(inStream);
-		inStream.close();
+		try{
+			inStream.close();
+		}
+		catch (Exception e) {
+			// Ignore
+		}
+		
+		keystoreChangedObserver = new Observer<KeystoreChangedEvent>() {
+			
+			@Override
+			public void notify(Observable<KeystoreChangedEvent> sender,
+					KeystoreChangedEvent message) throws Exception {
+				// TODO Auto-generated method stub
+				
+			}
+		};
+		
 	}
 
 	/**
@@ -167,6 +203,11 @@ public class CredentialManagerImplTest {
 		
 		// Set an empty list for service username and password providers
 		credentialManager.setServiceUsernameAndPasswordProviders(new ArrayList<ServiceUsernameAndPasswordProvider>());
+
+		credentialManager.setJavaTruststorePasswordProviders(new ArrayList<JavaTruststorePasswordProvider>());
+
+		credentialManager.setTrustConfirmationProviders(new ArrayList<TrustConfirmationProvider>());
+
 	}
 
 	@After
@@ -542,19 +583,9 @@ public class CredentialManagerImplTest {
 	 */
 	@Test
 	public void testAddObserver() {
-		Observer<KeystoreChangedEvent> observer = new Observer<KeystoreChangedEvent>() {
-			
-			@Override
-			public void notify(Observable<KeystoreChangedEvent> sender,
-					KeystoreChangedEvent message) throws Exception {
-				// TODO Auto-generated method stub
-				
-			}
-		};
-		
-		credentialManager.addObserver(observer);
-		
-		assertEquals(observer, credentialManager.getObservers().get(0));
+
+		credentialManager.addObserver(keystoreChangedObserver);
+		assertEquals(keystoreChangedObserver, credentialManager.getObservers().get(0));
 	}
 
 	/**
@@ -564,42 +595,40 @@ public class CredentialManagerImplTest {
 	public void testGetObservers() {
 		// Initially there are no observers
 		assertTrue(credentialManager.getObservers().isEmpty());
+
+		credentialManager.addObserver(keystoreChangedObserver);
+		
+		assertEquals(keystoreChangedObserver, credentialManager.getObservers().get(0));	
 	}
 
 	/**
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#removeObserver(net.sf.taverna.t2.lang.observer.Observer)}.
 	 */
 	@Test
-	@Ignore
 	public void testRemoveObserver() {
-		fail("Not yet implemented");
-	}
-
-	/**
-	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#exists(java.lang.String)}.
-	 */
-	@Test
-	@Ignore
-	public void testExists() {
-		fail("Not yet implemented");
+		credentialManager.addObserver(keystoreChangedObserver);
+		assertTrue(credentialManager.getObservers().size() == 1);	
+		credentialManager.removeObserver(keystoreChangedObserver);
+		assertTrue(credentialManager.getObservers().size() == 0);	
 	}
 
 	/**
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#confirmMasterPassword(java.lang.String)}.
+	 * @throws CMException 
 	 */
 	@Test
-	@Ignore
-	public void testConfirmMasterPassword() {
-		fail("Not yet implemented");
+	public void testConfirmMasterPassword() throws CMException {
+		credentialManager.confirmMasterPassword("uber");
 	}
 
 	/**
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#changeMasterPassword(java.lang.String)}.
+	 * @throws CMException 
 	 */
 	@Test
-	@Ignore
-	public void testChangeMasterPassword() {
-		fail("Not yet implemented");
+	public void testChangeMasterPassword() throws CMException {
+		credentialManager.changeMasterPassword("blah");
+		credentialManager.confirmMasterPassword("blah");
 	}
 
 	/**
@@ -678,11 +707,37 @@ public class CredentialManagerImplTest {
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#setMasterPasswordProviders(java.util.List)}.
 	 */
 	@Test
-	@Ignore
 	public void testSetMasterPasswordProviders() {
-		fail("Not yet implemented");
+		
+		List<MasterPasswordProvider> masterPasswordProviders = new ArrayList<MasterPasswordProvider>();
+		masterPasswordProviders.add(masterPasswordProvider);
+		
+		// Let's see if it is throwing an exception
+		credentialManager.setMasterPasswordProviders(masterPasswordProviders);
+		
+		assertFalse(credentialManager.getMasterPasswordProviders().isEmpty());
+		assertTrue(credentialManager.getMasterPasswordProviders().contains(masterPasswordProvider));
+		
+		// Set it to null and see what happens
+		credentialManager.setMasterPasswordProviders(null);		
+		assertNull(credentialManager.getMasterPasswordProviders());		
+		
 	}
 
+	/**
+	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#getMasterPasswordProviders()}.
+	 */
+	@Test
+	public void testGetMasterPasswordProviders() {
+		
+		// Let's see if it is throwing an exception
+		credentialManager.getMasterPasswordProviders();
+		
+		assertFalse(credentialManager.getMasterPasswordProviders().isEmpty());
+		assertTrue(credentialManager.getMasterPasswordProviders().contains(masterPasswordProvider));
+		
+	}
+	
 	/**
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#setJavaTruststorePasswordProviders(java.util.List)}.
 	 */
@@ -703,11 +758,20 @@ public class CredentialManagerImplTest {
 
 	/**
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#setTrustConfirmationProviders(java.util.List)}.
+	 * @throws IOException 
 	 */
 	@Test
 	@Ignore
-	public void testSetTrustConfirmationProviders() {
-		fail("Not yet implemented");
+	public void testSetTrustConfirmationProviders() throws IOException {
+		List<TrustConfirmationProvider> trustProviders = new ArrayList<TrustConfirmationProvider>();
+		trustProviders.add(new TrustAlwaysConfirmationProvider());
+		credentialManager.setTrustConfirmationProviders(trustProviders);
+		
+		URL url = new URL("https://code.google.com/p/taverna/");
+		HttpsURLConnection conn;
+		conn = (HttpsURLConnection) url.openConnection();
+		int  contentLength = conn.getContentLength();
+		assertTrue(contentLength > 0);
+		conn.disconnect();
 	}
-
 }

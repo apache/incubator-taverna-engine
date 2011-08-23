@@ -58,10 +58,14 @@ import org.junit.Test;
  * Tests here require Java strong/unlimited cryptography policy to be installed
  * so they are part of integration tests.
  * 
- * Java strong/unlimited cryptography policy is required to use Credential Manager and
- * use the full security capabilities in Taverna. 
+ * Java strong/unlimited cryptography policy is required to use the Credential Manager and
+ * the full security capabilities in Taverna. Java by default comes with the weak policy 
+ * that disables the use of certain cryto algorithms and bigger key sizes. Although 
+ * it is claimed that as of Java 6 the default policy is strong, we have seen otherwise, 
+ * so make sure you install it.
  * 
- * For Java 6, you can get it (together with the installation instructions) from:
+ * For Java 6, strong/unlimited cryptography policy can be downloaded 
+ * (together with the installation instructions) from:
  * http://www.oracle.com/technetwork/java/javase/downloads/jce-6-download-429243.html
  * 
  * @author Alex Nenadic
