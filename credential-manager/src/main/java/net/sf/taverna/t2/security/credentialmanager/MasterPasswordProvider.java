@@ -64,6 +64,12 @@ public interface MasterPasswordProvider {
 	 *         cancelled, etc.)
 	 */
 	public String getMasterPassword(boolean firstTime);
+	
+	/**
+	 * Set the master password.
+	 * @param password to set
+	 */
+	public void setMasterPassword(String password);
 
 	/**
 	 * Priority of this provider.
