@@ -12,7 +12,7 @@
 	<artifactId>credential-manager-impl</artifactId>
 	<packaging>bundle</packaging>
 	<name>Credential Manager Implementation</name>
-	<build>
+	<!-- <build>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.felix</groupId>
@@ -20,12 +20,12 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Export-Package>net.sf.taverna.t2.security.credentialmanager,org.bouncycastle.*</Export-Package>
+						<Export-Package>org.bouncycastle.*</Export-Package>
 					</instructions>
 				</configuration>
 			</plugin>
 		</plugins>
-	</build>
+	</build> -->
 	<dependencies>
 		<dependency>
 			<groupId>net.sf.taverna.t2.security</groupId>
@@ -42,16 +42,16 @@
 			<artifactId>observer</artifactId>
 			<version>${t2.lang.version}</version>
 		</dependency>
-		<!-- <dependency>
+		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>com.springsource.org.bouncycastle.jce</artifactId>
 			<version>1.39.0</version>
-		</dependency> -->
-		<dependency>
+		</dependency>
+		<!-- <dependency>
 			<groupId>bouncycastle</groupId>
 			<artifactId>bcprov-jdk16</artifactId>
 			<version>${bcprov.jdk16.version}</version>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>org.apache.log4j</groupId>
 			<artifactId>com.springsource.org.apache.log4j</artifactId>
