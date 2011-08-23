@@ -9,14 +9,9 @@
 	</parent>
 	<groupId>net.sf.taverna.t2.security</groupId>
 	<artifactId>credential-manager</artifactId>
-	<name>Credential manager</name>
 	<packaging>bundle</packaging>
+	<name>Credential manager</name>
 	<dependencies>
-		<!-- <dependency>
-			<groupId>net.sf.taverna.t2.infrastructure</groupId>
-			<artifactId>spi-discovery-api</artifactId>
-			<version>${t2.infrastructure.version}</version>
-		</dependency> -->
 		<dependency>
 			<groupId>net.sf.taverna.t2.infrastructure</groupId>
 			<artifactId>appconfig</artifactId>
@@ -57,7 +52,7 @@
 			<artifactId>jetty</artifactId>
 			<version>${jetty.version}</version>
 			<scope>test</scope>
-		</dependency>		
+		</dependency>
 	</dependencies>
 	<repositories>
 		<repository>
