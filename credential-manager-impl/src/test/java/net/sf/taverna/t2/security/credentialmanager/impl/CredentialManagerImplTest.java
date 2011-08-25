@@ -362,6 +362,18 @@ public class CredentialManagerImplTest {
 		credentialManager.deleteKeyPair(alias);
 		assertFalse(credentialManager.hasEntryWithAlias(CredentialManager.KeystoreType.KEYSTORE, alias));
 	}
+	
+	/**
+	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#deleteKeyPair(Key, Certificate[])}.
+	 * @throws CMException 
+	 */
+	@Test
+	public void testDeleteKeyPair2() throws CMException, KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException, CertificateException, FileNotFoundException, IOException {
+		credentialManager.addKeyPair(privateKey, privateKeyCertChain);
+		assertTrue(credentialManager.hasKeyPair(privateKey, privateKeyCertChain));
+		credentialManager.deleteKeyPair(privateKey, privateKeyCertChain);
+		assertFalse(credentialManager.hasKeyPair(privateKey, privateKeyCertChain));
+	}
 
 	/**
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#exportKeyPair(java.lang.String, java.io.File, java.lang.String)}.
@@ -449,13 +461,13 @@ public class CredentialManagerImplTest {
 	}
 
 	/**
-	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#getX509CertificateAlias(java.security.cert.X509Certificate)}.
+	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#createTrustedCertificateAlias(java.security.cert.X509Certificate)}.
 	 * @throws CMException 
 	 */
 	@Test
 	public void testGetX509CertificateAlias() throws CMException {
 
-		String alias = credentialManager.getX509CertificateAlias(trustedCertficate);
+		String alias = credentialManager.createTrustedCertificateAlias(trustedCertficate);
 		String alias2 = credentialManager.addTrustedCertificate(trustedCertficate);
 		assertEquals(alias, alias2);
 
@@ -472,9 +484,23 @@ public class CredentialManagerImplTest {
 		credentialManager.deleteTrustedCertificate("somealias");
 		
 		String alias = credentialManager.addTrustedCertificate(trustedCertficate);
+		assertTrue(credentialManager.hasEntryWithAlias(CredentialManager.KeystoreType.TRUSTSTORE, alias));
 		credentialManager.deleteTrustedCertificate(alias);
 		assertFalse(credentialManager.hasTrustedCertificate(trustedCertficate));
 		assertFalse(credentialManager.hasEntryWithAlias(CredentialManager.KeystoreType.TRUSTSTORE, alias));
+	}
+	
+	/**
+	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#deleteTrustedCertificate(X509Certificate)}.
+	 * @throws CMException 
+	 */
+	@Test
+	public void testDeleteTrustedCertificate2() throws CMException {
+
+		credentialManager.addTrustedCertificate(trustedCertficate);
+		assertTrue(credentialManager.hasTrustedCertificate(trustedCertficate));
+		credentialManager.deleteTrustedCertificate(trustedCertficate);
+		assertFalse(credentialManager.hasTrustedCertificate(trustedCertficate));
 	}
 
 	/**
@@ -504,7 +530,7 @@ public class CredentialManagerImplTest {
 	@Test
 	public void testHasEntryWithAlias() throws CMException {
 		
-		String aliasTrustedCert = credentialManager.getX509CertificateAlias(trustedCertficate);
+		String aliasTrustedCert = credentialManager.createTrustedCertificateAlias(trustedCertficate);
 		assertFalse(credentialManager.hasEntryWithAlias(KeystoreType.TRUSTSTORE, aliasTrustedCert));
 		
 		String aliasTrustedCert2 = credentialManager.addTrustedCertificate(trustedCertficate);

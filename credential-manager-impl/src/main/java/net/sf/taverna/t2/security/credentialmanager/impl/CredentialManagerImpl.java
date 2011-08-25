@@ -529,7 +529,7 @@ public class CredentialManagerImpl implements CredentialManager,
 							Certificate certificate = javaTruststore
 									.getCertificate(alias);
 							if (certificate instanceof X509Certificate) {
-								String trustedCertAlias = getX509CertificateAlias((X509Certificate) certificate);
+								String trustedCertAlias = createTrustedCertificateAlias((X509Certificate) certificate);
 								truststore.setCertificateEntry(
 										trustedCertAlias, certificate);
 							}
@@ -1167,42 +1167,12 @@ public class CredentialManagerImpl implements CredentialManager,
 	public boolean hasKeyPair(Key privateKey, Certificate[] certs)
 			throws CMException {
 
-		// Need to make sure we are initialized before we do anything else
-		// as Credential Manager can be created but not initialized
-		initialize();
+		// Create an alias for the new key pair entry in the Keystore as
+		// "keypair#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<CERT_SERIAL_NUMBER>
 
-		synchronized (keystore) {
-			// Create an alias for the new key pair entry in the Keystore
-			// as
-			// "keypair#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<CERT_SERIAL_NUMBER>
-			String ownerDN = ((X509Certificate) certs[0])
-					.getSubjectX500Principal().getName(X500Principal.RFC2253);
-			CMUtils util = new CMUtils();
-			util.parseDN(ownerDN);
-			String ownerCN = util.getCN(); // owner's common name
+		String alias = createKeyPairAlias(privateKey, certs);
+		return hasEntryWithAlias(KeystoreType.KEYSTORE, alias);
 
-			// Get the hexadecimal representation of the certificate's serial
-			// number
-			String serialNumber = new BigInteger(1,
-					((X509Certificate) certs[0]).getSerialNumber()
-							.toByteArray()).toString(16).toUpperCase();
-
-			String issuerDN = ((X509Certificate) certs[0])
-					.getIssuerX500Principal().getName(X500Principal.RFC2253);
-			util.parseDN(issuerDN);
-			String issuerCN = util.getCN(); // issuer's common name
-
-			String alias = "keypair#" + ownerCN + "#" + issuerCN + "#"
-					+ serialNumber;
-
-			try {
-				return keystore.containsAlias(alias);
-			} catch (KeyStoreException ex) {
-				String exMessage = "Credential Manager: Failed to get aliases from the Keystore to check if it contains the given key pair.";
-				logger.error(exMessage, ex);
-				throw new CMException(exMessage, ex);
-			}
-		}
 	}
 
 	/**
@@ -1215,33 +1185,6 @@ public class CredentialManagerImpl implements CredentialManager,
 		// as Credential Manager can be created but not initialized
 		initialize();
 
-		// TODO: We are passing alias for now but we want to be passing
-		// the private key and its public key certificate.
-
-		// // Create an alias for the new key pair entry in the Keystore
-		// // as
-		// "keypair#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<CERT_SERIAL_NUMBER>
-		// String ownerDN = ((X509Certificate)
-		// certs[0]).getSubjectX500Principal()
-		// .getName(X500Principal.RFC2253);
-		// CMX509Util util = new CMX509Util();
-		// util.parseDN(ownerDN);
-		// String ownerCN = util.getCN(); // owner's common name
-		//
-		// // Get the hexadecimal representation of the certificate's serial
-		// number
-		// String serialNumber = new BigInteger(1, ((X509Certificate) certs[0])
-		// .getSerialNumber().toByteArray()).toString(16)
-		// .toUpperCase();
-		//
-		// String issuerDN = ((X509Certificate)
-		// certs[0]).getIssuerX500Principal()
-		// .getName(X500Principal.RFC2253);
-		// util.parseDN(issuerDN);
-		// String issuerCN = util.getCN(); // issuer's common name
-		//
-		// String alias = "keypair#" + ownerCN + "#" + issuerCN + "#" +
-		// serialNumber;
 		synchronized (keystore) {
 			deleteEntry(KeystoreType.KEYSTORE, alias);
 			saveKeystore(KeystoreType.KEYSTORE);
@@ -1257,6 +1200,17 @@ public class CredentialManagerImpl implements CredentialManager,
 					+ "after deleting a keypair.");
 		}
 	}
+	
+	/**
+	 * Delete a key pair entry from the Keystore given its private and public key parts.
+	 */
+	@Override
+	public void deleteKeyPair(Key privateKey, Certificate[] certs)
+			throws CMException {
+		
+		String alias = createKeyPairAlias(privateKey, certs);
+		deleteKeyPair(alias);
+	}	
 
 	/**
 	 * Export a key entry containing private key and public key certificate
@@ -1409,7 +1363,7 @@ public class CredentialManagerImpl implements CredentialManager,
 		synchronized (truststore) {
 			// Create an alias for the new trusted certificate entry in the Truststore as
 			// "trustedcert#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<CERT_SERIAL_NUMBER>
-			alias = getX509CertificateAlias(cert);
+			alias = createTrustedCertificateAlias(cert);
 			try {
 				truststore.setCertificateEntry(alias, cert);
 				saveKeystore(KeystoreType.TRUSTSTORE);
@@ -1434,6 +1388,39 @@ public class CredentialManagerImpl implements CredentialManager,
 	}
 
 	/**
+	 * Create a Keystore alias that would be used for adding the given 
+	 * key pair (private and public key) entry to the Keystore. The alias is cretaed as 
+	 * "keypair#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<CERT_SERIAL_NUMBER>
+	 * 
+	 * @param privateKey private key
+	 * @param certs public key's certificate chain
+	 * @return
+	 */
+	public String createKeyPairAlias(Key privateKey, Certificate certs[]){
+
+		String ownerDN = ((X509Certificate) certs[0])
+				.getSubjectX500Principal().getName(X500Principal.RFC2253);
+		CMUtils util = new CMUtils();
+		util.parseDN(ownerDN);
+		String ownerCN = util.getCN(); // owner's common name
+
+		// Get the hexadecimal representation of the certificate's serial
+		// number
+		String serialNumber = new BigInteger(1,
+				((X509Certificate) certs[0]).getSerialNumber()
+						.toByteArray()).toString(16).toUpperCase();
+
+		String issuerDN = ((X509Certificate) certs[0])
+				.getIssuerX500Principal().getName(X500Principal.RFC2253);
+		util.parseDN(issuerDN);
+		String issuerCN = util.getCN(); // issuer's common name
+
+		String alias = "keypair#" + ownerCN + "#" + issuerCN + "#"
+				+ serialNumber;	
+		return alias;
+	}
+	
+	/**
 	 * Create a Truststore alias that would be used for adding the given 
 	 * trusted X509 certificate to the Truststore. The alias is cretaed as 
 	 * "trustedcert#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<
@@ -1442,7 +1429,7 @@ public class CredentialManagerImpl implements CredentialManager,
 	 * @param cert certificate to generate the alias for
 	 * @return the alias for the given certificate
 	 */
-	public String getX509CertificateAlias(X509Certificate cert) {
+	public String createTrustedCertificateAlias(X509Certificate cert) {
 		String ownerDN = cert.getSubjectX500Principal().getName(
 				X500Principal.RFC2253);
 		CMUtils util = new CMUtils();
@@ -1495,26 +1482,12 @@ public class CredentialManagerImpl implements CredentialManager,
 	 */
 	public boolean hasTrustedCertificate(Certificate cert)
 			throws CMException{
-		
-		// Need to make sure we are initialized before we do anything else
-		// as Credential Manager can be created but not initialized
-		initialize();
-		
-		String alias = null;
-		
-		synchronized (truststore) {			
-			
-			// Create an alias for the new trusted certificate entry in the Truststore as
-			// "trustedcert#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<CERT_SERIAL_NUMBER>
-			
-			// We are only dealing with X509 certificates so need to cast here which is not 100% safe
 
-			alias = getX509CertificateAlias((X509Certificate)cert);
-			
-			return hasEntryWithAlias(KeystoreType.TRUSTSTORE, alias);
+		// Create an alias for the new trusted certificate entry in the Truststore as
+		// "trustedcert#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<CERT_SERIAL_NUMBER>
+		String alias = createTrustedCertificateAlias((X509Certificate) cert);
+		return hasEntryWithAlias(KeystoreType.TRUSTSTORE, alias);
 
-		}
-		
 	}
 	
 	/**
@@ -1544,6 +1517,15 @@ public class CredentialManagerImpl implements CredentialManager,
 		}
 	}
 
+	/**
+	 * Delete a trusted certificate entry from the Truststore given the certificate.
+	 */
+	public void deleteTrustedCertificate(X509Certificate cert)
+			throws CMException{
+		String alias = createTrustedCertificateAlias(cert);
+		deleteTrustedCertificate(alias);
+	}
+	
 	/**
 	 * Check if the given alias identifies is a key entry in the Keystore.
 	 */
@@ -2207,7 +2189,7 @@ public class CredentialManagerImpl implements CredentialManager,
 		// method gets called twice.
 		// Well, this is not working - checkServerTrusted() is still called
 		// twice.
-		String alias = getX509CertificateAlias(chain[0]);
+		String alias = createTrustedCertificateAlias(chain[0]);
 		try {
 			if (truststore.containsAlias(alias)) {
 				return true;
@@ -2546,5 +2528,6 @@ public class CredentialManagerImpl implements CredentialManager,
 	 */
 	public List<TrustConfirmationProvider> getTrustConfirmationProviders(){
 		return trustConfirmationProviders;
-	}	
+	}
+
 }

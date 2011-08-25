@@ -175,6 +175,23 @@ public interface CredentialManager {
 	public void deleteKeyPair(String alias) throws CMException;
 
 	/**
+	 * Delete a key pair entry from the Keystore given its private and public key parts.
+	 */
+	public void deleteKeyPair(Key privateKey, Certificate[] certs)
+			throws CMException;
+	
+	/**
+	 * Create a Keystore alias that would be used for adding the given 
+	 * key pair (private and public key) entry to the Keystore. The alias is cretaed as 
+	 * "keypair#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<CERT_SERIAL_NUMBER>
+	 * 
+	 * @param privateKey private key
+	 * @param certs public key's certificate chain
+	 * @return
+	 */
+	public String createKeyPairAlias(Key privateKey, Certificate certs[]);
+	
+	/**
 	 * Export a key entry containing private key and public key certificate
 	 * chain from the Keystore to a PKCS #12 file.
 	 */
@@ -225,6 +242,12 @@ public interface CredentialManager {
 			throws CMException;
 
 	/**
+	 * Delete a trusted certificate entry from the Truststore given the certificate.
+	 */
+	public void deleteTrustedCertificate(X509Certificate cert)
+			throws CMException;
+	
+	/**
 	 * Create a Truststore alias that would be used for adding the given 
 	 * trusted X509 certificate to the Truststore. The alias is cretaed as 
 	 * "trustedcert#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<
@@ -233,7 +256,7 @@ public interface CredentialManager {
 	 * @param cert certificate to generate the alias for
 	 * @return the alias for the given certificate
 	 */
-	public String getX509CertificateAlias(X509Certificate cert);
+	public String createTrustedCertificateAlias(X509Certificate cert);
 	
 	/**
 	 * Check if the given alias identifies a key entry in the Keystore.
