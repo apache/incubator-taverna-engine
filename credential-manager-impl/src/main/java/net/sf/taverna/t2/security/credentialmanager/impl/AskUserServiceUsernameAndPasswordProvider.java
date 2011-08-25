@@ -8,9 +8,16 @@ import net.sf.taverna.t2.security.credentialmanager.UsernamePassword;
 public class AskUserServiceUsernameAndPasswordProvider implements ServiceUsernameAndPasswordProvider{
 
 	@Override
-	public UsernamePassword getUsernameAndPasswordForService(URI serviceURI, String requestingMessage) {
+	public UsernamePassword getServiceUsernameAndPassword(URI serviceURI, String requestMessage) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void setServiceUsernameAndPassword(URI serviceURI,
+			UsernamePassword usernamePassword) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

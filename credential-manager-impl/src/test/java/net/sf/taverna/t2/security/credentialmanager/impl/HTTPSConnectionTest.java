@@ -20,27 +20,40 @@
  ******************************************************************************/
 package net.sf.taverna.t2.security.credentialmanager.impl;
 
-import net.sf.taverna.t2.security.credentialmanager.JavaTruststorePasswordProvider;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
-/**
- * An implementation of the {@link JavaTruststorePasswordProvider} that pops up a
- * dialog and asks the user to provide the password.
- * 
- * @author Alex Nenadic
- *
- */
-public class AskUserJavaTruststorePasswordProvider implements JavaTruststorePasswordProvider{
+import javax.net.ssl.HttpsURLConnection;
 
-	@Override
-	public String getJavaTruststorePassword() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+import org.apache.log4j.Logger;
 
-	@Override
-	public void setJavaTruststorePassword(String password) {
-		// TODO Auto-generated method stub
-		
-	}
+public class HTTPSConnectionTest {
 
+	// Log4J Logger
+	private static Logger logger = Logger.getLogger(HTTPSConnectionTest.class);
+
+//	public static void main(String[] args){
+//		
+//		try {
+//			CredentialManagerOld.initialiseSSL();
+//			//CredentialManager.getInstance();
+//			//HttpsURLConnection.setDefaultSSLSocketFactory(CredentialManager.createTavernaSSLSocketFactory());
+//			URL url = new URL ("https://rpc103.cs.man.ac.uk:8443/wsrf/services/cagrid/SecureHelloWorld?wsdl");
+//			HttpsURLConnection httpsConnection = (HttpsURLConnection) url.openConnection();
+//			// user should be asked automatically if they want to trust the connection
+//			httpsConnection.connect();
+//			
+//		} catch (CMException e) {
+//			logger.error("", e);
+//		} catch (MalformedURLException e) {
+//			logger.error("", e);
+//		} catch (IOException e) {
+//			logger.error("", e);
+//		}
+//		catch(Exception ex){ // anything we did not expect
+//			logger.error("", ex);
+//		}
+//		
+//	}
 }

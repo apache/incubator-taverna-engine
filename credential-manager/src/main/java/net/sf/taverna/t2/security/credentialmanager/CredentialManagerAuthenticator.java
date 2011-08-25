@@ -24,29 +24,14 @@ public class CredentialManagerAuthenticator extends Authenticator {
 	private static Logger logger = Logger
 			.getLogger(CredentialManagerAuthenticator.class);
 
-	private CredentialManagerOld credManager;
+	private CredentialManager credManager;
 
-	public CredentialManagerAuthenticator() {
-		this.setCredManager(null); // Discover when first needed
+	public CredentialManagerAuthenticator(CredentialManager credManager) {
+		this.setCredentialManager(credManager);
 	}
 
-	public CredentialManagerAuthenticator(CredentialManagerOld credManager) {
-		this.setCredManager(credManager);
-	}
-
-	public void setCredManager(CredentialManagerOld credManager) {
+	public void setCredentialManager(CredentialManager credManager) {
 		this.credManager = credManager;
-	}
-
-	public CredentialManagerOld getCredManager() {
-		if (credManager == null) {
-			try {
-				credManager = CredentialManagerOld.getInstance();
-			} catch (CMException e) {
-				logger.warn("Could not obtain Credential Manager instance.", e);
-			}
-		}
-		return credManager;
 	}
 
 	@Override
@@ -88,9 +73,8 @@ public class CredentialManagerAuthenticator extends Authenticator {
 			uri = URI.create("socket://" + host + ":" + port);
 		}
 
-		CredentialManagerOld cm = getCredManager();
-		if (cm == null) {
-			logger.warn("No credential manager");
+		if (credManager == null) {
+			logger.warn("No Credential Manager");
 			return null;
 		}
 		boolean usePathRecursion = false;
@@ -110,7 +94,7 @@ public class CredentialManagerAuthenticator extends Authenticator {
 
 		UsernamePassword usernameAndPassword;
 		try {
-			usernameAndPassword = cm.getUsernameAndPasswordForService(uri,
+			usernameAndPassword = credManager.getUsernameAndPasswordForService(uri,
 					usePathRecursion, realm);
 		} catch (CMException e) {
 			logger.warn("Could not get username and password for " + uri, e);

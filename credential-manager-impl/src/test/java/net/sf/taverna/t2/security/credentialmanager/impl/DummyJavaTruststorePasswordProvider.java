@@ -22,25 +22,18 @@ package net.sf.taverna.t2.security.credentialmanager.impl;
 
 import net.sf.taverna.t2.security.credentialmanager.JavaTruststorePasswordProvider;
 
-/**
- * An implementation of the {@link JavaTruststorePasswordProvider} that pops up a
- * dialog and asks the user to provide the password.
- * 
- * @author Alex Nenadic
- *
- */
-public class AskUserJavaTruststorePasswordProvider implements JavaTruststorePasswordProvider{
+public class DummyJavaTruststorePasswordProvider implements JavaTruststorePasswordProvider{
 
+	String javaTruststorePassword;
+	
 	@Override
 	public String getJavaTruststorePassword() {
-		// TODO Auto-generated method stub
-		return null;
+		return javaTruststorePassword;
 	}
 
 	@Override
 	public void setJavaTruststorePassword(String password) {
-		// TODO Auto-generated method stub
-		
+		javaTruststorePassword = password;		
 	}
 
 }

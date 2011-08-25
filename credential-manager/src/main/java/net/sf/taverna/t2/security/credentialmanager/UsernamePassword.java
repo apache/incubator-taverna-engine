@@ -33,7 +33,7 @@ public class UsernamePassword {
 	private String username;
 
 	@Override
-	protected UsernamePassword clone() {
+	public UsernamePassword clone() {
 		UsernamePassword up = new UsernamePassword();
 		up.setUsername(getUsername());
 		up.setPassword(getPassword().clone());

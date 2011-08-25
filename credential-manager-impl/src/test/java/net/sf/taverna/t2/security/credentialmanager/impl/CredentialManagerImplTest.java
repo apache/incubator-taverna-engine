@@ -26,12 +26,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.security.Key;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -47,9 +44,6 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Random;
-
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLPeerUnverifiedException;
 
 import net.sf.taverna.t2.lang.observer.Observable;
 import net.sf.taverna.t2.lang.observer.Observer;
@@ -677,29 +671,11 @@ public class CredentialManagerImplTest {
 	}
 
 	/**
-	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#resetAuthCache()}.
-	 */
-	@Test
-	@Ignore
-	public void testResetAuthCache() {
-		fail("Not yet implemented");
-	}
-
-	/**
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#hasUsernamePasswordForService(java.net.URI)}.
 	 */
 	@Test
 	@Ignore
 	public void testHasUsernamePasswordForService() {
-		fail("Not yet implemented");
-	}
-
-	/**
-	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#setConfigurationDirectoryPath(java.io.File)}.
-	 */
-	@Test
-	@Ignore
-	public void testSetConfigurationDirectoryPath() {
 		fail("Not yet implemented");
 	}
 
@@ -712,16 +688,13 @@ public class CredentialManagerImplTest {
 		List<MasterPasswordProvider> masterPasswordProviders = new ArrayList<MasterPasswordProvider>();
 		masterPasswordProviders.add(masterPasswordProvider);
 		
-		// Let's see if it is throwing an exception
 		credentialManager.setMasterPasswordProviders(masterPasswordProviders);
 		
-		assertFalse(credentialManager.getMasterPasswordProviders().isEmpty());
 		assertTrue(credentialManager.getMasterPasswordProviders().contains(masterPasswordProvider));
 		
 		// Set it to null and see what happens
 		credentialManager.setMasterPasswordProviders(null);		
 		assertNull(credentialManager.getMasterPasswordProviders());		
-		
 	}
 
 	/**
@@ -730,48 +703,94 @@ public class CredentialManagerImplTest {
 	@Test
 	public void testGetMasterPasswordProviders() {
 		
-		// Let's see if it is throwing an exception
-		credentialManager.getMasterPasswordProviders();
-		
 		assertFalse(credentialManager.getMasterPasswordProviders().isEmpty());
-		assertTrue(credentialManager.getMasterPasswordProviders().contains(masterPasswordProvider));
-		
+		assertTrue(credentialManager.getMasterPasswordProviders().contains(masterPasswordProvider));	
 	}
 	
 	/**
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#setJavaTruststorePasswordProviders(java.util.List)}.
 	 */
 	@Test
-	@Ignore
 	public void testSetJavaTruststorePasswordProviders() {
-		fail("Not yet implemented");
+		
+		List<JavaTruststorePasswordProvider> javaTruststorePasswordProviders = new ArrayList<JavaTruststorePasswordProvider>();
+		JavaTruststorePasswordProvider javaTruststorePasswordProvider = new DummyJavaTruststorePasswordProvider();
+		javaTruststorePasswordProvider.setJavaTruststorePassword("blah");
+		javaTruststorePasswordProviders.add(javaTruststorePasswordProvider);
+		
+		credentialManager.setJavaTruststorePasswordProviders(javaTruststorePasswordProviders);
+		
+		assertTrue(credentialManager.getJavaTruststorePasswordProviders().contains(javaTruststorePasswordProvider));
+		
+		// Set it to null and see what happens
+		credentialManager.setJavaTruststorePasswordProviders(null);		
+		assertNull(credentialManager.getJavaTruststorePasswordProviders());	
 	}
 
 	/**
-	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#setServiceUsernameAndPasswordProviders(java.util.List)}.
+	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#getJavaTruststorePasswordProviders()}.
 	 */
 	@Test
-	@Ignore
-	public void testSetUsernameAndPasswordForServiceProviders() {
-		fail("Not yet implemented");
+	public void testGetJavaTruststorePasswordProviders() {
+		
+		assertTrue(credentialManager.getJavaTruststorePasswordProviders().isEmpty());
+	}
+	
+	/**
+	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#setServiceUsernameAndPasswordProviders(java.util.List)}.
+	 * @throws URISyntaxException 
+	 */
+	@Test
+	public void testSetServiceUsernameAndPasswordProviders() throws URISyntaxException {
+		
+		List<ServiceUsernameAndPasswordProvider> serviceUsernameAndPasswordProviders = new ArrayList<ServiceUsernameAndPasswordProvider>();
+		ServiceUsernameAndPasswordProvider serviceUsernameAndPasswordProvider = new DummyServiceUsernameAndPasswordProvider();
+		serviceUsernameAndPasswordProvider.setServiceUsernameAndPassword(new URI("http://someservice"), new UsernamePassword("blah", "blah"));
+		serviceUsernameAndPasswordProviders.add(serviceUsernameAndPasswordProvider);
+		
+		credentialManager.setServiceUsernameAndPasswordProviders(serviceUsernameAndPasswordProviders);
+		
+		assertTrue(credentialManager.getServiceUsernameAndPasswordProviders().contains(serviceUsernameAndPasswordProvider));
+		
+		// Set it to null and see what happens
+		credentialManager.setServiceUsernameAndPasswordProviders(null);		
+		assertNull(credentialManager.getServiceUsernameAndPasswordProviders());	
 	}
 
+	/**
+	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#getServiceUsernameAndPasswordProviders()}.
+	 */
+	@Test
+	public void testGetServiceUsernameAndPasswordProviders() {
+		
+		assertTrue(credentialManager.getServiceUsernameAndPasswordProviders().isEmpty());
+	}
+	
 	/**
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#setTrustConfirmationProviders(java.util.List)}.
 	 * @throws IOException 
 	 */
 	@Test
-	@Ignore
 	public void testSetTrustConfirmationProviders() throws IOException {
-		List<TrustConfirmationProvider> trustProviders = new ArrayList<TrustConfirmationProvider>();
-		trustProviders.add(new TrustAlwaysConfirmationProvider());
-		credentialManager.setTrustConfirmationProviders(trustProviders);
+		List<TrustConfirmationProvider> trustConfirmationProviders = new ArrayList<TrustConfirmationProvider>();
+		TrustConfirmationProvider trustConfirmationProvider = new TrustAlwaysConfirmationProvider();
+		trustConfirmationProviders.add(trustConfirmationProvider);
 		
-		URL url = new URL("https://code.google.com/p/taverna/");
-		HttpsURLConnection conn;
-		conn = (HttpsURLConnection) url.openConnection();
-		int  contentLength = conn.getContentLength();
-		assertTrue(contentLength > 0);
-		conn.disconnect();
+		credentialManager.setTrustConfirmationProviders(trustConfirmationProviders);
+		
+		assertTrue(credentialManager.getTrustConfirmationProviders().contains(trustConfirmationProvider));
+		
+		// Set it to null and see what happens
+		credentialManager.setTrustConfirmationProviders(null);		
+		assertNull(credentialManager.getTrustConfirmationProviders());	
+	}
+	
+	/**
+	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#getTrustConfirmationProviders()}.
+	 */
+	@Test
+	public void testGetTrustConfirmationProviders() {
+		
+		assertTrue(credentialManager.getTrustConfirmationProviders().isEmpty());
 	}
 }

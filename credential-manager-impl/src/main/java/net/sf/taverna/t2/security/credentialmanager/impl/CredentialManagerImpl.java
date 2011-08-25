@@ -761,7 +761,7 @@ public class CredentialManagerImpl implements CredentialManager,
 				// username and password providers
 				for (ServiceUsernameAndPasswordProvider serviceUsernameAndPasswordProvider : serviceUsernameAndPasswordProviders) {
 					UsernamePassword usernamePassword = serviceUsernameAndPasswordProvider
-							.getUsernameAndPasswordForService(serviceURI,
+							.getServiceUsernameAndPassword(serviceURI,
 									requestingMessage);
 					if (usernamePassword == null) {
 						continue;
@@ -835,7 +835,7 @@ public class CredentialManagerImpl implements CredentialManager,
 	 * and not bother user for credentials every time them access a URL from
 	 * that realm.
 	 */
-	protected static LinkedHashSet<URI> getPossibleServiceURIsToLookup(
+	protected LinkedHashSet<URI> getPossibleServiceURIsToLookup(
 			URI serviceURI, boolean usePathRecursion) {
 
 		try {
@@ -2298,14 +2298,14 @@ public class CredentialManagerImpl implements CredentialManager,
 	}
 
 	/**
-	 * Reset the VMs cache for authentication like HTTP Basic Auth.
+	 * Reset the JVMs cache for authentication like HTTP Basic Auth.
 	 * <p>
 	 * Note that this method uses undocumented calls to
 	 * <code>sun.net.www.protocol.http.AuthCacheValue</code> which might not be
 	 * valid in virtual machines other than Sun Java 6. If these calls fail,
 	 * this method will log the error and return <code>false</code>.
 	 * 
-	 * @return <code>true</code> if the VMs cache could be reset, or
+	 * @return <code>true</code> if the JVMs cache could be reset, or
 	 *         <code>false</code> otherwise.
 	 */
 	public boolean resetAuthCache() {
@@ -2324,7 +2324,7 @@ public class CredentialManagerImpl implements CredentialManager,
 			return true;
 		} catch (Exception ex) {
 			logger.warn(
-					"Could not reset authcache, non-Sun VM or internal Sun classes changed",
+					"Could not reset authcache, non-Sun JVM or internal Sun classes changed",
 					ex);
 			return false;
 		}
@@ -2543,7 +2543,7 @@ public class CredentialManagerImpl implements CredentialManager,
 	 * @return the providers of trust confirmation for HTTPS connections to external services/sites
 	 *
 	 */
-	public List<TrustConfirmationProvider> getTrustConfirmationProvider(){
+	public List<TrustConfirmationProvider> getTrustConfirmationProviders(){
 		return trustConfirmationProviders;
 	}	
 }

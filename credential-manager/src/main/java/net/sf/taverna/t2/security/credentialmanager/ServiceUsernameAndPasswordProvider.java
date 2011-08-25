@@ -51,11 +51,16 @@ public interface ServiceUsernameAndPasswordProvider {
 	 * 
 	 * @param serviceURI The service we are looking username and password for
 	 * 
-	 * @param requestingMessage The message to be presented to the user when asking for the username and password, 
+	 * @param requestMessage The message to be presented to the user when asking for the username and password, 
 	 * normally useful for UI providers that pop up dialogs, can be ignored otherwise
 	 * 
 	 * @return the username and password pair for the given service URI
 	 */
-	public UsernamePassword getUsernameAndPasswordForService(URI serviceURI, String requestingMessage);
+	public UsernamePassword getServiceUsernameAndPassword(URI serviceURI, String requestMessage);
 	
+	/**
+	 * Set the username and password pair for the given service URI.
+	 */
+	public void setServiceUsernameAndPassword(URI serviceURI, UsernamePassword usernamePassword);
+
 }

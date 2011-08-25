@@ -64,4 +64,10 @@ public interface JavaTruststorePasswordProvider {
 	 */
 	public String getJavaTruststorePassword();
 	
+	/**
+	 * Set the Java truststore password.
+	 * @param password to set
+	 */
+	public void setJavaTruststorePassword(String password);
+	
 }

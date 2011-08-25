@@ -42,9 +42,12 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Random;
 
+import javax.net.ssl.HttpsURLConnection;
+
 import net.sf.taverna.t2.security.credentialmanager.CMException;
 import net.sf.taverna.t2.security.credentialmanager.MasterPasswordProvider;
 import net.sf.taverna.t2.security.credentialmanager.ServiceUsernameAndPasswordProvider;
+import net.sf.taverna.t2.security.credentialmanager.TrustConfirmationProvider;
 import net.sf.taverna.t2.security.credentialmanager.UsernamePassword;
 
 import org.apache.commons.io.FileUtils;
@@ -218,5 +221,20 @@ public class CredentialManagerImplIT {
 //		assertTrue(newPrivateKey.equals(privateKey));
 //		assertTrue(Arrays.equals(newPrivateKeyCerts, privateKeyCertChain));
 //	}
+	
+	@Test
+	public void testSetTrustConfirmationProviders() throws IOException {
+		List<TrustConfirmationProvider> trustProviders = new ArrayList<TrustConfirmationProvider>();
+		trustProviders.add(new TrustAlwaysConfirmationProvider());
+		credentialManager.setTrustConfirmationProviders(trustProviders);
+		
+		URL url = new URL("https://code.google.com/p/taverna/");
+		HttpsURLConnection conn;
+		conn = (HttpsURLConnection) url.openConnection();
+		conn.connect();
+		int  contentLength = conn.getContentLength();
+		assertTrue(contentLength > 0);
+		conn.disconnect();
+	}
 	
 }
