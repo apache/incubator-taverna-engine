@@ -45,6 +45,8 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Random;
 
+import javax.net.ssl.SSLSocketFactory;
+
 import net.sf.taverna.t2.lang.observer.Observable;
 import net.sf.taverna.t2.lang.observer.Observer;
 import net.sf.taverna.t2.security.credentialmanager.CMException;
@@ -265,6 +267,24 @@ public class CredentialManagerImplTest {
 		assertTrue(usernamePassword.getUsername().equals(testUsernamePassword.getUsername()));
 	}
 
+	/**
+	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#hasUsernamePasswordForService(java.net.URI)}.
+	 * @throws CMException 
+	 */
+	@Test
+	public void testHasUsernamePasswordForService() throws CMException {
+	
+		UsernamePassword testUsernamePassword = credentialManager.getUsernameAndPasswordForService(serviceURI, false, "");
+		assertNull(testUsernamePassword);
+
+		String alias = credentialManager.addUsernameAndPasswordForService(usernamePassword,serviceURI);
+		testUsernamePassword = credentialManager.getUsernameAndPasswordForService(serviceURI, false, "");
+		assertNotNull(testUsernamePassword);
+		assertTrue(credentialManager.hasEntryWithAlias(CredentialManager.KeystoreType.KEYSTORE, alias));
+		assertTrue(Arrays.equals(usernamePassword.getPassword(), testUsernamePassword.getPassword()));
+		assertTrue(usernamePassword.getUsername().equals(testUsernamePassword.getUsername()));
+	}
+	
 	/**
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#deleteUsernameAndPasswordForService(java.net.URI)}.
 	 * @throws URISyntaxException 
@@ -627,56 +647,27 @@ public class CredentialManagerImplTest {
 
 	/**
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#initializeSSL()}.
+	 * @throws CMException 
 	 */
 	@Test
-	@Ignore
-	public void testInitializeSSL() {
-		fail("Not yet implemented");
+	public void testInitializeSSL() throws CMException {
+		//credentialManager.initializeSSL();
 	}
 
 	/**
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#getTavernaSSLSocketFactory()}.
+	 * @throws CMException 
 	 */
 	@Test
-	@Ignore
-	public void testGetTavernaSSLSocketFactory() {
-		fail("Not yet implemented");
-	}
+	public void testGetTavernaSSLSocketFactory() throws CMException {
+		SSLSocketFactory sslSocketFactory = credentialManager.getTavernaSSLSocketFactory();
+		assertNotNull(sslSocketFactory);
+		
+		// This should also create Taverna's SSLSocketFactory backed by Credential Manager's Keystore and Truststore
+		// if not already created
+		credentialManager.initializeSSL();
+		assertEquals(sslSocketFactory, credentialManager.getTavernaSSLSocketFactory());
 
-	/**
-	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#normalizeServiceURI(java.net.URI)}.
-	 */
-	@Test
-	@Ignore
-	public void testNormalizeServiceURI() {
-		fail("Not yet implemented");
-	}
-
-	/**
-	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#setFragmentForURI(java.net.URI, java.lang.String)}.
-	 */
-	@Test
-	@Ignore
-	public void testSetFragmentForURI() {
-		fail("Not yet implemented");
-	}
-
-	/**
-	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#setUserInfoForURI(java.net.URI, java.lang.String)}.
-	 */
-	@Test
-	@Ignore
-	public void testSetUserInfoForURI() {
-		fail("Not yet implemented");
-	}
-
-	/**
-	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#hasUsernamePasswordForService(java.net.URI)}.
-	 */
-	@Test
-	@Ignore
-	public void testHasUsernamePasswordForService() {
-		fail("Not yet implemented");
 	}
 
 	/**
@@ -773,7 +764,7 @@ public class CredentialManagerImplTest {
 	@Test
 	public void testSetTrustConfirmationProviders() throws IOException {
 		List<TrustConfirmationProvider> trustConfirmationProviders = new ArrayList<TrustConfirmationProvider>();
-		TrustConfirmationProvider trustConfirmationProvider = new TrustAlwaysConfirmationProvider();
+		TrustConfirmationProvider trustConfirmationProvider = new TrustAlwaysTrustConfirmationProvider();
 		trustConfirmationProviders.add(trustConfirmationProvider);
 		
 		credentialManager.setTrustConfirmationProviders(trustConfirmationProviders);

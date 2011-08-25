@@ -25,7 +25,7 @@ import java.security.cert.X509Certificate;
 import net.sf.taverna.t2.security.credentialmanager.TrustConfirmation;
 import net.sf.taverna.t2.security.credentialmanager.TrustConfirmationProvider;
 
-public class TrustAlwaysConfirmationProvider implements TrustConfirmationProvider{
+public class TrustAlwaysTrustConfirmationProvider implements TrustConfirmationProvider{
 
 	@Override
 	public TrustConfirmation shouldTrustCertificate(X509Certificate[] chain) {

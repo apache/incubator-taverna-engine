@@ -70,7 +70,7 @@ import org.mortbay.jetty.webapp.WebAppContext;
  * @author Alex Nenadic
  *
  */
-public class HTTPAuthenticatorTest {
+public class HTTPAuthenticatorIT {
 
 	protected static final String WRONG_PASSWORD = "wrongOne";
 	protected final static String PASSWORD = "basicPassword";
@@ -182,7 +182,7 @@ public class HTTPAuthenticatorTest {
 		WebAppContext webappcontext = new WebAppContext();
 		webappcontext.setContextPath("/");
 
-		URL htmlRoot = HTTPAuthenticatorTest.class.getResource(HTML);
+		URL htmlRoot = HTTPAuthenticatorIT.class.getResource(HTML);
 		assertNotNull("Could not find " + HTML, htmlRoot);
 		webappcontext.setWar(htmlRoot.toExternalForm());
 		

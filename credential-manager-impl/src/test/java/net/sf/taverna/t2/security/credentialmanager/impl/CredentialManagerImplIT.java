@@ -20,18 +20,21 @@
  ******************************************************************************/
 package net.sf.taverna.t2.security.credentialmanager.impl;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.security.Key;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.Security;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
@@ -43,15 +46,22 @@ import java.util.List;
 import java.util.Random;
 
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLHandshakeException;
 
+import net.sf.taverna.t2.lang.observer.Observable;
+import net.sf.taverna.t2.lang.observer.Observer;
 import net.sf.taverna.t2.security.credentialmanager.CMException;
+import net.sf.taverna.t2.security.credentialmanager.JavaTruststorePasswordProvider;
+import net.sf.taverna.t2.security.credentialmanager.KeystoreChangedEvent;
 import net.sf.taverna.t2.security.credentialmanager.MasterPasswordProvider;
 import net.sf.taverna.t2.security.credentialmanager.ServiceUsernameAndPasswordProvider;
 import net.sf.taverna.t2.security.credentialmanager.TrustConfirmationProvider;
 import net.sf.taverna.t2.security.credentialmanager.UsernamePassword;
 
 import org.apache.commons.io.FileUtils;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -76,61 +86,9 @@ import org.junit.Test;
  */
 public class CredentialManagerImplIT {
 
-	private CredentialManagerImpl credentialManager;
-	private DummyMasterPasswordProvider masterPasswordProvider;
-	private File credentialManagerDirectory;
-	
-	private static UsernamePassword usernamePassword;
-	private static URI serviceURI;
-	
-	private static Key privateKey;
-	private static Certificate[] privateKeyCertChain;
-	private static URL privateKeyFileURL = CredentialManagerImplTest.class.getResource(
-			"/security/test-private-key-cert.p12");
-	private static final String privateKeyAndPKCS12KeystorePassword = "testcert";
-	
-	private static X509Certificate trustedCertficate;
-	private static URL trustedCertficateFileURL = CredentialManagerImplTest.class.getResource(
-			"/security/google-trusted-certificate.pem");
-
-	
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-
-		// Create a test username and password for a service
-		serviceURI =  new URI("http://someservice");
-		usernamePassword = new UsernamePassword("testuser", "testpasswd");
-		
-		// Load the test private key and its certificate
-		File privateKeyCertFile = new File(privateKeyFileURL.getPath());
-		KeyStore pkcs12Keystore = java.security.KeyStore.getInstance("PKCS12");
-		FileInputStream inStream = new FileInputStream(privateKeyCertFile);
-		pkcs12Keystore.load(inStream, privateKeyAndPKCS12KeystorePassword.toCharArray());
-		// KeyStore pkcs12Keystore = credentialManager.loadPKCS12Keystore(privateKeyCertFile, privateKeyPassword);
-		Enumeration<String> aliases = pkcs12Keystore.aliases();
-		while (aliases.hasMoreElements()) {
-			// The test-private-key-cert.p12 file contains only one private key
-			// and corresponding certificate entry
-			String alias = aliases.nextElement();
-			if (pkcs12Keystore.isKeyEntry(alias)) { // is it a (private) key entry?
-				privateKey = pkcs12Keystore.getKey(alias,
-						"testcert".toCharArray());
-				privateKeyCertChain = pkcs12Keystore.getCertificateChain(alias);
-				break;
-			}
-		}
-		inStream.close();
-		
-		// Load the test trusted certificate (belonging to *.Google.com)
-		File trustedCertFile = new File(trustedCertficateFileURL.getPath());		
-		inStream = new FileInputStream(trustedCertFile);
-		CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
-		trustedCertficate = (X509Certificate) certFactory.generateCertificate(inStream);
-		inStream.close();
-	}
+	private static CredentialManagerImpl credentialManager;
+	private static DummyMasterPasswordProvider masterPasswordProvider;
+	private static File credentialManagerDirectory;
 
 	/**
 	 * @throws java.lang.Exception
@@ -161,15 +119,15 @@ public class CredentialManagerImplIT {
 
 		// Create the dummy master password provider
 		masterPasswordProvider = new DummyMasterPasswordProvider();
-		masterPasswordProvider.setMasterPassword("^kjhf565%£228fg2£@6#"); // set it to something long (longer than 7 characters) so we can test that the strong srypto policy is installed
+		masterPasswordProvider.setMasterPassword("uber");
 		List<MasterPasswordProvider> masterPasswordProviders = new ArrayList<MasterPasswordProvider>();
 		masterPasswordProviders.add(masterPasswordProvider);
 		credentialManager.setMasterPasswordProviders(masterPasswordProviders);
 		
-		// Set an empty list for service username and password providers
-		credentialManager.setServiceUsernameAndPasswordProviders(new ArrayList<ServiceUsernameAndPasswordProvider>());
+		// Set an empty list for trust confirmation providers
+		credentialManager.setTrustConfirmationProviders(new ArrayList<TrustConfirmationProvider>());
 	}
-
+	
 	@After
 	// Clean up the credentialManagerDirectory we created for testing
 	public void cleanUp(){
@@ -186,55 +144,114 @@ public class CredentialManagerImplIT {
 			}	
 		}
 	}
-//	/**
-//	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#exportKeyPair(java.lang.String, java.io.File, java.lang.String)}.
-//	 * @throws CMException 
-//	 * @throws KeyStoreException 
-//	 * @throws NoSuchAlgorithmException 
-//	 * @throws UnrecoverableKeyException 
-//	 */
+	
 //	@Test
-//	public void testExportKeyPair() throws CMException, KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException {
-//		String alias = credentialManager.addKeyPair(privateKey, privateKeyCertChain);
-//		File fileToExportTo = new File(credentialManagerDirectory, "test-export-key.p12");
-//		credentialManager.exportKeyPair(alias, fileToExportTo, privateKeyAndPKCS12KeystorePassword);
-//		assertTrue(fileToExportTo.exists());
-//		// Load it back from the file we just saved
-//		KeyStore ks = credentialManager.loadPKCS12Keystore(fileToExportTo, privateKeyAndPKCS12KeystorePassword);
-//		Enumeration<String> aliases = ks.aliases();
-//		Key newPrivateKey = null;
-//		Certificate[] newPrivateKeyCerts = null;
-//		while (aliases.hasMoreElements()) {
-//			// The test-private-key-cert.p12 file contains only one private key
-//			// and corresponding certificate entry
-//			alias = aliases.nextElement();
-//			if (ks.isKeyEntry(alias)) { // is it a (private) key entry?
-//				newPrivateKey = ks.getKey(alias,
-//						privateKeyAndPKCS12KeystorePassword.toCharArray());
-//				newPrivateKeyCerts = ks.getCertificateChain(alias);
-//				break;
-//			}
+//	public void testTrustConfirmationProvidersTrustAlways() throws IOException, CMException {
+//		// Initially trust provider list is empty, we only verify by what is in 
+//		// Credential Manager's Truststore (and it does not contains the certificate for https://heater.cs.man.ac.uk:7443/)
+//		
+//		// Do not forget to initialise Taverna's/Credential Manager's SSLSocketFactory
+//		credentialManager.initializeSSL();
+//		
+//		URL url = new URL("https://heater.cs.man.ac.uk:7443/");
+//		HttpsURLConnection conn;
+//		conn = (HttpsURLConnection) url.openConnection();
+//		try{
+//			// This should fail
+//			conn.connect();
+//			fail("Connection to https://heater.cs.man.ac.uk:7443/ should be untrusted at this point.");
 //		}
-//		assertNotNull(newPrivateKey);
-//		assertNotNull(newPrivateKeyCerts);
-//		//assertTrue(Arrays.equals(newPrivateKey.getEncoded(), privateKey.getEncoded()));
-//		assertTrue(newPrivateKey.equals(privateKey));
-//		assertTrue(Arrays.equals(newPrivateKeyCerts, privateKeyCertChain));
+//		catch(SSLHandshakeException sslex){
+//			// expected to fail so all is good
+//		}
+//		finally{
+//			conn.disconnect();
+//		}
+//		
+//		// Add the trust confirmation provider that trusts everyone
+//		List<TrustConfirmationProvider> trustProviders = new ArrayList<TrustConfirmationProvider>();
+//		credentialManager.setTrustConfirmationProviders(trustProviders);
+//		trustProviders.add(new TrustAlwaysTrustConfirmationProvider());
+//		credentialManager.setTrustConfirmationProviders(trustProviders);
+//		
+//		HttpsURLConnection conn2 = (HttpsURLConnection) url.openConnection();
+//		// This should work now
+//		conn2.connect();
+//		System.out.println(conn2.getHeaderField(0));
+//
+//		assertEquals("HTTP/1.1 200 OK", conn.getHeaderField(0));
+//		conn2.disconnect();
 //	}
-	
-	@Test
-	public void testSetTrustConfirmationProviders() throws IOException {
-		List<TrustConfirmationProvider> trustProviders = new ArrayList<TrustConfirmationProvider>();
-		trustProviders.add(new TrustAlwaysConfirmationProvider());
-		credentialManager.setTrustConfirmationProviders(trustProviders);
-		
-		URL url = new URL("https://code.google.com/p/taverna/");
-		HttpsURLConnection conn;
-		conn = (HttpsURLConnection) url.openConnection();
-		conn.connect();
-		int  contentLength = conn.getContentLength();
-		assertTrue(contentLength > 0);
-		conn.disconnect();
-	}
-	
+//	
+//	@Test
+//	public void testTrustConfirmationProvidersTrustNever() throws IOException, CMException {
+//		// Initially trust provider list is empty, we only verify by what is in 
+//		// Credential Manager's Truststore (and it does not contains the certificate for https://heater.cs.man.ac.uk:7443/)
+//		
+//		// Do not forget to initialise Taverna's/Credential Manager's SSLSocketFactory
+//		credentialManager.initializeSSL();
+//		
+//		URL url = new URL("https://heater.cs.man.ac.uk:7443/");
+//		HttpsURLConnection conn;
+//		conn = (HttpsURLConnection) url.openConnection();
+//		try{
+//			// This should fail
+//			conn.connect();
+//			fail("Connection to https://heater.cs.man.ac.uk:7443/ should be untrusted at this point.");
+//		}
+//		catch(SSLHandshakeException sslex){
+//			// expected to fail so all is good
+//		}
+//		finally{
+//			conn.disconnect();
+//		}
+//		
+//		// Add the trust confirmation provider that trusts no one
+//		List<TrustConfirmationProvider> trustProviders = new ArrayList<TrustConfirmationProvider>();
+//		credentialManager.setTrustConfirmationProviders(trustProviders);
+//		trustProviders = new ArrayList<TrustConfirmationProvider>();
+//		trustProviders.add(new TrustNeverTrustConfimationProvider());
+//		credentialManager.setTrustConfirmationProviders(trustProviders);
+//		
+//		HttpsURLConnection conn2 = (HttpsURLConnection) url.openConnection();
+//		try{
+//			// This should still fail as our trust providers are not trusting anyone
+//			// and we have not added heater's certificate to Credential Manager's Truststore
+//			conn2.connect();
+//			fail("Connection to https://heater.cs.man.ac.uk:7443/ should be untrusted at this point.");
+//		}
+//		catch(SSLHandshakeException sslex){
+//			// expected to fail so all is good
+//		}
+//		finally{
+//			conn2.disconnect();
+//		}
+//	}
+//	
+//	@Test
+//	public void testTrustConfirmationAddCertificateDirectly() throws CMException, IOException{
+//		// Initially trust provider list is empty, we only verify by what is in 
+//		// Credential Manager's Truststore (and it does not contains the certificate for https://heater.cs.man.ac.uk:7443/)
+//		
+//		// Do not forget to initialise Taverna's/Credential Manager's SSLSocketFactory
+//		credentialManager.initializeSSL();
+//		
+//		URL url = new URL("https://heater.cs.man.ac.uk:7443/");
+//		HttpsURLConnection conn;
+//		conn = (HttpsURLConnection) url.openConnection();
+//		try{
+//			// This should fail
+//			conn.connect();
+//			fail("Connection to https://heater.cs.man.ac.uk:7443/ should be untrusted at this point.");
+//		}
+//		catch(SSLHandshakeException sslex){
+//			// expected to fail so all is good
+//		}
+//		finally{
+//			conn.disconnect();
+//		}
+//		
+//		// Add heater's certificate directly to Credential Manager's Truststore
+//		
+//	}
 }

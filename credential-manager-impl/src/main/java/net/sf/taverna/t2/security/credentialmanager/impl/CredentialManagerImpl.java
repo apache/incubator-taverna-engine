@@ -137,9 +137,11 @@ public class CredentialManagerImpl implements CredentialManager,
 
 	// Whether SSLSocketFactory has been initialised with Taverna's
 	// Keystore/Truststore.
-	private static boolean sslInitialized = false;
+	// Actually tavernaSSLSocketFactory==null? check tells us if 
+	// Taverna's SSLSocketFactory has been initialised
+	//private static boolean sslInitialized = false;
 
-	private SSLSocketFactory tavernaSSLSocketFactory;
+	private static SSLSocketFactory tavernaSSLSocketFactory;
 
 	// Observer of changes to the Keystore and Truststore that
 	// updates the default SSLContext and SSLSocketFactory at the single
@@ -896,7 +898,7 @@ public class CredentialManagerImpl implements CredentialManager,
 		return possibles;
 	}
 
-	private static void addFragmentedURI(LinkedHashSet<URI> possibles, URI uri,
+	public void addFragmentedURI(LinkedHashSet<URI> possibles, URI uri,
 			String rawFragment) {
 		if (rawFragment != null && rawFragment.length() > 0) {
 			uri = uri.resolve("#" + rawFragment);
@@ -1832,7 +1834,7 @@ public class CredentialManagerImpl implements CredentialManager,
 	}
 
 	public void initializeSSL() throws CMException {
-		if (!sslInitialized) {
+		if (tavernaSSLSocketFactory == null) {
 			// We use the lazy initialization of Credential Manager from inside
 			// the Taverna's SSLSocketFactory (i.e. KeyManager's and
 			// TrustManager's init() methods)
@@ -1849,7 +1851,6 @@ public class CredentialManagerImpl implements CredentialManager,
 			// from HttpsURLConnectionS to use it
 			HttpsURLConnection
 					.setDefaultSSLSocketFactory(createTavernaSSLSocketFactory());
-			sslInitialized = true;
 		}
 	}
 
@@ -2271,7 +2272,7 @@ public class CredentialManagerImpl implements CredentialManager,
 	 * @return A normalized URI without query, userinfo or filename, ie. where
 	 *         uri.resolve(".").equals(uri).
 	 */
-	public static URI normalizeServiceURI(URI serviceURI) {
+	public URI normalizeServiceURI(URI serviceURI) {
 		try {
 			URI noUserInfo = setUserInfoForURI(serviceURI, null);
 			URI normalized = noUserInfo.normalize();
@@ -2285,13 +2286,13 @@ public class CredentialManagerImpl implements CredentialManager,
 		}
 	}
 
-	public static URI setFragmentForURI(URI uri, String fragment)
+	public URI setFragmentForURI(URI uri, String fragment)
 			throws URISyntaxException {
 		return new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost(),
 				uri.getPort(), uri.getPath(), uri.getQuery(), fragment);
 	}
 
-	public static URI setUserInfoForURI(URI uri, String userinfo)
+	public URI setUserInfoForURI(URI uri, String userinfo)
 			throws URISyntaxException {
 		return new URI(uri.getScheme(), userinfo, uri.getHost(), uri.getPort(),
 				uri.getPath(), uri.getQuery(), uri.getFragment());
