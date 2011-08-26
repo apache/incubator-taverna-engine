@@ -29,6 +29,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.Key;
 import java.security.KeyStore;
@@ -51,6 +52,7 @@ import javax.net.ssl.SSLHandshakeException;
 import net.sf.taverna.t2.lang.observer.Observable;
 import net.sf.taverna.t2.lang.observer.Observer;
 import net.sf.taverna.t2.security.credentialmanager.CMException;
+import net.sf.taverna.t2.security.credentialmanager.CredentialManager;
 import net.sf.taverna.t2.security.credentialmanager.JavaTruststorePasswordProvider;
 import net.sf.taverna.t2.security.credentialmanager.KeystoreChangedEvent;
 import net.sf.taverna.t2.security.credentialmanager.MasterPasswordProvider;
@@ -81,26 +83,92 @@ import org.junit.Test;
  * (together with the installation instructions) from:
  * http://www.oracle.com/technetwork/java/javase/downloads/jce-6-download-429243.html
  * 
+ * These tests use an existing keystore (in resources/security/taverna-keystore.ubr) and 
+ * truststore (in resources/security/taverna-truststore.ubr) that are not empty.
+ * 
  * @author Alex Nenadic
  *
  */
 public class CredentialManagerImplIT {
 
 	private static CredentialManagerImpl credentialManager;
+	// Master password for Credential Manager's Keystore and Truststore
+	private static String masterPassword = "(cl%ZDxu66AN/{vNXbLF";  
 	private static DummyMasterPasswordProvider masterPasswordProvider;
 	private static File credentialManagerDirectory;
+	
+	private static UsernamePassword usernamePassword;
+	private static URI serviceURI;
+	private static UsernamePassword usernamePassword2;
+	private static URI serviceURI2;
+	private static UsernamePassword usernamePassword3;
+	private static URI serviceURI3;
+	
+	private static Key privateKey;
+	private static Certificate[] privateKeyCertChain;
+	private static URL privateKeyFileURL = CredentialManagerImplTest.class.getResource(
+			"/security/test-private-key-cert.p12");
+	private static final String privateKeyAndPKCS12KeystorePassword = "test"; // password for the test PKCS#12 keystore in resources
+	
+	private static X509Certificate trustedCertficate;
+	private static URL trustedCertficateFileURL = CredentialManagerImplTest.class.getResource(
+			"/security/google-trusted-certificate.pem");
+
+	private static Observer<KeystoreChangedEvent> keystoreChangedObserver;
 
 	/**
 	 * @throws java.lang.Exception
 	 */
-	@Before
-	public void setUp() throws Exception {
+	//@BeforeClass
+	//@Ignore
+	public static void setUpBeforeCLass() throws Exception {
 
-		try {
-			credentialManager = new CredentialManagerImpl();
-		} catch (CMException e) {
-			System.out.println(e.getStackTrace());
+		Security.addProvider(new BouncyCastleProvider());
+		
+		// Create some test username and passwords for services
+		serviceURI =  new URI("http://someservice");
+		usernamePassword = new UsernamePassword("testuser", "testpasswd");
+		serviceURI2 =  new URI("http://someservice2");
+		usernamePassword2 = new UsernamePassword("testuser2", "testpasswd2");
+		serviceURI3 =  new URI("http://someservice3");
+		usernamePassword3 = new UsernamePassword("testuser3", "testpasswd3");
+		
+		// Load the test private key and its certificate
+		File privateKeyCertFile = new File(privateKeyFileURL.getPath());
+		KeyStore pkcs12Keystore = java.security.KeyStore.getInstance("PKCS12", "BC"); // We have to use the BC provider here as the certificate chain is not loaded if we use whichever provider is first in Java!!!
+		FileInputStream inStream = new FileInputStream(privateKeyCertFile);
+		pkcs12Keystore.load(inStream, privateKeyAndPKCS12KeystorePassword.toCharArray());
+		// KeyStore pkcs12Keystore = credentialManager.loadPKCS12Keystore(privateKeyCertFile, privateKeyPassword);
+		Enumeration<String> aliases = pkcs12Keystore.aliases();
+		while (aliases.hasMoreElements()) {
+			// The test-private-key-cert.p12 file contains only one private key
+			// and corresponding certificate entry
+			String alias = aliases.nextElement();
+			if (pkcs12Keystore.isKeyEntry(alias)) { // is it a (private) key entry?
+				privateKey = pkcs12Keystore.getKey(alias,
+						privateKeyAndPKCS12KeystorePassword.toCharArray());
+				privateKeyCertChain = pkcs12Keystore.getCertificateChain(alias);
+				break;
+			}
 		}
+		inStream.close();
+		
+		// Load the test trusted certificate (belonging to *.Google.com)
+		File trustedCertFile = new File(trustedCertficateFileURL.getPath());		
+		inStream = new FileInputStream(trustedCertFile);
+		CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+		trustedCertficate = (X509Certificate) certFactory.generateCertificate(inStream);
+		try{
+			inStream.close();
+		}
+		catch (Exception e) {
+			// Ignore
+		}
+		
+		credentialManager = new CredentialManagerImpl();
+
+		// Set up a temporary "security" directory and copy the Keystore and Truststore files there
+		// so that we are working with existing keystores, not empty fresh ones
 		Random randomGenerator = new Random();
 		String credentialManagerDirectoryPath = System
 				.getProperty("java.io.tmpdir")
@@ -110,30 +178,60 @@ public class CredentialManagerImplIT {
 		System.out.println("Credential Manager's directory path: "
 				+ credentialManagerDirectoryPath);
 		credentialManagerDirectory = new File(credentialManagerDirectoryPath);
-		try {
-			credentialManager
-					.setConfigurationDirectoryPath(credentialManagerDirectory);
-		} catch (CMException e) {
-			System.out.println(e.getStackTrace());
+		if (!credentialManagerDirectory.exists()) {
+			credentialManagerDirectory.mkdir();
 		}
-
+		URL keystoreFileURL = CredentialManagerImplIT.class.getResource("/security/taverna-keystore.ubr");
+		File keystoreFile = new File(keystoreFileURL.getPath());
+		File keystoreDestFile = new File(credentialManagerDirectory, "taverna-keystore.ubr");
+		URL truststroreFileURL = CredentialManagerImplIT.class.getResource("/security/taverna-truststore.ubr");
+		File truststoreFile = new File(truststroreFileURL.getPath());
+		File truststoreDestFile = new File(credentialManagerDirectory, "taverna-truststore.ubr");
+		FileUtils.copyFile(keystoreFile, keystoreDestFile);
+		FileUtils.copyFile(truststoreFile, truststoreDestFile);
+		credentialManager.setConfigurationDirectoryPath(credentialManagerDirectory);
+		
 		// Create the dummy master password provider
 		masterPasswordProvider = new DummyMasterPasswordProvider();
-		masterPasswordProvider.setMasterPassword("uber");
+		masterPasswordProvider.setMasterPassword(masterPassword);
 		List<MasterPasswordProvider> masterPasswordProviders = new ArrayList<MasterPasswordProvider>();
 		masterPasswordProviders.add(masterPasswordProvider);
 		credentialManager.setMasterPasswordProviders(masterPasswordProviders);
 		
+		// Add some stuff into Credential Manager
+		credentialManager.addUsernameAndPasswordForService(usernamePassword, serviceURI);
+		credentialManager.addUsernameAndPasswordForService(usernamePassword2, serviceURI2);
+		credentialManager.addUsernameAndPasswordForService(usernamePassword3, serviceURI3);
+		credentialManager.addKeyPair(privateKey, privateKeyCertChain);
+		
+		// Now start a new Credential Manager that will pick up the new directory with the
+		// preloaded keystores	
+		
+		credentialManager = new CredentialManagerImpl();
+		credentialManager.setConfigurationDirectoryPath(credentialManagerDirectory);
+		
+		// Continue setting up Credential Manager ...
+		
+		credentialManager.setMasterPasswordProviders(masterPasswordProviders);
+
 		// Set an empty list for trust confirmation providers
 		credentialManager.setTrustConfirmationProviders(new ArrayList<TrustConfirmationProvider>());
+		
+		keystoreChangedObserver = new Observer<KeystoreChangedEvent>() {		
+			@Override
+			public void notify(Observable<KeystoreChangedEvent> sender,
+					KeystoreChangedEvent message) throws Exception {
+				// TODO Auto-generated method stub
+			}
+		};
+		credentialManager.addObserver(keystoreChangedObserver);
 	}
 	
-	@After
+	//@AfterClass
+	//@Ignore
 	// Clean up the credentialManagerDirectory we created for testing
-	public void cleanUp(){
-//		assertTrue(credentialManagerDirectory.exists());
-//		assertFalse(credentialManagerDirectory.listFiles().length == 0); // something was created there
-	
+	public static void cleanUp(){
+
 		if (credentialManagerDirectory.exists()){
 			try {
 				FileUtils.deleteDirectory(credentialManagerDirectory);				
@@ -145,113 +243,38 @@ public class CredentialManagerImplIT {
 		}
 	}
 	
-//	@Test
-//	public void testTrustConfirmationProvidersTrustAlways() throws IOException, CMException {
-//		// Initially trust provider list is empty, we only verify by what is in 
-//		// Credential Manager's Truststore (and it does not contains the certificate for https://heater.cs.man.ac.uk:7443/)
-//		
-//		// Do not forget to initialise Taverna's/Credential Manager's SSLSocketFactory
-//		credentialManager.initializeSSL();
-//		
-//		URL url = new URL("https://heater.cs.man.ac.uk:7443/");
-//		HttpsURLConnection conn;
-//		conn = (HttpsURLConnection) url.openConnection();
-//		try{
-//			// This should fail
-//			conn.connect();
-//			fail("Connection to https://heater.cs.man.ac.uk:7443/ should be untrusted at this point.");
-//		}
-//		catch(SSLHandshakeException sslex){
-//			// expected to fail so all is good
-//		}
-//		finally{
-//			conn.disconnect();
-//		}
-//		
-//		// Add the trust confirmation provider that trusts everyone
-//		List<TrustConfirmationProvider> trustProviders = new ArrayList<TrustConfirmationProvider>();
-//		credentialManager.setTrustConfirmationProviders(trustProviders);
-//		trustProviders.add(new TrustAlwaysTrustConfirmationProvider());
-//		credentialManager.setTrustConfirmationProviders(trustProviders);
-//		
-//		HttpsURLConnection conn2 = (HttpsURLConnection) url.openConnection();
-//		// This should work now
-//		conn2.connect();
-//		System.out.println(conn2.getHeaderField(0));
-//
-//		assertEquals("HTTP/1.1 200 OK", conn.getHeaderField(0));
-//		conn2.disconnect();
-//	}
-//	
-//	@Test
-//	public void testTrustConfirmationProvidersTrustNever() throws IOException, CMException {
-//		// Initially trust provider list is empty, we only verify by what is in 
-//		// Credential Manager's Truststore (and it does not contains the certificate for https://heater.cs.man.ac.uk:7443/)
-//		
-//		// Do not forget to initialise Taverna's/Credential Manager's SSLSocketFactory
-//		credentialManager.initializeSSL();
-//		
-//		URL url = new URL("https://heater.cs.man.ac.uk:7443/");
-//		HttpsURLConnection conn;
-//		conn = (HttpsURLConnection) url.openConnection();
-//		try{
-//			// This should fail
-//			conn.connect();
-//			fail("Connection to https://heater.cs.man.ac.uk:7443/ should be untrusted at this point.");
-//		}
-//		catch(SSLHandshakeException sslex){
-//			// expected to fail so all is good
-//		}
-//		finally{
-//			conn.disconnect();
-//		}
-//		
-//		// Add the trust confirmation provider that trusts no one
-//		List<TrustConfirmationProvider> trustProviders = new ArrayList<TrustConfirmationProvider>();
-//		credentialManager.setTrustConfirmationProviders(trustProviders);
-//		trustProviders = new ArrayList<TrustConfirmationProvider>();
-//		trustProviders.add(new TrustNeverTrustConfimationProvider());
-//		credentialManager.setTrustConfirmationProviders(trustProviders);
-//		
-//		HttpsURLConnection conn2 = (HttpsURLConnection) url.openConnection();
-//		try{
-//			// This should still fail as our trust providers are not trusting anyone
-//			// and we have not added heater's certificate to Credential Manager's Truststore
-//			conn2.connect();
-//			fail("Connection to https://heater.cs.man.ac.uk:7443/ should be untrusted at this point.");
-//		}
-//		catch(SSLHandshakeException sslex){
-//			// expected to fail so all is good
-//		}
-//		finally{
-//			conn2.disconnect();
-//		}
-//	}
-//	
-//	@Test
-//	public void testTrustConfirmationAddCertificateDirectly() throws CMException, IOException{
-//		// Initially trust provider list is empty, we only verify by what is in 
-//		// Credential Manager's Truststore (and it does not contains the certificate for https://heater.cs.man.ac.uk:7443/)
-//		
-//		// Do not forget to initialise Taverna's/Credential Manager's SSLSocketFactory
-//		credentialManager.initializeSSL();
-//		
-//		URL url = new URL("https://heater.cs.man.ac.uk:7443/");
-//		HttpsURLConnection conn;
-//		conn = (HttpsURLConnection) url.openConnection();
-//		try{
-//			// This should fail
-//			conn.connect();
-//			fail("Connection to https://heater.cs.man.ac.uk:7443/ should be untrusted at this point.");
-//		}
-//		catch(SSLHandshakeException sslex){
-//			// expected to fail so all is good
-//		}
-//		finally{
-//			conn.disconnect();
-//		}
-//		
-//		// Add heater's certificate directly to Credential Manager's Truststore
-//		
-//	}
+	//@Test
+	//@Ignore
+	public void testCredentialManager() throws CMException, URISyntaxException{
+		
+		// There are 9 service username and password entries in the Keystore
+		List<URI> serviceList = credentialManager.getServiceURIsForAllUsernameAndPasswordPairs();
+		assertTrue(serviceList.size() == 9);
+		System.out.println();
+		assertTrue(serviceList.contains(new URI("http://heater.cs.man.ac.uk:7070/axis/services/HelloService-DigestPassword-Timestamp?wsdl")));
+		
+		
+		String alias = credentialManager.addUsernameAndPasswordForService(usernamePassword,serviceURI);
+		
+		UsernamePassword testUsernamePassword = credentialManager.getUsernameAndPasswordForService(serviceURI, false, "");
+		assertNotNull(testUsernamePassword);
+		assertTrue(credentialManager.hasEntryWithAlias(CredentialManager.KeystoreType.KEYSTORE, alias));
+		assertTrue(Arrays.equals(usernamePassword.getPassword(), testUsernamePassword.getPassword()));
+		assertTrue(usernamePassword.getUsername().equals(testUsernamePassword.getUsername()));
+		assertTrue(credentialManager.getServiceURIsForAllUsernameAndPasswordPairs().size() == 10);
+
+		
+		// Get username and password for service http://heater.cs.man.ac.uk:7070/axis/services/HelloService-DigestPassword-Timestamp?wsdl
+		UsernamePassword usernameAndPassword = credentialManager
+				.getUsernameAndPasswordForService(
+						new URI(
+								"https://heater.cs.man.ac.uk:7443/axis/services/HelloService-PlaintextPassword?wsdl"),
+						true, "");
+		assertNotNull(usernameAndPassword);
+		assertEquals(usernameAndPassword.getPassword(), "testpasswd".toCharArray());
+		assertEquals(usernameAndPassword.getUsername(), "testuser");
+		
+		// There are 2 private/public key pair entries in the Keystore
+
+	}
 }

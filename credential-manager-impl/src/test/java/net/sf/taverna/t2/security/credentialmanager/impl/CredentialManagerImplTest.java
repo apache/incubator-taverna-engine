@@ -64,7 +64,6 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -80,12 +79,16 @@ import org.junit.Test;
  * (together with the installation instructions) from:
  * http://www.oracle.com/technetwork/java/javase/downloads/jce-6-download-429243.html
  * 
+ * An empty Keystore/Truststore is created before each test so we always start afresh 
+ * (see the setUp() method).
+ * s
  * @author Alex Nenadic
  *
  */
 public class CredentialManagerImplTest {
 	
 	private CredentialManagerImpl credentialManager;
+	private String masterPassword = "uber";
 	private DummyMasterPasswordProvider masterPasswordProvider;
 	private File credentialManagerDirectory;
 	
@@ -160,7 +163,6 @@ public class CredentialManagerImplTest {
 				
 			}
 		};
-		
 	}
 
 	/**
@@ -192,7 +194,7 @@ public class CredentialManagerImplTest {
 
 		// Create the dummy master password provider
 		masterPasswordProvider = new DummyMasterPasswordProvider();
-		masterPasswordProvider.setMasterPassword("uber");
+		masterPasswordProvider.setMasterPassword(masterPassword);
 		List<MasterPasswordProvider> masterPasswordProviders = new ArrayList<MasterPasswordProvider>();
 		masterPasswordProviders.add(masterPasswordProvider);
 		credentialManager.setMasterPasswordProviders(masterPasswordProviders);
@@ -225,11 +227,11 @@ public class CredentialManagerImplTest {
 	
 	/**
 	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#CredentialManagerImpl()}.
+	 * @throws CMException 
 	 */
 	@Test
-	@Ignore
-	public void testCredentialManagerImpl() {
-		fail("Not yet implemented");
+	public void testCredentialManagerImpl() throws CMException {
+		new CredentialManagerImpl();
 	}
 
 	/**
@@ -433,15 +435,27 @@ public class CredentialManagerImplTest {
 	}
 
 	/**
-	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#getKeyPairCertificateChain(java.lang.String)}.
+	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#getKeyPairsCertificateChain(java.lang.String)}.
 	 * @throws CMException 
 	 */
 	@Test
 	public void testGetKeyPairCertificateChain() throws CMException {
 		String alias = credentialManager.addKeyPair(privateKey, privateKeyCertChain);
-		Certificate[] keyPairCertificateChain = credentialManager.getKeyPairCertificateChain(alias);
+		Certificate[] keyPairCertificateChain = credentialManager.getKeyPairsCertificateChain(alias);
 		assertNotNull(keyPairCertificateChain);
 		assertTrue(Arrays.equals(privateKeyCertChain, keyPairCertificateChain));
+	}
+	
+	/**
+	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#getKeyPairsPrivateKey(java.lang.String)}.
+	 * @throws CMException 
+	 */
+	@Test
+	public void testGetKeyPairsPrivateKey() throws CMException {
+		String alias = credentialManager.addKeyPair(privateKey, privateKeyCertChain);
+		Key prvKey = credentialManager.getKeyPairsPrivateKey(alias);
+		assertNotNull(prvKey);
+		assertEquals(privateKey, prvKey);
 	}
 
 	/**
@@ -667,8 +681,20 @@ public class CredentialManagerImplTest {
 	 */
 	@Test
 	public void testChangeMasterPassword() throws CMException {
+		// Test the changeMasterPassword() mthod first to see if 
+		// it will initialize Credential Mabager properly
 		credentialManager.changeMasterPassword("blah");
 		credentialManager.confirmMasterPassword("blah");
+		
+		// Add new stuff - key pair and password entries - under the new master password
+		String keyPairAlias = credentialManager.addKeyPair(privateKey, privateKeyCertChain);
+		credentialManager.addUsernameAndPasswordForService(usernamePassword, serviceURI);
+		
+		// Change the master password again and try to retrieve the private key and password
+		credentialManager.changeMasterPassword("hlab");
+		assertArrayEquals(credentialManager.getUsernameAndPasswordForService(serviceURI, false, "").getPassword(), usernamePassword.getPassword());
+		assertEquals(privateKey, credentialManager.getKeyPairsPrivateKey(keyPairAlias));
+		assertTrue(Arrays.equals(privateKeyCertChain, credentialManager.getKeyPairsCertificateChain(keyPairAlias)));
 	}
 
 	/**

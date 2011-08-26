@@ -26,11 +26,16 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 import java.security.Security;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -39,8 +44,11 @@ import java.util.List;
 import java.util.Random;
 
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLHandshakeException;
+import javax.net.ssl.TrustManagerFactory;
 
 import net.sf.taverna.t2.security.credentialmanager.CMException;
 import net.sf.taverna.t2.security.credentialmanager.MasterPasswordProvider;
@@ -52,6 +60,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class HTTPSConnectionAndTrustConfirmationIT {
@@ -60,6 +69,7 @@ public class HTTPSConnectionAndTrustConfirmationIT {
 	private static CredentialManagerImpl credentialManager;
 	private static DummyMasterPasswordProvider masterPasswordProvider;
 	private static File credentialManagerDirectory;
+	//private static URL trustedCertficateFileURL = HTTPSConnectionAndTrustConfirmationIT.class.getResource("/security/tomcat_heater_certificate.pem");
 	
 	// Log4J Logger
 	//private static Logger logger = Logger.getLogger(HTTPSConnectionAndTrustConfirmationIT.class);
@@ -140,7 +150,7 @@ public class HTTPSConnectionAndTrustConfirmationIT {
 	
 	@After
 	// Clean up the credentialManagerDirectory we created for testing
-	public void cleanUp() throws NoSuchAlgorithmException, KeyManagementException{
+	public void cleanUp() throws NoSuchAlgorithmException, KeyManagementException, NoSuchProviderException, KeyStoreException, UnrecoverableKeyException, CertificateException, IOException{
 //		assertTrue(credentialManagerDirectory.exists());
 //		assertFalse(credentialManagerDirectory.listFiles().length == 0); // something was created there
 	
@@ -157,7 +167,22 @@ public class HTTPSConnectionAndTrustConfirmationIT {
 		// Reset the SSLSocketFactory in JVM so we always have a clean start
 		SSLContext sc = null;
 		sc = SSLContext.getInstance("SSLv3");
-		sc.init(null, null, new SecureRandom());
+		
+		// Create a "default" JSSE X509KeyManager.
+		KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509",
+				"SunJSSE");
+		KeyStore ks = KeyStore.getInstance("JKS");
+		ks.load(null, null);
+		kmf.init(ks, "blah".toCharArray());
+		
+		// Create a "default" JSSE X509TrustManager.
+		TrustManagerFactory tmf = TrustManagerFactory.getInstance(
+				"SunX509", "SunJSSE");
+		KeyStore ts = KeyStore.getInstance("JKS");
+		ts.load(null, null);
+		tmf.init(ts);
+		
+		sc.init(kmf.getKeyManagers(), tmf.getTrustManagers(), new SecureRandom());
 		SSLContext.setDefault(sc);		
 		HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 	}
@@ -180,6 +205,7 @@ public class HTTPSConnectionAndTrustConfirmationIT {
 		}
 		catch(SSLHandshakeException sslex){
 			// expected to fail so all is good
+			System.out.println(sslex.getStackTrace());
 		}
 		finally{
 			conn.disconnect();
@@ -187,16 +213,15 @@ public class HTTPSConnectionAndTrustConfirmationIT {
 		
 		// Add the trust confirmation provider that trusts everyone
 		List<TrustConfirmationProvider> trustProviders = new ArrayList<TrustConfirmationProvider>();
-		credentialManager.setTrustConfirmationProviders(trustProviders);
 		trustProviders.add(new TrustAlwaysTrustConfirmationProvider());
 		credentialManager.setTrustConfirmationProviders(trustProviders);
 		
 		HttpsURLConnection conn2 = (HttpsURLConnection) url.openConnection();
 		// This should work now
 		conn2.connect();
-		System.out.println(conn2.getHeaderField(0));
+		System.out.println("Status header: "+ conn2.getHeaderField(0));
 
-		assertEquals("HTTP/1.1 200 OK", conn.getHeaderField(0));
+		assertEquals("HTTP/1.1 200 OK", conn2.getHeaderField(0));
 		conn2.disconnect();
 	}
 	
@@ -272,10 +297,11 @@ public class HTTPSConnectionAndTrustConfirmationIT {
 		
 		// Load the test trusted certificate (belonging to heater.cs.man.ac.uk)
 		X509Certificate trustedCertficate;
-		URL trustedCertficateFileURL = CredentialManagerImplTest.class.getResource(
-				"/security/tomcat_heater_certificate.pem");
+		URL trustedCertficateFileURL = getClass().getResource("/security/tomcat_heater_certificate.pem");
+		System.out.println("testTrustConfirmationAddDeleteCertificateDirectly: trusted certficate file URL " + trustedCertficateFileURL);
 		File trustedCertFile = new File(trustedCertficateFileURL.getPath());		
 		FileInputStream inStream = new FileInputStream(trustedCertFile);
+		//InputStream inStream = getClass().getClassLoader().getResourceAsStream("security/tomcat_heater_certificate.pem");
 		CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
 		trustedCertficate = (X509Certificate) certFactory.generateCertificate(inStream);
 		try{

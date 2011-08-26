@@ -24,8 +24,9 @@ import net.sf.taverna.t2.security.credentialmanager.MasterPasswordProvider;
 
 public class DummyMasterPasswordProvider implements MasterPasswordProvider{
 
-	String masterPassword;
-	
+	private String masterPassword;
+	private int priority = 0;
+
 	@Override
 	public String getMasterPassword(boolean firstTime) {
 		return masterPassword;
@@ -33,12 +34,17 @@ public class DummyMasterPasswordProvider implements MasterPasswordProvider{
 
 	@Override
 	public int getProviderPriority() {
-		return 0;
+		return priority;
 	}
 	
 	@Override
 	public void setMasterPassword(String password) {
 		masterPassword = password;
+	}
+
+	@Override
+	public void setProviderPriority(int priority) {
+		this.priority = priority;
 	}
 	
 }
