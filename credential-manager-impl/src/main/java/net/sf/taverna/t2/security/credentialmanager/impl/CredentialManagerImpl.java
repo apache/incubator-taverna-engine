@@ -723,11 +723,11 @@ public class CredentialManagerImpl implements CredentialManager,
 						continue;
 					}
 					// We found it - get the username and password in the
-					// Keystrote associated with this service URI
+					// Keystore associated with this service URI
 					String alias = null;
 					alias = "password#" + mappedURI.toASCIIString();
 					passwordKey = (((SecretKeySpec) keystore.getKey(alias,
-							masterPassword.toCharArray())));
+							null)));
 					if (passwordKey == null) {
 						// Unexpected, it was just there in the map!
 						logger.warn("Could not find alias " + alias
@@ -1039,7 +1039,7 @@ public class CredentialManagerImpl implements CredentialManager,
 			}
 			try {
 				keystore.setKeyEntry(alias, passwordKey,
-						masterPassword.toCharArray(), null);
+						null, null);
 				saveKeystore(KeystoreType.KEYSTORE);
 				multiCaster.notify(new KeystoreChangedEvent(
 						KeystoreType.KEYSTORE));
@@ -1139,7 +1139,7 @@ public class CredentialManagerImpl implements CredentialManager,
 
 			try {
 				keystore.setKeyEntry(alias, privateKey,
-						masterPassword.toCharArray(), certs);
+						null, certs);
 				saveKeystore(KeystoreType.KEYSTORE);
 				multiCaster.notify(new KeystoreChangedEvent(
 						KeystoreType.KEYSTORE));
@@ -1232,10 +1232,10 @@ public class CredentialManagerImpl implements CredentialManager,
 
 				// Get the private key for the alias
 				PrivateKey privateKey = (PrivateKey) keystore.getKey(alias,
-						masterPassword.toCharArray());
+						null);
 
 				// Get the related public key's certificate chain
-				Certificate[] certChain = getKeyPairCertificateChain(alias);
+				Certificate[] certChain = getKeyPairsCertificateChain(alias);
 
 				// Create a new PKCS #12 keystore
 				KeyStore newPkcs12 = KeyStore.getInstance("PKCS12", "BC");
@@ -1324,7 +1324,7 @@ public class CredentialManagerImpl implements CredentialManager,
 	 * pair entries, but trusted certificate entries only.
 	 */
 	@Override
-	public Certificate[] getKeyPairCertificateChain(String alias)
+	public Certificate[] getKeyPairsCertificateChain(String alias)
 			throws CMException {
 
 		// Need to make sure we are initialized before we do anything else
@@ -1342,6 +1342,30 @@ public class CredentialManagerImpl implements CredentialManager,
 		}
 	}
 
+	/**
+	 * Get the private key part of a key pair entry from the Keystore given its alias. 
+	 * <p>
+	 * This method works for the Keystore only as the Truststore does not contain key pair
+	 * entries, but trusted certificate entries only.
+	 * @throws CMException 
+	 */
+	public Key getKeyPairsPrivateKey(String alias) throws CMException{
+		
+		// Need to make sure we are initialized before we do anything else
+		// as Credential Manager can be created but not initialized
+		initialize();
+
+		synchronized (keystore) {
+			try {
+				return keystore.getKey(alias, null);
+			} catch (Exception ex) {
+				String exMessage = "Credential Manager: Failed to fetch private key for the keypair from the Keystore";
+				logger.error(exMessage, ex);
+				throw new CMException(exMessage, ex);
+			}
+		}
+	}
+	
 	/**
 	 * Insert a trusted certificate entry in the Truststore with an alias
 	 * constructed as:

@@ -29,6 +29,7 @@ public class AskUserMasterPasswordProvider implements MasterPasswordProvider{
 //		// TODO Auto-generated method stub
 //		return false;
 //	}
+	private int priority = 100;
 
 	@Override
 	public String getMasterPassword(boolean firstTime) {
@@ -38,13 +39,17 @@ public class AskUserMasterPasswordProvider implements MasterPasswordProvider{
 
 	@Override
 	public int getProviderPriority() {
-		return 100;
+		return priority;
 	}
 
 	@Override
 	public void setMasterPassword(String password) {
-		// TODO Auto-generated method stub
-		
+		// TODO Auto-generated method stub	
+	}
+	
+	@Override
+	public void setProviderPriority(int priority) {
+		this.priority = priority;
 	}
 	
 }
