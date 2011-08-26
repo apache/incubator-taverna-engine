@@ -214,7 +214,16 @@ public interface CredentialManager {
 	 * This method works for the Keystore only as the Truststore does not contain key pair
 	 * entries, but trusted certificate entries only.
 	 */
-	public Certificate[] getKeyPairCertificateChain(String alias)
+	public Certificate[] getKeyPairsCertificateChain(String alias)
+			throws CMException;
+	
+	/**
+	 * Get the private key part of a key pair entry from the Keystore given its alias. 
+	 * <p>
+	 * This method works for the Keystore only as the Truststore does not contain key pair
+	 * entries, but trusted certificate entries only.
+	 */
+	public Key getKeyPairsPrivateKey(String alias)
 			throws CMException;
 
 	/**

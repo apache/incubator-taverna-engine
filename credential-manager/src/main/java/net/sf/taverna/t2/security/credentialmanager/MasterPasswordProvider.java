@@ -72,7 +72,7 @@ public interface MasterPasswordProvider {
 	public void setMasterPassword(String password);
 
 	/**
-	 * Priority of this provider.
+	 * Get the priority of this provider.
 	 * <p>
 	 * The providers with highest priority will be asked first, lower-priority
 	 * providers will be asked only if the higher ones either return
@@ -92,6 +92,14 @@ public interface MasterPasswordProvider {
 	 */
 	public int getProviderPriority();
 	
+	/**
+	 * Set the provider's priority that determines the order in which various 
+	 * master password providers will be invoked.
+	 *
+	 * @param priority provider's priority 
+	 */
+	public void setProviderPriority(int priority);
+
 	public class ProviderComparator implements Comparator<MasterPasswordProvider>{
 
 		@Override
