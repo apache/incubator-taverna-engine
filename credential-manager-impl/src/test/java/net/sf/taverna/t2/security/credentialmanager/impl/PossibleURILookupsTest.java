@@ -38,6 +38,8 @@ import net.sf.taverna.t2.security.credentialmanager.MasterPasswordProvider;
 import net.sf.taverna.t2.security.credentialmanager.ServiceUsernameAndPasswordProvider;
 import net.sf.taverna.t2.security.credentialmanager.TrustConfirmationProvider;
 
+import org.apache.commons.io.FileUtils;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -106,6 +108,21 @@ public class PossibleURILookupsTest {
 		// These can be empty
 		credentialManager.setJavaTruststorePasswordProviders(new ArrayList<JavaTruststorePasswordProvider>());
 		credentialManager.setTrustConfirmationProviders(new ArrayList<TrustConfirmationProvider>());
+	}
+	
+	@AfterClass
+	// Clean up the credentialManagerDirectory we created for testing
+	public static void cleanUp(){
+	
+		if (credentialManagerDirectory.exists()){
+			try {
+				FileUtils.deleteDirectory(credentialManagerDirectory);				
+				System.out.println("Deleting Credential Manager's directory: "
+						+ credentialManagerDirectory.getAbsolutePath());
+			} catch (IOException e) {
+				System.out.println(e.getStackTrace());
+			}	
+		}
 	}
 	
 	@Test

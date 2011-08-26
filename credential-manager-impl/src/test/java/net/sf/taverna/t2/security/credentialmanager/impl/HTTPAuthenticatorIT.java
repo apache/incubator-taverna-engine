@@ -44,6 +44,7 @@ import net.sf.taverna.t2.security.credentialmanager.ServiceUsernameAndPasswordPr
 import net.sf.taverna.t2.security.credentialmanager.TrustConfirmationProvider;
 import net.sf.taverna.t2.security.credentialmanager.UsernamePassword;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -154,6 +155,21 @@ public class HTTPAuthenticatorIT {
 		// These can be empty
 		credentialManager.setJavaTruststorePasswordProviders(new ArrayList<JavaTruststorePasswordProvider>());
 		credentialManager.setTrustConfirmationProviders(new ArrayList<TrustConfirmationProvider>());
+	}
+	
+	@AfterClass
+	// Clean up the credentialManagerDirectory we created for testing
+	public static void cleanUp(){
+
+		if (credentialManagerDirectory.exists()){
+			try {
+				FileUtils.deleteDirectory(credentialManagerDirectory);				
+				System.out.println("Deleting Credential Manager's directory: "
+						+ credentialManagerDirectory.getAbsolutePath());
+			} catch (IOException e) {
+				System.out.println(e.getStackTrace());
+			}	
+		}
 	}
 
 	@BeforeClass

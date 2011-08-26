@@ -21,52 +21,37 @@
 package net.sf.taverna.t2.security.credentialmanager.impl;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.Key;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.security.Security;
-import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Random;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLHandshakeException;
-
 import net.sf.taverna.t2.lang.observer.Observable;
 import net.sf.taverna.t2.lang.observer.Observer;
 import net.sf.taverna.t2.security.credentialmanager.CMException;
-import net.sf.taverna.t2.security.credentialmanager.CredentialManager;
-import net.sf.taverna.t2.security.credentialmanager.JavaTruststorePasswordProvider;
 import net.sf.taverna.t2.security.credentialmanager.KeystoreChangedEvent;
 import net.sf.taverna.t2.security.credentialmanager.MasterPasswordProvider;
-import net.sf.taverna.t2.security.credentialmanager.ServiceUsernameAndPasswordProvider;
 import net.sf.taverna.t2.security.credentialmanager.TrustConfirmationProvider;
 import net.sf.taverna.t2.security.credentialmanager.UsernamePassword;
 
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -119,8 +104,7 @@ public class CredentialManagerImplIT {
 	/**
 	 * @throws java.lang.Exception
 	 */
-	//@BeforeClass
-	//@Ignore
+	@BeforeClass
 	public static void setUpBeforeCLass() throws Exception {
 
 		Security.addProvider(new BouncyCastleProvider());
@@ -167,8 +151,37 @@ public class CredentialManagerImplIT {
 		
 		credentialManager = new CredentialManagerImpl();
 
-		// Set up a temporary "security" directory and copy the Keystore and Truststore files there
-		// so that we are working with existing keystores, not empty fresh ones
+//		// The code below sets up the Keystore and Truststore files and loads some data into them
+//		// and saves them into a temp directory. These files can later be used for testing the Credential
+//		// Manager with non-empty keystores.
+//		Random randomGenerator = new Random();
+//		String credentialManagerDirectoryPath = System
+//				.getProperty("java.io.tmpdir")
+//				+ System.getProperty("file.separator")
+//				+ "taverna-security-"
+//				+ randomGenerator.nextInt(1000000);
+//		System.out.println("Credential Manager's directory path: "
+//				+ credentialManagerDirectoryPath);
+//		credentialManagerDirectory = new File(credentialManagerDirectoryPath);
+//		credentialManager.setConfigurationDirectoryPath(credentialManagerDirectory);
+//		
+//		// Create the dummy master password provider
+//		masterPasswordProvider = new DummyMasterPasswordProvider();
+//		masterPasswordProvider.setMasterPassword(masterPassword);
+//		List<MasterPasswordProvider> masterPasswordProviders = new ArrayList<MasterPasswordProvider>();
+//		masterPasswordProviders.add(masterPasswordProvider);
+//		credentialManager.setMasterPasswordProviders(masterPasswordProviders);
+//		
+//		// Add some stuff into Credential Manager
+//		credentialManager.addUsernameAndPasswordForService(usernamePassword, serviceURI);
+//		credentialManager.addUsernameAndPasswordForService(usernamePassword2, serviceURI2);
+//		credentialManager.addUsernameAndPasswordForService(usernamePassword3, serviceURI3);
+//		credentialManager.addKeyPair(privateKey, privateKeyCertChain);
+//		credentialManager.addTrustedCertificate(trustedCertficate);
+
+		
+		// Set up a random temp directory and copy the test keystore files 
+		// from resources/security
 		Random randomGenerator = new Random();
 		String credentialManagerDirectoryPath = System
 				.getProperty("java.io.tmpdir")
@@ -181,12 +194,16 @@ public class CredentialManagerImplIT {
 		if (!credentialManagerDirectory.exists()) {
 			credentialManagerDirectory.mkdir();
 		}
-		URL keystoreFileURL = CredentialManagerImplIT.class.getResource("/security/taverna-keystore.ubr");
+		URL keystoreFileURL = CredentialManagerImplIT.class
+				.getResource("/security/taverna-keystore.ubr");
 		File keystoreFile = new File(keystoreFileURL.getPath());
-		File keystoreDestFile = new File(credentialManagerDirectory, "taverna-keystore.ubr");
-		URL truststroreFileURL = CredentialManagerImplIT.class.getResource("/security/taverna-truststore.ubr");
+		File keystoreDestFile = new File(credentialManagerDirectory,
+				"taverna-keystore.ubr");
+		URL truststroreFileURL = CredentialManagerImplIT.class
+				.getResource("/security/taverna-truststore.ubr");
 		File truststoreFile = new File(truststroreFileURL.getPath());
-		File truststoreDestFile = new File(credentialManagerDirectory, "taverna-truststore.ubr");
+		File truststoreDestFile = new File(credentialManagerDirectory,
+				"taverna-truststore.ubr");
 		FileUtils.copyFile(keystoreFile, keystoreDestFile);
 		FileUtils.copyFile(truststoreFile, truststoreDestFile);
 		credentialManager.setConfigurationDirectoryPath(credentialManagerDirectory);
@@ -196,22 +213,6 @@ public class CredentialManagerImplIT {
 		masterPasswordProvider.setMasterPassword(masterPassword);
 		List<MasterPasswordProvider> masterPasswordProviders = new ArrayList<MasterPasswordProvider>();
 		masterPasswordProviders.add(masterPasswordProvider);
-		credentialManager.setMasterPasswordProviders(masterPasswordProviders);
-		
-		// Add some stuff into Credential Manager
-		credentialManager.addUsernameAndPasswordForService(usernamePassword, serviceURI);
-		credentialManager.addUsernameAndPasswordForService(usernamePassword2, serviceURI2);
-		credentialManager.addUsernameAndPasswordForService(usernamePassword3, serviceURI3);
-		credentialManager.addKeyPair(privateKey, privateKeyCertChain);
-		
-		// Now start a new Credential Manager that will pick up the new directory with the
-		// preloaded keystores	
-		
-		credentialManager = new CredentialManagerImpl();
-		credentialManager.setConfigurationDirectoryPath(credentialManagerDirectory);
-		
-		// Continue setting up Credential Manager ...
-		
 		credentialManager.setMasterPasswordProviders(masterPasswordProviders);
 
 		// Set an empty list for trust confirmation providers
@@ -227,8 +228,7 @@ public class CredentialManagerImplIT {
 		credentialManager.addObserver(keystoreChangedObserver);
 	}
 	
-	//@AfterClass
-	//@Ignore
+	@AfterClass
 	// Clean up the credentialManagerDirectory we created for testing
 	public static void cleanUp(){
 
@@ -243,38 +243,23 @@ public class CredentialManagerImplIT {
 		}
 	}
 	
-	//@Test
-	//@Ignore
+	@Test
 	public void testCredentialManager() throws CMException, URISyntaxException{
 		
-		// There are 9 service username and password entries in the Keystore
+		// There are 3 service username and password entries in the Keystore
 		List<URI> serviceList = credentialManager.getServiceURIsForAllUsernameAndPasswordPairs();
-		assertTrue(serviceList.size() == 9);
+		assertTrue(serviceList.size() == 3);
 		System.out.println();
-		assertTrue(serviceList.contains(new URI("http://heater.cs.man.ac.uk:7070/axis/services/HelloService-DigestPassword-Timestamp?wsdl")));
+		assertTrue(serviceList.contains(serviceURI2));
 		
-		
-		String alias = credentialManager.addUsernameAndPasswordForService(usernamePassword,serviceURI);
-		
-		UsernamePassword testUsernamePassword = credentialManager.getUsernameAndPasswordForService(serviceURI, false, "");
-		assertNotNull(testUsernamePassword);
-		assertTrue(credentialManager.hasEntryWithAlias(CredentialManager.KeystoreType.KEYSTORE, alias));
-		assertTrue(Arrays.equals(usernamePassword.getPassword(), testUsernamePassword.getPassword()));
-		assertTrue(usernamePassword.getUsername().equals(testUsernamePassword.getUsername()));
-		assertTrue(credentialManager.getServiceURIsForAllUsernameAndPasswordPairs().size() == 10);
-
-		
-		// Get username and password for service http://heater.cs.man.ac.uk:7070/axis/services/HelloService-DigestPassword-Timestamp?wsdl
-		UsernamePassword usernameAndPassword = credentialManager
-				.getUsernameAndPasswordForService(
-						new URI(
-								"https://heater.cs.man.ac.uk:7443/axis/services/HelloService-PlaintextPassword?wsdl"),
-						true, "");
-		assertNotNull(usernameAndPassword);
-		assertEquals(usernameAndPassword.getPassword(), "testpasswd".toCharArray());
-		assertEquals(usernameAndPassword.getUsername(), "testuser");
+		credentialManager.deleteUsernameAndPasswordForService(serviceURI3);
+		assertFalse(credentialManager.hasUsernamePasswordForService(serviceURI3));
 		
 		// There are 2 private/public key pair entries in the Keystore
-
+		credentialManager.hasKeyPair(privateKey, privateKeyCertChain);
+		
+		// There is the heater's trusted certificate in the Truststore
+		credentialManager.hasTrustedCertificate(trustedCertficate);
+		
 	}
 }
