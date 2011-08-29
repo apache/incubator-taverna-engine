@@ -98,7 +98,7 @@ public interface MasterPasswordProvider {
 	 *
 	 * @param priority provider's priority 
 	 */
-	public void setProviderPriority(int priority);
+	//public void setProviderPriority(int priority);
 
 	public class ProviderComparator implements Comparator<MasterPasswordProvider>{
 

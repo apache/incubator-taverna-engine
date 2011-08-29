@@ -22,13 +22,12 @@ package net.sf.taverna.t2.security.credentialmanager.impl;
 
 import java.security.cert.X509Certificate;
 
-import net.sf.taverna.t2.security.credentialmanager.TrustConfirmation;
 import net.sf.taverna.t2.security.credentialmanager.TrustConfirmationProvider;
 
 public class AskUserTrustConfirmationProvider implements TrustConfirmationProvider {
 
 	@Override
-	public TrustConfirmation shouldTrustCertificate(X509Certificate[] chain) {
+	public Boolean shouldTrustCertificate(X509Certificate[] chain) {
 		// TODO Auto-generated method stub
 		return null;
 	}

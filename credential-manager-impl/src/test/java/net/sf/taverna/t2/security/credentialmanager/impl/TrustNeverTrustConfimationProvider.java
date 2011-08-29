@@ -22,18 +22,15 @@ package net.sf.taverna.t2.security.credentialmanager.impl;
 
 import java.security.cert.X509Certificate;
 
-import net.sf.taverna.t2.security.credentialmanager.TrustConfirmation;
 import net.sf.taverna.t2.security.credentialmanager.TrustConfirmationProvider;
 
 public class TrustNeverTrustConfimationProvider implements TrustConfirmationProvider{
 
 	@Override
-	public TrustConfirmation shouldTrustCertificate(X509Certificate[] chain) {
+	public Boolean shouldTrustCertificate(X509Certificate[] chain) {
 		
 		// Never trust
-		TrustConfirmation trustConfirmation = new TrustConfirmation();
-		trustConfirmation.setShouldTrust(false);
-		return trustConfirmation;
+		return Boolean.FALSE;
 	}
 
 }

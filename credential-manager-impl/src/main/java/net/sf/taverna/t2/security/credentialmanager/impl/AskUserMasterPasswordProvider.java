@@ -47,9 +47,9 @@ public class AskUserMasterPasswordProvider implements MasterPasswordProvider{
 		// TODO Auto-generated method stub	
 	}
 	
-	@Override
-	public void setProviderPriority(int priority) {
-		this.priority = priority;
-	}
+//	@Override
+//	public void setProviderPriority(int priority) {
+//		this.priority = priority;
+//	}
 	
 }

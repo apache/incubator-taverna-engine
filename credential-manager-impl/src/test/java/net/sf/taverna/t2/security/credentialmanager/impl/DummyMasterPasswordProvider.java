@@ -42,9 +42,9 @@ public class DummyMasterPasswordProvider implements MasterPasswordProvider{
 		masterPassword = password;
 	}
 
-	@Override
-	public void setProviderPriority(int priority) {
-		this.priority = priority;
-	}
+//	@Override
+//	public void setProviderPriority(int priority) {
+//		this.priority = priority;
+//	}
 	
 }

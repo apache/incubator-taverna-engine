@@ -40,6 +40,8 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Random;
 
+import javax.net.ssl.HttpsURLConnection;
+
 import net.sf.taverna.t2.lang.observer.Observable;
 import net.sf.taverna.t2.lang.observer.Observer;
 import net.sf.taverna.t2.security.credentialmanager.CMException;
@@ -95,10 +97,13 @@ public class CredentialManagerImplIT {
 			"/security/test-private-key-cert.p12");
 	private static final String privateKeyAndPKCS12KeystorePassword = "test"; // password for the test PKCS#12 keystore in resources
 	
-	private static X509Certificate trustedCertficate;
-	private static URL trustedCertficateFileURL = CredentialManagerImplTest.class.getResource(
+	private static X509Certificate trustedCertficateGoogle;
+	private static URL trustedCertficateGoogleFileURL = CredentialManagerImplTest.class.getResource(
 			"/security/google-trusted-certificate.pem");
-
+	private static X509Certificate trustedCertficateHeater;
+	private static URL trustedCertficateHeaterFileURL = CredentialManagerImplTest.class.getResource(
+			"/security/tomcat_heater_certificate.pem");
+	
 	private static Observer<KeystoreChangedEvent> keystoreChangedObserver;
 
 	/**
@@ -138,16 +143,26 @@ public class CredentialManagerImplIT {
 		inStream.close();
 		
 		// Load the test trusted certificate (belonging to *.Google.com)
-		File trustedCertFile = new File(trustedCertficateFileURL.getPath());		
+		File trustedCertFile = new File(trustedCertficateGoogleFileURL.getPath());		
 		inStream = new FileInputStream(trustedCertFile);
 		CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
-		trustedCertficate = (X509Certificate) certFactory.generateCertificate(inStream);
+		trustedCertficateGoogle = (X509Certificate) certFactory.generateCertificate(inStream);
 		try{
 			inStream.close();
 		}
 		catch (Exception e) {
 			// Ignore
 		}
+		// Load the test trusted certificate (belonging to heater.cs.man.ac.uk)
+		File trustedCertFile2 = new File(trustedCertficateHeaterFileURL.getPath());		
+		inStream = new FileInputStream(trustedCertFile2);
+		trustedCertficateHeater = (X509Certificate) certFactory.generateCertificate(inStream);
+		try{
+			inStream.close();
+		}
+		catch (Exception e) {
+			// Ignore
+		}	
 		
 		credentialManager = new CredentialManagerImpl();
 
@@ -244,7 +259,7 @@ public class CredentialManagerImplIT {
 	}
 	
 	@Test
-	public void testCredentialManager() throws CMException, URISyntaxException{
+	public void testCredentialManager() throws CMException, URISyntaxException, IOException{
 		
 		// There are 3 service username and password entries in the Keystore
 		List<URI> serviceList = credentialManager.getServiceURIsForAllUsernameAndPasswordPairs();
@@ -258,8 +273,25 @@ public class CredentialManagerImplIT {
 		// There are 2 private/public key pair entries in the Keystore
 		credentialManager.hasKeyPair(privateKey, privateKeyCertChain);
 		
-		// There is the heater's trusted certificate in the Truststore
-		credentialManager.hasTrustedCertificate(trustedCertficate);
+		// There are Google's and heater.cs.man.ac's trusted certificates in the Truststore
+		credentialManager.hasTrustedCertificate(trustedCertficateGoogle);
+		// Open a HTTPS connection to Google
+		URL url = new URL("https://code.google.com/p/taverna/");
+		HttpsURLConnection conn;
+		conn = (HttpsURLConnection) url.openConnection();
+		// This should work
+		conn.connect();
+		assertEquals("HTTP/1.1 200 OK", conn.getHeaderField(0));
+		conn.disconnect();
+		
+		credentialManager.hasTrustedCertificate(trustedCertficateHeater);
+		// Open a HTTPS connection to heater
+		url = new URL("https://heater.cs.man.ac.uk:7443/");
+		conn = (HttpsURLConnection) url.openConnection();
+		// This should work
+		conn.connect();
+		assertEquals("HTTP/1.1 200 OK", conn.getHeaderField(0));
+		conn.disconnect();
 		
 	}
 }

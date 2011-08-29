@@ -74,7 +74,6 @@ import net.sf.taverna.t2.security.credentialmanager.JavaTruststorePasswordProvid
 import net.sf.taverna.t2.security.credentialmanager.KeystoreChangedEvent;
 import net.sf.taverna.t2.security.credentialmanager.MasterPasswordProvider;
 import net.sf.taverna.t2.security.credentialmanager.ServiceUsernameAndPasswordProvider;
-import net.sf.taverna.t2.security.credentialmanager.TrustConfirmation;
 import net.sf.taverna.t2.security.credentialmanager.TrustConfirmationProvider;
 import net.sf.taverna.t2.security.credentialmanager.UsernamePassword;
 
@@ -252,17 +251,9 @@ public class CredentialManagerImpl implements CredentialManager,
 		}
 
 		boolean firstTime = !keystoreFile.exists();
-		
-//		if (keystoreFile != null && !keystoreFile.exists()){
-//			firstTime = true;
-//		}
-//		else if (credentialManagerDirectory.exists()){
-//			File ksFile = new File (credentialManagerDirectory, TRUSTSTORE_FILE_NAME);
-//			if (!ksFile.exists()){
-//				firstTime = true;
-//			}
-//		}
 
+		// Master password providers are already sorted by 
+		// their priority by the OSGi framework
 		for (MasterPasswordProvider masterPasswordProvider : masterPasswordProviders) {
 			String password = masterPasswordProvider
 					.getMasterPassword(firstTime);
@@ -629,7 +620,7 @@ public class CredentialManagerImpl implements CredentialManager,
 				}
 			}
 		}
-		String exMessage = "None (if any) MasterPasswordProviderSPI could unlock "
+		String exMessage = "None (if any) Java truststore password providers could unlock "
 				+ "Java's truststore. Creating a new empty "
 				+ "Truststore for Taverna.";
 		logger.error(exMessage);
@@ -1844,14 +1835,13 @@ public class CredentialManagerImpl implements CredentialManager,
 			// We use the lazy initialization of Credential Manager from inside
 			// the Taverna's SSLSocketFactory (i.e. KeyManager's and
 			// TrustManager's init() methods)
-			// when it is actually needed so do not instantiate it here. These
+			// when it is actually needed so do not initialize it here. These
 			// init() methods will not
 			// be called unledd a SSL connection is attempted somewhere from
 			// Taverna and it is inside them
 			// that we actually call the initialize() method on Credential
 			// Manager (and not from the Credential
-			// Manager's constructor hence lazy)
-			// getInstance();
+			// Manager's constructor - hence lazy)
 
 			// Create Taverna's SSLSocketFactory and set the SSL socket factory
 			// from HttpsURLConnectionS to use it
@@ -1861,8 +1851,8 @@ public class CredentialManagerImpl implements CredentialManager,
 	}
 
 	/**
-	 * Creates SSLSocketFactory based on Credential MAnager's Keystore and
-	 * Truststore but only initalises Credential Manager when one of the methods
+	 * Creates SSLSocketFactory based on Credential Manager's Keystore and
+	 * Truststore but only initalizes Credential Manager when one of the methods
 	 * needed for creating an HTTPS connection is invoked.
 	 */
 	private SSLSocketFactory createTavernaSSLSocketFactory() throws CMException {
@@ -1940,7 +1930,7 @@ public class CredentialManagerImpl implements CredentialManager,
 		// the master password window, which we want to avoid early on while
 		// Taverna is
 		// starting, unless we need to contact a secure service early, e.g. to
-		// populate Service Panel.
+		// populate the Service Panel.
 		private void init() throws Exception {
 
 			logger.info("Credential Manager: inside TavernaKeyManager.init()");
@@ -1991,7 +1981,7 @@ public class CredentialManagerImpl implements CredentialManager,
 				Socket socket) {
 			logger.info("Credential Manager: inside chooseClientAlias()");
 
-			// We have postponed initialisation until we are actually asked to
+			// We have postponed initialization until we are actually asked to
 			// do something
 			if (sunJSSEX509KeyManager == null) {
 				try {
@@ -2071,7 +2061,7 @@ public class CredentialManagerImpl implements CredentialManager,
 	}
 
 	/**
-	 * Taverna's Trust Manager is a customised X509TrustManager that initilises
+	 * Taverna's Trust Manager is a customised X509TrustManager that initilizes
 	 * Credential Manager only if certain methods on it are invoked, i.e. if
 	 * acces to Truststore is actually needed to authenticate the remote
 	 * service.
@@ -2086,7 +2076,7 @@ public class CredentialManagerImpl implements CredentialManager,
 		 */
 		X509TrustManager sunJSSEX509TrustManager = null;
 
-		// Lazy initialisation - unless we are actually asked to do some SSL
+		// Lazy initialization - unless we are actually asked to do some SSL
 		// stuff -
 		// do not initialise Credential Manager as it will most probably result
 		// in popping
@@ -2225,16 +2215,16 @@ public class CredentialManagerImpl implements CredentialManager,
 		String name = chain[0].getSubjectX500Principal().getName();
 		for (TrustConfirmationProvider trustConfirmationProvider : trustConfirmationProviders) {
 
-			TrustConfirmation confirmation = trustConfirmationProvider
+			Boolean trustConfirmation = trustConfirmationProvider
 					.shouldTrustCertificate(chain);
-			if (confirmation == null) {
+			if (trustConfirmation == null) {
 				// SPI can't say yes or no, try next one
 				continue;
 			}
-			if (confirmation.isShouldTrust()) {
+			if (trustConfirmation == Boolean.TRUE) {
 				try {
-					initialize(); // init the Credential Manager if needed
-					addTrustedCertificate((X509Certificate) chain[0]);
+					//initialize(); // init the Credential Manager if needed
+					addTrustedCertificate((X509Certificate) chain[0]); // this will initialize Cred. Manager
 					logger.info("Stored trusted certificate " + name);
 				} catch (CMException ex) {
 					logger.error("Credential Manager failed to "
@@ -2242,7 +2232,7 @@ public class CredentialManagerImpl implements CredentialManager,
 				}
 			}
 			if (logger.isDebugEnabled()) {
-				if (confirmation.isShouldTrust()) {
+				if (trustConfirmation == Boolean.TRUE) {
 					logger.debug("Trusting " + name + " according to "
 							+ trustConfirmationProvider);
 				} else {
@@ -2250,7 +2240,7 @@ public class CredentialManagerImpl implements CredentialManager,
 							+ trustConfirmationProvider);
 				}
 			}
-			return confirmation.isShouldTrust();
+			return trustConfirmation.booleanValue();
 		}
 		logger.warn("No TrustConfirmationProvider instances could confirm or deny the trust in "
 				+ name);

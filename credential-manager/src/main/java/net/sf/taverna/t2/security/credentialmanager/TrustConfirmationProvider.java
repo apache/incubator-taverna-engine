@@ -43,18 +43,16 @@ public interface TrustConfirmationProvider {
 	 * providers will be asked), or an instance of {@link TrustConfirmation}
 	 * confirming or denying if the certificate is to be trusted.
 	 * <p>
-	 * If {@link TrustConfirmation#isShouldSave()} and
-	 * {@link TrustConfirmation#isShouldTrust()} are <code>true</code>, the
-	 * Credential Manager will save the first certificate of the certificate
+	 * If the provider returns <code>true</code>, the
+	 * Credential Manager will also save the first certificate of the certificate
 	 * chain (chain[0]) in its Truststore so the user will not be asked next
 	 * time.
 	 * 
 	 * @param chain
 	 *            X509 certificate chain to confirm whether it is trusted or not
-	 * @return <code>null</code> if the provider does not have an opinion, or a
-	 *         {@link TrustConfirmation} which
-	 *         {@link TrustConfirmation#isShouldTrust()} determines if
-	 *         certificate is to be trusted.
+	 * @return <code>null</code> if the provider does not have an opinion, <code>true</code>
+	 *         if certificate is to be trusted and <code>false</code> if not.
 	 */
-	public TrustConfirmation shouldTrustCertificate(X509Certificate[] chain);
+	public Boolean shouldTrustCertificate(X509Certificate[] chain);
+	
 }

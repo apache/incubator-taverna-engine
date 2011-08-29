@@ -48,9 +48,9 @@ public class SimpleMasterPasswordProvider implements MasterPasswordProvider{
 		return priority;
 	}
 
-	@Override
-	public void setProviderPriority(int priority) {
-		this.priority = priority;		
-	}
+//	@Override
+//	public void setProviderPriority(int priority) {
+//		this.priority = priority;		
+//	}
 
 }
