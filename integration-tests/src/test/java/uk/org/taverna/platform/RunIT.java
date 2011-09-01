@@ -31,7 +31,6 @@ import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.security.credentialmanager.CredentialManager;
 import net.sf.taverna.t2.security.credentialmanager.MasterPasswordProvider;
-import net.sf.taverna.t2.security.credentialmanager.TrustConfirmation;
 import net.sf.taverna.t2.security.credentialmanager.TrustConfirmationProvider;
 import net.sf.taverna.t2.security.credentialmanager.UsernamePassword;
 
@@ -45,7 +44,6 @@ import uk.org.taverna.platform.run.api.RunProfile;
 import uk.org.taverna.platform.run.api.RunService;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.io.WorkflowBundleReader;
-import uk.org.taverna.scufl2.translator.t2flow.T2FlowParser;
 import uk.org.taverna.scufl2.translator.t2flow.T2FlowReader;
 
 public class RunIT extends PlatformIT {
@@ -60,12 +58,9 @@ public class RunIT extends PlatformIT {
 		bundleContext.registerService(
 				"net.sf.taverna.t2.security.credentialmanager.TrustConfirmationProvider",
 				new TrustConfirmationProvider() {
-					public TrustConfirmation shouldTrustCertificate(X509Certificate[] chain) {
-						TrustConfirmation trustConfirmation = new TrustConfirmation();
-						trustConfirmation.setShouldTrust(true);
-						return trustConfirmation;
+					public Boolean shouldTrustCertificate(X509Certificate[] chain) {
+						return true;
 					}
-
 				}, null);
 
 		if (referenceService == null) {
