@@ -33,10 +33,18 @@ import net.sf.taverna.t2.reference.T2Reference;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.springframework.osgi.test.AbstractConfigurableBundleCreatorTests;
 import org.springframework.osgi.test.platform.OsgiPlatform;
+import org.springframework.osgi.test.platform.Platforms;
 
 import uk.org.taverna.platform.report.WorkflowReport;
 
 public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
+
+	protected ReferenceService referenceService;
+
+	protected String getPlatformName() {
+		   return Platforms.FELIX;
+//		   return Platforms.EQUINOX;
+	}
 
 	@Override
 	protected OsgiPlatform createPlatform() {
@@ -49,11 +57,13 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 	@Override
 	protected String[] getTestBundlesNames() {
 		return new String[] {
+				"com.jcraft.jsch, com.springsource.com.jcraft.jsch, 0.1.41",
 				"com.thoughtworks.xstream, com.springsource.com.thoughtworks.xstream, 1.2.2",
 				"javax.activation, com.springsource.javax.activation, 1.1.1",
 				"javax.jms, com.springsource.javax.jms, 1.1.0",
 				"javax.mail, com.springsource.javax.mail, 1.4.0",
 				"javax.servlet, com.springsource.javax.servlet, 2.5.0",
+//				"javax.transaction, com.springsource.javax.transaction, 1.1.0",
 				"javax.wsdl, com.springsource.javax.wsdl, 1.6.1",
 				"javax.xml.rpc, com.springsource.javax.xml.rpc, 1.1.0",
 				"javax.xml.soap, com.springsource.javax.xml.soap, 1.3.0",
@@ -67,12 +77,14 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 				"org.apache.commons, com.springsource.org.apache.commons.httpclient, 3.1.0",
 				"org.apache.commons, com.springsource.org.apache.commons.io, 1.4.0",
 				"org.apache.commons, com.springsource.org.apache.commons.lang, 2.5.0",
+				"org.apache.commons, com.springsource.org.apache.commons.logging, 1.1.1",
 				"org.apache.commons, com.springsource.org.apache.commons.net, 1.4.1",
-				"org.apache.derby, derby, 10.5.3.0_1",
-//				"org.apache.httpcomponents, com.springsource.org.apache.httpcomponents.httpclient, 4.1.1",
-//				"org.apache.httpcore, com.springsource.org.apache.httpcomponents.httpcore, 4.1.0",
+//				"org.apache.derby, derby, 10.5.3.0_1",
+				"org.apache.httpcomponents, com.springsource.org.apache.httpcomponents.httpclient, 4.1.1",
+				"org.apache.httpcore, com.springsource.org.apache.httpcomponents.httpcore, 4.1",
 				"org.apache.log4j, com.springsource.org.apache.log4j, 1.2.16",
 				"org.apache.ws, com.springsource.org.apache.ws.security, 1.5.8",
+//				"org.apache.ws.security, wss4j, 1.5.12",
 				"org.apache.xml, com.springsource.org.apache.xml.resolver, 1.2.0",
 				"org.apache.xmlbeans, com.springsource.org.apache.xmlbeans, 2.4.0",
 				"org.apache.xmlcommons, com.springsource.org.apache.xmlcommons, 1.3.4",
@@ -82,6 +94,7 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 				"org.apache.xml, com.springsource.org.apache.xml.security, 1.4.2",
 				"org.beanshell, com.springsource.bsh, 2.0.0.b4",
 				"org.biomart, martservice, 2.0-SNAPSHOT",
+				"org.bouncycastle, bcprov-jdk16, 1.46",
 				"org.dom4j, com.springsource.org.dom4j, 1.6.1",
 				"org.hibernate, com.springsource.org.hibernate, 3.2.6.ga",
 				"org.jboss.javassist, com.springsource.javassist, 3.3.0.ga",
@@ -99,26 +112,32 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 				"org.xmlpull, com.springsource.org.xmlpull, 1.1.3.4-O",
 				"net.sf.taverna, wsdl-generic, 1.9-SNAPSHOT",
 				"net.sf.taverna.jedit, jedit-syntax, 2.2.4-SNAPSHOT",
+				"net.sf.taverna.t2.activities, apiconsumer-activity, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.activities, beanshell-activity, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.activities, biomart-activity, 2.0-SNAPSHOT",
 //				"net.sf.taverna.t2.activities, biomoby-activity, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.activities, dataflow-activity, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.activities, dependency-activity, 2.0-SNAPSHOT",
+				"net.sf.taverna.t2.activities, external-tool-activity, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.activities, localworker-activity, 2.0-SNAPSHOT",
-//				"net.sf.taverna.t2.activities, rshell-activity, 2.0-SNAPSHOT",
+				"net.sf.taverna.t2.activities, rest-activity, 2.0-SNAPSHOT",
+				"net.sf.taverna.t2.activities, rshell-activity, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.activities, soaplab-activity, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.activities, spreadsheet-import-activity, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.activities, stringconstant-activity, 2.0-SNAPSHOT",
-//				"net.sf.taverna.t2.activities, wsdl-activity, 2.0-SNAPSHOT",
+				"net.sf.taverna.t2.activities, wsdl-activity, 2.0-SNAPSHOT",
+				"net.sf.taverna.t2.activities, xpath-activity, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.core, workflowmodel-api, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.core, workflowmodel-core-extensions, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.core, workflowmodel-impl, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.core, reference-api, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.core, reference-core-extensions, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.core, reference-impl, 2.0-SNAPSHOT",
+				"net.sf.taverna.t2.infrastructure, appconfig, 3.0-SNAPSHOT",
 				"net.sf.taverna.t2.lang, ui, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.lang, observer, 2.0-SNAPSHOT",
-//				"net.sf.taverna.t2.security, credential-manager, 2.0-SNAPSHOT",
+				"net.sf.taverna.t2.security, credential-manager, 2.0-SNAPSHOT",
+				"net.sf.taverna.t2.security, credential-manager-impl, 2.0-SNAPSHOT",
 				"net.sourceforge.cglib, com.springsource.net.sf.cglib, 2.1.3",
 				"uk.org.taverna.platform, activity, 0.1.1-SNAPSHOT",
 				"uk.org.taverna.platform, execution, 0.1.1-SNAPSHOT",
@@ -135,9 +154,10 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 
 
 	public void testOsgiPlatformStarts() throws Exception {
-		System.out.println(bundleContext.getProperty(Constants.FRAMEWORK_VENDOR));
-		System.out.println(bundleContext.getProperty(Constants.FRAMEWORK_VERSION));
-		System.out.println(bundleContext.getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT));
+		System.out.println(Constants.FRAMEWORK_VENDOR + " = " + bundleContext.getProperty(Constants.FRAMEWORK_VENDOR));
+		System.out.println(Constants.FRAMEWORK_VERSION + " = " + bundleContext.getProperty(Constants.FRAMEWORK_VERSION));
+		System.out.println(Constants.FRAMEWORK_EXECUTIONENVIRONMENT + " = " + bundleContext.getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT));
+		System.out.println(Constants.OSGI_IMPL_VERSION_KEY + " = " + bundleContext.getProperty(Constants.OSGI_IMPL_VERSION_KEY));
 	}
 
 
@@ -171,13 +191,37 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 		}
 	}
 
-	public void waitForResult(Map<String, T2Reference> results, String port, WorkflowReport report)
+	public boolean checkResult(T2Reference result, String expectedResult) {
+		if (result.containsErrors()) {
+			printErrors(referenceService, result);
+			return false;
+		} else {
+			String resultValue = (String) referenceService.renderIdentifier(result, String.class, null);
+			if (resultValue.startsWith(expectedResult)) {
+				return true;
+			} else {
+				System.out.println("Expected: " + expectedResult + ", Actual: " + resultValue);
+				return false;
+			}
+		}
+	}
+
+	public void waitForResults(Map<String, T2Reference> results, WorkflowReport report, String... ports)
 	throws InterruptedException {
 		int wait = 0;
-		while (!results.containsKey(port) && wait++ < 10) {
+		while (!resultsReady(results, ports) && wait++ < 30) {
 			System.out.println(report);
 			Thread.sleep(500);
 		}
+	}
+
+	private boolean resultsReady(Map<String, T2Reference> results, String... ports) {
+		for (String port : ports) {
+			if (!results.containsKey(port)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 }

@@ -67,7 +67,7 @@ public class LocalExecutionIT extends PlatformIT {
 
 		Map<String, T2Reference> results = report.getOutputs();
 		assertNotNull(results);
-		waitForResult(results, "out", report);
+		waitForResults(results, report, "out");
 
 		String result = (String) referenceService.renderIdentifier(results.get("out"),
 				String.class, null);
@@ -100,7 +100,7 @@ public class LocalExecutionIT extends PlatformIT {
 		System.out.println(report);
 
 		Map<String, T2Reference> results = report.getOutputs();
-		waitForResult(results, "out", report);
+		waitForResults(results, report, "out");
 
 		T2Reference resultReference = results.get("out");
 		if (resultReference.containsErrors()) {
@@ -140,7 +140,7 @@ public class LocalExecutionIT extends PlatformIT {
 		System.out.println(report);
 
 		Map<String, T2Reference> results = report.getOutputs();
-		waitForResult(results, "out", report);
+		waitForResults(results, report, "out");
 
 		T2Reference resultReference = results.get("out");
 		if (resultReference.containsErrors()) {
