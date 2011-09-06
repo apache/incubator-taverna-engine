@@ -134,7 +134,6 @@
 	</distributionManagement>
 
   <modules>
-    <module>prov-taverna-activity</module>
     <module>prov-taverna-activity-ui</module>
     <module>prov-taverna-plugin</module>
   </modules>
