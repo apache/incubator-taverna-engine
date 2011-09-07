@@ -29,11 +29,6 @@
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>prov-taverna-activity</artifactId>
-			<version>1.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
 			<artifactId>prov-taverna-activity-ui</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
