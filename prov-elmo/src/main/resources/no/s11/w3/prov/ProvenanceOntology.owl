@@ -1,0 +1,246 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY owl2xml "http://www.w3.org/2006/12/owl2-xml#" >
+    <!ENTITY ProvenanceOntology "http://w3.org/ProvenanceOntology.owl#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+]>
+
+
+<rdf:RDF xmlns="http://w3.org/ProvenanceOntology.owl#"
+     xml:base="http://w3.org/ProvenanceOntology.owl"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:owl2xml="http://www.w3.org/2006/12/owl2-xml#"
+     xmlns:ProvenanceOntology="http://w3.org/ProvenanceOntology.owl#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <owl:Ontology rdf:about="">
+        <owl:versionInfo>0.01</owl:versionInfo>
+        <rdfs:comment
+            >This document is published by the Provenance Working Group (http://www.w3.org/2011/prov/wiki/Main_Page). 
+
+If you wish to make comments regarding this document, please send them to public-prov-wg@w3.org (subscribe, archives). All feedback is welcome.</rdfs:comment>
+    </owl:Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://w3.org/ProvenanceOntology.owl#Used -->
+
+    <owl:ObjectProperty rdf:about="#Used">
+        <rdf:type rdf:resource="&owl;AsymmetricProperty"/>
+        <rdf:type rdf:resource="&owl;IrreflexiveProperty"/>
+        <rdfs:range rdf:resource="#Entity"/>
+        <rdfs:domain rdf:resource="#ProcessExecution"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://w3.org/ProvenanceOntology.owl#isControlledBy -->
+
+    <owl:ObjectProperty rdf:about="#isControlledBy">
+        <rdf:type rdf:resource="&owl;AsymmetricProperty"/>
+        <rdf:type rdf:resource="&owl;IrreflexiveProperty"/>
+        <rdfs:range rdf:resource="#Agent"/>
+        <rdfs:domain rdf:resource="#ProcessExecution"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://w3.org/ProvenanceOntology.owl#isDerivedFrom -->
+
+    <owl:ObjectProperty rdf:about="#isDerivedFrom">
+        <rdf:type rdf:resource="&owl;AsymmetricProperty"/>
+        <rdf:type rdf:resource="&owl;IrreflexiveProperty"/>
+        <rdf:type rdf:resource="&owl;TransitiveProperty"/>
+        <rdfs:label rdf:datatype="&xsd;string"
+            >isDerivedFrom links two distinct characterized entities, where &quot;some characterized entity is transformed from, created from, or affected by another characterized entity.&quot;</rdfs:label>
+        <rdfs:range rdf:resource="#Entity"/>
+        <rdfs:domain rdf:resource="#Entity"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://w3.org/ProvenanceOntology.owl#isGeneratedBy -->
+
+    <owl:ObjectProperty rdf:about="#isGeneratedBy">
+        <rdf:type rdf:resource="&owl;AsymmetricProperty"/>
+        <rdf:type rdf:resource="&owl;IrreflexiveProperty"/>
+        <rdfs:label rdf:datatype="&xsd;string"
+            >isGeneratedBy links BOB with ProcessExecution representing that BOB was generated as a result of ProcessExecution</rdfs:label>
+        <rdfs:domain rdf:resource="#Entity"/>
+        <rdfs:range rdf:resource="#ProcessExecution"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://w3.org/ProvenanceOntology.owl#isParticipantIn -->
+
+    <owl:ObjectProperty rdf:about="#isParticipantIn">
+        <rdf:type rdf:resource="&owl;AsymmetricProperty"/>
+        <rdf:type rdf:resource="&owl;IrreflexiveProperty"/>
+        <rdfs:domain rdf:resource="#Entity"/>
+        <rdfs:range rdf:resource="#ProcessExecution"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://w3.org/ProvenanceOntology.owl#isPrecededBy -->
+
+    <owl:ObjectProperty rdf:about="#isPrecededBy">
+        <rdf:type rdf:resource="&owl;IrreflexiveProperty"/>
+        <rdf:type rdf:resource="&owl;ReflexiveProperty"/>
+        <rdf:type rdf:resource="&owl;TransitiveProperty"/>
+        <rdfs:domain rdf:resource="#ProcessExecution"/>
+        <rdfs:range rdf:resource="#ProcessExecution"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://w3.org/ProvenanceOntology.owl#ab -->
+
+    <owl:DatatypeProperty rdf:about="#ab">
+        <rdfs:domain rdf:resource="#Entity"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://w3.org/ProvenanceOntology.owl#Agent -->
+
+    <owl:Class rdf:about="#Agent">
+        <rdfs:label rdf:datatype="&xsd;string"
+            >An agent represents a characterized entity capable of activity.</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Entity"/>
+    </owl:Class>
+    
+
+
+    <!-- http://w3.org/ProvenanceOntology.owl#Entity -->
+
+    <owl:Class rdf:about="#Entity">
+        <rdfs:label rdf:datatype="&xsd;string"
+            >A BOB represents an identifiable characterized entity.</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://w3.org/ProvenanceOntology.owl#Location -->
+
+    <owl:Class rdf:about="#Location"/>
+    
+
+
+    <!-- http://w3.org/ProvenanceOntology.owl#ProcessExecution -->
+
+    <owl:Class rdf:about="#ProcessExecution">
+        <rdfs:label rdf:datatype="&xsd;string"
+            >ProcessExecution is defined to be &quot;an identifiable activity, which performs a piece of work.&quot;</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://w3.org/ProvenanceOntology.owl#ProvenanceContainer -->
+
+    <owl:Class rdf:about="#ProvenanceContainer">
+        <rdfs:label rdf:datatype="&xsd;string"
+            >ProvenanceContainer is defined to be an aggregation of provenance assertions. A provenance container SHOULD have an URI associated with it.</rdfs:label>
+        <rdfs:subClassOf rdf:resource="#Entity"/>
+    </owl:Class>
+    
+
+
+    <!-- http://w3.org/ProvenanceOntology.owl#Revision -->
+
+    <owl:Class rdf:about="#Revision">
+        <rdfs:label rdf:datatype="&xsd;string"
+            >Revision is defined as a modified version of a BOB.</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://w3.org/ProvenanceOntology.owl#Role -->
+
+    <owl:Class rdf:about="#Role">
+        <rdfs:subClassOf rdf:resource="#Entity"/>
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >Role is defined to be &quot;a function assumed by a BOB or an agent.&quot;</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://w3.org/ProvenanceOntology.owl#Time -->
+
+    <owl:Class rdf:about="#Time">
+        <rdfs:label rdf:datatype="&xsd;string"
+            >Time represents temporal information about entities in the Provenance model.</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/2002/07/owl#Thing -->
+
+    <owl:Class rdf:about="&owl;Thing"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Individuals
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://w3.org/ProvenanceOntology.owl#s -->
+
+    <Entity rdf:about="#s">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <ab rdf:datatype="&xsd;string">file.txt</ab>
+    </Entity>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 2.2.1.1138) http://owlapi.sourceforge.net -->
+
