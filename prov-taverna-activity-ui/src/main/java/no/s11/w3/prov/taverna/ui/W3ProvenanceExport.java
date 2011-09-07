@@ -8,8 +8,6 @@ import java.util.Map.Entry;
 import javax.xml.namespace.QName;
 
 import net.sf.taverna.raven.appconfig.ApplicationConfig;
-import net.sf.taverna.raven.appconfig.ApplicationRuntime;
-import net.sf.taverna.raven.spi.Profile;
 import net.sf.taverna.t2.provenance.api.ProvenanceAccess;
 import net.sf.taverna.t2.provenance.lineageservice.URIGenerator;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DataflowInvocation;
@@ -30,7 +28,6 @@ import org.openrdf.repository.contextaware.ContextAwareConnection;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.helpers.OrganizedRDFWriter;
 import org.openrdf.rio.n3.N3Writer;
-import org.openrdf.rio.rdfxml.util.OrganizedRDFXMLWriter;
 
 public class W3ProvenanceExport {
 
@@ -86,11 +83,11 @@ public class W3ProvenanceExport {
 		Agent tavernaAgent = elmoManager.create(
 				new QName("http://ns.taverna.org.uk/2011/software/", versionName), Agent.class);
 		ProcessExecution storeProvenance = elmoManager.create(ProcessExecution.class);
-		storeProvenance.getProvenanceOntologyIsControlledBy().add(tavernaAgent);
-		tavernaAgent.getProvenanceOntologyIsParticipantIn().add(storeProvenance);
-		provContainer.getProvenanceOntologyIsGeneratedBy().add(storeProvenance);
+		storeProvenance.getProvIsControlledBy().add(tavernaAgent);
+		tavernaAgent.getProvIsParticipantIn().add(storeProvenance);
+		provContainer.getProvIsGeneratedBy().add(storeProvenance);
 		// The store-provenance-process used the workflow run as input
-		storeProvenance.getProvenanceOntologyUsed().add(elmoManager.create(new QName(runURI), Entity.class, ProcessExecution.class));
+		storeProvenance.getProvUsed().add(elmoManager.create(new QName(runURI), Entity.class, ProcessExecution.class));
 	//	elmoManager.persist(provContainer);
 		//elmoManager.persist(storeProvenance);
 	
@@ -98,9 +95,9 @@ public class W3ProvenanceExport {
 		DataflowInvocation dataflowInvocation = provenanceAccess.getDataflowInvocation(workflowRunId);
 		//String dataflowURI = uriGenerator.makeDataflowInvocationURI(workflowRunId, dataflowInvocation.getDataflowInvocationId());
 		ProcessExecution wfProcess = elmoManager.create(new QName(runURI), ProcessExecution.class, Agent.class);
-		wfProcess.getProvenanceOntologyIsControlledBy().add(tavernaAgent);
+		wfProcess.getProvIsControlledBy().add(tavernaAgent);
 		// inverse property
-		tavernaAgent.getProvenanceOntologyIsParticipantIn().add(wfProcess);
+		tavernaAgent.getProvIsParticipantIn().add(wfProcess);
 		// TODO: start, stop?
 
 		// Workflow inputs and outputs
@@ -130,9 +127,9 @@ public class W3ProvenanceExport {
 			ProcessExecution process = elmoManager.create(
 					new QName(processURI), ProcessExecution.class);
 			Agent parentProcess = elmoManager.designate(new QName(parentURI), Agent.class, ProcessExecution.class);
-			process.getProvenanceOntologyIsControlledBy().add(parentProcess);
+			process.getProvIsControlledBy().add(parentProcess);
 			// inverse property
-			parentProcess.getProvenanceOntologyIsParticipantIn().add(process);
+			parentProcess.getProvIsParticipantIn().add(process);
 			
 			// TODO: start, stop?
 
@@ -160,7 +157,7 @@ public class W3ProvenanceExport {
 		connection.setNamespace("scufl2",
 				"http://ns.taverna.org.uk/2010/scufl2#");
 		connection
-				.setNamespace("prov", "http://w3.org/ProvenanceOntology.owl#");
+				.setNamespace("prov", "http://w3.org/Prov.owl#");
 		connection.setNamespace("owl", "http://www.w3.org/2002/07/owl#");
 		connection.export(new OrganizedRDFWriter(new N3Writer(outStream)));
 
@@ -189,13 +186,13 @@ public class W3ProvenanceExport {
 					.create(new QName(dataURI), Entity.class);
 
 			if (direction == Direction.INPUTS) {
-				process.getProvenanceOntologyUsed().add(entity);
+				process.getProvUsed().add(entity);
 				// This is the inverse super-property, we should not need to do
 				// this
 				// if inferencing is turned on
-				entity.getProvenanceOntologyIsParticipantIn().add(process);
+				entity.getProvIsParticipantIn().add(process);
 			} else {
-				entity.getProvenanceOntologyIsGeneratedBy().add(process);
+				entity.getProvIsGeneratedBy().add(process);
 				// No equivalent inverse property in process!
 			}
 			String portURI = uriGenerator.makePortURI(port.getWorkflowId(),
