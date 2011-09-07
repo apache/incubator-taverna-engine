@@ -125,10 +125,12 @@ If you wish to make comments regarding this document, please send them to public
 
     <!-- http://w3.org/ProvenanceOntology.owl#ab -->
 
+<!-- Not sure what 'ab' is meant to do!
     <owl:DatatypeProperty rdf:about="#ab">
         <rdfs:domain rdf:resource="#Entity"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
+ -->
     
 
 
@@ -234,10 +236,12 @@ If you wish to make comments regarding this document, please send them to public
 
     <!-- http://w3.org/ProvenanceOntology.owl#s -->
 
+<!--  Examples should not be included here
     <Entity rdf:about="#s">
         <rdf:type rdf:resource="&owl;Thing"/>
         <ab rdf:datatype="&xsd;string">file.txt</ab>
     </Entity>
+ -->
 </rdf:RDF>
 
 
