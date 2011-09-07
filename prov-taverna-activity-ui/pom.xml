@@ -14,7 +14,7 @@
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>prov-elmo</artifactId>
-			<version>0.1-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.taverna.t2.ui-api</groupId>
@@ -35,6 +35,16 @@
 			<groupId>net.sf.taverna.t2.ui-impl</groupId>
 			<artifactId>activity-tools</artifactId>
 			<version>${t2.ui.impl.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.taverna.t2.core</groupId>
+			<artifactId>provenanceconnector</artifactId>
+			<version>${t2.core.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.taverna.t2.ui-components</groupId>
+			<artifactId>results-view</artifactId>
+			<version>${t2.ui.components.version}</version>
 		</dependency>
 
 		<!-- Workbench runtime for testing from IDE, remove if not using TavernaWorkbenchWithExamplePlugin.main() -->
