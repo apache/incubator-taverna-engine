@@ -98,7 +98,7 @@
 			<!-- The repository that your jars are deployed to -->
 			<id>my-repository</id>
 			<name>My Repository</name>
-			<url>http://repository.example.com/maven/repository</url>
+			<url>http://stain.github.com/taverna-prov/</url>
 		</repository>
 		<repository>
 			<!-- The repository that your snapshot jars are deployed to -->
@@ -108,7 +108,7 @@
 			<snapshots/>
 			<id>my-snapshot-repository</id>
 			<name>My snapshot Repository</name>
-			<url>file:///tmp/test-plugins/</url>
+			<url>http://stain.github.com/taverna-prov/</url>
 		</repository>
 	</repositories>
 
@@ -123,14 +123,14 @@
 	<!-- The location of your plugin site -->
 	<distributionManagement>
 		<repository>
-			<id>my-plugin-site</id>
+			<id>my-repository</id>
 			<name>My Plugin Site</name>
-			<url>scpexe://repository.example.com/www/taverna/plugins/</url>
+			<url>file:///media/sf_src/provenance-wg/prov-taverna-pages/</url>
 		</repository>
 		<snapshotRepository>
-			<id>my-test-plugin-site</id>
+			<id>my-test-repository</id>
 			<name>My Test Plugin Site</name>
-			<url>file:///tmp/test-plugins/</url>
+			<url>file:///media/sf_src/provenance-wg/prov-taverna-pages/</url>
 		</snapshotRepository>
 	</distributionManagement>
 
