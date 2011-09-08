@@ -7,46 +7,12 @@
 		<artifactId>prov-taverna</artifactId>
 		<version>1.0-SNAPSHOT</version>
 	</parent>
-	<artifactId>prov-taverna-activity-ui</artifactId>
+	<artifactId>prov-taverna-ui</artifactId>
 	<name>Example Taverna activity UI bindings</name>
 
 	<dependencies>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>prov-elmo</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.taverna.t2.ui-api</groupId>
-			<artifactId>activity-palette-api</artifactId>
-			<version>${t2.ui.api.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.taverna.t2.ui-api</groupId>
-			<artifactId>menu-api</artifactId>
-			<version>${t2.ui.api.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.taverna.t2.ui-api</groupId>
-			<artifactId>contextual-views-api</artifactId>
-			<version>${t2.ui.api.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.taverna.t2.ui-impl</groupId>
-			<artifactId>activity-tools</artifactId>
-			<version>${t2.ui.impl.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.taverna.t2.core</groupId>
-			<artifactId>provenanceconnector</artifactId>
-			<version>${t2.core.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.taverna.t2.ui-components</groupId>
-			<artifactId>results-view</artifactId>
-			<version>${t2.ui.components.version}</version>
-		</dependency>
-
+	
+	
 		<!-- Workbench runtime for testing from IDE, remove if not using TavernaWorkbenchWithExamplePlugin.main() -->
 		<dependency>
 			<groupId>net.sf.taverna.t2.taverna-workbench</groupId>
@@ -138,6 +104,41 @@
 				 	<artifactId>perspective-myexperiment</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+	
+	
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>prov-elmo</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.taverna.t2.ui-api</groupId>
+			<artifactId>menu-api</artifactId>
+			<version>${t2.ui.api.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.taverna.t2.ui-api</groupId>
+			<artifactId>contextual-views-api</artifactId>
+			<version>${t2.ui.api.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.taverna.t2.core</groupId>
+			<artifactId>provenanceconnector</artifactId>
+			<version>${t2.core.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.taverna.t2.ui-components</groupId>
+			<artifactId>results-view</artifactId>
+			<version>${t2.ui.components.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>1.4</version>
+			<type>jar</type>
+			<scope>compile</scope>
 		</dependency>
 	</dependencies>
 </project>
