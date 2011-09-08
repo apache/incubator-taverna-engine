@@ -194,7 +194,7 @@ public class SaveProvAction extends SaveAllResultsSPI {
 
 	@Override
 	protected String getFilter() {
-		return "ttl";
+		return "rdf";
 	}
 	
 }

@@ -28,6 +28,7 @@ import org.openrdf.repository.contextaware.ContextAwareConnection;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.helpers.OrganizedRDFWriter;
 import org.openrdf.rio.n3.N3Writer;
+import org.openrdf.rio.rdfxml.util.RDFXMLPrettyWriter;
 
 public class W3ProvenanceExport {
 
@@ -39,7 +40,7 @@ public class W3ProvenanceExport {
 	private static ProvenanceURIGenerator uriGenerator = new ProvenanceURIGenerator();
 
 	public SesameManager makeElmoManager() {
-		ElmoModule module = new ElmoModule();
+		ElmoModule module = new ElmoModule(getClass().getClassLoader());
 		SesameManagerFactory factory = new SesameManagerFactory(module);
 		factory.setInferencingEnabled(true);
 		return factory.createElmoManager();
@@ -159,7 +160,8 @@ public class W3ProvenanceExport {
 		connection
 				.setNamespace("prov", "http://w3.org/Prov.owl#");
 		connection.setNamespace("owl", "http://www.w3.org/2002/07/owl#");
-		connection.export(new OrganizedRDFWriter(new N3Writer(outStream)));
+		connection.export(new RDFXMLPrettyWriter(outStream));
+		//connection.export(new OrganizedRDFWriter(new N3Writer(outStream)));
 
 	}
 

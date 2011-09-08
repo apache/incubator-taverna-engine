@@ -263,13 +263,6 @@
 			<artifactId>elmo-codegen</artifactId>
 			<version>${elmo.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-rio-n3</artifactId>
-			<version>${sesame.version}</version>
-		</dependency>
-		
-
 	</dependencies>
 	<description>W3C Provenance WG Prov ontology bindings for Sesame/Elmo</description>
 	<repositories>
