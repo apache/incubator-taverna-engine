@@ -158,7 +158,7 @@ public class W3ProvenanceExport {
 		connection.setNamespace("scufl2",
 				"http://ns.taverna.org.uk/2010/scufl2#");
 		connection
-				.setNamespace("prov", "http://w3.org/Prov.owl#");
+				.setNamespace("prov", "http://w3.org/ProvenanceOntology.owl#");
 		connection.setNamespace("owl", "http://www.w3.org/2002/07/owl#");
 		connection.export(new RDFXMLPrettyWriter(outStream));
 		//connection.export(new OrganizedRDFWriter(new N3Writer(outStream)));
