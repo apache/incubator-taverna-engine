@@ -1830,6 +1830,7 @@ public class CredentialManagerImpl implements CredentialManager,
 		saveKeystore(KeystoreType.TRUSTSTORE);
 	}
 
+	@Override
 	public void initializeSSL() throws CMException {
 		if (tavernaSSLSocketFactory == null) {
 			// We use the lazy initialization of Credential Manager from inside
@@ -1904,6 +1905,7 @@ public class CredentialManagerImpl implements CredentialManager,
 		return tavernaSSLSocketFactory;
 	}
 
+	@Override
 	public SSLSocketFactory getTavernaSSLSocketFactory() throws CMException {
 		if (tavernaSSLSocketFactory == null) {
 			return createTavernaSSLSocketFactory();

@@ -29,6 +29,8 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.net.ssl.SSLSocketFactory;
+
 import net.sf.taverna.t2.lang.observer.Observer;
 
 /**
@@ -334,5 +336,22 @@ public interface CredentialManager {
 	 *         <code>false</code> otherwise.
 	 */
 	public boolean resetAuthCache();
+	
+	/**
+	 * Set the default SSLContext to use Credential Manager's Keystore and Truststore
+	 * for managing SSL connections from Taverna and also set HttpsURLConnection's 
+	 * default SSLSocketFactory to use the one from the just configured SSLContext, i.e.
+	 * backed by Credential Manager's Keystore and Truststore.
+	 * 
+	 * @throws CMException
+	 */
+	public void initializeSSL() throws CMException;
+
+	/**
+	 * Get Taverna's SSLSocketFactory backed by Credential Manager's Keystore and Truststore.
+	 * @return
+	 * @throws CMException
+	 */
+	public SSLSocketFactory getTavernaSSLSocketFactory() throws CMException;
 
 }
