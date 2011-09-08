@@ -80,13 +80,12 @@ public class W3ProvenanceExport {
 		//elmoManager.persist(provContainer);
 		
 		// Mini-provenance about this provenance trace
-		String versionName = ApplicationConfig.getInstance().getName();
+ 		String versionName = ApplicationConfig.getInstance().getName();
 		Agent tavernaAgent = elmoManager.create(
 				new QName("http://ns.taverna.org.uk/2011/software/", versionName), Agent.class);
 		ProcessExecution storeProvenance = elmoManager.create(ProcessExecution.class);
-		storeProvenance.getProvIsControlledBy().add(tavernaAgent);
-		tavernaAgent.getProvIsParticipantIn().add(storeProvenance);
-		provContainer.getProvIsGeneratedBy().add(storeProvenance);
+		storeProvenance.getProvWasControlledBy().add(tavernaAgent);
+		provContainer.getProvWasGeneratedBy().add(storeProvenance);
 		// The store-provenance-process used the workflow run as input
 		storeProvenance.getProvUsed().add(elmoManager.create(new QName(runURI), Entity.class, ProcessExecution.class));
 	//	elmoManager.persist(provContainer);
@@ -96,9 +95,7 @@ public class W3ProvenanceExport {
 		DataflowInvocation dataflowInvocation = provenanceAccess.getDataflowInvocation(workflowRunId);
 		//String dataflowURI = uriGenerator.makeDataflowInvocationURI(workflowRunId, dataflowInvocation.getDataflowInvocationId());
 		ProcessExecution wfProcess = elmoManager.create(new QName(runURI), ProcessExecution.class, Agent.class);
-		wfProcess.getProvIsControlledBy().add(tavernaAgent);
-		// inverse property
-		tavernaAgent.getProvIsParticipantIn().add(wfProcess);
+		wfProcess.getProvWasControlledBy().add(tavernaAgent);
 		// TODO: start, stop?
 
 		// Workflow inputs and outputs
@@ -128,9 +125,7 @@ public class W3ProvenanceExport {
 			ProcessExecution process = elmoManager.create(
 					new QName(processURI), ProcessExecution.class);
 			Agent parentProcess = elmoManager.designate(new QName(parentURI), Agent.class, ProcessExecution.class);
-			process.getProvIsControlledBy().add(parentProcess);
-			// inverse property
-			parentProcess.getProvIsParticipantIn().add(process);
+			process.getProvWasControlledBy().add(parentProcess);
 			
 			// TODO: start, stop?
 
@@ -189,12 +184,8 @@ public class W3ProvenanceExport {
 
 			if (direction == Direction.INPUTS) {
 				process.getProvUsed().add(entity);
-				// This is the inverse super-property, we should not need to do
-				// this
-				// if inferencing is turned on
-				entity.getProvIsParticipantIn().add(process);
 			} else {
-				entity.getProvIsGeneratedBy().add(process);
+				entity.getProvWasGeneratedBy().add(process);
 				// No equivalent inverse property in process!
 			}
 			String portURI = uriGenerator.makePortURI(port.getWorkflowId(),

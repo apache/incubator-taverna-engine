@@ -7,97 +7,52 @@
 	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
 <prov:ProvenanceContainer rdf:about="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/provenanceContainer"/>
 <prov:Agent rdf:about="http://ns.taverna.org.uk/2011/software/taverna-2.3-SNAPSHOT-dev"/>
-<prov:ProcessExecution rdf:nodeID="node1694kan7ax1">
-	<prov:isControlledBy>
-		<rdf:Description rdf:about="http://ns.taverna.org.uk/2011/software/taverna-2.3-SNAPSHOT-dev">
-			<prov:isParticipantIn rdf:nodeID="node1694kan7ax1"/>
-		</rdf:Description>
-	</prov:isControlledBy>
+<prov:ProcessExecution rdf:nodeID="node1695bh9elx1">
+	<prov:wasControlledBy rdf:resource="http://ns.taverna.org.uk/2011/software/taverna-2.3-SNAPSHOT-dev"/>
 </prov:ProcessExecution>
 <rdf:Description rdf:about="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/provenanceContainer">
-	<prov:isGeneratedBy rdf:nodeID="node1694kan7ax1"/>
+	<prov:wasGeneratedBy rdf:nodeID="node1695bh9elx1"/>
 </rdf:Description>
 <prov:Entity rdf:about="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/">
 	<rdf:type rdf:resource="http://w3.org/ProvenanceOntology.owl#ProcessExecution"/>
 </prov:Entity>
-<rdf:Description rdf:nodeID="node1694kan7ax1">
-	<prov:Used>
+<rdf:Description rdf:nodeID="node1695bh9elx1">
+	<prov:used>
 		<prov:Agent rdf:about="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/">
-			<prov:isControlledBy>
-				<rdf:Description rdf:about="http://ns.taverna.org.uk/2011/software/taverna-2.3-SNAPSHOT-dev">
-					<prov:isParticipantIn rdf:resource="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/"/>
-				</rdf:Description>
-			</prov:isControlledBy>
+			<prov:wasControlledBy rdf:resource="http://ns.taverna.org.uk/2011/software/taverna-2.3-SNAPSHOT-dev"/>
 		</prov:Agent>
-	</prov:Used>
+	</prov:used>
 </rdf:Description>
 <prov:Entity rdf:about="http://ns.taverna.org.uk/2011/data/2613aab1-dfe9-4a17-a4be-7589f5d388d6/ref/153277f1-5e4f-43fc-968d-ab3a8b038676"/>
 <rdf:Description rdf:about="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/">
-	<prov:Used>
-		<rdf:Description rdf:about="http://ns.taverna.org.uk/2011/data/2613aab1-dfe9-4a17-a4be-7589f5d388d6/ref/153277f1-5e4f-43fc-968d-ab3a8b038676">
-			<prov:isParticipantIn rdf:resource="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/"/>
-		</rdf:Description>
-	</prov:Used>
+	<prov:used rdf:resource="http://ns.taverna.org.uk/2011/data/2613aab1-dfe9-4a17-a4be-7589f5d388d6/ref/153277f1-5e4f-43fc-968d-ab3a8b038676"/>
 </rdf:Description>
 <prov:Entity rdf:about="http://ns.taverna.org.uk/2011/data/2613aab1-dfe9-4a17-a4be-7589f5d388d6/ref/a2f5a305-aa3d-4023-b592-23556024f976">
-	<prov:isGeneratedBy rdf:resource="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/"/>
+	<prov:wasGeneratedBy rdf:resource="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/"/>
 </prov:Entity>
 <prov:Entity rdf:about="http://ns.taverna.org.uk/2011/data/2613aab1-dfe9-4a17-a4be-7589f5d388d6/ref/64ad0eee-3986-4113-b56c-b60a4583724d">
-	<prov:isGeneratedBy rdf:resource="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/"/>
+	<prov:wasGeneratedBy rdf:resource="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/"/>
 </prov:Entity>
 <prov:ProcessExecution rdf:about="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/f209526b-75dc-47d4-bedf-9d88d3841535/">
-	<prov:isControlledBy>
-		<rdf:Description rdf:about="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/">
-			<prov:isParticipantIn rdf:resource="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/f209526b-75dc-47d4-bedf-9d88d3841535/"/>
-		</rdf:Description>
-	</prov:isControlledBy>
+	<prov:wasControlledBy rdf:resource="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/"/>
 </prov:ProcessExecution>
 <prov:Entity rdf:about="http://ns.taverna.org.uk/2011/data/2613aab1-dfe9-4a17-a4be-7589f5d388d6/ref/26e16173-109d-4d1f-ae3c-ca61f5b7d196">
-	<prov:isGeneratedBy rdf:resource="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/f209526b-75dc-47d4-bedf-9d88d3841535/"/>
+	<prov:wasGeneratedBy rdf:resource="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/f209526b-75dc-47d4-bedf-9d88d3841535/"/>
 </prov:Entity>
 <prov:ProcessExecution rdf:about="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/685ee1e1-0228-4d4d-b60c-c8b8d9b48ebe/">
-	<prov:isControlledBy>
-		<rdf:Description rdf:about="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/">
-			<prov:isParticipantIn>
-				<rdf:Description rdf:about="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/685ee1e1-0228-4d4d-b60c-c8b8d9b48ebe/">
-					<prov:Used>
-						<rdf:Description rdf:about="http://ns.taverna.org.uk/2011/data/2613aab1-dfe9-4a17-a4be-7589f5d388d6/ref/26e16173-109d-4d1f-ae3c-ca61f5b7d196">
-							<prov:isParticipantIn>
-								<rdf:Description rdf:about="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/685ee1e1-0228-4d4d-b60c-c8b8d9b48ebe/">
-									<prov:Used>
-										<rdf:Description rdf:about="http://ns.taverna.org.uk/2011/data/2613aab1-dfe9-4a17-a4be-7589f5d388d6/ref/153277f1-5e4f-43fc-968d-ab3a8b038676">
-											<prov:isParticipantIn rdf:resource="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/685ee1e1-0228-4d4d-b60c-c8b8d9b48ebe/"/>
-										</rdf:Description>
-									</prov:Used>
-								</rdf:Description>
-							</prov:isParticipantIn>
-						</rdf:Description>
-					</prov:Used>
-				</rdf:Description>
-			</prov:isParticipantIn>
-		</rdf:Description>
-	</prov:isControlledBy>
+	<prov:wasControlledBy rdf:resource="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/"/>
+	<prov:used rdf:resource="http://ns.taverna.org.uk/2011/data/2613aab1-dfe9-4a17-a4be-7589f5d388d6/ref/26e16173-109d-4d1f-ae3c-ca61f5b7d196"/>
+	<prov:used rdf:resource="http://ns.taverna.org.uk/2011/data/2613aab1-dfe9-4a17-a4be-7589f5d388d6/ref/153277f1-5e4f-43fc-968d-ab3a8b038676"/>
 </prov:ProcessExecution>
 <rdf:Description rdf:about="http://ns.taverna.org.uk/2011/data/2613aab1-dfe9-4a17-a4be-7589f5d388d6/ref/a2f5a305-aa3d-4023-b592-23556024f976">
-	<prov:isGeneratedBy rdf:resource="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/685ee1e1-0228-4d4d-b60c-c8b8d9b48ebe/"/>
+	<prov:wasGeneratedBy rdf:resource="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/685ee1e1-0228-4d4d-b60c-c8b8d9b48ebe/"/>
 </rdf:Description>
 <prov:ProcessExecution rdf:about="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/c505e664-1208-485f-aec0-72f6f0f78318/">
-	<prov:isControlledBy>
-		<rdf:Description rdf:about="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/">
-			<prov:isParticipantIn>
-				<rdf:Description rdf:about="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/c505e664-1208-485f-aec0-72f6f0f78318/">
-					<prov:Used>
-						<rdf:Description rdf:about="http://ns.taverna.org.uk/2011/data/2613aab1-dfe9-4a17-a4be-7589f5d388d6/ref/a2f5a305-aa3d-4023-b592-23556024f976">
-							<prov:isParticipantIn rdf:resource="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/c505e664-1208-485f-aec0-72f6f0f78318/"/>
-						</rdf:Description>
-					</prov:Used>
-				</rdf:Description>
-			</prov:isParticipantIn>
-		</rdf:Description>
-	</prov:isControlledBy>
+	<prov:wasControlledBy rdf:resource="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/"/>
+	<prov:used rdf:resource="http://ns.taverna.org.uk/2011/data/2613aab1-dfe9-4a17-a4be-7589f5d388d6/ref/a2f5a305-aa3d-4023-b592-23556024f976"/>
 </prov:ProcessExecution>
 <rdf:Description rdf:about="http://ns.taverna.org.uk/2011/data/2613aab1-dfe9-4a17-a4be-7589f5d388d6/ref/64ad0eee-3986-4113-b56c-b60a4583724d">
-	<prov:isGeneratedBy rdf:resource="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/c505e664-1208-485f-aec0-72f6f0f78318/"/>
+	<prov:wasGeneratedBy rdf:resource="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/c505e664-1208-485f-aec0-72f6f0f78318/"/>
 </rdf:Description>
 
 </rdf:RDF>
