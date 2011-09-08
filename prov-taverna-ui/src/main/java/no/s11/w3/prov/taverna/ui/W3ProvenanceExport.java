@@ -27,7 +27,6 @@ import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.contextaware.ContextAwareConnection;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.helpers.OrganizedRDFWriter;
-import org.openrdf.rio.n3.N3Writer;
 import org.openrdf.rio.rdfxml.util.RDFXMLPrettyWriter;
 
 public class W3ProvenanceExport {
