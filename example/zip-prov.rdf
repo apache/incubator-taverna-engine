@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+	xmlns:scufl2="http://ns.taverna.org.uk/2010/scufl2#"
+	xmlns:prov="http://w3.org/Prov.owl#"
+	xmlns:owl="http://www.w3.org/2002/07/owl#"
+	xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+<ProvenanceContainer xmlns="http://w3.org/ProvenanceOntology.owl#" rdf:about="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/provenanceContainer"/>
+<Agent xmlns="http://w3.org/ProvenanceOntology.owl#" rdf:about="http://ns.taverna.org.uk/2011/software/taverna-2.3-SNAPSHOT-dev"/>
+<ProcessExecution xmlns="http://w3.org/ProvenanceOntology.owl#" rdf:nodeID="node1694jjvj4x1">
+	<isControlledBy xmlns="http://w3.org/ProvenanceOntology.owl#">
+		<rdf:Description rdf:about="http://ns.taverna.org.uk/2011/software/taverna-2.3-SNAPSHOT-dev">
+			<isParticipantIn xmlns="http://w3.org/ProvenanceOntology.owl#" rdf:nodeID="node1694jjvj4x1"/>
+		</rdf:Description>
+	</isControlledBy>
+</ProcessExecution>
+<rdf:Description rdf:about="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/provenanceContainer">
+	<isGeneratedBy xmlns="http://w3.org/ProvenanceOntology.owl#" rdf:nodeID="node1694jjvj4x1"/>
+</rdf:Description>
+<Entity xmlns="http://w3.org/ProvenanceOntology.owl#" rdf:about="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/">
+	<rdf:type rdf:resource="http://w3.org/ProvenanceOntology.owl#ProcessExecution"/>
+</Entity>
+<rdf:Description rdf:nodeID="node1694jjvj4x1">
+	<Used xmlns="http://w3.org/ProvenanceOntology.owl#">
+		<Agent xmlns="http://w3.org/ProvenanceOntology.owl#" rdf:about="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/">
+			<isControlledBy xmlns="http://w3.org/ProvenanceOntology.owl#">
+				<rdf:Description rdf:about="http://ns.taverna.org.uk/2011/software/taverna-2.3-SNAPSHOT-dev">
+					<isParticipantIn xmlns="http://w3.org/ProvenanceOntology.owl#" rdf:resource="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/"/>
+				</rdf:Description>
+			</isControlledBy>
+		</Agent>
+	</Used>
+</rdf:Description>
+<Entity xmlns="http://w3.org/ProvenanceOntology.owl#" rdf:about="http://ns.taverna.org.uk/2011/data/2613aab1-dfe9-4a17-a4be-7589f5d388d6/ref/153277f1-5e4f-43fc-968d-ab3a8b038676"/>
+<rdf:Description rdf:about="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/">
+	<Used xmlns="http://w3.org/ProvenanceOntology.owl#">
+		<rdf:Description rdf:about="http://ns.taverna.org.uk/2011/data/2613aab1-dfe9-4a17-a4be-7589f5d388d6/ref/153277f1-5e4f-43fc-968d-ab3a8b038676">
+			<isParticipantIn xmlns="http://w3.org/ProvenanceOntology.owl#" rdf:resource="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/"/>
+		</rdf:Description>
+	</Used>
+</rdf:Description>
+<Entity xmlns="http://w3.org/ProvenanceOntology.owl#" rdf:about="http://ns.taverna.org.uk/2011/data/2613aab1-dfe9-4a17-a4be-7589f5d388d6/ref/a2f5a305-aa3d-4023-b592-23556024f976">
+	<isGeneratedBy xmlns="http://w3.org/ProvenanceOntology.owl#" rdf:resource="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/"/>
+</Entity>
+<Entity xmlns="http://w3.org/ProvenanceOntology.owl#" rdf:about="http://ns.taverna.org.uk/2011/data/2613aab1-dfe9-4a17-a4be-7589f5d388d6/ref/64ad0eee-3986-4113-b56c-b60a4583724d">
+	<isGeneratedBy xmlns="http://w3.org/ProvenanceOntology.owl#" rdf:resource="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/"/>
+</Entity>
+<ProcessExecution xmlns="http://w3.org/ProvenanceOntology.owl#" rdf:about="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/f209526b-75dc-47d4-bedf-9d88d3841535/">
+	<isControlledBy xmlns="http://w3.org/ProvenanceOntology.owl#">
+		<rdf:Description rdf:about="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/">
+			<isParticipantIn xmlns="http://w3.org/ProvenanceOntology.owl#" rdf:resource="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/f209526b-75dc-47d4-bedf-9d88d3841535/"/>
+		</rdf:Description>
+	</isControlledBy>
+</ProcessExecution>
+<Entity xmlns="http://w3.org/ProvenanceOntology.owl#" rdf:about="http://ns.taverna.org.uk/2011/data/2613aab1-dfe9-4a17-a4be-7589f5d388d6/ref/26e16173-109d-4d1f-ae3c-ca61f5b7d196">
+	<isGeneratedBy xmlns="http://w3.org/ProvenanceOntology.owl#" rdf:resource="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/f209526b-75dc-47d4-bedf-9d88d3841535/"/>
+</Entity>
+<ProcessExecution xmlns="http://w3.org/ProvenanceOntology.owl#" rdf:about="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/685ee1e1-0228-4d4d-b60c-c8b8d9b48ebe/">
+	<isControlledBy xmlns="http://w3.org/ProvenanceOntology.owl#">
+		<rdf:Description rdf:about="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/">
+			<isParticipantIn xmlns="http://w3.org/ProvenanceOntology.owl#">
+				<rdf:Description rdf:about="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/685ee1e1-0228-4d4d-b60c-c8b8d9b48ebe/">
+					<Used xmlns="http://w3.org/ProvenanceOntology.owl#">
+						<rdf:Description rdf:about="http://ns.taverna.org.uk/2011/data/2613aab1-dfe9-4a17-a4be-7589f5d388d6/ref/26e16173-109d-4d1f-ae3c-ca61f5b7d196">
+							<isParticipantIn xmlns="http://w3.org/ProvenanceOntology.owl#">
+								<rdf:Description rdf:about="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/685ee1e1-0228-4d4d-b60c-c8b8d9b48ebe/">
+									<Used xmlns="http://w3.org/ProvenanceOntology.owl#">
+										<rdf:Description rdf:about="http://ns.taverna.org.uk/2011/data/2613aab1-dfe9-4a17-a4be-7589f5d388d6/ref/153277f1-5e4f-43fc-968d-ab3a8b038676">
+											<isParticipantIn xmlns="http://w3.org/ProvenanceOntology.owl#" rdf:resource="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/685ee1e1-0228-4d4d-b60c-c8b8d9b48ebe/"/>
+										</rdf:Description>
+									</Used>
+								</rdf:Description>
+							</isParticipantIn>
+						</rdf:Description>
+					</Used>
+				</rdf:Description>
+			</isParticipantIn>
+		</rdf:Description>
+	</isControlledBy>
+</ProcessExecution>
+<rdf:Description rdf:about="http://ns.taverna.org.uk/2011/data/2613aab1-dfe9-4a17-a4be-7589f5d388d6/ref/a2f5a305-aa3d-4023-b592-23556024f976">
+	<isGeneratedBy xmlns="http://w3.org/ProvenanceOntology.owl#" rdf:resource="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/685ee1e1-0228-4d4d-b60c-c8b8d9b48ebe/"/>
+</rdf:Description>
+<ProcessExecution xmlns="http://w3.org/ProvenanceOntology.owl#" rdf:about="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/c505e664-1208-485f-aec0-72f6f0f78318/">
+	<isControlledBy xmlns="http://w3.org/ProvenanceOntology.owl#">
+		<rdf:Description rdf:about="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/">
+			<isParticipantIn xmlns="http://w3.org/ProvenanceOntology.owl#">
+				<rdf:Description rdf:about="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/c505e664-1208-485f-aec0-72f6f0f78318/">
+					<Used xmlns="http://w3.org/ProvenanceOntology.owl#">
+						<rdf:Description rdf:about="http://ns.taverna.org.uk/2011/data/2613aab1-dfe9-4a17-a4be-7589f5d388d6/ref/a2f5a305-aa3d-4023-b592-23556024f976">
+							<isParticipantIn xmlns="http://w3.org/ProvenanceOntology.owl#" rdf:resource="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/c505e664-1208-485f-aec0-72f6f0f78318/"/>
+						</rdf:Description>
+					</Used>
+				</rdf:Description>
+			</isParticipantIn>
+		</rdf:Description>
+	</isControlledBy>
+</ProcessExecution>
+<rdf:Description rdf:about="http://ns.taverna.org.uk/2011/data/2613aab1-dfe9-4a17-a4be-7589f5d388d6/ref/64ad0eee-3986-4113-b56c-b60a4583724d">
+	<isGeneratedBy xmlns="http://w3.org/ProvenanceOntology.owl#" rdf:resource="http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/c505e664-1208-485f-aec0-72f6f0f78318/"/>
+</rdf:Description>
+
+</rdf:RDF>

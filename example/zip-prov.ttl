@@ -1,0 +1,52 @@
+@prefix : <http://w3.org/ProvenanceOntology.owl#> .
+    
+    <http://ns.taverna.org.uk/2011/data/2613aab1-dfe9-4a17-a4be-7589f5d388d6/ref/153277f1-5e4f-43fc-968d-ab3a8b038676>     a :Entity;
+         :isParticipantIn <http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/>,
+                <http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/685ee1e1-0228-4d4d-b60c-c8b8d9b48ebe/> .
+    
+    <http://ns.taverna.org.uk/2011/data/2613aab1-dfe9-4a17-a4be-7589f5d388d6/ref/26e16173-109d-4d1f-ae3c-ca61f5b7d196>     a :Entity;
+         :isGeneratedBy <http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/f209526b-75dc-47d4-bedf-9d88d3841535/>;
+         :isParticipantIn <http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/685ee1e1-0228-4d4d-b60c-c8b8d9b48ebe/> .
+    
+    <http://ns.taverna.org.uk/2011/data/2613aab1-dfe9-4a17-a4be-7589f5d388d6/ref/64ad0eee-3986-4113-b56c-b60a4583724d>     a :Entity;
+         :isGeneratedBy <http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/>,
+                <http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/c505e664-1208-485f-aec0-72f6f0f78318/> .
+    
+    <http://ns.taverna.org.uk/2011/data/2613aab1-dfe9-4a17-a4be-7589f5d388d6/ref/a2f5a305-aa3d-4023-b592-23556024f976>     a :Entity;
+         :isGeneratedBy <http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/>,
+                <http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/685ee1e1-0228-4d4d-b60c-c8b8d9b48ebe/>;
+         :isParticipantIn <http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/c505e664-1208-485f-aec0-72f6f0f78318/> .
+    
+    <http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/>     a :Agent,
+                :Entity,
+                :ProcessExecution;
+         :Used <http://ns.taverna.org.uk/2011/data/2613aab1-dfe9-4a17-a4be-7589f5d388d6/ref/153277f1-5e4f-43fc-968d-ab3a8b038676>;
+         :isControlledBy <http://ns.taverna.org.uk/2011/software/taverna-2.3-SNAPSHOT-dev>;
+         :isParticipantIn <http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/685ee1e1-0228-4d4d-b60c-c8b8d9b48ebe/>,
+                <http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/c505e664-1208-485f-aec0-72f6f0f78318/>,
+                <http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/f209526b-75dc-47d4-bedf-9d88d3841535/> .
+    
+    <http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/685ee1e1-0228-4d4d-b60c-c8b8d9b48ebe/>     a :ProcessExecution;
+         :Used <http://ns.taverna.org.uk/2011/data/2613aab1-dfe9-4a17-a4be-7589f5d388d6/ref/153277f1-5e4f-43fc-968d-ab3a8b038676>,
+                <http://ns.taverna.org.uk/2011/data/2613aab1-dfe9-4a17-a4be-7589f5d388d6/ref/26e16173-109d-4d1f-ae3c-ca61f5b7d196>;
+         :isControlledBy <http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/> .
+    
+    <http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/c505e664-1208-485f-aec0-72f6f0f78318/>     a :ProcessExecution;
+         :Used <http://ns.taverna.org.uk/2011/data/2613aab1-dfe9-4a17-a4be-7589f5d388d6/ref/a2f5a305-aa3d-4023-b592-23556024f976>;
+         :isControlledBy <http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/> .
+    
+    <http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/process/f209526b-75dc-47d4-bedf-9d88d3841535/>     a :ProcessExecution;
+         :isControlledBy <http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/> .
+    
+    <http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/provenanceContainer>     a :ProvenanceContainer;
+         :isGeneratedBy :_g0 .
+    
+    <http://ns.taverna.org.uk/2011/software/taverna-2.3-SNAPSHOT-dev>     a :Agent;
+         :isParticipantIn <http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/>,
+                :_g0 .
+    
+    :_g0     a :ProcessExecution;
+         :Used <http://ns.taverna.org.uk/2011/run/2613aab1-dfe9-4a17-a4be-7589f5d388d6/>;
+         :isControlledBy <http://ns.taverna.org.uk/2011/software/taverna-2.3-SNAPSHOT-dev> .
+    
+#ENDS
