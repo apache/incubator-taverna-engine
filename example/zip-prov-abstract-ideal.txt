@@ -1,0 +1,46 @@
+
+agent(taverna)
+
+entity(input)
+
+processExecution(workflow_run)
+agent(workflow_run)
+entity(workflow_run)
+used(workflow_run, input)
+wasControlledBy(workflow_run, taverna)
+
+
+processExecution(constant)
+wasControlledBy(constant, workflow_run)
+
+entity(some_string)
+wasGeneratedBy(some_string, constant)
+
+
+processExecution(concatenate)
+used(concatenate, input)
+used(concatenate, some_string)
+wasControlledBy(workflow_run)
+
+entity(combined)
+wasGeneratedBy(combined, workflow_run)
+wasGeneratedBy(combined, concatenate)
+
+
+processExecution(sha1)
+used(sha1, combined)
+wasControlledBy(sha1, workflow_run)
+
+entity(sha1sum)
+wasGeneratedBy(sha1sum, workflow_run)
+wasGeneratedBy(sha1sum, sha1)
+
+
+
+processExecution(provExport)
+used(provExport, workflow_run)
+wasControlledBy(provExport, taverna)
+    
+provenanceContainer(container)
+wasGeneratedBy(container, provExport)
+
