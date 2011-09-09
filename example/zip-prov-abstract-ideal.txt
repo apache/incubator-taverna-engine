@@ -1,46 +1,65 @@
 
 agent(taverna)
 
-entity(input)
+entity(input, [value: "Some input data goes here"] )
 
-processExecution(workflow_run)
-agent(workflow_run)
-entity(workflow_run)
-used(workflow_run, input)
-wasControlledBy(workflow_run, taverna)
-
-
-processExecution(constant)
-wasControlledBy(constant, workflow_run)
-
-entity(some_string)
-wasGeneratedBy(some_string, constant)
+processExecution(workflow-run, 
+    <http://ns.taverna.org.uk/2010/workflow/ea4168eb-67ea-440f-ab73-818da5efc998/>, 
+    "2011-09-08T14:28:25", "2011-09-08T14:28:30")
+agent(workflow-run)
+entity(workflow-run)
+used(workflow-run, input, <http://ns.taverna.org.uk/2010/workflow/ea4168eb-67ea-440f-ab73-818da5efc998/in/input>)
+wasControlledBy(workflow-run, taverna)
 
 
-processExecution(concatenate)
-used(concatenate, input)
-used(concatenate, some_string)
-wasControlledBy(workflow_run)
+processExecution(constant, 
+    <http://ns.taverna.org.uk/2010/workflow/ea4168eb-67ea-440f-ab73-818da5efc998/processor/String_constant/>
+    "2011-09-08T14:28:26", "2011-09-08T14:28:28")
+wasControlledBy(constant, workflow-run)
 
-entity(combined)
-wasGeneratedBy(combined, workflow_run)
-wasGeneratedBy(combined, concatenate)
-
-
-processExecution(sha1)
-used(sha1, combined)
-wasControlledBy(sha1, workflow_run)
-
-entity(sha1sum)
-wasGeneratedBy(sha1sum, workflow_run)
-wasGeneratedBy(sha1sum, sha1)
+entity(some-string, [value: "some string"] )
+wasGeneratedBy(some-string, constant,
+    <http://ns.taverna.org.uk/2010/workflow/ea4168eb-67ea-440f-ab73-818da5efc998/processor/String_constant/out/value>)
 
 
+processExecution(concatenate, 
+    <http://ns.taverna.org.uk/2010/workflow/ea4168eb-67ea-440f-ab73-818da5efc998/processor/Concatenate_two_strings/>
+    "2011-09-08T14:28:29", "2011-09-08T14:28:29")
+used(concatenate, input, 
+    <http://ns.taverna.org.uk/2010/workflow/ea4168eb-67ea-440f-ab73-818da5efc998/processor/Concatenate_two_strings/in/string1>)
+used(concatenate, some-string,
+    <http://ns.taverna.org.uk/2010/workflow/ea4168eb-67ea-440f-ab73-818da5efc998/processor/Concatenate_two_strings/in/string2>)
+wasControlledBy(workflow-run)
+wasInformedBy(concatenate, constant)
 
-processExecution(provExport)
-used(provExport, workflow_run)
-wasControlledBy(provExport, taverna)
+
+entity(combined, [value: "Some input data goes heresome string"])
+wasGeneratedBy(combined, workflow-run, 
+    <http://ns.taverna.org.uk/2010/workflow/ea4168eb-67ea-440f-ab73-818da5efc998/out/combined>)
+wasGeneratedBy(combined, concatenate,
+    <http://ns.taverna.org.uk/2010/workflow/ea4168eb-67ea-440f-ab73-818da5efc998/processor/Concatenate_two_strings/out/output>)
+
+
+processExecution(sha1, 
+    <http://ns.taverna.org.uk/2010/workflow/ea4168eb-67ea-440f-ab73-818da5efc998/processor/sha1/>
+    "2011-09-08T14:28:29", "2011-09-08T14:28:30")
+used(sha1, combined,
+    <http://ns.taverna.org.uk/2010/workflow/ea4168eb-67ea-440f-ab73-818da5efc998/processor/sha1/in/STDIN>)
+wasControlledBy(sha1, workflow-run)
+wasInformedBy(sha1, concatenate)
+
+entity(sha1sum, [value: "2180ba804a22055b1e9e326eb93ea05d594e5db5  - "])
+wasGeneratedBy(sha1sum, workflow-run,
+    <http://ns.taverna.org.uk/2010/workflow/ea4168eb-67ea-440f-ab73-818da5efc998/out/sha1>)
+wasGeneratedBy(sha1sum, sha1, 
+    <http://ns.taverna.org.uk/2010/workflow/ea4168eb-67ea-440f-ab73-818da5efc998/processor/sha1/out/STDOUT>)
+
+
+
+processExecution(provenance-export, nil, "2011-09-09T09:41:51")
+used(provenance-export, workflow-run)
+wasControlledBy(provenance-export, taverna)
     
 provenanceContainer(container)
-wasGeneratedBy(container, provExport)
+wasGeneratedBy(container, provenance-export)
 
