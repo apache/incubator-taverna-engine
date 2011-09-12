@@ -20,16 +20,11 @@
  ******************************************************************************/
 package uk.org.taverna.platform;
 
-import java.io.IOException;
-import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.List;
 
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleReference;
 import org.osgi.framework.ServiceReference;
 
 import uk.org.taverna.platform.activity.ActivityConfigurationException;

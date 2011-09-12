@@ -2,19 +2,40 @@ package uk.org.taverna.platform.run.api;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.sf.taverna.t2.reference.T2Reference;
+import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
 import uk.org.taverna.platform.execution.api.InvalidExecutionIdException;
 import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
 import uk.org.taverna.platform.report.State;
 import uk.org.taverna.platform.report.WorkflowReport;
+import uk.org.taverna.scufl2.api.profiles.Profile;
 
 /**
- * A Service for managing runs of Taverna workflows.
+ * Service for managing runs of Taverna workflows.
  *
  * @author David Withers
  */
 public interface RunService {
+
+	/**
+	 * Returns the available <code>ExecutionEnvironment</code>s.
+	 *
+	 * @return the available <code>ExecutionEnvironment</code>s
+	 */
+	public Set<ExecutionEnvironment> getExecutionEnvironments();
+
+	/**
+	 * Returns the <code>ExecutionEnvironment</code>s that can execute the specified
+	 * <code>Profile</code>.
+	 *
+	 * @param profile
+	 *            the <code>Profile</code> to find <code>ExecutionEnvironment</code>s for
+	 * @return the <code>ExecutionEnvironment</code>s that can execute the specified
+	 *         <code>Profile</code>
+	 */
+	public Set<ExecutionEnvironment> getExecutionEnvironments(Profile profile);
 
 	/**
 	 * Creates a new run and returns the ID for the run.
@@ -29,8 +50,8 @@ public interface RunService {
 	 * @throws InvalidWorkflowException
 	 * @throws RunProfileException
 	 */
-	public String createRun(RunProfile runProfile)
-			throws InvalidWorkflowException, RunProfileException;
+	public String createRun(RunProfile runProfile) throws InvalidWorkflowException,
+			RunProfileException;
 
 	/**
 	 * Returns the list of runs that this service is managing.
@@ -48,8 +69,7 @@ public interface RunService {
 	 *             if the run ID is not valid
 	 * @throws InvalidExecutionIdException
 	 */
-	public void delete(String runID) throws InvalidRunIdException,
-			InvalidExecutionIdException;
+	public void delete(String runID) throws InvalidRunIdException, InvalidExecutionIdException;
 
 	/**
 	 * Starts a run.
@@ -62,8 +82,8 @@ public interface RunService {
 	 *             if the run state is not CREATED
 	 * @throws InvalidExecutionIdException
 	 */
-	public void start(String runID) throws InvalidRunIdException,
-			RunStateException, InvalidExecutionIdException;
+	public void start(String runID) throws InvalidRunIdException, RunStateException,
+			InvalidExecutionIdException;
 
 	/**
 	 * Pauses a running run.
@@ -76,8 +96,8 @@ public interface RunService {
 	 *             if the run state is not RUNNING
 	 * @throws InvalidExecutionIdException
 	 */
-	public void pause(String runID) throws InvalidRunIdException,
-			RunStateException, InvalidExecutionIdException;
+	public void pause(String runID) throws InvalidRunIdException, RunStateException,
+			InvalidExecutionIdException;
 
 	/**
 	 * Resumes a paused run.
@@ -90,8 +110,8 @@ public interface RunService {
 	 *             if the run state is not PAUSED
 	 * @throws InvalidExecutionIdException
 	 */
-	public void resume(String runID) throws InvalidRunIdException,
-			RunStateException, InvalidExecutionIdException;
+	public void resume(String runID) throws InvalidRunIdException, RunStateException,
+			InvalidExecutionIdException;
 
 	/**
 	 * Cancels a running or paused run.
@@ -104,14 +124,13 @@ public interface RunService {
 	 *             if the run state is not RUNNING or PAUSED
 	 * @throws InvalidExecutionIdException
 	 */
-	public void cancel(String runID) throws InvalidRunIdException,
-			RunStateException, InvalidExecutionIdException;
+	public void cancel(String runID) throws InvalidRunIdException, RunStateException,
+			InvalidExecutionIdException;
 
 	/**
 	 * Returns the current state of the run.
 	 *
-	 * A run's state can be CREATED, RUNNING, COMPLETED, PAUSED, CANCELLED or
-	 * FAILED.
+	 * A run's state can be CREATED, RUNNING, COMPLETED, PAUSED, CANCELLED or FAILED.
 	 *
 	 * @param runID
 	 *            the ID of the run
@@ -130,8 +149,7 @@ public interface RunService {
 	 * @throws InvalidRunIdException
 	 *             if the run ID is not valid
 	 */
-	public Map<String, T2Reference> getInputs(String runID)
-			throws InvalidRunIdException;
+	public Map<String, T2Reference> getInputs(String runID) throws InvalidRunIdException;
 
 	/**
 	 * Returns the outputs of the run. May be null if there are no outputs.
@@ -142,8 +160,7 @@ public interface RunService {
 	 * @throws InvalidRunIdException
 	 *             if the run ID is not valid
 	 */
-	public Map<String, T2Reference> getOutputs(String runID)
-			throws InvalidRunIdException;
+	public Map<String, T2Reference> getOutputs(String runID) throws InvalidRunIdException;
 
 	/**
 	 * Returns the status report for the run.
@@ -154,7 +171,6 @@ public interface RunService {
 	 * @throws InvalidRunIdException
 	 *             if the run ID is not valid
 	 */
-	public WorkflowReport getWorkflowReport(String runID)
-			throws InvalidRunIdException;
+	public WorkflowReport getWorkflowReport(String runID) throws InvalidRunIdException;
 
 }

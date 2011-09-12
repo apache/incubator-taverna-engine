@@ -33,7 +33,7 @@ import uk.org.taverna.scufl2.api.profiles.Profile;
 
 /**
  * A common super type for concrete implementations of <code>ExecutionService</code>s.
- *
+ * 
  * @author David Withers
  */
 public abstract class AbstractExecutionService implements ExecutionService {
@@ -53,88 +53,83 @@ public abstract class AbstractExecutionService implements ExecutionService {
 		executionMap = Collections.synchronizedMap(new HashMap<String, Execution>());
 	}
 
-	/* (non-Javadoc)
-	 * @see uk.org.taverna.platform.execution.ExecutionService#getID()
-	 */
 	@Override
 	public String getID() {
 		return ID;
 	}
 
-	/* (non-Javadoc)
-	 * @see uk.org.taverna.platform.execution.ExecutionService#getName()
-	 */
 	@Override
 	public String getName() {
 		return name;
 	}
 
-	/* (non-Javadoc)
-	 * @see uk.org.taverna.platform.execution.ExecutionService#getDescription()
-	 */
 	@Override
 	public String getDescription() {
 		return description;
 	}
 
-	/* (non-Javadoc)
-	 * @see uk.org.taverna.platform.execution.ExecutionService#createExecution(uk.org.taverna.scufl2.api.core.Workflow, uk.org.taverna.scufl2.api.profiles.Profile, java.util.Map, net.sf.taverna.t2.reference.ReferenceService)
-	 */
 	@Override
-	public String createExecution(WorkflowBundle workflowBundle, Workflow workflow, Profile profile, Map<String, T2Reference> inputs,
-			ReferenceService referenceService) throws InvalidWorkflowException {
-		Execution execution = createExecutionImpl(workflowBundle, workflow, profile, inputs, referenceService);
+	public String createExecution(WorkflowBundle workflowBundle, Workflow workflow,
+			Profile profile, Map<String, T2Reference> inputs, ReferenceService referenceService)
+			throws InvalidWorkflowException {
+		Execution execution = createExecutionImpl(workflowBundle, workflow, profile, inputs,
+				referenceService);
 		executionMap.put(execution.getID(), execution);
 		return execution.getID();
 	}
 
-	protected abstract Execution createExecutionImpl(WorkflowBundle workflowBundle, Workflow workflow, Profile profile, Map<String, T2Reference> inputs,
+	/**
+	 * Creates an implementation of an Execution.
+	 * 
+	 * To be implemented by concrete implementations of <code>ExecutionService</code>.
+	 * 
+	 * @param workflowBundle
+	 *            the <code>WorkflowBundle</code> containing the <code>Workflow</code>s required for
+	 *            execution
+	 * @param workflow
+	 *            the <code>Workflow</code> to execute
+	 * @param profile
+	 *            the <code>Profile</code> to use when executing the <code>Workflow</code>
+	 * @param inputs
+	 *            the inputs for the <code>Workflow</code>. May be <code>null</code> if the
+	 *            <code>Workflow</code> doesn't require any inputs
+	 * @param referenceService
+	 *            the <code>ReferenceService</code> used to register inputs, outputs and
+	 *            intermediate values
+	 * @return a new Execution implementation
+	 * @throws InvalidWorkflowException
+	 *             if the specified workflow is invalid
+	 */
+	protected abstract Execution createExecutionImpl(WorkflowBundle workflowBundle,
+			Workflow workflow, Profile profile, Map<String, T2Reference> inputs,
 			ReferenceService referenceService) throws InvalidWorkflowException;
 
-	/* (non-Javadoc)
-	 * @see uk.org.taverna.platform.execution.ExecutionService#getWorkflowReport(java.lang.String)
-	 */
 	@Override
 	public WorkflowReport getWorkflowReport(String executionID) throws InvalidExecutionIdException {
 		return getExecution(executionID).getWorkflowReport();
 	}
 
-	/* (non-Javadoc)
-	 * @see uk.org.taverna.platform.execution.ExecutionService#delete(java.lang.String)
-	 */
 	@Override
 	public void delete(String executionID) throws InvalidExecutionIdException {
 		getExecution(executionID).delete();
 		executionMap.remove(executionID);
 	}
 
-	/* (non-Javadoc)
-	 * @see uk.org.taverna.platform.execution.ExecutionService#start(java.lang.String)
-	 */
 	@Override
 	public void start(String executionID) throws InvalidExecutionIdException {
 		getExecution(executionID).start();
 	}
 
-	/* (non-Javadoc)
-	 * @see uk.org.taverna.platform.execution.ExecutionService#pause(java.lang.String)
-	 */
 	@Override
 	public void pause(String executionID) throws InvalidExecutionIdException {
 		getExecution(executionID).pause();
 	}
 
-	/* (non-Javadoc)
-	 * @see uk.org.taverna.platform.execution.ExecutionService#resume(java.lang.String)
-	 */
 	@Override
 	public void resume(String executionID) throws InvalidExecutionIdException {
 		getExecution(executionID).resume();
 	}
 
-	/* (non-Javadoc)
-	 * @see uk.org.taverna.platform.execution.ExecutionService#cancel(java.lang.String)
-	 */
 	@Override
 	public void cancel(String executionID) throws InvalidExecutionIdException {
 		getExecution(executionID).cancel();

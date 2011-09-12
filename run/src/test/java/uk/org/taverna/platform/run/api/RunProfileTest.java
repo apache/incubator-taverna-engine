@@ -20,20 +20,22 @@
  ******************************************************************************/
 package uk.org.taverna.platform.run.api;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import net.sf.taverna.t2.reference.ReferenceService;
-import net.sf.taverna.t2.reference.ReferenceServiceException;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.reference.impl.ReferenceServiceImpl;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import uk.org.taverna.platform.execution.api.ExecutionService;
+import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
+import uk.org.taverna.platform.execution.impl.local.LocalExecutionEnvironment;
 import uk.org.taverna.platform.execution.impl.local.LocalExecutionService;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.Workflow;
@@ -47,9 +49,10 @@ import uk.org.taverna.scufl2.api.profiles.Profile;
 public class RunProfileTest {
 
 	private RunProfile runProfile;
+	private ExecutionEnvironment executionEnvironment;
 	private WorkflowBundle workflowBundle;
 	private ReferenceService referenceService;
-	private ExecutionService executionService;
+	private LocalExecutionService executionService;
 	private Workflow workflow, mainWorkflow;
 	private Profile profile, mainProfile;
 	private Map<String, T2Reference> inputs;
@@ -68,9 +71,10 @@ public class RunProfileTest {
 		workflowBundle.setMainWorkflow(mainWorkflow);
 		referenceService = new ReferenceServiceImpl();
 		executionService = new LocalExecutionService();
+		executionEnvironment = new LocalExecutionEnvironment(executionService, referenceService, null, null);
+
 		inputs = new HashMap<String, T2Reference>();
-		runProfile = new RunProfile(workflowBundle, workflow, profile, inputs, referenceService,
-				executionService);
+		runProfile = new RunProfile(executionEnvironment, workflowBundle, workflow, profile, inputs);
 	}
 
 	/**
@@ -80,7 +84,7 @@ public class RunProfileTest {
 	 */
 	@Test
 	public void testRunProfileWorkflowBundleReferenceServiceExecutionService() {
-		runProfile = new RunProfile(workflowBundle, referenceService, executionService);
+		runProfile = new RunProfile(executionEnvironment, workflowBundle);
 	}
 
 	/**
@@ -90,7 +94,7 @@ public class RunProfileTest {
 	 */
 	@Test
 	public void testRunProfileWorkflowBundleMapOfStringT2ReferenceReferenceServiceExecutionService() {
-		runProfile = new RunProfile(workflowBundle, inputs, referenceService, executionService);
+		runProfile = new RunProfile(executionEnvironment, workflowBundle, inputs);
 	}
 
 	/**
@@ -100,8 +104,7 @@ public class RunProfileTest {
 	 */
 	@Test
 	public void testRunProfileWorkflowBundleWorkflowProfileMapOfStringT2ReferenceReferenceServiceExecutionService() {
-		runProfile = new RunProfile(workflowBundle, workflow, profile, inputs, referenceService,
-				executionService);
+		runProfile = new RunProfile(executionEnvironment, workflowBundle, workflow, profile, inputs);
 	}
 
 	/**
@@ -231,19 +234,6 @@ public class RunProfileTest {
 
 	/**
 	 * Test method for
-	 * {@link uk.org.taverna.platform.run.api.RunProfile#setReferenceService(net.sf.taverna.t2.reference.ReferenceService)}
-	 * .
-	 */
-	@Test
-	public void testSetReferenceService() {
-		runProfile.setReferenceService(null);
-		assertNull(runProfile.getReferenceService());
-		runProfile.setReferenceService(referenceService);
-		assertEquals(referenceService, runProfile.getReferenceService());
-	}
-
-	/**
-	 * Test method for
 	 * {@link uk.org.taverna.platform.run.api.RunProfile#getExecutionService()}.
 	 */
 	@Test
@@ -255,15 +245,26 @@ public class RunProfileTest {
 
 	/**
 	 * Test method for
-	 * {@link uk.org.taverna.platform.run.api.RunProfile#setExecutionService(uk.org.taverna.platform.execution.api.ExecutionService)}
+	 * {@link uk.org.taverna.platform.run.api.RunProfile#getExecutionEnvironment()}.
+	 */
+	@Test
+	public void testGetExecutionEnvironment() {
+		assertNotNull(runProfile.getExecutionEnvironment());
+		assertEquals(executionEnvironment, runProfile.getExecutionEnvironment());
+		assertEquals(runProfile.getExecutionEnvironment(), runProfile.getExecutionEnvironment());
+	}
+
+	/**
+	 * Test method for
+	 * {@link uk.org.taverna.platform.run.api.RunProfile#setExecutionEnvironment(uk.org.taverna.platform.execution.api.ExecutionEnvironment)}
 	 * .
 	 */
 	@Test
-	public void testSetExecutionService() {
-		runProfile.setExecutionService(null);
-		assertNull(runProfile.getExecutionService());
-		runProfile.setExecutionService(executionService);
-		assertEquals(executionService, runProfile.getExecutionService());
+	public void testSetExecutionEnvironment() {
+		runProfile.setExecutionEnvironment(null);
+		assertNull(runProfile.getExecutionEnvironment());
+		runProfile.setExecutionEnvironment(executionEnvironment);
+		assertEquals(executionEnvironment, runProfile.getExecutionEnvironment());
 	}
 
 }

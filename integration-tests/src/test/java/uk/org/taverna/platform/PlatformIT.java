@@ -20,6 +20,8 @@
  ******************************************************************************/
 package uk.org.taverna.platform;
 
+import java.net.URL;
+import java.security.cert.X509Certificate;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -29,17 +31,28 @@ import net.sf.taverna.t2.reference.IdentifiedList;
 import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.StackTraceElementBean;
 import net.sf.taverna.t2.reference.T2Reference;
+import net.sf.taverna.t2.security.credentialmanager.CredentialManager;
+import net.sf.taverna.t2.security.credentialmanager.MasterPasswordProvider;
+import net.sf.taverna.t2.security.credentialmanager.TrustConfirmationProvider;
 
 import org.eclipse.osgi.framework.internal.core.Constants;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.springframework.osgi.test.AbstractConfigurableBundleCreatorTests;
 import org.springframework.osgi.test.platform.OsgiPlatform;
 import org.springframework.osgi.test.platform.Platforms;
 
+import uk.org.taverna.platform.execution.api.ExecutionService;
 import uk.org.taverna.platform.report.WorkflowReport;
+import uk.org.taverna.platform.run.api.RunService;
+import uk.org.taverna.scufl2.api.container.WorkflowBundle;
+import uk.org.taverna.scufl2.api.io.WorkflowBundleReader;
+import uk.org.taverna.scufl2.translator.t2flow.T2FlowReader;
 
 public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 
-	protected ReferenceService referenceService;
+	protected WorkflowBundleReader workflowBundleReader;
+	protected CredentialManager credentialManager;
 
 	protected String getPlatformName() {
 		   return Platforms.FELIX;
@@ -153,6 +166,44 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 	}
 
 
+	protected void setup() throws InvalidSyntaxException {
+
+		bundleContext.registerService(
+				"net.sf.taverna.t2.security.credentialmanager.TrustConfirmationProvider",
+				new TrustConfirmationProvider() {
+					public Boolean shouldTrustCertificate(X509Certificate[] chain) {
+						return true;
+					}
+				}, null);
+
+		if (credentialManager == null) {
+			ServiceReference credentialManagerReference = bundleContext
+					.getServiceReference("net.sf.taverna.t2.security.credentialmanager.CredentialManager");
+			credentialManager = (CredentialManager) bundleContext
+					.getService(credentialManagerReference);
+		}
+
+		if (workflowBundleReader == null) {
+			ServiceReference[] workflowBundleReaderReferences = bundleContext
+					.getServiceReferences("uk.org.taverna.scufl2.api.io.WorkflowBundleReader", null);
+			for (ServiceReference serviceReference : workflowBundleReaderReferences) {
+				workflowBundleReader = (WorkflowBundleReader) bundleContext.getService(serviceReference);
+				if (workflowBundleReader.getMediaTypes().contains(T2FlowReader.APPLICATION_VND_TAVERNA_T2FLOW_XML)) {
+					break;
+				}
+			}
+		}
+
+		ServiceReference[] masterPasswordProviderReferences = bundleContext.getServiceReferences(
+				"net.sf.taverna.t2.security.credentialmanager.MasterPasswordProvider", null);
+		for (ServiceReference serviceReference : masterPasswordProviderReferences) {
+			MasterPasswordProvider masterPasswordProvider = (MasterPasswordProvider) bundleContext
+					.getService(serviceReference);
+			masterPasswordProvider.setMasterPassword("test");
+		}
+
+	}
+
 	public void testOsgiPlatformStarts() throws Exception {
 		System.out.println(Constants.FRAMEWORK_VENDOR + " = " + bundleContext.getProperty(Constants.FRAMEWORK_VENDOR));
 		System.out.println(Constants.FRAMEWORK_VERSION + " = " + bundleContext.getProperty(Constants.FRAMEWORK_VERSION));
@@ -160,6 +211,13 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 		System.out.println(Constants.OSGI_IMPL_VERSION_KEY + " = " + bundleContext.getProperty(Constants.OSGI_IMPL_VERSION_KEY));
 	}
 
+
+	public WorkflowBundle loadWorkflow(String t2FlowFile) throws Exception {
+		URL wfResource = getClass().getResource(t2FlowFile);
+		assertNotNull(wfResource);
+		System.out.println(workflowBundleReader.getMediaTypes());
+		return workflowBundleReader.readBundle(wfResource.openStream(), T2FlowReader.APPLICATION_VND_TAVERNA_T2FLOW_XML);
+	}
 
 	public void printErrors(ReferenceService referenceService, T2Reference resultReference) {
 		if (resultReference.getDepth() > 0) {
@@ -191,7 +249,7 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 		}
 	}
 
-	public boolean checkResult(T2Reference result, String expectedResult) {
+	public boolean checkResult(ReferenceService referenceService, T2Reference result, String expectedResult) {
 		if (result.containsErrors()) {
 			printErrors(referenceService, result);
 			return false;

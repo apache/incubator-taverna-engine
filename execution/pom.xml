@@ -27,7 +27,7 @@
 			<artifactId>scufl2-api</artifactId>
 			<version>${scufl2.version}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

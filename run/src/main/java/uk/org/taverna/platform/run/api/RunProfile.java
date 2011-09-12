@@ -4,6 +4,7 @@ import java.util.Map;
 
 import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.T2Reference;
+import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
 import uk.org.taverna.platform.execution.api.ExecutionService;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.Workflow;
@@ -21,28 +22,25 @@ public class RunProfile {
 	private Workflow workflow;
 	private Profile profile;
 	private Map<String, T2Reference> inputs;
-	private ReferenceService referenceService;
-	private ExecutionService executionService;
+	private ExecutionEnvironment executionEnvironment;
 
 	/**
 	 * Constructs a <code>RunProfile</code> that specifies the parameters
 	 * required to run a {@link Workflow}. The main <code>Workflow</code> and
 	 * <code>Profile</code> from the <code>WorkflowBundle</code> are used.
 	 *
+	 * @param executionEnvironment
+	 *            the {@link ExecutionEnvironment} used to execute the
+	 *            <code>Workflow</code>
 	 * @param workflowBundle
 	 *            the <code>WorkflowBundle</code> containing the
 	 *            <code>Workflow</code> to run
 	 * @param referenceService
 	 *            the {@link ReferenceService} used to register the
 	 *            <code>Workflow</code> inputs and outputs
-	 * @param executionService
-	 *            the {@link ExecutionService} used to execute the
-	 *            <code>Workflow</code>
 	 */
-	public RunProfile(WorkflowBundle workflowBundle,
-			ReferenceService referenceService, ExecutionService executionService) {
-		this(workflowBundle, null, null, null, referenceService,
-				executionService);
+	public RunProfile(ExecutionEnvironment executionEnvironment, WorkflowBundle workflowBundle) {
+		this(executionEnvironment, workflowBundle, null, null, null);
 	}
 
 	/**
@@ -50,30 +48,28 @@ public class RunProfile {
 	 * required to run a {@link Workflow}. The main <code>Workflow</code> and
 	 * <code>Profile</code> from the <code>WorkflowBundle</code> are used.
 	 *
+	 * @param executionEnvironment
+	 *            the {@link ExecutionEnvironment} used to execute the
+	 *            <code>Workflow</code>
 	 * @param workflowBundle
 	 *            the <code>WorkflowBundle</code> containing the
 	 *            <code>Workflow</code> to run
 	 * @param inputs
 	 *            the inputs for the <code>Workflow</code>. Can be
 	 *            <code>null</code> if there are no inputs
-	 * @param referenceService
-	 *            the {@link ReferenceService} used to register the
-	 *            <code>Workflow</code> inputs and outputs
-	 * @param executionService
-	 *            the {@link ExecutionService} used to execute the
-	 *            <code>Workflow</code>
 	 */
-	public RunProfile(WorkflowBundle workflowBundle,
-			Map<String, T2Reference> inputs, ReferenceService referenceService,
-			ExecutionService executionService) {
-		this(workflowBundle, null, null, inputs, referenceService,
-				executionService);
+	public RunProfile(ExecutionEnvironment executionEnvironment, WorkflowBundle workflowBundle,
+			Map<String, T2Reference> inputs) {
+		this(executionEnvironment, workflowBundle, null, null, inputs);
 	}
 
 	/**
 	 * Constructs a <code>RunProfile</code> that specifies the parameters
 	 * required to run a {@link Workflow}.
 	 *
+	 * @param executionEnvironment
+	 *            the {@link ExecutionEnvironment} used to execute the
+	 *            <code>Workflow</code>
 	 * @param workflowBundle
 	 *            the <code>WorkflowBundle</code> containing the
 	 *            <code>Workflow</code> to run
@@ -88,22 +84,14 @@ public class RunProfile {
 	 * @param inputs
 	 *            the inputs for the <code>Workflow</code>. Can be
 	 *            <code>null</code> if there are no inputs
-	 * @param referenceService
-	 *            the {@link ReferenceService} used to register the
-	 *            <code>Workflow</code> inputs and outputs
-	 * @param executionService
-	 *            the {@link ExecutionService} used to execute the
-	 *            <code>Workflow</code>
 	 */
-	public RunProfile(WorkflowBundle workflowBundle, Workflow workflow,
-			Profile profile, Map<String, T2Reference> inputs,
-			ReferenceService referenceService, ExecutionService executionService) {
+	public RunProfile(ExecutionEnvironment executionEnvironment, WorkflowBundle workflowBundle, Workflow workflow,
+			Profile profile, Map<String, T2Reference> inputs) {
+		this.executionEnvironment = executionEnvironment;
 		this.workflowBundle = workflowBundle;
 		this.workflow = workflow;
 		this.profile = profile;
 		this.inputs = inputs;
-		this.referenceService = referenceService;
-		this.executionService = executionService;
 	}
 
 	/**
@@ -219,44 +207,36 @@ public class RunProfile {
 	 * @return the <code>ReferenceService</code> used to register the inputs
 	 */
 	public ReferenceService getReferenceService() {
-		return referenceService;
+		return executionEnvironment.getReferenceService();
 	}
 
 	/**
-	 * Sets the <code>ReferenceService</code> used to register the inputs.
-	 *
-	 * This <code>ReferenceService</code> will also be used to register any
-	 * outputs and intermediate values produced by the <code>Workflow</code>
-	 * run.
-	 *
-	 * @param referenceService
-	 *            the <code>ReferenceService</code> used to register the inputs
-	 */
-	public void setReferenceService(ReferenceService referenceService) {
-		this.referenceService = referenceService;
-	}
-
-	/**
-	 * The <code>ExecutionService</code> used to execute the
+	 * Returns the <code>ExecutionService</code> used to execute the
 	 * <code>Workflow</code>.
 	 *
 	 * @return the <code>ExecutionService</code> used to execute the
 	 *         <code>Workflow</code>
 	 */
 	public ExecutionService getExecutionService() {
-		return executionService;
+		return executionEnvironment.getExecutionService();
 	}
 
 	/**
-	 * Sets the <code>ExecutionService</code> used to execute the
-	 * <code>Workflow</code>.
+	 * Returns the <code>ExecutionEnvironment</code> used to execute the <code>Workflow</code>.
 	 *
-	 * @param executionService
-	 *            the <code>ExecutionService</code> used to execute the
-	 *            <code>Workflow</code>
+	 * @return the  <code>ExecutionEnvironment</code> used to execute the <code>Workflow</code>
 	 */
-	public void setExecutionService(ExecutionService executionService) {
-		this.executionService = executionService;
+	public ExecutionEnvironment getExecutionEnvironment() {
+		return executionEnvironment;
+	}
+
+	/**
+	 * Sets the <code>ExecutionEnvironment</code> used to execute the <code>Workflow</code>.
+	 *
+	 * @param executionEnvironment the <code>ExecutionEnvironment</code> used to execute the <code>Workflow</code>
+	 */
+	public void setExecutionEnvironment(ExecutionEnvironment executionEnvironment) {
+		this.executionEnvironment = executionEnvironment;
 	}
 
 }

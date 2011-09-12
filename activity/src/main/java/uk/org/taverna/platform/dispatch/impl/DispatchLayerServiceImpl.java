@@ -1,19 +1,19 @@
 /*******************************************************************************
- * Copyright (C) 2011 The University of Manchester   
- * 
+ * Copyright (C) 2011 The University of Manchester
+ *
  *  Modifications to the initial code base are copyright of their
  *  respective authors, or their employers as appropriate.
- * 
+ *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public License
  *  as published by the Free Software Foundation; either version 2.1 of
  *  the License, or (at your option) any later version.
- *    
+ *
  *  This program is distributed in the hope that it will be useful, but
  *  WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *    
+ *
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -41,7 +41,7 @@ import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.dispatchstack.DispatchStackLayer;
 
 /**
- * 
+ *
  * @author David Withers
  */
 public class DispatchLayerServiceImpl implements DispatchLayerService {
@@ -49,7 +49,7 @@ public class DispatchLayerServiceImpl implements DispatchLayerService {
 	private static Logger logger = Logger.getLogger(DispatchLayerServiceImpl.class);
 
 	private List<DispatchLayerFactory> dispatchLayerFactories;
-	
+
 	@Override
 	public List<URI> getDispatchLayerURIs() {
 		List<URI> dispatchLayerURIs = new ArrayList<URI>();
@@ -82,7 +82,7 @@ public class DispatchLayerServiceImpl implements DispatchLayerService {
 			throws DispatchLayerNotFoundException, DispatchLayerConfigurationException {
 		DispatchLayerFactory factory = getDispatchLayerFactory(uri);
 		DispatchLayer<?> dispatchLayer = factory.createDispatchLayer(uri);
-		
+
 		if (configuration != null) {
 			// check configuration is for the correct activity
 			Configurable configurable = configuration.getConfigures();
@@ -126,7 +126,14 @@ public class DispatchLayerServiceImpl implements DispatchLayerService {
 		return null;
 	}
 
-	@Override
+	/**
+	 * Sets the list of available <code>DispatchLayerFactory</code>s.
+	 *
+	 * In a production environment this should be set by Spring DM.
+	 *
+	 * @param dispatchLayerFactories
+	 *            the list of available <code>DispatchLayerFactory</code>s
+	 */
 	public void setDispatchLayerFactories(List<DispatchLayerFactory> dispatchLayerFactories) {
 		this.dispatchLayerFactories = dispatchLayerFactories;
 	}

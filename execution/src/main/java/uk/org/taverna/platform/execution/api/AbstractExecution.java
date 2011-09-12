@@ -61,6 +61,25 @@ public abstract class AbstractExecution implements Execution {
 	private final Scufl2Tools scufl2Tools = new Scufl2Tools();
 	private final URITools uriTools = new URITools();
 
+	/**
+	 * Constructs an abstract implementation of an Execution.
+	 *
+	 * @param workflowBundle
+	 *            the <code>WorkflowBundle</code> containing the <code>Workflow</code>s required for
+	 *            execution
+	 * @param workflow
+	 *            the <code>Workflow</code> to execute
+	 * @param profile
+	 *            the <code>Profile</code> to use when executing the <code>Workflow</code>
+	 * @param inputs
+	 *            the inputs for the <code>Workflow</code>. May be <code>null</code> if the
+	 *            <code>Workflow</code> doesn't require any inputs
+	 * @param referenceService
+	 *            the <code>ReferenceService</code> used to register inputs, outputs and
+	 *            intermediate values
+	 * @throws InvalidWorkflowException
+	 *             if the specified workflow is invalid
+	 */
 	public AbstractExecution(WorkflowBundle workflowBundle, Workflow workflow, Profile profile,
 			Map<String, T2Reference> inputs, ReferenceService referenceService) {
 		this.workflowBundle = workflowBundle;

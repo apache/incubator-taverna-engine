@@ -24,8 +24,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.sf.taverna.t2.reference.T2Reference;
+import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
+import uk.org.taverna.platform.execution.api.ExecutionEnvironmentService;
 import uk.org.taverna.platform.execution.api.InvalidExecutionIdException;
 import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
 import uk.org.taverna.platform.report.State;
@@ -35,6 +38,7 @@ import uk.org.taverna.platform.run.api.RunProfile;
 import uk.org.taverna.platform.run.api.RunProfileException;
 import uk.org.taverna.platform.run.api.RunService;
 import uk.org.taverna.platform.run.api.RunStateException;
+import uk.org.taverna.scufl2.api.profiles.Profile;
 
 /**
  * Implementation of the <code>RunService</code>.
@@ -47,22 +51,28 @@ public class RunServiceImpl implements RunService {
 
 	private final Map<String, Run> runMap;
 
+	private ExecutionEnvironmentService executionEnvironmentService;
+
 	public RunServiceImpl() {
 		runs = new ArrayList<String>();
 		runMap = new HashMap<String, Run>();
 	}
 
-	/* (non-Javadoc)
-	 * @see uk.org.taverna.platform.run.RunService#getRuns()
-	 */
+	@Override
+	public Set<ExecutionEnvironment> getExecutionEnvironments() {
+		return executionEnvironmentService.getExecutionEnvironments();
+	}
+
+	@Override
+	public Set<ExecutionEnvironment> getExecutionEnvironments(Profile profile) {
+		return executionEnvironmentService.getExecutionEnvironments(profile);
+	}
+
 	@Override
 	public List<String> getRuns() {
 		return runs;
 	}
 
-	/* (non-Javadoc)
-	 * @see uk.org.taverna.platform.run.RunService#createRun(uk.org.taverna.scufl2.api.core.Workflow, uk.org.taverna.scufl2.api.profiles.Profile, java.util.Map, net.sf.taverna.t2.reference.ReferenceService)
-	 */
 	@Override
 	public String createRun(RunProfile runProfile) throws InvalidWorkflowException, RunProfileException {
 		Run run = new Run(runProfile);
@@ -77,65 +87,41 @@ public class RunServiceImpl implements RunService {
 		runMap.remove(runID);
 	}
 
-	/* (non-Javadoc)
-	 * @see uk.org.taverna.platform.run.RunService#start(java.lang.String)
-	 */
 	@Override
 	public void start(String runID) throws InvalidRunIdException, RunStateException, InvalidExecutionIdException {
 		getRun(runID).start();
 	}
 
-	/* (non-Javadoc)
-	 * @see uk.org.taverna.platform.run.RunService#pause(java.lang.String)
-	 */
 	@Override
 	public void pause(String runID) throws InvalidRunIdException, RunStateException, InvalidExecutionIdException {
 		getRun(runID).pause();
 	}
 
-	/* (non-Javadoc)
-	 * @see uk.org.taverna.platform.run.RunService#resume(java.lang.String)
-	 */
 	@Override
 	public void resume(String runID) throws InvalidRunIdException, RunStateException, InvalidExecutionIdException {
 		getRun(runID).resume();
 	}
 
-	/* (non-Javadoc)
-	 * @see uk.org.taverna.platform.run.RunService#cancel(java.lang.String)
-	 */
 	@Override
 	public void cancel(String runID) throws InvalidRunIdException, RunStateException, InvalidExecutionIdException {
 		getRun(runID).cancel();
 	}
 
-	/* (non-Javadoc)
-	 * @see uk.org.taverna.platform.run.RunService#getState(java.lang.String)
-	 */
 	@Override
 	public State getState(String runID) throws InvalidRunIdException {
 		return getRun(runID).getState();
 	}
 
-	/* (non-Javadoc)
-	 * @see uk.org.taverna.platform.run.RunService#getInputs(java.lang.String)
-	 */
 	@Override
 	public Map<String, T2Reference> getInputs(String runID) throws InvalidRunIdException {
 		return getRun(runID).getInputs();
 	}
 
-	/* (non-Javadoc)
-	 * @see uk.org.taverna.platform.run.RunService#getOutputs(java.lang.String)
-	 */
 	@Override
 	public Map<String, T2Reference> getOutputs(String runID) throws InvalidRunIdException {
 		return getRun(runID).getOutputs();
 	}
 
-	/* (non-Javadoc)
-	 * @see uk.org.taverna.platform.run.RunService#getWorkflowReport(java.lang.String)
-	 */
 	@Override
 	public WorkflowReport getWorkflowReport(String runID) throws InvalidRunIdException {
 		return getRun(runID).getWorkflowReport();
@@ -147,6 +133,10 @@ public class RunServiceImpl implements RunService {
 			throw new InvalidRunIdException("Run ID " + runID + " is not valid");
 		}
 		return run;
+	}
+
+	public void setExecutionEnvironmentService(ExecutionEnvironmentService executionEnvironmentService) {
+		this.executionEnvironmentService = executionEnvironmentService;
 	}
 
 }

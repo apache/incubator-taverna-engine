@@ -21,98 +21,48 @@
 package uk.org.taverna.platform;
 
 import java.net.URI;
-import java.net.URL;
-import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.security.credentialmanager.CredentialManager;
-import net.sf.taverna.t2.security.credentialmanager.MasterPasswordProvider;
-import net.sf.taverna.t2.security.credentialmanager.TrustConfirmationProvider;
 import net.sf.taverna.t2.security.credentialmanager.UsernamePassword;
 
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
+import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
 import uk.org.taverna.platform.execution.api.ExecutionService;
+import uk.org.taverna.platform.execution.impl.local.LocalExecutionEnvironment;
 import uk.org.taverna.platform.report.State;
 import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.platform.run.api.RunProfile;
 import uk.org.taverna.platform.run.api.RunService;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
-import uk.org.taverna.scufl2.api.io.WorkflowBundleReader;
-import uk.org.taverna.scufl2.translator.t2flow.T2FlowReader;
 
 public class RunIT extends PlatformIT {
 
-	private ExecutionService executionService;
 	private RunService runService;
-	private CredentialManager credentialManager;
-	private WorkflowBundleReader workflowBundleReader;
+	private ExecutionEnvironment executionEnvironment;
+	private ReferenceService referenceService;
 
-	private void setup() throws InvalidSyntaxException {
-
-		bundleContext.registerService(
-				"net.sf.taverna.t2.security.credentialmanager.TrustConfirmationProvider",
-				new TrustConfirmationProvider() {
-					public Boolean shouldTrustCertificate(X509Certificate[] chain) {
-						return true;
-					}
-				}, null);
-
-		if (referenceService == null) {
-			ServiceReference[] referenceServiceReferences = bundleContext.getServiceReferences(
-					"net.sf.taverna.t2.reference.ReferenceService",
-					"(org.springframework.osgi.bean.name=inMemoryReferenceService)");
-			assertEquals(1, referenceServiceReferences.length);
-			referenceService = (ReferenceService) bundleContext
-					.getService(referenceServiceReferences[0]);
-		}
-
-		if (executionService == null) {
-			ServiceReference[] executionServiceReferences = bundleContext.getServiceReferences(
-					"uk.org.taverna.platform.execution.api.ExecutionService",
-					"(org.springframework.osgi.bean.name=localExecution)");
-			assertEquals(1, executionServiceReferences.length);
-			executionService = (ExecutionService) bundleContext
-					.getService(executionServiceReferences[0]);
-		}
-
+	protected void setup() throws InvalidSyntaxException {
+		super.setup();
 		if (runService == null) {
 			ServiceReference runServiceReference = bundleContext
 					.getServiceReference("uk.org.taverna.platform.run.api.RunService");
 			runService = (RunService) bundleContext.getService(runServiceReference);
 		}
-
-		if (credentialManager == null) {
-			ServiceReference credentialManagerReference = bundleContext
-					.getServiceReference("net.sf.taverna.t2.security.credentialmanager.CredentialManager");
-			credentialManager = (CredentialManager) bundleContext
-					.getService(credentialManagerReference);
-		}
-
-		if (workflowBundleReader == null) {
-			ServiceReference[] workflowBundleReaderReferences = bundleContext
-					.getServiceReferences("uk.org.taverna.scufl2.api.io.WorkflowBundleReader", null);
-			for (ServiceReference serviceReference : workflowBundleReaderReferences) {
-				workflowBundleReader = (WorkflowBundleReader) bundleContext.getService(serviceReference);
-				if (workflowBundleReader.getMediaTypes().contains(T2FlowReader.APPLICATION_VND_TAVERNA_T2FLOW_XML)) {
-					break;
-				}
+		for (ExecutionEnvironment executionEnvironment : runService.getExecutionEnvironments()) {
+			if (executionEnvironment.getID().equals("uk.org.taverna.platform.execution.impl.local.LocalExecutionEnvironment")) {
+				this.executionEnvironment = executionEnvironment;
+				break;
 			}
 		}
-
-		ServiceReference[] masterPasswordProviderReferences = bundleContext.getServiceReferences(
-				"net.sf.taverna.t2.security.credentialmanager.MasterPasswordProvider", null);
-		for (ServiceReference serviceReference : masterPasswordProviderReferences) {
-			MasterPasswordProvider masterPasswordProvider = (MasterPasswordProvider) bundleContext
-					.getService(serviceReference);
-			masterPasswordProvider.setMasterPassword("test");
-		}
-
+		referenceService = executionEnvironment.getReferenceService();
 	}
 
 	public void testRun() throws Exception {
@@ -123,8 +73,7 @@ public class RunIT extends PlatformIT {
 		Map<String, T2Reference> inputs = new HashMap<String, T2Reference>();
 		inputs.put("in", referenceService.register("test-input", 0, true, null));
 
-		String runId = runService.createRun(new RunProfile(workflowBundle, inputs,
-				referenceService, executionService));
+		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle, inputs));
 		assertEquals(State.CREATED, runService.getState(runId));
 
 		WorkflowReport report = runService.getWorkflowReport(runId);
@@ -139,7 +88,7 @@ public class RunIT extends PlatformIT {
 		assertNotNull(results);
 		waitForResults(results, runService.getWorkflowReport(runId), "out");
 
-		assertTrue(checkResult(results.get("out"), "test-input"));
+		assertTrue(checkResult(referenceService, results.get("out"), "test-input"));
 
 		assertEquals(State.COMPLETED, runService.getState(runId));
 		System.out.println(report);
@@ -153,8 +102,7 @@ public class RunIT extends PlatformIT {
 		Map<String, T2Reference> inputs = new HashMap<String, T2Reference>();
 		inputs.put("in", referenceService.register("test-input", 0, true, null));
 
-		String runId = runService.createRun(new RunProfile(workflowBundle, inputs,
-				referenceService, executionService));
+		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle, inputs));
 		assertEquals(State.CREATED, runService.getState(runId));
 
 		WorkflowReport report = runService.getWorkflowReport(runId);
@@ -191,8 +139,7 @@ public class RunIT extends PlatformIT {
 		Map<String, T2Reference> inputs = new HashMap<String, T2Reference>();
 		inputs.put("in", referenceService.register("test input", 0, true, null));
 
-		String runId = runService.createRun(new RunProfile(workflowBundle, inputs,
-				referenceService, executionService));
+		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle, inputs));
 		assertEquals(State.CREATED, runService.getState(runId));
 
 		WorkflowReport report = runService.getWorkflowReport(runId);
@@ -205,7 +152,7 @@ public class RunIT extends PlatformIT {
 		Map<String, T2Reference> results = runService.getOutputs(runId);
 		waitForResults(results, report, "out");
 
-		assertTrue(checkResult(results.get("out"), "nested dataflow : test input"));
+		assertTrue(checkResult(referenceService, results.get("out"), "nested dataflow : test input"));
 
 		assertEquals(State.COMPLETED, runService.getState(runId));
 		System.out.println(report);
@@ -219,8 +166,7 @@ public class RunIT extends PlatformIT {
 		Map<String, T2Reference> inputs = new HashMap<String, T2Reference>();
 		inputs.put("in", referenceService.register("Tom", 0, true, null));
 
-		String runId = runService.createRun(new RunProfile(workflowBundle, inputs,
-				referenceService, executionService));
+		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle, inputs));
 		assertEquals(State.CREATED, runService.getState(runId));
 
 		WorkflowReport report = runService.getWorkflowReport(runId);
@@ -235,7 +181,7 @@ public class RunIT extends PlatformIT {
 		assertNotNull(results);
 		waitForResults(results, report, "out");
 
-		assertTrue(checkResult(results.get("out"), "Hello Tom"));
+		assertTrue(checkResult(referenceService, results.get("out"), "Hello Tom"));
 
 		assertEquals(State.COMPLETED, runService.getState(runId));
 		System.out.println(report);
@@ -246,8 +192,7 @@ public class RunIT extends PlatformIT {
 	//
 	// WorkflowBundle workflowBundle = loadWorkflow("/t2flow/secure-basic-authentication.t2flow");
 	//
-	// String runId = runService.createRun(new RunProfile(workflowBundle, referenceService,
-	// executionService));
+	// String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle));
 	// assertEquals(State.CREATED, runService.getState(runId));
 	//
 	// WorkflowReport report = runService.getWorkflowReport(runId);
@@ -260,7 +205,7 @@ public class RunIT extends PlatformIT {
 	// Map<String, T2Reference> results = runService.getOutputs(runId);
 	// waitForResults(results, report, "out");
 	//
-	// assertTrue(checkResult(
+	// assertTrue(checkResult(referenceService,
 	// results.get("out"),
 	// "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">\n"
 	// + "<HTML><HEAD><TITLE>Apache Tomcat Examples</TITLE>\n"
@@ -282,8 +227,7 @@ public class RunIT extends PlatformIT {
 
 		WorkflowBundle workflowBundle = loadWorkflow("/t2flow/soaplab.t2flow");
 
-		String runId = runService.createRun(new RunProfile(workflowBundle, referenceService,
-				executionService));
+		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle));
 		assertEquals(State.CREATED, runService.getState(runId));
 
 		WorkflowReport report = runService.getWorkflowReport(runId);
@@ -296,7 +240,7 @@ public class RunIT extends PlatformIT {
 		Map<String, T2Reference> results = runService.getOutputs(runId);
 		waitForResults(results, report, "sequence");
 
-		assertTrue(checkResult(results.get("sequence"),
+		assertTrue(checkResult(referenceService, results.get("sequence"),
 				"ID   X52524; SV 1; linear; genomic DNA; STD; INV; 4507 BP."));
 
 		assertEquals(State.COMPLETED, runService.getState(runId));
@@ -308,8 +252,7 @@ public class RunIT extends PlatformIT {
 
 		WorkflowBundle workflowBundle = loadWorkflow("/t2flow/stringconstant.t2flow");
 
-		String runId = runService.createRun(new RunProfile(workflowBundle, referenceService,
-				executionService));
+		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle));
 		WorkflowReport report = runService.getWorkflowReport(runId);
 		assertEquals(State.CREATED, runService.getState(runId));
 
@@ -320,7 +263,7 @@ public class RunIT extends PlatformIT {
 		Map<String, T2Reference> results = runService.getOutputs(runId);
 		waitForResults(results, report, "out");
 
-		assertTrue(checkResult(results.get("out"), "Test Value"));
+		assertTrue(checkResult(referenceService, results.get("out"), "Test Value"));
 
 		assertEquals(State.COMPLETED, runService.getState(runId));
 	}
@@ -334,8 +277,7 @@ public class RunIT extends PlatformIT {
 		Map<String, T2Reference> inputs = new HashMap<String, T2Reference>();
 		inputs.put("in", referenceService.register("test", 0, true, null));
 
-		String runId = runService.createRun(new RunProfile(workflowBundle, inputs,
-				referenceService, executionService));
+		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle, inputs));
 		assertEquals(State.CREATED, runService.getState(runId));
 
 		WorkflowReport report = runService.getWorkflowReport(runId);
@@ -424,8 +366,7 @@ public class RunIT extends PlatformIT {
 
 		WorkflowBundle workflowBundle = loadWorkflow("/t2flow/wsdl.t2flow");
 
-		String runId = runService.createRun(new RunProfile(workflowBundle, referenceService,
-				executionService));
+		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle));
 		assertEquals(State.CREATED, runService.getState(runId));
 
 		WorkflowReport report = runService.getWorkflowReport(runId);
@@ -438,9 +379,9 @@ public class RunIT extends PlatformIT {
 		Map<String, T2Reference> results = runService.getOutputs(runId);
 		waitForResults(results, report, "out");
 
-		// assertTrue(checkResult(results.get("out"),
+		// assertTrue(checkResult(referenceService, results.get("out"),
 		// "Apache Axis version: 1.4\nBuilt on Apr 22, 2006 (06:55:48 PDT)"));
-		assertTrue(checkResult(results.get("out"),
+		assertTrue(checkResult(referenceService, results.get("out"),
 				"Apache Axis version: 1.2\nBuilt on May 03, 2005 (02:20:24 EDT)"));
 
 		assertEquals(State.COMPLETED, runService.getState(runId));
@@ -455,8 +396,7 @@ public class RunIT extends PlatformIT {
 						new UsernamePassword("testuser", "testpasswd"),
 						URI.create("http://heater.cs.man.ac.uk:7070/axis/services/HelloService-PlaintextPassword?wsdl"));
 
-		String runId = runService.createRun(new RunProfile(workflowBundle, referenceService,
-				executionService));
+		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle));
 		assertEquals(State.CREATED, runService.getState(runId));
 
 		WorkflowReport report = runService.getWorkflowReport(runId);
@@ -469,7 +409,7 @@ public class RunIT extends PlatformIT {
 		Map<String, T2Reference> results = runService.getOutputs(runId);
 		waitForResults(results, report, "out");
 
-		assertTrue(checkResult(results.get("out"), "Hello Alan!"));
+		assertTrue(checkResult(referenceService, results.get("out"), "Hello Alan!"));
 
 		assertEquals(State.COMPLETED, runService.getState(runId));
 		System.out.println(report);
@@ -496,8 +436,7 @@ public class RunIT extends PlatformIT {
 
 		WorkflowBundle workflowBundle = loadWorkflow("/t2flow/secure-ws.t2flow");
 
-		String runId = runService.createRun(new RunProfile(workflowBundle, referenceService,
-				executionService));
+		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle));
 		assertEquals(State.CREATED, runService.getState(runId));
 
 		WorkflowReport report = runService.getWorkflowReport(runId);
@@ -511,10 +450,10 @@ public class RunIT extends PlatformIT {
 		waitForResults(results, report, "out_plaintext", "out_digest", "out_digest_timestamp",
 				"out_plaintext_timestamp");
 
-		assertTrue(checkResult(results.get("out_plaintext"), "Hello Alan!"));
-		assertTrue(checkResult(results.get("out_digest"), "Hello Stian!"));
-		assertTrue(checkResult(results.get("out_digest_timestamp"), "Hello David!"));
-		assertTrue(checkResult(results.get("out_plaintext_timestamp"), "Hello Alex!"));
+		assertTrue(checkResult(referenceService, results.get("out_plaintext"), "Hello Alan!"));
+		assertTrue(checkResult(referenceService, results.get("out_digest"), "Hello Stian!"));
+		assertTrue(checkResult(referenceService, results.get("out_digest_timestamp"), "Hello David!"));
+		assertTrue(checkResult(referenceService, results.get("out_plaintext_timestamp"), "Hello Alex!"));
 
 		assertEquals(State.COMPLETED, runService.getState(runId));
 		System.out.println(report);
@@ -541,8 +480,7 @@ public class RunIT extends PlatformIT {
 
 		WorkflowBundle workflowBundle = loadWorkflow("/t2flow/secure-ws-https.t2flow");
 
-		String runId = runService.createRun(new RunProfile(workflowBundle, referenceService,
-				executionService));
+		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle));
 		assertEquals(State.CREATED, runService.getState(runId));
 
 		WorkflowReport report = runService.getWorkflowReport(runId);
@@ -556,10 +494,10 @@ public class RunIT extends PlatformIT {
 		waitForResults(results, report, "out_plaintext", "out_digest", "out_digest_timestamp",
 				"out_plaintext_timestamp");
 
-		assertTrue(checkResult(results.get("out_plaintext"), "Hello Alan!"));
-		assertTrue(checkResult(results.get("out_digest"), "Hello Stian!"));
-		assertTrue(checkResult(results.get("out_digest_timestamp"), "Hello David!"));
-		assertTrue(checkResult(results.get("out_plaintext_timestamp"), "Hello Alex!"));
+		assertTrue(checkResult(referenceService, results.get("out_plaintext"), "Hello Alan!"));
+		assertTrue(checkResult(referenceService, results.get("out_digest"), "Hello Stian!"));
+		assertTrue(checkResult(referenceService, results.get("out_digest_timestamp"), "Hello David!"));
+		assertTrue(checkResult(referenceService, results.get("out_plaintext_timestamp"), "Hello Alex!"));
 
 		assertEquals(State.COMPLETED, runService.getState(runId));
 		System.out.println(report);
@@ -575,8 +513,7 @@ public class RunIT extends PlatformIT {
 		inputs.put("lastName", referenceService.register("Smith", 0, true, null));
 		inputs.put("age", referenceService.register("21", 0, true, null));
 
-		String runId = runService.createRun(new RunProfile(workflowBundle, inputs,
-				referenceService, executionService));
+		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle, inputs));
 		assertEquals(State.CREATED, runService.getState(runId));
 
 		WorkflowReport report = runService.getWorkflowReport(runId);
@@ -590,21 +527,11 @@ public class RunIT extends PlatformIT {
 		Map<String, T2Reference> results = runService.getOutputs(runId);
 		waitForResults(results, report, "out");
 
-		assertTrue(checkResult(results.get("out"),
+		assertTrue(checkResult(referenceService, results.get("out"),
 				"John Smith (21) of 40, Oxford Road. Manchester."));
 
 		assertEquals(State.COMPLETED, runService.getState(runId));
 		System.out.println(report);
-	}
-
-	private WorkflowBundle loadWorkflow(String t2FlowFile) throws Exception {
-		URL wfResource = getClass().getResource(t2FlowFile);
-		assertNotNull(wfResource);
-		System.out.println(workflowBundleReader.getMediaTypes());
-		return workflowBundleReader.readBundle(wfResource.openStream(), T2FlowReader.APPLICATION_VND_TAVERNA_T2FLOW_XML);
-//		T2FlowParser t2FlowParser = new T2FlowParser();
-//		t2FlowParser.setStrict(true);
-//		return t2FlowParser.parseT2Flow(wfResource.openStream());
 	}
 
 }
