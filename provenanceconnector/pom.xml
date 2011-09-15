@@ -77,11 +77,13 @@
             <groupId>org.tupeloproject</groupId>
             <artifactId>tupelo-cet</artifactId>
             <version>${tupelo.version}</version>
-        </dependency>
+            <scope>provided</scope>
+       </dependency>
         <dependency>
             <groupId>org.tupeloproject</groupId>
             <artifactId>tupelo-kernel</artifactId>
             <version>${tupelo.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <!--
@@ -95,7 +97,8 @@
             <groupId>org.openprovenance</groupId>
             <artifactId>opm-core</artifactId>
             <version>${opm.version}</version>
-        </dependency>
+            <scope>provided</scope>
+         </dependency>
 
 <!--
 
