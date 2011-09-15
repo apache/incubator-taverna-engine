@@ -20,10 +20,7 @@
  ******************************************************************************/
 package net.sf.taverna.t2.lang.results;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -42,13 +39,8 @@ import net.sf.taverna.t2.reference.ReferencedDataNature;
 import net.sf.taverna.t2.reference.StackTraceElementBean;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.reference.T2ReferenceType;
-import net.sf.taverna.t2.reference.ValueCarryingExternalReference;
 
 import org.apache.log4j.Logger;
-import org.clapper.util.misc.MIMETypeUtil;
-
-import eu.medsea.mimeutil.MimeType;
-import eu.medsea.mimeutil.MimeUtil2;
 
 /**
  * Convenience methods for displaying and storing workflow run results. For
@@ -274,7 +266,12 @@ public class ResultsUtils {
 		return errorDocuments;
 	}
 
-	@SuppressWarnings("unchecked")
+	/**
+	 * @param externalReference
+	 * @param context
+	 * @return
+	 */
+/*	@SuppressWarnings("unchecked")
 	public static List<MimeType> getMimeTypes(
 			ExternalReferenceSPI externalReference, InvocationContext context) {
 		List<MimeType> mimeList = new ArrayList<MimeType>();
@@ -315,12 +312,12 @@ public class ResultsUtils {
 		}
 
 		return mimeList;
-	}
+	}*/
 
-	public static String getExtension(String mimeType) {
+/*	public static String getExtension(String mimeType) {
 
 		String mimeTypeForFileExtension = MIMETypeUtil
 				.fileExtensionForMIMEType(mimeType);
 		return mimeTypeForFileExtension;
-	}
+	}*/
 }
