@@ -28,7 +28,7 @@
 			<version>1.39.0</version>
 		</dependency> -->
 		<dependency>
-			<groupId>bouncycastle</groupId>
+			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk16</artifactId>
 			<version>${bcprov.jdk16.version}</version>
 		</dependency>

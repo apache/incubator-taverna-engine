@@ -32,7 +32,7 @@
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk16</artifactId>
-			<version>1.46</version>
+			<version>${bcprov.jdk16.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.log4j</groupId>
