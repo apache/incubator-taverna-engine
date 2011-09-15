@@ -8,13 +8,12 @@ import java.io.PrintWriter;
 import java.util.Map;
 
 import net.sf.taverna.t2.invocation.InvocationContext;
+import net.sf.taverna.t2.lang.baclava.factory.DataThingFactory;
+import net.sf.taverna.t2.lang.baclava.factory.DataThingXMLFactory;
 import net.sf.taverna.t2.lang.results.ResultsUtils;
 import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.T2Reference;
 
-import org.embl.ebi.escience.baclava.DataThing;
-import org.embl.ebi.escience.baclava.factory.DataThingFactory;
-import org.embl.ebi.escience.baclava.factory.DataThingXMLFactory;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
