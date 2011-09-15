@@ -20,21 +20,12 @@
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
 				<version>${junit.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>commons-io</groupId>
-				<artifactId>commons-io</artifactId>
-				<version>${commons.io.version}</version>
+				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.log4j</groupId>
 				<artifactId>com.springsource.org.apache.log4j</artifactId>
 				<version>1.2.16</version>
-			</dependency>
-			<dependency>
-				<groupId>org.jdom</groupId>
-				<artifactId>jdom</artifactId>
-				<version>${jdom.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
