@@ -76,6 +76,22 @@ public interface CredentialManager {
 	// we are currently performing an operation on (in cases when the same operation can be done on both).
 	public static enum KeystoreType {KEYSTORE, TRUSTSTORE};
 	
+	
+	/**
+	 * Set the directory where Credential Manager's Keystore and Truststore 
+	 * files will be read from. If this method is not used, the directory will
+	 * default to <TAVERNA_HOME>/security somewhere in user's home directory.
+	 * 
+	 * If you want to use this method to change the location of Credential Manager's
+	 * configuration directory then make sure you call it before any other method on 
+	 * Credential Manager. 
+	 * 
+	 * @param credentialManagerDirectory
+	 * @throws CMException
+	 */
+	public void setConfigurationDirectoryPath(File credentialManagerDirectory)
+			throws CMException;
+
 	/**
 	 * Checks if the Keystore contains a username and password for the given service URI.
 	 */

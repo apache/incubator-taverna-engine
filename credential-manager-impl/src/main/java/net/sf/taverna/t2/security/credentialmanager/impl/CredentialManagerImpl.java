@@ -2360,12 +2360,20 @@ public class CredentialManagerImpl implements CredentialManager,
 	}
 
 	/**
-	 * Helper method to set the directory with Credential Manager's files. 
-	 * We will use the OSGi Configuration Service for this in production.
+	 * Set the directory where Credential Manager's Keystore and Truststore 
+	 * files will be read from. If this method is not used, the directory will
+	 * default to <TAVERNA_HOME>/security somewhere in user's home directory.
+	 * 
+	 * If you want to use this method to change the location of Credential Manager's
+	 * configuration directory then make sure you call it before any other method on 
+	 * Credential Manager. 
+	 * 
+	 * This was supposed to be done through OSGi services.
 	 * 
 	 * @param credentialManagerDirectory
 	 * @throws CMException
 	 */
+	@Override
 	public void setConfigurationDirectoryPath(File credentialManagerDirectory)
 			throws CMException {
 
@@ -2386,6 +2394,15 @@ public class CredentialManagerImpl implements CredentialManager,
 		keystoreFile = new File(credentialManagerDirectory, KEYSTORE_FILE_NAME);
 		truststoreFile = new File(credentialManagerDirectory,
 				TRUSTSTORE_FILE_NAME);
+		
+		// Are we resetting the directory? Has stuff been initialized yet?
+		// Then we need to reset everything else.
+		if (isInitialized){
+			masterPassword = null;
+			keystore = null;
+			truststore = null;
+			isInitialized = false;			
+		}
 	}
 
 	// private void loadSecurityFiles(String credentialManagerDirPath)
