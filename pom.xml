@@ -17,7 +17,6 @@
 		<url>http://code.google.com/p/taverna/source/browse/#svn/taverna/platform/uk.org.taverna.platform/trunk</url>
 	</scm>
 	<properties>
-		<scufl2.version>0.1-SNAPSHOT</scufl2.version>
 		<tycho-version>0.10.0</tycho-version>
 	</properties>
 	<!-- <build>

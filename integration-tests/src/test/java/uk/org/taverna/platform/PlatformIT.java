@@ -20,6 +20,7 @@
  ******************************************************************************/
 package uk.org.taverna.platform;
 
+import java.io.File;
 import java.net.URL;
 import java.security.cert.X509Certificate;
 import java.util.Map;
@@ -31,6 +32,7 @@ import net.sf.taverna.t2.reference.IdentifiedList;
 import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.StackTraceElementBean;
 import net.sf.taverna.t2.reference.T2Reference;
+import net.sf.taverna.t2.security.credentialmanager.CMException;
 import net.sf.taverna.t2.security.credentialmanager.CredentialManager;
 import net.sf.taverna.t2.security.credentialmanager.MasterPasswordProvider;
 import net.sf.taverna.t2.security.credentialmanager.TrustConfirmationProvider;
@@ -160,9 +162,16 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 				"uk.org.taverna.platform, run, 0.1.1-SNAPSHOT",
 //				"uk.org.taverna.platform, integration-tests, 0.1.1-SNAPSHOT",
 				// FIXME: Add the other scufl2 modules
-				"uk.org.taverna.scufl2, scufl2-api, 0.1-SNAPSHOT",
-				"uk.org.taverna.scufl2, scufl2-ucfpackage, 0.1-SNAPSHOT",
-		"uk.org.taverna.scufl2, scufl2-t2flow, 0.1-SNAPSHOT"};
+				"uk.org.taverna.scufl2, scufl2-api, 0.9-SNAPSHOT",
+				"uk.org.taverna.scufl2, scufl2-ucfpackage, 0.9-SNAPSHOT",
+				"uk.org.taverna.scufl2, scufl2-t2flow, 0.9-SNAPSHOT",
+				"uk.org.taverna.scufl2, scufl2-validation, 0.9-SNAPSHOT",
+				"uk.org.taverna.scufl2, scufl2-validation-correctness, 0.9-SNAPSHOT",
+				"uk.org.taverna.scufl2, scufl2-validation-structural, 0.9-SNAPSHOT",
+				"net.sf.taverna.t2.lang, results, 2.0-SNAPSHOT",
+				"org.apache.commons, com.springsource.org.apache.commons.cli, 1.2.0",
+				"net.sf.taverna.t2.taverna-commandline, taverna-commandline-common, 2.0-SNAPSHOT"
+				};
 	}
 
 
@@ -182,6 +191,12 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 			credentialManager = (CredentialManager) bundleContext
 					.getService(credentialManagerReference);
 		}
+//		try {
+//			credentialManager.setConfigurationDirectoryPath(new File("/tmp/taverna"));
+//		} catch (CMException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 
 		if (workflowBundleReader == null) {
 			ServiceReference[] workflowBundleReaderReferences = bundleContext
