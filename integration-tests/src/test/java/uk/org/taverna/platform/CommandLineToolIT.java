@@ -28,12 +28,14 @@ import org.osgi.framework.ServiceReference;
 
 import uk.org.taverna.platform.run.api.RunService;
 import uk.org.taverna.scufl2.api.io.WorkflowBundleIO;
+import uk.org.taverna.scufl2.api.io.WorkflowBundleReader;
 
 public class CommandLineToolIT extends PlatformIT {
 
 	
 	private RunService runService;
-	private WorkflowBundleIO workflowBundleIO;
+	//private WorkflowBundleIO workflowBundleIO;
+	private WorkflowBundleReader workflowReader;
 
 	protected void setup() throws InvalidSyntaxException {
 		super.setup();
@@ -43,10 +45,17 @@ public class CommandLineToolIT extends PlatformIT {
 			runService = (RunService) bundleContext.getService(runServiceReference);
 		}
 		
-		if (workflowBundleIO == null) {
-			ServiceReference workflowBundleIOServiceReference = bundleContext
-					.getServiceReference("uk.org.taverna.scufl2.api.io.WorkflowBundleIO");
-			workflowBundleIO = (WorkflowBundleIO) bundleContext.getService(workflowBundleIOServiceReference);
+//		if (workflowBundleIO == null) {
+//			ServiceReference workflowBundleIOServiceReference = bundleContext
+//					.getServiceReference("uk.org.taverna.scufl2.api.io.WorkflowBundleIO");
+//			workflowBundleIO = (WorkflowBundleIO) bundleContext.getService(workflowBundleIOServiceReference);
+//		}
+		
+		if (workflowReader == null) {
+//			ServiceReference workflowBundleReaderServiceReference = bundleContext
+//					.getServiceReference("uk.org.taverna.scufl2.api.io.WorkflowBundleReader");
+			ServiceReference workflowBundleReaderServiceReference = bundleContext.getServiceReferences("uk.org.taverna.scufl2.api.io.WorkflowBundleReader", "(mediaType=application/vnd.taverna.t2flow+xml)")[0];
+			workflowBundleReader = (WorkflowBundleReader) bundleContext.getService(workflowBundleReaderServiceReference);
 		}
 	}
 	
@@ -57,7 +66,7 @@ public class CommandLineToolIT extends PlatformIT {
 		CommandLineTool cmdTool = new CommandLineTool();
 		cmdTool.setRunService(runService);
 		cmdTool.setCredentialManager(credentialManager);
-		cmdTool.setWorkflowBundleIO(workflowBundleIO);
+		cmdTool.setWorkflowBundleReader(workflowBundleReader);
 		cmdTool.run(new String[]{"-outputdoc", "/tmp/taverna3/baclava-output.xml", "/tmp/taverna3/simple-wf-no-inputs-one-output.t2flow"});
 	}
 
