@@ -67,7 +67,11 @@ public class CommandLineToolIT extends PlatformIT {
 		cmdTool.setRunService(runService);
 		cmdTool.setCredentialManager(credentialManager);
 		cmdTool.setWorkflowBundleReader(workflowBundleReader);
-		cmdTool.run(new String[]{"-outputdoc", "/tmp/taverna3/baclava-output.xml", "/tmp/taverna3/simple-wf-no-inputs-one-output.t2flow"});
+
+		cmdTool.run(new String[]{"-outputdoc", "/tmp/taverna3/baclava-output1.xml", "/Users/alex/Desktop/t2flows/simple-wf-no-inputs-one-output.t2flow"});
+	
+		cmdTool.run(new String[]{"-inputvalue", "in", "Taverna 3 Platform rules", "-outputdoc", "/tmp/taverna3/baclava-output2.xml", "/Users/alex/Desktop/t2flows/simple-wf-one-input-one-output.t2flow"});
+		
 	}
 
 	
