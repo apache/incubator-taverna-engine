@@ -54,6 +54,7 @@ import org.apache.commons.io.FileUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -110,6 +111,7 @@ public class CredentialManagerImplIT {
 	 * @throws java.lang.Exception
 	 */
 	@BeforeClass
+	@Ignore
 	public static void setUpBeforeCLass() throws Exception {
 
 		Security.addProvider(new BouncyCastleProvider());
@@ -244,6 +246,7 @@ public class CredentialManagerImplIT {
 	}
 	
 	@AfterClass
+	@Ignore
 	// Clean up the credentialManagerDirectory we created for testing
 	public static void cleanUp(){
 
@@ -259,6 +262,7 @@ public class CredentialManagerImplIT {
 	}
 	
 	@Test
+	@Ignore
 	public void testCredentialManager() throws CMException, URISyntaxException, IOException{
 		
 		// There are 3 service username and password entries in the Keystore
