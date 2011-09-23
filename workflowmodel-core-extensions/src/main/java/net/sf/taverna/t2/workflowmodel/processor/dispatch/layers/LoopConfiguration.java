@@ -3,6 +3,8 @@ package net.sf.taverna.t2.workflowmodel.processor.dispatch.layers;
 import java.util.Properties;
 
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
+import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationBean;
+import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationProperty;
 
 import org.apache.log4j.Logger;
 
@@ -18,10 +20,11 @@ import org.apache.log4j.Logger;
  * before invoking the job for the first time, otherwise the condition will be
  * invoked after the job has come back with successful results.
  * </p>
- * 
+ *
  * @author Stian Soiland-Reyes
- * 
+ *
  */
+@ConfigurationBean(uri = Loop.URI + "#Config")
 public class LoopConfiguration implements Cloneable {
 
 	transient private static Logger logger = Logger
@@ -68,10 +71,12 @@ public class LoopConfiguration implements Cloneable {
 		return runFirst;
 	}
 
+	@ConfigurationProperty(name = "condition", label = "Condition Activity", description = "The condition activity with an output port called \"loop\"", required=false)
 	public void setCondition(Activity<?> activity) {
 		this.condition = activity;
 	}
 
+	@ConfigurationProperty(name = "runFirst", label = "Check Condition On Run First", description = "Whether to check the condition before invoking the job for the first time", required=false)
 	public void setRunFirst(boolean runFirst) {
 		this.runFirst = runFirst;
 	}
