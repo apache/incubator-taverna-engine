@@ -302,7 +302,7 @@ public class CredentialManagerImpl implements CredentialManager,
 					masterPassword = null; // it is probably the wrong password
 											// so do not remember it just in
 											// case
-					String exMessage = "Failed to load Taverna's Keystore. Possible reason: incorrect password or corrupted file.";
+					String exMessage = "Failed to load Taverna's Keystore from " + keystoreFile.getAbsolutePath() + ". Possible reason: incorrect password or corrupted file.";
 					logger.error(exMessage, ex);
 					throw new CMException(exMessage, ex);
 				} finally {
@@ -401,7 +401,7 @@ public class CredentialManagerImpl implements CredentialManager,
 					masterPassword = null; // it is probably the wrong password
 											// so do not remember it just in
 											// case
-					String exMessage = "Failed to load Taverna's Truststore. Possible reason: incorrect password or corrupted file.";
+					String exMessage = "Failed to load Taverna's Truststore from " + truststoreFile.getAbsolutePath() + ". Possible reason: incorrect password or corrupted file.";
 					// logger.error(exMessage, ex);
 					throw new CMException(exMessage, ex);
 				} finally {

@@ -298,4 +298,42 @@ public class CredentialManagerImplIT {
 		conn.disconnect();
 		
 	}
+	
+	public void generateKeystores() throws Exception{
+		
+		setUpBeforeCLass();
+		
+		// The code below sets up the Keystore and Truststore files and loads some data into them
+		// and saves them into a temp directory. These files can later be used for testing the Credential
+		// Manager with non-empty keystores.
+		Random randomGenerator = new Random();
+		String credentialManagerDirectoryPath = System
+				.getProperty("java.io.tmpdir")
+				+ System.getProperty("file.separator")
+				+ "taverna-security-"
+				+ randomGenerator.nextInt(1000000);
+		System.out.println("Credential Manager's Keystore and Truststore will be saved to: "
+				+ credentialManagerDirectoryPath);
+		credentialManagerDirectory = new File(credentialManagerDirectoryPath);
+		credentialManager.setConfigurationDirectoryPath(credentialManagerDirectory);
+		
+		// Create the dummy master password provider
+		masterPasswordProvider = new DummyMasterPasswordProvider();
+//		masterPasswordProvider.setMasterPassword(masterPassword);
+		masterPasswordProvider.setMasterPassword("uber");
+		List<MasterPasswordProvider> masterPasswordProviders = new ArrayList<MasterPasswordProvider>();
+		masterPasswordProviders.add(masterPasswordProvider);
+		credentialManager.setMasterPasswordProviders(masterPasswordProviders);
+		
+		// Add some stuff into Credential Manager
+		credentialManager.addUsernameAndPasswordForService(usernamePassword, new URI("http://heater.cs.man.ac.uk:7070/axis/services/HelloService-PlaintextPassword?wsdl"));
+
+//		credentialManager.addUsernameAndPasswordForService(usernamePassword, serviceURI);
+//		credentialManager.addUsernameAndPasswordForService(usernamePassword2, serviceURI2);
+//		credentialManager.addUsernameAndPasswordForService(usernamePassword3, serviceURI3);
+//		credentialManager.addKeyPair(privateKey, privateKeyCertChain);
+		credentialManager.addTrustedCertificate(trustedCertficateHeater);
+	}
+	
+	
 }
