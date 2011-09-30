@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2011 The University of Manchester
+ * Copyright (C) 2010 The University of Manchester
  *
  *  Modifications to the initial code base are copyright of their
  *  respective authors, or their employers as appropriate.
@@ -18,32 +18,31 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package uk.org.taverna.platform.dispatch;
-
-import uk.org.taverna.platform.configuration.ConfigurationException;
+package uk.org.taverna.platform.configuration;
 
 /**
- * Thrown when a dispatch layer's configuration is incorrect.
+ * Thrown when a {@link uk.org.taverna.scufl2.api.common.Configurable Configurable} cannot be
+ * configured by a {@link uk.org.taverna.scufl2.api.configurations.Configuration Configuration}.
  *
  * @author David Withers
  */
-public class DispatchLayerConfigurationException extends ConfigurationException {
+public class ConfigurationException extends Exception {
 
-	private static final long serialVersionUID = -6180865500734235308L;
+	private static final long serialVersionUID = -6129960388197785712L;
 
-	public DispatchLayerConfigurationException() {
+	public ConfigurationException() {
 		super();
 	}
 
-	public DispatchLayerConfigurationException(String message) {
+	public ConfigurationException(String message) {
 		super(message);
 	}
 
-	public DispatchLayerConfigurationException(String message, Throwable cause) {
+	public ConfigurationException(String message, Throwable cause) {
 		super(message, cause);
 	}
 
-	public DispatchLayerConfigurationException(Throwable cause) {
+	public ConfigurationException(Throwable cause) {
 		super(cause);
 	}
 

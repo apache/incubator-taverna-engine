@@ -1,10 +1,10 @@
-package uk.org.taverna.platform.activity.impl;
+package uk.org.taverna.platform.configuration;
 
 import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationBean;
 import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationProperty;
 
-@ConfigurationBean(uri = ActivityServiceImplTest.annotatedBeanURI + "/subclass")
-public class SubclassActivityTestBean extends ActivityTestBean2 {
+@ConfigurationBean(uri = TestUtils.annotatedBeanURI + "/subclass")
+public class SubclassTestBean extends TestBean2 {
 
 	public String subclassStringType;
 	public String conflicting;
@@ -41,7 +41,7 @@ public class SubclassActivityTestBean extends ActivityTestBean2 {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		SubclassActivityTestBean other = (SubclassActivityTestBean) obj;
+		SubclassTestBean other = (SubclassTestBean) obj;
 		if (conflicting == null) {
 			if (other.conflicting != null)
 				return false;

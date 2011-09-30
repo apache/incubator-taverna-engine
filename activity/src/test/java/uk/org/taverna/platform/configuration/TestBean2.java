@@ -18,7 +18,7 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package uk.org.taverna.platform.activity.impl;
+package uk.org.taverna.platform.configuration;
 
 import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationBean;
 import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationProperty;
@@ -27,8 +27,8 @@ import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationProperty;
  * 
  * @author David Withers
  */
-@ConfigurationBean(uri = ActivityServiceImplTest.annotatedBeanURI + "/configuration2")
-public class ActivityTestBean2 {
+@ConfigurationBean(uri = TestUtils.annotatedBeanURI + "/configuration2")
+public class TestBean2 {
 
 
 	public String stringType;
@@ -74,7 +74,7 @@ public class ActivityTestBean2 {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		ActivityTestBean2 other = (ActivityTestBean2) obj;
+		TestBean2 other = (TestBean2) obj;
 		if (stringType == null) {
 			if (other.stringType != null)
 				return false;

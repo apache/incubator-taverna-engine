@@ -20,25 +20,31 @@
  ******************************************************************************/
 package uk.org.taverna.platform.dispatch.impl;
 
+import static uk.org.taverna.platform.configuration.ConfigurationUtils.createPropertyDefinitions;
+import static uk.org.taverna.platform.configuration.ConfigurationUtils.setConfigurationProperties;
+
 import java.net.URI;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.sf.taverna.t2.workflowmodel.ConfigurationException;
+import net.sf.taverna.t2.workflowmodel.Configurable;
+import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationBean;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayer;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayerFactory;
 
 import org.apache.log4j.Logger;
 
+import uk.org.taverna.platform.configuration.ConfigurationException;
 import uk.org.taverna.platform.dispatch.DispatchLayerConfigurationException;
 import uk.org.taverna.platform.dispatch.DispatchLayerNotFoundException;
 import uk.org.taverna.platform.dispatch.DispatchLayerService;
-import uk.org.taverna.scufl2.api.common.Configurable;
 import uk.org.taverna.scufl2.api.configurations.Configuration;
 import uk.org.taverna.scufl2.api.configurations.ConfigurationDefinition;
+import uk.org.taverna.scufl2.api.configurations.PropertyResourceDefinition;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.dispatchstack.DispatchStackLayer;
+import uk.org.taverna.scufl2.api.property.PropertyException;
 
 /**
  *
@@ -72,9 +78,8 @@ public class DispatchLayerServiceImpl implements DispatchLayerService {
 	@Override
 	public ConfigurationDefinition getDispatchLayerConfigurationDefinition(URI uri)
 			throws DispatchLayerNotFoundException, DispatchLayerConfigurationException {
-		DispatchLayerFactory dispatchLayerFactory = getDispatchLayerFactory(uri);
-		// TODO implement this
-		return null;
+		DispatchLayerFactory factory = getDispatchLayerFactory(uri);
+		return createConfigurationDefinition(uri, factory.createDispatchLayerConfiguration(uri).getClass());
 	}
 
 	@Override
@@ -84,8 +89,8 @@ public class DispatchLayerServiceImpl implements DispatchLayerService {
 		DispatchLayer<?> dispatchLayer = factory.createDispatchLayer(uri);
 
 		if (configuration != null) {
-			// check configuration is for the correct activity
-			Configurable configurable = configuration.getConfigures();
+			// check configuration is for the correct dispatch layer
+			uk.org.taverna.scufl2.api.common.Configurable configurable = configuration.getConfigures();
 			if (configurable instanceof DispatchStackLayer) {
 				DispatchStackLayer scufl2DispatchLayer = (DispatchStackLayer) configurable;
 				if (!scufl2DispatchLayer.getConfigurableType().equals(uri)) {
@@ -102,17 +107,18 @@ public class DispatchLayerServiceImpl implements DispatchLayerService {
 			}
 			// create the configuration bean
 			Object configurationBean = factory.createDispatchLayerConfiguration(uri);
-//			ConfigurationDefinition definition = getDispatchLayerConfigurationDefinition(uri,
-//					configurationBean.getClass());
+			ConfigurationDefinition definition = createConfigurationDefinition(uri, configurationBean.getClass());
 			WorkflowBundle workflowBundle = configuration.getParent().getParent();
 			try {
 				// set the properties on the configuration bean
-//				setConfigurationProperties(configurationBean, configuration, configuration.getPropertyResource(),
-//						definition.getPropertyResourceDefinition(), uri, workflowBundle);
-				// configure the activity with the configuration bean
-				((net.sf.taverna.t2.workflowmodel.Configurable) dispatchLayer).configure(configurationBean);
-//			} catch (PropertyException e) {
-//				throw new DispatchLayerConfigurationException(e);
+				setConfigurationProperties(configurationBean, configuration, configuration.getPropertyResource(),
+						definition.getPropertyResourceDefinition(), uri, workflowBundle);
+				// configure the dispatchLayer with the configuration bean
+				((Configurable) dispatchLayer).configure(configurationBean);
+			} catch (PropertyException e) {
+				throw new DispatchLayerConfigurationException(e);
+			} catch (net.sf.taverna.t2.workflowmodel.ConfigurationException e) {
+				throw new DispatchLayerConfigurationException(e);
 			} catch (ConfigurationException e) {
 				throw new DispatchLayerConfigurationException(e);
 			}
@@ -124,6 +130,26 @@ public class DispatchLayerServiceImpl implements DispatchLayerService {
 	public List<DispatchLayer<?>> createDefaultDispatchLayers() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	private ConfigurationDefinition createConfigurationDefinition(URI uri,
+			Class<?> configurationClass) throws DispatchLayerConfigurationException {
+
+		ConfigurationDefinition configurationDefinition = new ConfigurationDefinition(uri);
+		PropertyResourceDefinition propertyResourceDefinition = configurationDefinition
+				.getPropertyResourceDefinition();
+
+		ConfigurationBean configurationBean = configurationClass.getAnnotation(ConfigurationBean.class);
+		if (configurationBean == null) {
+			throw new DispatchLayerConfigurationException("Configuration bean for "+uri+" is not annotated");
+		} else {
+			uri = URI.create(configurationBean.uri());
+			propertyResourceDefinition.setTypeURI(uri);
+			propertyResourceDefinition
+					.setPropertyDefinitions(createPropertyDefinitions(configurationClass));
+		}
+
+		return configurationDefinition;
 	}
 
 	/**
