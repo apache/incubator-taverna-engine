@@ -21,10 +21,9 @@
 package uk.org.taverna.platform.execution.impl.hadoop;
 
 import java.io.IOException;
+import java.util.Map;
 
-import net.sf.taverna.t2.reference.T2Reference;
-
-import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
@@ -34,43 +33,49 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
  *
  * @author David Withers
  */
-public class TavernaRecordReader extends RecordReader<LongWritable, T2Reference> {
+public class TavernaRecordReader extends RecordReader<int[], Map<String, Path>> {
+
+	private TavernaInputSplit split;
+	private boolean read = false;
 
 	@Override
 	public void initialize(InputSplit split, TaskAttemptContext context) throws IOException,
 			InterruptedException {
-		// TODO Auto-generated method stub
-
+		this.split = (TavernaInputSplit) split;
 	}
 
 	@Override
 	public boolean nextKeyValue() throws IOException, InterruptedException {
-		// TODO Auto-generated method stub
+		read = true;
 		return false;
 	}
 
 	@Override
-	public LongWritable getCurrentKey() throws IOException, InterruptedException {
-		// TODO Auto-generated method stub
-		return null;
+	public int[] getCurrentKey() throws IOException, InterruptedException {
+		if (read) {
+			return null;
+		}
+		return split.getIndex();
 	}
 
 	@Override
-	public T2Reference getCurrentValue() throws IOException, InterruptedException {
-		// TODO Auto-generated method stub
-		return null;
+	public Map<String, Path> getCurrentValue() throws IOException, InterruptedException {
+		if (read) {
+			return null;
+		}
+		return split.getInputs();
 	}
 
 	@Override
 	public float getProgress() throws IOException, InterruptedException {
-		// TODO Auto-generated method stub
+		if (read) {
+			return 1;
+		}
 		return 0;
 	}
 
 	@Override
 	public void close() throws IOException {
-		// TODO Auto-generated method stub
-
 	}
 
 }

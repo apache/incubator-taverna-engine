@@ -21,6 +21,7 @@
 package uk.org.taverna.platform.execution.impl.hadoop;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.InputSplit;
@@ -31,24 +32,24 @@ import org.apache.hadoop.mapreduce.InputSplit;
  * @author David Withers
  */
 public class TavernaInputSplit extends InputSplit {
-	private final Path[] files;
+	private int[] index;
+	private Map<String, Path> inputs;
 	private long length;
 	private String[] hosts;
-	private final String[] ports;
 
-	public TavernaInputSplit(String[] ports, Path[] inputFiles, long length, String[] hosts) {
-		this.ports = ports;
-		this.files = inputFiles;
+	public TavernaInputSplit(int[] index, Map<String, Path> inputs, long length, String[] hosts) {
+		this.index = index;
+		this.inputs = inputs;
 		this.length = length;
 		this.hosts = hosts;
 	}
 
-	public String[] getPorts() {
-		return ports;
+	public int[] getIndex() {
+		return index;
 	}
 
-	public Path[] getFiles() {
-		return files;
+	public Map<String, Path> getInputs() {
+		return inputs;
 	}
 
 	@Override

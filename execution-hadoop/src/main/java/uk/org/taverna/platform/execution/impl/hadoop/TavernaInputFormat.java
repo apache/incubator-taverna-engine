@@ -22,18 +22,17 @@ package uk.org.taverna.platform.execution.impl.hadoop;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import net.sf.taverna.t2.reference.T2Reference;
+import java.util.Map.Entry;
 
 import org.apache.hadoop.fs.BlockLocation;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
-import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
@@ -51,42 +50,68 @@ public class TavernaInputFormat extends FileInputFormat<int[], Map<String, Path>
 
 	private static final PathFilter inputFileFilter = new PathFilter() {
 		public boolean accept(Path p) {
-			String name = p.getName();
-			return !name.startsWith("_") && !name.startsWith(".");
+//			String name = p.getName();
+//			return name.matches("[0-9]+") || name.equals("value");
+			return true;
 		}
 	};
 
 	@Override
 	public RecordReader<int[], Map<String, Path>> createRecordReader(InputSplit split,
 			TaskAttemptContext context) throws IOException, InterruptedException {
-
 		return null;
 	}
 
 	public List<InputSplit> getSplits(JobContext job) throws IOException {
-		// generate splits
+		int index = 0;
 		List<InputSplit> splits = new ArrayList<InputSplit>();
-		List<FileStatus> files = listStatus(job);
-		for (FileStatus file : files) {
-			Path path = file.getPath();
-			long length = file.getLen();
-			if (length != 0) {
+		Map<String, List<FileStatus>> inputPortFiles = getInputPortFiles(job);
+		List<Map<String, FileStatus>> iterations = dotProduct(inputPortFiles);
+
+		for (Map<String, FileStatus> iteration : iterations) {
+			long length = 0;
+			Map<String, Path> inputs = new HashMap<String, Path>();
+			List<String> hosts = new ArrayList<String>();
+
+			for (Entry<String, FileStatus> entry : iteration.entrySet()) {
+				FileStatus file = entry.getValue();
+				long fileLength = file.getLen();
+				length += fileLength;
+				Path path = file.getPath();
 				FileSystem fs = path.getFileSystem(job.getConfiguration());
 				BlockLocation[] blkLocations = fs.getFileBlockLocations(file, 0, length);
-				splits.add(new TavernaInputSplit(path, length, blkLocations[0].getHosts()));
-			} else {
-				// Create empty hosts array for zero length files
-				splits.add(new TavernaInputSplit(path, length, new String[0]));
+				for (BlockLocation blockLocation : blkLocations) {
+					hosts.addAll(Arrays.asList(blockLocation.getHosts()));
+				}
+				inputs.put(entry.getKey(), path);
 			}
+
+			splits.add(new TavernaInputSplit(new int[] {index++}, inputs, length, hosts.toArray(new String[hosts.size()])));
 		}
-		// Save the number of input files for metrics/loadgen
-		job.getConfiguration().setLong(NUM_INPUT_FILES, files.size());
-		// LOG.debug("Total # of splits: " + splits.size());
 		return splits;
 	}
 
-	protected Map<String, FileStatus> listStatus(JobContext job) throws IOException {
-		Map<String, FileStatus> result = new HashMap<String, FileStatus>();
+	/**
+	 * @param inputPortFiles
+	 * @return
+	 */
+	private List<Map<String, FileStatus>> dotProduct(Map<String, List<FileStatus>> inputPortFiles) {
+		List<Map<String, FileStatus>> iterations = new ArrayList<Map<String, FileStatus>>();
+		for (Entry<String, List<FileStatus>> entry : inputPortFiles.entrySet()) {
+			String port = entry.getKey();
+			List<FileStatus> paths = entry.getValue();
+			for (int i = 0; i < paths.size(); i++) {
+				if (iterations.size() < i) {
+					iterations.add(new HashMap<String, FileStatus>());
+				}
+				iterations.get(i).put(port, paths.get(i));
+			}
+		}
+		return iterations;
+	}
+
+	protected Map<String, List<FileStatus>> getInputPortFiles(JobContext job) throws IOException {
+		Map<String, List<FileStatus>> result = new HashMap<String, List<FileStatus>>();
 		Path[] dirs = getInputPaths(job);
 		if (dirs.length == 0) {
 			throw new IOException("No input paths specified in job");
@@ -97,34 +122,24 @@ public class TavernaInputFormat extends FileInputFormat<int[], Map<String, Path>
 
 		List<IOException> errors = new ArrayList<IOException>();
 
-		// creates a MultiPathFilter with the hiddenFileFilter and the
-		// user provided one (if any).
-		List<PathFilter> filters = new ArrayList<PathFilter>();
-		filters.add(hiddenFileFilter);
-		PathFilter jobFilter = getInputPathFilter(job);
-		if (jobFilter != null) {
-			filters.add(jobFilter);
-		}
-		PathFilter inputFilter = new MultiPathFilter(filters);
+		PathFilter inputFilter = inputFileFilter;
 
 		for (int i = 0; i < dirs.length; ++i) {
-			Path p = dirs[i];
-			FileSystem fs = p.getFileSystem(job.getConfiguration());
-			FileStatus[] matches = fs.globStatus(p, inputFilter);
+			Path path = dirs[i];
+			String portName = path.getName();
+			FileSystem fs = path.getFileSystem(job.getConfiguration());
+			FileStatus[] matches = fs.globStatus(path, inputFilter);
 			if (matches == null) {
-				errors.add(new IOException("Input path does not exist: " + p));
+				errors.add(new IOException("Input path does not exist: " + path));
 			} else if (matches.length == 0) {
-				errors.add(new IOException("Input Pattern " + p + " matches 0 files"));
+				errors.add(new IOException("Input Pattern " + path + " matches 0 files"));
 			} else {
+				List<FileStatus> paths = new ArrayList<FileStatus>();
 				for (FileStatus globStat : matches) {
-					if (globStat.isDirectory()) {
-						for (FileStatus stat : fs.listStatus(globStat.getPath(), inputFilter)) {
-							result.add(stat);
-						}
-					} else {
-						result.add(globStat);
-					}
+					paths.add(globStat);
 				}
+				result.put(portName, paths);
+
 			}
 		}
 
