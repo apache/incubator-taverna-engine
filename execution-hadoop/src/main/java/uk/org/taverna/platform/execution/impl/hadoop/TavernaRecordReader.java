@@ -21,61 +21,57 @@
 package uk.org.taverna.platform.execution.impl.hadoop;
 
 import java.io.IOException;
-import java.util.Map;
 
-import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 /**
  *
  *
  * @author David Withers
  */
-public class TavernaRecordReader extends RecordReader<int[], Map<String, Path>> {
+public class TavernaRecordReader extends RecordReader<LongWritable, Text> {
 
-	private TavernaInputSplit split;
-	private boolean read = false;
+	private FileSplit split;
+	private boolean done;
 
 	@Override
-	public void initialize(InputSplit split, TaskAttemptContext context) throws IOException,
-			InterruptedException {
-		this.split = (TavernaInputSplit) split;
+	public void initialize(InputSplit split, TaskAttemptContext context) throws IOException, InterruptedException {
+		this.split = (FileSplit) split;
 	}
 
 	@Override
 	public boolean nextKeyValue() throws IOException, InterruptedException {
-		read = true;
-		return false;
+		if (done) {
+			return false;
+		}
+		done = true;
+		return true;
 	}
 
 	@Override
-	public int[] getCurrentKey() throws IOException, InterruptedException {
-		if (read) {
-			return null;
-		}
-		return split.getIndex();
+	public LongWritable getCurrentKey() throws IOException, InterruptedException {
+		return new LongWritable(Long.valueOf(split.getPath().getName()));
 	}
 
 	@Override
-	public Map<String, Path> getCurrentValue() throws IOException, InterruptedException {
-		if (read) {
-			return null;
-		}
-		return split.getInputs();
+	public Text getCurrentValue() throws IOException, InterruptedException {
+		return new Text(split.getPath().toString());
 	}
 
 	@Override
 	public float getProgress() throws IOException, InterruptedException {
-		if (read) {
-			return 1;
-		}
-		return 0;
+		return done?1:0;
 	}
 
 	@Override
 	public void close() throws IOException {
+
 	}
+
 
 }
