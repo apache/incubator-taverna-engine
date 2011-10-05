@@ -21,25 +21,32 @@
 package uk.org.taverna.platform.execution.impl.hadoop;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.MapWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.security.TokenCache;
 
 /**
  *
  *
  * @author David Withers
  */
-public class TavernaInputFormat extends FileInputFormat<LongWritable, Text> {
+public class TavernaInputFormat extends FileInputFormat<LongWritable, MapWritable> {
 
 	@Override
-	public RecordReader<LongWritable, Text> createRecordReader(InputSplit split,
+	public RecordReader<LongWritable, MapWritable> createRecordReader(InputSplit split,
 			TaskAttemptContext context) throws IOException, InterruptedException {
 		return new TavernaRecordReader();
 	}
@@ -47,6 +54,42 @@ public class TavernaInputFormat extends FileInputFormat<LongWritable, Text> {
 	@Override
 	protected boolean isSplitable(JobContext context, Path filename) {
 		return false;
+	}
+
+	@Override
+	protected List<FileStatus> listStatus(JobContext job) throws IOException {
+		List<FileStatus> result = new ArrayList<FileStatus>();
+		Path[] dirs = getInputPaths(job);
+		if (dirs.length == 0) {
+			throw new IOException("No input paths specified in job");
+		}
+
+		// get tokens for all the required FileSystems..
+		TokenCache.obtainTokensForNamenodes(job.getCredentials(), dirs, job.getConfiguration());
+
+		PathFilter inputFilter = getInputPathFilter(job);
+
+		for (int i = 0; i < dirs.length; ++i) {
+			Path p = dirs[i];
+			FileSystem fs = p.getFileSystem(job.getConfiguration());
+			FileStatus[] matches = fs.globStatus(p/*, inputFilter*/);
+			if (matches == null) {
+				throw new IOException("Input path does not exist: " + p);
+			} else if (matches.length == 0) {
+				throw new IOException("Input Pattern " + p + " matches 0 files");
+			} else {
+				for (FileStatus globStat : matches) {
+					if (globStat.isDir()) {
+						for (FileStatus stat : fs.listStatus(globStat.getPath()/*, inputFilter*/)) {
+							result.add(stat);
+						}
+					} else {
+						result.add(globStat);
+					}
+				}
+			}
+		}
+		return result;
 	}
 
 }

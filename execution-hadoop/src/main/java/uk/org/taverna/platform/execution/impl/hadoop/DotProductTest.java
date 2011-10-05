@@ -25,12 +25,12 @@ import java.io.IOException;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.MapWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.Tool;
@@ -38,30 +38,29 @@ import org.apache.hadoop.util.ToolRunner;
 
 public class DotProductTest extends Configured implements Tool {
 
-	public static class Map extends Mapper<LongWritable, Text, LongWritable, Text> {
-		public void map(LongWritable key, Text value, Context context) throws IOException,
+	public static class Map extends Mapper<LongWritable, MapWritable, LongWritable, MapWritable> {
+		public void map(LongWritable key, MapWritable value, Context context) throws IOException,
 				InterruptedException {
 			System.out.println("Map key = " + key);
-			System.out.println("Map value = " + value);
+			System.out.println("Map value tag = " + value.get(new Text("tag")));
+			System.out.println("Map value record = " + value.get(new Text("record")));
 			context.write(key, value);
 		}
 	}
 
-	public static class Reduce extends Reducer<LongWritable, Text, LongWritable, Text> {
-		public void reduce(LongWritable key, Iterable<Text> values, Context context)
+	public static class Reduce extends Reducer<LongWritable, MapWritable, LongWritable, Text> {
+		public void reduce(LongWritable key, Iterable<MapWritable> values, Context context)
 				throws IOException, InterruptedException {
 
 			System.out.println("Reduce key = " + key);
-			for (Text val : values) {
-				System.out.println("Reduce value = " + val);
-			}
 			context.write(key, f(values));
 		}
 
-		private Text f(Iterable<Text> values) {
+		private Text f(Iterable<MapWritable> values) {
 			StringBuilder sb = new StringBuilder();
-			for (Text value : values) {
-				sb.append(value);
+			for (MapWritable value : values) {
+				System.out.println("Reduce value = " + value.get(new Text("record")));
+				sb.append(value.get(new Text("record")) + " ");
 			}
 			return new Text(sb.toString());
 		}
@@ -74,7 +73,7 @@ public class DotProductTest extends Configured implements Tool {
 		job.setJobName("dot product");
 
 		job.setOutputKeyClass(LongWritable.class);
-		job.setOutputValueClass(Text.class);
+		job.setOutputValueClass(MapWritable.class);
 
 		job.setMapperClass(Map.class);
 //		job.setCombinerClass(Reduce.class);
@@ -84,8 +83,7 @@ public class DotProductTest extends Configured implements Tool {
 		job.setOutputFormatClass(TextOutputFormat.class);
 
 		FileInputFormat.setInputPaths(job, new Path(args[0]));
-		FileInputFormat.addInputPath(job, new Path(args[1]));
-		FileOutputFormat.setOutputPath(job, new Path(args[2]));
+		FileOutputFormat.setOutputPath(job, new Path(args[1]));
 
 		boolean success = job.waitForCompletion(true);
 		return success ? 0 : 1;
