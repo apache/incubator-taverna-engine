@@ -21,7 +21,10 @@
 package uk.org.taverna.platform.execution.impl.hadoop;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
@@ -54,11 +57,13 @@ public class DotProductTest extends Configured implements Tool {
 
 			System.out.println("Reduce key = " + key);
 			context.write(key, f(values));
+			context.write(key, f(values));
 		}
 
 		private Text f(Iterable<MapWritable> values) {
 			StringBuilder sb = new StringBuilder();
 			for (MapWritable value : values) {
+				System.out.println("Reduce tag = " + value.get(new Text("tag")));
 				System.out.println("Reduce value = " + value.get(new Text("record")));
 				sb.append(value.get(new Text("record")) + " ");
 			}
@@ -67,10 +72,15 @@ public class DotProductTest extends Configured implements Tool {
 	}
 
 	public int run(String[] args) throws Exception {
-		System.out.println(getConf());
-		Job job = new Job(getConf());
+		java.util.Map datalinks = new HashMap();
+
+
+		Configuration configuration = getConf();
+		configuration.set("taverna.datalinks", "A|X,B|Y");
+		System.out.println(configuration);
+		Job job = new Job(configuration);
 		job.setJarByClass(DotProductTest.class);
-		job.setJobName("dot product");
+		job.setJobName("dotproduct");
 
 		job.setOutputKeyClass(LongWritable.class);
 		job.setOutputValueClass(MapWritable.class);

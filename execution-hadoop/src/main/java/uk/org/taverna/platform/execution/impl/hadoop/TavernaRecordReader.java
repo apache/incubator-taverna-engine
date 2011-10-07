@@ -21,6 +21,8 @@
 package uk.org.taverna.platform.execution.impl.hadoop;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
@@ -43,6 +45,7 @@ public class TavernaRecordReader extends RecordReader<LongWritable, MapWritable>
 	private String recordName;
 	private FileStatus[] files;
 	private int index = -1;
+	private Map<String, String> datalinks;
 
 	@Override
 	public void initialize(InputSplit split, TaskAttemptContext context) throws IOException, InterruptedException {
@@ -50,6 +53,24 @@ public class TavernaRecordReader extends RecordReader<LongWritable, MapWritable>
 		Path path = fileSplit.getPath();
 		recordName = path.getName();
 		files = path.getFileSystem(context.getConfiguration()).listStatus(path);
+		setDatalinks(context);
+	}
+
+	/**
+	 * @param context
+	 */
+	private void setDatalinks(TaskAttemptContext context) {
+		datalinks = new HashMap<String, String>();
+		String datalinkConfig = context.getConfiguration().get("taverna.datalinks");
+		if (datalinkConfig != null) {
+			String[] datalinksSplit = datalinkConfig.split(",");
+			for (String datalink : datalinksSplit) {
+				String[] split = datalink.split("\\|");
+				if (split.length == 2) {
+					datalinks.put(split[0], split[1]);
+				}
+			}
+		}
 	}
 
 	@Override
@@ -66,7 +87,7 @@ public class TavernaRecordReader extends RecordReader<LongWritable, MapWritable>
 	@Override
 	public MapWritable getCurrentValue() throws IOException, InterruptedException {
 		MapWritable mapWritable = new MapWritable();
-		mapWritable.put(new Text("tag"), new Text(recordName));
+		mapWritable.put(new Text("tag"), new Text(datalinks.get(recordName)));
 		mapWritable.put(new Text("record"), new Text(files[index].getPath().toString()));
 		return mapWritable;
 	}
