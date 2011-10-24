@@ -24,6 +24,9 @@ import java.net.URI;
 import java.util.List;
 
 import net.sf.taverna.t2.reference.ReferenceService;
+import uk.org.taverna.platform.activity.ActivityConfigurationException;
+import uk.org.taverna.platform.activity.ActivityNotFoundException;
+import uk.org.taverna.scufl2.api.configurations.ConfigurationDefinition;
 
 /**
  * The ExecutionEnvironment specifies the capabilities of a workflow execution environment.
@@ -52,7 +55,6 @@ public interface ExecutionEnvironment {
 	 * @return a description of this ExecutionEnvironment
 	 */
 	public String getDescription();
-
 
 	/**
 	 * Returns the ExecutionService that provides this ExecutionEnvironment.
@@ -92,6 +94,20 @@ public interface ExecutionEnvironment {
 	 * @return true if a dispatch layer exists for the specified URI in this ExecutionEnvironment
 	 */
 	public boolean dispatchLayerExists(URI uri);
+
+	/**
+	 * Returns a definition of the configuration required by an activity.
+	 *
+	 * @param uri
+	 *            a URI that identifies an activity
+	 * @return a definition of the configuration required by an activity
+	 * @throws ActivityNotFoundException
+	 *             if an activity cannot be found for the specified URI
+	 * @throws ActivityConfigurationException
+	 *             if the ConfigurationDefinition cannot be created
+	 */
+	public ConfigurationDefinition getActivityConfigurationDefinition(URI uri)
+			throws ActivityNotFoundException, ActivityConfigurationException;
 
 	public ReferenceService getReferenceService();
 

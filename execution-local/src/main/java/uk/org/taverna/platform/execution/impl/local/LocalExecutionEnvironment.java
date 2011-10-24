@@ -25,9 +25,12 @@ import java.util.List;
 
 import net.sf.taverna.t2.reference.ReferenceService;
 
+import uk.org.taverna.platform.activity.ActivityConfigurationException;
+import uk.org.taverna.platform.activity.ActivityNotFoundException;
 import uk.org.taverna.platform.activity.ActivityService;
 import uk.org.taverna.platform.dispatch.DispatchLayerService;
 import uk.org.taverna.platform.execution.api.AbstractExecutionEnvironment;
+import uk.org.taverna.scufl2.api.configurations.ConfigurationDefinition;
 
 /**
  *
@@ -67,6 +70,11 @@ public class LocalExecutionEnvironment extends AbstractExecutionEnvironment {
 	@Override
 	public boolean dispatchLayerExists(URI uri) {
 		return dispatchLayerService.dispatchLayerExists(uri);
+	}
+
+	public ConfigurationDefinition getActivityConfigurationDefinition(URI uri)
+			throws ActivityNotFoundException, ActivityConfigurationException {
+		return activityService.getActivityConfigurationDefinition(uri);
 	}
 
 }

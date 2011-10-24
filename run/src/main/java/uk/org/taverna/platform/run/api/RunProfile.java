@@ -5,7 +5,6 @@ import java.util.Map;
 import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.T2Reference;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
-import uk.org.taverna.platform.execution.api.ExecutionService;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.Workflow;
 import uk.org.taverna.scufl2.api.profiles.Profile;
@@ -208,17 +207,6 @@ public class RunProfile {
 	 */
 	public ReferenceService getReferenceService() {
 		return executionEnvironment.getReferenceService();
-	}
-
-	/**
-	 * Returns the <code>ExecutionService</code> used to execute the
-	 * <code>Workflow</code>.
-	 *
-	 * @return the <code>ExecutionService</code> used to execute the
-	 *         <code>Workflow</code>
-	 */
-	public ExecutionService getExecutionService() {
-		return executionEnvironment.getExecutionService();
 	}
 
 	/**

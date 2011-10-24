@@ -126,12 +126,6 @@ public class DispatchLayerServiceImpl implements DispatchLayerService {
 		return dispatchLayer;
 	}
 
-	@Override
-	public List<DispatchLayer<?>> createDefaultDispatchLayers() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	private ConfigurationDefinition createConfigurationDefinition(URI uri,
 			Class<?> configurationClass) throws DispatchLayerConfigurationException {
 

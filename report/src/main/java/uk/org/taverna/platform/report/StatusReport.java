@@ -22,25 +22,102 @@ package uk.org.taverna.platform.report;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import uk.org.taverna.scufl2.api.common.WorkflowBean;
 
 /**
+ * Report about the {@link State} of a workflow component.
  *
  * @author David Withers
+ * @param <SUBJECT>
+ *            the WorkflowBean that the report is about
+ * @param <PARENT>
+ *            the parent report type
+ * @param <CHILD>
+ *            the child report type
  */
-public class StatusReport {
+public class StatusReport<SUBJECT extends WorkflowBean, PARENT extends StatusReport<?, ?, ?>, CHILD extends StatusReport<?, ?, ?>> {
+
+	private SUBJECT subject;
+
+	private PARENT parentReport;
+
+	private Set<CHILD> childReports = new HashSet<CHILD>();
 
 	private State state;
 
-	private Date createdDate, startedDate, pausedDate, resumedDate,
-			cancelledDate, completedDate, failedDate;
+	private Date createdDate, startedDate, pausedDate, resumedDate, cancelledDate, completedDate,
+			failedDate;
 
 	private List<Date> pausedDates, resumedDates;
 
-	public StatusReport() {
+	/**
+	 * Constructs a new <code>StatusReport</code> for the subject and sets the created date to the
+	 * current date.
+	 *
+	 * @param subject
+	 *            the subject of the report
+	 */
+	public StatusReport(SUBJECT subject) {
+		this.subject = subject;
 		pausedDates = new ArrayList<Date>();
 		resumedDates = new ArrayList<Date>();
 		setCreatedDate(new Date());
+	}
+
+	/**
+	 * Returns the subject of this report.
+	 *
+	 * @return the subject of this report
+	 */
+	public SUBJECT getSubject() {
+		return subject;
+	}
+
+	/**
+	 * Returns the parent report.
+	 *
+	 * Returns null if this report has no parent.
+	 *
+	 * @return the parent report
+	 */
+	public PARENT getParentReport() {
+		return parentReport;
+	}
+
+	/**
+	 * Sets the parent report.
+	 *
+	 * Can be null if this report has no parent.
+	 *
+	 * @param workflowReport the parent report
+	 */
+	public void setParentReport(PARENT parentReport) {
+		this.parentReport = parentReport;
+	}
+
+	/**
+	 * Returns the child report.
+	 *
+	 * Returns an empty set if this report has no child reports.
+	 *
+	 * @return the child report
+	 */
+	public Set<CHILD> getChildReports() {
+		return childReports;
+	}
+
+	/**
+	 * Adds a child report.
+	 *
+	 * @param the
+	 *            child report to add
+	 */
+	public void addChildReport(CHILD childReport) {
+		childReports.add(childReport);
 	}
 
 	/**
@@ -75,8 +152,8 @@ public class StatusReport {
 	}
 
 	/**
-	 * Returns the date that the status changed to RUNNING. If the status has
-	 * never been RUNNING <code>null</code> is returned.
+	 * Returns the date that the status changed to RUNNING. If the status has never been RUNNING
+	 * <code>null</code> is returned.
 	 *
 	 * @return the date that the status changed to started
 	 */
@@ -98,8 +175,8 @@ public class StatusReport {
 	}
 
 	/**
-	 * Returns the date that the status last changed to PAUSED. If the status
-	 * has never been PAUSED <code>null</code> is returned.
+	 * Returns the date that the status last changed to PAUSED. If the status has never been PAUSED
+	 * <code>null</code> is returned.
 	 *
 	 * @return the date that the status last changed to PAUSED
 	 */
@@ -120,9 +197,8 @@ public class StatusReport {
 	}
 
 	/**
-	 * Returns the date that the status last changed form PAUSED to RUNNING. If
-	 * the status has never changed form PAUSED to RUNNING <code>null</code> is
-	 * returned.
+	 * Returns the date that the status last changed form PAUSED to RUNNING. If the status has never
+	 * changed form PAUSED to RUNNING <code>null</code> is returned.
 	 *
 	 * @return the date that the status last changed form PAUSED to RUNNING
 	 */
@@ -143,8 +219,8 @@ public class StatusReport {
 	}
 
 	/**
-	 * Returns the date that the status changed to CANCELLED. If the status has
-	 * never been CANCELLED <code>null</code> is returned.
+	 * Returns the date that the status changed to CANCELLED. If the status has never been CANCELLED
+	 * <code>null</code> is returned.
 	 *
 	 * @return the date that the status changed to canceled
 	 */
@@ -164,8 +240,8 @@ public class StatusReport {
 	}
 
 	/**
-	 * Returns the date that the status changed to COMPLETED. If the status
-	 * never been COMPLETED <code>null</code> is returned.
+	 * Returns the date that the status changed to COMPLETED. If the status never been COMPLETED
+	 * <code>null</code> is returned.
 	 *
 	 * @return the date that the status changed to COMPLETED
 	 */
@@ -185,8 +261,8 @@ public class StatusReport {
 	}
 
 	/**
-	 * Returns the date that the status changed to FAILED. If the status has
-	 * never been FAILED <code>null</code> is returned.
+	 * Returns the date that the status changed to FAILED. If the status has never been FAILED
+	 * <code>null</code> is returned.
 	 *
 	 * @return the date that the status changed to failed
 	 */
@@ -206,8 +282,8 @@ public class StatusReport {
 	}
 
 	/**
-	 * Returns the dates that the status changed to PAUSED. If the status has
-	 * never been PAUSED an empty list is returned.
+	 * Returns the dates that the status changed to PAUSED. If the status has never been PAUSED an
+	 * empty list is returned.
 	 *
 	 * @return the dates that the status was paused
 	 */
@@ -216,9 +292,8 @@ public class StatusReport {
 	}
 
 	/**
-	 * Returns the dates that the status changed from PAUSED to RUNNING. If the
-	 * status has never changed from PAUSED to RUNNING an empty list is
-	 * returned.
+	 * Returns the dates that the status changed from PAUSED to RUNNING. If the status has never
+	 * changed from PAUSED to RUNNING an empty list is returned.
 	 *
 	 * @return the dates that the status was resumed
 	 */

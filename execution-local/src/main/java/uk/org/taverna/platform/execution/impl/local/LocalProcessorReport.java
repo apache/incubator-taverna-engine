@@ -24,9 +24,9 @@ public class LocalProcessorReport extends ProcessorReport {
 	private static final String DISPATCH_PARALLELIZE_QUEUESIZE = "dispatch:parallelize:queuesize";
 
 	private Map<String, MonitorableProperty<?>> propertyMap;
-	
-	public LocalProcessorReport(Processor processor, WorkflowReport parentReport) {
-		super(processor, parentReport);
+
+	public LocalProcessorReport(Processor processor) {
+		super(processor);
 		propertyMap = new HashMap<String, MonitorableProperty<?>>();
 	}
 
@@ -35,7 +35,7 @@ public class LocalProcessorReport extends ProcessorReport {
 			propertyMap.put(getPropertyName(property), property);
 		}
 	}
-	
+
 	public void saveProperties() {
 		for (Entry<String, MonitorableProperty<?>> entry : propertyMap.entrySet()) {
 			entry.setValue(new StaticProperty(entry.getValue()));
@@ -100,7 +100,7 @@ public class LocalProcessorReport extends ProcessorReport {
 		}
 		return super.getPropertyKeys();
 	}
-	
+
 	public Object getProperty(String key) {
 		Object result = null;
 		MonitorableProperty<?> property = propertyMap.get(key);
@@ -112,7 +112,7 @@ public class LocalProcessorReport extends ProcessorReport {
 		}
 		return result;
 	}
-	
+
 	public void setProperty(String key, Object value) {
 		MonitorableProperty<?> monitorableProperty = propertyMap.get(key);
 		if (monitorableProperty instanceof SteerableProperty<?>) {
@@ -124,7 +124,7 @@ public class LocalProcessorReport extends ProcessorReport {
 			}
 		}
 	}
-	
+
 	private String getPropertyName(MonitorableProperty<?> property) {
 		StringBuilder sb = new StringBuilder();
 		String[] name = property.getName();

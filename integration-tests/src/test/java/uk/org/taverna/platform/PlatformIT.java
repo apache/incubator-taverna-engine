@@ -170,7 +170,7 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 				"uk.org.taverna.scufl2, scufl2-validation-structural, 0.9-SNAPSHOT",
 				"net.sf.taverna.t2.lang, results, 2.0-SNAPSHOT",
 				"org.apache.commons, com.springsource.org.apache.commons.cli, 1.2.0",
-				"net.sf.taverna.t2.taverna-commandline, taverna-commandline-common, 2.0-SNAPSHOT"
+//				"net.sf.taverna.t2.taverna-commandline, taverna-commandline-common, 2.0-SNAPSHOT"
 				};
 	}
 

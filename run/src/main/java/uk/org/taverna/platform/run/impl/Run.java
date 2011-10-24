@@ -29,7 +29,7 @@ import net.sf.taverna.t2.reference.T2Reference;
 
 import org.apache.log4j.Logger;
 
-import uk.org.taverna.platform.execution.api.ExecutionService;
+import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
 import uk.org.taverna.platform.execution.api.InvalidExecutionIdException;
 import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
 import uk.org.taverna.platform.report.State;
@@ -54,7 +54,7 @@ public class Run {
 
 	private Map<String, T2Reference> inputs;
 
-	private final ExecutionService executionService;
+	private final ExecutionEnvironment executionEnvironment;
 
 	private final WorkflowReport workflowReport;
 
@@ -124,21 +124,21 @@ public class Run {
 		} else {
 			referenceService = runProfile.getReferenceService();
 		}
-		if (runProfile.getExecutionService() == null) {
-			String message = "No ExecutionService specified in the RunProfile";
+		if (runProfile.getExecutionEnvironment() == null) {
+			String message = "No ExecutionEnvironment specified in the RunProfile";
 			logger.warn(message);
 			throw new RunProfileException(message);
 		} else {
-			executionService = runProfile.getExecutionService();
+			executionEnvironment = runProfile.getExecutionEnvironment();
 		}
 		ID = UUID.randomUUID().toString();
-		executionID = executionService.createExecution(workflowBundle,
+		executionID = executionEnvironment.getExecutionService().createExecution(workflowBundle,
 				workflow, profile, inputs, referenceService);
 		try {
-			workflowReport = executionService.getWorkflowReport(executionID);
+			workflowReport = executionEnvironment.getExecutionService().getWorkflowReport(executionID);
 		} catch (InvalidExecutionIdException e) {
 			String message = "Error while creating a execution on the "
-					+ executionService.getName();
+					+ executionEnvironment.getName();
 			logger.error(message);
 			throw new RuntimeException(message, e);
 		}
@@ -200,7 +200,7 @@ public class Run {
 	 */
 	public void delete() throws InvalidExecutionIdException {
 		synchronized (workflowReport) {
-			executionService.delete(executionID);
+			executionEnvironment.getExecutionService().delete(executionID);
 		}
 	}
 
@@ -209,7 +209,7 @@ public class Run {
 			State state = workflowReport.getState();
 			if (state.equals(State.CREATED)) {
 				workflowReport.setStartedDate(new Date());
-				executionService.start(executionID);
+				executionEnvironment.getExecutionService().start(executionID);
 			} else {
 				throw new RunStateException("Cannot start a " + state + " run.");
 			}
@@ -221,7 +221,7 @@ public class Run {
 		synchronized (workflowReport) {
 			State state = workflowReport.getState();
 			if (state.equals(State.RUNNING)) {
-				executionService.pause(executionID);
+				executionEnvironment.getExecutionService().pause(executionID);
 				workflowReport.setPausedDate(new Date());
 			} else {
 				throw new RunStateException("Cannot pause a " + state + " run.");
@@ -234,7 +234,7 @@ public class Run {
 		synchronized (workflowReport) {
 			State state = workflowReport.getState();
 			if (state.equals(State.PAUSED)) {
-				executionService.resume(executionID);
+				executionEnvironment.getExecutionService().resume(executionID);
 				workflowReport.setResumedDate(new Date());
 			} else {
 				throw new RunStateException("Cannot resume a " + state
@@ -251,7 +251,7 @@ public class Run {
 				throw new RunStateException("Cannot cancel a " + state
 						+ " run.");
 			} else {
-				executionService.cancel(executionID);
+				executionEnvironment.getExecutionService().cancel(executionID);
 				workflowReport.setCancelledDate(new Date());
 			}
 		}

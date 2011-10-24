@@ -83,13 +83,4 @@ public interface DispatchLayerService {
 	public DispatchLayer<?> createDispatchLayer(URI uri, Configuration configuration)
 			throws DispatchLayerNotFoundException, DispatchLayerConfigurationException;
 
-	/**
-	 * Returns the default list of dispatch layers.
-	 *
-	 * Configurable layers will have a default configuration applied.
-	 *
-	 * @return the default list of dispatch layers
-	 */
-	public List<DispatchLayer<?>> createDefaultDispatchLayers();
-
 }

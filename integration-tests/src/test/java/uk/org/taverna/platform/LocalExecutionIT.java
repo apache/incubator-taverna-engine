@@ -20,7 +20,6 @@
  ******************************************************************************/
 package uk.org.taverna.platform;
 
-import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +38,6 @@ import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.Workflow;
 import uk.org.taverna.scufl2.api.profiles.Profile;
-import uk.org.taverna.scufl2.translator.t2flow.T2FlowParser;
 
 public class LocalExecutionIT extends PlatformIT {
 

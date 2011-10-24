@@ -31,6 +31,8 @@ import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
 
+import uk.org.taverna.scufl2.api.core.Workflow;
+
 /**
  * Unit tests for StatusReport.
  *
@@ -38,14 +40,16 @@ import org.junit.Test;
  */
 public class StatusReportTest {
 
-	private StatusReport statusReport;
+	private StatusReport<Workflow, ?, ?> statusReport;
+	private Workflow subject;
 
 	/**
 	 * @throws java.lang.Exception
 	 */
 	@Before
 	public void setUp() throws Exception {
-		statusReport = new StatusReport();
+		subject = new Workflow();
+		statusReport = new StatusReport<Workflow,StatusReport,StatusReport>(subject);
 	}
 
 	/**
@@ -54,7 +58,7 @@ public class StatusReportTest {
 	@Test
 	public void testStatusReport() {
 		Date preCreationTime = new Date();
-		statusReport = new StatusReport();
+		statusReport = new StatusReport<Workflow,StatusReport,StatusReport>(null);
 		assertFalse(statusReport.getCreatedDate().before(preCreationTime));
 		assertFalse(statusReport.getCreatedDate().after(new Date()));
 		assertEquals(State.CREATED, statusReport.getState());
@@ -66,6 +70,16 @@ public class StatusReportTest {
 		assertNull(statusReport.getPausedDate());
 		assertNull(statusReport.getResumedDate());
 		assertNull(statusReport.getStartedDate());
+	}
+
+	/**
+	 * Test method for {@link uk.org.taverna.platform.report.StatusReport#getSubject()}.
+	 */
+	@Test
+	public void testGetSubject() {
+		assertNotNull(statusReport.getSubject());
+		assertEquals(subject, statusReport.getSubject());
+		assertEquals(subject, statusReport.getSubject());
 	}
 
 	/**

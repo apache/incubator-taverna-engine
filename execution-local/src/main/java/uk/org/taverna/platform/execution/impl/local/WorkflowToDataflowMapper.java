@@ -40,6 +40,7 @@ import net.sf.taverna.t2.workflowmodel.Merge;
 import net.sf.taverna.t2.workflowmodel.MergeInputPort;
 import net.sf.taverna.t2.workflowmodel.ProcessorInputPort;
 import net.sf.taverna.t2.workflowmodel.ProcessorOutputPort;
+import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayer;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationStrategy;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.NamedInputPortNode;
 import uk.org.taverna.platform.activity.ActivityConfigurationException;
@@ -60,6 +61,7 @@ import uk.org.taverna.scufl2.api.core.DataLink;
 import uk.org.taverna.scufl2.api.core.Processor;
 import uk.org.taverna.scufl2.api.core.Workflow;
 import uk.org.taverna.scufl2.api.dispatchstack.DispatchStack;
+import uk.org.taverna.scufl2.api.dispatchstack.DispatchStackLayer;
 import uk.org.taverna.scufl2.api.iterationstrategy.CrossProduct;
 import uk.org.taverna.scufl2.api.iterationstrategy.DotProduct;
 import uk.org.taverna.scufl2.api.iterationstrategy.IterationStrategyNode;
@@ -243,56 +245,87 @@ public class WorkflowToDataflowMapper {
 			}
 
 			// add dispatch stack
-			net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchStack dataflowDispatchStack = dataflowProcessor
-					.getDispatchStack();
-			DispatchStack dispatchStack = processor.getDispatchStack();
-			for (int layer = 0; layer < dispatchStack.size(); layer++) {
-				URI uri = dispatchStack.get(layer).getConfigurableType();
-				edits.getAddDispatchLayerEdit(dataflowDispatchStack,
-						dispatchLayerService.createDispatchLayer(uri, null), layer).doEdit();
-			}
+			addDispatchStack(processor, dataflowProcessor);
 
 			addIterationStrategy(processor, dataflowProcessor);
 
 			// add bound activities
-			List<ProcessorBinding> processorBindings = scufl2Tools.processorBindingsForProcessor(processor, profile);
+			List<ProcessorBinding> processorBindings = scufl2Tools.processorBindingsForProcessor(
+					processor, profile);
 			for (ProcessorBinding processorBinding : processorBindings) {
 				addActivity(processorBinding);
 			}
 		}
 	}
 
-	private void addIterationStrategy(Processor processor, net.sf.taverna.t2.workflowmodel.Processor dataflowProcessor) throws EditException, InvalidWorkflowException {
+	private void addDispatchStack(Processor processor,
+			net.sf.taverna.t2.workflowmodel.Processor dataflowProcessor)
+			throws DispatchLayerNotFoundException, DispatchLayerConfigurationException,
+			EditException {
+		net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchStack dataflowDispatchStack = dataflowProcessor
+				.getDispatchStack();
+		DispatchStack dispatchStack = processor.getDispatchStack();
+		if (dispatchStack == null) {
+			edits.getDefaultDispatchStackEdit(dataflowProcessor).doEdit();
+		} else {
+			for (int layer = 0; layer < dispatchStack.size(); layer++) {
+				DispatchStackLayer dispatchStackLayer = dispatchStack.get(layer);
+				URI dispatchLayerType = dispatchStackLayer.getConfigurableType();
+				Configuration configuration = null;
+				try {
+					configuration = scufl2Tools.configurationFor(dispatchStackLayer, profile);
+				} catch (IndexOutOfBoundsException e) {
+					// no configuration for dispatch layer
+				}
+				// create the dispatch layer
+				DispatchLayer<?> dispatchLayer = dispatchLayerService.createDispatchLayer(
+						dispatchLayerType, configuration);
+				// add the dispatch layer to the dispatch layer stack
+				edits.getAddDispatchLayerEdit(dataflowDispatchStack, dispatchLayer, layer).doEdit();
+			}
+		}
+	}
+
+	private void addIterationStrategy(Processor processor,
+			net.sf.taverna.t2.workflowmodel.Processor dataflowProcessor) throws EditException,
+			InvalidWorkflowException {
 		// get the iteration strategy from the processor
-		net.sf.taverna.t2.workflowmodel.processor.iteration.IterationStrategyStack dataflowIterationStrategyStack = dataflowProcessor.getIterationStrategy();
-		// clear the  iteration strategy
+		net.sf.taverna.t2.workflowmodel.processor.iteration.IterationStrategyStack dataflowIterationStrategyStack = dataflowProcessor
+				.getIterationStrategy();
+		// clear the iteration strategy
 		edits.getClearIterationStrategyStackEdit(dataflowIterationStrategyStack).doEdit();
 		IterationStrategyStack iterationStrategyStack = processor.getIterationStrategyStack();
 		for (IterationStrategyTopNode iterationStrategyTopNode : iterationStrategyStack) {
 			// create iteration strategy
 			IterationStrategy dataflowIterationStrategy = edits.createIterationStrategy();
 			// add iteration strategy to the stack
-			edits.getAddIterationStrategyEdit(dataflowIterationStrategyStack, dataflowIterationStrategy).doEdit();
+			edits.getAddIterationStrategyEdit(dataflowIterationStrategyStack,
+					dataflowIterationStrategy).doEdit();
 			// add the node to the iteration strategy
-			addIterationStrategyNode(dataflowIterationStrategy, dataflowIterationStrategy.getTerminalNode(), iterationStrategyTopNode);
+			addIterationStrategyNode(dataflowIterationStrategy,
+					dataflowIterationStrategy.getTerminalNode(), iterationStrategyTopNode);
 		}
 	}
 
-	private void addIterationStrategyNode(IterationStrategy dataflowIterationStrategy,
+	private void addIterationStrategyNode(
+			IterationStrategy dataflowIterationStrategy,
 			net.sf.taverna.t2.workflowmodel.processor.iteration.IterationStrategyNode dataflowIterationStrategyNode,
-			IterationStrategyNode iterationStrategyNode) throws EditException, InvalidWorkflowException {
+			IterationStrategyNode iterationStrategyNode) throws EditException,
+			InvalidWorkflowException {
 		net.sf.taverna.t2.workflowmodel.processor.iteration.IterationStrategyNode childDataflowIterationStrategyNode = null;
 		if (iterationStrategyNode instanceof CrossProduct) {
 			CrossProduct crossProduct = (CrossProduct) iterationStrategyNode;
 			childDataflowIterationStrategyNode = new net.sf.taverna.t2.workflowmodel.processor.iteration.CrossProduct();
 			for (IterationStrategyNode iterationStrategyNode2 : crossProduct) {
-				addIterationStrategyNode(dataflowIterationStrategy, childDataflowIterationStrategyNode, iterationStrategyNode2);
+				addIterationStrategyNode(dataflowIterationStrategy,
+						childDataflowIterationStrategyNode, iterationStrategyNode2);
 			}
 		} else if (iterationStrategyNode instanceof DotProduct) {
 			DotProduct dotProduct = (DotProduct) iterationStrategyNode;
 			childDataflowIterationStrategyNode = new net.sf.taverna.t2.workflowmodel.processor.iteration.DotProduct();
 			for (IterationStrategyNode iterationStrategyNode2 : dotProduct) {
-				addIterationStrategyNode(dataflowIterationStrategy, childDataflowIterationStrategyNode, iterationStrategyNode2);
+				addIterationStrategyNode(dataflowIterationStrategy,
+						childDataflowIterationStrategyNode, iterationStrategyNode2);
 			}
 		} else if (iterationStrategyNode instanceof PortNode) {
 			PortNode portNode = (PortNode) iterationStrategyNode;
@@ -300,11 +333,14 @@ public class WorkflowToDataflowMapper {
 			if (desiredDepth == null) {
 				desiredDepth = portNode.getInputProcessorPort().getDepth();
 			}
-			NamedInputPortNode namedInputPortNode = new NamedInputPortNode(portNode.getInputProcessorPort().getName(), desiredDepth);
-			edits.getAddIterationStrategyInputNodeEdit(dataflowIterationStrategy, namedInputPortNode).doEdit();
+			NamedInputPortNode namedInputPortNode = new NamedInputPortNode(portNode
+					.getInputProcessorPort().getName(), desiredDepth);
+			edits.getAddIterationStrategyInputNodeEdit(dataflowIterationStrategy,
+					namedInputPortNode).doEdit();
 			childDataflowIterationStrategyNode = namedInputPortNode;
 		} else {
-			throw new InvalidWorkflowException("Unknown IterationStrategyNode type : " + iterationStrategyNode.getClass().getName());
+			throw new InvalidWorkflowException("Unknown IterationStrategyNode type : "
+					+ iterationStrategyNode.getClass().getName());
 		}
 		childDataflowIterationStrategyNode.setParent(dataflowIterationStrategyNode);
 	}

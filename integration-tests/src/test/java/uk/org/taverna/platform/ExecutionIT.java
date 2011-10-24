@@ -32,12 +32,15 @@ import net.sf.taverna.t2.reference.T2Reference;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
+import uk.org.taverna.platform.activity.ActivityConfigurationException;
+import uk.org.taverna.platform.activity.ActivityNotFoundException;
 import uk.org.taverna.platform.execution.api.AbstractExecutionEnvironment;
 import uk.org.taverna.platform.execution.api.AbstractExecutionService;
 import uk.org.taverna.platform.execution.api.Execution;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironmentService;
 import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
+import uk.org.taverna.scufl2.api.configurations.ConfigurationDefinition;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.Workflow;
 import uk.org.taverna.scufl2.api.profiles.Profile;
@@ -54,6 +57,15 @@ public class ExecutionIT extends PlatformIT {
 		executionEnvironmentService = (ExecutionEnvironmentService) bundleContext
 				.getService(executionServiceReferences[0]);
 
+	}
+
+	public void testGetExecutionEnvironments() throws Exception {
+		setup();
+
+		Set<ExecutionEnvironment> executionEnvironments = executionEnvironmentService
+				.getExecutionEnvironments();
+		assertEquals(1, executionEnvironments.size());
+
 		bundleContext.registerService("uk.org.taverna.platform.execution.api.ExecutionService",
 				new AbstractExecutionService("test id", "test name", "test description") {
 					public Set<ExecutionEnvironment> getExecutionEnvivonments() {
@@ -61,11 +73,13 @@ public class ExecutionIT extends PlatformIT {
 								.<ExecutionEnvironment> singleton(new AbstractExecutionEnvironment(
 										"test id", "test name", "test description", this, null) {
 									public List<URI> getDispatchLayerURIs() {
-										return Collections.singletonList(URI.create("http://ns.taverna.org.uk/2010/dispatchlayer/testDispatchLayer"));
+										return Collections.singletonList(URI
+												.create("http://ns.taverna.org.uk/2010/dispatchlayer/testDispatchLayer"));
 									}
 
 									public List<URI> getActivityURIs() {
-										return Collections.singletonList(URI.create("http://ns.taverna.org.uk/2010/activity/testActivity"));
+										return Collections.singletonList(URI
+												.create("http://ns.taverna.org.uk/2010/activity/testActivity"));
 									}
 
 									public boolean dispatchLayerExists(URI uri) {
@@ -75,20 +89,24 @@ public class ExecutionIT extends PlatformIT {
 									public boolean activityExists(URI uri) {
 										return false;
 									}
+
+									public ConfigurationDefinition getActivityConfigurationDefinition(
+											URI uri) throws ActivityNotFoundException,
+											ActivityConfigurationException {
+										return null;
+									}
 								});
 					}
+
 					protected Execution createExecutionImpl(WorkflowBundle workflowBundle,
 							Workflow workflow, Profile profile, Map<String, T2Reference> inputs,
 							ReferenceService referenceService) throws InvalidWorkflowException {
 						return null;
 					}
 				}, null);
-	}
 
-	public void testGetExecutionEnvironments() throws Exception {
-		setup();
 
-		Set<ExecutionEnvironment> executionEnvironments = executionEnvironmentService
+		executionEnvironments = executionEnvironmentService
 				.getExecutionEnvironments();
 		assertEquals(2, executionEnvironments.size());
 

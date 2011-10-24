@@ -38,6 +38,7 @@ import uk.org.taverna.platform.run.api.RunProfile;
 import uk.org.taverna.platform.run.api.RunProfileException;
 import uk.org.taverna.platform.run.api.RunService;
 import uk.org.taverna.platform.run.api.RunStateException;
+import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.profiles.Profile;
 
 /**
@@ -61,6 +62,11 @@ public class RunServiceImpl implements RunService {
 	@Override
 	public Set<ExecutionEnvironment> getExecutionEnvironments() {
 		return executionEnvironmentService.getExecutionEnvironments();
+	}
+
+	@Override
+	public Set<ExecutionEnvironment> getExecutionEnvironments(WorkflowBundle workflowBundle) {
+		return getExecutionEnvironments(workflowBundle.getMainProfile());
 	}
 
 	@Override

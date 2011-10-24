@@ -178,15 +178,6 @@ public class DispatchLayerServiceImplTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.dispatch.impl.DispatchLayerServiceImpl#createDefaultDispatchLayers()}.
-	 */
-	@Test
-	@Ignore
-	public void testCreateDefaultDispatchLayers() {
-		fail("Not yet implemented");
-	}
-
-	/**
 	 * Test method for {@link uk.org.taverna.platform.dispatch.impl.DispatchLayerServiceImpl#setDispatchLayerFactories(java.util.List)}.
 	 */
 	@Test

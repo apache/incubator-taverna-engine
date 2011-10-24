@@ -52,6 +52,8 @@ import uk.org.taverna.platform.activity.ActivityService;
 import uk.org.taverna.platform.dispatch.DispatchLayerService;
 import uk.org.taverna.platform.execution.api.AbstractExecution;
 import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
+import uk.org.taverna.platform.report.ActivityReport;
+import uk.org.taverna.platform.report.ProcessorReport;
 import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.Workflow;
@@ -102,8 +104,8 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 					dispatchLayerService);
 			Dataflow dataflow = mapping.getDataflow(workflow);
 			facade = edits.createWorkflowInstanceFacade(dataflow, createContext(), "");
-			executionMonitor = new LocalExecutionMonitor((LocalWorkflowReport) getWorkflowReport(),
-					mapping, facade.getIdentifier());
+			executionMonitor = new LocalExecutionMonitor(getWorkflowReport(), mapping,
+					facade.getIdentifier());
 		} catch (InvalidDataflowException e) {
 			throw new InvalidWorkflowException(e);
 		}
@@ -154,7 +156,17 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 
 	@Override
 	protected WorkflowReport createWorkflowReport(Workflow workflow) {
-		return new LocalWorkflowReport(workflow);
+		return new WorkflowReport(workflow);
+	}
+
+	@Override
+	public ProcessorReport createProcessorReport(uk.org.taverna.scufl2.api.core.Processor processor) {
+		return new LocalProcessorReport(processor);
+	}
+
+	@Override
+	public ActivityReport createActivityReport(uk.org.taverna.scufl2.api.activity.Activity activity) {
+		return new ActivityReport(activity);
 	}
 
 	private InvocationContext createContext() {

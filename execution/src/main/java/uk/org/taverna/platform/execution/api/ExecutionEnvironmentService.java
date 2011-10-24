@@ -44,7 +44,7 @@ public interface ExecutionEnvironmentService {
 	 *
 	 * @param profile
 	 *            the <code>Profile</code> to find <code>ExecutionEnvironment</code>s for
-	 * @return the <code>ExecutionEnvironment</code>s that can execute the specified
+	 * @return the <code>ExecutionEnvironment</code>s that can execute a workflow with the specified
 	 *         <code>Profile</code>
 	 */
 	public Set<ExecutionEnvironment> getExecutionEnvironments(Profile profile);

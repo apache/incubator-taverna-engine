@@ -234,17 +234,6 @@ public class RunProfileTest {
 
 	/**
 	 * Test method for
-	 * {@link uk.org.taverna.platform.run.api.RunProfile#getExecutionService()}.
-	 */
-	@Test
-	public void testGetExecutionService() {
-		assertNotNull(runProfile.getExecutionService());
-		assertEquals(executionService, runProfile.getExecutionService());
-		assertEquals(runProfile.getExecutionService(), runProfile.getExecutionService());
-	}
-
-	/**
-	 * Test method for
 	 * {@link uk.org.taverna.platform.run.api.RunProfile#getExecutionEnvironment()}.
 	 */
 	@Test

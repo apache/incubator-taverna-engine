@@ -21,7 +21,6 @@
 package uk.org.taverna.platform.execution.api;
 
 import java.net.URI;
-import java.util.List;
 
 import net.sf.taverna.t2.reference.ReferenceService;
 

@@ -1,19 +1,19 @@
 /*******************************************************************************
- * Copyright (C) 2010 The University of Manchester   
- * 
+ * Copyright (C) 2010 The University of Manchester
+ *
  *  Modifications to the initial code base are copyright of their
  *  respective authors, or their employers as appropriate.
- * 
+ *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public License
  *  as published by the Free Software Foundation; either version 2.1 of
  *  the License, or (at your option) any later version.
- *    
+ *
  *  This program is distributed in the hope that it will be useful, but
  *  WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *    
+ *
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -46,7 +46,7 @@ import uk.org.taverna.platform.report.WorkflowReport;
 
 /**
  * A workflow monitor for local executions.
- * 
+ *
  * @author David Withers
  */
 public class LocalExecutionMonitor implements Observer<MonitorMessage> {
@@ -55,22 +55,22 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 
 	private Map<String, Object> dataflowObjects;
 
-	private Map<Dataflow, LocalWorkflowReport> workflowReports;
-	
+	private Map<Dataflow, WorkflowReport> workflowReports;
+
 	private Map<Processor, LocalProcessorReport> processorReports;
-	
+
 	private Map<Activity<?>, ActivityReport> activityReports;
-	
+
 	private Map<Processor, AtomicInteger> processorInvocations;
 
 	private Map<Activity<?>, AtomicInteger> activityInvocations;
 
 	private final String facadeId;
 
-	public LocalExecutionMonitor(LocalWorkflowReport workflowReport, WorkflowToDataflowMapper mapping, String facadeId) throws InvalidWorkflowException {
+	public LocalExecutionMonitor(WorkflowReport workflowReport, WorkflowToDataflowMapper mapping, String facadeId) throws InvalidWorkflowException {
 		this.facadeId = facadeId;
 		dataflowObjects = new HashMap<String, Object>();
-		workflowReports = new HashMap<Dataflow, LocalWorkflowReport>();
+		workflowReports = new HashMap<Dataflow, WorkflowReport>();
 		processorReports = new HashMap<Processor, LocalProcessorReport>();
 		processorInvocations = new HashMap<Processor, AtomicInteger>();
 		activityReports = new HashMap<Activity<?>, ActivityReport>();
@@ -78,19 +78,19 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 		mapReports(workflowReport, mapping);
 	}
 
-	private void mapReports(LocalWorkflowReport workflowReport, WorkflowToDataflowMapper mapping) throws InvalidWorkflowException {
-		workflowReports.put(mapping.getDataflow(workflowReport.getWorkflow()), workflowReport);
-		for (ProcessorReport processorReport : workflowReport.getProcessorReports()) {
-			Processor processor = mapping.getDataflowProcessor(processorReport.getProcessor());
+	private void mapReports(WorkflowReport workflowReport, WorkflowToDataflowMapper mapping) throws InvalidWorkflowException {
+		workflowReports.put(mapping.getDataflow(workflowReport.getSubject()), workflowReport);
+		for (ProcessorReport processorReport : workflowReport.getChildReports()) {
+			Processor processor = mapping.getDataflowProcessor(processorReport.getSubject());
 			processorReports.put(processor, (LocalProcessorReport) processorReport);
 			processorInvocations.put(processor, new AtomicInteger());
-			for (ActivityReport activityReport : processorReport.getActivityReports()) {
-				Activity<?> activity = mapping.getDataflowActivity(activityReport.getActivity());
+			for (ActivityReport activityReport : processorReport.getChildReports()) {
+				Activity<?> activity = mapping.getDataflowActivity(activityReport.getSubject());
 				activityReports.put(activity, activityReport);
 				activityInvocations.put(activity, new AtomicInteger());
 				WorkflowReport nestedWorkflowReport = activityReport.getNestedWorkflowReport();
 				if (nestedWorkflowReport != null) {
-					mapReports((LocalWorkflowReport) nestedWorkflowReport, mapping);
+					mapReports(nestedWorkflowReport, mapping);
 				}
 			}
 		}
@@ -169,7 +169,7 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 
 	/**
 	 * Converts the owning process array to a string.
-	 * 
+	 *
 	 * @param owningProcess
 	 *            the owning process id
 	 * @return the owning process as a string

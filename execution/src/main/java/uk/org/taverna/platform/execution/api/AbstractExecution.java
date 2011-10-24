@@ -93,17 +93,21 @@ public abstract class AbstractExecution implements Execution {
 
 	protected abstract WorkflowReport createWorkflowReport(Workflow workflow);
 
+	protected abstract ProcessorReport createProcessorReport(Processor processor);
+
+	protected abstract ActivityReport createActivityReport(Activity activity);
+
 	public WorkflowReport generateWorkflowReport(Workflow workflow) {
 		WorkflowReport workflowReport = createWorkflowReport(workflow);
 		for (Processor processor : workflow.getProcessors()) {
-			ProcessorReport processorReport = workflowReport.createProcessorReport(processor,
-					workflowReport);
-			workflowReport.addProcessorReport(processorReport);
+			ProcessorReport processorReport = createProcessorReport(processor);
+			processorReport.setParentReport(workflowReport);
+			workflowReport.addChildReport(processorReport);
 			ProcessorBinding processorBinding = scufl2Tools.processorBindingForProcessor(processor,
 					profile);
 			Activity boundActivity = processorBinding.getBoundActivity();
-			ActivityReport activityReport = workflowReport.createActivityReport(boundActivity,
-					processorReport);
+			ActivityReport activityReport = createActivityReport(boundActivity);
+			activityReport.setParentReport(processorReport);
 			URI activityType = boundActivity.getConfigurableType();
 			if (activityType.equals(NESTED_WORKFLOW_URI)) {
 				Configuration configuration = scufl2Tools.configurationFor(boundActivity, profile);
@@ -111,7 +115,7 @@ public abstract class AbstractExecution implements Execution {
 					PropertyReference propertyReference = configuration.getPropertyResource().getPropertyAsReference(NESTED_WORKFLOW_URI.resolve("#workflow"));
 					URI dataflowURI = propertyReference.getResourceURI();
 					Workflow subWorkflow = (Workflow) uriTools.resolveUri(dataflowURI, workflowBundle);
-					activityReport.setNestedWorkflowReport(generateWorkflowReport(subWorkflow));
+					activityReport.addChildReport(generateWorkflowReport(subWorkflow));
 				} catch (UnexpectedPropertyException e) {
 					e.printStackTrace();
 				} catch (PropertyNotFoundException e) {
@@ -120,7 +124,7 @@ public abstract class AbstractExecution implements Execution {
 					e.printStackTrace();
 				}
 			}
-			processorReport.addActivityReport(activityReport);
+			processorReport.addChildReport(activityReport);
 		}
 		return workflowReport;
 	}
