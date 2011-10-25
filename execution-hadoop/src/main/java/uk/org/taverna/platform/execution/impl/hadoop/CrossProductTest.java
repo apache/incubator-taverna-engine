@@ -45,11 +45,11 @@ public class CrossProductTest extends Configured implements Tool {
 				InterruptedException {
 			System.out.println("Map key = " + key);
 			System.out.println("Map value = " );
-			
+
 			for (int i = 0; i < value.get().length; i++){
-				System.out.println(value.get()[i]);
+				System.out.println("  " + value.get()[i]);
 			}
-			
+
 			context.write(key, value);
 		}
 	}
@@ -64,10 +64,10 @@ public class CrossProductTest extends Configured implements Tool {
 
 		private Text f(Iterable<TextArrayWritable> values) {
 			StringBuilder sb = new StringBuilder();
-			
+
 			// There should be only one array
 			TextArrayWritable arrayValue = values.iterator().next();
-			
+
 			for (int i = 0; i < arrayValue.get().length; i++){
 				sb.append(arrayValue.get()[i] + "\nx");
 			}
@@ -76,7 +76,7 @@ public class CrossProductTest extends Configured implements Tool {
 				str = str.substring(0, sb.lastIndexOf("\nx") -1);
 			}
 			System.out.println("Result of function f(): " + str);
-			
+
 			return new Text(str);
 		}
 	}
