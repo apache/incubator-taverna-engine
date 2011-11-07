@@ -200,8 +200,6 @@ public class ActivityServiceImpl implements ActivityService {
 						false);
 				propertyResourceDefinition.setPropertyDefinitions(Collections
 						.singletonList(referenceDefinition));
-			} else if (Element.class.isAssignableFrom(configurationClass)) {
-				// TODO biomart activity
 			} else {
 				throw new ActivityConfigurationException("Configuration bean for "+uri+" is not annotated");
 			}

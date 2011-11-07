@@ -45,6 +45,9 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.config.ActivityInputPo
 import net.sf.taverna.t2.workflowmodel.processor.activity.config.ActivityOutputPortDefinitionBean;
 import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationBean;
 import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationProperty;
+
+import org.jdom.input.DOMBuilder;
+
 import uk.org.taverna.scufl2.api.common.URITools;
 import uk.org.taverna.scufl2.api.common.WorkflowBean;
 import uk.org.taverna.scufl2.api.configurations.Configuration;
@@ -313,8 +316,8 @@ public class ConfigurationUtils {
 
 	private static void setConfigurationProperty(Object configurationBean,
 			Configuration configuration, PropertyResource resource,
-			PropertyDefinition propertyDefinition, URI uri, WorkflowBundle bundle) throws ConfigurationException,
-			PropertyException {
+			PropertyDefinition propertyDefinition, URI uri, WorkflowBundle bundle)
+			throws ConfigurationException, PropertyException {
 		try {
 			Class<?> configurationClass = configurationBean.getClass();
 			URI predicate = propertyDefinition.getPredicate();
@@ -344,14 +347,10 @@ public class ConfigurationUtils {
 				for (PropertyLiteral literal : literals) {
 					URI literalType = literal.getLiteralType();
 					if (!literalType.equals(type)) {
-						if (!literalType.equals(PropertyLiteral.XML_LITERAL)
-								&& !type.equals(PropertyLiteral.XSD_STRING)) {
-							throw new ConfigurationException(MessageFormat.format(
-									"Expected property {0} to have type {1} but was {2}",
-									propertyDefinition.getName(),
-									dataPropertyDefinition.getLiteralType(),
-									literal.getLiteralType()));
-						}
+						throw new ConfigurationException(MessageFormat.format(
+								"Expected property {0} to have type {1} but was {2}",
+								propertyDefinition.getName(),
+								dataPropertyDefinition.getLiteralType(), literal.getLiteralType()));
 					}
 					if (type.equals(PropertyLiteral.XSD_STRING)) {
 						if (propertyType.isEnum()) {
@@ -376,8 +375,12 @@ public class ConfigurationUtils {
 					} else if (type.equals(PropertyLiteral.XSD_BOOLEAN)) {
 						propertyValues.add(literal.getLiteralValueAsBoolean());
 					} else if (type.equals(PropertyLiteral.XML_LITERAL)) {
-						// TODO support for jdom Element?
-						propertyValues.add(literal.getLiteralValueAsElement());
+						if (propertyType.equals(org.w3c.dom.Element.class)) {
+							propertyValues.add(literal.getLiteralValueAsElement());
+						} else if (propertyType.equals(org.jdom.Element.class)) {
+							propertyValues.add(new DOMBuilder().build(literal
+									.getLiteralValueAsElement()));
+						}
 					} else {
 						// TODO
 					}
@@ -445,20 +448,24 @@ public class ConfigurationUtils {
 			UnexpectedPropertyException {
 		List<T> properties = new ArrayList<T>();
 		if (propertyDefinition.isOrdered()) {
-			PropertyObject property = propertyResource.getProperty(predicate);
-			if (property instanceof PropertyList) {
-				PropertyList propertyList = (PropertyList) property;
-				for (PropertyObject propertyObject : propertyList) {
-					if (propertyType.isInstance(propertyObject)) {
-						properties.add(propertyType.cast(propertyObject));
-					} else {
-						throw new UnexpectedPropertyException("Expected a PropertyList of "
-								+ propertyType.getSimpleName(), predicate, propertyResource);
+			if (propertyResource.hasProperty(predicate)) {
+				PropertyObject property = propertyResource.getProperty(predicate);
+				if (property instanceof PropertyList) {
+					PropertyList propertyList = (PropertyList) property;
+					for (PropertyObject propertyObject : propertyList) {
+						if (propertyType.isInstance(propertyObject)) {
+							properties.add(propertyType.cast(propertyObject));
+						} else {
+							throw new UnexpectedPropertyException("Expected a PropertyList of "
+									+ propertyType.getSimpleName(), predicate, propertyResource);
+						}
 					}
+				} else {
+					throw new UnexpectedPropertyException("Expected a PropertyList", predicate,
+							propertyResource);
 				}
-			} else {
-				throw new UnexpectedPropertyException("Expected a PropertyList", predicate,
-						propertyResource);
+			} else if (propertyDefinition.isRequired()) {
+				throw new PropertyNotFoundException(predicate, propertyResource);
 			}
 		} else {
 			properties.addAll(propertyResource.getPropertiesOfType(predicate, propertyType));
