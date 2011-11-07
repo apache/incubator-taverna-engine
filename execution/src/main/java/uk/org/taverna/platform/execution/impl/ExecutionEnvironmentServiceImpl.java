@@ -39,16 +39,22 @@ import uk.org.taverna.platform.execution.api.ExecutionService;
 import uk.org.taverna.scufl2.api.activity.Activity;
 import uk.org.taverna.scufl2.api.common.NamedSet;
 import uk.org.taverna.scufl2.api.common.Scufl2Tools;
+import uk.org.taverna.scufl2.api.common.URITools;
+import uk.org.taverna.scufl2.api.common.WorkflowBean;
 import uk.org.taverna.scufl2.api.configurations.Configuration;
 import uk.org.taverna.scufl2.api.configurations.ConfigurationDefinition;
 import uk.org.taverna.scufl2.api.configurations.PropertyDefinition;
 import uk.org.taverna.scufl2.api.configurations.PropertyLiteralDefinition;
 import uk.org.taverna.scufl2.api.configurations.PropertyReferenceDefinition;
 import uk.org.taverna.scufl2.api.configurations.PropertyResourceDefinition;
+import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.Processor;
 import uk.org.taverna.scufl2.api.dispatchstack.DispatchStackLayer;
+import uk.org.taverna.scufl2.api.port.InputActivityPort;
+import uk.org.taverna.scufl2.api.port.OutputActivityPort;
 import uk.org.taverna.scufl2.api.profiles.ProcessorBinding;
 import uk.org.taverna.scufl2.api.profiles.Profile;
+import uk.org.taverna.scufl2.api.property.PropertyList;
 import uk.org.taverna.scufl2.api.property.PropertyLiteral;
 import uk.org.taverna.scufl2.api.property.PropertyObject;
 import uk.org.taverna.scufl2.api.property.PropertyReference;
@@ -63,7 +69,11 @@ public class ExecutionEnvironmentServiceImpl implements ExecutionEnvironmentServ
 
 	private static final Logger logger = Logger.getLogger(ExecutionEnvironmentServiceImpl.class);
 
+	private static final URI SCUFL2 = URI.create("http://ns.taverna.org.uk/2010/scufl2#");
+
 	private final Scufl2Tools scufl2Tools = new Scufl2Tools();
+
+	private final URITools uriTools = new URITools();
 
 	private Set<ExecutionService> executionServices;
 
@@ -140,7 +150,8 @@ public class ExecutionEnvironmentServiceImpl implements ExecutionEnvironmentServ
 			PropertyResourceDefinition propertyResourceDefinition = configurationDefinition
 					.getPropertyResourceDefinition();
 			PropertyResource propertyResource = configuration.getPropertyResource();
-			if (!isValidPropertyResource(propertyResourceDefinition, propertyResource)) {
+			if (!isValidPropertyResource(configuration, propertyResourceDefinition,
+					propertyResource)) {
 				return false;
 			}
 		} catch (ActivityNotFoundException e) {
@@ -160,8 +171,8 @@ public class ExecutionEnvironmentServiceImpl implements ExecutionEnvironmentServ
 	 * @param propertyResource
 	 * @return
 	 */
-	private boolean isValidPropertyResource(PropertyResourceDefinition propertyResourceDefinition,
-			PropertyResource propertyResource) {
+	private boolean isValidPropertyResource(Configuration configuration,
+			PropertyResourceDefinition propertyResourceDefinition, PropertyResource propertyResource) {
 		if (!propertyResourceDefinition.getTypeURI().equals(propertyResource.getTypeURI())) {
 			logger.debug(MessageFormat.format(
 					"Property type {0} does not equal property definition type {1}",
@@ -192,8 +203,26 @@ public class ExecutionEnvironmentServiceImpl implements ExecutionEnvironmentServ
 							propertyDefinition.getPredicate()));
 					return false;
 				}
+				if (propertySet.size() > 1 && propertyDefinition.isMultiple() && propertyDefinition.isOrdered()) {
+					logger.debug(MessageFormat.format(
+							"{0} property lists found for property {1}", propertySet.size(),
+							propertyDefinition.getPredicate()));
+					return false;
+				}
 				for (PropertyObject property : propertySet) {
-					if (!isValidProperty(propertyDefinition, property)) {
+					if (propertyDefinition.isMultiple() && propertyDefinition.isOrdered()) {
+						if (property instanceof PropertyList) {
+							PropertyList propertyList = (PropertyList) property;
+							for (PropertyObject propertyObject : propertyList) {
+								if (!isValidProperty(configuration, propertyDefinition, propertyObject)) {
+									logger.debug(MessageFormat.format("Property {0} is invalid",
+											propertyDefinition.getPredicate()));
+									return false;
+								}
+							}
+						}
+
+					} else if (!isValidProperty(configuration, propertyDefinition, property)) {
 						logger.debug(MessageFormat.format("Property {0} is invalid",
 								propertyDefinition.getPredicate()));
 						return false;
@@ -209,13 +238,14 @@ public class ExecutionEnvironmentServiceImpl implements ExecutionEnvironmentServ
 	 * @param property
 	 * @return
 	 */
-	private boolean isValidProperty(PropertyDefinition propertyDefinition, PropertyObject property) {
+	private boolean isValidProperty(Configuration configuration,
+			PropertyDefinition propertyDefinition, PropertyObject property) {
 		if (propertyDefinition instanceof PropertyLiteralDefinition) {
 			if (property instanceof PropertyLiteral) {
 				PropertyLiteralDefinition propertyLiteralDefinition = (PropertyLiteralDefinition) propertyDefinition;
 				PropertyLiteral propertyLiteral = (PropertyLiteral) property;
-				if (!propertyLiteralDefinition.getLiteralType().equals(
-						propertyLiteral.getLiteralType())) {
+				if (!propertyLiteral.getLiteralType().equals(
+						propertyLiteralDefinition.getLiteralType())) {
 					logger.debug(MessageFormat.format(
 							"Property type {0} does not equal property definition type {1}",
 							propertyLiteral.getLiteralType(),
@@ -256,13 +286,55 @@ public class ExecutionEnvironmentServiceImpl implements ExecutionEnvironmentServ
 			if (property instanceof PropertyResource) {
 				PropertyResourceDefinition propertyResourceDefinition = (PropertyResourceDefinition) propertyDefinition;
 				PropertyResource propertyResource = (PropertyResource) property;
-				return isValidPropertyResource(propertyResourceDefinition, propertyResource);
+				return isValidPropertyResource(configuration, propertyResourceDefinition,
+						propertyResource);
 			} else if (property instanceof PropertyReference) {
-				logger.debug("Expected a PropertyResource but got a PropertyReference");
-				// TODO Do we need to follow the reference and check if refers to the correct
-				// element? Would need access to workflow bundle to do so.
+				// special cases where a PropertyResource is actually a reference to a WorkflowBundle component
+				PropertyReference propertyReference = (PropertyReference) property;
+				WorkflowBundle workflowBundle = scufl2Tools.findParent(WorkflowBundle.class,
+						configuration);
+				URI configUri = uriTools.uriForBean(configuration);
+				URI referenceUri = configUri.resolve(propertyReference.getResourceURI());
+				if (workflowBundle != null) {
+					URI predicate = propertyDefinition.getPredicate();
+					WorkflowBean workflowBean = uriTools.resolveUri(referenceUri, workflowBundle);
+					if (workflowBean == null) {
+						logger.debug(MessageFormat.format(
+								"Cannot resolve {0} in WorkflowBundle {1}",
+								propertyReference.getResourceURI(), workflowBundle.getName()));
+					}
+					if (predicate.equals(SCUFL2.resolve("#definesInputPort"))) {
+						if (workflowBean == null) {
+							return false;
+						}
+						if (!(workflowBean instanceof InputActivityPort)) {
+							logger.debug(MessageFormat.format(
+									"{0} resolved to a {1}, expected a InputActivityPort",
+									propertyReference.getResourceURI(), workflowBean.getClass()
+											.getSimpleName()));
+							return false;
+						}
+					} else if (predicate.equals(SCUFL2.resolve("#definesOutputPort"))) {
+						if (workflowBean == null) {
+							return false;
+						}
+						if (!(workflowBean instanceof OutputActivityPort)) {
+							logger.debug(MessageFormat.format(
+									"{0} resolved to a {1}, expected a OutputActivityPort",
+									propertyReference.getResourceURI(), workflowBean.getClass()
+											.getSimpleName()));
+							return false;
+						}
+					} else {
+						logger.debug(MessageFormat.format("Unexpected reference to {0}", predicate));
+					}
+				} else {
+					logger.debug(MessageFormat
+							.format("Cannot resolve reference to {0} because Configuration {1} not contained within a WorkflowBundle",
+									referenceUri, configuration.getName()));
+				}
 			} else {
-				logger.debug(MessageFormat.format("Expected a PropertyResource but got a {0}",
+				logger.debug(MessageFormat.format("Expected a PropertyResource or PropertyReference but got a {0}",
 						property.getClass().getSimpleName()));
 				return false;
 			}
