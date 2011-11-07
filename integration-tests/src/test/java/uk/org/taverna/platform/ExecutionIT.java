@@ -119,10 +119,9 @@ public class ExecutionIT extends PlatformIT {
 		setup();
 
 		WorkflowBundle workflowBundle = loadWorkflow("/t2flow/beanshell.t2flow");
-		Profile profile = workflowBundle.getMainProfile();
 
 		Set<ExecutionEnvironment> executionEnvironments = executionEnvironmentService
-				.getExecutionEnvironments(profile);
+				.getExecutionEnvironments(workflowBundle.getMainProfile());
 		assertEquals(1, executionEnvironments.size());
 
 		System.out.println(executionEnvironments.iterator().next());

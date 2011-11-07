@@ -20,9 +20,7 @@
  ******************************************************************************/
 package uk.org.taverna.platform;
 
-import java.io.File;
 import java.net.URL;
-import java.security.cert.X509Certificate;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -32,10 +30,8 @@ import net.sf.taverna.t2.reference.IdentifiedList;
 import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.StackTraceElementBean;
 import net.sf.taverna.t2.reference.T2Reference;
-import net.sf.taverna.t2.security.credentialmanager.CMException;
 import net.sf.taverna.t2.security.credentialmanager.CredentialManager;
 import net.sf.taverna.t2.security.credentialmanager.MasterPasswordProvider;
-import net.sf.taverna.t2.security.credentialmanager.TrustConfirmationProvider;
 
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -44,9 +40,7 @@ import org.springframework.osgi.test.AbstractConfigurableBundleCreatorTests;
 import org.springframework.osgi.test.platform.OsgiPlatform;
 import org.springframework.osgi.test.platform.Platforms;
 
-import uk.org.taverna.platform.execution.api.ExecutionService;
 import uk.org.taverna.platform.report.WorkflowReport;
-import uk.org.taverna.platform.run.api.RunService;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.io.WorkflowBundleReader;
 import uk.org.taverna.scufl2.translator.t2flow.T2FlowReader;
@@ -112,6 +106,7 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 				"org.bouncycastle, bcprov-jdk16, 1.46",
 				"org.dom4j, com.springsource.org.dom4j, 1.6.1",
 				"org.hibernate, com.springsource.org.hibernate, 3.2.6.ga",
+				"org.jaxen, com.springsource.org.jaxen, 1.1.1",
 				"org.jboss.javassist, com.springsource.javassist, 3.3.0.ga",
 				"org.jdom, com.springsource.org.jdom, 1.1.0",
 				"org.objectweb.asm, com.springsource.org.objectweb.asm, 1.5.3",
@@ -160,7 +155,8 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 				"uk.org.taverna.platform, execution-remote, 0.1.1-SNAPSHOT",
 				"uk.org.taverna.platform, report, 0.1.1-SNAPSHOT",
 				"uk.org.taverna.platform, run, 0.1.1-SNAPSHOT",
-//				"uk.org.taverna.platform, integration-tests, 0.1.1-SNAPSHOT",
+				"uk.org.taverna.osgi.services, xml-parser-service, 0.0.1-SNAPSHOT",
+				"uk.org.taverna.osgi.services, xml-transformer-service, 0.0.1-SNAPSHOT",
 				// FIXME: Add the other scufl2 modules
 				"uk.org.taverna.scufl2, scufl2-api, 0.9-SNAPSHOT",
 				"uk.org.taverna.scufl2, scufl2-ucfpackage, 0.9-SNAPSHOT",
@@ -177,13 +173,13 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 
 	protected void setup() throws InvalidSyntaxException {
 
-		bundleContext.registerService(
-				"net.sf.taverna.t2.security.credentialmanager.TrustConfirmationProvider",
-				new TrustConfirmationProvider() {
-					public Boolean shouldTrustCertificate(X509Certificate[] chain) {
-						return true;
-					}
-				}, null);
+//		bundleContext.registerService(
+//				"net.sf.taverna.t2.security.credentialmanager.TrustConfirmationProvider",
+//				new TrustConfirmationProvider() {
+//					public Boolean shouldTrustCertificate(X509Certificate[] chain) {
+//						return true;
+//					}
+//				}, null);
 
 		if (credentialManager == null) {
 			ServiceReference credentialManagerReference = bundleContext

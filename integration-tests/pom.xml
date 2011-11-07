@@ -291,6 +291,30 @@
 			<version>${project.version}</version>
 		</dependency>
 
+		<!-- Taverna OSGI Services -->
+		<!-- <dependency>
+			<groupId>uk.org.taverna.osgi.services</groupId>
+			<artifactId>xml-parser-service</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.xerces</groupId>
+					<artifactId>com.springsource.org.apache.xerces</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency> -->
+		<dependency>
+			<groupId>uk.org.taverna.osgi.services</groupId>
+			<artifactId>xml-transformer-service</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.xalan</groupId>
+					<artifactId>com.springsource.org.apache.xalan</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
 		<!-- Scufl2 -->
 		<dependency>
 			<groupId>uk.org.taverna.scufl2</groupId>
@@ -324,11 +348,11 @@
 		</dependency>
 
 		<!-- Taverna CommandLine Tool -->
-		<!-- <dependency>
+		<dependency>
 			<groupId>net.sf.taverna.t2.taverna-commandline</groupId>
 			<artifactId>taverna-commandline-common</artifactId>
 			<version>2.0-SNAPSHOT</version>
-		</dependency> -->
+		</dependency>
 
 		<!-- Dependencies declared as provided by some poms - specified here to
 			ensure that they are in the local repository for the testing framework -->

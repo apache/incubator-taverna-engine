@@ -21,18 +21,17 @@
 package uk.org.taverna.platform;
 
 import net.sf.taverna.t2.commandline.CommandLineTool;
-import net.sf.taverna.t2.security.credentialmanager.CredentialManager;
 
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
+import uk.org.taverna.commandline.args.CommandLineArguments;
 import uk.org.taverna.platform.run.api.RunService;
-import uk.org.taverna.scufl2.api.io.WorkflowBundleIO;
 import uk.org.taverna.scufl2.api.io.WorkflowBundleReader;
 
 public class CommandLineToolIT extends PlatformIT {
 
-	
+
 	private RunService runService;
 	//private WorkflowBundleIO workflowBundleIO;
 	private WorkflowBundleReader workflowReader;
@@ -44,13 +43,13 @@ public class CommandLineToolIT extends PlatformIT {
 					.getServiceReference("uk.org.taverna.platform.run.api.RunService");
 			runService = (RunService) bundleContext.getService(runServiceReference);
 		}
-		
+
 //		if (workflowBundleIO == null) {
 //			ServiceReference workflowBundleIOServiceReference = bundleContext
 //					.getServiceReference("uk.org.taverna.scufl2.api.io.WorkflowBundleIO");
 //			workflowBundleIO = (WorkflowBundleIO) bundleContext.getService(workflowBundleIOServiceReference);
 //		}
-		
+
 		if (workflowReader == null) {
 //			ServiceReference workflowBundleReaderServiceReference = bundleContext
 //					.getServiceReference("uk.org.taverna.scufl2.api.io.WorkflowBundleReader");
@@ -58,21 +57,32 @@ public class CommandLineToolIT extends PlatformIT {
 			workflowBundleReader = (WorkflowBundleReader) bundleContext.getService(workflowBundleReaderServiceReference);
 		}
 	}
-	
+
 	public void testCommandLineTool() throws InvalidSyntaxException{
-		
+
 		setup();
-		
+
 		CommandLineTool cmdTool = new CommandLineTool();
 		cmdTool.setRunService(runService);
 		cmdTool.setCredentialManager(credentialManager);
 		cmdTool.setWorkflowBundleReader(workflowBundleReader);
+		cmdTool.setCommandLineArgumentsService(new CommandLineArguments() {
+			public String[] getCommandLineArguments() {
+				return new String[]{"-outputdoc", "/tmp/taverna3/baclava-output1.xml", "/Users/alex/Desktop/t2flows/simple-wf-no-inputs-one-output.t2flow"};
+			}
 
-		cmdTool.run(new String[]{"-outputdoc", "/tmp/taverna3/baclava-output1.xml", "/Users/alex/Desktop/t2flows/simple-wf-no-inputs-one-output.t2flow"});
-	
-		cmdTool.run(new String[]{"-inputvalue", "in", "Taverna 3 Platform rules", "-outputdoc", "/tmp/taverna3/baclava-output2.xml", "/Users/alex/Desktop/t2flows/simple-wf-one-input-one-output.t2flow"});
-		
+		});
+		cmdTool.run();
+
+		cmdTool.setCommandLineArgumentsService(new CommandLineArguments() {
+			public String[] getCommandLineArguments() {
+				return new String[]{"-inputvalue", "in", "Taverna 3 Platform rules", "-outputdoc", "/tmp/taverna3/baclava-output2.xml", "/Users/alex/Desktop/t2flows/simple-wf-one-input-one-output.t2flow"};
+			}
+
+		});
+		cmdTool.run();
+
 	}
 
-	
+
 }
