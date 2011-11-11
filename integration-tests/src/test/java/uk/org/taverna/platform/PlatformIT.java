@@ -40,6 +40,7 @@ import org.springframework.osgi.test.AbstractConfigurableBundleCreatorTests;
 import org.springframework.osgi.test.platform.OsgiPlatform;
 import org.springframework.osgi.test.platform.Platforms;
 
+import uk.org.taverna.platform.report.State;
 import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.io.WorkflowBundleReader;
@@ -165,13 +166,14 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 				"uk.org.taverna.scufl2, scufl2-validation-correctness, 0.9-SNAPSHOT",
 				"uk.org.taverna.scufl2, scufl2-validation-structural, 0.9-SNAPSHOT",
 				"net.sf.taverna.t2, results, 2.0-SNAPSHOT",
+				"net.sf.taverna.t2, baclava, 0.1-SNAPSHOT",
 				"org.apache.commons, com.springsource.org.apache.commons.cli, 1.2.0",
 //				"net.sf.taverna.t2.taverna-commandline, taverna-commandline-common, 2.0-SNAPSHOT"
 				};
 	}
 
 
-	protected void setup() throws InvalidSyntaxException {
+	protected void setup() throws Exception {
 
 //		bundleContext.registerService(
 //				"net.sf.taverna.t2.security.credentialmanager.TrustConfirmationProvider",
@@ -226,7 +228,6 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 	public WorkflowBundle loadWorkflow(String t2FlowFile) throws Exception {
 		URL wfResource = getClass().getResource(t2FlowFile);
 		assertNotNull(wfResource);
-		System.out.println(workflowBundleReader.getMediaTypes());
 		return workflowBundleReader.readBundle(wfResource.openStream(), T2FlowReader.APPLICATION_VND_TAVERNA_T2FLOW_XML);
 	}
 
@@ -273,6 +274,20 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 				return false;
 			}
 		}
+	}
+
+	public boolean waitForState(WorkflowReport report, State state) throws InterruptedException {
+		return waitForState(report, state, true);
+	}
+
+	public boolean waitForState(WorkflowReport report, State state, boolean printReport)
+	throws InterruptedException {
+		int wait = 0;
+		while (!report.getState().equals(state) && wait++ < 30) {
+			if (printReport) System.out.println(report);
+			Thread.sleep(500);
+		}
+		return report.getState().equals(state);
 	}
 
 	public void waitForResults(Map<String, T2Reference> results, WorkflowReport report, String... ports)

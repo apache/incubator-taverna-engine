@@ -36,7 +36,7 @@ public class CommandLineToolIT extends PlatformIT {
 	//private WorkflowBundleIO workflowBundleIO;
 	private WorkflowBundleReader workflowReader;
 
-	protected void setup() throws InvalidSyntaxException {
+	protected void setup() throws Exception {
 		super.setup();
 		if (runService == null) {
 			ServiceReference runServiceReference = bundleContext
@@ -58,7 +58,7 @@ public class CommandLineToolIT extends PlatformIT {
 		}
 	}
 
-	public void testCommandLineTool() throws InvalidSyntaxException{
+	public void testCommandLineTool() throws Exception{
 
 		setup();
 

@@ -44,7 +44,7 @@ public class LocalExecutionIT extends PlatformIT {
 	private ExecutionService executionService;
 	private ReferenceService referenceService;
 
-	protected void setup() throws InvalidSyntaxException {
+	protected void setup() throws Exception {
 		super.setup();
 		ServiceReference[] executionServiceReferences = bundleContext.getServiceReferences(
 				"uk.org.taverna.platform.execution.api.ExecutionService",

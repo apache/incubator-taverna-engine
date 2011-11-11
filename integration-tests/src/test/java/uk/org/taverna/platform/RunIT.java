@@ -47,7 +47,7 @@ public class RunIT extends PlatformIT {
 
 	private RunService runService;
 
-	protected void setup() throws InvalidSyntaxException {
+	protected void setup() throws Exception {
 		super.setup();
 		if (runService == null) {
 			ServiceReference runServiceReference = bundleContext
@@ -603,6 +603,33 @@ public class RunIT extends PlatformIT {
 		waitForResults(results, report, "out");
 
 		assertTrue(checkResult(referenceService, results.get("out"), "Test Value"));
+
+		assertEquals(State.COMPLETED, runService.getState(runId));
+	}
+
+	public void testRunTool() throws Exception {
+		setup();
+
+		WorkflowBundle workflowBundle = loadWorkflow("/t2flow/tool.t2flow");
+
+		Set<ExecutionEnvironment> executionEnvironments = runService
+				.getExecutionEnvironments(workflowBundle);
+		assertEquals(1, executionEnvironments.size());
+		ExecutionEnvironment executionEnvironment = executionEnvironments.iterator().next();
+		ReferenceService referenceService = executionEnvironment.getReferenceService();
+
+		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle));
+		WorkflowReport report = runService.getWorkflowReport(runId);
+		assertEquals(State.CREATED, runService.getState(runId));
+
+		runService.start(runId);
+		assertTrue(runService.getState(runId).equals(State.RUNNING)
+				|| runService.getState(runId).equals(State.COMPLETED));
+
+		Map<String, T2Reference> results = runService.getOutputs(runId);
+		waitForResults(results, report, "out");
+
+		assertTrue(checkResult(referenceService, results.get("out"), "HelloWorld"));
 
 		assertEquals(State.COMPLETED, runService.getState(runId));
 	}

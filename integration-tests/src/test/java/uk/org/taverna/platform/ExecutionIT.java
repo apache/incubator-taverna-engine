@@ -49,7 +49,7 @@ public class ExecutionIT extends PlatformIT {
 
 	private ExecutionEnvironmentService executionEnvironmentService;
 
-	protected void setup() throws InvalidSyntaxException {
+	protected void setup() throws Exception {
 		super.setup();
 		ServiceReference[] executionServiceReferences = bundleContext.getServiceReferences(
 				"uk.org.taverna.platform.execution.api.ExecutionEnvironmentService", null);
