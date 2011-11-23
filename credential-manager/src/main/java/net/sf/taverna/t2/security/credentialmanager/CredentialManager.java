@@ -39,6 +39,7 @@ import java.security.Principal;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.Security;
+import java.security.KeyStore.Entry;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -1548,7 +1549,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 			} else if (ksType.equals(TRUSTSTORE)) {
 				synchronized (truststore) {
 					fos = new FileOutputStream(truststoreFile);
-					// Hard-coded trust store password
 					truststore.store(fos, masterPassword.toCharArray());	
 				}
 			}
@@ -1618,10 +1618,97 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	 * Changes the Keystore master password. Truststore is using a different
 	 * pre-set password.
 	 */
-	public void changeMasterPassword(String newPassword) throws CMException {
-		masterPassword = newPassword;
-		saveKeystore(KEYSTORE);
-		saveKeystore(TRUSTSTORE);
+	public void changeMasterPassword(String newMasterPassword) throws CMException {
+		FileOutputStream fos = null;
+		
+		String oldMasterPassword = masterPassword;
+		KeyStore oldKeystore = keystore;
+		KeyStore oldTruststore = truststore;
+
+		try {
+			synchronized (keystore) {
+				// Create a new keystore and copy all items from the current
+				// one, encrypting them with the new password
+				KeyStore newKeystore = null;
+				try {
+					// Try to create Taverna's Keystore as Bouncy Castle
+					// UBER-type keystore.
+					newKeystore = KeyStore.getInstance("UBER", "BC");
+				} catch (Exception ex) {
+					// The requested keystore type is not available from
+					// security providers.
+					String exMessage = "Failed to instantiate a new Bouncy Castle Keystore when changing master password.";
+					throw new CMException(exMessage, ex);
+				}
+				try{
+					// Initialize a new empty keystore
+					newKeystore.load(null, null);
+				}
+				catch(Exception ex){
+					String exMessage = "Failed to create a new empty Keystore to copy over the entries from the current one.";
+					throw new CMException(exMessage, ex);					
+				}
+
+				Enumeration<String> aliases = keystore.aliases();
+				while (aliases.hasMoreElements()) {
+					String alias = aliases.nextElement();
+//					if (alias.startsWith("password#")) { // a password entry
+//						SecretKeySpec passwordKey = (((SecretKeySpec) keystore
+//								.getKey(alias, masterPassword.toCharArray())));
+//						newKeystore.setKeyEntry(alias, passwordKey, newMasterPassword
+//								.toCharArray(), null);
+//					} else if (alias.startsWith("keypair#")) { // a private key entry
+//						// Get the private key for the alias
+//						PrivateKey privateKey = (PrivateKey) keystore.getKey(
+//								alias, masterPassword.toCharArray());
+//						// Get the related public key's certificate chain
+//						Certificate[] certChain = keystore
+//								.getCertificateChain(alias);
+//						newKeystore.setKeyEntry(alias, privateKey, newMasterPassword
+//								.toCharArray(), certChain);
+//					}
+					// Do all entries at once, not reason to separate password & key pair entries
+					Entry entry = keystore.getEntry(alias,
+							new KeyStore.PasswordProtection(masterPassword.toCharArray()));
+					newKeystore.setEntry(alias, entry,
+							new KeyStore.PasswordProtection(
+									newMasterPassword.toCharArray()));
+				}
+				fos = new FileOutputStream(keystoreFile);
+				newKeystore.store(fos, newMasterPassword.toCharArray());
+				keystore = newKeystore;
+			}
+
+			// Truststore does not need to be re-encrypeted item by item as
+			// entries there are not encrypted, just the whole truststore
+			synchronized (truststore) {
+				fos = new FileOutputStream(truststoreFile);
+				truststore.store(fos, newMasterPassword.toCharArray());	
+			}			
+			
+			// Set the new master password as well
+			masterPassword = newMasterPassword;
+			
+		} catch (Exception ex) {
+			// rollback
+			keystore = oldKeystore;
+			truststore = oldTruststore;
+			masterPassword = oldMasterPassword;
+			saveKeystore(KEYSTORE);
+			saveKeystore(TRUSTSTORE);
+
+			String exMessage = "Credential Manager: Failed to change maaster password - reverting to the old.";
+			logger.error(exMessage, ex);
+			throw (new CMException(exMessage));
+		} finally {
+			if (fos != null) {
+				try {
+					fos.close();
+				} catch (IOException e) {
+					// ignore
+				}
+			}
+		}
 	}
 
 	public static void initialiseSSL() throws CMException {
