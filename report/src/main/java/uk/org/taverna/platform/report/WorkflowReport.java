@@ -43,6 +43,8 @@ public class WorkflowReport extends
 
 	private final Map<String, T2Reference> outputs = new HashMap<String, T2Reference>();
 
+	private static final String dateFormatString = "yyyy-MM-dd HH:mm:ss";
+
 	public WorkflowReport(Workflow workflow) {
 		super(workflow);
 	}
@@ -77,8 +79,9 @@ public class WorkflowReport extends
 	}
 
 	public String toString() {
+		DateFormat dateFormat = new SimpleDateFormat(dateFormatString);
 		StringBuilder sb = new StringBuilder();
-		int max = getLongestName();
+		int max = getLongestName(this, 0);
 		sb.append(spaces(max + 1));
 		sb.append("Status    ");
 		sb.append("Queued    ");
@@ -99,61 +102,78 @@ public class WorkflowReport extends
 		sb.append(spaces(9));
 		sb.append("-");
 		sb.append(spaces(9));
-		sb.append(dates(getStartedDate(), getCompletedDate()));
+		addDates(sb, getStartedDate(), getCompletedDate(), dateFormat);
 		for (ProcessorReport processorReport : getChildReports()) {
-			String processorName = processorReport.getSubject().getName();
-			sb.append(processorName);
-			sb.append(spaces(max - processorName.length() + 1));
-
-			State processorState = processorReport.getState();
-			sb.append(processorState);
-			sb.append(spaces(10 - processorState.name().length()));
-
-			String jobsQueued = String.valueOf(processorReport.getJobsQueued());
-			sb.append(jobsQueued);
-			sb.append(spaces(10 - jobsQueued.length()));
-
-			String jobsStarted = String.valueOf(processorReport.getJobsStarted());
-			sb.append(jobsStarted);
-			sb.append(spaces(10 - jobsStarted.length()));
-
-			String jobsCompleted = String.valueOf(processorReport.getJobsCompleted());
-			sb.append(jobsCompleted);
-			sb.append(spaces(10 - jobsCompleted.length()));
-
-			String jobsCompletedWithErrors = String.valueOf(processorReport
-					.getJobsCompletedWithErrors());
-			sb.append(jobsCompletedWithErrors);
-			sb.append(spaces(10 - jobsCompletedWithErrors.length()));
-
-			sb.append(dates(processorReport.getStartedDate(), processorReport.getCompletedDate()));
+			addProcessor(sb, max, 0, processorReport, dateFormat);
 		}
 		return sb.toString();
 	}
 
-	private String dates(Date started, Date stopped) {
-		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		StringBuilder sb = new StringBuilder();
+	private void addProcessor(StringBuilder sb, int max, int level, ProcessorReport processorReport, DateFormat dateFormat) {
+		String processorName = processorReport.getSubject().getName();
+		sb.append(spaces(level));
+		sb.append(processorName);
+		sb.append(spaces(max - processorName.length() - level + 1));
+
+		State processorState = processorReport.getState();
+		sb.append(processorState);
+		sb.append(spaces(10 - processorState.name().length()));
+
+		String jobsQueued = String.valueOf(processorReport.getJobsQueued());
+		sb.append(jobsQueued);
+		sb.append(spaces(10 - jobsQueued.length()));
+
+		String jobsStarted = String.valueOf(processorReport.getJobsStarted());
+		sb.append(jobsStarted);
+		sb.append(spaces(10 - jobsStarted.length()));
+
+		String jobsCompleted = String.valueOf(processorReport.getJobsCompleted());
+		sb.append(jobsCompleted);
+		sb.append(spaces(10 - jobsCompleted.length()));
+
+		String jobsCompletedWithErrors = String.valueOf(processorReport
+				.getJobsCompletedWithErrors());
+		sb.append(jobsCompletedWithErrors);
+		sb.append(spaces(10 - jobsCompletedWithErrors.length()));
+
+		addDates(sb, processorReport.getStartedDate(), processorReport.getCompletedDate(), dateFormat);
+
+		for (ActivityReport activityReport : processorReport.getChildReports()) {
+			WorkflowReport nestedWorkflowReport = activityReport.getNestedWorkflowReport();
+			if (nestedWorkflowReport != null) {
+				for (ProcessorReport nestedProcessorReport : nestedWorkflowReport.getChildReports()) {
+					addProcessor(sb, max, level + 1, nestedProcessorReport, dateFormat);
+				}
+			}
+		}
+	}
+
+	private void addDates(StringBuilder sb, Date started, Date stopped, DateFormat dateFormat) {
 		if (started != null) {
 			sb.append(dateFormat.format(started));
-			sb.append(spaces(1));
+			sb.append(' ');
 		} else {
-			sb.append("-");
-			sb.append(spaces(19));
+			sb.append('-');
+			sb.append(spaces(dateFormatString.length()));
 		}
 		if (stopped != null) {
 			sb.append(dateFormat.format(stopped) + "\n");
 		} else {
 			sb.append("-\n");
 		}
-		return sb.toString();
 	}
 
-	private int getLongestName() {
+	private int getLongestName(WorkflowReport workflowReport, int level) {
 		int result = 0;
-		result = Math.max(result, getSubject().getName().length());
-		for (ProcessorReport processorReport : getAllProcessorReports()) {
+		result = Math.max(result, getSubject().getName().length() + level);
+		for (ProcessorReport processorReport : workflowReport.getChildReports()) {
 			result = Math.max(result, processorReport.getSubject().getName().length());
+			for (ActivityReport activityReport : processorReport.getChildReports()) {
+				WorkflowReport nestedWorkflowReport = activityReport.getNestedWorkflowReport();
+				if (nestedWorkflowReport != null) {
+					result = Math.max(result, getLongestName(nestedWorkflowReport, level + 1));
+				}
+			}
 		}
 		return result;
 	}
