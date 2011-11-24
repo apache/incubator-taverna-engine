@@ -34,7 +34,6 @@ import net.sf.taverna.t2.security.credentialmanager.CredentialManager;
 import net.sf.taverna.t2.security.credentialmanager.MasterPasswordProvider;
 
 import org.eclipse.osgi.framework.internal.core.Constants;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.springframework.osgi.test.AbstractConfigurableBundleCreatorTests;
 import org.springframework.osgi.test.platform.OsgiPlatform;
@@ -50,6 +49,7 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 
 	protected WorkflowBundleReader workflowBundleReader;
 	protected CredentialManager credentialManager;
+	protected MasterPasswordProvider masterPasswordProvider;
 
 	protected String getPlatformName() {
 		   return Platforms.FELIX;
@@ -175,13 +175,21 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 
 	protected void setup() throws Exception {
 
-//		bundleContext.registerService(
-//				"net.sf.taverna.t2.security.credentialmanager.TrustConfirmationProvider",
-//				new TrustConfirmationProvider() {
-//					public Boolean shouldTrustCertificate(X509Certificate[] chain) {
-//						return true;
-//					}
-//				}, null);
+		if (masterPasswordProvider == null) {
+			masterPasswordProvider = new MasterPasswordProvider() {
+				public String getMasterPassword(boolean firstTime) {
+					return "test";
+				}
+				public void setMasterPassword(String password) {
+				}
+				public int getProviderPriority() {
+					return 0;
+				}
+			};
+			bundleContext.registerService(
+					"net.sf.taverna.t2.security.credentialmanager.MasterPasswordProvider",
+					masterPasswordProvider, null);
+		}
 
 		if (credentialManager == null) {
 			ServiceReference credentialManagerReference = bundleContext
@@ -189,12 +197,6 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 			credentialManager = (CredentialManager) bundleContext
 					.getService(credentialManagerReference);
 		}
-//		try {
-//			credentialManager.setConfigurationDirectoryPath(new File("/tmp/taverna"));
-//		} catch (CMException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
 
 		if (workflowBundleReader == null) {
 			ServiceReference[] workflowBundleReaderReferences = bundleContext
@@ -205,14 +207,6 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 					break;
 				}
 			}
-		}
-
-		ServiceReference[] masterPasswordProviderReferences = bundleContext.getServiceReferences(
-				"net.sf.taverna.t2.security.credentialmanager.MasterPasswordProvider", null);
-		for (ServiceReference serviceReference : masterPasswordProviderReferences) {
-			MasterPasswordProvider masterPasswordProvider = (MasterPasswordProvider) bundleContext
-					.getService(serviceReference);
-			masterPasswordProvider.setMasterPassword("test");
 		}
 
 	}

@@ -211,6 +211,45 @@ public class RunIT extends PlatformIT {
 		System.out.println(report);
 	}
 
+	public void testRunBiomoby() throws Exception {
+		setup();
+		WorkflowBundle workflowBundle = loadWorkflow("/t2flow/biomoby.t2flow");
+
+		Set<ExecutionEnvironment> executionEnvironments = runService
+				.getExecutionEnvironments(workflowBundle);
+		assertEquals(1, executionEnvironments.size());
+		ExecutionEnvironment executionEnvironment = executionEnvironments.iterator().next();
+		ReferenceService referenceService = executionEnvironment.getReferenceService();
+
+		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle));
+		assertEquals(State.CREATED, runService.getState(runId));
+
+		WorkflowReport report = runService.getWorkflowReport(runId);
+		System.out.println(report);
+
+		runService.start(runId);
+		assertTrue(runService.getState(runId).equals(State.RUNNING)
+				|| runService.getState(runId).equals(State.COMPLETED));
+		System.out.println(report);
+
+		Map<String, T2Reference> results = runService.getOutputs(runId);
+		assertNotNull(results);
+		waitForResults(results, report, "out");
+
+		T2Reference resultReference = results.get("out");
+		if (resultReference.containsErrors()) {
+			printErrors(referenceService, resultReference);
+		}
+		assertFalse(resultReference.containsErrors());
+		@SuppressWarnings("unchecked")
+		List<String> result = (List<String>) referenceService.renderIdentifier(resultReference,
+				String.class, null);
+		assertEquals(5, result.size());
+		assertEquals("ENSBTAG00000018854", result.get(0));
+		assertEquals(State.COMPLETED, runService.getState(runId));
+		System.out.println(report);
+	}
+
 	public void testRunDataflow() throws Exception {
 		setup();
 
