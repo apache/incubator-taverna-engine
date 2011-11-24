@@ -681,8 +681,8 @@ public class CredentialManagerImplTest {
 	 */
 	@Test
 	public void testChangeMasterPassword() throws CMException {
-		// Test the changeMasterPassword() mthod first to see if 
-		// it will initialize Credential Mabager properly
+		// Test the changeMasterPassword() method first to see if 
+		// it will initialize Credential Manager properly
 		credentialManager.changeMasterPassword("blah");
 		credentialManager.confirmMasterPassword("blah");
 		
@@ -695,6 +695,39 @@ public class CredentialManagerImplTest {
 		assertArrayEquals(credentialManager.getUsernameAndPasswordForService(serviceURI, false, "").getPassword(), usernamePassword.getPassword());
 		assertEquals(privateKey, credentialManager.getKeyPairsPrivateKey(keyPairAlias));
 		assertTrue(Arrays.equals(privateKeyCertChain, credentialManager.getKeyPairsCertificateChain(keyPairAlias)));
+		
+		// Load the Credential Manager back from the saved file to see of entries will be picked up properly
+		CredentialManagerImpl credentialManagerNew = null;
+		try {
+			credentialManagerNew = new CredentialManagerImpl();
+		} catch (CMException e) {
+			System.out.println(e.getStackTrace());
+		}
+		try {
+			credentialManagerNew
+					.setConfigurationDirectoryPath(credentialManagerDirectory);
+		} catch (CMException e) {
+			System.out.println(e.getStackTrace());
+		}
+
+		// Create the dummy master password provider
+		masterPasswordProvider = new DummyMasterPasswordProvider();
+		masterPasswordProvider.setMasterPassword("hlab");
+		List<MasterPasswordProvider> masterPasswordProviders = new ArrayList<MasterPasswordProvider>();
+		masterPasswordProviders.add(masterPasswordProvider);
+		credentialManager.setMasterPasswordProviders(masterPasswordProviders);
+		
+		// Set an empty list for service username and password providers
+		credentialManagerNew.setServiceUsernameAndPasswordProviders(new ArrayList<ServiceUsernameAndPasswordProvider>());
+
+		credentialManager.setJavaTruststorePasswordProviders(new ArrayList<JavaTruststorePasswordProvider>());
+
+		credentialManager.setTrustConfirmationProviders(new ArrayList<TrustConfirmationProvider>());		
+		
+		assertArrayEquals(credentialManager.getUsernameAndPasswordForService(serviceURI, false, "").getPassword(), usernamePassword.getPassword());
+		assertEquals(privateKey, credentialManager.getKeyPairsPrivateKey(keyPairAlias));
+		assertTrue(Arrays.equals(privateKeyCertChain, credentialManager.getKeyPairsCertificateChain(keyPairAlias)));
+
 	}
 
 	/**

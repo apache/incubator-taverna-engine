@@ -33,6 +33,7 @@ import java.net.URISyntaxException;
 import java.security.Key;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
+import java.security.KeyStore.Entry;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
@@ -718,7 +719,7 @@ public class CredentialManagerImpl implements CredentialManager,
 					String alias = null;
 					alias = "password#" + mappedURI.toASCIIString();
 					passwordKey = (((SecretKeySpec) keystore.getKey(alias,
-							null)));
+							masterPassword.toCharArray())));
 					if (passwordKey == null) {
 						// Unexpected, it was just there in the map!
 						logger.warn("Could not find alias " + alias
@@ -1030,7 +1031,7 @@ public class CredentialManagerImpl implements CredentialManager,
 			}
 			try {
 				keystore.setKeyEntry(alias, passwordKey,
-						null, null);
+						masterPassword.toCharArray(), null);
 				saveKeystore(KeystoreType.KEYSTORE);
 				multiCaster.notify(new KeystoreChangedEvent(
 						KeystoreType.KEYSTORE));
@@ -1130,7 +1131,7 @@ public class CredentialManagerImpl implements CredentialManager,
 
 			try {
 				keystore.setKeyEntry(alias, privateKey,
-						null, certs);
+						masterPassword.toCharArray(), certs);
 				saveKeystore(KeystoreType.KEYSTORE);
 				multiCaster.notify(new KeystoreChangedEvent(
 						KeystoreType.KEYSTORE));
@@ -1223,7 +1224,7 @@ public class CredentialManagerImpl implements CredentialManager,
 
 				// Get the private key for the alias
 				PrivateKey privateKey = (PrivateKey) keystore.getKey(alias,
-						null);
+						masterPassword.toCharArray());
 
 				// Get the related public key's certificate chain
 				Certificate[] certChain = getKeyPairsCertificateChain(alias);
@@ -1348,7 +1349,7 @@ public class CredentialManagerImpl implements CredentialManager,
 
 		synchronized (keystore) {
 			try {
-				return keystore.getKey(alias, null);
+				return keystore.getKey(alias, masterPassword.toCharArray());
 			} catch (Exception ex) {
 				String exMessage = "Credential Manager: Failed to fetch private key for the keypair from the Keystore";
 				logger.error(exMessage, ex);
@@ -1819,15 +1820,102 @@ public class CredentialManagerImpl implements CredentialManager,
 	 * Change the Keystore and the Truststore's master password to the one
 	 * provided. The Keystore and Truststore both use the same password.
 	 */
-	public void changeMasterPassword(String newPassword) throws CMException {
+	public void changeMasterPassword(String newMasterPassword) throws CMException {
 
 		// Need to make sure we are initialized before we do anything else
 		// as Credential Manager can be created but not initialized
 		initialize();
 
-		masterPassword = newPassword;
-		saveKeystore(KeystoreType.KEYSTORE);
-		saveKeystore(KeystoreType.TRUSTSTORE);
+		FileOutputStream fos = null;
+		
+		String oldMasterPassword = masterPassword;
+		KeyStore oldKeystore = keystore;
+		KeyStore oldTruststore = truststore;
+
+		try {
+			synchronized (keystore) {
+				// Create a new keystore and copy all items from the current
+				// one, encrypting them with the new password
+				KeyStore newKeystore = null;
+				try {
+					// Try to create Taverna's Keystore as Bouncy Castle
+					// UBER-type keystore.
+					newKeystore = KeyStore.getInstance("UBER", "BC");
+				} catch (Exception ex) {
+					// The requested keystore type is not available from
+					// security providers.
+					String exMessage = "Failed to instantiate a new Bouncy Castle Keystore when changing master password.";
+					throw new CMException(exMessage, ex);
+				}
+				try{
+					// Initialize a new empty keystore
+					newKeystore.load(null, null);
+				}
+				catch(Exception ex){
+					String exMessage = "Failed to create a new empty Keystore to copy over the entries from the current one.";
+					throw new CMException(exMessage, ex);					
+				}
+
+				Enumeration<String> aliases = keystore.aliases();
+				while (aliases.hasMoreElements()) {
+					String alias = aliases.nextElement();
+//					if (alias.startsWith("password#")) { // a password entry
+//						SecretKeySpec passwordKey = (((SecretKeySpec) keystore
+//								.getKey(alias, masterPassword.toCharArray())));
+//						newKeystore.setKeyEntry(alias, passwordKey, newMasterPassword
+//								.toCharArray(), null);
+//					} else if (alias.startsWith("keypair#")) { // a private key entry
+//						// Get the private key for the alias
+//						PrivateKey privateKey = (PrivateKey) keystore.getKey(
+//								alias, masterPassword.toCharArray());
+//						// Get the related public key's certificate chain
+//						Certificate[] certChain = keystore
+//								.getCertificateChain(alias);
+//						newKeystore.setKeyEntry(alias, privateKey, newMasterPassword
+//								.toCharArray(), certChain);
+//					}
+					// Do all entries at once, not reason to separate password & key pair entries
+					Entry entry = keystore.getEntry(alias,
+							new KeyStore.PasswordProtection(masterPassword.toCharArray()));
+					newKeystore.setEntry(alias, entry,
+							new KeyStore.PasswordProtection(
+									newMasterPassword.toCharArray()));
+				}
+				fos = new FileOutputStream(keystoreFile);
+				newKeystore.store(fos, newMasterPassword.toCharArray());
+				keystore = newKeystore;
+			}
+
+			// Truststore does not need to be re-encrypeted item by item as
+			// entries there are not encrypted, just the whole truststore
+			synchronized (truststore) {
+				fos = new FileOutputStream(truststoreFile);
+				truststore.store(fos, newMasterPassword.toCharArray());	
+			}			
+			
+			// Set the new master password as well
+			masterPassword = newMasterPassword;
+			
+		} catch (Exception ex) {
+			// rollback
+			keystore = oldKeystore;
+			truststore = oldTruststore;
+			masterPassword = oldMasterPassword;
+			saveKeystore(KeystoreType.KEYSTORE);
+			saveKeystore(KeystoreType.TRUSTSTORE);
+
+			String exMessage = "Credential Manager: Failed to change maaster password - reverting to the old.";
+			logger.error(exMessage, ex);
+			throw (new CMException(exMessage));
+		} finally {
+			if (fos != null) {
+				try {
+					fos.close();
+				} catch (IOException e) {
+					// ignore
+				}
+			}
+		}
 	}
 
 	@Override

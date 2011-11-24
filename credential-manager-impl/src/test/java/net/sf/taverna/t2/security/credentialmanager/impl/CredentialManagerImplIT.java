@@ -71,8 +71,8 @@ import org.junit.Test;
  * (together with the installation instructions) from:
  * http://www.oracle.com/technetwork/java/javase/downloads/jce-6-download-429243.html
  * 
- * These tests use an existing keystore (in resources/security/taverna-keystore.ubr) and 
- * truststore (in resources/security/taverna-truststore.ubr) that are not empty.
+ * These tests use an existing keystore (in resources/security/t2keystore.ubr) and 
+ * truststore (in resources/security/t2truststore.ubr) that are not empty.
  * 
  * @author Alex Nenadic
  *
@@ -212,12 +212,12 @@ public class CredentialManagerImplIT {
 			credentialManagerDirectory.mkdir();
 		}
 		URL keystoreFileURL = CredentialManagerImplIT.class
-				.getResource("/security/taverna-keystore.ubr");
+				.getResource("/security/t2keystore.ubr");
 		File keystoreFile = new File(keystoreFileURL.getPath());
 		File keystoreDestFile = new File(credentialManagerDirectory,
 				"taverna-keystore.ubr");
 		URL truststroreFileURL = CredentialManagerImplIT.class
-				.getResource("/security/taverna-truststore.ubr");
+				.getResource("/security/t2truststore.ubr");
 		File truststoreFile = new File(truststroreFileURL.getPath());
 		File truststoreDestFile = new File(credentialManagerDirectory,
 				"taverna-truststore.ubr");
