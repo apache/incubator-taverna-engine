@@ -75,7 +75,8 @@ public class ProcessorXMLDeserializer extends AbstractXMLDeserializer {
 			edits.getAddProcessorOutputPortEdit(result,port).doEdit();
 		}
 		
-		//TODO: annotations
+		//annotations
+		annotationsFromXml(result, el, result.getClass().getClassLoader());
 		
 		//Dispatch stack
 		Element dispatchStack = el.getChild(DISPATCH_STACK,T2_WORKFLOW_NAMESPACE);
