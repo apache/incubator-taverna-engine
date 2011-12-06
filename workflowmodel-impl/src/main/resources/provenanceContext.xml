@@ -16,7 +16,7 @@
 
 	-->
 	<bean id="workflowProvenanceItem"
-		raven:artifact="net.sf.taverna.t2.core:provenanceconnector-impl:1.3-SNAPSHOT"
+		raven:artifact="net.sf.taverna.t2.core:provenanceconnector-impl:1.4-SNAPSHOT"
 		raven:repository="raven.repository"
 		class="net.sf.taverna.t2.provenance.item.WorkflowProvenanceItem" />
 
