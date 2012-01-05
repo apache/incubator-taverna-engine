@@ -88,7 +88,10 @@
 									fork="true" failonerror="true" maxmemory="128m">
 									<arg value="-b" />
 									<arg
-										value="no.s11.w3.prov.elmo=http://w3.org/ProvenanceOntology.owl#" />
+										value="org.w3.provo=http://www.w3.org/ns/prov-o/" />
+									<arg value="-b" />
+									<arg
+										value="org.w3.time=http://www.w3.org/2006/time#" />
 									<arg value="-p" />
 									<arg value="prov" />	
 									<arg value="-j" />
