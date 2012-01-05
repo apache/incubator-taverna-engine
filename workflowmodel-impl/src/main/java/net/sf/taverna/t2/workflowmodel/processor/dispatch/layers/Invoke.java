@@ -42,6 +42,8 @@ import net.sf.taverna.t2.monitor.MonitorableProperty;
 import net.sf.taverna.t2.provenance.item.InvocationStartedProvenanceItem;
 import net.sf.taverna.t2.provenance.item.IterationProvenanceItem;
 import net.sf.taverna.t2.provenance.reporter.ProvenanceReporter;
+import net.sf.taverna.t2.reference.ErrorDocument;
+import net.sf.taverna.t2.reference.ErrorDocumentService;
 import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.workflowmodel.ControlBoundary;
@@ -296,10 +298,22 @@ public class Invoke extends AbstractDispatchLayer<Object> {
 
 		public void receiveResult(Map<String, T2Reference> data, int[] index) {
 
+			ErrorDocumentService errorDocumentService = refService.getErrorDocumentService();
+
 			if (index.length == 0) {
 				// Final result, clean up monitor state
 				MonitorManager.getInstance().deregisterNode(
 						invocationProcessIdentifier);
+				
+				// Fill in missing port values
+				for (OutputPort activityOutput : asyncActivity.getOutputPorts()) {
+					String name = activityOutput.getName();
+					if (!data.containsKey(name)) {
+						ErrorDocument errorDoc = errorDocumentService
+						.registerError("No data returned on port" , activityOutput.getDepth(), null);
+						data.put(name, errorDoc.getId());
+					}
+				}
 			}
 
 			// Construct a new result map using the activity mapping
@@ -314,7 +328,7 @@ public class Invoke extends AbstractDispatchLayer<Object> {
 						Processor p = getProcessor();
 						String message = "Processor '" + getProcessor().getLocalName() + "' - Port '" + processorOutputName + "'";
 						resultMap.put (processorOutputName,
-								refService.getErrorDocumentService()
+								errorDocumentService
 						.registerError(message , Collections.singleton(ref), ref.getDepth(), null).getId());
 					} else {
 						resultMap.put(processorOutputName, data.get(outputName));
