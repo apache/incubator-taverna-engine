@@ -62,11 +62,11 @@ public class SaveProvAction extends SaveAllResultsSPI {
 		String connectorType = DataManagementConfiguration.getInstance()
 				.getConnectorType();
 		ProvenanceAccess provenanceAccess = new ProvenanceAccess(connectorType, getContext());
-		W3ProvenanceExport export = new W3ProvenanceExport(provenanceAccess);
+		W3ProvenanceExport export = new W3ProvenanceExport(provenanceAccess, getRunId());
 		BufferedOutputStream outStream = new BufferedOutputStream(
 				new FileOutputStream(file));		
 		try {
-			export.exportAsW3Prov(getRunId(), outStream);
+			export.exportAsW3Prov(outStream);
 		} catch (Exception e) {
 			logger.error("Failed to save the provenance graph to " + file, e);
 			JOptionPane.showMessageDialog(null,
@@ -194,7 +194,7 @@ public class SaveProvAction extends SaveAllResultsSPI {
 
 	@Override
 	protected String getFilter() {
-		return "rdf";
+		return "prov.rdf";
 	}
 	
 }
