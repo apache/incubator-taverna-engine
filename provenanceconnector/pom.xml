@@ -20,7 +20,13 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Export-Package>net.sf.taverna.t2.provenance.*,org.openprovenance.model.*,org.tupeloproject.*</Export-Package>
+						<Export-Package>
+						!net.sf.taverna.t2.provenance.vocabulary,
+						!net.sf.taverna.t2.provenance.reporter,
+						!net.sf.taverna.t2.provenance.item,
+						net.sf.taverna.t2.provenance.*,org.openprovenance.model.*,org.tupeloproject.*
+						</Export-Package>
+						<Import-Package>!com.sun.xml.bind.marshaller.*,!org.jvnet.jaxb2_commons.lang.*,*</Import-Package>
 					</instructions>
 				</configuration>
 			</plugin>

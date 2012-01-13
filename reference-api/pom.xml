@@ -24,7 +24,10 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Import-Package>org.springframework.transaction.*;resolution:=optional, *</Import-Package>
+						<Import-Package>
+						org.hibernate.proxy;resolution:=optional,
+						org.springframework.transaction.*;resolution:=optional, *
+						</Import-Package>
 					</instructions>
 				</configuration>
 			</plugin>
