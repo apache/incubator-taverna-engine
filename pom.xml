@@ -67,6 +67,9 @@
 		<module>run</module>
 		<module>report</module>
 		<!-- <module>integration-tests</module> -->
+		<!-- <module>configuration</module> -->
+		<module>data</module>
+		<!-- <module>database</module> -->
 	</modules>
 	<dependencyManagement>
 		<dependencies>
