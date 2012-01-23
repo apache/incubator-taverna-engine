@@ -7,7 +7,10 @@
 		<property name="edits" ref="workflowModelEdits" />
 		<property name="activityService" ref="activityService" />
 		<property name="dispatchLayerService" ref="dispatchLayerService" />
-		<property name="referenceServices" ref="referenceServices" />
+		<property name="dataService" ref="dataService" />
+		<property name="referenceService" ref="referenceService" />
+		<property name="databaseConfiguration" ref="databaseConfiguration" />
+		<property name="provenanceConnectorFactories" ref="provenanceConnectorFactories" />
 	</bean>
 
 </beans>

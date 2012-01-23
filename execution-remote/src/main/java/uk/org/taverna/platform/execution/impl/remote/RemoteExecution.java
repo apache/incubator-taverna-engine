@@ -22,8 +22,7 @@ package uk.org.taverna.platform.execution.impl.remote;
 
 import java.util.Map;
 
-import net.sf.taverna.t2.reference.ReferenceService;
-import net.sf.taverna.t2.reference.T2Reference;
+import uk.org.taverna.platform.data.Data;
 import uk.org.taverna.platform.execution.api.AbstractExecution;
 import uk.org.taverna.platform.report.ActivityReport;
 import uk.org.taverna.platform.report.ProcessorReport;
@@ -42,8 +41,8 @@ import uk.org.taverna.scufl2.api.profiles.Profile;
 public class RemoteExecution extends AbstractExecution {
 
 	public RemoteExecution(WorkflowBundle workflowBundle, Workflow workflow, Profile profile,
-			Map<String, T2Reference> inputs, ReferenceService referenceService) {
-		super(workflowBundle, workflow, profile, inputs, referenceService);
+			Map<String, Data> inputs) {
+		super(workflowBundle, workflow, profile, inputs);
 		// TODO Auto-generated constructor stub
 	}
 

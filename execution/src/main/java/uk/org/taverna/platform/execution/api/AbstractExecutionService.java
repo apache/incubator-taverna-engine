@@ -24,8 +24,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.sf.taverna.t2.reference.ReferenceService;
-import net.sf.taverna.t2.reference.T2Reference;
+import uk.org.taverna.platform.data.Data;
 import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.Workflow;
@@ -33,7 +32,7 @@ import uk.org.taverna.scufl2.api.profiles.Profile;
 
 /**
  * A common super type for concrete implementations of <code>ExecutionService</code>s.
- * 
+ *
  * @author David Withers
  */
 public abstract class AbstractExecutionService implements ExecutionService {
@@ -69,20 +68,19 @@ public abstract class AbstractExecutionService implements ExecutionService {
 	}
 
 	@Override
-	public String createExecution(WorkflowBundle workflowBundle, Workflow workflow,
-			Profile profile, Map<String, T2Reference> inputs, ReferenceService referenceService)
+	public String createExecution(ExecutionEnvironment executionEnvironment, WorkflowBundle workflowBundle, Workflow workflow,
+			Profile profile, Map<String, Data> inputs)
 			throws InvalidWorkflowException {
-		Execution execution = createExecutionImpl(workflowBundle, workflow, profile, inputs,
-				referenceService);
+		Execution execution = createExecutionImpl(workflowBundle, workflow, profile, inputs);
 		executionMap.put(execution.getID(), execution);
 		return execution.getID();
 	}
 
 	/**
 	 * Creates an implementation of an Execution.
-	 * 
+	 *
 	 * To be implemented by concrete implementations of <code>ExecutionService</code>.
-	 * 
+	 *
 	 * @param workflowBundle
 	 *            the <code>WorkflowBundle</code> containing the <code>Workflow</code>s required for
 	 *            execution
@@ -93,16 +91,12 @@ public abstract class AbstractExecutionService implements ExecutionService {
 	 * @param inputs
 	 *            the inputs for the <code>Workflow</code>. May be <code>null</code> if the
 	 *            <code>Workflow</code> doesn't require any inputs
-	 * @param referenceService
-	 *            the <code>ReferenceService</code> used to register inputs, outputs and
-	 *            intermediate values
 	 * @return a new Execution implementation
 	 * @throws InvalidWorkflowException
 	 *             if the specified workflow is invalid
 	 */
 	protected abstract Execution createExecutionImpl(WorkflowBundle workflowBundle,
-			Workflow workflow, Profile profile, Map<String, T2Reference> inputs,
-			ReferenceService referenceService) throws InvalidWorkflowException;
+			Workflow workflow, Profile profile, Map<String, Data> inputs) throws InvalidWorkflowException;
 
 	@Override
 	public WorkflowReport getWorkflowReport(String executionID) throws InvalidExecutionIdException {

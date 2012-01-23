@@ -24,10 +24,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import net.sf.taverna.t2.provenance.ProvenanceConnectorFactory;
 import net.sf.taverna.t2.reference.ReferenceService;
-import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.workflowmodel.Edits;
 import uk.org.taverna.platform.activity.ActivityService;
+import uk.org.taverna.platform.data.Data;
+import uk.org.taverna.platform.data.DataService;
+import uk.org.taverna.platform.database.configuration.DatabaseConfiguration;
 import uk.org.taverna.platform.dispatch.DispatchLayerService;
 import uk.org.taverna.platform.execution.api.AbstractExecutionService;
 import uk.org.taverna.platform.execution.api.Execution;
@@ -50,7 +53,13 @@ public class LocalExecutionService extends AbstractExecutionService {
 
 	private DispatchLayerService dispatchLayerService;
 
-	private Set<ReferenceService> referenceServices;
+	private DataService dataService;
+
+	private ReferenceService referenceService;
+
+	private DatabaseConfiguration databaseConfiguration;
+
+	private Set<ProvenanceConnectorFactory> provenanceConnectorFactories;
 
 	/**
 	 * Constructs an execution service that executes workflows using the T2 dataflow engine.
@@ -63,19 +72,17 @@ public class LocalExecutionService extends AbstractExecutionService {
 	@Override
 	public Set<ExecutionEnvironment> getExecutionEnvivonments() {
 		Set<ExecutionEnvironment> executionEnvironments = new HashSet<ExecutionEnvironment>();
-		for (ReferenceService referenceService : referenceServices) {
-			executionEnvironments.add(new LocalExecutionEnvironment(this, referenceService,
-					activityService, dispatchLayerService));
-		}
+		executionEnvironments.add(new LocalExecutionEnvironment(this, activityService,
+				dispatchLayerService));
 		return executionEnvironments;
 	}
 
 	@Override
 	protected Execution createExecutionImpl(WorkflowBundle workflowBundle, Workflow workflow,
-			Profile profile, Map<String, T2Reference> inputs, ReferenceService referenceService)
-			throws InvalidWorkflowException {
-		return new LocalExecution(workflowBundle, workflow, profile, inputs, referenceService,
-				edits, activityService, dispatchLayerService);
+			Profile profile, Map<String, Data> inputs) throws InvalidWorkflowException {
+		return new LocalExecution(workflowBundle, workflow, profile, inputs, dataService,
+				referenceService, edits, activityService, dispatchLayerService, databaseConfiguration,
+				provenanceConnectorFactories);
 	}
 
 	/**
@@ -108,8 +115,44 @@ public class LocalExecutionService extends AbstractExecutionService {
 		this.dispatchLayerService = dispatchLayerService;
 	}
 
-	public void setReferenceServices(Set<ReferenceService> referenceServices) {
-		this.referenceServices = referenceServices;
+	/**
+	 * Sets the data service.
+	 *
+	 * @param dataService
+	 *            the data service
+	 */
+	public void setDataService(DataService dataService) {
+		this.dataService = dataService;
+	}
+
+	/**
+	 * Sets the reference service.
+	 *
+	 * @param referenceService
+	 *            the reference service
+	 */
+	public void setReferenceService(ReferenceService referenceService) {
+		this.referenceService = referenceService;
+	}
+
+	/**
+	 * Sets the ProvenanceConnector factories.
+	 *
+	 * @param factories
+	 *            the ProvenanceConnector factories
+	 */
+	public void setProvenanceConnectorFactories(
+			Set<ProvenanceConnectorFactory> provenanceConnectorFactories) {
+		this.provenanceConnectorFactories = provenanceConnectorFactories;
+	}
+
+	/**
+	 * Sets the databaseConfiguration.
+	 *
+	 * @param databaseConfiguration the new value of databaseConfiguration
+	 */
+	public void setDatabaseConfiguration(DatabaseConfiguration databaseConfiguration) {
+		this.databaseConfiguration = databaseConfiguration;
 	}
 
 }

@@ -23,9 +23,10 @@ package uk.org.taverna.platform.execution.api;
 import java.net.URI;
 import java.util.List;
 
-import net.sf.taverna.t2.reference.ReferenceService;
 import uk.org.taverna.platform.activity.ActivityConfigurationException;
 import uk.org.taverna.platform.activity.ActivityNotFoundException;
+import uk.org.taverna.platform.dispatch.DispatchLayerConfigurationException;
+import uk.org.taverna.platform.dispatch.DispatchLayerNotFoundException;
 import uk.org.taverna.scufl2.api.configurations.ConfigurationDefinition;
 
 /**
@@ -80,6 +81,20 @@ public interface ExecutionEnvironment {
 	public boolean activityExists(URI uri);
 
 	/**
+	 * Returns a definition of the configuration required by an activity.
+	 *
+	 * @param uri
+	 *            a URI that identifies an activity
+	 * @return a definition of the configuration required by an activity
+	 * @throws ActivityNotFoundException
+	 *             if an activity cannot be found for the specified URI
+	 * @throws ActivityConfigurationException
+	 *             if the ConfigurationDefinition cannot be created
+	 */
+	public ConfigurationDefinition getActivityConfigurationDefinition(URI uri)
+			throws ActivityNotFoundException, ActivityConfigurationException;
+
+	/**
 	 * Returns a list URI's that identify dispatch layers available in this ExecutionEnvironment.
 	 *
 	 * @return a list URI's that identify dispatch layers available in this ExecutionEnvironment
@@ -96,19 +111,18 @@ public interface ExecutionEnvironment {
 	public boolean dispatchLayerExists(URI uri);
 
 	/**
-	 * Returns a definition of the configuration required by an activity.
+	 * Returns a definition of the configuration required by a dispatch layer.
 	 *
 	 * @param uri
-	 *            a URI that identifies an activity
-	 * @return a definition of the configuration required by an activity
-	 * @throws ActivityNotFoundException
-	 *             if an activity cannot be found for the specified URI
-	 * @throws ActivityConfigurationException
+	 *            a URI that identifies a dispatch layer
+	 * @return
+	 * @return a definition of the configuration required by a dispatch layer
+	 * @throws DispatchLayerNotFoundException
+	 *             if a dispatch layer cannot be found for the specified URI
+	 * @throws DispatchLayerConfigurationException
 	 *             if the ConfigurationDefinition cannot be created
 	 */
-	public ConfigurationDefinition getActivityConfigurationDefinition(URI uri)
-			throws ActivityNotFoundException, ActivityConfigurationException;
-
-	public ReferenceService getReferenceService();
+	public ConfigurationDefinition getDispatchLayerConfigurationDefinition(URI uri)
+			throws DispatchLayerNotFoundException, DispatchLayerConfigurationException;
 
 }

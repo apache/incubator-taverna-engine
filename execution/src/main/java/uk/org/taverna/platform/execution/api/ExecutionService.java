@@ -23,8 +23,7 @@ package uk.org.taverna.platform.execution.api;
 import java.util.Map;
 import java.util.Set;
 
-import net.sf.taverna.t2.reference.ReferenceService;
-import net.sf.taverna.t2.reference.T2Reference;
+import uk.org.taverna.platform.data.Data;
 import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.Workflow;
@@ -70,6 +69,9 @@ public interface ExecutionService {
 	/**
 	 * Creates a workflow execution and returns its ID.
 	 *
+	 * @param executionEnvironment
+	 *            the {@link ExecutionEnvironment} used to execute the
+	 *            <code>Workflow</code>
 	 * @param workflowBundle
 	 *            the <code>WorkflowBundle</code> containing the workflows required for execution
 	 * @param workflow
@@ -78,13 +80,11 @@ public interface ExecutionService {
 	 *            the profile to use when executing the workflow
 	 * @param inputs
 	 *            the inputs to the workflow
-	 * @param referenceService
-	 *            the reference service used to register the workflow inputs and outputs
 	 * @return the ID of the created workflow execution
 	 * @throws InvalidWorkflowException
 	 */
-	public String createExecution(WorkflowBundle workflowBundle, Workflow workflow, Profile profile,
-			Map<String, T2Reference> inputs, ReferenceService referenceService)
+	public String createExecution(ExecutionEnvironment executionEnvironment, WorkflowBundle workflowBundle, Workflow workflow, Profile profile,
+			Map<String, Data> inputs)
 			throws InvalidWorkflowException;
 
 	/**

@@ -27,12 +27,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.sf.taverna.t2.reference.ReferenceService;
-import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.reference.impl.ReferenceServiceImpl;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import uk.org.taverna.platform.data.Data;
 import uk.org.taverna.platform.report.ActivityReport;
 import uk.org.taverna.platform.report.ProcessorReport;
 import uk.org.taverna.platform.report.WorkflowReport;
@@ -56,9 +56,7 @@ public class AbstractExecutionTest {
 
 	private Profile profile;
 
-	private Map<String, T2Reference> inputs;
-
-	private ReferenceService referenceService;
+	private Map<String, Data> inputs;
 
 	/**
 	 * @throws java.lang.Exception
@@ -68,9 +66,8 @@ public class AbstractExecutionTest {
 		workflowBundle = new WorkflowBundle();
 		workflow = new Workflow();
 		profile = new Profile();
-		inputs = new HashMap<String, T2Reference>();
-		referenceService = new ReferenceServiceImpl();
-		execution = new AbstractExecution(workflowBundle, workflow, profile, inputs, referenceService) {
+		inputs = new HashMap<String, Data>();
+		execution = new AbstractExecution(workflowBundle, workflow, profile, inputs) {
 			@Override
 			public void start() {}
 			@Override
@@ -128,14 +125,6 @@ public class AbstractExecutionTest {
 	@Test
 	public void testGetInputs() {
 		assertEquals(inputs, execution.getInputs());
-	}
-
-	/**
-	 * Test method for {@link uk.org.taverna.platform.execution.api.AbstractExecution#getReferenceService()}.
-	 */
-	@Test
-	public void testGetReferenceService() {
-		assertEquals(referenceService, execution.getReferenceService());
 	}
 
 	/**

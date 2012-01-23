@@ -23,17 +23,17 @@ package uk.org.taverna.platform.execution.impl.local;
 import java.net.URI;
 import java.util.List;
 
-import net.sf.taverna.t2.reference.ReferenceService;
-
 import uk.org.taverna.platform.activity.ActivityConfigurationException;
 import uk.org.taverna.platform.activity.ActivityNotFoundException;
 import uk.org.taverna.platform.activity.ActivityService;
+import uk.org.taverna.platform.dispatch.DispatchLayerConfigurationException;
+import uk.org.taverna.platform.dispatch.DispatchLayerNotFoundException;
 import uk.org.taverna.platform.dispatch.DispatchLayerService;
 import uk.org.taverna.platform.execution.api.AbstractExecutionEnvironment;
 import uk.org.taverna.scufl2.api.configurations.ConfigurationDefinition;
 
 /**
- *
+ * Execution Environment for a local Taverna Dataflow Engine
  *
  * @author David Withers
  */
@@ -43,11 +43,9 @@ public class LocalExecutionEnvironment extends AbstractExecutionEnvironment {
 	private final DispatchLayerService dispatchLayerService;
 
 	public LocalExecutionEnvironment(LocalExecutionService localExecutionService,
-			ReferenceService referenceService, ActivityService activityService,
-			DispatchLayerService dispatchLayerService) {
+			ActivityService activityService, DispatchLayerService dispatchLayerService) {
 		super(LocalExecutionEnvironment.class.getName(), "Taverna Local Execution Environment",
-				"Execution Environment for a local Taverna Dataflow Engine",
-				localExecutionService, referenceService);
+				"Execution Environment for a local Taverna Dataflow Engine", localExecutionService);
 		this.activityService = activityService;
 		this.dispatchLayerService = dispatchLayerService;
 	}
@@ -63,6 +61,12 @@ public class LocalExecutionEnvironment extends AbstractExecutionEnvironment {
 	}
 
 	@Override
+	public ConfigurationDefinition getActivityConfigurationDefinition(URI uri)
+			throws ActivityNotFoundException, ActivityConfigurationException {
+		return activityService.getActivityConfigurationDefinition(uri);
+	}
+
+	@Override
 	public List<URI> getDispatchLayerURIs() {
 		return dispatchLayerService.getDispatchLayerURIs();
 	}
@@ -72,9 +76,10 @@ public class LocalExecutionEnvironment extends AbstractExecutionEnvironment {
 		return dispatchLayerService.dispatchLayerExists(uri);
 	}
 
-	public ConfigurationDefinition getActivityConfigurationDefinition(URI uri)
-			throws ActivityNotFoundException, ActivityConfigurationException {
-		return activityService.getActivityConfigurationDefinition(uri);
+	@Override
+	public ConfigurationDefinition getDispatchLayerConfigurationDefinition(URI uri)
+			throws DispatchLayerNotFoundException, DispatchLayerConfigurationException {
+		return dispatchLayerService.getDispatchLayerConfigurationDefinition(uri);
 	}
 
 }

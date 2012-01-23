@@ -88,8 +88,7 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 				Activity<?> activity = mapping.getDataflowActivity(activityReport.getSubject());
 				activityReports.put(activity, activityReport);
 				activityInvocations.put(activity, new AtomicInteger());
-				WorkflowReport nestedWorkflowReport = activityReport.getNestedWorkflowReport();
-				if (nestedWorkflowReport != null) {
+				for (WorkflowReport nestedWorkflowReport : activityReport.getChildReports()) {
 					mapReports(nestedWorkflowReport, mapping);
 				}
 			}

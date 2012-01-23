@@ -18,6 +18,12 @@
 
 	<reference id="dispatchLayerService" interface="uk.org.taverna.platform.dispatch.DispatchLayerService" />
 
-	<set id="referenceServices" interface="net.sf.taverna.t2.reference.ReferenceService" />
+	<reference id="dataService" interface="uk.org.taverna.platform.data.DataService" />
+
+	<reference id="referenceService" interface="net.sf.taverna.t2.reference.ReferenceService" />
+
+	<reference id="databaseConfiguration" interface="uk.org.taverna.platform.database.configuration.DatabaseConfiguration" />
+
+	<set id="provenanceConnectorFactories" interface="net.sf.taverna.t2.provenance.ProvenanceConnectorFactory" cardinality="0..N"/>
 
 </beans:beans>

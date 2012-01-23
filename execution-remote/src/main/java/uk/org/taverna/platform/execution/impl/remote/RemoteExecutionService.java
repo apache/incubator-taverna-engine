@@ -24,8 +24,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-import net.sf.taverna.t2.reference.ReferenceService;
-import net.sf.taverna.t2.reference.T2Reference;
+import uk.org.taverna.platform.data.Data;
 import uk.org.taverna.platform.execution.api.AbstractExecutionService;
 import uk.org.taverna.platform.execution.api.Execution;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
@@ -48,9 +47,9 @@ public class RemoteExecutionService extends AbstractExecutionService {
 
 	@Override
 	protected Execution createExecutionImpl(WorkflowBundle workflowBundle, Workflow workflow,
-			Profile profile, Map<String, T2Reference> inputs, ReferenceService referenceService)
+			Profile profile, Map<String, Data> inputs)
 			throws InvalidWorkflowException {
-		return new RemoteExecution(workflowBundle, workflow, profile, inputs, referenceService);
+		return new RemoteExecution(workflowBundle, workflow, profile, inputs);
 	}
 
 	@Override

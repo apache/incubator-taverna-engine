@@ -10,9 +10,13 @@ import net.sf.taverna.t2.monitor.MonitorableProperty;
 import net.sf.taverna.t2.monitor.NoSuchPropertyException;
 import net.sf.taverna.t2.monitor.SteerableProperty;
 import uk.org.taverna.platform.report.ProcessorReport;
-import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.scufl2.api.core.Processor;
 
+/**
+ * ProcessorReport implementation based on MonitorableProperty objects.
+ *
+ * @author David Withers
+ */
 public class LocalProcessorReport extends ProcessorReport {
 
 	private static final String DISPATCH_ERRORBOUNCE_TOTAL_TRANSLATED = "dispatch:errorbounce:totalTranslated";

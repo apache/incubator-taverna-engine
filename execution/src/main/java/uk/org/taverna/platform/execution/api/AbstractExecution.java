@@ -24,8 +24,7 @@ import java.net.URI;
 import java.util.Map;
 import java.util.UUID;
 
-import net.sf.taverna.t2.reference.ReferenceService;
-import net.sf.taverna.t2.reference.T2Reference;
+import uk.org.taverna.platform.data.Data;
 import uk.org.taverna.platform.report.ActivityReport;
 import uk.org.taverna.platform.report.ProcessorReport;
 import uk.org.taverna.platform.report.WorkflowReport;
@@ -55,8 +54,7 @@ public abstract class AbstractExecution implements Execution {
 	private final WorkflowBundle workflowBundle;
 	private final Workflow workflow;
 	private final Profile profile;
-	private final Map<String, T2Reference> inputs;
-	private final ReferenceService referenceService;
+	private final Map<String, Data> inputs;
 	private final WorkflowReport workflowReport;
 	private final Scufl2Tools scufl2Tools = new Scufl2Tools();
 	private final URITools uriTools = new URITools();
@@ -74,19 +72,15 @@ public abstract class AbstractExecution implements Execution {
 	 * @param inputs
 	 *            the inputs for the <code>Workflow</code>. May be <code>null</code> if the
 	 *            <code>Workflow</code> doesn't require any inputs
-	 * @param referenceService
-	 *            the <code>ReferenceService</code> used to register inputs, outputs and
-	 *            intermediate values
 	 * @throws InvalidWorkflowException
 	 *             if the specified workflow is invalid
 	 */
 	public AbstractExecution(WorkflowBundle workflowBundle, Workflow workflow, Profile profile,
-			Map<String, T2Reference> inputs, ReferenceService referenceService) {
+			Map<String, Data> inputs) {
 		this.workflowBundle = workflowBundle;
 		this.workflow = workflow;
 		this.profile = profile;
 		this.inputs = inputs;
-		this.referenceService = referenceService;
 		ID = UUID.randomUUID().toString();
 		workflowReport = generateWorkflowReport(workflow);
 	}
@@ -150,13 +144,8 @@ public abstract class AbstractExecution implements Execution {
 	}
 
 	@Override
-	public Map<String, T2Reference> getInputs() {
+	public Map<String, Data> getInputs() {
 		return inputs;
-	}
-
-	@Override
-	public ReferenceService getReferenceService() {
-		return referenceService;
 	}
 
 	@Override

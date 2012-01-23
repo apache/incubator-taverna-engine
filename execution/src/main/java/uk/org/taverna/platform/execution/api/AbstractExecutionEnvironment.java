@@ -22,8 +22,6 @@ package uk.org.taverna.platform.execution.api;
 
 import java.net.URI;
 
-import net.sf.taverna.t2.reference.ReferenceService;
-
 /**
  * A common super type for concrete implementations of <code>ExecutionEnvironment</code>s.
  *
@@ -35,15 +33,13 @@ public abstract class AbstractExecutionEnvironment implements ExecutionEnvironme
 	private final String name;
 	private final String description;
 	private final ExecutionService executionService;
-	private final ReferenceService referenceService;
 
 	public AbstractExecutionEnvironment(String ID, String name, String description,
-			ExecutionService executionService, ReferenceService referenceService) {
+			ExecutionService executionService) {
 		this.ID = ID;
 		this.name = name;
 		this.description = description;
 		this.executionService = executionService;
-		this.referenceService = referenceService;
 	}
 
 	@Override
@@ -64,11 +60,6 @@ public abstract class AbstractExecutionEnvironment implements ExecutionEnvironme
 	@Override
 	public ExecutionService getExecutionService() {
 		return executionService;
-	}
-
-	@Override
-	public ReferenceService getReferenceService() {
-		return referenceService;
 	}
 
 	@Override

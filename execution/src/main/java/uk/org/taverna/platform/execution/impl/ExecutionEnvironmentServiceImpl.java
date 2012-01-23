@@ -33,6 +33,8 @@ import org.apache.log4j.Logger;
 
 import uk.org.taverna.platform.activity.ActivityConfigurationException;
 import uk.org.taverna.platform.activity.ActivityNotFoundException;
+import uk.org.taverna.platform.dispatch.DispatchLayerConfigurationException;
+import uk.org.taverna.platform.dispatch.DispatchLayerNotFoundException;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironmentService;
 import uk.org.taverna.platform.execution.api.ExecutionService;
@@ -122,8 +124,8 @@ public class ExecutionEnvironmentServiceImpl implements ExecutionEnvironmentServ
 						executionEnvironment.getName(), activity.getConfigurableType()));
 				return false;
 			}
-			Configuration configuration = scufl2Tools.configurationFor(activity, profile);
-			if (!isValidActivityConfiguration(executionEnvironment, configuration, activity)) {
+			Configuration activityConfiguration = scufl2Tools.configurationFor(activity, profile);
+			if (!isValidActivityConfiguration(executionEnvironment, activityConfiguration, activity)) {
 				logger.debug(MessageFormat.format("Invalid activity configuration for {1} in {0}",
 						executionEnvironment.getName(), activity.getConfigurableType()));
 				return false;
@@ -136,6 +138,19 @@ public class ExecutionEnvironmentServiceImpl implements ExecutionEnvironmentServ
 							executionEnvironment.getName(),
 							dispatchStackLayer.getConfigurableType()));
 					return false;
+				}
+
+				List<Configuration> dispatchLayerConfigurations = scufl2Tools.configurationsFor(dispatchStackLayer, profile);
+				if (dispatchLayerConfigurations.size() > 1) {
+					logger.debug(MessageFormat.format("{0} contains multiple configurations for dispatch layer {1}",
+							executionEnvironment.getName(),
+							dispatchStackLayer.getConfigurableType()));
+				} else if (dispatchLayerConfigurations.size() == 1) {
+					if (!isValidDispatchLayerConfiguration(executionEnvironment, dispatchLayerConfigurations.get(0), dispatchStackLayer)) {
+						logger.debug(MessageFormat.format("Invalid dispatch layer configuration for {1} in {0}",
+								executionEnvironment.getName(), dispatchStackLayer.getConfigurableType()));
+						return false;
+					}
 				}
 			}
 		}
@@ -161,6 +176,30 @@ public class ExecutionEnvironmentServiceImpl implements ExecutionEnvironmentServ
 		} catch (ActivityConfigurationException e) {
 			logger.debug(MessageFormat.format("Configuration for {1} is incorrect in {0}",
 					executionEnvironment.getName(), activity.getConfigurableType()));
+			return false;
+		}
+		return true;
+	}
+
+	private boolean isValidDispatchLayerConfiguration(ExecutionEnvironment executionEnvironment,
+			Configuration configuration, DispatchStackLayer dispatchLayer) {
+		try {
+			ConfigurationDefinition configurationDefinition = executionEnvironment
+					.getDispatchLayerConfigurationDefinition(dispatchLayer.getConfigurableType());
+			PropertyResourceDefinition propertyResourceDefinition = configurationDefinition
+					.getPropertyResourceDefinition();
+			PropertyResource propertyResource = configuration.getPropertyResource();
+			if (!isValidPropertyResource(configuration, propertyResourceDefinition,
+					propertyResource)) {
+				return false;
+			}
+		} catch (DispatchLayerNotFoundException e) {
+			logger.debug(MessageFormat.format("{0} does not contain dispatch layer {1}",
+					executionEnvironment.getName(), dispatchLayer.getConfigurableType()));
+			return false;
+		} catch (DispatchLayerConfigurationException e) {
+			logger.debug(MessageFormat.format("Configuration for {1} is incorrect in {0}",
+					executionEnvironment.getName(), dispatchLayer.getConfigurableType()));
 			return false;
 		}
 		return true;
