@@ -20,17 +20,15 @@
  ******************************************************************************/
 package uk.org.taverna.platform;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import net.sf.taverna.t2.reference.ReferenceService;
-import net.sf.taverna.t2.reference.T2Reference;
-
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
+import uk.org.taverna.platform.data.Data;
+import uk.org.taverna.platform.data.DataService;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
 import uk.org.taverna.platform.execution.api.ExecutionService;
 import uk.org.taverna.platform.report.State;
@@ -42,19 +40,26 @@ import uk.org.taverna.scufl2.api.profiles.Profile;
 public class LocalExecutionIT extends PlatformIT {
 
 	private ExecutionService executionService;
-	private ReferenceService referenceService;
+	private DataService dataService;
+	private Set<ExecutionEnvironment> executionEnvironments;
 
 	protected void setup() throws Exception {
 		super.setup();
-		ServiceReference[] executionServiceReferences = bundleContext.getServiceReferences(
-				"uk.org.taverna.platform.execution.api.ExecutionService",
-				"(org.springframework.osgi.bean.name=localExecution)");
-		assertEquals(1, executionServiceReferences.length);
-		executionService = (ExecutionService) bundleContext
-				.getService(executionServiceReferences[0]);
-		Set<ExecutionEnvironment> executionEnvivonments = executionService.getExecutionEnvivonments();
-		assertEquals(1, executionEnvivonments.size());
-		referenceService = executionEnvivonments.iterator().next().getReferenceService();
+		if (executionService == null) {
+			ServiceReference[] executionServiceReferences = bundleContext.getServiceReferences(
+					"uk.org.taverna.platform.execution.api.ExecutionService",
+					"(org.springframework.osgi.bean.name=localExecution)");
+			assertEquals(1, executionServiceReferences.length);
+			executionService = (ExecutionService) bundleContext
+					.getService(executionServiceReferences[0]);
+			executionEnvironments = executionService.getExecutionEnvivonments();
+			assertEquals(1, executionEnvironments.size());
+		}
+		if (dataService == null) {
+			ServiceReference dataServiceReference = bundleContext
+					.getServiceReference("uk.org.taverna.platform.data.DataService");
+			dataService = (DataService) bundleContext.getService(dataServiceReference);
+		}
 	}
 
 	public void testLocalExecution() throws Exception {
@@ -63,27 +68,24 @@ public class LocalExecutionIT extends PlatformIT {
 		WorkflowBundle workflowBundle = loadWorkflow("/t2flow/in-out.t2flow");
 		Workflow workflow = workflowBundle.getMainWorkflow();
 		Profile profile = workflowBundle.getMainProfile();
+		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
+			Map<String, Data> inputs = Collections.singletonMap("in", dataService.create("test-input"));
 
-		T2Reference reference = referenceService.register("test-input", 0, true, null);
+			String executionId = executionService.createExecution(executionEnvironment,
+					workflowBundle, workflow, profile, inputs);
+			WorkflowReport report = executionService.getWorkflowReport(executionId);
+			assertEquals(State.CREATED, report.getState());
+			executionService.start(executionId);
 
-		Map<String, T2Reference> inputs = new HashMap<String, T2Reference>();
-		inputs.put("in", reference);
+			Map<String, Data> results = report.getOutputs();
+			assertNotNull(results);
+			waitForResults(results, report, "out");
 
-		String executionId = executionService.createExecution(workflowBundle, workflow, profile,
-				inputs, referenceService);
-		WorkflowReport report = executionService.getWorkflowReport(executionId);
-		assertEquals(State.CREATED, report.getState());
-		executionService.start(executionId);
-
-		Map<String, T2Reference> results = report.getOutputs();
-		assertNotNull(results);
-		waitForResults(results, report, "out");
-
-		String result = (String) referenceService.renderIdentifier(results.get("out"),
-				String.class, null);
-		assertEquals("test-input", result);
-		assertEquals(State.COMPLETED, report.getState());
-		System.out.println(report);
+			Object result = results.get("out").getValue();
+			assertEquals("test-input", result);
+			assertEquals(State.COMPLETED, report.getState());
+			System.out.println(report);
+		}
 	}
 
 	public void testLocalExecution2() throws Exception {
@@ -93,33 +95,26 @@ public class LocalExecutionIT extends PlatformIT {
 		Workflow workflow = workflowBundle.getMainWorkflow();
 		Profile profile = workflowBundle.getMainProfile();
 
-		T2Reference reference = referenceService.register("test-input", 0, true, null);
-		Map<String, T2Reference> inputs = new HashMap<String, T2Reference>();
-		inputs.put("in", reference);
+		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
+			Map<String, Data> inputs = Collections.singletonMap("in", dataService.create("test-input"));
 
-		String executionId = executionService.createExecution(workflowBundle, workflow, profile,
-				inputs, referenceService);
-		WorkflowReport report = executionService.getWorkflowReport(executionId);
-		System.out.println(report);
-		assertEquals(State.CREATED, report.getState());
-		executionService.start(executionId);
-		System.out.println(report);
+			String executionId = executionService.createExecution(executionEnvironment,
+					workflowBundle, workflow, profile, inputs);
+			WorkflowReport report = executionService.getWorkflowReport(executionId);
+			System.out.println(report);
+			assertEquals(State.CREATED, report.getState());
+			executionService.start(executionId);
+			System.out.println(report);
 
-		Map<String, T2Reference> results = report.getOutputs();
-		waitForResults(results, report, "out");
+			Map<String, Data> results = report.getOutputs();
+			waitForResults(results, report, "out");
 
-		T2Reference resultReference = results.get("out");
-		if (resultReference.containsErrors()) {
-			printErrors(referenceService, resultReference);
+			List<Data> result = results.get("out").getElements();
+			assertEquals(1000, result.size());
+			assertEquals("test-input:0", result.get(0).getValue());
+			assertEquals(State.COMPLETED, report.getState());
+			System.out.println(report);
 		}
-		assertFalse(resultReference.containsErrors());
-		@SuppressWarnings("unchecked")
-		List<String> result = (List<String>) referenceService.renderIdentifier(results.get("out"),
-				String.class, null);
-		assertEquals(1000, result.size());
-		assertEquals("test-input:0", result.get(0));
-		assertEquals(State.COMPLETED, report.getState());
-		System.out.println(report);
 	}
 
 }

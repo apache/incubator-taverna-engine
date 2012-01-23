@@ -22,10 +22,13 @@ package uk.org.taverna.platform.report;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import uk.org.taverna.platform.data.Data;
 import uk.org.taverna.scufl2.api.common.WorkflowBean;
 
 /**
@@ -41,18 +44,22 @@ import uk.org.taverna.scufl2.api.common.WorkflowBean;
  */
 public class StatusReport<SUBJECT extends WorkflowBean, PARENT extends StatusReport<?, ?, ?>, CHILD extends StatusReport<?, ?, ?>> {
 
-	private SUBJECT subject;
+	private final SUBJECT subject;
 
 	private PARENT parentReport;
 
-	private Set<CHILD> childReports = new HashSet<CHILD>();
+	private final Set<CHILD> childReports = new HashSet<CHILD>();
 
 	private State state;
 
 	private Date createdDate, startedDate, pausedDate, resumedDate, cancelledDate, completedDate,
 			failedDate;
 
-	private List<Date> pausedDates, resumedDates;
+	private List<Date> pausedDates = new ArrayList<Date>(), resumedDates = new ArrayList<Date>();
+
+	private final Map<String, Data> inputs = new HashMap<String, Data>();
+
+	private final Map<String, Data> outputs = new HashMap<String, Data>();
 
 	/**
 	 * Constructs a new <code>StatusReport</code> for the subject and sets the created date to the
@@ -63,8 +70,6 @@ public class StatusReport<SUBJECT extends WorkflowBean, PARENT extends StatusRep
 	 */
 	public StatusReport(SUBJECT subject) {
 		this.subject = subject;
-		pausedDates = new ArrayList<Date>();
-		resumedDates = new ArrayList<Date>();
 		setCreatedDate(new Date());
 	}
 
@@ -299,6 +304,28 @@ public class StatusReport<SUBJECT extends WorkflowBean, PARENT extends StatusRep
 	 */
 	public List<Date> getResumedDates() {
 		return resumedDates;
+	}
+
+	/**
+	 * Returns the inputs for the workflow component.
+	 *
+	 * If there are no inputs an empty map is returned.
+	 *
+	 * @return the inputs
+	 */
+	public Map<String, Data> getInputs() {
+		return inputs;
+	}
+
+	/**
+	 * Returns the outputs from the workflow component.
+	 *
+	 * If there are no outputs an empty map is returned.
+	 *
+	 * @return the outputs
+	 */
+	public Map<String, Data> getOutputs() {
+		return outputs;
 	}
 
 }

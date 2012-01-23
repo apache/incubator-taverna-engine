@@ -24,11 +24,9 @@ import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
-import net.sf.taverna.t2.reference.ReferenceService;
-import net.sf.taverna.t2.reference.T2Reference;
-
 import org.apache.log4j.Logger;
 
+import uk.org.taverna.platform.data.Data;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
 import uk.org.taverna.platform.execution.api.InvalidExecutionIdException;
 import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
@@ -52,7 +50,7 @@ public class Run {
 
 	private final String ID, executionID;
 
-	private Map<String, T2Reference> inputs;
+	private final Map<String, Data> inputs;
 
 	private final ExecutionEnvironment executionEnvironment;
 
@@ -64,22 +62,19 @@ public class Run {
 
 	private final Profile profile;
 
-	private final ReferenceService referenceService;
-
 	/**
 	 * Constructs a <code>Run</code> from the specified <code>RunProfile</code>.
 	 *
 	 * @param runProfile
 	 *            the profile to create a <code>Run</code> from
 	 * @throws InvalidWorkflowException
-	 *             if the <code>Workflow</code> specified by the
-	 *             <code>RunProfile</code> is not valid
+	 *             if the <code>Workflow</code> specified by the <code>RunProfile</code> is not
+	 *             valid
 	 * @throws RunProfileException
-	 *             if the <code>RunProfile</code> does not contain the correct
-	 *             information to run a <code>Workflow</code>
+	 *             if the <code>RunProfile</code> does not contain the correct information to run a
+	 *             <code>Workflow</code>
 	 */
-	public Run(RunProfile runProfile) throws InvalidWorkflowException,
-			RunProfileException {
+	public Run(RunProfile runProfile) throws InvalidWorkflowException, RunProfileException {
 		if (runProfile.getWorkflowBundle() == null) {
 			String message = "No WorkflowBundle specified in the RunProfile";
 			logger.warn(message);
@@ -114,28 +109,21 @@ public class Run {
 		if (runProfile.getInputs() == null) {
 			String message = "No workflow inputs in the RunProfile";
 			logger.info(message);
-		} else {
-			inputs = runProfile.getInputs();
 		}
-		if (runProfile.getReferenceService() == null) {
-			String message = "No ReferenceService specified in the RunProfile";
-			logger.warn(message);
-			throw new RunProfileException(message);
-		} else {
-			referenceService = runProfile.getReferenceService();
-		}
+		inputs = runProfile.getInputs();
 		if (runProfile.getExecutionEnvironment() == null) {
 			String message = "No ExecutionEnvironment specified in the RunProfile";
 			logger.warn(message);
 			throw new RunProfileException(message);
-		} else {
-			executionEnvironment = runProfile.getExecutionEnvironment();
 		}
+		executionEnvironment = runProfile.getExecutionEnvironment();
+
 		ID = UUID.randomUUID().toString();
-		executionID = executionEnvironment.getExecutionService().createExecution(workflowBundle,
-				workflow, profile, inputs, referenceService);
+		executionID = executionEnvironment.getExecutionService().createExecution(
+				executionEnvironment, workflowBundle, workflow, profile, inputs);
 		try {
-			workflowReport = executionEnvironment.getExecutionService().getWorkflowReport(executionID);
+			workflowReport = executionEnvironment.getExecutionService().getWorkflowReport(
+					executionID);
 		} catch (InvalidExecutionIdException e) {
 			String message = "Error while creating a execution on the "
 					+ executionEnvironment.getName();
@@ -156,8 +144,7 @@ public class Run {
 	/**
 	 * Returns the current {@link State} of the <code>Run</code>.
 	 *
-	 * A <code>Run</code>'s state can be CREATED, RUNNING, COMPLETED, PAUSED,
-	 * CANCELLED or FAILED.
+	 * A <code>Run</code>'s state can be CREATED, RUNNING, COMPLETED, PAUSED, CANCELLED or FAILED.
 	 *
 	 * @return the current <code>State</code> of the <code>Run</code>
 	 */
@@ -168,24 +155,22 @@ public class Run {
 	/**
 	 * Returns the inputs of the run.
 	 *
-	 * May be <code>null</code> if the <code>Workflow</code> doesn't require any
-	 * inputs.
+	 * May be <code>null</code> if the <code>Workflow</code> doesn't require any inputs.
 	 *
 	 * @return the inputs for the <code>Workflow</code>
 	 */
-	public Map<String, T2Reference> getInputs() {
+	public Map<String, Data> getInputs() {
 		return inputs;
 	}
 
 	/**
 	 * Returns the outputs for the <code>Workflow</code>.
 	 *
-	 * May be <code>null</code> if the <code>Workflow</code> hasn't produced any
-	 * outputs (yet).
+	 * May be <code>null</code> if the <code>Workflow</code> hasn't produced any outputs (yet).
 	 *
 	 * @return the outputs for the <code>Workflow</code>
 	 */
-	public Map<String, T2Reference> getOutputs() {
+	public Map<String, Data> getOutputs() {
 		return workflowReport.getOutputs();
 	}
 
@@ -237,8 +222,7 @@ public class Run {
 				executionEnvironment.getExecutionService().resume(executionID);
 				workflowReport.setResumedDate(new Date());
 			} else {
-				throw new RunStateException("Cannot resume a " + state
-						+ " run.");
+				throw new RunStateException("Cannot resume a " + state + " run.");
 			}
 		}
 	}
@@ -248,8 +232,7 @@ public class Run {
 			State state = workflowReport.getState();
 			if (state.equals(State.CANCELLED) || state.equals(State.COMPLETED)
 					|| state.equals(State.FAILED)) {
-				throw new RunStateException("Cannot cancel a " + state
-						+ " run.");
+				throw new RunStateException("Cannot cancel a " + state + " run.");
 			} else {
 				executionEnvironment.getExecutionService().cancel(executionID);
 				workflowReport.setCancelledDate(new Date());

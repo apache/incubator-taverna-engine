@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import net.sf.taverna.t2.reference.T2Reference;
+import uk.org.taverna.platform.data.Data;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
 import uk.org.taverna.platform.execution.api.InvalidExecutionIdException;
 import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
@@ -161,7 +161,7 @@ public interface RunService {
 	 * @throws InvalidRunIdException
 	 *             if the run ID is not valid
 	 */
-	public Map<String, T2Reference> getInputs(String runID) throws InvalidRunIdException;
+	public Map<String, Data> getInputs(String runID) throws InvalidRunIdException;
 
 	/**
 	 * Returns the outputs of the run. May be null if there are no outputs.
@@ -172,7 +172,7 @@ public interface RunService {
 	 * @throws InvalidRunIdException
 	 *             if the run ID is not valid
 	 */
-	public Map<String, T2Reference> getOutputs(String runID) throws InvalidRunIdException;
+	public Map<String, Data> getOutputs(String runID) throws InvalidRunIdException;
 
 	/**
 	 * Returns the status report for the run.

@@ -27,13 +27,10 @@ import static org.junit.Assert.assertNull;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.sf.taverna.t2.reference.ReferenceService;
-import net.sf.taverna.t2.reference.T2Reference;
-import net.sf.taverna.t2.reference.impl.ReferenceServiceImpl;
-
 import org.junit.Before;
 import org.junit.Test;
 
+import uk.org.taverna.platform.data.Data;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
 import uk.org.taverna.platform.execution.impl.local.LocalExecutionEnvironment;
 import uk.org.taverna.platform.execution.impl.local.LocalExecutionService;
@@ -51,11 +48,10 @@ public class RunProfileTest {
 	private RunProfile runProfile;
 	private ExecutionEnvironment executionEnvironment;
 	private WorkflowBundle workflowBundle;
-	private ReferenceService referenceService;
 	private LocalExecutionService executionService;
 	private Workflow workflow, mainWorkflow;
 	private Profile profile, mainProfile;
-	private Map<String, T2Reference> inputs;
+	private Map<String, Data> inputs;
 
 	/**
 	 * @throws java.lang.Exception
@@ -69,11 +65,10 @@ public class RunProfileTest {
 		workflowBundle = new WorkflowBundle();
 		workflowBundle.setMainProfile(mainProfile);
 		workflowBundle.setMainWorkflow(mainWorkflow);
-		referenceService = new ReferenceServiceImpl();
 		executionService = new LocalExecutionService();
-		executionEnvironment = new LocalExecutionEnvironment(executionService, referenceService, null, null);
+		executionEnvironment = new LocalExecutionEnvironment(executionService, null, null);
 
-		inputs = new HashMap<String, T2Reference>();
+		inputs = new HashMap<String, Data>();
 		runProfile = new RunProfile(executionEnvironment, workflowBundle, workflow, profile, inputs);
 	}
 
@@ -219,17 +214,6 @@ public class RunProfileTest {
 		assertNull(runProfile.getInputs());
 		runProfile.setInputs(inputs);
 		assertEquals(inputs, runProfile.getInputs());
-	}
-
-	/**
-	 * Test method for
-	 * {@link uk.org.taverna.platform.run.api.RunProfile#getReferenceService()}.
-	 */
-	@Test
-	public void testGetReferenceService() {
-		assertNotNull(runProfile.getReferenceService());
-		assertEquals(referenceService, runProfile.getReferenceService());
-		assertEquals(runProfile.getReferenceService(), runProfile.getReferenceService());
 	}
 
 	/**

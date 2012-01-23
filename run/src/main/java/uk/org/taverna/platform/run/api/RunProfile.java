@@ -2,8 +2,7 @@ package uk.org.taverna.platform.run.api;
 
 import java.util.Map;
 
-import net.sf.taverna.t2.reference.ReferenceService;
-import net.sf.taverna.t2.reference.T2Reference;
+import uk.org.taverna.platform.data.Data;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.Workflow;
@@ -17,11 +16,11 @@ import uk.org.taverna.scufl2.api.profiles.Profile;
  */
 public class RunProfile {
 
+	private ExecutionEnvironment executionEnvironment;
 	private WorkflowBundle workflowBundle;
 	private Workflow workflow;
 	private Profile profile;
-	private Map<String, T2Reference> inputs;
-	private ExecutionEnvironment executionEnvironment;
+	private Map<String, Data> inputs;
 
 	/**
 	 * Constructs a <code>RunProfile</code> that specifies the parameters
@@ -34,9 +33,6 @@ public class RunProfile {
 	 * @param workflowBundle
 	 *            the <code>WorkflowBundle</code> containing the
 	 *            <code>Workflow</code> to run
-	 * @param referenceService
-	 *            the {@link ReferenceService} used to register the
-	 *            <code>Workflow</code> inputs and outputs
 	 */
 	public RunProfile(ExecutionEnvironment executionEnvironment, WorkflowBundle workflowBundle) {
 		this(executionEnvironment, workflowBundle, null, null, null);
@@ -58,7 +54,7 @@ public class RunProfile {
 	 *            <code>null</code> if there are no inputs
 	 */
 	public RunProfile(ExecutionEnvironment executionEnvironment, WorkflowBundle workflowBundle,
-			Map<String, T2Reference> inputs) {
+			Map<String, Data> inputs) {
 		this(executionEnvironment, workflowBundle, null, null, inputs);
 	}
 
@@ -85,7 +81,7 @@ public class RunProfile {
 	 *            <code>null</code> if there are no inputs
 	 */
 	public RunProfile(ExecutionEnvironment executionEnvironment, WorkflowBundle workflowBundle, Workflow workflow,
-			Profile profile, Map<String, T2Reference> inputs) {
+			Profile profile, Map<String, Data> inputs) {
 		this.executionEnvironment = executionEnvironment;
 		this.workflowBundle = workflowBundle;
 		this.workflow = workflow;
@@ -182,7 +178,7 @@ public class RunProfile {
 	 *
 	 * @return the inputs for the <code>Workflow</code>
 	 */
-	public Map<String, T2Reference> getInputs() {
+	public Map<String, Data> getInputs() {
 		return inputs;
 	}
 
@@ -192,21 +188,8 @@ public class RunProfile {
 	 * @param inputs
 	 *            the inputs for the <code>Workflow</code>
 	 */
-	public void setInputs(Map<String, T2Reference> inputs) {
+	public void setInputs(Map<String, Data> inputs) {
 		this.inputs = inputs;
-	}
-
-	/**
-	 * Returns the <code>ReferenceService</code> used to register the inputs.
-	 *
-	 * This <code>ReferenceService</code> will also be used to register any
-	 * outputs and intermediate values produced by the <code>Workflow</code>
-	 * run.
-	 *
-	 * @return the <code>ReferenceService</code> used to register the inputs
-	 */
-	public ReferenceService getReferenceService() {
-		return executionEnvironment.getReferenceService();
 	}
 
 	/**

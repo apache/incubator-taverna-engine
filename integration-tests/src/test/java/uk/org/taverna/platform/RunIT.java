@@ -20,6 +20,7 @@
  ******************************************************************************/
 package uk.org.taverna.platform;
 
+import java.io.File;
 import java.net.URI;
 import java.net.URL;
 import java.security.cert.CertificateFactory;
@@ -29,13 +30,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import net.sf.taverna.t2.reference.ReferenceService;
-import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.security.credentialmanager.UsernamePassword;
 
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
+import uk.org.taverna.platform.data.Data;
+import uk.org.taverna.platform.data.DataService;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
 import uk.org.taverna.platform.report.State;
 import uk.org.taverna.platform.report.WorkflowReport;
@@ -46,6 +46,7 @@ import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 public class RunIT extends PlatformIT {
 
 	private RunService runService;
+	private DataService dataService;
 
 	protected void setup() throws Exception {
 		super.setup();
@@ -53,6 +54,11 @@ public class RunIT extends PlatformIT {
 			ServiceReference runServiceReference = bundleContext
 					.getServiceReference("uk.org.taverna.platform.run.api.RunService");
 			runService = (RunService) bundleContext.getService(runServiceReference);
+		}
+		if (dataService == null) {
+			ServiceReference dataServiceReference = bundleContext
+					.getServiceReference("uk.org.taverna.platform.data.DataService");
+			dataService = (DataService) bundleContext.getService(dataServiceReference);
 		}
 	}
 
@@ -63,33 +69,32 @@ public class RunIT extends PlatformIT {
 
 		Set<ExecutionEnvironment> executionEnvironments = runService
 				.getExecutionEnvironments(workflowBundle);
-		assertEquals(1, executionEnvironments.size());
-		ExecutionEnvironment executionEnvironment = executionEnvironments.iterator().next();
-		ReferenceService referenceService = executionEnvironment.getReferenceService();
+		assertTrue(executionEnvironments.size() > 0);
+		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
+			Map<String, Data> inputs = new HashMap<String, Data>();
+			inputs.put("in", dataService.create("test-input"));
 
-		Map<String, T2Reference> inputs = new HashMap<String, T2Reference>();
-		inputs.put("in", referenceService.register("test-input", 0, true, null));
+			String runId = runService.createRun(new RunProfile(executionEnvironment,
+					workflowBundle, inputs));
+			assertEquals(State.CREATED, runService.getState(runId));
 
-		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle,
-				inputs));
-		assertEquals(State.CREATED, runService.getState(runId));
+			WorkflowReport report = runService.getWorkflowReport(runId);
+			System.out.println(report);
 
-		WorkflowReport report = runService.getWorkflowReport(runId);
-		System.out.println(report);
+			runService.start(runId);
+			assertTrue(runService.getState(runId).equals(State.RUNNING)
+					|| runService.getState(runId).equals(State.COMPLETED));
+			System.out.println(report);
 
-		runService.start(runId);
-		assertTrue(runService.getState(runId).equals(State.RUNNING)
-				|| runService.getState(runId).equals(State.COMPLETED));
-		System.out.println(report);
+			Map<String, Data> results = runService.getOutputs(runId);
+			assertNotNull(results);
+			waitForResults(results, runService.getWorkflowReport(runId), "out");
 
-		Map<String, T2Reference> results = runService.getOutputs(runId);
-		assertNotNull(results);
-		waitForResults(results, runService.getWorkflowReport(runId), "out");
+			assertTrue(checkResult(results.get("out"), "test-input"));
 
-		assertTrue(checkResult(referenceService, results.get("out"), "test-input"));
-
-		assertEquals(State.COMPLETED, runService.getState(runId));
-		System.out.println(report);
+			assertEquals(State.COMPLETED, runService.getState(runId));
+			System.out.println(report);
+		}
 	}
 
 	public void testRunApiConsumer() throws Exception {
@@ -99,33 +104,32 @@ public class RunIT extends PlatformIT {
 
 		Set<ExecutionEnvironment> executionEnvironments = runService
 				.getExecutionEnvironments(workflowBundle);
-		assertEquals(1, executionEnvironments.size());
-		ExecutionEnvironment executionEnvironment = executionEnvironments.iterator().next();
-		ReferenceService referenceService = executionEnvironment.getReferenceService();
+		assertTrue(executionEnvironments.size() > 0);
+		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
+			Map<String, Data> inputs = new HashMap<String, Data>();
+			inputs.put("in", dataService.create("test-input"));
 
-		Map<String, T2Reference> inputs = new HashMap<String, T2Reference>();
-		inputs.put("in", referenceService.register("test-input", 0, true, null));
+			String runId = runService.createRun(new RunProfile(executionEnvironment,
+					workflowBundle, inputs));
+			assertEquals(State.CREATED, runService.getState(runId));
 
-		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle,
-				inputs));
-		assertEquals(State.CREATED, runService.getState(runId));
+			WorkflowReport report = runService.getWorkflowReport(runId);
+			System.out.println(report);
 
-		WorkflowReport report = runService.getWorkflowReport(runId);
-		System.out.println(report);
+			runService.start(runId);
+			assertTrue(runService.getState(runId).equals(State.RUNNING)
+					|| runService.getState(runId).equals(State.COMPLETED));
+			System.out.println(report);
 
-		runService.start(runId);
-		assertTrue(runService.getState(runId).equals(State.RUNNING)
-				|| runService.getState(runId).equals(State.COMPLETED));
-		System.out.println(report);
+			Map<String, Data> results = runService.getOutputs(runId);
+			assertNotNull(results);
+			waitForResults(results, report, "out");
 
-		Map<String, T2Reference> results = runService.getOutputs(runId);
-		assertNotNull(results);
-		waitForResults(results, report, "out");
+			assertTrue(checkResult(results.get("out"), "TEST-INPUT"));
 
-		assertTrue(checkResult(referenceService, results.get("out"), "TEST-INPUT"));
-
-		assertEquals(State.COMPLETED, runService.getState(runId));
-		System.out.println(report);
+			assertEquals(State.COMPLETED, runService.getState(runId));
+			System.out.println(report);
+		}
 	}
 
 	public void testRunBeanshell() throws Exception {
@@ -135,41 +139,33 @@ public class RunIT extends PlatformIT {
 
 		Set<ExecutionEnvironment> executionEnvironments = runService
 				.getExecutionEnvironments(workflowBundle);
-		assertEquals(1, executionEnvironments.size());
-		ExecutionEnvironment executionEnvironment = executionEnvironments.iterator().next();
-		ReferenceService referenceService = executionEnvironment.getReferenceService();
+		assertTrue(executionEnvironments.size() > 0);
+		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
+			Map<String, Data> inputs = new HashMap<String, Data>();
+			inputs.put("in", dataService.create("test-input"));
 
-		Map<String, T2Reference> inputs = new HashMap<String, T2Reference>();
-		inputs.put("in", referenceService.register("test-input", 0, true, null));
+			String runId = runService.createRun(new RunProfile(executionEnvironment,
+					workflowBundle, inputs));
+			assertEquals(State.CREATED, runService.getState(runId));
 
-		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle,
-				inputs));
-		assertEquals(State.CREATED, runService.getState(runId));
+			WorkflowReport report = runService.getWorkflowReport(runId);
+			System.out.println(report);
 
-		WorkflowReport report = runService.getWorkflowReport(runId);
-		System.out.println(report);
+			runService.start(runId);
+			assertTrue(runService.getState(runId).equals(State.RUNNING)
+					|| runService.getState(runId).equals(State.COMPLETED));
+			System.out.println(report);
 
-		runService.start(runId);
-		assertTrue(runService.getState(runId).equals(State.RUNNING)
-				|| runService.getState(runId).equals(State.COMPLETED));
-		System.out.println(report);
+			Map<String, Data> results = runService.getOutputs(runId);
+			assertNotNull(results);
+			waitForResults(results, report, "out");
 
-		Map<String, T2Reference> results = runService.getOutputs(runId);
-		assertNotNull(results);
-		waitForResults(results, report, "out");
-
-		T2Reference resultReference = results.get("out");
-		if (resultReference.containsErrors()) {
-			printErrors(referenceService, resultReference);
+			List<Data> result = results.get("out").getElements();
+			assertEquals(1000, result.size());
+			assertEquals("test-input:0", result.get(0).getValue());
+			assertEquals(State.COMPLETED, runService.getState(runId));
+			System.out.println(report);
 		}
-		assertFalse(resultReference.containsErrors());
-		@SuppressWarnings("unchecked")
-		List<String> result = (List<String>) referenceService.renderIdentifier(resultReference,
-				String.class, null);
-		assertEquals(1000, result.size());
-		assertEquals("test-input:0", result.get(0));
-		assertEquals(State.COMPLETED, runService.getState(runId));
-		System.out.println(report);
 	}
 
 	public void testRunBiomart() throws Exception {
@@ -178,77 +174,70 @@ public class RunIT extends PlatformIT {
 
 		Set<ExecutionEnvironment> executionEnvironments = runService
 				.getExecutionEnvironments(workflowBundle);
-		assertEquals(1, executionEnvironments.size());
-		ExecutionEnvironment executionEnvironment = executionEnvironments.iterator().next();
-		ReferenceService referenceService = executionEnvironment.getReferenceService();
+		assertTrue(executionEnvironments.size() > 0);
+		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
+			String runId = runService
+					.createRun(new RunProfile(executionEnvironment, workflowBundle));
+			assertEquals(State.CREATED, runService.getState(runId));
 
-		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle));
-		assertEquals(State.CREATED, runService.getState(runId));
+			WorkflowReport report = runService.getWorkflowReport(runId);
+			System.out.println(report);
 
-		WorkflowReport report = runService.getWorkflowReport(runId);
-		System.out.println(report);
+			runService.start(runId);
+			assertTrue(runService.getState(runId).equals(State.RUNNING)
+					|| runService.getState(runId).equals(State.COMPLETED));
+			System.out.println(report);
 
-		runService.start(runId);
-		assertTrue(runService.getState(runId).equals(State.RUNNING)
-				|| runService.getState(runId).equals(State.COMPLETED));
-		System.out.println(report);
+			Map<String, Data> results = runService.getOutputs(runId);
+			assertNotNull(results);
+			waitForResults(results, report, "out");
 
-		Map<String, T2Reference> results = runService.getOutputs(runId);
-		assertNotNull(results);
-		waitForResults(results, report, "out");
-
-		T2Reference resultReference = results.get("out");
-		if (resultReference.containsErrors()) {
-			printErrors(referenceService, resultReference);
+			List<Data> result = results.get("out").getElements();
+			assertEquals(5, result.size());
+			assertEquals("ENSBTAG00000018854", result.get(0).getValue());
+			assertEquals(State.COMPLETED, runService.getState(runId));
+			System.out.println(report);
 		}
-		assertFalse(resultReference.containsErrors());
-		@SuppressWarnings("unchecked")
-		List<String> result = (List<String>) referenceService.renderIdentifier(resultReference,
-				String.class, null);
-		assertEquals(5, result.size());
-		assertEquals("ENSBTAG00000018854", result.get(0));
-		assertEquals(State.COMPLETED, runService.getState(runId));
-		System.out.println(report);
 	}
 
-	public void testRunBiomoby() throws Exception {
-		setup();
-		WorkflowBundle workflowBundle = loadWorkflow("/t2flow/biomoby.t2flow");
-
-		Set<ExecutionEnvironment> executionEnvironments = runService
-				.getExecutionEnvironments(workflowBundle);
-		assertEquals(1, executionEnvironments.size());
-		ExecutionEnvironment executionEnvironment = executionEnvironments.iterator().next();
-		ReferenceService referenceService = executionEnvironment.getReferenceService();
-
-		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle));
-		assertEquals(State.CREATED, runService.getState(runId));
-
-		WorkflowReport report = runService.getWorkflowReport(runId);
-		System.out.println(report);
-
-		runService.start(runId);
-		assertTrue(runService.getState(runId).equals(State.RUNNING)
-				|| runService.getState(runId).equals(State.COMPLETED));
-		System.out.println(report);
-
-		Map<String, T2Reference> results = runService.getOutputs(runId);
-		assertNotNull(results);
-		waitForResults(results, report, "out");
-
-		T2Reference resultReference = results.get("out");
-		if (resultReference.containsErrors()) {
-			printErrors(referenceService, resultReference);
-		}
-		assertFalse(resultReference.containsErrors());
-		@SuppressWarnings("unchecked")
-		List<String> result = (List<String>) referenceService.renderIdentifier(resultReference,
-				String.class, null);
-		assertEquals(5, result.size());
-		assertEquals("ENSBTAG00000018854", result.get(0));
-		assertEquals(State.COMPLETED, runService.getState(runId));
-		System.out.println(report);
-	}
+	// public void testRunBiomoby() throws Exception {
+	// setup();
+	// WorkflowBundle workflowBundle = loadWorkflow("/t2flow/biomoby.t2flow");
+	//
+	// Set<ExecutionEnvironment> executionEnvironments = runService
+	// .getExecutionEnvironments(workflowBundle);
+	// for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
+	//
+	//
+	// String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle));
+	// assertEquals(State.CREATED, runService.getState(runId));
+	//
+	// WorkflowReport report = runService.getWorkflowReport(runId);
+	// System.out.println(report);
+	//
+	// runService.start(runId);
+	// assertTrue(runService.getState(runId).equals(State.RUNNING)
+	// || runService.getState(runId).equals(State.COMPLETED));
+	// System.out.println(report);
+	//
+	// Map<String, Data> results = runService.getOutputs(runId);
+	// assertNotNull(results);
+	// waitForResults(results, report, "out");
+	//
+	// T2Reference resultReference = results.get("out");
+	// if (resultReference.containsErrors()) {
+	// printErrors(referenceService, resultReference);
+	// }
+	// assertFalse(resultReference.containsErrors());
+	// @SuppressWarnings("unchecked")
+	// List<String> result = (List<String>) referenceService.renderIdentifier(resultReference,
+	// String.class, null);
+	// assertEquals(5, result.size());
+	// assertEquals("ENSBTAG00000018854", result.get(0));
+	// assertEquals(State.COMPLETED, runService.getState(runId));
+	// System.out.println(report);
+	// }
+	// }
 
 	public void testRunDataflow() throws Exception {
 		setup();
@@ -257,31 +246,31 @@ public class RunIT extends PlatformIT {
 
 		Set<ExecutionEnvironment> executionEnvironments = runService
 				.getExecutionEnvironments(workflowBundle);
-		assertEquals(1, executionEnvironments.size());
-		ExecutionEnvironment executionEnvironment = executionEnvironments.iterator().next();
-		ReferenceService referenceService = executionEnvironment.getReferenceService();
+		assertTrue(executionEnvironments.size() > 0);
+		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
+			Map<String, Data> inputs = new HashMap<String, Data>();
+			inputs.put("in", dataService.create("test input"));
 
-		Map<String, T2Reference> inputs = new HashMap<String, T2Reference>();
-		inputs.put("in", referenceService.register("test input", 0, true, null));
+			String runId = runService.createRun(new RunProfile(executionEnvironment,
+					workflowBundle, inputs));
+			assertEquals(State.CREATED, runService.getState(runId));
 
-		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle,
-				inputs));
-		assertEquals(State.CREATED, runService.getState(runId));
+			WorkflowReport report = runService.getWorkflowReport(runId);
+			System.out.println(report);
 
-		WorkflowReport report = runService.getWorkflowReport(runId);
-		System.out.println(report);
+			runService.start(runId);
+			assertFalse(runService.getState(runId).equals(State.CREATED));
+			System.out.println(report);
 
-		runService.start(runId);
-		assertFalse(runService.getState(runId).equals(State.CREATED));
-		System.out.println(report);
+			Map<String, Data> results = runService.getOutputs(runId);
+			waitForResults(results, report, "out");
 
-		Map<String, T2Reference> results = runService.getOutputs(runId);
-		waitForResults(results, report, "out");
+			assertTrue(checkResult(results.get("out"),
+					"nested dataflow : test input"));
 
-		assertTrue(checkResult(referenceService, results.get("out"), "nested dataflow : test input"));
-
-		assertEquals(State.COMPLETED, runService.getState(runId));
-		System.out.println(report);
+			assertEquals(State.COMPLETED, runService.getState(runId));
+			System.out.println(report);
+		}
 	}
 
 	public void testRunLocalworker() throws Exception {
@@ -291,33 +280,32 @@ public class RunIT extends PlatformIT {
 
 		Set<ExecutionEnvironment> executionEnvironments = runService
 				.getExecutionEnvironments(workflowBundle);
-		assertEquals(1, executionEnvironments.size());
-		ExecutionEnvironment executionEnvironment = executionEnvironments.iterator().next();
-		ReferenceService referenceService = executionEnvironment.getReferenceService();
+		assertTrue(executionEnvironments.size() > 0);
+		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
+			Map<String, Data> inputs = new HashMap<String, Data>();
+			inputs.put("in", dataService.create("Tom"));
 
-		Map<String, T2Reference> inputs = new HashMap<String, T2Reference>();
-		inputs.put("in", referenceService.register("Tom", 0, true, null));
+			String runId = runService.createRun(new RunProfile(executionEnvironment,
+					workflowBundle, inputs));
+			assertEquals(State.CREATED, runService.getState(runId));
 
-		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle,
-				inputs));
-		assertEquals(State.CREATED, runService.getState(runId));
+			WorkflowReport report = runService.getWorkflowReport(runId);
+			System.out.println(report);
 
-		WorkflowReport report = runService.getWorkflowReport(runId);
-		System.out.println(report);
+			runService.start(runId);
+			assertTrue(runService.getState(runId).equals(State.RUNNING)
+					|| runService.getState(runId).equals(State.COMPLETED));
+			System.out.println(report);
 
-		runService.start(runId);
-		assertTrue(runService.getState(runId).equals(State.RUNNING)
-				|| runService.getState(runId).equals(State.COMPLETED));
-		System.out.println(report);
+			Map<String, Data> results = runService.getOutputs(runId);
+			assertNotNull(results);
+			waitForResults(results, report, "out");
 
-		Map<String, T2Reference> results = runService.getOutputs(runId);
-		assertNotNull(results);
-		waitForResults(results, report, "out");
+			assertTrue(checkResult(results.get("out"), "Hello Tom"));
 
-		assertTrue(checkResult(referenceService, results.get("out"), "Hello Tom"));
-
-		assertEquals(State.COMPLETED, runService.getState(runId));
-		System.out.println(report);
+			assertEquals(State.COMPLETED, runService.getState(runId));
+			System.out.println(report);
+		}
 	}
 
 	public void testRunRest() throws Exception {
@@ -327,35 +315,30 @@ public class RunIT extends PlatformIT {
 
 		Set<ExecutionEnvironment> executionEnvironments = runService
 				.getExecutionEnvironments(workflowBundle);
-		assertEquals(1, executionEnvironments.size());
-		ExecutionEnvironment executionEnvironment = executionEnvironments.iterator().next();
-		ReferenceService referenceService = executionEnvironment.getReferenceService();
+		assertTrue(executionEnvironments.size() > 0);
+		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
+			String runId = runService
+					.createRun(new RunProfile(executionEnvironment, workflowBundle));
+			assertEquals(State.CREATED, runService.getState(runId));
 
-		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle));
-		assertEquals(State.CREATED, runService.getState(runId));
+			WorkflowReport report = runService.getWorkflowReport(runId);
+			System.out.println(report);
 
-		WorkflowReport report = runService.getWorkflowReport(runId);
-		System.out.println(report);
+			runService.start(runId);
+			assertEquals(State.RUNNING, runService.getState(runId));
+			System.out.println(report);
 
-		runService.start(runId);
-		assertEquals(State.RUNNING, runService.getState(runId));
-		System.out.println(report);
+			Map<String, Data> results = runService.getOutputs(runId);
+			waitForResults(results, report, "out");
 
-		Map<String, T2Reference> results = runService.getOutputs(runId);
-		waitForResults(results, report, "out");
+			Object outResult = results.get("out").getValue();
+			assert(outResult instanceof String);
+			String outString = (String) outResult;
+			assertTrue(outString.contains("<name>AATM_RABIT</name>"));
 
-		waitForResults(results, report, "out");
-		T2Reference resultReference = results.get("out");
-		if (resultReference.containsErrors()) {
-			printErrors(referenceService, resultReference);
+			assertEquals(State.COMPLETED, runService.getState(runId));
+			System.out.println(report);
 		}
-		assertFalse(resultReference.containsErrors());
-		String outResult = (String) referenceService.renderIdentifier(resultReference,
-				String.class, null);
-		assertTrue(outResult.contains("<name>AATM_RABIT</name>"));
-
-		assertEquals(State.COMPLETED, runService.getState(runId));
-		System.out.println(report);
 	}
 
 	public void testRunRestSecureBasic() throws Exception {
@@ -368,38 +351,36 @@ public class RunIT extends PlatformIT {
 
 		Set<ExecutionEnvironment> executionEnvironments = runService
 				.getExecutionEnvironments(workflowBundle);
-		assertEquals(1, executionEnvironments.size());
-		ExecutionEnvironment executionEnvironment = executionEnvironments.iterator().next();
-		ReferenceService referenceService = executionEnvironment.getReferenceService();
+		assertTrue(executionEnvironments.size() > 0);
+		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
+			String runId = runService
+					.createRun(new RunProfile(executionEnvironment, workflowBundle));
+			assertEquals(State.CREATED, runService.getState(runId));
 
-		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle));
-		assertEquals(State.CREATED, runService.getState(runId));
+			WorkflowReport report = runService.getWorkflowReport(runId);
+			System.out.println(report);
 
-		WorkflowReport report = runService.getWorkflowReport(runId);
-		System.out.println(report);
+			runService.start(runId);
+			assertEquals(State.RUNNING, runService.getState(runId));
+			System.out.println(report);
 
-		runService.start(runId);
-		assertEquals(State.RUNNING, runService.getState(runId));
-		System.out.println(report);
+			Map<String, Data> results = runService.getOutputs(runId);
+			waitForResults(results, report, "out");
 
-		Map<String, T2Reference> results = runService.getOutputs(runId);
-		waitForResults(results, report, "out");
+			assertTrue(checkResult(results.get("out"),
+					"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">\n"
+							+ "<HTML><HEAD><TITLE>Apache Tomcat Examples</TITLE>\n"
+							+ "<META http-equiv=Content-Type content=\"text/html\">\n"
+							+ "</HEAD>\n"
+							+ "<BODY>\n"
+							+ "<P>\n"
+							+ "<H3>Secure Apache Tomcat Examples</H3>\n"
+							+ "<P>Congratulations! If you see this page that means that you have authenticated yourself successfully using HTTP Basic Authentication.</P>\n"
+							+ "</BODY></HTML>"));
 
-		assertTrue(checkResult(
-				referenceService,
-				results.get("out"),
-				"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">\n"
-						+ "<HTML><HEAD><TITLE>Apache Tomcat Examples</TITLE>\n"
-						+ "<META http-equiv=Content-Type content=\"text/html\">\n"
-						+ "</HEAD>\n"
-						+ "<BODY>\n"
-						+ "<P>\n"
-						+ "<H3>Secure Apache Tomcat Examples</H3>\n"
-						+ "<P>Congratulations! If you see this page that means that you have authenticated yourself successfully using HTTP Basic Authentication.</P>\n"
-						+ "</BODY></HTML>"));
-
-		assertEquals(State.COMPLETED, runService.getState(runId));
-		System.out.println(report);
+			assertEquals(State.COMPLETED, runService.getState(runId));
+			System.out.println(report);
+		}
 	}
 
 	public void testRunRestSecureBasicHttps() throws Exception {
@@ -419,38 +400,36 @@ public class RunIT extends PlatformIT {
 
 		Set<ExecutionEnvironment> executionEnvironments = runService
 				.getExecutionEnvironments(workflowBundle);
-		assertEquals(1, executionEnvironments.size());
-		ExecutionEnvironment executionEnvironment = executionEnvironments.iterator().next();
-		ReferenceService referenceService = executionEnvironment.getReferenceService();
+		assertTrue(executionEnvironments.size() > 0);
+		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
+			String runId = runService
+					.createRun(new RunProfile(executionEnvironment, workflowBundle));
+			assertEquals(State.CREATED, runService.getState(runId));
 
-		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle));
-		assertEquals(State.CREATED, runService.getState(runId));
+			WorkflowReport report = runService.getWorkflowReport(runId);
+			System.out.println(report);
 
-		WorkflowReport report = runService.getWorkflowReport(runId);
-		System.out.println(report);
+			runService.start(runId);
+			assertEquals(State.RUNNING, runService.getState(runId));
+			System.out.println(report);
 
-		runService.start(runId);
-		assertEquals(State.RUNNING, runService.getState(runId));
-		System.out.println(report);
+			Map<String, Data> results = runService.getOutputs(runId);
+			waitForResults(results, report, "out");
 
-		Map<String, T2Reference> results = runService.getOutputs(runId);
-		waitForResults(results, report, "out");
+			assertTrue(checkResult(results.get("out"),
+					"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">\n"
+							+ "<HTML><HEAD><TITLE>Apache Tomcat Examples</TITLE>\n"
+							+ "<META http-equiv=Content-Type content=\"text/html\">\n"
+							+ "</HEAD>\n"
+							+ "<BODY>\n"
+							+ "<P>\n"
+							+ "<H3>Secure Apache Tomcat Examples</H3>\n"
+							+ "<P>Congratulations! If you see this page that means that you have authenticated yourself successfully using HTTP Basic Authentication.</P>\n"
+							+ "</BODY></HTML>"));
 
-		assertTrue(checkResult(
-				referenceService,
-				results.get("out"),
-				"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">\n"
-						+ "<HTML><HEAD><TITLE>Apache Tomcat Examples</TITLE>\n"
-						+ "<META http-equiv=Content-Type content=\"text/html\">\n"
-						+ "</HEAD>\n"
-						+ "<BODY>\n"
-						+ "<P>\n"
-						+ "<H3>Secure Apache Tomcat Examples</H3>\n"
-						+ "<P>Congratulations! If you see this page that means that you have authenticated yourself successfully using HTTP Basic Authentication.</P>\n"
-						+ "</BODY></HTML>"));
-
-		assertEquals(State.COMPLETED, runService.getState(runId));
-		System.out.println(report);
+			assertEquals(State.COMPLETED, runService.getState(runId));
+			System.out.println(report);
+		}
 	}
 
 	public void testRunRestSecureDigest() throws Exception {
@@ -463,38 +442,36 @@ public class RunIT extends PlatformIT {
 
 		Set<ExecutionEnvironment> executionEnvironments = runService
 				.getExecutionEnvironments(workflowBundle);
-		assertEquals(1, executionEnvironments.size());
-		ExecutionEnvironment executionEnvironment = executionEnvironments.iterator().next();
-		ReferenceService referenceService = executionEnvironment.getReferenceService();
+		assertTrue(executionEnvironments.size() > 0);
+		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
+			String runId = runService
+					.createRun(new RunProfile(executionEnvironment, workflowBundle));
+			assertEquals(State.CREATED, runService.getState(runId));
 
-		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle));
-		assertEquals(State.CREATED, runService.getState(runId));
+			WorkflowReport report = runService.getWorkflowReport(runId);
+			System.out.println(report);
 
-		WorkflowReport report = runService.getWorkflowReport(runId);
-		System.out.println(report);
+			runService.start(runId);
+			assertEquals(State.RUNNING, runService.getState(runId));
+			System.out.println(report);
 
-		runService.start(runId);
-		assertEquals(State.RUNNING, runService.getState(runId));
-		System.out.println(report);
+			Map<String, Data> results = runService.getOutputs(runId);
+			waitForResults(results, report, "out");
 
-		Map<String, T2Reference> results = runService.getOutputs(runId);
-		waitForResults(results, report, "out");
+			assertTrue(checkResult(results.get("out"),
+					"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">\n"
+							+ "<HTML><HEAD><TITLE>Apache Tomcat Examples</TITLE>\n"
+							+ "<META http-equiv=Content-Type content=\"text/html\">\n"
+							+ "</HEAD>\n"
+							+ "<BODY>\n"
+							+ "<P>\n"
+							+ "<H3>Secure Apache Tomcat Examples</H3>\n"
+							+ "<P>Congratulations! If you see this page that means that you have authenticated yourself successfully using HTTP Digest Authentication.</P>\n"
+							+ "</BODY></HTML>"));
 
-		assertTrue(checkResult(
-				referenceService,
-				results.get("out"),
-				"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">\n"
-						+ "<HTML><HEAD><TITLE>Apache Tomcat Examples</TITLE>\n"
-						+ "<META http-equiv=Content-Type content=\"text/html\">\n"
-						+ "</HEAD>\n"
-						+ "<BODY>\n"
-						+ "<P>\n"
-						+ "<H3>Secure Apache Tomcat Examples</H3>\n"
-						+ "<P>Congratulations! If you see this page that means that you have authenticated yourself successfully using HTTP Digest Authentication.</P>\n"
-						+ "</BODY></HTML>"));
-
-		assertEquals(State.COMPLETED, runService.getState(runId));
-		System.out.println(report);
+			assertEquals(State.COMPLETED, runService.getState(runId));
+			System.out.println(report);
+		}
 	}
 
 	public void testRunRestSecureDigestHttps() throws Exception {
@@ -514,38 +491,36 @@ public class RunIT extends PlatformIT {
 
 		Set<ExecutionEnvironment> executionEnvironments = runService
 				.getExecutionEnvironments(workflowBundle);
-		assertEquals(1, executionEnvironments.size());
-		ExecutionEnvironment executionEnvironment = executionEnvironments.iterator().next();
-		ReferenceService referenceService = executionEnvironment.getReferenceService();
+		assertTrue(executionEnvironments.size() > 0);
+		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
+			String runId = runService
+					.createRun(new RunProfile(executionEnvironment, workflowBundle));
+			assertEquals(State.CREATED, runService.getState(runId));
 
-		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle));
-		assertEquals(State.CREATED, runService.getState(runId));
+			WorkflowReport report = runService.getWorkflowReport(runId);
+			System.out.println(report);
 
-		WorkflowReport report = runService.getWorkflowReport(runId);
-		System.out.println(report);
+			runService.start(runId);
+			assertEquals(State.RUNNING, runService.getState(runId));
+			System.out.println(report);
 
-		runService.start(runId);
-		assertEquals(State.RUNNING, runService.getState(runId));
-		System.out.println(report);
+			Map<String, Data> results = runService.getOutputs(runId);
+			waitForResults(results, report, "out");
 
-		Map<String, T2Reference> results = runService.getOutputs(runId);
-		waitForResults(results, report, "out");
+			assertTrue(checkResult(results.get("out"),
+					"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">\n"
+							+ "<HTML><HEAD><TITLE>Apache Tomcat Examples</TITLE>\n"
+							+ "<META http-equiv=Content-Type content=\"text/html\">\n"
+							+ "</HEAD>\n"
+							+ "<BODY>\n"
+							+ "<P>\n"
+							+ "<H3>Secure Apache Tomcat Examples</H3>\n"
+							+ "<P>Congratulations! If you see this page that means that you have authenticated yourself successfully using HTTP Digest Authentication.</P>\n"
+							+ "</BODY></HTML>"));
 
-		assertTrue(checkResult(
-				referenceService,
-				results.get("out"),
-				"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">\n"
-						+ "<HTML><HEAD><TITLE>Apache Tomcat Examples</TITLE>\n"
-						+ "<META http-equiv=Content-Type content=\"text/html\">\n"
-						+ "</HEAD>\n"
-						+ "<BODY>\n"
-						+ "<P>\n"
-						+ "<H3>Secure Apache Tomcat Examples</H3>\n"
-						+ "<P>Congratulations! If you see this page that means that you have authenticated yourself successfully using HTTP Digest Authentication.</P>\n"
-						+ "</BODY></HTML>"));
-
-		assertEquals(State.COMPLETED, runService.getState(runId));
-		System.out.println(report);
+			assertEquals(State.COMPLETED, runService.getState(runId));
+			System.out.println(report);
+		}
 	}
 
 	public void testRunSpreadsheetImport() throws Exception {
@@ -555,37 +530,30 @@ public class RunIT extends PlatformIT {
 
 		Set<ExecutionEnvironment> executionEnvironments = runService
 				.getExecutionEnvironments(workflowBundle);
-		assertEquals(1, executionEnvironments.size());
-		ExecutionEnvironment executionEnvironment = executionEnvironments.iterator().next();
-		ReferenceService referenceService = executionEnvironment.getReferenceService();
+		assertTrue(executionEnvironments.size() > 0);
+		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
+			String runId = runService
+					.createRun(new RunProfile(executionEnvironment, workflowBundle));
+			assertEquals(State.CREATED, runService.getState(runId));
 
-		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle));
-		assertEquals(State.CREATED, runService.getState(runId));
+			WorkflowReport report = runService.getWorkflowReport(runId);
+			System.out.println(report);
 
-		WorkflowReport report = runService.getWorkflowReport(runId);
-		System.out.println(report);
+			runService.start(runId);
+			assertEquals(State.RUNNING, runService.getState(runId));
+			System.out.println(report);
 
-		runService.start(runId);
-		assertEquals(State.RUNNING, runService.getState(runId));
-		System.out.println(report);
+			Map<String, Data> results = runService.getOutputs(runId);
+			waitForResults(results, report, "out");
 
-		Map<String, T2Reference> results = runService.getOutputs(runId);
-		waitForResults(results, report, "out");
+			List<Data> result = results.get("out").getElements();
+			assertEquals(35, result.size());
+			assertEquals("1971.0", result.get(1).getValue());
+			assertEquals("2004.0", result.get(34).getValue());
 
-		T2Reference resultReference = results.get("out");
-		if (resultReference.containsErrors()) {
-			printErrors(referenceService, resultReference);
+			assertEquals(State.COMPLETED, runService.getState(runId));
+			System.out.println(report);
 		}
-		assertFalse(resultReference.containsErrors());
-		@SuppressWarnings("unchecked")
-		List<String> result = (List<String>) referenceService.renderIdentifier(resultReference,
-				String.class, null);
-		assertEquals(35, result.size());
-		assertEquals("1971.0", result.get(1));
-		assertEquals("2004.0", result.get(34));
-
-		assertEquals(State.COMPLETED, runService.getState(runId));
-		System.out.println(report);
 	}
 
 	public void testRunSoaplab() throws Exception {
@@ -595,28 +563,28 @@ public class RunIT extends PlatformIT {
 
 		Set<ExecutionEnvironment> executionEnvironments = runService
 				.getExecutionEnvironments(workflowBundle);
-		assertEquals(1, executionEnvironments.size());
-		ExecutionEnvironment executionEnvironment = executionEnvironments.iterator().next();
-		ReferenceService referenceService = executionEnvironment.getReferenceService();
+		assertTrue(executionEnvironments.size() > 0);
+		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
+			String runId = runService
+					.createRun(new RunProfile(executionEnvironment, workflowBundle));
+			assertEquals(State.CREATED, runService.getState(runId));
 
-		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle));
-		assertEquals(State.CREATED, runService.getState(runId));
+			WorkflowReport report = runService.getWorkflowReport(runId);
+			System.out.println(report);
 
-		WorkflowReport report = runService.getWorkflowReport(runId);
-		System.out.println(report);
+			runService.start(runId);
+			assertEquals(State.RUNNING, runService.getState(runId));
+			System.out.println(report);
 
-		runService.start(runId);
-		assertEquals(State.RUNNING, runService.getState(runId));
-		System.out.println(report);
+			Map<String, Data> results = runService.getOutputs(runId);
+			waitForResults(results, report, "sequence");
 
-		Map<String, T2Reference> results = runService.getOutputs(runId);
-		waitForResults(results, report, "sequence");
+			assertTrue(checkResult(results.get("sequence"),
+					"ID   X52524; SV 1; linear; genomic DNA; STD; INV; 4507 BP."));
 
-		assertTrue(checkResult(referenceService, results.get("sequence"),
-				"ID   X52524; SV 1; linear; genomic DNA; STD; INV; 4507 BP."));
-
-		assertEquals(State.COMPLETED, runService.getState(runId));
-		System.out.println(report);
+			assertEquals(State.COMPLETED, runService.getState(runId));
+			System.out.println(report);
+		}
 	}
 
 	public void testRunStringConstant() throws Exception {
@@ -626,24 +594,24 @@ public class RunIT extends PlatformIT {
 
 		Set<ExecutionEnvironment> executionEnvironments = runService
 				.getExecutionEnvironments(workflowBundle);
-		assertEquals(1, executionEnvironments.size());
-		ExecutionEnvironment executionEnvironment = executionEnvironments.iterator().next();
-		ReferenceService referenceService = executionEnvironment.getReferenceService();
+		assertTrue(executionEnvironments.size() > 0);
+		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
+			String runId = runService
+					.createRun(new RunProfile(executionEnvironment, workflowBundle));
+			WorkflowReport report = runService.getWorkflowReport(runId);
+			assertEquals(State.CREATED, runService.getState(runId));
 
-		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle));
-		WorkflowReport report = runService.getWorkflowReport(runId);
-		assertEquals(State.CREATED, runService.getState(runId));
+			runService.start(runId);
+			assertTrue(runService.getState(runId).equals(State.RUNNING)
+					|| runService.getState(runId).equals(State.COMPLETED));
 
-		runService.start(runId);
-		assertTrue(runService.getState(runId).equals(State.RUNNING)
-				|| runService.getState(runId).equals(State.COMPLETED));
+			Map<String, Data> results = runService.getOutputs(runId);
+			waitForResults(results, report, "out");
 
-		Map<String, T2Reference> results = runService.getOutputs(runId);
-		waitForResults(results, report, "out");
+			assertTrue(checkResult(results.get("out"), "Test Value"));
 
-		assertTrue(checkResult(referenceService, results.get("out"), "Test Value"));
-
-		assertEquals(State.COMPLETED, runService.getState(runId));
+			assertEquals(State.COMPLETED, runService.getState(runId));
+		}
 	}
 
 	public void testRunTool() throws Exception {
@@ -653,27 +621,26 @@ public class RunIT extends PlatformIT {
 
 		Set<ExecutionEnvironment> executionEnvironments = runService
 				.getExecutionEnvironments(workflowBundle);
-		assertEquals(1, executionEnvironments.size());
-		ExecutionEnvironment executionEnvironment = executionEnvironments.iterator().next();
-		ReferenceService referenceService = executionEnvironment.getReferenceService();
+		assertTrue(executionEnvironments.size() > 0);
+		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
+			String runId = runService
+					.createRun(new RunProfile(executionEnvironment, workflowBundle));
+			WorkflowReport report = runService.getWorkflowReport(runId);
+			assertEquals(State.CREATED, runService.getState(runId));
 
-		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle));
-		WorkflowReport report = runService.getWorkflowReport(runId);
-		assertEquals(State.CREATED, runService.getState(runId));
+			runService.start(runId);
+			assertTrue(runService.getState(runId).equals(State.RUNNING)
+					|| runService.getState(runId).equals(State.COMPLETED));
 
-		runService.start(runId);
-		assertTrue(runService.getState(runId).equals(State.RUNNING)
-				|| runService.getState(runId).equals(State.COMPLETED));
+			Map<String, Data> results = runService.getOutputs(runId);
+			waitForResults(results, report, "out");
 
-		Map<String, T2Reference> results = runService.getOutputs(runId);
-		waitForResults(results, report, "out");
+			assertTrue(checkResult(results.get("out"), "HelloWorld"));
 
-		assertTrue(checkResult(referenceService, results.get("out"), "HelloWorld"));
-
-		assertEquals(State.COMPLETED, runService.getState(runId));
+			assertEquals(State.COMPLETED, runService.getState(runId));
+		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public void testRunIteration() throws Exception {
 		setup();
 
@@ -681,96 +648,69 @@ public class RunIT extends PlatformIT {
 
 		Set<ExecutionEnvironment> executionEnvironments = runService
 				.getExecutionEnvironments(workflowBundle);
-		assertEquals(1, executionEnvironments.size());
-		ExecutionEnvironment executionEnvironment = executionEnvironments.iterator().next();
-		ReferenceService referenceService = executionEnvironment.getReferenceService();
+		assertTrue(executionEnvironments.size() > 0);
+		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
+			Map<String, Data> inputs = new HashMap<String, Data>();
+			inputs.put("in", dataService.create("test"));
 
-		Map<String, T2Reference> inputs = new HashMap<String, T2Reference>();
-		inputs.put("in", referenceService.register("test", 0, true, null));
+			String runId = runService.createRun(new RunProfile(executionEnvironment,
+					workflowBundle, inputs));
+			assertEquals(State.CREATED, runService.getState(runId));
 
-		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle,
-				inputs));
-		assertEquals(State.CREATED, runService.getState(runId));
+			WorkflowReport report = runService.getWorkflowReport(runId);
+			System.out.println(report);
 
-		WorkflowReport report = runService.getWorkflowReport(runId);
-		System.out.println(report);
+			runService.start(runId);
+			assertEquals(State.RUNNING, runService.getState(runId));
+			System.out.println(report);
 
-		runService.start(runId);
-		assertEquals(State.RUNNING, runService.getState(runId));
-		System.out.println(report);
+			Map<String, Data> results = runService.getOutputs(runId);
 
-		Map<String, T2Reference> results = runService.getOutputs(runId);
+			waitForResults(results, report, "cross");
+			List<Data> crossResult = results.get("cross").getElements();
+			assertEquals(10, crossResult.size());
+			assertEquals(10, crossResult.get(0).getElements().size());
+			assertEquals(10, crossResult.get(5).getElements().size());
+			assertEquals("test:0test:0", crossResult.get(0).getElements().get(0).getValue());
+			assertEquals("test:0test:1", crossResult.get(0).getElements().get(1).getValue());
+			assertEquals("test:4test:2", crossResult.get(4).getElements().get(2).getValue());
+			assertEquals("test:7test:6", crossResult.get(7).getElements().get(6).getValue());
 
-		waitForResults(results, report, "cross");
-		T2Reference resultReference = results.get("cross");
-		if (resultReference.containsErrors()) {
-			printErrors(referenceService, resultReference);
+			waitForResults(results, report, "dot");
+
+			List<Data> dotResult = results.get("dot").getElements();
+			assertEquals(10, dotResult.size());
+			assertEquals("test:0test:0", dotResult.get(0).getValue());
+			assertEquals("test:5test:5", dotResult.get(5).getValue());
+
+			waitForResults(results, report, "crossdot");
+
+			List<Data> crossdotResult = results.get("crossdot").getElements();
+			assertEquals(10, crossdotResult.size());
+			assertEquals(10, crossdotResult.get(0).getElements().size());
+			assertEquals(10, crossdotResult.get(5).getElements().size());
+			assertEquals("test:0test:0test", crossdotResult.get(0).getElements().get(0).getValue());
+			assertEquals("test:0test:1test", crossdotResult.get(0).getElements().get(1).getValue());
+			assertEquals("test:4test:2test", crossdotResult.get(4).getElements().get(2).getValue());
+			assertEquals("test:7test:6test", crossdotResult.get(7).getElements().get(6).getValue());
+
+			waitForResults(results, report, "dotcross");
+
+			List<Data> dotcrossResult = results.get("dotcross").getElements();
+			assertEquals(10, dotResult.size());
+			assertEquals("test:0test:0test", dotcrossResult.get(0).getValue());
+			assertEquals("test:5test:5test", dotcrossResult.get(5).getValue());
+
+			waitForResults(results, report, "dotdot");
+
+			List<Data> dotdotResult = results.get("dotdot").getElements();
+			assertEquals(10, dotResult.size());
+			assertEquals("test:0test:0test:0", dotdotResult.get(0).getValue());
+			assertEquals("test:5test:5test:5", dotdotResult.get(5).getValue());
+
+			assertEquals(State.COMPLETED, runService.getState(runId));
+			System.out.println(report);
 		}
-		assertFalse(resultReference.containsErrors());
-		List<List<String>> crossResult = (List<List<String>>) referenceService.renderIdentifier(
-				resultReference, String.class, null);
-		assertEquals(10, crossResult.size());
-		assertEquals(10, crossResult.get(0).size());
-		assertEquals(10, crossResult.get(5).size());
-		assertEquals("test:0test:0", crossResult.get(0).get(0));
-		assertEquals("test:0test:1", crossResult.get(0).get(1));
-		assertEquals("test:4test:2", crossResult.get(4).get(2));
-		assertEquals("test:7test:6", crossResult.get(7).get(6));
-
-		waitForResults(results, report, "dot");
-		resultReference = results.get("dot");
-		if (resultReference.containsErrors()) {
-			printErrors(referenceService, resultReference);
-		}
-		assertFalse(resultReference.containsErrors());
-		List<String> dotResult = (List<String>) referenceService.renderIdentifier(resultReference,
-				String.class, null);
-		assertEquals(10, dotResult.size());
-		assertEquals("test:0test:0", dotResult.get(0));
-		assertEquals("test:5test:5", dotResult.get(5));
-
-		waitForResults(results, report, "crossdot");
-		resultReference = results.get("crossdot");
-		if (resultReference.containsErrors()) {
-			printErrors(referenceService, resultReference);
-		}
-		assertFalse(resultReference.containsErrors());
-		List<List<String>> crossdotResult = (List<List<String>>) referenceService.renderIdentifier(
-				resultReference, String.class, null);
-		assertEquals(10, crossdotResult.size());
-		assertEquals(10, crossdotResult.get(0).size());
-		assertEquals(10, crossdotResult.get(5).size());
-		assertEquals("test:0test:0test", crossdotResult.get(0).get(0));
-		assertEquals("test:0test:1test", crossdotResult.get(0).get(1));
-		assertEquals("test:4test:2test", crossdotResult.get(4).get(2));
-		assertEquals("test:7test:6test", crossdotResult.get(7).get(6));
-
-		waitForResults(results, report, "dotcross");
-		resultReference = results.get("dotcross");
-		if (resultReference.containsErrors()) {
-			printErrors(referenceService, resultReference);
-		}
-		assertFalse(resultReference.containsErrors());
-		List<String> dotcrossResult = (List<String>) referenceService.renderIdentifier(
-				resultReference, String.class, null);
-		assertEquals(10, dotResult.size());
-		assertEquals("test:0test:0test", dotcrossResult.get(0));
-		assertEquals("test:5test:5test", dotcrossResult.get(5));
-
-		waitForResults(results, report, "dotdot");
-		resultReference = results.get("dotdot");
-		if (resultReference.containsErrors()) {
-			printErrors(referenceService, resultReference);
-		}
-		assertFalse(resultReference.containsErrors());
-		List<String> dotdotResult = (List<String>) referenceService.renderIdentifier(
-				resultReference, String.class, null);
-		assertEquals(10, dotResult.size());
-		assertEquals("test:0test:0test:0", dotdotResult.get(0));
-		assertEquals("test:5test:5test:5", dotdotResult.get(5));
-
-		assertEquals(State.COMPLETED, runService.getState(runId));
-		System.out.println(report);
 	}
 
 	public void testRunWSDL() throws Exception {
@@ -780,30 +720,30 @@ public class RunIT extends PlatformIT {
 
 		Set<ExecutionEnvironment> executionEnvironments = runService
 				.getExecutionEnvironments(workflowBundle);
-		assertEquals(1, executionEnvironments.size());
-		ExecutionEnvironment executionEnvironment = executionEnvironments.iterator().next();
-		ReferenceService referenceService = executionEnvironment.getReferenceService();
+		assertTrue(executionEnvironments.size() > 0);
+		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
+			String runId = runService
+					.createRun(new RunProfile(executionEnvironment, workflowBundle));
+			assertEquals(State.CREATED, runService.getState(runId));
 
-		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle));
-		assertEquals(State.CREATED, runService.getState(runId));
+			WorkflowReport report = runService.getWorkflowReport(runId);
+			System.out.println(report);
 
-		WorkflowReport report = runService.getWorkflowReport(runId);
-		System.out.println(report);
+			runService.start(runId);
+			assertEquals(State.RUNNING, runService.getState(runId));
+			System.out.println(report);
 
-		runService.start(runId);
-		assertEquals(State.RUNNING, runService.getState(runId));
-		System.out.println(report);
+			Map<String, Data> results = runService.getOutputs(runId);
+			waitForResults(results, report, "out");
 
-		Map<String, T2Reference> results = runService.getOutputs(runId);
-		waitForResults(results, report, "out");
+			// assertTrue(checkResult(results.get("out"),
+			// "Apache Axis version: 1.4\nBuilt on Apr 22, 2006 (06:55:48 PDT)"));
+			assertTrue(checkResult(results.get("out"),
+					"Apache Axis version: 1.2\nBuilt on May 03, 2005 (02:20:24 EDT)"));
 
-		// assertTrue(checkResult(referenceService, results.get("out"),
-		// "Apache Axis version: 1.4\nBuilt on Apr 22, 2006 (06:55:48 PDT)"));
-		assertTrue(checkResult(referenceService, results.get("out"),
-				"Apache Axis version: 1.2\nBuilt on May 03, 2005 (02:20:24 EDT)"));
-
-		assertEquals(State.COMPLETED, runService.getState(runId));
-		System.out.println(report);
+			assertEquals(State.COMPLETED, runService.getState(runId));
+			System.out.println(report);
+		}
 	}
 
 	public void testRunWSDLSecure() throws Exception {
@@ -817,27 +757,27 @@ public class RunIT extends PlatformIT {
 
 		Set<ExecutionEnvironment> executionEnvironments = runService
 				.getExecutionEnvironments(workflowBundle);
-		assertEquals(1, executionEnvironments.size());
-		ExecutionEnvironment executionEnvironment = executionEnvironments.iterator().next();
-		ReferenceService referenceService = executionEnvironment.getReferenceService();
+		assertTrue(executionEnvironments.size() > 0);
+		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
+			String runId = runService
+					.createRun(new RunProfile(executionEnvironment, workflowBundle));
+			assertEquals(State.CREATED, runService.getState(runId));
 
-		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle));
-		assertEquals(State.CREATED, runService.getState(runId));
+			WorkflowReport report = runService.getWorkflowReport(runId);
+			System.out.println(report);
 
-		WorkflowReport report = runService.getWorkflowReport(runId);
-		System.out.println(report);
+			runService.start(runId);
+			assertEquals(State.RUNNING, runService.getState(runId));
+			System.out.println(report);
 
-		runService.start(runId);
-		assertEquals(State.RUNNING, runService.getState(runId));
-		System.out.println(report);
+			Map<String, Data> results = runService.getOutputs(runId);
+			waitForResults(results, report, "out");
 
-		Map<String, T2Reference> results = runService.getOutputs(runId);
-		waitForResults(results, report, "out");
+			assertTrue(checkResult(results.get("out"), "Hello Alan!"));
 
-		assertTrue(checkResult(referenceService, results.get("out"), "Hello Alan!"));
-
-		assertEquals(State.COMPLETED, runService.getState(runId));
-		System.out.println(report);
+			assertEquals(State.COMPLETED, runService.getState(runId));
+			System.out.println(report);
+		}
 	}
 
 	public void testRunWSDLSecureFull() throws Exception {
@@ -863,33 +803,33 @@ public class RunIT extends PlatformIT {
 
 		Set<ExecutionEnvironment> executionEnvironments = runService
 				.getExecutionEnvironments(workflowBundle);
-		assertEquals(1, executionEnvironments.size());
-		ExecutionEnvironment executionEnvironment = executionEnvironments.iterator().next();
-		ReferenceService referenceService = executionEnvironment.getReferenceService();
+		assertTrue(executionEnvironments.size() > 0);
+		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
+			String runId = runService
+					.createRun(new RunProfile(executionEnvironment, workflowBundle));
+			assertEquals(State.CREATED, runService.getState(runId));
 
-		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle));
-		assertEquals(State.CREATED, runService.getState(runId));
+			WorkflowReport report = runService.getWorkflowReport(runId);
+			System.out.println(report);
 
-		WorkflowReport report = runService.getWorkflowReport(runId);
-		System.out.println(report);
+			runService.start(runId);
+			assertEquals(State.RUNNING, runService.getState(runId));
+			System.out.println(report);
 
-		runService.start(runId);
-		assertEquals(State.RUNNING, runService.getState(runId));
-		System.out.println(report);
+			Map<String, Data> results = runService.getOutputs(runId);
+			waitForResults(results, report, "out_plaintext", "out_digest", "out_digest_timestamp",
+					"out_plaintext_timestamp");
 
-		Map<String, T2Reference> results = runService.getOutputs(runId);
-		waitForResults(results, report, "out_plaintext", "out_digest", "out_digest_timestamp",
-				"out_plaintext_timestamp");
+			assertTrue(checkResult(results.get("out_plaintext"), "Hello Alan!"));
+			assertTrue(checkResult(results.get("out_digest"), "Hello Stian!"));
+			assertTrue(checkResult(results.get("out_digest_timestamp"),
+					"Hello David!"));
+			assertTrue(checkResult(results.get("out_plaintext_timestamp"),
+					"Hello Alex!"));
 
-		assertTrue(checkResult(referenceService, results.get("out_plaintext"), "Hello Alan!"));
-		assertTrue(checkResult(referenceService, results.get("out_digest"), "Hello Stian!"));
-		assertTrue(checkResult(referenceService, results.get("out_digest_timestamp"),
-				"Hello David!"));
-		assertTrue(checkResult(referenceService, results.get("out_plaintext_timestamp"),
-				"Hello Alex!"));
-
-		assertEquals(State.COMPLETED, runService.getState(runId));
-		System.out.println(report);
+			assertEquals(State.COMPLETED, runService.getState(runId));
+			System.out.println(report);
+		}
 	}
 
 	public void testRunWSDLSecureSsh() throws Exception {
@@ -922,33 +862,33 @@ public class RunIT extends PlatformIT {
 
 		Set<ExecutionEnvironment> executionEnvironments = runService
 				.getExecutionEnvironments(workflowBundle);
-		assertEquals(1, executionEnvironments.size());
-		ExecutionEnvironment executionEnvironment = executionEnvironments.iterator().next();
-		ReferenceService referenceService = executionEnvironment.getReferenceService();
+		assertTrue(executionEnvironments.size() > 0);
+		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
+			String runId = runService
+					.createRun(new RunProfile(executionEnvironment, workflowBundle));
+			assertEquals(State.CREATED, runService.getState(runId));
 
-		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle));
-		assertEquals(State.CREATED, runService.getState(runId));
+			WorkflowReport report = runService.getWorkflowReport(runId);
+			System.out.println(report);
 
-		WorkflowReport report = runService.getWorkflowReport(runId);
-		System.out.println(report);
+			runService.start(runId);
+			assertEquals(State.RUNNING, runService.getState(runId));
+			System.out.println(report);
 
-		runService.start(runId);
-		assertEquals(State.RUNNING, runService.getState(runId));
-		System.out.println(report);
+			Map<String, Data> results = runService.getOutputs(runId);
+			waitForResults(results, report, "out_plaintext", "out_digest", "out_digest_timestamp",
+					"out_plaintext_timestamp");
 
-		Map<String, T2Reference> results = runService.getOutputs(runId);
-		waitForResults(results, report, "out_plaintext", "out_digest", "out_digest_timestamp",
-				"out_plaintext_timestamp");
+			assertTrue(checkResult(results.get("out_plaintext"), "Hello Alan!"));
+			assertTrue(checkResult(results.get("out_digest"), "Hello Stian!"));
+			assertTrue(checkResult(results.get("out_digest_timestamp"),
+					"Hello David!"));
+			assertTrue(checkResult(results.get("out_plaintext_timestamp"),
+					"Hello Alex!"));
 
-		assertTrue(checkResult(referenceService, results.get("out_plaintext"), "Hello Alan!"));
-		assertTrue(checkResult(referenceService, results.get("out_digest"), "Hello Stian!"));
-		assertTrue(checkResult(referenceService, results.get("out_digest_timestamp"),
-				"Hello David!"));
-		assertTrue(checkResult(referenceService, results.get("out_plaintext_timestamp"),
-				"Hello Alex!"));
-
-		assertEquals(State.COMPLETED, runService.getState(runId));
-		System.out.println(report);
+			assertEquals(State.COMPLETED, runService.getState(runId));
+			System.out.println(report);
+		}
 	}
 
 	public void testRunXMLSplitter() throws Exception {
@@ -958,35 +898,34 @@ public class RunIT extends PlatformIT {
 
 		Set<ExecutionEnvironment> executionEnvironments = runService
 				.getExecutionEnvironments(workflowBundle);
-		assertEquals(1, executionEnvironments.size());
-		ExecutionEnvironment executionEnvironment = executionEnvironments.iterator().next();
-		ReferenceService referenceService = executionEnvironment.getReferenceService();
+		assertTrue(executionEnvironments.size() > 0);
+		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
+			Map<String, Data> inputs = new HashMap<String, Data>();
+			inputs.put("firstName", dataService.create("John"));
+			inputs.put("lastName", dataService.create("Smith"));
+			inputs.put("age", dataService.create("21"));
 
-		Map<String, T2Reference> inputs = new HashMap<String, T2Reference>();
-		inputs.put("firstName", referenceService.register("John", 0, true, null));
-		inputs.put("lastName", referenceService.register("Smith", 0, true, null));
-		inputs.put("age", referenceService.register("21", 0, true, null));
+			String runId = runService.createRun(new RunProfile(executionEnvironment,
+					workflowBundle, inputs));
+			assertEquals(State.CREATED, runService.getState(runId));
 
-		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle,
-				inputs));
-		assertEquals(State.CREATED, runService.getState(runId));
+			WorkflowReport report = runService.getWorkflowReport(runId);
+			System.out.println(report);
 
-		WorkflowReport report = runService.getWorkflowReport(runId);
-		System.out.println(report);
+			runService.start(runId);
+			assertTrue(runService.getState(runId).equals(State.RUNNING)
+					|| runService.getState(runId).equals(State.COMPLETED));
+			System.out.println(report);
 
-		runService.start(runId);
-		assertTrue(runService.getState(runId).equals(State.RUNNING)
-				|| runService.getState(runId).equals(State.COMPLETED));
-		System.out.println(report);
+			Map<String, Data> results = runService.getOutputs(runId);
+			waitForResults(results, report, "out");
 
-		Map<String, T2Reference> results = runService.getOutputs(runId);
-		waitForResults(results, report, "out");
+			assertTrue(checkResult(results.get("out"),
+					"John Smith (21) of 40, Oxford Road. Manchester."));
 
-		assertTrue(checkResult(referenceService, results.get("out"),
-				"John Smith (21) of 40, Oxford Road. Manchester."));
-
-		assertEquals(State.COMPLETED, runService.getState(runId));
-		System.out.println(report);
+			assertEquals(State.COMPLETED, runService.getState(runId));
+			System.out.println(report);
+		}
 	}
 
 	public void testRunXPath() throws Exception {
@@ -996,29 +935,67 @@ public class RunIT extends PlatformIT {
 
 		Set<ExecutionEnvironment> executionEnvironments = runService
 				.getExecutionEnvironments(workflowBundle);
-		assertEquals(1, executionEnvironments.size());
-		ExecutionEnvironment executionEnvironment = executionEnvironments.iterator().next();
-		ReferenceService referenceService = executionEnvironment.getReferenceService();
+		assertTrue(executionEnvironments.size() > 0);
+		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
+			String runId = runService
+					.createRun(new RunProfile(executionEnvironment, workflowBundle));
+			assertEquals(State.CREATED, runService.getState(runId));
 
-		String runId = runService.createRun(new RunProfile(executionEnvironment, workflowBundle));
-		assertEquals(State.CREATED, runService.getState(runId));
+			WorkflowReport report = runService.getWorkflowReport(runId);
+			System.out.println(report);
 
-		WorkflowReport report = runService.getWorkflowReport(runId);
-		System.out.println(report);
+			runService.start(runId);
+			assertTrue(runService.getState(runId).equals(State.RUNNING)
+					|| runService.getState(runId).equals(State.COMPLETED));
+			System.out.println(report);
 
-		runService.start(runId);
-		assertTrue(runService.getState(runId).equals(State.RUNNING)
-				|| runService.getState(runId).equals(State.COMPLETED));
-		System.out.println(report);
+			Map<String, Data> results = runService.getOutputs(runId);
+			waitForResults(results, report, "out");
 
-		Map<String, T2Reference> results = runService.getOutputs(runId);
-		waitForResults(results, report, "out");
+			assertTrue(checkResult(results.get("out"),
+					"<test-element>test</test-element>"));
 
-		assertTrue(checkResult(referenceService, results.get("out"),
-				"<test-element>test</test-element>"));
+			assertEquals(State.COMPLETED, runService.getState(runId));
+			System.out.println(report);
+		}
+	}
 
-		assertEquals(State.COMPLETED, runService.getState(runId));
-		System.out.println(report);
+	public void testRunFromFile() throws Exception {
+		setup();
+
+		WorkflowBundle workflowBundle = loadWorkflow("/t2flow/in-out.t2flow");
+
+		Set<ExecutionEnvironment> executionEnvironments = runService
+				.getExecutionEnvironments(workflowBundle);
+		assertTrue(executionEnvironments.size() > 0);
+		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
+			Map<String, Data> inputs = new HashMap<String, Data>();
+			File file = loadFile("/t2flow/input.txt");
+			Data data = dataService.create(file.toURI());
+			System.out.println("data.isReference()="+data.isReference());
+			inputs.put("in", data);
+
+			String runId = runService.createRun(new RunProfile(executionEnvironment,
+					workflowBundle, inputs));
+			assertEquals(State.CREATED, runService.getState(runId));
+
+			WorkflowReport report = runService.getWorkflowReport(runId);
+			System.out.println(report);
+
+			runService.start(runId);
+			assertTrue(runService.getState(runId).equals(State.RUNNING)
+					|| runService.getState(runId).equals(State.COMPLETED));
+			System.out.println(report);
+
+			Map<String, Data> results = runService.getOutputs(runId);
+			assertNotNull(results);
+			waitForResults(results, runService.getWorkflowReport(runId), "out");
+
+			assertTrue(checkResult(results.get("out"), "test input value"));
+
+			assertEquals(State.COMPLETED, runService.getState(runId));
+			System.out.println(report);
+		}
 	}
 
 }

@@ -20,6 +20,12 @@
  ******************************************************************************/
 package uk.org.taverna.platform;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.util.Map;
 import java.util.Properties;
@@ -35,10 +41,15 @@ import net.sf.taverna.t2.security.credentialmanager.MasterPasswordProvider;
 
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.jndi.JNDIContextManager;
 import org.springframework.osgi.test.AbstractConfigurableBundleCreatorTests;
 import org.springframework.osgi.test.platform.OsgiPlatform;
 import org.springframework.osgi.test.platform.Platforms;
 
+import uk.org.taverna.platform.configuration.app.ApplicationConfiguration;
+import uk.org.taverna.platform.data.Data;
+import uk.org.taverna.platform.database.DatabaseManager;
+import uk.org.taverna.platform.database.configuration.DatabaseConfiguration;
 import uk.org.taverna.platform.report.State;
 import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
@@ -50,6 +61,9 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 	protected WorkflowBundleReader workflowBundleReader;
 	protected CredentialManager credentialManager;
 	protected MasterPasswordProvider masterPasswordProvider;
+	protected DatabaseConfiguration databaseConfiguration;
+	protected JNDIContextManager jndiContextManager;
+	protected ApplicationConfiguration applicationConfiguration;
 
 	protected String getPlatformName() {
 		   return Platforms.FELIX;
@@ -68,20 +82,29 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 	protected String[] getTestBundlesNames() {
 		return new String[] {
 				"com.jcraft.jsch, com.springsource.com.jcraft.jsch, 0.1.41",
+//opm			"com.sun.xml, com.springsource.com.sun.xml.bind, 2.2.0",
+//opm			"com.sun.xml, com.springsource.com.sun.xml.fastinfoset, 1.2.2",
 				"com.thoughtworks.xstream, com.springsource.com.thoughtworks.xstream, 1.2.2",
+				"commons-dbcp, commons-dbcp, 1.4",
+				"commons-pool, commons-pool, 1.5.6",
 				"javax.activation, com.springsource.javax.activation, 1.1.1",
 				"javax.jms, com.springsource.javax.jms, 1.1.0",
 				"javax.mail, com.springsource.javax.mail, 1.4.0",
 				"javax.servlet, com.springsource.javax.servlet, 2.5.0",
-//				"javax.transaction, com.springsource.javax.transaction, 1.1.0",
+				"javax.transaction, com.springsource.javax.transaction, 1.1.0",//for derby client
 				"javax.wsdl, com.springsource.javax.wsdl, 1.6.1",
+//opm			"javax.xml.bind, com.springsource.javax.xml.bind, 2.2.0",
 				"javax.xml.rpc, com.springsource.javax.xml.rpc, 1.1.0",
 				"javax.xml.soap, com.springsource.javax.xml.soap, 1.3.0",
 				"javax.xml.stream, com.springsource.javax.xml.stream, 1.0.1",
 				"org.antlr, com.springsource.antlr, 2.7.6",
+				"org.apache.aries, org.apache.aries.util, 0.3",
+				"org.apache.aries.proxy, org.apache.aries.proxy.api, 0.3",
+				"org.apache.aries.jndi, org.apache.aries.jndi, 0.3",
 				"org.apache.axis, com.springsource.org.apache.axis, 1.4.0",
-//				"org.apache.commons, com.springsource.org.apache.commons.codec, 1.3.0",
+				"org.apache.commons, com.springsource.org.apache.commons.cli, 1.2.0",
 				"org.apache.commons, com.springsource.org.apache.commons.codec, 1.4.0",
+				"org.apache.commons, com.springsource.org.apache.commons.csv, 1.0.0.BUILD-20080106",
 				"org.apache.commons, com.springsource.org.apache.commons.collections, 3.2.0",
 				"org.apache.commons, com.springsource.org.apache.commons.discovery, 0.4.0",
 				"org.apache.commons, com.springsource.org.apache.commons.httpclient, 3.1.0",
@@ -90,6 +113,9 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 				"org.apache.commons, com.springsource.org.apache.commons.logging, 1.1.1",
 				"org.apache.commons, com.springsource.org.apache.commons.net, 1.4.1",
 //				"org.apache.derby, derby, 10.5.3.0_1",
+				"org.apache.derby, com.springsource.org.apache.derby, 10.5.1000001.764942",
+				"org.apache.derby, com.springsource.org.apache.derby.client, 10.5.1000001.764942",
+				"org.apache.derby, com.springsource.org.apache.derby.drda, 10.5.1000001.764942",
 				"org.apache.httpcomponents, com.springsource.org.apache.httpcomponents.httpclient, 4.1.1",
 				"org.apache.httpcore, com.springsource.org.apache.httpcomponents.httpcore, 4.1",
 				"org.apache.log4j, com.springsource.org.apache.log4j, 1.2.16",
@@ -110,6 +136,7 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 				"org.jaxen, com.springsource.org.jaxen, 1.1.1",
 				"org.jboss.javassist, com.springsource.javassist, 3.3.0.ga",
 				"org.jdom, com.springsource.org.jdom, 1.1.0",
+//opm			"org.jvnet.staxex, com.springsource.org.jvnet.staxex, 1.0.0",
 				"org.objectweb.asm, com.springsource.org.objectweb.asm, 1.5.3",
 				"org.objectweb.asm, com.springsource.org.objectweb.asm.attrs, 1.5.3",
 				"org.opensaml, com.springsource.org.opensaml, 1.1.0",
@@ -138,19 +165,25 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 				"net.sf.taverna.t2.activities, stringconstant-activity, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.activities, wsdl-activity, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.activities, xpath-activity, 2.0-SNAPSHOT",
-				"net.sf.taverna.t2.core, workflowmodel-api, 2.0-SNAPSHOT",
-				"net.sf.taverna.t2.core, workflowmodel-core-extensions, 2.0-SNAPSHOT",
-				"net.sf.taverna.t2.core, workflowmodel-impl, 2.0-SNAPSHOT",
+				"net.sf.taverna.t2.core, provenance-derby, 2.0-SNAPSHOT",
+				"net.sf.taverna.t2.core, provenance-mysql, 2.0-SNAPSHOT",
+				"net.sf.taverna.t2.core, provenanceconnector, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.core, reference-api, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.core, reference-core-extensions, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.core, reference-impl, 2.0-SNAPSHOT",
-				"net.sf.taverna.t2.infrastructure, appconfig, 3.0-SNAPSHOT",
+				"net.sf.taverna.t2.core, workflowmodel-api, 2.0-SNAPSHOT",
+				"net.sf.taverna.t2.core, workflowmodel-core-extensions, 2.0-SNAPSHOT",
+				"net.sf.taverna.t2.core, workflowmodel-impl, 2.0-SNAPSHOT",
+//				"net.sf.taverna.t2.infrastructure, appconfig, 3.0-SNAPSHOT",
 				"net.sf.taverna.t2.lang, ui, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.lang, observer, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.security, credential-manager, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.security, credential-manager-impl, 2.0-SNAPSHOT",
 				"net.sourceforge.cglib, com.springsource.net.sf.cglib, 2.1.3",
 				"uk.org.taverna.platform, activity, 0.1.1-SNAPSHOT",
+				"uk.org.taverna.platform, configuration, 0.1.1-SNAPSHOT",
+				"uk.org.taverna.platform, data, 0.1.1-SNAPSHOT",
+				"uk.org.taverna.platform, database, 0.1.1-SNAPSHOT",
 				"uk.org.taverna.platform, execution, 0.1.1-SNAPSHOT",
 				"uk.org.taverna.platform, execution-local, 0.1.1-SNAPSHOT",
 				"uk.org.taverna.platform, execution-remote, 0.1.1-SNAPSHOT",
@@ -167,7 +200,6 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 				"uk.org.taverna.scufl2, scufl2-validation-structural, 0.9-SNAPSHOT",
 				"net.sf.taverna.t2, results, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2, baclava, 0.1-SNAPSHOT",
-				"org.apache.commons, com.springsource.org.apache.commons.cli, 1.2.0",
 //				"net.sf.taverna.t2.taverna-commandline, taverna-commandline-common, 2.0-SNAPSHOT"
 				};
 	}
@@ -209,6 +241,22 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 			}
 		}
 
+		if (databaseConfiguration == null) {
+			ServiceReference databaseConfigurationReference = bundleContext
+					.getServiceReference("uk.org.taverna.platform.database.configuration.DatabaseConfiguration");
+			databaseConfiguration = (DatabaseConfiguration) bundleContext
+					.getService(databaseConfigurationReference);
+			ServiceReference jndiContextManagerReference = bundleContext
+					.getServiceReference("org.osgi.service.jndi.JNDIContextManager");
+			jndiContextManager = (JNDIContextManager) bundleContext
+					.getService(jndiContextManagerReference);
+			ServiceReference applicationConfigurationReference = bundleContext
+					.getServiceReference("uk.org.taverna.platform.configuration.app.ApplicationConfiguration");
+			applicationConfiguration = (ApplicationConfiguration) bundleContext
+					.getService(applicationConfigurationReference);
+			DatabaseManager.setupDataSource(databaseConfiguration, jndiContextManager, applicationConfiguration);
+		}
+
 	}
 
 	public void testOsgiPlatformStarts() throws Exception {
@@ -223,6 +271,20 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 		URL wfResource = getClass().getResource(t2FlowFile);
 		assertNotNull(wfResource);
 		return workflowBundleReader.readBundle(wfResource.openStream(), T2FlowReader.APPLICATION_VND_TAVERNA_T2FLOW_XML);
+	}
+
+	public File loadFile(String fileName) throws IOException, FileNotFoundException {
+		File file = File.createTempFile("platform-test", null);
+		InputStream inputStream = getClass().getResource(fileName).openStream();
+		OutputStream outputStream = new FileOutputStream(file);
+		byte[] buffer = new byte[64];
+		int length = -1;
+		while ((length = inputStream.read(buffer)) >= 0) {
+			outputStream.write(buffer, 0, length);
+		}
+		outputStream.flush();
+		outputStream.close();
+		return file;
 	}
 
 	public void printErrors(ReferenceService referenceService, T2Reference resultReference) {
@@ -255,19 +317,19 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 		}
 	}
 
-	public boolean checkResult(ReferenceService referenceService, T2Reference result, String expectedResult) {
-		if (result.containsErrors()) {
-			printErrors(referenceService, result);
-			return false;
-		} else {
-			String resultValue = (String) referenceService.renderIdentifier(result, String.class, null);
+	public boolean checkResult(Data result, String expectedResult) {
+//		if (result.containsErrors()) {
+//			printErrors(referenceService, result);
+//			return false;
+//		} else {
+			String resultValue = (String) result.getValue();
 			if (resultValue.startsWith(expectedResult)) {
 				return true;
 			} else {
 				System.out.println("Expected: " + expectedResult + ", Actual: " + resultValue);
 				return false;
 			}
-		}
+//		}
 	}
 
 	public boolean waitForState(WorkflowReport report, State state) throws InterruptedException {
@@ -284,16 +346,16 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 		return report.getState().equals(state);
 	}
 
-	public void waitForResults(Map<String, T2Reference> results, WorkflowReport report, String... ports)
+	public void waitForResults(Map<String, Data> results, WorkflowReport report, String... ports)
 	throws InterruptedException {
 		int wait = 0;
-		while (!resultsReady(results, ports) && wait++ < 30) {
+		while (!resultsReady(results, ports) && wait++ < 20) {
 			System.out.println(report);
 			Thread.sleep(500);
 		}
 	}
 
-	private boolean resultsReady(Map<String, T2Reference> results, String... ports) {
+	private boolean resultsReady(Map<String, Data> results, String... ports) {
 		for (String port : ports) {
 			if (!results.containsKey(port)) {
 				return false;

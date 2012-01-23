@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import net.sf.taverna.t2.reference.T2Reference;
+import uk.org.taverna.platform.data.Data;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironmentService;
 import uk.org.taverna.platform.execution.api.InvalidExecutionIdException;
@@ -119,12 +119,12 @@ public class RunServiceImpl implements RunService {
 	}
 
 	@Override
-	public Map<String, T2Reference> getInputs(String runID) throws InvalidRunIdException {
+	public Map<String, Data> getInputs(String runID) throws InvalidRunIdException {
 		return getRun(runID).getInputs();
 	}
 
 	@Override
-	public Map<String, T2Reference> getOutputs(String runID) throws InvalidRunIdException {
+	public Map<String, Data> getOutputs(String runID) throws InvalidRunIdException {
 		return getRun(runID).getOutputs();
 	}
 

@@ -23,12 +23,7 @@ package uk.org.taverna.platform.report;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
-import net.sf.taverna.t2.reference.T2Reference;
 import uk.org.taverna.scufl2.api.core.Workflow;
 
 /**
@@ -39,43 +34,10 @@ import uk.org.taverna.scufl2.api.core.Workflow;
 public class WorkflowReport extends
 		StatusReport<Workflow, ActivityReport, ProcessorReport> {
 
-	private final Map<String, T2Reference> inputs = new HashMap<String, T2Reference>();
-
-	private final Map<String, T2Reference> outputs = new HashMap<String, T2Reference>();
-
 	private static final String dateFormatString = "yyyy-MM-dd HH:mm:ss";
 
 	public WorkflowReport(Workflow workflow) {
 		super(workflow);
-	}
-
-	public WorkflowReport(Workflow workflow, Map<String, T2Reference> inputs) {
-		super(workflow);
-		if (inputs != null) {
-			this.inputs.putAll(inputs);
-		}
-	}
-
-	/**
-	 * Returns the inputs for the workflow run.
-	 *
-	 * If there are no inputs an empty map is returned.
-	 *
-	 * @return the inputs
-	 */
-	public Map<String, T2Reference> getInputs() {
-		return inputs;
-	}
-
-	/**
-	 * Returns the outputs from the workflow run.
-	 *
-	 * If there are no outputs an empty map is returned.
-	 *
-	 * @return the outputs
-	 */
-	public Map<String, T2Reference> getOutputs() {
-		return outputs;
 	}
 
 	public String toString() {
@@ -139,8 +101,7 @@ public class WorkflowReport extends
 		addDates(sb, processorReport.getStartedDate(), processorReport.getCompletedDate(), dateFormat);
 
 		for (ActivityReport activityReport : processorReport.getChildReports()) {
-			WorkflowReport nestedWorkflowReport = activityReport.getNestedWorkflowReport();
-			if (nestedWorkflowReport != null) {
+			for (WorkflowReport nestedWorkflowReport : activityReport.getChildReports()) {
 				for (ProcessorReport nestedProcessorReport : nestedWorkflowReport.getChildReports()) {
 					addProcessor(sb, max, level + 1, nestedProcessorReport, dateFormat);
 				}
@@ -169,27 +130,12 @@ public class WorkflowReport extends
 		for (ProcessorReport processorReport : workflowReport.getChildReports()) {
 			result = Math.max(result, processorReport.getSubject().getName().length());
 			for (ActivityReport activityReport : processorReport.getChildReports()) {
-				WorkflowReport nestedWorkflowReport = activityReport.getNestedWorkflowReport();
-				if (nestedWorkflowReport != null) {
+				for (WorkflowReport nestedWorkflowReport : activityReport.getChildReports()) {
 					result = Math.max(result, getLongestName(nestedWorkflowReport, level + 1));
 				}
 			}
 		}
 		return result;
-	}
-
-	private Set<ProcessorReport> getAllProcessorReports() {
-		Set<ProcessorReport> allProcessorReports = new HashSet<ProcessorReport>();
-		for (ProcessorReport processorReport : getChildReports()) {
-			allProcessorReports.add(processorReport);
-			for (ActivityReport activityReport : processorReport.getChildReports()) {
-				WorkflowReport nestedWorkflowReport = activityReport.getNestedWorkflowReport();
-				if (nestedWorkflowReport != null) {
-					allProcessorReports.addAll(nestedWorkflowReport.getAllProcessorReports());
-				}
-			}
-		}
-		return allProcessorReports;
 	}
 
 	private String spaces(int length) {

@@ -149,6 +149,16 @@
 			<version>10.5.1000001.764942</version>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.derby</groupId>
+			<artifactId>com.springsource.org.apache.derby.client</artifactId>
+			<version>10.5.1000001.764942</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.derby</groupId>
+			<artifactId>com.springsource.org.apache.derby.drda</artifactId>
+			<version>10.5.1000001.764942</version>
+		</dependency>
+		<dependency>
 			<groupId>org.aopalliance</groupId>
 			<artifactId>com.springsource.org.aopalliance</artifactId>
 			<version>1.0.0</version>
@@ -207,6 +217,30 @@
 			<scope>test</scope>
 		</dependency>
 
+		<!-- OSGI Enterprise Services -->
+		<dependency>
+			<groupId>org.apache.aries.jndi</groupId>
+			<artifactId>org.apache.aries.jndi</artifactId>
+			<version>0.3</version>
+		</dependency>
+
+		<!-- Taverna OSGI Services -->
+		<!-- <dependency> <groupId>uk.org.taverna.osgi.services</groupId> <artifactId>xml-parser-service</artifactId>
+			<version>0.0.1-SNAPSHOT</version> <exclusions> <exclusion> <groupId>org.apache.xerces</groupId>
+			<artifactId>com.springsource.org.apache.xerces</artifactId> </exclusion>
+			</exclusions> </dependency> -->
+		<dependency>
+			<groupId>uk.org.taverna.osgi.services</groupId>
+			<artifactId>xml-transformer-service</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.xalan</groupId>
+					<artifactId>com.springsource.org.apache.xalan</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
 		<!-- Taverna -->
 		<dependency>
 			<groupId>net.sf.taverna.t2.core</groupId>
@@ -258,16 +292,16 @@
 			<artifactId>credential-manager-impl</artifactId>
 			<version>${t2.security.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>net.sf.taverna.t2.infrastructure</groupId>
-			<artifactId>appconfig</artifactId>
-			<version>${t2.infrastructure.version}</version>
-		</dependency>
 
 		<!-- Taverna Platform -->
 		<dependency>
 			<groupId>uk.org.taverna.platform</groupId>
 			<artifactId>activity</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>uk.org.taverna.platform</groupId>
+			<artifactId>data</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -291,30 +325,6 @@
 			<version>${project.version}</version>
 		</dependency>
 
-		<!-- Taverna OSGI Services -->
-		<!-- <dependency>
-			<groupId>uk.org.taverna.osgi.services</groupId>
-			<artifactId>xml-parser-service</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.apache.xerces</groupId>
-					<artifactId>com.springsource.org.apache.xerces</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency> -->
-		<dependency>
-			<groupId>uk.org.taverna.osgi.services</groupId>
-			<artifactId>xml-transformer-service</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.apache.xalan</groupId>
-					<artifactId>com.springsource.org.apache.xalan</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
 		<!-- Scufl2 -->
 		<dependency>
 			<groupId>uk.org.taverna.scufl2</groupId>
@@ -332,19 +342,19 @@
 			<version>${scufl2.version}</version>
 		</dependency>
 		<dependency>
-		    <groupId>uk.org.taverna.scufl2</groupId>
- 			<artifactId>scufl2-validation</artifactId>
-    		<version>${scufl2.version}</version>
+			<groupId>uk.org.taverna.scufl2</groupId>
+			<artifactId>scufl2-validation</artifactId>
+			<version>${scufl2.version}</version>
 		</dependency>
 		<dependency>
-		    <groupId>uk.org.taverna.scufl2</groupId>
-  			<artifactId>scufl2-validation-correctness</artifactId>
-    		<version>${scufl2.version}</version>
+			<groupId>uk.org.taverna.scufl2</groupId>
+			<artifactId>scufl2-validation-correctness</artifactId>
+			<version>${scufl2.version}</version>
 		</dependency>
 		<dependency>
-		    <groupId>uk.org.taverna.scufl2</groupId>
-  			<artifactId>scufl2-validation-structural</artifactId>
-    		<version>${scufl2.version}</version>
+			<groupId>uk.org.taverna.scufl2</groupId>
+			<artifactId>scufl2-validation-structural</artifactId>
+			<version>${scufl2.version}</version>
 		</dependency>
 
 		<!-- Taverna CommandLine Tool -->
@@ -426,6 +436,11 @@
 			<artifactId>com.springsource.org.apache.commons.codec</artifactId>
 			<version>1.4.0</version>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>com.springsource.org.apache.commons.csv</artifactId>
+			<version>1.0.0.BUILD-20080106</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>

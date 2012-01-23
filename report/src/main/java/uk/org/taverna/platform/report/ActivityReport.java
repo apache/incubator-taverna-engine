@@ -20,8 +20,6 @@
  ******************************************************************************/
 package uk.org.taverna.platform.report;
 
-import java.util.Set;
-
 import uk.org.taverna.scufl2.api.activity.Activity;
 
 /**
@@ -38,17 +36,6 @@ public class ActivityReport extends StatusReport<Activity, ProcessorReport, Work
 	 */
 	public ActivityReport(Activity activity) {
 		super(activity);
-	}
-
-	/**
-	 * @return
-	 */
-	public WorkflowReport getNestedWorkflowReport() {
-		Set<WorkflowReport> childReports = getChildReports();
-		if (!childReports.isEmpty()) {
-			return childReports.iterator().next();
-		}
-		return null;
 	}
 
 }
