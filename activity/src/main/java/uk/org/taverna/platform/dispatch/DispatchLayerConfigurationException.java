@@ -20,7 +20,7 @@
  ******************************************************************************/
 package uk.org.taverna.platform.dispatch;
 
-import uk.org.taverna.platform.configuration.ConfigurationException;
+import uk.org.taverna.platform.property.ConfigurationException;
 
 /**
  * Thrown when a dispatch layer's configuration is incorrect.

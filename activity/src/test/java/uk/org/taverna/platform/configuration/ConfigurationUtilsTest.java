@@ -48,6 +48,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import uk.org.taverna.platform.activity.impl.ActivityServiceImpl;
+import uk.org.taverna.platform.property.ConfigurationUtils;
 import uk.org.taverna.scufl2.api.configurations.Configuration;
 import uk.org.taverna.scufl2.api.configurations.ConfigurationDefinition;
 import uk.org.taverna.scufl2.api.configurations.PropertyDefinition;
@@ -98,7 +99,7 @@ public class ConfigurationUtilsTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.configuration.ConfigurationUtils#createPropertyDefinitions(java.lang.Class)}.
+	 * Test method for {@link uk.org.taverna.platform.property.ConfigurationUtils#createPropertyDefinitions(java.lang.Class)}.
 	 */
 	@Test
 	public void testCreatePropertyDefinitions() {
@@ -580,7 +581,7 @@ public class ConfigurationUtilsTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.configuration.ConfigurationUtils#setConfigurationProperties(java.lang.Object, uk.org.taverna.scufl2.api.configurations.Configuration, uk.org.taverna.scufl2.api.property.PropertyResource, uk.org.taverna.scufl2.api.configurations.PropertyResourceDefinition, java.net.URI, uk.org.taverna.scufl2.api.container.WorkflowBundle)}.
+	 * Test method for {@link uk.org.taverna.platform.property.ConfigurationUtils#setConfigurationProperties(java.lang.Object, uk.org.taverna.scufl2.api.configurations.Configuration, uk.org.taverna.scufl2.api.property.PropertyResource, uk.org.taverna.scufl2.api.configurations.PropertyResourceDefinition, java.net.URI, uk.org.taverna.scufl2.api.container.WorkflowBundle)}.
 	 */
 	@Test
 	public void testSetConfigurationProperties() throws Exception {

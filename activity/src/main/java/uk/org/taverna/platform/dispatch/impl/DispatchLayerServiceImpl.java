@@ -20,8 +20,8 @@
  ******************************************************************************/
 package uk.org.taverna.platform.dispatch.impl;
 
-import static uk.org.taverna.platform.configuration.ConfigurationUtils.createPropertyDefinitions;
-import static uk.org.taverna.platform.configuration.ConfigurationUtils.setConfigurationProperties;
+import static uk.org.taverna.platform.property.ConfigurationUtils.createPropertyDefinitions;
+import static uk.org.taverna.platform.property.ConfigurationUtils.setConfigurationProperties;
 
 import java.net.URI;
 import java.text.MessageFormat;
@@ -35,10 +35,10 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayerFactory;
 
 import org.apache.log4j.Logger;
 
-import uk.org.taverna.platform.configuration.ConfigurationException;
 import uk.org.taverna.platform.dispatch.DispatchLayerConfigurationException;
 import uk.org.taverna.platform.dispatch.DispatchLayerNotFoundException;
 import uk.org.taverna.platform.dispatch.DispatchLayerService;
+import uk.org.taverna.platform.property.ConfigurationException;
 import uk.org.taverna.scufl2.api.configurations.Configuration;
 import uk.org.taverna.scufl2.api.configurations.ConfigurationDefinition;
 import uk.org.taverna.scufl2.api.configurations.PropertyResourceDefinition;
