@@ -37,6 +37,8 @@ import uk.org.taverna.platform.data.DataService;
  */
 public class DataServiceImpl implements DataService {
 
+	private static final String ERROR_CLASS = "net.sf.taverna.t2.reference.ErrorDocument";
+
 	private Map<String, Data> store = new HashMap<String, Data>();
 
 	@Override
@@ -60,6 +62,10 @@ public class DataServiceImpl implements DataService {
 			return store(new DataImpl(UUID.randomUUID().toString(), dataList));
 		} else if (value instanceof URI) {
 			return store(new DataImpl(UUID.randomUUID().toString(), (URI) value));
+		} else if (value.getClass().getName().equals(ERROR_CLASS)) {
+			DataImpl data = new DataImpl(UUID.randomUUID().toString(), value);
+			data.setError(true);
+			return store(new DataImpl(UUID.randomUUID().toString(), data));
 		} else {
 			return store(new DataImpl(UUID.randomUUID().toString(), value));
 		}

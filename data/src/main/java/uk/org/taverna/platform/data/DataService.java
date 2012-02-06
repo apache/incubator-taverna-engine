@@ -27,10 +27,25 @@ package uk.org.taverna.platform.data;
  */
 public interface DataService {
 
+	/**
+	 * Returns the Data for the ID. Returns <code>null</code> if there is no Data for the ID.
+	 *
+	 * @param ID
+	 *            the data identifier
+	 * @return
+	 */
 	public Data get(String ID);
 
+	/**
+	 * @param ID
+	 * @return
+	 */
 	public boolean delete(String ID);
 
+	/**
+	 * @param value
+	 * @return
+	 */
 	public Data create(Object value);
 
 }

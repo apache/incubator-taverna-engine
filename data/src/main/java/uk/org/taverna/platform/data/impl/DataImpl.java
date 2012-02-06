@@ -42,6 +42,8 @@ public class DataImpl implements Data {
 
 	private List<Data> elements;
 
+	private boolean error;
+
 	private String mimeType;
 
 	public DataImpl(String ID, Object value) {
@@ -106,4 +108,12 @@ public class DataImpl implements Data {
 		return elements;
 	}
 
+	@Override
+	public boolean isError() {
+		return error;
+	}
+
+	public void setError(boolean error) {
+		this.error = error;
+	}
 }
