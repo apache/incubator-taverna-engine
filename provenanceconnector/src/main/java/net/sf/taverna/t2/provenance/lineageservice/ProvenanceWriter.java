@@ -1,19 +1,19 @@
 /*******************************************************************************
- * Copyright (C) 2007 The University of Manchester   
- * 
+ * Copyright (C) 2007 The University of Manchester
+ *
  *  Modifications to the initial code base are copyright of their
  *  respective authors, or their employers as appropriate.
- * 
+ *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public License
  *  as published by the Free Software Foundation; either version 2.1 of
  *  the License, or (at your option) any later version.
- *    
+ *
  *  This program is distributed in the hope that it will be useful, but
  *  WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *    
+ *
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import net.sf.taverna.t2.provenance.connector.JDBCConnector;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.ActivityTable;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataBindingTable;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataflowInvocationTable;
@@ -44,29 +43,36 @@ import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 
 import org.apache.log4j.Logger;
 
+import uk.org.taverna.platform.database.DatabaseManager;
+
 /**
  * Handles all the writing out of provenance items to the database layer. Uses
  * standard SQL so all specific instances of this class can extend this writer
  * to handle all of the db writes
- * 
+ *
  * @author Paolo Missier
  * @author Ian Dunlop
  * @author Stuart Owen
- * 
+ *
  */
 public class ProvenanceWriter {
 
-	protected static Logger logger = Logger.getLogger(ProvenanceWriter.class);    
+	protected static Logger logger = Logger.getLogger(ProvenanceWriter.class);
 	protected int cnt; // counts number of calls to PortBinding
     protected ProvenanceQuery pq = null;
+	private final DatabaseManager databaseManager;
+
+    public ProvenanceWriter(DatabaseManager databaseManager) {
+		this.databaseManager = databaseManager;
+    }
 
 	public Connection getConnection() throws SQLException {
-		return JDBCConnector.getConnection();
+		return databaseManager.getConnection();
 	}
-		
+
 	public void closeCurrentModel() {
-		
-	}	
+
+	}
 
 
 
@@ -145,7 +151,7 @@ public class ProvenanceWriter {
 			}
 		}
 	}
-	
+
 	/**
 	 * inserts one row into the ARC DB table
 	 *
@@ -171,7 +177,7 @@ public class ProvenanceWriter {
 			ps.setString(5, destinationPort.getPortName());
 			ps.setString(6, sourcePort.getIdentifier());
 			ps.setString(7, destinationPort.getIdentifier());
-			
+
 			int result = ps.executeUpdate();
 
 		} finally {
@@ -183,7 +189,7 @@ public class ProvenanceWriter {
 	}
 
 	public void addDataBinding(net.sf.taverna.t2.provenance.lineageservice.utils.DataBinding dataBinding) throws SQLException {
-		
+
 		PreparedStatement ps = null;
 		Connection connection = null;
 		try {
@@ -193,14 +199,14 @@ public class ProvenanceWriter {
 					+ DataBindingTable.dataBindingId + ","
 					+ DataBindingTable.portId + ","
 					+ DataBindingTable.t2Reference + ","
-					+ DataBindingTable.workflowRunId 
+					+ DataBindingTable.workflowRunId
 					+ ") VALUES(?,?,?,?)");
-			
+
 			ps.setString(1, dataBinding.getDataBindingId());
 			ps.setString(2, dataBinding.getPort().getIdentifier());
 			ps.setString(3, dataBinding.getT2Reference());
 			ps.setString(4, dataBinding.getWorkflowRunId());
-			ps.executeUpdate();			
+			ps.executeUpdate();
 			if (logger.isDebugEnabled()) {
 				logger.debug("adding DataBinding:\n "+dataBinding);
 			}
@@ -213,7 +219,7 @@ public class ProvenanceWriter {
 				}
 			}
 		}
-		
+
 	}
 
 
@@ -250,7 +256,7 @@ public class ProvenanceWriter {
 
 			ps.executeUpdate();
 
-	
+
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -272,7 +278,7 @@ public class ProvenanceWriter {
 			ps.setString(2, wfId);
 
 			ps.executeUpdate();
-	
+
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -306,7 +312,7 @@ public class ProvenanceWriter {
 	 * @param workflowId
 	 * @throws SQLException
 	 */
-	
+
 
 	public void addProcessor(ProvenanceProcessor provProc) 	throws SQLException {
 
@@ -324,16 +330,16 @@ public class ProvenanceWriter {
 			ps.setString(5, provProc.getIdentifier());
 
 			ps.executeUpdate();
-	
+
 		} finally {
 			if (connection != null) {
 				connection.close();
 			}
 		}
 	}
-	
+
 	public void addProcessorEnactment(net.sf.taverna.t2.provenance.lineageservice.utils.ProcessorEnactment enactment) throws SQLException {
-	
+
 		PreparedStatement ps = null;
 		Connection connection = null;
 		try {
@@ -345,7 +351,7 @@ public class ProvenanceWriter {
 					+ ProcessorEnactmentTable.processorId + ","
 					+ ProcessorEnactmentTable.processIdentifier + ","
 					+ ProcessorEnactmentTable.iteration + ","
-					+ ProcessorEnactmentTable.parentProcessorEnactmentId + "," 
+					+ ProcessorEnactmentTable.parentProcessorEnactmentId + ","
 					+ ProcessorEnactmentTable.enactmentStarted + ","
 					+ ProcessorEnactmentTable.enactmentEnded + ","
 					+ ProcessorEnactmentTable.initialInputsDataBindingId + ","
@@ -362,7 +368,7 @@ public class ProvenanceWriter {
 			ps.setString(9, enactment.getInitialInputsDataBindingId());
 			ps.setString(10, enactment.getFinalOutputsDataBindingId());
 			ps.executeUpdate();
-			
+
 			if (logger.isDebugEnabled()) {
 				logger.debug("adding ProcessorEnactment binding:\n "+enactment);
 			}
@@ -405,7 +411,7 @@ public class ProvenanceWriter {
 
 			ps.executeUpdate();
 
-		
+
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -418,7 +424,7 @@ public class ProvenanceWriter {
 
 	public void addData(String dataRef, String wfInstanceId, Object data)
 	throws SQLException {
-		
+
 		Connection connection = null;
 
 		try {
@@ -435,10 +441,10 @@ public class ProvenanceWriter {
 			cnt++;
 
 			logger.debug("addData executed on data value from char: "+String.valueOf(data));
-			
+
 		} catch (SQLException e) {
 			// the same ID will come in several times -- duplications are
-			// expected, don't panic		
+			// expected, don't panic
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -447,7 +453,7 @@ public class ProvenanceWriter {
 	}
 
 
-		
+
 	/**
 	 * OBSOLETE<p/>
 	 * adds (dataRef, data) pairs to the Data table (only for string data)
@@ -471,10 +477,10 @@ public class ProvenanceWriter {
 			cnt++;
 
 			logger.debug("addData executed on data value from char: "+String.valueOf(data));
-			
+
 		} catch (SQLException e) {
 			// the same ID will come in several times -- duplications are
-			// expected, don't panic	
+			// expected, don't panic
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -504,7 +510,7 @@ public class ProvenanceWriter {
 			ps.setString(9, vb.getIteration());
 			ps.setInt(10, vb.getPositionInColl());
 
-			
+
 			logger.debug("addVarBinding query: \n"+ps.toString());
 			ps.executeUpdate();
 			logger.debug("insert done");
@@ -568,7 +574,7 @@ public class ProvenanceWriter {
 					+ ProcessorEnactmentTable.enactmentEnded+ "=?"
 					+ " WHERE " + ProcessorEnactmentTable.processEnactmentId + "=?");
 
-			ps.setString(1, enactment.getFinalOutputsDataBindingId());				
+			ps.setString(1, enactment.getFinalOutputsDataBindingId());
 			ps.setTimestamp(2, enactment.getEnactmentEnded());
 			ps.setString(3, enactment.getProcessEnactmentId());
 
@@ -577,7 +583,7 @@ public class ProvenanceWriter {
 
 		} catch (SQLException e) {
 			logger.warn("****  insert failed for query ", e);
-		
+
 		} finally {
 			if (connection != null) {
 				try {
@@ -588,7 +594,7 @@ public class ProvenanceWriter {
 			}
 		}
 	}
-	
+
 	public void updatePortBinding(PortBinding vb) {
 
 		PreparedStatement ps = null;
@@ -615,7 +621,7 @@ public class ProvenanceWriter {
 
 		} catch (SQLException e) {
 			logger.warn("****  insert failed for query ", e);
-		
+
 		} finally {
 			if (connection != null) {
 				try {
@@ -647,7 +653,7 @@ public class ProvenanceWriter {
 
 		} catch (SQLException e) {
 			logger.warn("Error replacing collection record", e);
-	
+
 		} finally {
 			if (connection != null) {
 				try {
@@ -691,10 +697,10 @@ public class ProvenanceWriter {
 
 			q = "DELETE FROM Port";
 			stmt.executeUpdate(q);
-			
+
 			q = "DELETE FROM " + ActivityTable.Activity;
 			stmt.executeUpdate(q);
-			
+
 		} catch (SQLException e) {
 			logger.warn("Could not clear static database", e);
 		} finally {
@@ -735,13 +741,13 @@ public class ProvenanceWriter {
 			"DELETE FROM Port WHERE workflowId = ?");
 			ps.setString(1, wfID);
 			ps.executeUpdate();
-			
+
 			q = "DELETE FROM " + ActivityTable.Activity + " WHERE " + ActivityTable.workflowId + "=?";
 			ps = connection.prepareStatement(q);
 			ps.setString(1, wfID);
 			ps.executeUpdate();
 
-	
+
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -774,24 +780,24 @@ public class ProvenanceWriter {
 			if (runID != null) {
 				ps = connection.prepareStatement("DELETE FROM WorkflowRun WHERE workflowRunId = ?");
 				ps.setString(1, runID);
-			} else 
+			} else
 				ps = connection.prepareStatement("DELETE FROM WorkflowRun");
 			ps.executeUpdate();
 
 			if (runID != null) {
 				ps = connection.prepareStatement("DELETE FROM PortBinding WHERE workflowRunId = ?");
 				ps.setString(1, runID);
-			} else 
+			} else
 				ps = connection.prepareStatement("DELETE FROM PortBinding");
 			ps.executeUpdate();
 
 			if (runID != null) {
 				ps = connection.prepareStatement("DELETE FROM Collection WHERE workflowRunId = ?");
 				ps.setString(1, runID);
-			} else 
+			} else
 				ps = connection.prepareStatement("DELETE FROM Collection");
 			ps.executeUpdate();
-			
+
 			if (runID != null) {
 				ps = connection.prepareStatement("DELETE FROM "
 						+ DataflowInvocationTable.DataflowInvocation + " WHERE "
@@ -801,7 +807,7 @@ public class ProvenanceWriter {
 				ps = connection.prepareStatement("DELETE FROM "
 						+ DataflowInvocationTable.DataflowInvocation);
 			ps.executeUpdate();
-			
+
 			if (runID != null) {
 				ps = connection.prepareStatement("DELETE FROM "
 						+ ServiceInvocationTable.ServiceInvocation + " WHERE "
@@ -811,7 +817,7 @@ public class ProvenanceWriter {
 				ps = connection.prepareStatement("DELETE FROM "
 						+ ServiceInvocationTable.ServiceInvocation);
 			ps.executeUpdate();
-			
+
 			if (runID != null) {
 				ps = connection.prepareStatement("DELETE FROM "
 						+ ProcessorEnactmentTable.ProcessorEnactment + " WHERE "
@@ -822,9 +828,9 @@ public class ProvenanceWriter {
 						.prepareStatement("DELETE FROM "
 								+ ProcessorEnactmentTable.ProcessorEnactment);
 			ps.executeUpdate();
-			
-			
-			
+
+
+
 			if (runID != null) {
 				ps = connection.prepareStatement("DELETE FROM "
 						+ DataBindingTable.DataBinding + " WHERE "
@@ -885,9 +891,9 @@ public class ProvenanceWriter {
 				}
 			}
 
-	
+
 		} catch (SQLException e) {
-			logger.error("Problem collecting value references for: " + runID + " : " + e);  
+			logger.error("Problem collecting value references for: " + runID + " : " + e);
 		} finally {
 			if (connection != null) {
 				connection.close();
@@ -946,7 +952,7 @@ public class ProvenanceWriter {
 			String q = "INSERT INTO DD (PFrom,VFrom,valFrom,PTo,VTo,valTo,iteration,workflowRun) VALUES (" + "\'" + pFrom + "\'," + "\'" + vFrom + "\",  " + "valFrom = \"" + valFrom + "\", " + "PTo = \"" + pTo + "\", " + "VTo = \"" + vTo + "\", " + "valTo  = \"" + valTo + "\", " + "iteration = \"" + iteration + "\", " + "workflowRun = \"" + workflowRunId + "\"; ";
 
 			stmt.executeUpdate(q);
-		
+
 		} catch (SQLException e) {
 			logger.warn("Error inserting record into DD", e);
 		} finally {

@@ -50,6 +50,12 @@
 		</dependency>
 
 		<dependency>
+			<groupId>uk.org.taverna.platform</groupId>
+			<artifactId>database</artifactId>
+			<version>0.1.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
 			<groupId>org.jdom</groupId>
 			<artifactId>com.springsource.org.jdom</artifactId>
 		</dependency>
@@ -106,24 +112,6 @@
             <scope>provided</scope>
          </dependency>
 
-<!--
-
-        <dependency>
-            <groupId>simple-jndi</groupId>
-            <artifactId>simple-jndi</artifactId>
-            <version>0.11.1</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-dbcp</groupId>
-                    <artifactId>commons-dbcp</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>commons-pool</groupId>
-                    <artifactId>commons-pool</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
- -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

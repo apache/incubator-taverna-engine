@@ -1,19 +1,19 @@
 /*******************************************************************************
- * Copyright (C) 2007 The University of Manchester   
- * 
+ * Copyright (C) 2007 The University of Manchester
+ *
  *  Modifications to the initial code base are copyright of their
  *  respective authors, or their employers as appropriate.
- * 
+ *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public License
  *  as published by the Free Software Foundation; either version 2.1 of
  *  the License, or (at your option) any later version.
- *    
+ *
  *  This program is distributed in the hope that it will be useful, but
  *  WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *    
+ *
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -44,28 +44,30 @@ import net.sf.taverna.t2.reference.ReferenceService;
 
 import org.apache.log4j.Logger;
 
+import uk.org.taverna.platform.database.DatabaseManager;
+
 /**
  * Collects {@link ProvenanceItem}s as it travels up and down the dispatch stack
  * inside the InvocationContext
- *  
+ *
  * @author Ian Dunlop
  * @author Stuart Owen
- * 
+ *
  */
 public abstract class ProvenanceConnector implements ProvenanceReporter {
-	
+
 	public static enum ActivityTable {
 		Activity, activityId, activityDefinition, workflowId;
-		
+
 		public static String getCreateTable() {
 			return "CREATE TABLE " + Activity + "(\n"
-			+ activityId + " varchar(36) NOT NULL,\n" 
-			+ activityDefinition + " blob NOT NULL,\n"	
+			+ activityId + " varchar(36) NOT NULL,\n"
+			+ activityDefinition + " blob NOT NULL,\n"
 			+ workflowId + " varchar(100) NOT NULL, \n"
 			+ "PRIMARY KEY (" + activityId + ")\n" + ")";
-		}		
+		}
 	}
-	
+
 	public static enum CollectionTable {
 		Collection, collID, parentCollIDRef, workflowRunId, processorNameRef, portName, iteration;
 		public static String getCreateTable() {
@@ -85,28 +87,28 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 
 	public static enum DataBindingTable {
 		DataBinding, dataBindingId, portId, t2Reference, workflowRunId;
-		
+
 		public static String getCreateTable() {
 			return "CREATE TABLE " + DataBinding + "(\n"
-			+ dataBindingId + " varchar(36) NOT NULL,\n" 
-			+ portId + " varchar(36) NOT NULL,\n"		
-			+ t2Reference + " varchar(100) NOT NULL,\n"		
+			+ dataBindingId + " varchar(36) NOT NULL,\n"
+			+ portId + " varchar(36) NOT NULL,\n"
+			+ t2Reference + " varchar(100) NOT NULL,\n"
 			+ workflowRunId + " varchar(100) NOT NULL, \n"
 			+ "PRIMARY KEY (" + dataBindingId + "," + portId + ")\n" + ")";
-		}		
+		}
 	}
-	
+
 	public static enum DataflowInvocationTable {
-		DataflowInvocation, dataflowInvocationId, 
+		DataflowInvocation, dataflowInvocationId,
 		workflowId,
-		invocationStarted, invocationEnded, 
+		invocationStarted, invocationEnded,
 		inputsDataBinding, outputsDataBinding,
 		parentProcessorEnactmentId, workflowRunId, completed;
-		
+
 		public static String getCreateTable() {
 			return "CREATE TABLE " + DataflowInvocation + "(\n"
 			+ dataflowInvocationId + " varchar(36) NOT NULL,\n"
-			+ workflowId + " varchar(100) NOT NULL, \n"			
+			+ workflowId + " varchar(100) NOT NULL, \n"
 			+ invocationStarted + " timestamp, \n"
 			+ invocationEnded + " timestamp, \n"
 			+ inputsDataBinding + " varchar(36),\n"
@@ -115,11 +117,11 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 			+ workflowRunId + " varchar(100) NOT NULL, \n"
 			+ completed + " smallint NOT NULL,\n"
 			+ "PRIMARY KEY (" + dataflowInvocationId+ ")\n" + ")";
-		}		
+		}
 	}
-	
-	public static enum DataLinkTable { 
-		Datalink, sourcePortName, sourcePortId, destinationPortId, 
+
+	public static enum DataLinkTable {
+		Datalink, sourcePortName, sourcePortId, destinationPortId,
 		destinationPortName, sourceProcessorName, destinationProcessorName, workflowId;
 		public static String getCreateTable() {
 			return "CREATE TABLE " + Datalink + " (\n"
@@ -129,7 +131,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 					+ destinationPortName + " varchar(100) NOT NULL,\n"
 					+ sourceProcessorName + " varchar(100) NOT NULL,\n"
 					+ destinationProcessorName + " varchar(100) NOT NULL,\n"
-					+ workflowId + " varchar(36) NOT NULL," 
+					+ workflowId + " varchar(36) NOT NULL,"
 					+ " PRIMARY KEY  ("
 					+ sourcePortId + "," + destinationPortId + "," + workflowId
 					+ "))";
@@ -150,7 +152,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 			+ ref + " varchar(100) default NULL,\n"
 			+ iteration + " varchar(2000) NOT NULL,\n"
 			+ workflowId + " varchar(36),\n"
-			+ "PRIMARY KEY (\n" 
+			+ "PRIMARY KEY (\n"
 			+ portName + "," + workflowRunId + ","
 			+ processorNameRef + "," + iteration + ", " + workflowId
 			+ "))";
@@ -158,19 +160,19 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 	}
 
 	public static enum PortTable {
-		Port, portId, processorId, portName, isInputPort, processorName, 
+		Port, portId, processorId, portName, isInputPort, processorName,
 		workflowId, depth, resolvedDepth, iterationStrategyOrder;
 		public static String getCreateTable() {
 			return  "CREATE TABLE " + Port + " (\n"
 			+ portId + " varchar(36) NOT NULL,\n"
 			+ processorId + " varchar(36),\n"
-			+ portName + " varchar(100) NOT NULL,\n"			
+			+ portName + " varchar(100) NOT NULL,\n"
 			+ isInputPort + " smallint NOT NULL ,\n"
 			+ processorName + " varchar(100) NOT NULL,\n"
-			+ workflowId + " varchar(36) NOT NULL,\n" 
+			+ workflowId + " varchar(36) NOT NULL,\n"
 			+ depth + " int,\n"
-			+ resolvedDepth + " int,\n" 
-			+ iterationStrategyOrder + " smallint, \n" 
+			+ resolvedDepth + " int,\n"
+			+ iterationStrategyOrder + " smallint, \n"
 			+ "PRIMARY KEY (" + "portId" + "),\n"
 			+ "CONSTRAINT port_constraint UNIQUE (\n"
 			+ portName + "," + isInputPort + "," + processorName + "," + workflowId + "\n"
@@ -179,11 +181,11 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 	}
 
 	public static enum ProcessorEnactmentTable {
-		ProcessorEnactment, processEnactmentId, workflowRunId, processorId, 
-		processIdentifier, iteration, parentProcessorEnactmentId, 
-		enactmentStarted, enactmentEnded, initialInputsDataBindingId, 
+		ProcessorEnactment, processEnactmentId, workflowRunId, processorId,
+		processIdentifier, iteration, parentProcessorEnactmentId,
+		enactmentStarted, enactmentEnded, initialInputsDataBindingId,
 		finalOutputsDataBindingId;
-	
+
 		public static String getCreateTable() {
 			return "CREATE TABLE " + ProcessorEnactment + " (\n"
 			+ processEnactmentId + " varchar(36) NOT NULL, \n"
@@ -199,7 +201,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 			+ " PRIMARY KEY (" + processEnactmentId + ")" + ")";
 		}
 	}
-	
+
 	public static enum ProcessorTable {
 		Processor,processorId, processorName,workflowId,firstActivityClass,isTopLevel ;
 		public static String getCreateTable() {
@@ -216,14 +218,14 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 	}
 
 	public static enum ServiceInvocationTable {
-		ServiceInvocation, processorEnactmentId, workflowRunId, 
-		invocationNumber, invocationStarted, invocationEnded, 
-		inputsDataBinding, outputsDataBinding, failureT2Reference, 
+		ServiceInvocation, processorEnactmentId, workflowRunId,
+		invocationNumber, invocationStarted, invocationEnded,
+		inputsDataBinding, outputsDataBinding, failureT2Reference,
 		activityId, initiatingDispatchLayer, finalDispatchLayer;
-		
+
 		public static String getCreateTable() {
 			return "CREATE TABLE " + ServiceInvocation + "(\n"
-			+ processorEnactmentId + " varchar(36) NOT NULL,\n" 
+			+ processorEnactmentId + " varchar(36) NOT NULL,\n"
 			+ workflowRunId + " varchar(100) NOT NULL, \n"
 			+ invocationNumber + " bigint NOT NULL,\n"
 			+ invocationStarted + " timestamp, \n"
@@ -234,9 +236,9 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 			+ activityId + " varchar(36),\n"
 			+ initiatingDispatchLayer + " varchar(250) NOT NULL,\n"
 			+ finalDispatchLayer + " varchar(250) NOT NULL,\n"
-			+ "PRIMARY KEY (" + processorEnactmentId + ", " 
+			+ "PRIMARY KEY (" + processorEnactmentId + ", "
 			+ invocationNumber + "))";
-		}			
+		}
 	}
 
 	public static enum WorkflowRunTable {
@@ -249,21 +251,21 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 			+ " PRIMARY KEY (" + workflowRunId + ", " + workflowId + "))";
 		}
 	}
-	
+
 	public static enum WorkflowTable {
 		WorkflowTable, workflowId, parentWorkflowId, externalName, dataflow;
 		public static String getCreateTable() {
 			return "CREATE TABLE " + "Workflow (\n" +
-					workflowId	+ " varchar(36) NOT NULL,\n" 
-					+ parentWorkflowId + " varchar(100),\n" 
+					workflowId	+ " varchar(36) NOT NULL,\n"
+					+ parentWorkflowId + " varchar(100),\n"
 					+ externalName + " varchar(100),\n"
-					+ dataflow + " blob, \n" 
+					+ dataflow + " blob, \n"
 					+ "PRIMARY KEY  (" + workflowId	+ "))";
 		}
 	}
-	
+
 	private static Logger logger = Logger.getLogger(ProvenanceConnector.class);
-	private String saveEvents;    
+	private String saveEvents;
 	private ProvenanceAnalysis provenanceAnalysis;
 	private ExecutorService executor = Executors.newSingleThreadExecutor();
 	private boolean finished = false;
@@ -276,9 +278,12 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 	private ProvenanceQuery query;
 	private WorkflowDataProcessor wfdp;
 	private EventProcessor eventProcessor;
+	private final DatabaseManager databaseManager;
 
-	public ProvenanceConnector() { }
 
+	public ProvenanceConnector(DatabaseManager databaseManager) {
+		this.databaseManager = databaseManager;
+	}
 
 	/**
 	 * Set up the the {@link EventProcessor}, {@link ProvenanceWriter} &
@@ -287,7 +292,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 	 * and after the dbURL has been set.
 	 */
 	public void init() {
-		
+
         createDatabase();
 
 		try {
@@ -364,7 +369,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 				} catch (IOException e) {
 					logger.error("Could not add provenance for " + provenanceItem.getEventType() + " " + provenanceItem.getIdentifier(), e);
 				} catch (RuntimeException e) {
-					logger.error("Could not add provenance for " + provenanceItem.getEventType() + " " + provenanceItem.getIdentifier(), e);						
+					logger.error("Could not add provenance for " + provenanceItem.getEventType() + " " + provenanceItem.getIdentifier(), e);
 				}
 //
 //			}
@@ -373,9 +378,8 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 
 	}
 
-	protected Connection getConnection() throws InstantiationException,
-	IllegalAccessException, ClassNotFoundException, SQLException {
-		return JDBCConnector.getConnection();
+	protected Connection getConnection() throws SQLException {
+		return databaseManager.getConnection();
 	}
 
 	/**
@@ -383,11 +387,11 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 	 * create the database. Requires each datbase type to create all its own
 	 * tables
 	 */
-	public abstract void createDatabase();    
+	public abstract void createDatabase();
 
 
 	public void clearDatabase() { clearDatabase(true); }
-  
+
 	/**
 	 * Clear all the values in the database but keep the db there
 	 */
@@ -397,14 +401,14 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 			logger.info("clearing DB");
 			try {
 				getWriter().clearDBStatic();
-				
+
 				Set<String> danglingDataRefs = getWriter().clearDBDynamic();
-				
+
 				logger.info("references collected during removeRun:");
 				for (String s:danglingDataRefs) {
 					logger.info(s);
 				}
-				
+
 			} catch (SQLException e) {
 				logger.error("Problem clearing database", e);
 			}
