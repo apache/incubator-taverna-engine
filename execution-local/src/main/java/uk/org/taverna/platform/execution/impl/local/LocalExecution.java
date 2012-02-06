@@ -22,8 +22,10 @@ package uk.org.taverna.platform.execution.impl.local;
 
 import java.io.File;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -37,8 +39,15 @@ import net.sf.taverna.t2.invocation.impl.InvocationContextImpl;
 import net.sf.taverna.t2.monitor.MonitorManager;
 import net.sf.taverna.t2.provenance.ProvenanceConnectorFactory;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector;
+import net.sf.taverna.t2.reference.ErrorDocument;
+import net.sf.taverna.t2.reference.ExternalReferenceSPI;
+import net.sf.taverna.t2.reference.IdentifiedList;
 import net.sf.taverna.t2.reference.ReferenceService;
+import net.sf.taverna.t2.reference.ReferenceServiceException;
+import net.sf.taverna.t2.reference.ReferenceSet;
+import net.sf.taverna.t2.reference.ReferencedDataNature;
 import net.sf.taverna.t2.reference.T2Reference;
+import net.sf.taverna.t2.reference.T2ReferenceType;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
 import net.sf.taverna.t2.workflowmodel.DataflowInputPort;
 import net.sf.taverna.t2.workflowmodel.Edits;
@@ -57,7 +66,7 @@ import org.apache.log4j.Logger;
 import uk.org.taverna.platform.activity.ActivityService;
 import uk.org.taverna.platform.data.Data;
 import uk.org.taverna.platform.data.DataService;
-import uk.org.taverna.platform.database.configuration.DatabaseConfiguration;
+import uk.org.taverna.platform.database.DatabaseConfiguration;
 import uk.org.taverna.platform.dispatch.DispatchLayerService;
 import uk.org.taverna.platform.execution.api.AbstractExecution;
 import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
@@ -245,10 +254,10 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 	@Override
 	public void resultTokenProduced(WorkflowDataToken token, String portName) {
 		if (token.getIndex().length == 0) {
-			getWorkflowReport().getOutputs().put(
-					portName,
-					dataService.create(referenceService.renderIdentifier(token.getData(),
-							String.class, null)));
+			Object object = convertReferenceToObject(token.getData(),
+					referenceService, token.getContext());
+			getWorkflowReport().getOutputs().put(portName, dataService.create(object));
+
 		}
 	}
 
@@ -298,6 +307,60 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 			NamedInputPortNode inputPortNode = (NamedInputPortNode) node;
 			System.out.println(indent + inputPortNode.getPortName() + "("
 					+ inputPortNode.getCardinality() + ")");
+		}
+	}
+
+	private Object convertReferenceToObject(T2Reference reference,
+			ReferenceService referenceService, InvocationContext context) {
+
+		if (reference.getReferenceType() == T2ReferenceType.ReferenceSet) {
+
+			ReferenceSet rs = referenceService.getReferenceSetService().getReferenceSet(reference);
+			if (rs == null) {
+				throw new ReferenceServiceException("Could not find ReferenceSet " + reference);
+			}
+			// Check that there are references in the set
+			if (rs.getExternalReferences().isEmpty()) {
+				throw new ReferenceServiceException("Can't render an empty reference set to a POJO");
+			}
+
+			ReferencedDataNature dataNature = ReferencedDataNature.UNKNOWN;
+			for (ExternalReferenceSPI ers : rs.getExternalReferences()) {
+				ReferencedDataNature erDataNature = ers.getDataNature();
+				if (!erDataNature.equals(ReferencedDataNature.UNKNOWN)) {
+					dataNature = erDataNature;
+					break;
+				}
+			}
+
+			// Dereference the object
+			Object dataValue;
+			try {
+				if (dataNature.equals(ReferencedDataNature.TEXT)) {
+					dataValue = referenceService.renderIdentifier(reference, String.class, context);
+				} else {
+					dataValue = referenceService.renderIdentifier(reference, byte[].class, context);
+				}
+			} catch (ReferenceServiceException rse) {
+				logger.error("Problem rendering T2Reference", rse);
+				throw rse;
+			}
+			return dataValue;
+		} else if (reference.getReferenceType() == T2ReferenceType.ErrorDocument) {
+			// Dereference the ErrorDocument
+			ErrorDocument errorDocument = (ErrorDocument) referenceService.resolveIdentifier(
+					reference, null, context);
+			return errorDocument;
+		} else { // it is an IdentifiedList<T2Reference>
+			IdentifiedList<T2Reference> identifiedList = referenceService.getListService().getList(
+					reference);
+			List<Object> list = new ArrayList<Object>();
+
+			for (int j = 0; j < identifiedList.size(); j++) {
+				T2Reference ref = identifiedList.get(j);
+				list.add(convertReferenceToObject(ref, referenceService, context));
+			}
+			return list;
 		}
 	}
 

@@ -30,7 +30,7 @@ import net.sf.taverna.t2.workflowmodel.Edits;
 import uk.org.taverna.platform.activity.ActivityService;
 import uk.org.taverna.platform.data.Data;
 import uk.org.taverna.platform.data.DataService;
-import uk.org.taverna.platform.database.configuration.DatabaseConfiguration;
+import uk.org.taverna.platform.database.DatabaseConfiguration;
 import uk.org.taverna.platform.dispatch.DispatchLayerService;
 import uk.org.taverna.platform.execution.api.AbstractExecutionService;
 import uk.org.taverna.platform.execution.api.Execution;
