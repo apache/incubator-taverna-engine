@@ -60,6 +60,7 @@ public class RunIT extends PlatformIT {
 					.getServiceReference("uk.org.taverna.platform.data.DataService");
 			dataService = (DataService) bundleContext.getService(dataServiceReference);
 		}
+		databaseConfiguration.setProvenanceEnabled(false);
 	}
 
 	public void testRun() throws Exception {

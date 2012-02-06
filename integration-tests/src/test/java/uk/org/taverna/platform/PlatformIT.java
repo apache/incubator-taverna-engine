@@ -48,8 +48,7 @@ import org.springframework.osgi.test.platform.Platforms;
 
 import uk.org.taverna.platform.configuration.app.ApplicationConfiguration;
 import uk.org.taverna.platform.data.Data;
-import uk.org.taverna.platform.database.DatabaseManager;
-import uk.org.taverna.platform.database.configuration.DatabaseConfiguration;
+import uk.org.taverna.platform.database.DatabaseConfiguration;
 import uk.org.taverna.platform.report.State;
 import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
@@ -66,8 +65,8 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 	protected ApplicationConfiguration applicationConfiguration;
 
 	protected String getPlatformName() {
-		   return Platforms.FELIX;
-//		   return Platforms.EQUINOX;
+//		   return Platforms.FELIX;
+		   return Platforms.EQUINOX;
 	}
 
 	@Override
@@ -82,8 +81,8 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 	protected String[] getTestBundlesNames() {
 		return new String[] {
 				"com.jcraft.jsch, com.springsource.com.jcraft.jsch, 0.1.41",
-//opm			"com.sun.xml, com.springsource.com.sun.xml.bind, 2.2.0",
-//opm			"com.sun.xml, com.springsource.com.sun.xml.fastinfoset, 1.2.2",
+				"com.sun.xml, com.springsource.com.sun.xml.bind, 2.2.0",
+				"com.sun.xml, com.springsource.com.sun.xml.fastinfoset, 1.2.2",
 				"com.thoughtworks.xstream, com.springsource.com.thoughtworks.xstream, 1.2.2",
 				"commons-dbcp, commons-dbcp, 1.4",
 				"commons-pool, commons-pool, 1.5.6",
@@ -93,7 +92,7 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 				"javax.servlet, com.springsource.javax.servlet, 2.5.0",
 				"javax.transaction, com.springsource.javax.transaction, 1.1.0",//for derby client
 				"javax.wsdl, com.springsource.javax.wsdl, 1.6.1",
-//opm			"javax.xml.bind, com.springsource.javax.xml.bind, 2.2.0",
+				"javax.xml.bind, com.springsource.javax.xml.bind, 2.2.0",
 				"javax.xml.rpc, com.springsource.javax.xml.rpc, 1.1.0",
 				"javax.xml.soap, com.springsource.javax.xml.soap, 1.3.0",
 				"javax.xml.stream, com.springsource.javax.xml.stream, 1.0.1",
@@ -128,6 +127,8 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 				"org.apache.xalan, com.springsource.org.apache.xml.serializer, 2.7.1",
 				"org.apache.xerces, com.springsource.org.apache.xerces, 2.9.1",
 				"org.apache.xml, com.springsource.org.apache.xml.security, 1.4.2",
+				"org.aspectj, com.springsource.org.aspectj.runtime, 1.6.0",
+				"org.aspectj, com.springsource.org.aspectj.weaver, 1.6.0",
 				"org.beanshell, com.springsource.bsh, 2.0.0.b4",
 				"org.biomart, martservice, 2.0-SNAPSHOT",
 				"org.bouncycastle, bcprov-jdk16, 1.46",
@@ -136,7 +137,7 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 				"org.jaxen, com.springsource.org.jaxen, 1.1.1",
 				"org.jboss.javassist, com.springsource.javassist, 3.3.0.ga",
 				"org.jdom, com.springsource.org.jdom, 1.1.0",
-//opm			"org.jvnet.staxex, com.springsource.org.jvnet.staxex, 1.0.0",
+				"org.jvnet.staxex, com.springsource.org.jvnet.staxex, 1.0.0",
 				"org.objectweb.asm, com.springsource.org.objectweb.asm, 1.5.3",
 				"org.objectweb.asm, com.springsource.org.objectweb.asm.attrs, 1.5.3",
 				"org.opensaml, com.springsource.org.opensaml, 1.1.0",
@@ -148,7 +149,7 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 //				"org.springframework, org.springframework.context, 3.0.5.RELEASE",
 //				"org.springframework, org.springframework.transaction, 3.0.5.RELEASE",
 				"org.xmlpull, com.springsource.org.xmlpull, 1.1.3.4-O",
-				"net.sf.taverna, wsdl-generic, 1.9-SNAPSHOT",
+				"net.sf.taverna, wsdl-generic, 1.10-SNAPSHOT",
 				"net.sf.taverna.jedit, jedit-syntax, 2.2.4-SNAPSHOT",
 				"net.sf.taverna.t2.activities, apiconsumer-activity, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.activities, beanshell-activity, 2.0-SNAPSHOT",
@@ -193,6 +194,7 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 				"uk.org.taverna.osgi.services, xml-transformer-service, 0.0.1-SNAPSHOT",
 				// FIXME: Add the other scufl2 modules
 				"uk.org.taverna.scufl2, scufl2-api, 0.9-SNAPSHOT",
+				"uk.org.taverna.scufl2, scufl2-rdfxml, 0.9-SNAPSHOT",
 				"uk.org.taverna.scufl2, scufl2-ucfpackage, 0.9-SNAPSHOT",
 				"uk.org.taverna.scufl2, scufl2-t2flow, 0.9-SNAPSHOT",
 				"uk.org.taverna.scufl2, scufl2-validation, 0.9-SNAPSHOT",
@@ -243,7 +245,7 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 
 		if (databaseConfiguration == null) {
 			ServiceReference databaseConfigurationReference = bundleContext
-					.getServiceReference("uk.org.taverna.platform.database.configuration.DatabaseConfiguration");
+					.getServiceReference("uk.org.taverna.platform.database.DatabaseConfiguration");
 			databaseConfiguration = (DatabaseConfiguration) bundleContext
 					.getService(databaseConfigurationReference);
 			ServiceReference jndiContextManagerReference = bundleContext
@@ -254,7 +256,7 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 					.getServiceReference("uk.org.taverna.platform.configuration.app.ApplicationConfiguration");
 			applicationConfiguration = (ApplicationConfiguration) bundleContext
 					.getService(applicationConfigurationReference);
-			DatabaseManager.setupDataSource(databaseConfiguration, jndiContextManager, applicationConfiguration);
+//			DatabaseManager.setupDataSource(databaseConfiguration, jndiContextManager, applicationConfiguration);
 		}
 
 	}
