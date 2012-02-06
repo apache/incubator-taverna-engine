@@ -1,19 +1,19 @@
 /*******************************************************************************
- * Copyright (C) 2007 The University of Manchester   
- * 
+ * Copyright (C) 2007 The University of Manchester
+ *
  *  Modifications to the initial code base are copyright of their
  *  respective authors, or their employers as appropriate.
- * 
+ *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public License
  *  as published by the Free Software Foundation; either version 2.1 of
  *  the License, or (at your option) any later version.
- *    
+ *
  *  This program is distributed in the hope that it will be useful, but
  *  WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *    
+ *
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -32,36 +32,27 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-//import java.util.HashMap;
 
 import org.apache.log4j.Logger;
-//import org.bouncycastle.asn1.ASN1OctetString;
-//import org.bouncycastle.asn1.DERBitString;
-//import org.bouncycastle.asn1.DEROctetString;
-//import org.bouncycastle.asn1.misc.NetscapeCertType;
 
-import net.sf.taverna.raven.appconfig.ApplicationRuntime;
+import uk.org.taverna.platform.configuration.app.ApplicationConfiguration;
 
 /**
  * Utility methods for Credential Manager and security-related stuff.
- * 
+ *
  * @author Alex Nenadic
  * @author Stian Soiland-Reyes
  */
 public class CMUtils {
 
 	private static Logger logger = Logger.getLogger(CMUtils.class);
-    
+
 	/**
 	 * Get the configuration directory where the security stuff will be/is saved to.
 	 */
-	public static File getCredentialManagerDefaultDirectory() {
-		
-		File home = ApplicationRuntime.getInstance().getApplicationHomeDir();
-//		File configDirectory = new File(home,"conf");
-//		if (!configDirectory.exists()) {
-//			configDirectory.mkdir();
-//		}
+	public static File getCredentialManagerDefaultDirectory(ApplicationConfiguration applicationConfiguration) {
+
+		File home = applicationConfiguration.getApplicationHomeDir();
 		File secConfigDirectory = new File(home,"security");
 		if (!secConfigDirectory.exists()) {
 			secConfigDirectory.mkdir();
@@ -69,7 +60,7 @@ public class CMUtils {
 		return secConfigDirectory;
 	}
 
-	
+
 	public static URI resolveUriFragment(URI uri, String realm) throws URISyntaxException {
 		URI fragment;
 		/*
@@ -82,7 +73,7 @@ public class CMUtils {
 		uri = uri.resolve(fragment);
 		return uri;
 	}
-  
+
     /**
      * Convert the certificate object into an X509Certificate object.
      */
@@ -92,7 +83,7 @@ public class CMUtils {
         try {
         	// Get the factory for X509 certificates
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
-            // Get the encoded (binary) form of the certificate. 
+            // Get the encoded (binary) form of the certificate.
             // For an X509 certificate the encoding will be DER.
             ByteArrayInputStream bais = new ByteArrayInputStream(
                 cert.getEncoded());
@@ -103,15 +94,15 @@ public class CMUtils {
             throw new CMException("Failed to convert the certificate object into X.509 certificate.", ex);
         }
     }
-      
-    
+
+
     /**
-     * Get the message digest of the given byte array 
+     * Get the message digest of the given byte array
      * as a string of hexadecimal characters in the form XX:XX:XX...
      * using the given digest algorithm.
      */
 	public static String getMessageDigestAsFormattedString(byte[] messageBytes, String digestAlgorithm) {
-		
+
 		MessageDigest messageDigest;
 		byte[] digestBytes;
 		try
@@ -131,7 +122,7 @@ public class CMUtils {
         String hexValueString = number.toString(16).toUpperCase();
 
 		StringBuffer strBuff = new StringBuffer(hexValueString);
-		// If the hex number contains odd number of characters - 
+		// If the hex number contains odd number of characters -
 		// insert a padding "0" at the front of the string
 		if ((strBuff.length() % 2) != 0) {
 			strBuff.insert(0, '0');
@@ -146,14 +137,14 @@ public class CMUtils {
 
 		return strBuff.toString();
 	}
-	
+
 //	/**
 //	 * Gets the intended certificate uses, i.e. Netscape Certificate Type
 //	 * extension (2.16.840.1.113730.1.1) as a string.
 //	 */
-//    // From openssl's documentation: "The [above] extension is non standard, Netscape 
+//    // From openssl's documentation: "The [above] extension is non standard, Netscape
 //    // specific and largely obsolete. Their use in new applications is discouraged."
-//    // TODO replace with "basicConstraints, keyUsage and extended key usage extensions 
+//    // TODO replace with "basicConstraints, keyUsage and extended key usage extensions
 //    // which are now used instead."
 //	public static String getIntendedCertificateUses(byte[] value) {
 //
@@ -195,8 +186,8 @@ public class CMUtils {
 //		str = str.substring(0, str.length() - 3);
 //		return str;
 //	}
-	
-    // FROM RFC 2253:	
+
+    // FROM RFC 2253:
     //                    CN      commonName
     //                    L       localityName
     //                    ST      stateOrProvinceName
@@ -208,7 +199,7 @@ public class CMUtils {
     //                    UID     userid
 
     private String emailAddress; // not from RFC 2253, yet some certificates contain this field
-    
+
     private String CN;
     private String L;
     private String ST;
@@ -218,7 +209,7 @@ public class CMUtils {
     /**
      * Parses a DN string and fills in fields with DN parts.
      * Heavily based on uk.ac.omii.security.utils.DNParser class from omii-security-utils library.
-     * 
+     *
      * http://maven.omii.ac.uk/maven2/repository/omii/omii-security-utils/
      */
 
@@ -289,7 +280,7 @@ public class CMUtils {
             String currentToken = String.valueOf(majorTokenList.get(i));
 
             currentToken = currentToken.trim();
-	   
+
             String[] minorTokenList = currentToken.split("=", 2); // split on first equals only, as value can contain an equals char
 
             if(minorTokenList.length == 2) // there had better be a key and a value only
