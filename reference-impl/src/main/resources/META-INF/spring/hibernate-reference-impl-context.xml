@@ -39,29 +39,12 @@
 		<property name="t2ReferenceGenerator" ref="t2ReferenceGenerator" />
 	</bean>
 
-	<!-- Apache Derby rooted at a temporary directory -->
-	<!--<bean id="t2reference.jdbc.temporaryjdbc"
-		class="net.sf.taverna.platform.spring.jdbc.TemporaryJDBC">
-	</bean>-->
-
-	<!--<bean id="t2reference.jdbc.url" class="java.lang.String"
-		factory-bean="t2reference.jdbc.temporaryjdbc"
-		factory-method="getTemporaryDerbyJDBC" />-->
-
-	<!-- At least for testing purposes we use Apache Derby -->
-	<!-- <bean id="exampleDataSource"
-		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-		<property name="driverClassName">
-			<value>org.apache.derby.jdbc.EmbeddedDriver</value>
-		</property>
-		<property name="url" value="jdbc:derby:/Users/david/Desktop/database;create=true" />
-		<property name="url">
-			<ref bean="t2reference.jdbc.url" />
-		</property>
-	</bean> -->
+	<bean id="dataSource" class="javax.sql.DataSource"
+		factory-bean="databaseManager"
+		factory-method="getDataSource" />
 
 	<!-- Configure hibernate to use dynamic schema update -->
-	<bean id="exampleHibernateProperties"
+	<bean id="hibernateProperties"
 		class="org.springframework.beans.factory.config.PropertiesFactoryBean">
 		<property name="properties">
 			<props>
@@ -87,13 +70,13 @@
 	</bean>
 
 	<!-- A regular hibernate session factory -->
-	<!-- <bean id="sessionFactoryBean"
+	<bean id="sessionFactoryBean"
 		class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
 		<property name="dataSource">
-			<ref local="exampleDataSource" />
+			<ref local="dataSource" />
 		</property>
 		<property name="hibernateProperties">
-			<ref bean="exampleHibernateProperties" />
+			<ref bean="hibernateProperties" />
 		</property>
 		<property name="mappingResources">
 			<list>
@@ -111,24 +94,24 @@
 				</value>
 			</list>
 		</property>
-	</bean> -->
+	</bean>
 
 	<bean id="referenceSetDao" class="net.sf.taverna.t2.reference.impl.HibernateReferenceSetDao" >
-		<!-- <property name="sessionFactory">
+		<property name="sessionFactory">
 			<ref local="sessionFactoryBean" />
-		</property> -->
+		</property>
 	</bean>
 
 	<bean id="listDao" class="net.sf.taverna.t2.reference.impl.HibernateListDao" >
-		<!-- <property name="sessionFactory">
+		<property name="sessionFactory">
 			<ref local="sessionFactoryBean" />
-		</property> -->
+		</property>
 	</bean>
 
 	<bean id="errorDocumentDao" class="net.sf.taverna.t2.reference.impl.HibernateErrorDocumentDao" >
-		<!-- <property name="sessionFactory">
+		<property name="sessionFactory">
 			<ref local="sessionFactoryBean" />
-		</property> -->
+		</property>
 	</bean>
 
 </beans>
