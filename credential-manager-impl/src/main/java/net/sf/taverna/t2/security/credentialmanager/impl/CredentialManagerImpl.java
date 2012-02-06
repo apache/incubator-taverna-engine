@@ -1,19 +1,19 @@
 /*******************************************************************************
- * Copyright (C) 2008-2010 The University of Manchester   
- * 
+ * Copyright (C) 2008-2010 The University of Manchester
+ *
  *  Modifications to the initial code base are copyright of their
  *  respective authors, or their employers as appropriate.
- * 
+ *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public License
  *  as published by the Free Software Foundation; either version 2.1 of
  *  the License, or (at your option) any later version.
- *    
+ *
  *  This program is distributed in the hope that it will be useful, but
  *  WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *    
+ *
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -81,9 +81,11 @@ import net.sf.taverna.t2.security.credentialmanager.UsernamePassword;
 import org.apache.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+import uk.org.taverna.platform.configuration.app.ApplicationConfiguration;
+
 /**
  * Provides an implementation of {@link #CredentialManagerService}.
- * 
+ *
  * @author Alex Nenadic
  * @author Stian Soiland-Reyes
  */
@@ -137,7 +139,7 @@ public class CredentialManagerImpl implements CredentialManager,
 
 	// Whether SSLSocketFactory has been initialised with Taverna's
 	// Keystore/Truststore.
-	// Actually tavernaSSLSocketFactory==null? check tells us if 
+	// Actually tavernaSSLSocketFactory==null? check tells us if
 	// Taverna's SSLSocketFactory has been initialised
 	//private static boolean sslInitialized = false;
 
@@ -178,12 +180,14 @@ public class CredentialManagerImpl implements CredentialManager,
 	// A list of providers of trust confirmation for services
 	private List<TrustConfirmationProvider> trustConfirmationProviders;
 
+	private ApplicationConfiguration applicationConfiguration;
+
 	public CredentialManagerImpl() throws CMException {
 
 		// Make sure we have BouncyCastle provider installed, just in case
 		// (needed for some tests and reading PKCS#12 keystores)
 		Security.addProvider(new BouncyCastleProvider());
-		
+
 		// Open the files stored in the (DEFAULT!!!) Credential Manager's
 		// directory
 		// loadDefaultConfigurationFiles();
@@ -235,7 +239,7 @@ public class CredentialManagerImpl implements CredentialManager,
 
 	/**
 	 * Get the master password from the available providers.
-	 * 
+	 *
 	 * @return master password
 	 * @throws CMException
 	 *             if none of the providers can provide a non-null master
@@ -253,7 +257,7 @@ public class CredentialManagerImpl implements CredentialManager,
 
 		boolean firstTime = !keystoreFile.exists();
 
-		// Master password providers are already sorted by 
+		// Master password providers are already sorted by
 		// their priority by the OSGi framework
 		for (MasterPasswordProvider masterPasswordProvider : masterPasswordProviders) {
 			String password = masterPasswordProvider
@@ -584,7 +588,7 @@ public class CredentialManagerImpl implements CredentialManager,
 	 * given file (pointing to the Java's default truststore) using the
 	 * {@link JavaTruststorePasswordProvider}s lookup to obtain the password for
 	 * the keytore.
-	 * 
+	 *
 	 * @param javaTruststore
 	 *            Java's default truststore
 	 * @param javaTruststoreFile
@@ -632,7 +636,7 @@ public class CredentialManagerImpl implements CredentialManager,
 	 * Get a username and password pair for the given service, or null if it
 	 * does not exit. The returned array contains username as the first element
 	 * and password as the second.
-	 * 
+	 *
 	 * @deprecated Use
 	 *             {@link #getUsernameAndPasswordForService(URI, boolean, String)}
 	 *             instead
@@ -669,25 +673,25 @@ public class CredentialManagerImpl implements CredentialManager,
 	 * If the parameter <code>useURIPathRecursion</code> is true, then the
 	 * Credential Manager will also attempt to look for stored credentials for
 	 * each of the parent fragments of the URI.
-	 * 
+	 *
 	 * @param serviceURI
 	 *            The URI of the service for which we are providing the username
 	 *            and password
-	 * 
+	 *
 	 * @param useURIPathRecursion
 	 *            Whether to look for any username and passwords stored in the
 	 *            Keystore for the parent fragments of the service URI (for
 	 *            example, we are looking for the credentials for service
 	 *            http://somehost/some-fragment but we already have credentials
 	 *            stored for http://somehost which can be reused)
-	 * 
+	 *
 	 * @param requestingMessage
 	 *            The message to be presented to the user when asking for the
 	 *            username and password, normally useful for UI providers that
 	 *            pop up dialogs, can be ignored otherwise
-	 * 
+	 *
 	 * @return username and password pair for the given service
-	 * 
+	 *
 	 * @throws CMException
 	 *             if anything goes wrong during Keystore lookup, etc.
 	 */
@@ -901,7 +905,7 @@ public class CredentialManagerImpl implements CredentialManager,
 	/**
 	 * Get service URLs associated with all username/password pairs currently in
 	 * the Keystore.
-	 * 
+	 *
 	 * @deprecated
 	 * @see #getServiceURIsForAllUsernameAndPasswordPairs()
 	 */
@@ -939,7 +943,7 @@ public class CredentialManagerImpl implements CredentialManager,
 	 * as "password#"<SERVICE_URL> using the service URL this username/password
 	 * pair is to be used for.
 	 * <p>
-	 * 
+	 *
 	 * @param usernamePassword
 	 *            The {@link UsernamePassword} to store
 	 * @param serviceURI
@@ -980,7 +984,7 @@ public class CredentialManagerImpl implements CredentialManager,
 	 * as "password#"<SERVICE_URL> using the service URL this username/password
 	 * pair is to be used for.
 	 * <p>
-	 * 
+	 *
 	 * @return the alias under which this username and password entry was saved in the Keystore
 
 	 * @deprecated Use
@@ -996,7 +1000,7 @@ public class CredentialManagerImpl implements CredentialManager,
 		initialize();
 
 		String alias = null;
-		
+
 		// Alias for the username and password entry
 		synchronized (keystore) {
 
@@ -1012,7 +1016,7 @@ public class CredentialManagerImpl implements CredentialManager,
 			 * with them, e.g., DES or Triple DES. That is why we create it with
 			 * the name "DUMMY" for algorithm name, as this is not checked for
 			 * anyway.
-			 * 
+			 *
 			 * Use a separator character that will not appear in the username or
 			 * password.
 			 */
@@ -1042,7 +1046,7 @@ public class CredentialManagerImpl implements CredentialManager,
 				throw new CMException(exMessage, ex);
 			}
 		}
-		
+
 		return alias;
 	}
 
@@ -1065,7 +1069,7 @@ public class CredentialManagerImpl implements CredentialManager,
 	/**
 	 * Delete a username and password pair for the given service URL string from
 	 * the Keystore.
-	 * 
+	 *
 	 * @deprecated Use
 	 *             {@link #deleteUsernameAndPasswordForService(URI serviceURI)}
 	 *             instead.
@@ -1088,11 +1092,11 @@ public class CredentialManagerImpl implements CredentialManager,
 	/**
 	 * Insert a new key entry containing private key and the corresponding
 	 * public key certificate chain in the Keystore.
-	 * 
+	 *
 	 * An alias used to identify the keypair entry is constructed as:
 	 * "keypair#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<
 	 * CERT_SERIAL_NUMBER>
-	 * 
+	 *
 	 * @return the alias under which this key entry was saved in the Keystore
 	 */
 	@Override
@@ -1146,7 +1150,7 @@ public class CredentialManagerImpl implements CredentialManager,
 				String exMessage = "Credential Manager: Failed to insert the key pair entry in the Keystore.";
 				// logger.error(exMessage, ex);
 				throw (new CMException(exMessage, ex));
-			}	
+			}
 		}
 		return alias;
 	}
@@ -1192,17 +1196,17 @@ public class CredentialManagerImpl implements CredentialManager,
 					+ "after deleting a keypair.");
 		}
 	}
-	
+
 	/**
 	 * Delete a key pair entry from the Keystore given its private and public key parts.
 	 */
 	@Override
 	public void deleteKeyPair(Key privateKey, Certificate[] certs)
 			throws CMException {
-		
+
 		String alias = createKeyPairAlias(privateKey, certs);
 		deleteKeyPair(alias);
-	}	
+	}
 
 	/**
 	 * Export a key entry containing private key and public key certificate
@@ -1335,14 +1339,14 @@ public class CredentialManagerImpl implements CredentialManager,
 	}
 
 	/**
-	 * Get the private key part of a key pair entry from the Keystore given its alias. 
+	 * Get the private key part of a key pair entry from the Keystore given its alias.
 	 * <p>
 	 * This method works for the Keystore only as the Truststore does not contain key pair
 	 * entries, but trusted certificate entries only.
-	 * @throws CMException 
+	 * @throws CMException
 	 */
 	public Key getKeyPairsPrivateKey(String alias) throws CMException{
-		
+
 		// Need to make sure we are initialized before we do anything else
 		// as Credential Manager can be created but not initialized
 		initialize();
@@ -1357,11 +1361,11 @@ public class CredentialManagerImpl implements CredentialManager,
 			}
 		}
 	}
-	
+
 	/**
 	 * Insert a trusted certificate entry in the Truststore with an alias
 	 * constructed as:
-	 * 
+	 *
 	 * "trustedcert#<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#
 	 * "<CERT_SERIAL_NUMBER>
 	 *
@@ -1373,9 +1377,9 @@ public class CredentialManagerImpl implements CredentialManager,
 		// Need to make sure we are initialized before we do anything else
 		// as Credential Manager can be created but not initialized
 		initialize();
-		
+
 		String alias = null;
-		
+
 		synchronized (truststore) {
 			// Create an alias for the new trusted certificate entry in the Truststore as
 			// "trustedcert#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<CERT_SERIAL_NUMBER>
@@ -1399,15 +1403,15 @@ public class CredentialManagerImpl implements CredentialManager,
 				throw (new CMException(exMessage, ex));
 			}
 		}
-		
+
 		return alias;
 	}
 
 	/**
-	 * Create a Keystore alias that would be used for adding the given 
-	 * key pair (private and public key) entry to the Keystore. The alias is cretaed as 
+	 * Create a Keystore alias that would be used for adding the given
+	 * key pair (private and public key) entry to the Keystore. The alias is cretaed as
 	 * "keypair#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<CERT_SERIAL_NUMBER>
-	 * 
+	 *
 	 * @param privateKey private key
 	 * @param certs public key's certificate chain
 	 * @return
@@ -1432,16 +1436,16 @@ public class CredentialManagerImpl implements CredentialManager,
 		String issuerCN = util.getCN(); // issuer's common name
 
 		String alias = "keypair#" + ownerCN + "#" + issuerCN + "#"
-				+ serialNumber;	
+				+ serialNumber;
 		return alias;
 	}
-	
+
 	/**
-	 * Create a Truststore alias that would be used for adding the given 
-	 * trusted X509 certificate to the Truststore. The alias is cretaed as 
+	 * Create a Truststore alias that would be used for adding the given
+	 * trusted X509 certificate to the Truststore. The alias is cretaed as
 	 * "trustedcert#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<
 	 * CERT_SERIAL_NUMBER>
-	 * 
+	 *
 	 * @param cert certificate to generate the alias for
 	 * @return the alias for the given certificate
 	 */
@@ -1505,7 +1509,7 @@ public class CredentialManagerImpl implements CredentialManager,
 		return hasEntryWithAlias(KeystoreType.TRUSTSTORE, alias);
 
 	}
-	
+
 	/**
 	 * Delete a trusted certificate entry from the Truststore given its alias.
 	 */
@@ -1541,7 +1545,7 @@ public class CredentialManagerImpl implements CredentialManager,
 		String alias = createTrustedCertificateAlias(cert);
 		deleteTrustedCertificate(alias);
 	}
-	
+
 	/**
 	 * Check if the given alias identifies is a key entry in the Keystore.
 	 */
@@ -1577,7 +1581,7 @@ public class CredentialManagerImpl implements CredentialManager,
 			if (ksType.equals(KeystoreType.KEYSTORE)) {
 				synchronized (keystore) {
 					if (keystore.containsAlias(alias)){
-						keystore.deleteEntry(alias);						
+						keystore.deleteEntry(alias);
 					}
 				}
 			} else if (ksType.equals(KeystoreType.TRUSTSTORE)) {
@@ -1660,7 +1664,7 @@ public class CredentialManagerImpl implements CredentialManager,
 	/**
 	 * Get service URIs associated with all username/password pairs currently in
 	 * the Keystore.
-	 * 
+	 *
 	 * @see #hasUsernamePasswordForService(URI)
 	 */
 	@Override
@@ -1827,7 +1831,7 @@ public class CredentialManagerImpl implements CredentialManager,
 		initialize();
 
 		FileOutputStream fos = null;
-		
+
 		String oldMasterPassword = masterPassword;
 		KeyStore oldKeystore = keystore;
 		KeyStore oldTruststore = truststore;
@@ -1853,7 +1857,7 @@ public class CredentialManagerImpl implements CredentialManager,
 				}
 				catch(Exception ex){
 					String exMessage = "Failed to create a new empty Keystore to copy over the entries from the current one.";
-					throw new CMException(exMessage, ex);					
+					throw new CMException(exMessage, ex);
 				}
 
 				Enumeration<String> aliases = keystore.aliases();
@@ -1890,12 +1894,12 @@ public class CredentialManagerImpl implements CredentialManager,
 			// entries there are not encrypted, just the whole truststore
 			synchronized (truststore) {
 				fos = new FileOutputStream(truststoreFile);
-				truststore.store(fos, newMasterPassword.toCharArray());	
-			}			
-			
+				truststore.store(fos, newMasterPassword.toCharArray());
+			}
+
 			// Set the new master password as well
 			masterPassword = newMasterPassword;
-			
+
 		} catch (Exception ex) {
 			// rollback
 			keystore = oldKeystore;
@@ -2352,7 +2356,7 @@ public class CredentialManagerImpl implements CredentialManager,
 	 * <p>
 	 * Note that #fragments are preserved, as these are used to indicate HTTP
 	 * Basic Auth realms
-	 * 
+	 *
 	 * @param serviceURI
 	 *            URI for a service that is to be normalized
 	 * @return A normalized URI without query, userinfo or filename, ie. where
@@ -2391,7 +2395,7 @@ public class CredentialManagerImpl implements CredentialManager,
 	 * <code>sun.net.www.protocol.http.AuthCacheValue</code> which might not be
 	 * valid in virtual machines other than Sun Java 6. If these calls fail,
 	 * this method will log the error and return <code>false</code>.
-	 * 
+	 *
 	 * @return <code>true</code> if the JVMs cache could be reset, or
 	 *         <code>false</code> otherwise.
 	 */
@@ -2435,7 +2439,7 @@ public class CredentialManagerImpl implements CredentialManager,
 	private void loadDefaultConfigurationFiles() {
 		if (credentialManagerDirectory == null) {
 			credentialManagerDirectory = CMUtils
-					.getCredentialManagerDefaultDirectory();
+					.getCredentialManagerDefaultDirectory(applicationConfiguration);
 		}
 		if (keystoreFile == null) {
 			keystoreFile = new File(credentialManagerDirectory,
@@ -2448,16 +2452,16 @@ public class CredentialManagerImpl implements CredentialManager,
 	}
 
 	/**
-	 * Set the directory where Credential Manager's Keystore and Truststore 
+	 * Set the directory where Credential Manager's Keystore and Truststore
 	 * files will be read from. If this method is not used, the directory will
 	 * default to <TAVERNA_HOME>/security somewhere in user's home directory.
-	 * 
+	 *
 	 * If you want to use this method to change the location of Credential Manager's
-	 * configuration directory then make sure you call it before any other method on 
-	 * Credential Manager. 
-	 * 
+	 * configuration directory then make sure you call it before any other method on
+	 * Credential Manager.
+	 *
 	 * This was supposed to be done through OSGi services.
-	 * 
+	 *
 	 * @param credentialManagerDirectory
 	 * @throws CMException
 	 */
@@ -2478,18 +2482,18 @@ public class CredentialManagerImpl implements CredentialManager,
 					"Failed to open Credential Manager's directory "+credentialManagerDirectory+" to load the security files: "
 							+ e.getMessage(), e);
 		}
-			
+
 		keystoreFile = new File(credentialManagerDirectory, KEYSTORE_FILE_NAME);
 		truststoreFile = new File(credentialManagerDirectory,
 				TRUSTSTORE_FILE_NAME);
-		
+
 		// Are we resetting the directory? Has stuff been initialized yet?
 		// Then we need to reset everything else.
 		if (isInitialized){
 			masterPassword = null;
 			keystore = null;
 			truststore = null;
-			isInitialized = false;			
+			isInitialized = false;
 		}
 	}
 
@@ -2576,14 +2580,14 @@ public class CredentialManagerImpl implements CredentialManager,
 			List<MasterPasswordProvider> masterPasswordProviders) {
 		this.masterPasswordProviders = masterPasswordProviders;
 	}
-	
+
 	/**
 	 * Get the master password providers for providing the master password to
 	 * encrypt/decrypt the Credential Maager's Keystore and Truststore.
-	 * 
+	 *
 	 * @return the master password providers for providing the master password to
 	 * encrypt/decrypt the Credential Maager's Keystore and Truststore.
-	 * 
+	 *
 	 */
 	public List<MasterPasswordProvider> getMasterPasswordProviders(){
 		return masterPasswordProviders;
@@ -2599,18 +2603,18 @@ public class CredentialManagerImpl implements CredentialManager,
 			List<JavaTruststorePasswordProvider> javaTruststorePasswordProvider) {
 		this.javaTruststorePasswordProviders = javaTruststorePasswordProvider;
 	}
-	
+
 	/**
 	 * Get the Java truststore password providers for providing the password to
 	 * encrypt/decrypt the Java's default truststore.
-	 * 
+	 *
 	 * @return Java truststore providers for providing the password to
 	 * encrypt/decrypt the Java's default truststore
 	 */
 	public List<JavaTruststorePasswordProvider> getJavaTruststorePasswordProviders(){
 		return javaTruststorePasswordProviders;
 	}
-	
+
 	/**
 	 * Set the providers of username and passwords for services.
 	 * <p>
@@ -2623,14 +2627,14 @@ public class CredentialManagerImpl implements CredentialManager,
 
 	/**
 	 * Get the providers of username and passwords for services.
-	 * 
+	 *
 	 * @return the providers of username and passwords for services.
 	 *
 	 */
 	public List<ServiceUsernameAndPasswordProvider> getServiceUsernameAndPasswordProviders(){
 		return serviceUsernameAndPasswordProviders;
-	}	
-	
+	}
+
 	/**
 	 * Set the providers of trust confirmation for HTTPS connections to external services/sites.
 	 * <p>
@@ -2640,15 +2644,24 @@ public class CredentialManagerImpl implements CredentialManager,
 			List<TrustConfirmationProvider> trustConfirmationProviders) {
 		this.trustConfirmationProviders = trustConfirmationProviders;
 	}
-	
+
 	/**
 	 * Get the providers of trust confirmation for HTTPS connections to external services/sites
-	 * 
+	 *
 	 * @return the providers of trust confirmation for HTTPS connections to external services/sites
 	 *
 	 */
 	public List<TrustConfirmationProvider> getTrustConfirmationProviders(){
 		return trustConfirmationProviders;
+	}
+
+	/**
+	 * Sets the applicationConfiguration.
+	 *
+	 * @param applicationConfiguration the new value of applicationConfiguration
+	 */
+	public void setApplicationConfiguration(ApplicationConfiguration applicationConfiguration) {
+		this.applicationConfiguration = applicationConfiguration;
 	}
 
 }
