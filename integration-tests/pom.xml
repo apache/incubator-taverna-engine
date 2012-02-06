@@ -165,6 +165,16 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>com.springsource.org.aspectj.runtime</artifactId>
+			<version>1.6.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>com.springsource.org.aspectj.weaver</artifactId>
+			<version>1.6.0</version>
+		</dependency>
+		<dependency>
 			<groupId>org.objectweb.asm</groupId>
 			<artifactId>com.springsource.org.objectweb.asm</artifactId>
 			<version>2.2.3</version>
@@ -301,6 +311,11 @@
 		</dependency>
 		<dependency>
 			<groupId>uk.org.taverna.platform</groupId>
+			<artifactId>configuration</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>uk.org.taverna.platform</groupId>
 			<artifactId>data</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -338,6 +353,11 @@
 		</dependency>
 		<dependency>
 			<groupId>uk.org.taverna.scufl2</groupId>
+			<artifactId>scufl2-rdfxml</artifactId>
+			<version>${scufl2.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>uk.org.taverna.scufl2</groupId>
 			<artifactId>scufl2-ucfpackage</artifactId>
 			<version>${scufl2.version}</version>
 		</dependency>
@@ -366,6 +386,11 @@
 
 		<!-- Dependencies declared as provided by some poms - specified here to
 			ensure that they are in the local repository for the testing framework -->
+		<dependency>
+			<groupId>com.sun.xml</groupId>
+			<artifactId>com.springsource.com.sun.xml.bind</artifactId>
+			<version>2.2.0</version>
+		</dependency>
 		<dependency>
 			<groupId>com.thoughtworks.xstream</groupId>
 			<artifactId>com.springsource.com.thoughtworks.xstream</artifactId>
