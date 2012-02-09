@@ -50,9 +50,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>uk.org.taverna.platform</groupId>
-			<artifactId>database</artifactId>
-			<version>0.1.1-SNAPSHOT</version>
+			<groupId>uk.org.taverna.configuration</groupId>
+			<artifactId>taverna-database-configuration-api</artifactId>
+			<version>${taverna.configuration.version}</version>
 		</dependency>
 
 		<dependency>

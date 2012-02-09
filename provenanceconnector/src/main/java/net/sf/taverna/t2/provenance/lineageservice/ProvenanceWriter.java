@@ -43,7 +43,7 @@ import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 
 import org.apache.log4j.Logger;
 
-import uk.org.taverna.platform.database.DatabaseManager;
+import uk.org.taverna.configuration.database.DatabaseManager;
 
 /**
  * Handles all the writing out of provenance items to the database layer. Uses

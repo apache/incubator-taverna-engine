@@ -17,7 +17,7 @@
 		<listener ref="referenceSetAugmentor" bind-method="translatorsUpdated" unbind-method="translatorsUpdated" />
 	</list>
 
-    <reference id="databaseManager" interface="uk.org.taverna.platform.database.DatabaseManager"/>
+    <reference id="databaseManager" interface="uk.org.taverna.configuration.database.DatabaseManager"/>
 
 	<service ref="inMemoryReferenceService" interface="net.sf.taverna.t2.reference.ReferenceService" />
 	<service ref="hibernateReferenceService" interface="net.sf.taverna.t2.reference.ReferenceService" />

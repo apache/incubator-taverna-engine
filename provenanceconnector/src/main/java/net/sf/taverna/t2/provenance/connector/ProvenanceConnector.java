@@ -44,7 +44,7 @@ import net.sf.taverna.t2.reference.ReferenceService;
 
 import org.apache.log4j.Logger;
 
-import uk.org.taverna.platform.database.DatabaseManager;
+import uk.org.taverna.configuration.database.DatabaseManager;
 
 /**
  * Collects {@link ProvenanceItem}s as it travels up and down the dispatch stack
