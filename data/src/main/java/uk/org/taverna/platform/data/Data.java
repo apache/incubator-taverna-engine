@@ -33,10 +33,10 @@ public interface Data {
 	public String getID();
 
 	/**
-	 * The depth of the data. Depth 0 is a single value, depth 1 is a list, depth 2 a list of list,
-	 * etc.
+	 * Returns the depth of the data. Depth 0 is a single value, depth 1 is a list, depth 2 a list
+	 * of list, etc.
 	 *
-	 * @return
+	 * @return the depth of the data
 	 */
 	public int getDepth();
 
@@ -47,19 +47,43 @@ public interface Data {
 	 */
 	public boolean isReference();
 
+	/**
+	 * Returns true if this Data object represents an error.
+	 *
+	 * @return true if this Data object represents an error
+	 */
 	public boolean isError();
 
 	/**
-	 * A reference to an external source for the data.
+	 * Returns a reference to an external source for the data. Returns <code>null</code> if no
+	 * reference is available. There is no guarantee that the returned reference will be resolvable
+	 * nor that it will resolve to the same object returned by getValue().
 	 *
-	 * @return
+	 * @return a reference to an external source for the data
 	 */
 	public URI getReference();
 
+	/**
+	 * Returns the value of this Data object.
+	 *
+	 * @return
+	 */
 	public Object getValue();
 
+	/**
+	 * Returns the Data object that contains this element. Ruturns <code>null</code> if not an
+	 * elements of another Data object.
+	 *
+	 * @return the Data object that contains this element
+	 */
 	public Data getContainer();
 
+	/**
+	 * Returns a list of Data elements if the depth is > 0. If the depth is 0, <code>null</code> is
+	 * returned.
+	 *
+	 * @return a list of Data elements
+	 */
 	public List<Data> getElements();
 
 }
