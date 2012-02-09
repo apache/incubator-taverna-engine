@@ -46,8 +46,8 @@ import org.springframework.osgi.test.AbstractConfigurableBundleCreatorTests;
 import org.springframework.osgi.test.platform.OsgiPlatform;
 import org.springframework.osgi.test.platform.Platforms;
 
-import uk.org.taverna.configuration.database.DatabaseConfiguration;
 import uk.org.taverna.configuration.app.ApplicationConfiguration;
+import uk.org.taverna.configuration.database.DatabaseConfiguration;
 import uk.org.taverna.platform.data.Data;
 import uk.org.taverna.platform.report.State;
 import uk.org.taverna.platform.report.WorkflowReport;
@@ -175,6 +175,7 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 				"net.sf.taverna.t2.core, workflowmodel-api, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.core, workflowmodel-core-extensions, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.core, workflowmodel-impl, 2.0-SNAPSHOT",
+//				"net.sf.taverna.t2.infrastructure, appconfig, 3.0-SNAPSHOT",
 				"net.sf.taverna.t2.lang, ui, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.lang, observer, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.security, credential-manager, 2.0-SNAPSHOT",
