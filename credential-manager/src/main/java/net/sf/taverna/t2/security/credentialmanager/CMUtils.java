@@ -35,7 +35,7 @@ import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 
-import uk.org.taverna.platform.configuration.app.ApplicationConfiguration;
+import uk.org.taverna.configuration.app.ApplicationConfiguration;
 
 /**
  * Utility methods for Credential Manager and security-related stuff.
