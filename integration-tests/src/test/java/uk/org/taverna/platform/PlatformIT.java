@@ -46,9 +46,9 @@ import org.springframework.osgi.test.AbstractConfigurableBundleCreatorTests;
 import org.springframework.osgi.test.platform.OsgiPlatform;
 import org.springframework.osgi.test.platform.Platforms;
 
-import uk.org.taverna.platform.configuration.app.ApplicationConfiguration;
+import uk.org.taverna.configuration.database.DatabaseConfiguration;
+import uk.org.taverna.configuration.app.ApplicationConfiguration;
 import uk.org.taverna.platform.data.Data;
-import uk.org.taverna.platform.database.DatabaseConfiguration;
 import uk.org.taverna.platform.report.State;
 import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
@@ -175,16 +175,19 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 				"net.sf.taverna.t2.core, workflowmodel-api, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.core, workflowmodel-core-extensions, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.core, workflowmodel-impl, 2.0-SNAPSHOT",
-//				"net.sf.taverna.t2.infrastructure, appconfig, 3.0-SNAPSHOT",
 				"net.sf.taverna.t2.lang, ui, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.lang, observer, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.security, credential-manager, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.security, credential-manager-impl, 2.0-SNAPSHOT",
 				"net.sourceforge.cglib, com.springsource.net.sf.cglib, 2.1.3",
+				"uk.org.taverna.configuration, taverna-app-configuration-api, 0.1.0-SNAPSHOT",
+				"uk.org.taverna.configuration, taverna-app-configuration-impl, 0.1.0-SNAPSHOT",
+				"uk.org.taverna.configuration, taverna-configuration-api, 0.1.0-SNAPSHOT",
+				"uk.org.taverna.configuration, taverna-configuration-impl, 0.1.0-SNAPSHOT",
+				"uk.org.taverna.configuration, taverna-database-configuration-api, 0.1.0-SNAPSHOT",
+				"uk.org.taverna.configuration, taverna-database-configuration-impl, 0.1.0-SNAPSHOT",
 				"uk.org.taverna.platform, activity, 0.1.1-SNAPSHOT",
-				"uk.org.taverna.platform, configuration, 0.1.1-SNAPSHOT",
 				"uk.org.taverna.platform, data, 0.1.1-SNAPSHOT",
-				"uk.org.taverna.platform, database, 0.1.1-SNAPSHOT",
 				"uk.org.taverna.platform, execution, 0.1.1-SNAPSHOT",
 				"uk.org.taverna.platform, execution-local, 0.1.1-SNAPSHOT",
 				"uk.org.taverna.platform, execution-remote, 0.1.1-SNAPSHOT",
@@ -245,7 +248,7 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 
 		if (databaseConfiguration == null) {
 			ServiceReference databaseConfigurationReference = bundleContext
-					.getServiceReference("uk.org.taverna.platform.database.DatabaseConfiguration");
+					.getServiceReference("uk.org.taverna.configuration.database.DatabaseConfiguration");
 			databaseConfiguration = (DatabaseConfiguration) bundleContext
 					.getService(databaseConfigurationReference);
 			ServiceReference jndiContextManagerReference = bundleContext
@@ -253,10 +256,9 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 			jndiContextManager = (JNDIContextManager) bundleContext
 					.getService(jndiContextManagerReference);
 			ServiceReference applicationConfigurationReference = bundleContext
-					.getServiceReference("uk.org.taverna.platform.configuration.app.ApplicationConfiguration");
+					.getServiceReference("uk.org.taverna.configuration.app.ApplicationConfiguration");
 			applicationConfiguration = (ApplicationConfiguration) bundleContext
 					.getService(applicationConfigurationReference);
-//			DatabaseManager.setupDataSource(databaseConfiguration, jndiContextManager, applicationConfiguration);
 		}
 
 	}

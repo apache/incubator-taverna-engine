@@ -22,7 +22,7 @@
 
 	<reference id="referenceService" interface="net.sf.taverna.t2.reference.ReferenceService" />
 
-	<reference id="databaseConfiguration" interface="uk.org.taverna.platform.database.DatabaseConfiguration" />
+	<reference id="databaseConfiguration" interface="uk.org.taverna.configuration.database.DatabaseConfiguration" />
 
 	<set id="provenanceConnectorFactories" interface="net.sf.taverna.t2.provenance.ProvenanceConnectorFactory" cardinality="0..N"/>
 

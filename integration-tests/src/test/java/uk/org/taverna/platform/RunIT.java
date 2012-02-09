@@ -333,7 +333,7 @@ public class RunIT extends PlatformIT {
 			waitForResults(results, report, "out");
 
 			Object outResult = results.get("out").getValue();
-			assert(outResult instanceof String);
+			assertTrue(outResult instanceof String);
 			String outString = (String) outResult;
 			assertTrue(outString.contains("<name>AATM_RABIT</name>"));
 
