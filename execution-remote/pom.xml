@@ -15,7 +15,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>uk.org.taverna.platform</groupId>
-			<artifactId>execution</artifactId>
+			<artifactId>taverna-execution-api</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
