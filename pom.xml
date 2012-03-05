@@ -61,13 +61,15 @@
 	</repositories>
 	<modules>
 		<module>activity</module>
-		<module>execution</module>
 		<module>execution-local</module>
 		<module>execution-remote</module>
-		<module>run</module>
 		<module>report</module>
 		<!-- <module>integration-tests</module> -->
 		<module>data</module>
+		<module>taverna-run-api</module>
+		<module>taverna-run-impl</module>
+		<module>taverna-execution-api</module>
+		<module>taverna-execution-impl</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>

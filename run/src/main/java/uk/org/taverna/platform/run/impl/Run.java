@@ -82,7 +82,7 @@ public class Run {
 		} else {
 			workflowBundle = runProfile.getWorkflowBundle();
 		}
-		if (runProfile.getWorkflow() == null) {
+		if (runProfile.getWorkflowName() == null) {
 			if (workflowBundle.getMainWorkflow() == null) {
 				String message = "No Workflow specified in either the RunProfile or the WorkflowBundle";
 				logger.warn(message);
@@ -92,9 +92,9 @@ public class Run {
 				workflow = workflowBundle.getMainWorkflow();
 			}
 		} else {
-			workflow = runProfile.getWorkflow();
+			workflow = workflowBundle.getWorkflows().getByName(runProfile.getWorkflowName());
 		}
-		if (runProfile.getProfile() == null) {
+		if (runProfile.getProfileName() == null) {
 			if (workflowBundle.getMainProfile() == null) {
 				String message = "No Profile specified in either the RunProfile or the WorkflowBundle";
 				logger.warn(message);
@@ -104,7 +104,7 @@ public class Run {
 				profile = workflowBundle.getMainProfile();
 			}
 		} else {
-			profile = runProfile.getProfile();
+			profile = workflowBundle.getProfiles().getByName(runProfile.getProfileName());
 		}
 		if (runProfile.getInputs() == null) {
 			String message = "No workflow inputs in the RunProfile";
