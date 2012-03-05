@@ -9,7 +9,7 @@
 	<groupId>uk.org.taverna.platform</groupId>
 	<artifactId>taverna-run-impl</artifactId>
 	<packaging>bundle</packaging>
-	<name>Taverna Workflow Run Service</name>
+	<name>Taverna Platform Run Service Implementation</name>
 	<dependencies>
 		<dependency>
 			<groupId>uk.org.taverna.platform</groupId>
