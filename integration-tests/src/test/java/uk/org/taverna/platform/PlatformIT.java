@@ -65,15 +65,16 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 	protected ApplicationConfiguration applicationConfiguration;
 
 	protected String getPlatformName() {
-//		   return Platforms.FELIX;
-		   return Platforms.EQUINOX;
+		// return Platforms.FELIX;
+		return Platforms.EQUINOX;
 	}
 
 	@Override
 	protected OsgiPlatform createPlatform() {
 		OsgiPlatform platform = super.createPlatform();
 		Properties config = platform.getConfigurationProperties();
-		config.setProperty("org.osgi.framework.system.packages.extra", "com.sun.org.apache.xml.internal.utils");
+		config.setProperty("org.osgi.framework.system.packages.extra",
+				"com.sun.org.apache.xml.internal.utils");
 		return platform;
 	}
 
@@ -90,7 +91,7 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 				"javax.jms, com.springsource.javax.jms, 1.1.0",
 				"javax.mail, com.springsource.javax.mail, 1.4.0",
 				"javax.servlet, com.springsource.javax.servlet, 2.5.0",
-				"javax.transaction, com.springsource.javax.transaction, 1.1.0",//for derby client
+				"javax.transaction, com.springsource.javax.transaction, 1.1.0",// for derby client
 				"javax.wsdl, com.springsource.javax.wsdl, 1.6.1",
 				"javax.xml.bind, com.springsource.javax.xml.bind, 2.2.0",
 				"javax.xml.rpc, com.springsource.javax.xml.rpc, 1.1.0",
@@ -111,7 +112,7 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 				"org.apache.commons, com.springsource.org.apache.commons.lang, 2.5.0",
 				"org.apache.commons, com.springsource.org.apache.commons.logging, 1.1.1",
 				"org.apache.commons, com.springsource.org.apache.commons.net, 1.4.1",
-//				"org.apache.derby, derby, 10.5.3.0_1",
+				// "org.apache.derby, derby, 10.5.3.0_1",
 				"org.apache.derby, com.springsource.org.apache.derby, 10.5.1000001.764942",
 				"org.apache.derby, com.springsource.org.apache.derby.client, 10.5.1000001.764942",
 				"org.apache.derby, com.springsource.org.apache.derby.drda, 10.5.1000001.764942",
@@ -119,7 +120,7 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 				"org.apache.httpcore, com.springsource.org.apache.httpcomponents.httpcore, 4.1",
 				"org.apache.log4j, com.springsource.org.apache.log4j, 1.2.16",
 				"org.apache.ws, com.springsource.org.apache.ws.security, 1.5.8",
-//				"org.apache.ws.security, wss4j, 1.5.12",
+				// "org.apache.ws.security, wss4j, 1.5.12",
 				"org.apache.xml, com.springsource.org.apache.xml.resolver, 1.2.0",
 				"org.apache.xmlbeans, com.springsource.org.apache.xmlbeans, 2.4.0",
 				"org.apache.xmlcommons, com.springsource.org.apache.xmlcommons, 1.3.4",
@@ -144,17 +145,17 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 				"org.springframework, org.springframework.jdbc, 3.0.0.RC1",
 				"org.springframework, org.springframework.orm, 3.0.0.RC1",
 				"org.springframework, org.springframework.transaction, 3.0.0.RC1",
-//				"org.springframework, org.springframework.beans, 3.0.5.RELEASE",
-//				"org.springframework, org.springframework.core, 3.0.5.RELEASE",
-//				"org.springframework, org.springframework.context, 3.0.5.RELEASE",
-//				"org.springframework, org.springframework.transaction, 3.0.5.RELEASE",
+				// "org.springframework, org.springframework.beans, 3.0.5.RELEASE",
+				// "org.springframework, org.springframework.core, 3.0.5.RELEASE",
+				// "org.springframework, org.springframework.context, 3.0.5.RELEASE",
+				// "org.springframework, org.springframework.transaction, 3.0.5.RELEASE",
 				"org.xmlpull, com.springsource.org.xmlpull, 1.1.3.4-O",
 				"net.sf.taverna, wsdl-generic, 1.10-SNAPSHOT",
 				"net.sf.taverna.jedit, jedit-syntax, 2.2.4-SNAPSHOT",
 				"net.sf.taverna.t2.activities, apiconsumer-activity, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.activities, beanshell-activity, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.activities, biomart-activity, 2.0-SNAPSHOT",
-//				"net.sf.taverna.t2.activities, biomoby-activity, 2.0-SNAPSHOT",
+				// "net.sf.taverna.t2.activities, biomoby-activity, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.activities, dataflow-activity, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.activities, dependency-activity, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.activities, external-tool-activity, 2.0-SNAPSHOT",
@@ -175,7 +176,7 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 				"net.sf.taverna.t2.core, workflowmodel-api, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.core, workflowmodel-core-extensions, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.core, workflowmodel-impl, 2.0-SNAPSHOT",
-//				"net.sf.taverna.t2.infrastructure, appconfig, 3.0-SNAPSHOT",
+				// "net.sf.taverna.t2.infrastructure, appconfig, 3.0-SNAPSHOT",
 				"net.sf.taverna.t2.lang, ui, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.lang, observer, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.security, credential-manager, 2.0-SNAPSHOT",
@@ -206,10 +207,9 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 				"uk.org.taverna.scufl2, scufl2-validation-structural, 0.9-SNAPSHOT",
 				"net.sf.taverna.t2, results, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2, baclava, 0.1-SNAPSHOT",
-//				"net.sf.taverna.t2.taverna-commandline, taverna-commandline-common, 2.0-SNAPSHOT"
-				};
+		// "net.sf.taverna.t2.taverna-commandline, taverna-commandline-common, 2.0-SNAPSHOT"
+		};
 	}
-
 
 	protected void setup() throws Exception {
 
@@ -218,8 +218,10 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 				public String getMasterPassword(boolean firstTime) {
 					return "test";
 				}
+
 				public void setMasterPassword(String password) {
 				}
+
 				public int getProviderPriority() {
 					return 0;
 				}
@@ -237,11 +239,13 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 		}
 
 		if (workflowBundleReader == null) {
-			ServiceReference[] workflowBundleReaderReferences = bundleContext
-					.getServiceReferences("uk.org.taverna.scufl2.api.io.WorkflowBundleReader", null);
+			ServiceReference[] workflowBundleReaderReferences = bundleContext.getServiceReferences(
+					"uk.org.taverna.scufl2.api.io.WorkflowBundleReader", null);
 			for (ServiceReference serviceReference : workflowBundleReaderReferences) {
-				workflowBundleReader = (WorkflowBundleReader) bundleContext.getService(serviceReference);
-				if (workflowBundleReader.getMediaTypes().contains(T2FlowReader.APPLICATION_VND_TAVERNA_T2FLOW_XML)) {
+				workflowBundleReader = (WorkflowBundleReader) bundleContext
+						.getService(serviceReference);
+				if (workflowBundleReader.getMediaTypes().contains(
+						T2FlowReader.APPLICATION_VND_TAVERNA_T2FLOW_XML)) {
 					break;
 				}
 			}
@@ -265,17 +269,21 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 	}
 
 	public void testOsgiPlatformStarts() throws Exception {
-		System.out.println(Constants.FRAMEWORK_VENDOR + " = " + bundleContext.getProperty(Constants.FRAMEWORK_VENDOR));
-		System.out.println(Constants.FRAMEWORK_VERSION + " = " + bundleContext.getProperty(Constants.FRAMEWORK_VERSION));
-		System.out.println(Constants.FRAMEWORK_EXECUTIONENVIRONMENT + " = " + bundleContext.getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT));
-		System.out.println(Constants.OSGI_IMPL_VERSION_KEY + " = " + bundleContext.getProperty(Constants.OSGI_IMPL_VERSION_KEY));
+		System.out.println(Constants.FRAMEWORK_VENDOR + " = "
+				+ bundleContext.getProperty(Constants.FRAMEWORK_VENDOR));
+		System.out.println(Constants.FRAMEWORK_VERSION + " = "
+				+ bundleContext.getProperty(Constants.FRAMEWORK_VERSION));
+		System.out.println(Constants.FRAMEWORK_EXECUTIONENVIRONMENT + " = "
+				+ bundleContext.getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT));
+		System.out.println(Constants.OSGI_IMPL_VERSION_KEY + " = "
+				+ bundleContext.getProperty(Constants.OSGI_IMPL_VERSION_KEY));
 	}
-
 
 	public WorkflowBundle loadWorkflow(String t2FlowFile) throws Exception {
 		URL wfResource = getClass().getResource(t2FlowFile);
 		assertNotNull(wfResource);
-		return workflowBundleReader.readBundle(wfResource.openStream(), T2FlowReader.APPLICATION_VND_TAVERNA_T2FLOW_XML);
+		return workflowBundleReader.readBundle(wfResource.openStream(),
+				T2FlowReader.APPLICATION_VND_TAVERNA_T2FLOW_XML);
 	}
 
 	public File loadFile(String fileName) throws IOException, FileNotFoundException {
@@ -292,16 +300,8 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 		return file;
 	}
 
-	public void printErrors(ReferenceService referenceService, T2Reference resultReference) {
-		if (resultReference.getDepth() > 0) {
-			IdentifiedList<T2Reference> list = referenceService.getListService().getList(
-					resultReference);
-			for (T2Reference t2Reference : list) {
-				printErrors(referenceService, t2Reference);
-			}
-		} else if (resultReference.containsErrors()) {
-			ErrorDocument error = referenceService.getErrorDocumentService().getError(
-					resultReference);
+	public void printErrors(Data data) {
+			ErrorDocument error = (ErrorDocument) data.getValue();
 			String message = error.getMessage();
 			if (message != null) {
 				System.out.println(message);
@@ -315,26 +315,32 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 				System.out.println(stackTraceElementBean.getMethodName());
 				System.out.println(stackTraceElementBean.getLineNumber());
 			}
-			Set<T2Reference> errorReferences = error.getErrorReferences();
-			for (T2Reference t2Reference : errorReferences) {
-				printErrors(referenceService, t2Reference);
-			}
-		}
+//			Set<T2Reference> errorReferences = error.getErrorReferences();
+//			for (T2Reference t2Reference : errorReferences) {
+//				printErrors(referenceService, t2Reference);
+//			}
 	}
 
 	public boolean checkResult(Data result, String expectedResult) {
-//		if (result.containsErrors()) {
-//			printErrors(referenceService, result);
-//			return false;
-//		} else {
-			String resultValue = (String) result.getValue();
+		if (result.isError()) {
+			printErrors(result);
+			return false;
+		} else {
+			Object resultObject = result.getValue();
+			String resultValue = null;
+			if (resultObject instanceof byte[]) {
+				resultValue = new String((byte[]) resultObject);
+			} else {
+				resultValue = (String) resultObject;
+			}
+
 			if (resultValue.startsWith(expectedResult)) {
 				return true;
 			} else {
 				System.out.println("Expected: " + expectedResult + ", Actual: " + resultValue);
 				return false;
 			}
-//		}
+		}
 	}
 
 	public boolean waitForState(WorkflowReport report, State state) throws InterruptedException {
@@ -342,17 +348,18 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 	}
 
 	public boolean waitForState(WorkflowReport report, State state, boolean printReport)
-	throws InterruptedException {
+			throws InterruptedException {
 		int wait = 0;
 		while (!report.getState().equals(state) && wait++ < 30) {
-			if (printReport) System.out.println(report);
+			if (printReport)
+				System.out.println(report);
 			Thread.sleep(500);
 		}
 		return report.getState().equals(state);
 	}
 
 	public void waitForResults(Map<String, Data> results, WorkflowReport report, String... ports)
-	throws InterruptedException {
+			throws InterruptedException {
 		int wait = 0;
 		while (!resultsReady(results, ports) && wait++ < 20) {
 			System.out.println(report);

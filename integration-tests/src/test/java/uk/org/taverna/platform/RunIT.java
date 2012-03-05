@@ -333,6 +333,9 @@ public class RunIT extends PlatformIT {
 			waitForResults(results, report, "out");
 
 			Object outResult = results.get("out").getValue();
+			if (outResult instanceof byte[]) {
+				outResult = new String((byte[]) outResult);
+			}
 			assertTrue(outResult instanceof String);
 			String outString = (String) outResult;
 			assertTrue(outString.contains("<name>AATM_RABIT</name>"));
@@ -973,7 +976,7 @@ public class RunIT extends PlatformIT {
 			Map<String, Data> inputs = new HashMap<String, Data>();
 			File file = loadFile("/t2flow/input.txt");
 			Data data = dataService.create(file.toURI());
-			System.out.println("data.isReference()="+data.isReference());
+			assertTrue(data.isReference());
 			inputs.put("in", data);
 
 			String runId = runService.createRun(new RunProfile(executionEnvironment,
