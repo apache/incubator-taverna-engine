@@ -321,7 +321,7 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 			}
 			// Check that there are references in the set
 			if (rs.getExternalReferences().isEmpty()) {
-				throw new ReferenceServiceException("Can't render an empty reference set to a POJO");
+				throw new ReferenceServiceException("ReferenceSet " + reference + " is empty");
 			}
 
 			ReferencedDataNature dataNature = ReferencedDataNature.UNKNOWN;
@@ -350,6 +350,7 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 			// Dereference the ErrorDocument
 			ErrorDocument errorDocument = (ErrorDocument) referenceService.resolveIdentifier(
 					reference, null, context);
+			// TODO dereference referenced errors from errorDocument.getErrorReferences()
 			return errorDocument;
 		} else { // it is an IdentifiedList<T2Reference>
 			IdentifiedList<T2Reference> identifiedList = referenceService.getListService().getList(
