@@ -10,8 +10,8 @@ import uk.org.taverna.platform.execution.api.InvalidExecutionIdException;
 import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
 import uk.org.taverna.platform.report.State;
 import uk.org.taverna.platform.report.WorkflowReport;
-//import uk.org.taverna.scufl2.api.container.WorkflowBundle;
-//import uk.org.taverna.scufl2.api.profiles.Profile;
+import uk.org.taverna.scufl2.api.container.WorkflowBundle;
+import uk.org.taverna.scufl2.api.profiles.Profile;
 
 /**
  * Service for managing runs of Taverna workflows.
@@ -36,7 +36,7 @@ public interface RunService {
 	 * @return the <code>ExecutionEnvironment</code>s that can execute the specified
 	 *         <code>WorkflowBundle</code>
 	 */
-//	public Set<ExecutionEnvironment> getExecutionEnvironments(WorkflowBundle workflowBundle);
+	public Set<ExecutionEnvironment> getExecutionEnvironments(WorkflowBundle workflowBundle);
 
 	/**
 	 * Returns the <code>ExecutionEnvironment</code>s that can execute the specified
@@ -47,7 +47,7 @@ public interface RunService {
 	 * @return the <code>ExecutionEnvironment</code>s that can execute the specified
 	 *         <code>Profile</code>
 	 */
-//	public Set<ExecutionEnvironment> getExecutionEnvironments(Profile profile);
+	public Set<ExecutionEnvironment> getExecutionEnvironments(Profile profile);
 
 	/**
 	 * Creates a new run and returns the ID for the run.
