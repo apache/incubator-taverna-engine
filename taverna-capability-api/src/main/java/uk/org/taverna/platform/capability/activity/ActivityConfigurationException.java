@@ -20,7 +20,7 @@
  ******************************************************************************/
 package uk.org.taverna.platform.capability.activity;
 
-import uk.org.taverna.platform.capability.property.ConfigurationException;
+import uk.org.taverna.platform.capability.configuration.ConfigurationException;
 
 /**
  * Thrown when an activity's configuration is incorrect.

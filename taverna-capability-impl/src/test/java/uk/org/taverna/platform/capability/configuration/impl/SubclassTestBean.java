@@ -1,4 +1,4 @@
-package uk.org.taverna.platform.capability.property;
+package uk.org.taverna.platform.capability.configuration.impl;
 
 import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationBean;
 import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationProperty;

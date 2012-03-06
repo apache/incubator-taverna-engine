@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>platform</artifactId>
 		<groupId>uk.org.taverna</groupId>
-		<version>0.1.1-SNAPSHOT</version>
+		<version>0.1.2-SNAPSHOT</version>
 	</parent>
 	<groupId>uk.org.taverna.platform</groupId>
 	<artifactId>taverna-capability-api</artifactId>
@@ -19,18 +19,6 @@
 			<groupId>uk.org.taverna.scufl2</groupId>
 			<artifactId>scufl2-api</artifactId>
 			<version>${scufl2.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>uk.org.taverna.platform</groupId>
-			<artifactId>activity</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
 		</dependency>
 	</dependencies>
 	<repositories>

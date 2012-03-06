@@ -18,7 +18,7 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package uk.org.taverna.platform.capability.property;
+package uk.org.taverna.platform.capability.configuration.impl;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -26,11 +26,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static uk.org.taverna.platform.capability.property.TestUtils.annotatedBeanURI;
-import static uk.org.taverna.platform.capability.property.TestUtils.createTestConfiguration;
-import static uk.org.taverna.platform.capability.property.TestUtils.subclassTestBeanURI;
-import static uk.org.taverna.platform.capability.property.TestUtils.testBean2URI;
-import static uk.org.taverna.platform.capability.property.TestUtils.testBeanURI;
+import static uk.org.taverna.platform.capability.configuration.impl.TestUtils.annotatedBeanURI;
+import static uk.org.taverna.platform.capability.configuration.impl.TestUtils.createTestConfiguration;
+import static uk.org.taverna.platform.capability.configuration.impl.TestUtils.subclassTestBeanURI;
+import static uk.org.taverna.platform.capability.configuration.impl.TestUtils.testBean2URI;
+import static uk.org.taverna.platform.capability.configuration.impl.TestUtils.testBeanURI;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -48,8 +48,7 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-import uk.org.taverna.platform.activity.impl.ActivityServiceImpl;
-import uk.org.taverna.platform.property.ConfigurationUtils;
+import uk.org.taverna.platform.capability.activity.impl.ActivityServiceImpl;
 import uk.org.taverna.scufl2.api.configurations.Configuration;
 import uk.org.taverna.scufl2.api.configurations.ConfigurationDefinition;
 import uk.org.taverna.scufl2.api.configurations.PropertyDefinition;
@@ -100,7 +99,7 @@ public class ConfigurationUtilsTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.property.ConfigurationUtils#createPropertyDefinitions(java.lang.Class)}.
+	 * Test method for {@link uk.org.taverna.platform.capability.configuration.property.ConfigurationUtils#createPropertyDefinitions(java.lang.Class)}.
 	 */
 	@Test
 	public void testCreatePropertyDefinitions() {
@@ -582,7 +581,7 @@ public class ConfigurationUtilsTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.property.ConfigurationUtils#setConfigurationProperties(java.lang.Object, uk.org.taverna.scufl2.api.configurations.Configuration, uk.org.taverna.scufl2.api.property.PropertyResource, uk.org.taverna.scufl2.api.configurations.PropertyResourceDefinition, java.net.URI, uk.org.taverna.scufl2.api.container.WorkflowBundle)}.
+	 * Test method for {@link uk.org.taverna.platform.capability.configuration.property.ConfigurationUtils#setConfigurationProperties(java.lang.Object, uk.org.taverna.scufl2.api.configurations.Configuration, uk.org.taverna.scufl2.api.property.PropertyResource, uk.org.taverna.scufl2.api.configurations.PropertyResourceDefinition, java.net.URI, uk.org.taverna.scufl2.api.container.WorkflowBundle)}.
 	 */
 	@Test
 	public void testSetConfigurationProperties() throws Exception {

@@ -20,8 +20,8 @@
  ******************************************************************************/
 package uk.org.taverna.platform.capability.activity.impl;
 
-import static uk.org.taverna.platform.capability.property.ConfigurationUtils.createPropertyDefinitions;
-import static uk.org.taverna.platform.capability.property.ConfigurationUtils.setConfigurationProperties;
+import static uk.org.taverna.platform.capability.configuration.impl.ConfigurationUtils.createPropertyDefinitions;
+import static uk.org.taverna.platform.capability.configuration.impl.ConfigurationUtils.setConfigurationProperties;
 
 import java.net.URI;
 import java.text.MessageFormat;
@@ -44,7 +44,7 @@ import org.apache.log4j.Logger;
 import uk.org.taverna.platform.capability.activity.ActivityConfigurationException;
 import uk.org.taverna.platform.capability.activity.ActivityNotFoundException;
 import uk.org.taverna.platform.capability.activity.ActivityService;
-import uk.org.taverna.platform.capability.property.ConfigurationException;
+import uk.org.taverna.platform.capability.configuration.ConfigurationException;
 import uk.org.taverna.scufl2.api.configurations.Configuration;
 import uk.org.taverna.scufl2.api.configurations.ConfigurationDefinition;
 import uk.org.taverna.scufl2.api.configurations.PropertyDefinition;

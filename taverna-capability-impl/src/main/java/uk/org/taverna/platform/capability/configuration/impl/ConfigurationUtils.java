@@ -18,7 +18,7 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package uk.org.taverna.platform.capability.property;
+package uk.org.taverna.platform.capability.configuration.impl;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
@@ -48,6 +48,7 @@ import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationProperty;
 
 import org.jdom.input.DOMBuilder;
 
+import uk.org.taverna.platform.capability.configuration.ConfigurationException;
 import uk.org.taverna.scufl2.api.common.URITools;
 import uk.org.taverna.scufl2.api.common.WorkflowBean;
 import uk.org.taverna.scufl2.api.configurations.Configuration;
