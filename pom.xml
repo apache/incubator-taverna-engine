@@ -8,14 +8,9 @@
 	</parent>
 	<groupId>uk.org.taverna</groupId>
 	<artifactId>platform</artifactId>
-	<version>0.1.1-SNAPSHOT</version>
+	<version>0.1.2-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Taverna Platform</name>
-	<scm>
-		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/platform/uk.org.taverna.platform/trunk/</connection>
-		<developerConnection>scm:svn:https://taverna.googlecode.com/svn/taverna/platform/uk.org.taverna.platform/trunk/</developerConnection>
-		<url>http://code.google.com/p/taverna/source/browse/#svn/taverna/platform/uk.org.taverna.platform/trunk</url>
-	</scm>
 	<properties>
 		<tycho-version>0.10.0</tycho-version>
 	</properties>
@@ -60,16 +55,18 @@
 		</repository>
 	</repositories>
 	<modules>
-		<module>activity</module>
-		<module>execution-local</module>
-		<module>execution-remote</module>
-		<module>report</module>
 		<!-- <module>integration-tests</module> -->
-		<module>data</module>
+		<module>taverna-capability-api</module>
+		<module>taverna-capability-impl</module>
+		<module>taverna-data-api</module>
+		<module>taverna-data-impl</module>
+		<module>taverna-execution-api</module>
+		<module>taverna-execution-local</module>
+		<module>taverna-execution-remote</module>
+		<module>taverna-execution-impl</module>
+		<module>taverna-report-api</module>
 		<module>taverna-run-api</module>
 		<module>taverna-run-impl</module>
-		<module>taverna-execution-api</module>
-		<module>taverna-execution-impl</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>
