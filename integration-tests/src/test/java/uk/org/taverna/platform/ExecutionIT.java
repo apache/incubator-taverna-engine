@@ -28,11 +28,11 @@ import java.util.Set;
 
 import org.osgi.framework.ServiceReference;
 
-import uk.org.taverna.platform.activity.ActivityConfigurationException;
-import uk.org.taverna.platform.activity.ActivityNotFoundException;
-import uk.org.taverna.platform.data.Data;
-import uk.org.taverna.platform.dispatch.DispatchLayerConfigurationException;
-import uk.org.taverna.platform.dispatch.DispatchLayerNotFoundException;
+import uk.org.taverna.platform.capability.activity.ActivityConfigurationException;
+import uk.org.taverna.platform.capability.activity.ActivityNotFoundException;
+import uk.org.taverna.platform.data.api.Data;
+import uk.org.taverna.platform.capability.dispatch.DispatchLayerConfigurationException;
+import uk.org.taverna.platform.capability.dispatch.DispatchLayerNotFoundException;
 import uk.org.taverna.platform.execution.api.AbstractExecutionEnvironment;
 import uk.org.taverna.platform.execution.api.AbstractExecutionService;
 import uk.org.taverna.platform.execution.api.Execution;

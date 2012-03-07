@@ -24,7 +24,7 @@ import java.net.URI;
 import java.util.Map;
 import java.util.UUID;
 
-import uk.org.taverna.platform.data.Data;
+import uk.org.taverna.platform.data.api.Data;
 import uk.org.taverna.platform.report.ActivityReport;
 import uk.org.taverna.platform.report.ProcessorReport;
 import uk.org.taverna.platform.report.WorkflowReport;

@@ -23,10 +23,10 @@ package uk.org.taverna.platform.execution.api;
 import java.net.URI;
 import java.util.List;
 
-import uk.org.taverna.platform.activity.ActivityConfigurationException;
-import uk.org.taverna.platform.activity.ActivityNotFoundException;
-import uk.org.taverna.platform.dispatch.DispatchLayerConfigurationException;
-import uk.org.taverna.platform.dispatch.DispatchLayerNotFoundException;
+import uk.org.taverna.platform.capability.activity.ActivityConfigurationException;
+import uk.org.taverna.platform.capability.activity.ActivityNotFoundException;
+import uk.org.taverna.platform.capability.dispatch.DispatchLayerConfigurationException;
+import uk.org.taverna.platform.capability.dispatch.DispatchLayerNotFoundException;
 import uk.org.taverna.scufl2.api.configurations.ConfigurationDefinition;
 
 /**

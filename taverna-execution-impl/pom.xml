@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>uk.org.taverna</groupId>
 		<artifactId>platform</artifactId>
-		<version>0.1.1-SNAPSHOT</version>
+		<version>0.1.2-SNAPSHOT</version>
 	</parent>
 	<groupId>uk.org.taverna.platform</groupId>
 	<artifactId>taverna-execution-impl</artifactId>
@@ -19,7 +19,7 @@
 		</dependency>
 		<dependency>
 			<groupId>uk.org.taverna.platform</groupId>
-			<artifactId>activity</artifactId>
+			<artifactId>taverna-capability-api</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>

@@ -27,9 +27,9 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 
 import org.osgi.framework.ServiceReference;
 
-import uk.org.taverna.platform.activity.ActivityConfigurationException;
-import uk.org.taverna.platform.activity.ActivityNotFoundException;
-import uk.org.taverna.platform.activity.ActivityService;
+import uk.org.taverna.platform.capability.activity.ActivityConfigurationException;
+import uk.org.taverna.platform.capability.activity.ActivityNotFoundException;
+import uk.org.taverna.platform.capability.activity.ActivityService;
 import uk.org.taverna.scufl2.api.configurations.ConfigurationDefinition;
 
 public class ActivityIT extends PlatformIT {

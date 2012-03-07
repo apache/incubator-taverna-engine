@@ -23,7 +23,7 @@ package uk.org.taverna.platform.data.impl;
 import java.net.URI;
 import java.util.List;
 
-import uk.org.taverna.platform.data.Data;
+import uk.org.taverna.platform.data.api.Data;
 
 /**
  *

@@ -29,13 +29,9 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 import net.sf.taverna.t2.reference.ErrorDocument;
-import net.sf.taverna.t2.reference.IdentifiedList;
-import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.StackTraceElementBean;
-import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.security.credentialmanager.CredentialManager;
 import net.sf.taverna.t2.security.credentialmanager.MasterPasswordProvider;
 
@@ -48,7 +44,7 @@ import org.springframework.osgi.test.platform.Platforms;
 
 import uk.org.taverna.configuration.app.ApplicationConfiguration;
 import uk.org.taverna.configuration.database.DatabaseConfiguration;
-import uk.org.taverna.platform.data.Data;
+import uk.org.taverna.platform.data.api.Data;
 import uk.org.taverna.platform.report.State;
 import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
@@ -188,23 +184,26 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 				"uk.org.taverna.configuration, taverna-configuration-impl, 0.1.0-SNAPSHOT",
 				"uk.org.taverna.configuration, taverna-database-configuration-api, 0.1.0-SNAPSHOT",
 				"uk.org.taverna.configuration, taverna-database-configuration-impl, 0.1.0-SNAPSHOT",
-				"uk.org.taverna.platform, activity, 0.1.1-SNAPSHOT",
-				"uk.org.taverna.platform, data, 0.1.1-SNAPSHOT",
-				"uk.org.taverna.platform, execution, 0.1.1-SNAPSHOT",
-				"uk.org.taverna.platform, execution-local, 0.1.1-SNAPSHOT",
-				"uk.org.taverna.platform, execution-remote, 0.1.1-SNAPSHOT",
-				"uk.org.taverna.platform, report, 0.1.1-SNAPSHOT",
-				"uk.org.taverna.platform, run, 0.1.1-SNAPSHOT",
+				"uk.org.taverna.platform, report, 0.1.2-SNAPSHOT",
+				"uk.org.taverna.platform, data, 0.1.2-SNAPSHOT",
+				"uk.org.taverna.platform, execution-local, 0.1.2-SNAPSHOT",
+				"uk.org.taverna.platform, execution-remote, 0.1.2-SNAPSHOT",
+				"uk.org.taverna.platform, taverna-capability-api, 0.1.2-SNAPSHOT",
+				"uk.org.taverna.platform, taverna-capability-impl, 0.1.2-SNAPSHOT",
+				"uk.org.taverna.platform, taverna-execution-api, 0.1.2-SNAPSHOT",
+				"uk.org.taverna.platform, taverna-execution-impl, 0.1.2-SNAPSHOT",
+				"uk.org.taverna.platform, taverna-run-api, 0.1.2-SNAPSHOT",
+				"uk.org.taverna.platform, taverna-run-impl, 0.1.2-SNAPSHOT",
 				"uk.org.taverna.osgi.services, xml-parser-service, 0.0.1-SNAPSHOT",
 				"uk.org.taverna.osgi.services, xml-transformer-service, 0.0.1-SNAPSHOT",
 				// FIXME: Add the other scufl2 modules
-				"uk.org.taverna.scufl2, scufl2-api, 0.9-SNAPSHOT",
-				"uk.org.taverna.scufl2, scufl2-rdfxml, 0.9-SNAPSHOT",
-				"uk.org.taverna.scufl2, scufl2-ucfpackage, 0.9-SNAPSHOT",
-				"uk.org.taverna.scufl2, scufl2-t2flow, 0.9-SNAPSHOT",
-				"uk.org.taverna.scufl2, scufl2-validation, 0.9-SNAPSHOT",
-				"uk.org.taverna.scufl2, scufl2-validation-correctness, 0.9-SNAPSHOT",
-				"uk.org.taverna.scufl2, scufl2-validation-structural, 0.9-SNAPSHOT",
+				"uk.org.taverna.scufl2, scufl2-api, 0.9.2",
+				"uk.org.taverna.scufl2, scufl2-rdfxml, 0.9.2",
+				"uk.org.taverna.scufl2, scufl2-ucfpackage, 0.9.2",
+				"uk.org.taverna.scufl2, scufl2-t2flow, 0.9.2",
+				"uk.org.taverna.scufl2, scufl2-validation, 0.9.2",
+				"uk.org.taverna.scufl2, scufl2-validation-correctness, 0.9.2",
+				"uk.org.taverna.scufl2, scufl2-validation-structural, 0.9.2",
 				"net.sf.taverna.t2, results, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2, baclava, 0.1-SNAPSHOT",
 		// "net.sf.taverna.t2.taverna-commandline, taverna-commandline-common, 2.0-SNAPSHOT"

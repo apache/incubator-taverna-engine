@@ -2,10 +2,9 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<artifactId>platform</artifactId>
 		<groupId>uk.org.taverna</groupId>
-		<version>0.1.1-SNAPSHOT</version>
-		<relativePath>..</relativePath>
+		<artifactId>platform</artifactId>
+		<version>0.1.2-SNAPSHOT</version>
 	</parent>
 	<groupId>uk.org.taverna.platform</groupId>
 	<artifactId>execution-hadoop</artifactId>

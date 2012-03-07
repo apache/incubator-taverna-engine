@@ -29,7 +29,7 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
-import uk.org.taverna.platform.data.Data;
+import uk.org.taverna.platform.data.api.Data;
 import uk.org.taverna.platform.report.ActivityReport;
 import uk.org.taverna.platform.report.ProcessorReport;
 import uk.org.taverna.platform.report.WorkflowReport;

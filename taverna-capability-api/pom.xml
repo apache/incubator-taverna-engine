@@ -8,6 +8,7 @@
 	</parent>
 	<groupId>uk.org.taverna.platform</groupId>
 	<artifactId>taverna-capability-api</artifactId>
+	<packaging>bundle</packaging>
 	<name>Taverna Platform Capability API</name>
 	<dependencies>
 		<dependency>

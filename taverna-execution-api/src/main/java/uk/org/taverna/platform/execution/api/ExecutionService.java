@@ -23,7 +23,7 @@ package uk.org.taverna.platform.execution.api;
 import java.util.Map;
 import java.util.Set;
 
-import uk.org.taverna.platform.data.Data;
+import uk.org.taverna.platform.data.api.Data;
 import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.Workflow;

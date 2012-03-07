@@ -31,10 +31,10 @@ import java.util.SortedSet;
 
 import org.apache.log4j.Logger;
 
-import uk.org.taverna.platform.activity.ActivityConfigurationException;
-import uk.org.taverna.platform.activity.ActivityNotFoundException;
-import uk.org.taverna.platform.dispatch.DispatchLayerConfigurationException;
-import uk.org.taverna.platform.dispatch.DispatchLayerNotFoundException;
+import uk.org.taverna.platform.capability.activity.ActivityConfigurationException;
+import uk.org.taverna.platform.capability.activity.ActivityNotFoundException;
+import uk.org.taverna.platform.capability.dispatch.DispatchLayerConfigurationException;
+import uk.org.taverna.platform.capability.dispatch.DispatchLayerNotFoundException;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironmentService;
 import uk.org.taverna.platform.execution.api.ExecutionService;

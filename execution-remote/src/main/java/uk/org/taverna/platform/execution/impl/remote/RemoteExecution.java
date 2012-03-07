@@ -22,7 +22,7 @@ package uk.org.taverna.platform.execution.impl.remote;
 
 import java.util.Map;
 
-import uk.org.taverna.platform.data.Data;
+import uk.org.taverna.platform.data.api.Data;
 import uk.org.taverna.platform.execution.api.AbstractExecution;
 import uk.org.taverna.platform.report.ActivityReport;
 import uk.org.taverna.platform.report.ProcessorReport;

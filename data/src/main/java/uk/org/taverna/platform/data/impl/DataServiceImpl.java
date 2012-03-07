@@ -27,8 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import uk.org.taverna.platform.data.Data;
-import uk.org.taverna.platform.data.DataService;
+import uk.org.taverna.platform.data.api.Data;
+import uk.org.taverna.platform.data.api.DataService;
 
 /**
  *

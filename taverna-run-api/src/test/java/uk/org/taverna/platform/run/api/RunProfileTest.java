@@ -30,7 +30,7 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
-import uk.org.taverna.platform.data.Data;
+import uk.org.taverna.platform.data.api.Data;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
 import uk.org.taverna.platform.execution.impl.local.LocalExecutionEnvironment;
 import uk.org.taverna.platform.execution.impl.local.LocalExecutionService;

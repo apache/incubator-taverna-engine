@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>platform</artifactId>
 		<groupId>uk.org.taverna</groupId>
-		<version>0.1.1-SNAPSHOT</version>
+		<version>0.1.2-SNAPSHOT</version>
 	</parent>
 	<groupId>uk.org.taverna.platform</groupId>
 	<artifactId>integration-tests</artifactId>
@@ -195,7 +195,7 @@
 		<dependency>
 			<groupId>org.apache.log4j</groupId>
 			<artifactId>com.springsource.org.apache.log4j</artifactId>
-			<version>[1.2.15,1.3.0)</version>
+			<version>1.2.16</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -336,7 +336,7 @@
 		<!-- Taverna Platform -->
 		<dependency>
 			<groupId>uk.org.taverna.platform</groupId>
-			<artifactId>activity</artifactId>
+			<artifactId>taverna-capability-impl</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -346,12 +346,12 @@
 		</dependency>
 		<dependency>
 			<groupId>uk.org.taverna.platform</groupId>
-			<artifactId>execution</artifactId>
+			<artifactId>taverna-execution-impl</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>uk.org.taverna.platform</groupId>
-			<artifactId>run</artifactId>
+			<artifactId>taverna-run-impl</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -411,6 +411,16 @@
 
 		<!-- Dependencies declared as provided by some poms - specified here to
 			ensure that they are in the local repository for the testing framework -->
+		<dependency>
+			<groupId>commons-dbcp</groupId>
+			<artifactId>commons-dbcp</artifactId>
+			<version>1.4</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-pool</groupId>
+			<artifactId>commons-pool</artifactId>
+			<version>1.5.6</version>
+		</dependency>
 		<dependency>
 			<groupId>com.sun.xml</groupId>
 			<artifactId>com.springsource.com.sun.xml.bind</artifactId>

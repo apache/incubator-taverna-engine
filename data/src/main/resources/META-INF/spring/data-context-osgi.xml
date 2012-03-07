@@ -6,6 +6,6 @@
                                  http://www.springframework.org/schema/osgi
                                  http://www.springframework.org/schema/osgi/spring-osgi.xsd">
 
-	<service ref="dataService" interface="uk.org.taverna.platform.data.DataService" />
+	<service ref="dataService" interface="uk.org.taverna.platform.data.api.DataService" />
 
 </beans:beans>

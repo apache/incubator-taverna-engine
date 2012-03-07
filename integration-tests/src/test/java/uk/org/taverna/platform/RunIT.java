@@ -34,8 +34,8 @@ import net.sf.taverna.t2.security.credentialmanager.UsernamePassword;
 
 import org.osgi.framework.ServiceReference;
 
-import uk.org.taverna.platform.data.Data;
-import uk.org.taverna.platform.data.DataService;
+import uk.org.taverna.platform.data.api.Data;
+import uk.org.taverna.platform.data.api.DataService;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
 import uk.org.taverna.platform.report.State;
 import uk.org.taverna.platform.report.WorkflowReport;
