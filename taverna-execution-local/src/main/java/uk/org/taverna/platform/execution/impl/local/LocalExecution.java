@@ -23,22 +23,25 @@ package uk.org.taverna.platform.execution.impl.local;
 import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import net.sf.taverna.t2.facade.ResultListener;
 import net.sf.taverna.t2.facade.WorkflowInstanceFacade;
 import net.sf.taverna.t2.invocation.InvocationContext;
 import net.sf.taverna.t2.invocation.TokenOrderException;
 import net.sf.taverna.t2.invocation.WorkflowDataToken;
-import net.sf.taverna.t2.invocation.impl.InvocationContextImpl;
 import net.sf.taverna.t2.monitor.MonitorManager;
 import net.sf.taverna.t2.provenance.ProvenanceConnectorFactory;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector;
+import net.sf.taverna.t2.provenance.reporter.ProvenanceReporter;
 import net.sf.taverna.t2.reference.ErrorDocument;
 import net.sf.taverna.t2.reference.ExternalReferenceSPI;
 import net.sf.taverna.t2.reference.IdentifiedList;
@@ -60,8 +63,6 @@ import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationStrategy;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationStrategyNode;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.NamedInputPortNode;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.TerminalNode;
-
-import org.apache.log4j.Logger;
 
 import uk.org.taverna.configuration.database.DatabaseConfiguration;
 import uk.org.taverna.platform.capability.activity.ActivityService;
@@ -85,7 +86,7 @@ import uk.org.taverna.scufl2.api.profiles.Profile;
  */
 public class LocalExecution extends AbstractExecution implements ResultListener {
 
-	private static Logger logger = Logger.getLogger(LocalExecution.class);
+	private static Logger logger = Logger.getLogger(LocalExecution.class.getName());
 
 	private final WorkflowToDataflowMapper mapping;
 
@@ -102,6 +103,8 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 	private final Set<ProvenanceConnectorFactory> provenanceConnectorFactories;
 
 	private final Map<String, DataflowInputPort> inputPorts = new HashMap<String, DataflowInputPort>();
+
+	private ProvenanceConnector provenanceConnector;
 
 	/**
 	 * Constructs an Execution for executing Taverna workflows on a local Taverna Dataflow Engine.
@@ -169,7 +172,7 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 				try {
 					facade.pushData(token, portName);
 				} catch (TokenOrderException e) {
-					logger.error("Unable to push data for input " + portName, e);
+					logger.log(Level.SEVERE, "Unable to push data for input " + portName, e);
 				}
 			}
 		}
@@ -223,8 +226,6 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 	}
 
 	private InvocationContext createContext() {
-		ProvenanceConnector provenanceConnector = null;
-
 		if (databaseConfiguration.isProvenanceEnabled()) {
 			String connectorType = databaseConfiguration.getConnectorType();
 
@@ -241,10 +242,42 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 					provenanceConnector.setReferenceService(referenceService);
 				}
 			} catch (Exception exception) {
-				logger.error("Error initializing provenance connector", exception);
+				logger.log(Level.SEVERE, "Error initializing provenance connector", exception);
 			}
 		}
-		InvocationContext context = new InvocationContextImpl(referenceService, provenanceConnector);
+		InvocationContext context = new InvocationContext() {
+			private List<Object> entities = Collections
+					.synchronizedList(new ArrayList<Object>());
+
+			@Override
+			public <T> List<T> getEntities(Class<T> entityType) {
+				List<T> entitiesOfType = new ArrayList<T>();
+				synchronized (entities) {
+					for (Object entity : entities) {
+						if (entityType.isInstance(entity)) {
+							entitiesOfType.add(entityType.cast(entity));
+						}
+					}
+				}
+				return entitiesOfType;
+			}
+
+			@Override
+			public void addEntity(Object entity) {
+				entities.add(entity);
+			}
+
+			@Override
+			public ReferenceService getReferenceService() {
+				return referenceService;
+			}
+
+			@Override
+			public ProvenanceReporter getProvenanceReporter() {
+				return provenanceConnector;
+			}
+
+		};
 		if (provenanceConnector != null) {
 			provenanceConnector.setInvocationContext(context);
 		}
@@ -342,7 +375,7 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 					dataValue = referenceService.renderIdentifier(reference, byte[].class, context);
 				}
 			} catch (ReferenceServiceException rse) {
-				logger.error("Problem rendering T2Reference", rse);
+				logger.log(Level.SEVERE, "Problem rendering T2Reference", rse);
 				throw rse;
 			}
 			return dataValue;

@@ -23,8 +23,7 @@ package uk.org.taverna.platform.run.impl;
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
-
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import uk.org.taverna.platform.data.api.Data;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
@@ -46,7 +45,7 @@ import uk.org.taverna.scufl2.api.profiles.Profile;
  */
 public class Run {
 
-	private static final Logger logger = Logger.getLogger(Run.class);
+	private static final Logger logger = Logger.getLogger(Run.class.getName());
 
 	private final String ID, executionID;
 
@@ -77,7 +76,7 @@ public class Run {
 	public Run(RunProfile runProfile) throws InvalidWorkflowException, RunProfileException {
 		if (runProfile.getWorkflowBundle() == null) {
 			String message = "No WorkflowBundle specified in the RunProfile";
-			logger.warn(message);
+			logger.warning(message);
 			throw new RunProfileException(message);
 		} else {
 			workflowBundle = runProfile.getWorkflowBundle();
@@ -85,7 +84,7 @@ public class Run {
 		if (runProfile.getWorkflowName() == null) {
 			if (workflowBundle.getMainWorkflow() == null) {
 				String message = "No Workflow specified in either the RunProfile or the WorkflowBundle";
-				logger.warn(message);
+				logger.warning(message);
 				throw new RunProfileException(message);
 			} else {
 				logger.info("No Workflow specified - using the main Workflow from the WorkflowBundle");
@@ -97,7 +96,7 @@ public class Run {
 		if (runProfile.getProfileName() == null) {
 			if (workflowBundle.getMainProfile() == null) {
 				String message = "No Profile specified in either the RunProfile or the WorkflowBundle";
-				logger.warn(message);
+				logger.warning(message);
 				throw new RunProfileException(message);
 			} else {
 				logger.info("No Profile specified - using the main Profile from the WorkflowBundle");
@@ -113,7 +112,7 @@ public class Run {
 		inputs = runProfile.getInputs();
 		if (runProfile.getExecutionEnvironment() == null) {
 			String message = "No ExecutionEnvironment specified in the RunProfile";
-			logger.warn(message);
+			logger.warning(message);
 			throw new RunProfileException(message);
 		}
 		executionEnvironment = runProfile.getExecutionEnvironment();
@@ -127,7 +126,7 @@ public class Run {
 		} catch (InvalidExecutionIdException e) {
 			String message = "Error while creating a execution on the "
 					+ executionEnvironment.getName();
-			logger.error(message);
+			logger.severe(message);
 			throw new RuntimeException(message, e);
 		}
 	}

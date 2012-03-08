@@ -27,13 +27,12 @@ import java.net.URI;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import net.sf.taverna.t2.workflowmodel.Configurable;
 import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationBean;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayer;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayerFactory;
-
-import org.apache.log4j.Logger;
 
 import uk.org.taverna.platform.capability.configuration.ConfigurationException;
 import uk.org.taverna.platform.capability.dispatch.DispatchLayerConfigurationException;
@@ -52,7 +51,7 @@ import uk.org.taverna.scufl2.api.property.PropertyException;
  */
 public class DispatchLayerServiceImpl implements DispatchLayerService {
 
-	private static Logger logger = Logger.getLogger(DispatchLayerServiceImpl.class);
+	private static Logger logger = Logger.getLogger(DispatchLayerServiceImpl.class.getName());
 
 	private List<DispatchLayerFactory> dispatchLayerFactories;
 
@@ -97,12 +96,12 @@ public class DispatchLayerServiceImpl implements DispatchLayerService {
 					String message = MessageFormat.format(
 							"Expected a configuration for {0} but got a configuration for {1}",
 							uri, scufl2DispatchLayer.getConfigurableType());
-					logger.debug(message);
+					logger.fine(message);
 					throw new DispatchLayerConfigurationException(message);
 				}
 			} else {
 				String message = "Configuration does not configure an DispatchLayer";
-				logger.debug(message);
+				logger.fine(message);
 				throw new DispatchLayerConfigurationException(message);
 			}
 			// create the configuration bean

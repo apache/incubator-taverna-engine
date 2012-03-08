@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import net.sf.taverna.t2.workflowmodel.Configurable;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
@@ -38,8 +39,6 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityFactory;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityInputPort;
 import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationBean;
-
-import org.apache.log4j.Logger;
 
 import uk.org.taverna.platform.capability.activity.ActivityConfigurationException;
 import uk.org.taverna.platform.capability.activity.ActivityNotFoundException;
@@ -57,7 +56,7 @@ import uk.org.taverna.scufl2.api.property.PropertyException;
 
 public class ActivityServiceImpl implements ActivityService {
 
-	private static Logger logger = Logger.getLogger(ActivityServiceImpl.class);
+	private static Logger logger = Logger.getLogger(ActivityServiceImpl.class.getName());
 
 	private List<ActivityFactory> activityFactories;
 
@@ -108,12 +107,12 @@ public class ActivityServiceImpl implements ActivityService {
 					String message = MessageFormat.format(
 							"Expected a configuration for {0} but got a configuration for {1}",
 							uri, scufl2Activity.getConfigurableType());
-					logger.debug(message);
+					logger.fine(message);
 					throw new ActivityConfigurationException(message);
 				}
 			} else {
 				String message = "Configuration does not configure an Activity";
-				logger.debug(message);
+				logger.fine(message);
 				throw new ActivityConfigurationException(message);
 			}
 			// create the configuration bean

@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 
 import net.sf.taverna.t2.lang.observer.Observable;
 import net.sf.taverna.t2.lang.observer.Observer;
@@ -36,8 +37,6 @@ import net.sf.taverna.t2.monitor.MonitorableProperty;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
 import net.sf.taverna.t2.workflowmodel.Processor;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
-
-import org.apache.log4j.Logger;
 
 import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
 import uk.org.taverna.platform.report.ActivityReport;
@@ -51,7 +50,7 @@ import uk.org.taverna.platform.report.WorkflowReport;
  */
 public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 
-	private static final Logger logger = Logger.getLogger(LocalExecutionMonitor.class);
+	private static final Logger logger = Logger.getLogger(LocalExecutionMonitor.class.getName());
 
 	private Map<String, Object> dataflowObjects;
 
@@ -107,7 +106,7 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 				AddPropertiesMessage addMessage = (AddPropertiesMessage) message;
 				addPropertiesToNode(owningProcess, addMessage.getNewProperties());
 			} else {
-				logger.warn("Unknown message " + message + " from " + sender);
+				logger.warning("Unknown message " + message + " from " + sender);
 			}
 		}
 	}
