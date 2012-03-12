@@ -9,7 +9,7 @@
 	<groupId>uk.org.taverna.platform</groupId>
 	<artifactId>taverna-execution-remote</artifactId>
 	<packaging>bundle</packaging>
-	<name>Taverna Remote Workflow Execution Service</name>
+	<name>Taverna Platform Remote Execution Service</name>
 	<description>An Execution Service for executing Taverna workflows on a Taverna Server
 	</description>
 	<dependencies>

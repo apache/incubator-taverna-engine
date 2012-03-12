@@ -9,6 +9,7 @@
 	<groupId>uk.org.taverna.platform</groupId>
 	<artifactId>taverna-data-impl</artifactId>
 	<packaging>bundle</packaging>
+	<name>Taverna Platform Data Implementation</name>
 	<dependencies>
 		<dependency>
 			<groupId>uk.org.taverna.platform</groupId>
