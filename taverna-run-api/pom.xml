@@ -40,7 +40,7 @@
 		</dependency>
 		<dependency>
 			<groupId>uk.org.taverna.platform</groupId>
-			<artifactId>execution-local</artifactId>
+			<artifactId>taverna-execution-local</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
