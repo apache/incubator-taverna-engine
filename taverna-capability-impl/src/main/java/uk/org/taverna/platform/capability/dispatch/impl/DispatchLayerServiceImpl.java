@@ -34,10 +34,10 @@ import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationBean;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayer;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayerFactory;
 
-import uk.org.taverna.platform.capability.configuration.ConfigurationException;
-import uk.org.taverna.platform.capability.dispatch.DispatchLayerConfigurationException;
-import uk.org.taverna.platform.capability.dispatch.DispatchLayerNotFoundException;
-import uk.org.taverna.platform.capability.dispatch.DispatchLayerService;
+import uk.org.taverna.platform.capability.api.ConfigurationException;
+import uk.org.taverna.platform.capability.api.DispatchLayerConfigurationException;
+import uk.org.taverna.platform.capability.api.DispatchLayerNotFoundException;
+import uk.org.taverna.platform.capability.api.DispatchLayerService;
 import uk.org.taverna.scufl2.api.configurations.Configuration;
 import uk.org.taverna.scufl2.api.configurations.ConfigurationDefinition;
 import uk.org.taverna.scufl2.api.configurations.PropertyResourceDefinition;

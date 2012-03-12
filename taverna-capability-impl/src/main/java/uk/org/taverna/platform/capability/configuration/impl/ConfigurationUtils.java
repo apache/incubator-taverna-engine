@@ -48,7 +48,7 @@ import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationProperty;
 
 import org.jdom.input.DOMBuilder;
 
-import uk.org.taverna.platform.capability.configuration.ConfigurationException;
+import uk.org.taverna.platform.capability.api.ConfigurationException;
 import uk.org.taverna.scufl2.api.common.URITools;
 import uk.org.taverna.scufl2.api.common.WorkflowBean;
 import uk.org.taverna.scufl2.api.configurations.Configuration;

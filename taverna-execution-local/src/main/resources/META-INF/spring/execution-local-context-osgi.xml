@@ -14,9 +14,9 @@
 
 	<reference id="workflowModelEdits" interface="net.sf.taverna.t2.workflowmodel.Edits" />
 
-	<reference id="activityService" interface="uk.org.taverna.platform.capability.activity.ActivityService" />
+	<reference id="activityService" interface="uk.org.taverna.platform.capability.api.ActivityService" />
 
-	<reference id="dispatchLayerService" interface="uk.org.taverna.platform.capability.dispatch.DispatchLayerService" />
+	<reference id="dispatchLayerService" interface="uk.org.taverna.platform.capability.api.DispatchLayerService" />
 
 	<reference id="dataService" interface="uk.org.taverna.platform.data.DataService" />
 

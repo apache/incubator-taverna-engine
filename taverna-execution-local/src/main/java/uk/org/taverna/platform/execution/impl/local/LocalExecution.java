@@ -65,10 +65,10 @@ import net.sf.taverna.t2.workflowmodel.processor.iteration.NamedInputPortNode;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.TerminalNode;
 
 import uk.org.taverna.configuration.database.DatabaseConfiguration;
-import uk.org.taverna.platform.capability.activity.ActivityService;
+import uk.org.taverna.platform.capability.api.ActivityService;
+import uk.org.taverna.platform.capability.api.DispatchLayerService;
 import uk.org.taverna.platform.data.api.Data;
 import uk.org.taverna.platform.data.api.DataService;
-import uk.org.taverna.platform.capability.dispatch.DispatchLayerService;
 import uk.org.taverna.platform.execution.api.AbstractExecution;
 import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
 import uk.org.taverna.platform.report.ActivityReport;

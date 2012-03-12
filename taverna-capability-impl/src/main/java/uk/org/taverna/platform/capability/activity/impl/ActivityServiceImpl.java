@@ -40,10 +40,10 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityFactory;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityInputPort;
 import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationBean;
 
-import uk.org.taverna.platform.capability.activity.ActivityConfigurationException;
-import uk.org.taverna.platform.capability.activity.ActivityNotFoundException;
-import uk.org.taverna.platform.capability.activity.ActivityService;
-import uk.org.taverna.platform.capability.configuration.ConfigurationException;
+import uk.org.taverna.platform.capability.api.ActivityConfigurationException;
+import uk.org.taverna.platform.capability.api.ActivityNotFoundException;
+import uk.org.taverna.platform.capability.api.ActivityService;
+import uk.org.taverna.platform.capability.api.ConfigurationException;
 import uk.org.taverna.scufl2.api.configurations.Configuration;
 import uk.org.taverna.scufl2.api.configurations.ConfigurationDefinition;
 import uk.org.taverna.scufl2.api.configurations.PropertyDefinition;

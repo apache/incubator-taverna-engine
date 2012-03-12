@@ -18,9 +18,8 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package uk.org.taverna.platform.capability.activity;
+package uk.org.taverna.platform.capability.api;
 
-import uk.org.taverna.platform.capability.configuration.ConfigurationException;
 
 /**
  * Thrown when an activity's configuration is incorrect.
