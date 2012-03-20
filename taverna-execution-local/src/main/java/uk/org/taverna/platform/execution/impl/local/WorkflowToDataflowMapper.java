@@ -360,12 +360,11 @@ public class WorkflowToDataflowMapper {
 		if (activityType.equals(NESTED_WORKFLOW_URI)) {
 			activity = activityService.createActivity(activityType, null);
 			try {
-				PropertyReference propertyReference = configuration.getPropertyResource()
-						.getPropertyAsReference(NESTED_WORKFLOW_URI.resolve("#workflow"));
-				URI dataflowURI = propertyReference.getResourceURI();
-				Workflow workflow = (Workflow) uriTools.resolveUri(dataflowURI, workflowBundle);
-				Dataflow dataflow = getDataflow(workflow);
-				((Configurable) activity).configure(dataflow);
+				URI workflowURI = configuration.getPropertyResource().getPropertyAsResourceURI(NESTED_WORKFLOW_URI.resolve("#workflow"));
+				URI profileURI = uriTools.uriForBean(profile);
+				Workflow nestedWorkflow = (Workflow) uriTools.resolveUri(profileURI.resolve(workflowURI), workflowBundle);
+				Dataflow nestedDataflow = getDataflow(nestedWorkflow);
+				((Configurable) activity).configure(nestedDataflow);
 			} catch (ConfigurationException e) {
 				throw new ActivityConfigurationException(e);
 			} catch (UnexpectedPropertyException e) {

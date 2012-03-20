@@ -106,10 +106,10 @@ public abstract class AbstractExecution implements Execution {
 			if (activityType.equals(NESTED_WORKFLOW_URI)) {
 				Configuration configuration = scufl2Tools.configurationFor(boundActivity, profile);
 				try {
-					PropertyReference propertyReference = configuration.getPropertyResource().getPropertyAsReference(NESTED_WORKFLOW_URI.resolve("#workflow"));
-					URI dataflowURI = propertyReference.getResourceURI();
-					Workflow subWorkflow = (Workflow) uriTools.resolveUri(dataflowURI, workflowBundle);
-					activityReport.addChildReport(generateWorkflowReport(subWorkflow));
+					URI workflowURI = configuration.getPropertyResource().getPropertyAsResourceURI(NESTED_WORKFLOW_URI.resolve("#workflow"));
+					URI profileURI = uriTools.uriForBean(profile);
+					Workflow nestedWorkflow = (Workflow) uriTools.resolveUri(profileURI.resolve(workflowURI), workflowBundle);
+					activityReport.addChildReport(generateWorkflowReport(nestedWorkflow));
 				} catch (UnexpectedPropertyException e) {
 					e.printStackTrace();
 				} catch (PropertyNotFoundException e) {
