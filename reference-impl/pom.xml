@@ -58,12 +58,6 @@
 			<groupId>uk.org.taverna.configuration</groupId>
 			<artifactId>taverna-database-configuration-api</artifactId>
 			<version>${taverna.configuration.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.apache.derby</groupId>
-					<artifactId>com.springsource.org.apache.derby</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 		<dependency>
