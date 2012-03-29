@@ -71,7 +71,7 @@ public interface Data {
 	public Object getValue();
 
 	/**
-	 * Returns the Data object that contains this element. Ruturns <code>null</code> if not an
+	 * Returns the Data object that contains this element. Returns <code>null</code> if not an
 	 * elements of another Data object.
 	 *
 	 * @return the Data object that contains this element
