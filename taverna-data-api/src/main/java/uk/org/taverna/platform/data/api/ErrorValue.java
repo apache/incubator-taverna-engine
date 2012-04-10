@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2011 The University of Manchester
+ * Copyright (C) 2012 The University of Manchester
  *
  *  Modifications to the initial code base are copyright of their
  *  respective authors, or their employers as appropriate.
@@ -24,50 +24,38 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Service for managing Data consumed and produced by a workflow.
+ * Value produced when an error has occurred.
  *
  * @author David Withers
  */
-public interface DataService {
+public interface ErrorValue {
 
 	/**
-	 * Returns the Data for the ID. Returns <code>null</code> if there is no Data for the ID.
+	 * Returns the error message.
 	 *
-	 * @param ID
-	 *            the data identifier
-	 * @return the Data for the ID
+	 * @return the error message
 	 */
-	public Data get(String ID);
+	public String getMessage();
 
 	/**
-	 * Deletes the Data for the ID. Returns <code>true</code> if Data existed for the ID and was
-	 * deleted, false otherwise.
+	 * Returns the exception message if the error was caused by an Exception.
 	 *
-	 * @param ID
-	 *            the data identifier
-	 * @return
+	 * @return the exception message
 	 */
-	public boolean delete(String ID);
+	public String getExceptionMessage();
 
 	/**
-	 * Creates a new Data object.
+	 * Returns the exception stack trace if the error was caused by an Exception.
 	 *
-	 * @param value
-	 *            the value of the Data
-	 * @return
+	 * @return the exception stack trace
 	 */
-	public Data create(Object value);
+	public List<StackTraceElement> getStackTrace();
 
 	/**
-	 * Creates a value for storing error information.
+	 * Returns other ErrorValues that may have caused this error.
 	 *
-	 * @param message
-	 * @param exceptionMessage
-	 * @param stackTrace
-	 * @param causes
-	 * @return
+	 * @return ErrorValues that may have caused this error
 	 */
-	public ErrorValue createErrorValue(String message, String exceptionMessage,
-			List<StackTraceElement> stackTrace, Set<ErrorValue> causes);
+	public Set<ErrorValue> getCauses();
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2011 The University of Manchester
+ * Copyright (C) 2012 The University of Manchester
  *
  *  Modifications to the initial code base are copyright of their
  *  respective authors, or their employers as appropriate.
@@ -18,56 +18,51 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package uk.org.taverna.platform.data.api;
+package uk.org.taverna.platform.data.impl;
 
 import java.util.List;
 import java.util.Set;
 
+import uk.org.taverna.platform.data.api.ErrorValue;
+
 /**
- * Service for managing Data consumed and produced by a workflow.
+ * Implementation of an <code>ErrorValue</code>.
  *
  * @author David Withers
  */
-public interface DataService {
+public class ErrorValueImpl implements ErrorValue {
 
-	/**
-	 * Returns the Data for the ID. Returns <code>null</code> if there is no Data for the ID.
-	 *
-	 * @param ID
-	 *            the data identifier
-	 * @return the Data for the ID
-	 */
-	public Data get(String ID);
+	private final String message;
+	private final String exceptionMessage;
+	private final List<StackTraceElement> stackTrace;
+	private final Set<ErrorValue> causes;
 
-	/**
-	 * Deletes the Data for the ID. Returns <code>true</code> if Data existed for the ID and was
-	 * deleted, false otherwise.
-	 *
-	 * @param ID
-	 *            the data identifier
-	 * @return
-	 */
-	public boolean delete(String ID);
+	public ErrorValueImpl(String message, String exceptionMessage,
+			List<StackTraceElement> stackTrace, Set<ErrorValue> causes) {
+		this.message = message;
+		this.exceptionMessage = exceptionMessage;
+		this.stackTrace = stackTrace;
+		this.causes = causes;
+	}
 
-	/**
-	 * Creates a new Data object.
-	 *
-	 * @param value
-	 *            the value of the Data
-	 * @return
-	 */
-	public Data create(Object value);
+	@Override
+	public String getMessage() {
+		return message;
+	}
 
-	/**
-	 * Creates a value for storing error information.
-	 *
-	 * @param message
-	 * @param exceptionMessage
-	 * @param stackTrace
-	 * @param causes
-	 * @return
-	 */
-	public ErrorValue createErrorValue(String message, String exceptionMessage,
-			List<StackTraceElement> stackTrace, Set<ErrorValue> causes);
+	@Override
+	public String getExceptionMessage() {
+		return exceptionMessage;
+	}
+
+	@Override
+	public List<StackTraceElement> getStackTrace() {
+		return stackTrace;
+	}
+
+	@Override
+	public Set<ErrorValue> getCauses() {
+		return causes;
+	}
 
 }

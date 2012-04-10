@@ -24,7 +24,7 @@ import java.net.URI;
 import java.util.List;
 
 /**
- *
+ * The data output by a workflow port.
  *
  * @author David Withers
  */
@@ -48,9 +48,9 @@ public interface Data {
 	public boolean isReference();
 
 	/**
-	 * Returns true if this Data object represents an error.
+	 * Returns true if the value is an {@link ErrorValue}.
 	 *
-	 * @return true if this Data object represents an error
+	 * @return true if the value is an <code>ErrorValue</code>
 	 */
 	public boolean isError();
 

@@ -25,19 +25,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import uk.org.taverna.platform.data.api.Data;
 import uk.org.taverna.platform.data.api.DataService;
+import uk.org.taverna.platform.data.api.ErrorValue;
 
 /**
- *
+ * Basic implementation of a DataService that stores data in-memory.
  *
  * @author David Withers
  */
 public class DataServiceImpl implements DataService {
-
-	private static final String ERROR_CLASS = "net.sf.taverna.t2.reference.ErrorDocument";
 
 	private Map<String, Data> store = new HashMap<String, Data>();
 
@@ -62,13 +62,15 @@ public class DataServiceImpl implements DataService {
 			return store(new DataImpl(UUID.randomUUID().toString(), dataList));
 		} else if (value instanceof URI) {
 			return store(new DataImpl(UUID.randomUUID().toString(), (URI) value));
-		} else if (value.getClass().getName().equals(ERROR_CLASS)) {
-			DataImpl data = new DataImpl(UUID.randomUUID().toString(), value);
-			data.setError(true);
-			return store(new DataImpl(UUID.randomUUID().toString(), data));
 		} else {
 			return store(new DataImpl(UUID.randomUUID().toString(), value));
 		}
+	}
+
+	@Override
+	public ErrorValue createErrorValue(String message, String exceptionMessage,
+			List<StackTraceElement> stackTrace, Set<ErrorValue> causes) {
+		return new ErrorValueImpl(message, exceptionMessage, stackTrace, causes);
 	}
 
 	private Data store(Data data) {

@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -49,6 +50,7 @@ import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.ReferenceServiceException;
 import net.sf.taverna.t2.reference.ReferenceSet;
 import net.sf.taverna.t2.reference.ReferencedDataNature;
+import net.sf.taverna.t2.reference.StackTraceElementBean;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.reference.T2ReferenceType;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
@@ -69,6 +71,7 @@ import uk.org.taverna.platform.capability.api.ActivityService;
 import uk.org.taverna.platform.capability.api.DispatchLayerService;
 import uk.org.taverna.platform.data.api.Data;
 import uk.org.taverna.platform.data.api.DataService;
+import uk.org.taverna.platform.data.api.ErrorValue;
 import uk.org.taverna.platform.execution.api.AbstractExecution;
 import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
 import uk.org.taverna.platform.report.ActivityReport;
@@ -380,11 +383,7 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 			}
 			return dataValue;
 		} else if (reference.getReferenceType() == T2ReferenceType.ErrorDocument) {
-			// Dereference the ErrorDocument
-			ErrorDocument errorDocument = (ErrorDocument) referenceService.resolveIdentifier(
-					reference, null, context);
-			// TODO dereference referenced errors from errorDocument.getErrorReferences()
-			return errorDocument;
+			return createErrorValue(reference);
 		} else { // it is an IdentifiedList<T2Reference>
 			IdentifiedList<T2Reference> identifiedList = referenceService.getListService().getList(
 					reference);
@@ -396,6 +395,47 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 			}
 			return list;
 		}
+	}
+
+	private ErrorValue createErrorValue(T2Reference reference) {
+		// Dereference the ErrorDocument
+		ErrorDocument errorDocument = referenceService.getErrorDocumentService().getError(reference);
+		List<StackTraceElement> stackTrace = getStackTrace(errorDocument.getStackTraceStrings());
+		Set<ErrorValue> errorValues = new HashSet<ErrorValue>();
+		// dereference error references
+		Set<T2Reference> errorReferences = errorDocument.getErrorReferences();
+		for (T2Reference errorReference : errorReferences) {
+			if (errorReference.getReferenceType() == T2ReferenceType.ErrorDocument) {
+				errorValues.add(createErrorValue(errorReference));
+			} else if (errorReference.getReferenceType() == T2ReferenceType.IdentifiedList) {
+				errorValues.addAll(createErrorValues(errorReference));
+			}
+		}
+		return dataService.createErrorValue(errorDocument.getMessage(), errorDocument.getExceptionMessage(),
+				stackTrace, errorValues);
+	}
+
+	private List<ErrorValue> createErrorValues(T2Reference reference) {
+		List<ErrorValue> errorValues = new ArrayList<ErrorValue>();
+		IdentifiedList<T2Reference> identifiedList = referenceService.getListService().getList(
+				reference);
+		for (T2Reference t2Reference : identifiedList) {
+			if (t2Reference.getReferenceType() == T2ReferenceType.ErrorDocument) {
+				errorValues.add(createErrorValue(t2Reference));
+			} else if (t2Reference.getReferenceType() == T2ReferenceType.IdentifiedList) {
+				errorValues.addAll(createErrorValues(t2Reference));
+			}
+		}
+		return errorValues;
+	}
+
+	private List<StackTraceElement> getStackTrace(List<StackTraceElementBean> stackTraceBeans) {
+		List<StackTraceElement> stackTrace = new ArrayList<StackTraceElement>();
+		for (StackTraceElementBean stackTraceBean : stackTraceBeans) {
+			stackTrace.add(new StackTraceElement(stackTraceBean.getClassName(), stackTraceBean.getMethodName(),
+					stackTraceBean.getFileName(), stackTraceBean.getLineNumber()));
+		}
+		return stackTrace;
 	}
 
 }

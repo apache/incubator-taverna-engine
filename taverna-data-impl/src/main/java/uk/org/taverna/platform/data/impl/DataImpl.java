@@ -24,9 +24,10 @@ import java.net.URI;
 import java.util.List;
 
 import uk.org.taverna.platform.data.api.Data;
+import uk.org.taverna.platform.data.api.ErrorValue;
 
 /**
- *
+ * Implementation of a Data object.
  *
  * @author David Withers
  */
@@ -41,8 +42,6 @@ public class DataImpl implements Data {
 	private Data container;
 
 	private List<Data> elements;
-
-	private boolean error;
 
 	private String mimeType;
 
@@ -110,10 +109,7 @@ public class DataImpl implements Data {
 
 	@Override
 	public boolean isError() {
-		return error;
+		return value instanceof ErrorValue;
 	}
 
-	public void setError(boolean error) {
-		this.error = error;
-	}
 }
