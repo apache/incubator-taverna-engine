@@ -352,6 +352,9 @@ public class WorkflowToDataflowMapper {
 				.get(processorBinding.getBoundProcessor());
 		Activity scufl2Activity = processorBinding.getBoundActivity();
 		URI activityType = scufl2Activity.getConfigurableType();
+		if (!activityService.activityExists(activityType)) {
+			throw new ActivityNotFoundException("No activity exists for " + activityType);
+		}
 		Configuration configuration = scufl2Tools.configurationFor(scufl2Activity, profile);
 
 		// create the activity
