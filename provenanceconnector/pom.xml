@@ -5,7 +5,7 @@
     <parent>
         <groupId>net.sf.taverna.t2</groupId>
         <artifactId>core</artifactId>
-        <version>2.0-SNAPSHOT</version>
+        <version>2.0.0</version>
     </parent>
     <groupId>net.sf.taverna.t2.core</groupId>
     <artifactId>provenanceconnector</artifactId>
@@ -20,12 +20,7 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Export-Package>
-						!net.sf.taverna.t2.provenance.vocabulary,
-						!net.sf.taverna.t2.provenance.reporter,
-						!net.sf.taverna.t2.provenance.item,
-						net.sf.taverna.t2.provenance.*,org.openprovenance.model.*,org.tupeloproject.*
-						</Export-Package>
+						<Private-Package>org.openprovenance.model.*,org.tupeloproject.*</Private-Package>
 						<Import-Package>!com.sun.xml.bind.marshaller.*,!org.jvnet.jaxb2_commons.lang.*,*</Import-Package>
 					</instructions>
 				</configuration>
