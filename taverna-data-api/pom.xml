@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>uk.org.taverna</groupId>
 		<artifactId>platform</artifactId>
-		<version>0.1.2-SNAPSHOT</version>
+		<version>0.1.2</version>
 	</parent>
 	<groupId>uk.org.taverna.platform</groupId>
 	<artifactId>taverna-data-api</artifactId>

@@ -4,56 +4,13 @@
 	<parent>
 		<groupId>net.sf.taverna</groupId>
 		<artifactId>taverna-parent</artifactId>
-		<version>3.0-SNAPSHOT</version>
+		<version>3.0.0</version>
 	</parent>
 	<groupId>uk.org.taverna</groupId>
 	<artifactId>platform</artifactId>
-	<version>0.1.2-SNAPSHOT</version>
+	<version>0.1.2</version>
 	<packaging>pom</packaging>
 	<name>Taverna Platform</name>
-	<properties>
-		<tycho-version>0.10.0</tycho-version>
-	</properties>
-	<!-- <build>
-		<plugins>
-			<plugin>
-				<groupId>org.sonatype.tycho</groupId>
-				<artifactId>tycho-maven-plugin</artifactId>
-				<version>${tycho-version}</version>
-				<extensions>true</extensions>
-			</plugin>
-			<plugin>
-				<groupId>org.sonatype.tycho</groupId>
-				<artifactId>target-platform-configuration</artifactId>
-				<version>${tycho-version}</version>
-				<configuration>
-					<resolver>p2</resolver>
-					<pomDependencies>consider</pomDependencies>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build> -->
-	<repositories>
-		<repository>
-			<releases />
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<id>mygrid-repository</id>
-			<name>myGrid Repository</name>
-			<url>http://www.mygrid.org.uk/maven/repository
-			</url>
-		</repository>
-		<repository>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-			<snapshots />
-			<id>mygrid-snapshot-repository</id>
-			<name>myGrid Snapshot Repository</name>
-			<url>http://www.mygrid.org.uk/maven/snapshot-repository</url>
-		</repository>
-	</repositories>
 	<modules>
 		<!-- <module>integration-tests</module> -->
 		<module>taverna-capability-api</module>
@@ -83,4 +40,25 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+	<repositories>
+		<repository>
+			<releases />
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>mygrid-repository</id>
+			<name>myGrid Repository</name>
+			<url>http://www.mygrid.org.uk/maven/repository
+			</url>
+		</repository>
+		<repository>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots />
+			<id>mygrid-snapshot-repository</id>
+			<name>myGrid Snapshot Repository</name>
+			<url>http://www.mygrid.org.uk/maven/snapshot-repository</url>
+		</repository>
+	</repositories>
 </project>

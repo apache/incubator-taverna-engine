@@ -350,8 +350,7 @@ public class ConfigurationUtils {
 					if (!literalType.equals(type)) {
 						throw new ConfigurationException(MessageFormat.format(
 								"Expected property {0} to have type {1} but was {2}",
-								propertyDefinition.getName(),
-								dataPropertyDefinition.getLiteralType(), literal.getLiteralType()));
+								propertyDefinition.getName(), type, literalType));
 					}
 					if (type.equals(PropertyLiteral.XSD_STRING)) {
 						if (propertyType.isEnum()) {
