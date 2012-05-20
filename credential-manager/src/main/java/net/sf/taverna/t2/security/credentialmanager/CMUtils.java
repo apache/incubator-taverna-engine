@@ -74,6 +74,18 @@ public class CMUtils {
 		return uri;
 	}
 
+	public static URI setFragmentForURI(URI uri, String fragment)
+			throws URISyntaxException {
+		return new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost(),
+				uri.getPort(), uri.getPath(), uri.getQuery(), fragment);
+	}
+
+	public static URI setUserInfoForURI(URI uri, String userinfo)
+			throws URISyntaxException {
+		return new URI(uri.getScheme(), userinfo, uri.getHost(), uri.getPort(),
+				uri.getPath(), uri.getQuery(), uri.getFragment());
+	}
+
     /**
      * Convert the certificate object into an X509Certificate object.
      */

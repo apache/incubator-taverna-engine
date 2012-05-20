@@ -802,7 +802,7 @@ public class CredentialManagerImpl implements CredentialManager,
 					// Look up the no-fragment uri as an additional mapping
 					URI noFragment;
 					try {
-						noFragment = setFragmentForURI(serviceURI, null);
+						noFragment = CMUtils.setFragmentForURI(serviceURI, null);
 					} catch (URISyntaxException e) {
 						logger.warn("Could not reset fragment for service URI "
 								+ serviceURI);
@@ -838,7 +838,7 @@ public class CredentialManagerImpl implements CredentialManager,
 
 		try {
 			serviceURI = serviceURI.normalize();
-			serviceURI = setUserInfoForURI(serviceURI, null);
+			serviceURI = CMUtils.setUserInfoForURI(serviceURI, null);
 		} catch (URISyntaxException ex) {
 			logger.warn("Could not strip userinfo from " + serviceURI, ex);
 		}
@@ -885,7 +885,7 @@ public class CredentialManagerImpl implements CredentialManager,
 			// Add the non-fragment versions in the bottom of the list
 			for (URI withFragment : new ArrayList<URI>(possibles)) {
 				try {
-					possibles.add(setFragmentForURI(withFragment, null));
+					possibles.add(CMUtils.setFragmentForURI(withFragment, null));
 				} catch (URISyntaxException e) {
 					logger.warn("Could not non-fragment URI " + withFragment);
 				}
@@ -2364,28 +2364,16 @@ public class CredentialManagerImpl implements CredentialManager,
 	 */
 	public URI normalizeServiceURI(URI serviceURI) {
 		try {
-			URI noUserInfo = setUserInfoForURI(serviceURI, null);
+			URI noUserInfo = CMUtils.setUserInfoForURI(serviceURI, null);
 			URI normalized = noUserInfo.normalize();
 			URI parent = normalized.resolve(".");
 			// Strip userinfo, keep fragment
-			URI withFragment = setFragmentForURI(parent,
+			URI withFragment = CMUtils.setFragmentForURI(parent,
 					serviceURI.getFragment());
 			return withFragment;
 		} catch (URISyntaxException ex) {
 			return serviceURI;
 		}
-	}
-
-	public URI setFragmentForURI(URI uri, String fragment)
-			throws URISyntaxException {
-		return new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost(),
-				uri.getPort(), uri.getPath(), uri.getQuery(), fragment);
-	}
-
-	public URI setUserInfoForURI(URI uri, String userinfo)
-			throws URISyntaxException {
-		return new URI(uri.getScheme(), userinfo, uri.getHost(), uri.getPort(),
-				uri.getPath(), uri.getQuery(), uri.getFragment());
 	}
 
 	/**
