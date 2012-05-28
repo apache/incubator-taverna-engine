@@ -24,7 +24,7 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Export-Package>net.sf.taverna.t2.workflowmodel.processor.dispatch.layers,net.sf.taverna.t2.invocation.impl</Export-Package>
+						<Export-Package>net.sf.taverna.t2.invocation.impl,net.sf.taverna.t2.workflowmodel.impl,net.sf.taverna.t2.workflowmodel.serialization.xml.impl</Export-Package>
 					</instructions>
 				</configuration>
 			</plugin>
