@@ -27,8 +27,8 @@ import net.sf.taverna.t2.workflowmodel.ConfigurationException;
 import net.sf.taverna.t2.workflowmodel.EditException;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityAndBeanWrapper;
 import net.sf.taverna.t2.workflowmodel.processor.activity.DisabledActivity;
-import net.sf.taverna.t2.workflowmodel.serialization.xml.AbstractXMLDeserializer;
-import net.sf.taverna.t2.workflowmodel.serialization.xml.AbstractXMLSerializer;
+import net.sf.taverna.t2.workflowmodel.serialization.xml.impl.AbstractXMLDeserializer;
+import net.sf.taverna.t2.workflowmodel.serialization.xml.impl.AbstractXMLSerializer;
 
 import org.apache.log4j.Logger;
 import org.jdom.Element;

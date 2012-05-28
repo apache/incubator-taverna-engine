@@ -46,7 +46,7 @@ import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationTypeMismatch
 import net.sf.taverna.t2.workflowmodel.processor.iteration.NamedInputPortNode;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.PrefixDotProduct;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.TerminalNode;
-import net.sf.taverna.t2.workflowmodel.serialization.xml.XMLSerializationConstants;
+import net.sf.taverna.t2.workflowmodel.serialization.xml.impl.XMLSerializationConstants;
 
 import org.jdom.Element;
 
