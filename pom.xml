@@ -125,12 +125,12 @@
 		<repository>
 			<id>my-repository</id>
 			<name>My Plugin Site</name>
-			<url>file:///home/stain/src/provenance-wg/prov-taverna-pages/</url>
+			<url>file:///home/stain/src/wf4ever/prov-taverna-pages/</url>
 		</repository>
 		<snapshotRepository>
 			<id>my-test-repository</id>
 			<name>My Test Plugin Site</name>
-			<url>file:///home/stain/src/provenance-wg/prov-taverna-pages/</url>
+			<url>file:///home/stain/src/wf4ever/prov-taverna-pages/</url>
 		</snapshotRepository>
 	</distributionManagement>
 
