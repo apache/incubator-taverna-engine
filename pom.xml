@@ -98,7 +98,7 @@
 			<!-- The repository that your jars are deployed to -->
 			<id>my-repository</id>
 			<name>My Repository</name>
-			<url>http://stain.github.com/taverna-prov/</url>
+			<url>http://wf4ever.github.com/taverna-prov/</url>
 		</repository>
 		<repository>
 			<!-- The repository that your snapshot jars are deployed to -->
@@ -108,7 +108,7 @@
 			<snapshots/>
 			<id>my-snapshot-repository</id>
 			<name>My snapshot Repository</name>
-			<url>http://stain.github.com/taverna-prov/</url>
+			<url>http://wf4ever.github.com/taverna-prov/</url>
 		</repository>
 	</repositories>
 
@@ -125,14 +125,29 @@
 		<repository>
 			<id>my-repository</id>
 			<name>My Plugin Site</name>
-			<url>file:///home/stain/src/wf4ever/prov-taverna-pages/</url>
+            <url>file:///${user.home}/src/prov-taverna-pages/</url>
 		</repository>
 		<snapshotRepository>
 			<id>my-test-repository</id>
 			<name>My Test Plugin Site</name>
-			<url>file:///home/stain/src/wf4ever/prov-taverna-pages/</url>
+            <url>file:///${user.home}/src/prov-taverna-pages/</url>
 		</snapshotRepository>
 	</distributionManagement>
+  <scm>
+    <url>https://github.com/wf4ever/taverna-prov</url>
+    <connection>scm:git:git://github.com/wf4ever/taverna-prov.git</connection>
+    <developerConnection>scm:git:git@github.com:wf4ever/taverna-prov.git</developerConnection>
+  </scm>
+  <issueManagement>
+    <system>github</system>
+    <url>https://github.com/wf4ever/taverna-prov/issues</url>
+  </issueManagement>
+  <organization>
+    <name>Wf4Ever</name>
+    <url>http://www.wf4ever-project.org/</url>
+  </organization>
+  <url>http://wf4ever.github.com/taverna-prov/</url>
+    
 
   <modules>
     <module>prov-taverna-ui</module>
