@@ -1,11 +1,10 @@
 <?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>no.s11.w3.prov</groupId>
 		<artifactId>prov-taverna</artifactId>
-		<version>1.0-SNAPSHOT</version>
+		<version>1.0</version>
 	</parent>
 	<artifactId>prov-elmo</artifactId>
 	<name>W3 Provenance ontology Elmo bindings</name>
@@ -84,11 +83,9 @@
 								<mkdir dir="${project.build.directory}/generated-sources" />
 								<mkdir dir="${project.build.directory}/generated-sources/elmo" />
 
-								<java classname="org.openrdf.elmo.codegen.OntologyConverter"
-									fork="true" failonerror="true" maxmemory="128m">
+								<java classname="org.openrdf.elmo.codegen.OntologyConverter" fork="true" failonerror="true" maxmemory="128m">
 									<arg value="-b" />
-									<arg
-										value="org.w3.prov=http://www.w3.org/ns/prov#" />									
+									<arg value="org.w3.prov=http://www.w3.org/ns/prov#" />									
 									<arg value="-p" />
 									<arg value="prov" />	
 									<arg value="-j" />
@@ -100,8 +97,7 @@
 										<pathelement path="." />
 									</classpath>
 								</java>
-								<unzip src="${project.build.directory}/prov-ontology.jar"
-									dest="${project.build.directory}/generated-sources/elmo">
+								<unzip src="${project.build.directory}/prov-ontology.jar" dest="${project.build.directory}/generated-sources/elmo">
 									<patternset>
 										<exclude name="**/*.class" />
 									</patternset>
@@ -179,7 +175,7 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore></ignore>
+										<ignore />
 									</action>
 								</pluginExecution>
 								<pluginExecution>
@@ -198,7 +194,7 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore></ignore>
+										<ignore />
 									</action>
 								</pluginExecution>
 							</pluginExecutions>

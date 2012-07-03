@@ -4,7 +4,7 @@
 
 	<groupId>no.s11.w3.prov</groupId>
 	<artifactId>prov-taverna</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>1.0</version>
 	<packaging>pom</packaging>
 	<name>Example Taverna project</name>
 
@@ -86,7 +86,7 @@
 	<repositories>
 		<repository>
 			<!-- The myGrid repository for Taverna dependencies -->
-			<releases/>
+			<releases />
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
@@ -105,7 +105,7 @@
 			<releases>
 				<enabled>false</enabled>
 			</releases>
-			<snapshots/>
+			<snapshots />
 			<id>my-snapshot-repository</id>
 			<name>My snapshot Repository</name>
 			<url>http://wf4ever.github.com/taverna-prov/</url>
