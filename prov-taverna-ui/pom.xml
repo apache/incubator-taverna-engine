@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>no.s11.w3.prov</groupId>
 		<artifactId>prov-taverna</artifactId>
-		<version>1.0</version>
+		<version>1.1-SNAPSHOT</version>
 	</parent>
 	<artifactId>prov-taverna-ui</artifactId>
 	<name>Example Taverna activity UI bindings</name>
