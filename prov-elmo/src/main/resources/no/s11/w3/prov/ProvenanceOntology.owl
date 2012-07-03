@@ -122,11 +122,6 @@ Note how the range of the unqualified property is mirrored by the prov:activity 
     
 
 
-    <!-- http://www.w3.org/2002/07/owl#topObjectProperty -->
-
-    <owl:ObjectProperty rdf:about="&owl;topObjectProperty"/>
-    
-
 
     <!-- http://www.w3.org/ns/prov#actedOnBehalfOf -->
 
@@ -193,7 +188,6 @@ Note how the range of the unqualified property is mirrored by the prov:activity 
         <category>expanded</category>
         <component>alternate</component>
         <inverse>alternateOf</inverse>
-        <rdfs:subPropertyOf rdf:resource="&owl;topObjectProperty"/>
         <rdfs:domain rdf:resource="http://www.w3.org/ns/prov#Entity"/>
         <rdfs:range rdf:resource="http://www.w3.org/ns/prov#Entity"/>
         <rdfs:seeAlso rdf:resource="http://www.w3.org/ns/prov#specializationOf"/>
