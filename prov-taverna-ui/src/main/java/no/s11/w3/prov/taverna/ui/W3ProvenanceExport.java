@@ -1,6 +1,7 @@
 package no.s11.w3.prov.taverna.ui;
 
 import java.io.BufferedOutputStream;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -29,18 +30,22 @@ import org.openrdf.repository.contextaware.ContextAwareConnection;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.helpers.OrganizedRDFWriter;
 import org.openrdf.rio.rdfxml.util.RDFXMLPrettyWriter;
-import org.w3.provo.Activity;
-import org.w3.provo.Agent;
-import org.w3.provo.Entity;
-import org.w3.provo.Generation;
-import org.w3.provo.ProvenanceContainer;
-import org.w3.provo.QualifiedInvolvement;
-import org.w3.provo.Recipe;
-import org.w3.provo.Role;
-import org.w3.provo.Usage;
-import org.w3.time.Instant;
+import org.openrdf.rio.turtle.TurtleWriter;
+import org.w3.prov.Activity;
+import org.w3.prov.Agent;
+import org.w3.prov.Association;
+import org.w3.prov.AssociationOrEndOrGenerationOrInvalidationOrStartOrUsage;
+import org.w3.prov.Bundle;
+import org.w3.prov.Entity;
+import org.w3.prov.EntityInfluence;
+import org.w3.prov.Generation;
+import org.w3.prov.Plan;
+import org.w3.prov.Role;
+import org.w3.prov.Usage;
 
 public class W3ProvenanceExport {
+
+	private static final int NANOSCALE = 9;
 
 	private ProvenanceAccess provenanceAccess;
 
@@ -49,7 +54,7 @@ public class W3ProvenanceExport {
 	private ProvenanceURIGenerator uriGenerator = new ProvenanceURIGenerator() ;
 
 	private String workflowRunId;
-
+	
 	public SesameManager makeElmoManager() {
 		ElmoModule module = new ElmoModule(getClass().getClassLoader());
 		SesameManagerFactory factory = new SesameManagerFactory(module);
@@ -110,45 +115,57 @@ public class W3ProvenanceExport {
 
 	public void exportAsW3Prov(BufferedOutputStream outStream)
 			throws RepositoryException, RDFHandlerException {
-
+		
+		GregorianCalendar startedProvExportAt = new GregorianCalendar();
+		
 		SesameManager elmoManager = makeElmoManager();
 		String runURI = uriGenerator.makeWFInstanceURI(getWorkflowRunId());
 		// FIXME: Should this be "" to indicate the current file?
 		// FIXME: Should this not be an Account instead?
-		ProvenanceContainer provContainer = elmoManager.create(
-				new QName(runURI, "provenanceContainer"), ProvenanceContainer.class, Entity.class);
-		// TODO: Link provContainer to anything?
+		Bundle bundle = elmoManager.create(
+				new QName(runURI, "bundle"), Bundle.class, Entity.class);
 		//elmoManager.persist(provContainer);
 		
 		// Mini-provenance about this provenance trace
  		
  		
  		
-		Agent tavernaAgent = elmoManager.create(Agent.class, Activity.class);
-
+		Agent tavernaAgent = elmoManager.create(Agent.class);
 		Activity storeProvenance = elmoManager.create(Activity.class);
-		storeProvenance.getProvWasControlledBy().add(tavernaAgent);		
+		
+		storeProvenance.setProvStartedAtTime(datatypeFactory.newXMLGregorianCalendar(startedProvExportAt));
+		storeProvenance.getProvWasAssociatedWith().add(tavernaAgent);		
 		// The agent is an execution of the Taverna software (e.g. also an Activity)
 		String versionName = ApplicationConfig.getInstance().getName();
-		((Activity)tavernaAgent).getProvHadRecipe().add(elmoManager.create(
-				new QName("http://ns.taverna.org.uk/2011/software/", versionName), Recipe.class));
-
-		((Entity)provContainer).setProvWasGeneratedBy(storeProvenance);
-		// The store-provenance-process used the workflow run as input
-		storeProvenance.getProvUsed().add(elmoManager.create(new QName(runURI), Entity.class, Activity.class));
-
-	
 		
+		// Qualify it to add the plan
+		Association association = elmoManager.create(Association.class);
+		association.getProvAgent().add(tavernaAgent);
+		storeProvenance.getProvQualifiedAssociation().add(association);
+		association.getProvHadPlan().add(elmoManager.create(
+				new QName("http://ns.taverna.org.uk/2011/software/", versionName), Plan.class));
+		
+		bundle.getProvWasGeneratedBy().add(storeProvenance);
+		// The store-provenance-process used the workflow run as input
+		storeProvenance.getProvWasInformedBy().add(elmoManager.create(new QName(runURI), Activity.class));
+
+			
 		DataflowInvocation dataflowInvocation = provenanceAccess.getDataflowInvocation(getWorkflowRunId());
 		//String dataflowURI = uriGenerator.makeDataflowInvocationURI(workflowRunId, dataflowInvocation.getDataflowInvocationId());
-		Activity wfProcess = elmoManager.create(new QName(runURI), Activity.class, Agent.class);
-		wfProcess.getProvWasControlledBy().add(tavernaAgent);				
-		// Recipe
+		Activity wfProcess = elmoManager.create(new QName(runURI), Activity.class);
+		wfProcess.getProvWasAssociatedWith().add(tavernaAgent);
+		association = elmoManager.create(Association.class);
+		association.getProvAgent().add(tavernaAgent);
+		wfProcess.getProvQualifiedAssociation().add(association);
+		
 		String wfUri = uriGenerator.makeWorkflowURI(dataflowInvocation.getWorkflowId());
-		// TODO: Also make the recipe a Scufl2 Workflow
-		Recipe recipe = elmoManager.create(new QName(wfUri), Recipe.class);
-		wfProcess.getProvHadRecipe().add(recipe);
-		// TODO: start, stop?		
+		// TODO: Also make the recipe a Scufl2 Workflow?
+		Plan plan = elmoManager.create(new QName(wfUri), Plan.class);
+		association.getProvHadPlan().add(plan);
+	
+		wfProcess.setProvStartedAtTime(timestampToXmlGreg(dataflowInvocation.getInvocationStarted()));
+		wfProcess.setProvEndedAtTime(timestampToXmlGreg(dataflowInvocation.getInvocationEnded()));
+		
 		
 
 		// Workflow inputs and outputs
@@ -177,30 +194,25 @@ public class W3ProvenanceExport {
 					pe.getWorkflowRunId(), pe.getProcessEnactmentId());
 			Activity process = elmoManager.create(
 					new QName(processURI), Activity.class);
-			Agent parentProcess = elmoManager.designate(new QName(parentURI), Agent.class, Activity.class);
-			process.getProvWasControlledBy().add(parentProcess);
-			
-			// start/stop			
-			setStartedEnded(process, pe.getEnactmentStarted(), pe.getEnactmentEnded(), elmoManager);
-			
+			Activity parentProcess = elmoManager.designate(new QName(parentURI), Activity.class);
+			process.getProvWasInformedBy().add(parentProcess);			
+			process.setProvStartedAtTime(timestampToXmlGreg(pe.getEnactmentStarted()));
+			process.setProvEndedAtTime(timestampToXmlGreg(pe.getEnactmentEnded()));
 
-
-			// TODO: work out preceeding and controlling from workflow definitions
-
-			
-			
 			// TODO: Linking to the processor in the workflow definition?			
 			ProvenanceProcessor provenanceProcessor = provenanceAccess.getProvenanceProcessor(pe.getProcessorId());			
 			String processorURI = uriGenerator.makeProcessorURI(provenanceProcessor.getProcessorName(), provenanceProcessor.getWorkflowId());
-			// TODO: Also make the recipe a Scufl2 Processor
-			recipe = elmoManager.create(new QName(processorURI), Recipe.class);
-			process.getProvHadRecipe().add(recipe);
+			// TODO: Also make the plan a Scufl2 Processor
 			
+			process.getProvQualifiedAssociation().add(association);
+			association = elmoManager.create(Association.class);
+			association.getProvAgent().add(tavernaAgent);
+			plan = elmoManager.create(new QName(processorURI), Plan.class);
+			association.getProvHadPlan().add(plan);
 
-			
 			// TODO: How to link together iterations on a single processor and the collections
 			// they are iterating over and creating? 
-			// Need 'virtual' ProcessExecution for iteration.
+			// Need 'virtual' ProcessExecution for iteration?
 			
 			// TODO: Activity/service details from definition?
 			
@@ -212,31 +224,28 @@ public class W3ProvenanceExport {
 
 //			elmoManager.persist(process);
 		}
+		
+		GregorianCalendar endedProvExportAt = new GregorianCalendar();
+		storeProvenance.setProvEndedAtTime(datatypeFactory.newXMLGregorianCalendar(endedProvExportAt));
 
 		// Save the whole thing
 		ContextAwareConnection connection = elmoManager.getConnection();
 		connection.setNamespace("scufl2",
 				"http://ns.taverna.org.uk/2010/scufl2#");
 		connection
-				.setNamespace("prov", "http://www.w3.org/ns/prov-o/");
+				.setNamespace("prov", "http://www.w3.org/ns/prov#");
 		connection.setNamespace("owl", "http://www.w3.org/2002/07/owl#");
-		connection.export(new OrganizedRDFWriter(new RDFXMLPrettyWriter(outStream)));
-//		connection.export(new OrganizedRDFWriter(new TurtleWriter(outStream)));
+//		connection.export(new OrganizedRDFWriter(new RDFXMLPrettyWriter(outStream)));
+		connection.export(new OrganizedRDFWriter(new TurtleWriter(outStream)));
 
 	}
 
-	private void setStartedEnded(Activity activity, Timestamp enactmentStarted,
-			Timestamp enactmentEnded, SesameManager elmoManager) {
+	protected XMLGregorianCalendar timestampToXmlGreg(Timestamp invocationStarted) {
 		GregorianCalendar cal = new GregorianCalendar();
-		cal.setTime(enactmentStarted);			
-		XMLGregorianCalendar started = datatypeFactory.newXMLGregorianCalendar(cal);
-		cal.setTime(enactmentEnded);
-		XMLGregorianCalendar ended = datatypeFactory.newXMLGregorianCalendar(cal);
-		activity.setProvStartedAt(elmoManager.create(Instant.class));
-		activity.setProvEndedAt(elmoManager.create(Instant.class));
-		activity.getProvStartedAt().getProvInXSDDateTime().add(started);
-		activity.getProvEndedAt().getProvInXSDDateTime().add(ended);
-		
+		cal.setTime(invocationStarted);
+		XMLGregorianCalendar xmlCal = datatypeFactory.newXMLGregorianCalendar(cal);
+		xmlCal.setFractionalSecond(BigDecimal.valueOf(invocationStarted.getNanos(), NANOSCALE));
+		return xmlCal;
 	}
 
 	private void storeEntitities(String dataBindingId,
@@ -262,24 +271,25 @@ public class W3ProvenanceExport {
 					// Double-output, alias the entity with a fresh one
 					// to avoid double-generation
 					Entity viewOfEntity = elmoManager.create(Entity.class);
-					viewOfEntity.getProvWasComplementOf().add(entity);
+					viewOfEntity.getProvAlternateOf().add(entity);
 					entity = viewOfEntity;
 				}
-				entity.setProvWasGeneratedBy(activity);
-				// No equivalent inverse property in activity
+				entity.getProvWasGeneratedBy().add(activity);
 			}
 			
-			QualifiedInvolvement involvement;
+			AssociationOrEndOrGenerationOrInvalidationOrStartOrUsage involvement;
 			if (direction == Direction.INPUTS) {
-				involvement = elmoManager.create(Usage.class);
-				activity.getProvHadQualifiedUsage().add((Usage)involvement);
+				Usage usage = elmoManager.create(Usage.class);
+				involvement = usage;
+				activity.getProvQualifiedUsage().add(usage);
+				usage.getProvEntity().add(entity);
 			} else {
-				involvement = elmoManager.create(Generation.class);
-				activity.getProvHadQualifiedGeneration().add((Generation)involvement);
+				Generation generation = elmoManager.create(Generation.class);
+				involvement = generation;
+				entity.getProvQualifiedGeneration().add(generation);				
+				generation.getProvActivity().add(activity);
 			}
-			involvement.getProvHadQualifiedEntity().add(entity);
 
-			
 			String processerName = null;
 			if (port.getProcessorId() != null) {
 				// Not a workflow port
