@@ -1,12 +1,16 @@
 package no.s11.w3.prov.taverna.ui;
 
+import info.aduna.lang.service.ServiceRegistry;
+
 import java.io.BufferedOutputStream;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.ServiceLoader;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
@@ -22,14 +26,36 @@ import net.sf.taverna.t2.provenance.lineageservice.utils.ProcessorEnactment;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 import net.sf.taverna.t2.reference.T2Reference;
 
+import org.apache.log4j.Logger;
 import org.openrdf.elmo.ElmoModule;
 import org.openrdf.elmo.sesame.SesameManager;
 import org.openrdf.elmo.sesame.SesameManagerFactory;
+import org.openrdf.query.algebra.evaluation.function.Function;
+import org.openrdf.query.algebra.evaluation.function.FunctionRegistry;
+import org.openrdf.query.parser.QueryParserFactory;
+import org.openrdf.query.parser.QueryParserRegistry;
+import org.openrdf.query.parser.sparql.SPARQLParserFactory;
+import org.openrdf.query.resultio.BooleanQueryResultParserFactory;
+import org.openrdf.query.resultio.BooleanQueryResultParserRegistry;
+import org.openrdf.query.resultio.BooleanQueryResultWriterFactory;
+import org.openrdf.query.resultio.BooleanQueryResultWriterRegistry;
+import org.openrdf.query.resultio.TupleQueryResultParserFactory;
+import org.openrdf.query.resultio.TupleQueryResultParserRegistry;
+import org.openrdf.query.resultio.TupleQueryResultWriterFactory;
+import org.openrdf.query.resultio.TupleQueryResultWriterRegistry;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.config.RepositoryFactory;
+import org.openrdf.repository.config.RepositoryRegistry;
 import org.openrdf.repository.contextaware.ContextAwareConnection;
 import org.openrdf.rio.RDFHandlerException;
+import org.openrdf.rio.RDFParserFactory;
+import org.openrdf.rio.RDFParserRegistry;
+import org.openrdf.rio.RDFWriterFactory;
+import org.openrdf.rio.RDFWriterRegistry;
 import org.openrdf.rio.helpers.OrganizedRDFWriter;
 import org.openrdf.rio.turtle.TurtleWriter;
+import org.openrdf.sail.config.SailFactory;
+import org.openrdf.sail.config.SailRegistry;
 import org.w3.prov.Activity;
 import org.w3.prov.Agent;
 import org.w3.prov.Association;
@@ -43,16 +69,18 @@ import org.w3.prov.Usage;
 
 public class W3ProvenanceExport {
 
+	private static Logger logger = Logger.getLogger(W3ProvenanceExport.class);
+
 	private static final int NANOSCALE = 9;
 
 	private ProvenanceAccess provenanceAccess;
 
 	private DatatypeFactory datatypeFactory;
-	
-	private ProvenanceURIGenerator uriGenerator = new ProvenanceURIGenerator() ;
+
+	private ProvenanceURIGenerator uriGenerator = new ProvenanceURIGenerator();
 
 	private String workflowRunId;
-	
+
 	public SesameManager makeElmoManager() {
 		ElmoModule module = new ElmoModule(getClass().getClassLoader());
 		SesameManagerFactory factory = new SesameManagerFactory(module);
@@ -60,50 +88,144 @@ public class W3ProvenanceExport {
 		return factory.createElmoManager();
 	}
 
-	public W3ProvenanceExport(ProvenanceAccess provenanceAccess, String workflowRunId) {
+	protected void initializeRegistries() {
+		// Thanks to info.aduna.lang.service.ServiceRegistry for passing down
+		// the classloader
+		// of the interface (!!) rather than the current thread's context class
+		// loader, we'll#
+		// have to do this ourself for these registries to work within Raven or
+		// OSGi.
+
+		// These are all the subclasses of
+		// info.aduna.lang.service.ServiceRegistry<String, SailFactory>
+		// as far as Eclipse could find..
+
+	/* For some reason this fails with:
+	 * ERROR 2012-07-04 16:06:22,830 (net.sf.taverna.t2.workbench.ui.impl.Workbench:115) - Uncaught exception in Thread[SaveAllResults: Saving results to /home/stain/Desktop/popopopo.prov.ttl,6,main]
+java.lang.VerifyError: (class: no/s11/w3/prov/taverna/ui/W3ProvenanceExport, method: initializeRegistries signature: ()V) Incompatible argument to function
+	at no.s11.w3.prov.taverna.ui.SaveProvAction.saveData(SaveProvAction.java:65)
+	at net.sf.taverna.t2.workbench.views.results.saveactions.SaveAllResultsSPI$2.run(SaveAllResultsSPI.java:177)
+
+
+or with java -noverify (..)
+
+ERROR 2012-07-04 16:28:47,814 (net.sf.taverna.t2.workbench.ui.impl.Workbench:115) - Uncaught exception in Thread[SaveAllResults: Saving results to /home/stain/Desktop/ppp.prov.ttl,6,main]
+java.lang.AbstractMethodError: info.aduna.lang.service.ServiceRegistry.add(Ljava/lang/Object;)Ljava/lang/Object;
+	at no.s11.w3.prov.taverna.ui.W3ProvenanceExport.repopulateRegistry(W3ProvenanceExport.java:132)
+	at no.s11.w3.prov.taverna.ui.W3ProvenanceExport.initializeRegistries(W3ProvenanceExport.java:111)
+	at no.s11.w3.prov.taverna.ui.W3ProvenanceExport.<init>(W3ProvenanceExport.java:162)
+	at no.s11.w3.prov.taverna.ui.SaveProvAction.saveData(SaveProvAction.java:65)
+	at net.sf.taverna.t2.workbench.views.results.saveactions.SaveAllResultsSPI$2.run(SaveAllResultsSPI.java:177)
+
+
+		*/
+		
+		
+//		repopulateRegistry(BooleanQueryResultParserRegistry.getInstance(),
+//				BooleanQueryResultParserFactory.class);
+//		repopulateRegistry(BooleanQueryResultWriterRegistry.getInstance(),
+//				BooleanQueryResultWriterFactory.class);
+//		repopulateRegistry(RDFParserRegistry.getInstance(),
+//				RDFParserFactory.class);
+//		repopulateRegistry(RDFWriterRegistry.getInstance(),
+//				RDFWriterFactory.class);
+//		repopulateRegistry(TupleQueryResultParserRegistry.getInstance(),
+//				TupleQueryResultParserFactory.class);
+//		repopulateRegistry(TupleQueryResultWriterRegistry.getInstance(),
+//				TupleQueryResultWriterFactory.class);
+//		repopulateRegistry(FunctionRegistry.getInstance(), Function.class);
+//		repopulateRegistry(QueryParserRegistry.getInstance(),
+//				QueryParserFactory.class);
+//		repopulateRegistry(RepositoryRegistry.getInstance(),
+//				RepositoryFactory.class);
+//		repopulateRegistry(SailRegistry.getInstance(), SailFactory.class);
+		
+		/* So instead we just do a minimal workaround */
+		QueryParserRegistry.getInstance().add(new SPARQLParserFactory());
+	}
+	
+	protected <I> void repopulateRegistry(ServiceRegistry<?, I> registry,
+			Class<I> spi) {
+		ClassLoader cl = classLoaderForServiceLoader(spi);
+		logger.info("Selected classloader " + cl + " for registry of " + spi);
+		for (I service : ServiceLoader.load(spi, cl)) {
+			registry.add(service);
+		}
+	}
+
+	
+	private ClassLoader classLoaderForServiceLoader(Class<?> mustHave) {
+		List<ClassLoader> possibles = Arrays.asList(
+				Thread.currentThread().getContextClassLoader(), 
+				getClass().getClassLoader(), 
+				mustHave.getClassLoader());
+
+		for (ClassLoader cl : possibles) {
+			if (cl == null) {
+				continue;
+			}
+			try {
+				if (cl.loadClass(mustHave.getCanonicalName()) == mustHave) {				
+					return cl;
+				}
+			} catch (ClassNotFoundException e) {
+			}
+		}
+		// Final fall-back, the old..
+		return ClassLoader.getSystemClassLoader();
+	}
+
+	public W3ProvenanceExport(ProvenanceAccess provenanceAccess,
+			String workflowRunId) {
 		this.setWorkflowRunId(workflowRunId);
 		this.setProvenanceAccess(provenanceAccess);
+		initializeRegistries();
 		try {
 			datatypeFactory = DatatypeFactory.newInstance();
 		} catch (DatatypeConfigurationException e) {
-			throw new IllegalStateException("Can't find a DatatypeFactory implementation", e);
+			throw new IllegalStateException(
+					"Can't find a DatatypeFactory implementation", e);
 		}
 	}
 
 	private final class ProvenanceURIGenerator extends URIGenerator {
-		
+
 		// Make URIs match with Scufl2
 		@Override
 		public String makeWorkflowURI(String workflowID) {
-			return makeWorkflowBundleURI(workflowRunId) + "workflow/" + 
-				provenanceAccess.getWorkflowNameByWorkflowID(workflowID) + "/";
+			return makeWorkflowBundleURI(workflowRunId) + "workflow/"
+					+ provenanceAccess.getWorkflowNameByWorkflowID(workflowID)
+					+ "/";
 		}
-		
+
 		public String makeWorkflowBundleURI(String workflowRunId) {
-			
-			
-			return "http://ns.taverna.org.uk/2010/workflowBundle/" + provenanceAccess.getTopLevelWorkflowID(workflowRunId) + "/";
+
+			return "http://ns.taverna.org.uk/2010/workflowBundle/"
+					+ provenanceAccess.getTopLevelWorkflowID(workflowRunId)
+					+ "/";
 		}
 
 		public String makePortURI(String wfId, String pName, String vName,
-				boolean inputPort) {		
+				boolean inputPort) {
 			String base;
 			if (pName == null) {
 				base = makeWorkflowURI(wfId);
 			} else {
-				base = makeProcessorURI(pName, wfId) ;
+				base = makeProcessorURI(pName, wfId);
 			}
 			return base + (inputPort ? "in/" : "out/") + escape(vName);
 		}
 
 		public String makeDataflowInvocationURI(String workflowRunId,
 				String dataflowInvocationId) {
-			return makeWFInstanceURI(workflowRunId) + "workflow/" + dataflowInvocationId + "/";
+			return makeWFInstanceURI(workflowRunId) + "workflow/"
+					+ dataflowInvocationId + "/";
 		}
 
 		public String makeProcessExecution(String workflowRunId,
 				String processEnactmentId) {
-			return makeWFInstanceURI(workflowRunId) + "process/" + processEnactmentId + "/";
+			return makeWFInstanceURI(workflowRunId) + "process/"
+					+ processEnactmentId + "/";
 		}
 	}
 
@@ -113,68 +235,74 @@ public class W3ProvenanceExport {
 
 	public void exportAsW3Prov(BufferedOutputStream outStream)
 			throws RepositoryException, RDFHandlerException {
-		
+
 		GregorianCalendar startedProvExportAt = new GregorianCalendar();
-		
+
 		SesameManager elmoManager = makeElmoManager();
 		String runURI = uriGenerator.makeWFInstanceURI(getWorkflowRunId());
 		// FIXME: Should this be "" to indicate the current file?
 		// FIXME: Should this not be an Account instead?
-		Bundle bundle = elmoManager.create(
-				new QName(runURI, "bundle"), Bundle.class, Entity.class);
-		//elmoManager.persist(provContainer);
-		
+		Bundle bundle = elmoManager.create(new QName(runURI, "bundle"),
+				Bundle.class, Entity.class);
+		// elmoManager.persist(provContainer);
+
 		// Mini-provenance about this provenance trace
- 		
- 		
- 		
+
 		Agent tavernaAgent = elmoManager.create(Agent.class);
 		Activity storeProvenance = elmoManager.create(Activity.class);
-		
-		storeProvenance.setProvStartedAtTime(datatypeFactory.newXMLGregorianCalendar(startedProvExportAt));
-		storeProvenance.getProvWasAssociatedWith().add(tavernaAgent);		
-		// The agent is an execution of the Taverna software (e.g. also an Activity)
+
+		storeProvenance.setProvStartedAtTime(datatypeFactory
+				.newXMLGregorianCalendar(startedProvExportAt));
+		storeProvenance.getProvWasAssociatedWith().add(tavernaAgent);
+		// The agent is an execution of the Taverna software (e.g. also an
+		// Activity)
 		String versionName = ApplicationConfig.getInstance().getName();
-		
+
 		// Qualify it to add the plan
 		Association association = elmoManager.create(Association.class);
 		association.getProvAgent().add(tavernaAgent);
 		storeProvenance.getProvQualifiedAssociation().add(association);
-		association.getProvHadPlan().add(elmoManager.create(
-				new QName("http://ns.taverna.org.uk/2011/software/", versionName), Plan.class));
-		
+		association.getProvHadPlan().add(
+				elmoManager.create(
+						new QName("http://ns.taverna.org.uk/2011/software/",
+								versionName), Plan.class));
+
 		bundle.getProvWasGeneratedBy().add(storeProvenance);
 		// The store-provenance-process used the workflow run as input
-		storeProvenance.getProvWasInformedBy().add(elmoManager.create(new QName(runURI), Activity.class));
+		storeProvenance.getProvWasInformedBy().add(
+				elmoManager.create(new QName(runURI), Activity.class));
 
-			
-		DataflowInvocation dataflowInvocation = provenanceAccess.getDataflowInvocation(getWorkflowRunId());
-		//String dataflowURI = uriGenerator.makeDataflowInvocationURI(workflowRunId, dataflowInvocation.getDataflowInvocationId());
-		Activity wfProcess = elmoManager.create(new QName(runURI), Activity.class);
+		DataflowInvocation dataflowInvocation = provenanceAccess
+				.getDataflowInvocation(getWorkflowRunId());
+		// String dataflowURI =
+		// uriGenerator.makeDataflowInvocationURI(workflowRunId,
+		// dataflowInvocation.getDataflowInvocationId());
+		Activity wfProcess = elmoManager.create(new QName(runURI),
+				Activity.class);
 		wfProcess.getProvWasAssociatedWith().add(tavernaAgent);
 		association = elmoManager.create(Association.class);
 		association.getProvAgent().add(tavernaAgent);
 		wfProcess.getProvQualifiedAssociation().add(association);
-		
-		String wfUri = uriGenerator.makeWorkflowURI(dataflowInvocation.getWorkflowId());
+
+		String wfUri = uriGenerator.makeWorkflowURI(dataflowInvocation
+				.getWorkflowId());
 		// TODO: Also make the recipe a Scufl2 Workflow?
 		Plan plan = elmoManager.create(new QName(wfUri), Plan.class);
 		association.getProvHadPlan().add(plan);
-	
-		wfProcess.setProvStartedAtTime(timestampToXmlGreg(dataflowInvocation.getInvocationStarted()));
-		wfProcess.setProvEndedAtTime(timestampToXmlGreg(dataflowInvocation.getInvocationEnded()));
-		
-		
+
+		wfProcess.setProvStartedAtTime(timestampToXmlGreg(dataflowInvocation
+				.getInvocationStarted()));
+		wfProcess.setProvEndedAtTime(timestampToXmlGreg(dataflowInvocation
+				.getInvocationEnded()));
 
 		// Workflow inputs and outputs
 		storeEntitities(dataflowInvocation.getInputsDataBindingId(), wfProcess,
 				Direction.INPUTS, elmoManager);
 		// FIXME: These entities come out as "generated" by multiple processes
-		storeEntitities(dataflowInvocation.getOutputsDataBindingId(), wfProcess,
-				Direction.OUTPUTS, elmoManager);
-//		elmoManager.persist(wfProcess);
-		
-		
+		storeEntitities(dataflowInvocation.getOutputsDataBindingId(),
+				wfProcess, Direction.OUTPUTS, elmoManager);
+		// elmoManager.persist(wfProcess);
+
 		List<ProcessorEnactment> processorEnactments = provenanceAccess
 				.getProcessorEnactments(getWorkflowRunId());
 		// This will also include processor enactments in nested workflows
@@ -190,65 +318,76 @@ public class W3ProvenanceExport {
 			}
 			String processURI = uriGenerator.makeProcessExecution(
 					pe.getWorkflowRunId(), pe.getProcessEnactmentId());
-			Activity process = elmoManager.create(
-					new QName(processURI), Activity.class);
-			Activity parentProcess = elmoManager.designate(new QName(parentURI), Activity.class);
-			process.getProvWasInformedBy().add(parentProcess);			
-			process.setProvStartedAtTime(timestampToXmlGreg(pe.getEnactmentStarted()));
-			process.setProvEndedAtTime(timestampToXmlGreg(pe.getEnactmentEnded()));
+			Activity process = elmoManager.create(new QName(processURI),
+					Activity.class);
+			Activity parentProcess = elmoManager.designate(
+					new QName(parentURI), Activity.class);
+			process.getProvWasInformedBy().add(parentProcess);
+			process.setProvStartedAtTime(timestampToXmlGreg(pe
+					.getEnactmentStarted()));
+			process.setProvEndedAtTime(timestampToXmlGreg(pe
+					.getEnactmentEnded()));
 
-			// TODO: Linking to the processor in the workflow definition?			
-			ProvenanceProcessor provenanceProcessor = provenanceAccess.getProvenanceProcessor(pe.getProcessorId());			
-			String processorURI = uriGenerator.makeProcessorURI(provenanceProcessor.getProcessorName(), provenanceProcessor.getWorkflowId());
+			// TODO: Linking to the processor in the workflow definition?
+			ProvenanceProcessor provenanceProcessor = provenanceAccess
+					.getProvenanceProcessor(pe.getProcessorId());
+			String processorURI = uriGenerator.makeProcessorURI(
+					provenanceProcessor.getProcessorName(),
+					provenanceProcessor.getWorkflowId());
 			// TODO: Also make the plan a Scufl2 Processor
-			
+
 			process.getProvQualifiedAssociation().add(association);
 			association = elmoManager.create(Association.class);
 			association.getProvAgent().add(tavernaAgent);
 			plan = elmoManager.create(new QName(processorURI), Plan.class);
 			association.getProvHadPlan().add(plan);
 
-			// TODO: How to link together iterations on a single processor and the collections
-			// they are iterating over and creating? 
+			// TODO: How to link together iterations on a single processor and
+			// the collections
+			// they are iterating over and creating?
 			// Need 'virtual' ProcessExecution for iteration?
-			
+
 			// TODO: Activity/service details from definition?
-			
+
 			// Inputs and outputs
 			storeEntitities(pe.getInitialInputsDataBindingId(), process,
 					Direction.INPUTS, elmoManager);
 			storeEntitities(pe.getFinalOutputsDataBindingId(), process,
 					Direction.OUTPUTS, elmoManager);
 
-//			elmoManager.persist(process);
+			// elmoManager.persist(process);
 		}
-		
+
 		GregorianCalendar endedProvExportAt = new GregorianCalendar();
-		storeProvenance.setProvEndedAtTime(datatypeFactory.newXMLGregorianCalendar(endedProvExportAt));
+		storeProvenance.setProvEndedAtTime(datatypeFactory
+				.newXMLGregorianCalendar(endedProvExportAt));
 
 		// Save the whole thing
 		ContextAwareConnection connection = elmoManager.getConnection();
 		connection.setNamespace("scufl2",
 				"http://ns.taverna.org.uk/2010/scufl2#");
-		connection
-				.setNamespace("prov", "http://www.w3.org/ns/prov#");
+		connection.setNamespace("prov", "http://www.w3.org/ns/prov#");
 		connection.setNamespace("owl", "http://www.w3.org/2002/07/owl#");
-//		connection.export(new OrganizedRDFWriter(new RDFXMLPrettyWriter(outStream)));
+		// connection.export(new OrganizedRDFWriter(new
+		// RDFXMLPrettyWriter(outStream)));
 		connection.export(new OrganizedRDFWriter(new TurtleWriter(outStream)));
 
 	}
 
-	protected XMLGregorianCalendar timestampToXmlGreg(Timestamp invocationStarted) {
+	protected XMLGregorianCalendar timestampToXmlGreg(
+			Timestamp invocationStarted) {
 		GregorianCalendar cal = new GregorianCalendar();
 		cal.setTime(invocationStarted);
-		XMLGregorianCalendar xmlCal = datatypeFactory.newXMLGregorianCalendar(cal);
-		xmlCal.setFractionalSecond(BigDecimal.valueOf(invocationStarted.getNanos(), NANOSCALE));
+		XMLGregorianCalendar xmlCal = datatypeFactory
+				.newXMLGregorianCalendar(cal);
+		// Chop of the trailing 0-s of non-precission
+		xmlCal.setFractionalSecond(BigDecimal.valueOf(
+				invocationStarted.getNanos() / 1000000, NANOSCALE - 6));
 		return xmlCal;
 	}
 
-	private void storeEntitities(String dataBindingId,
-			Activity activity, Direction direction,
-			SesameManager elmoManager) {
+	private void storeEntitities(String dataBindingId, Activity activity,
+			Direction direction, SesameManager elmoManager) {
 
 		Map<Port, T2Reference> inputs = provenanceAccess
 				.getDataBindings(dataBindingId);
@@ -274,7 +413,7 @@ public class W3ProvenanceExport {
 				}
 				entity.getProvWasGeneratedBy().add(activity);
 			}
-			
+
 			AssociationOrEndOrGenerationOrInvalidationOrStartOrUsage involvement;
 			if (direction == Direction.INPUTS) {
 				Usage usage = elmoManager.create(Usage.class);
@@ -284,24 +423,24 @@ public class W3ProvenanceExport {
 			} else {
 				Generation generation = elmoManager.create(Generation.class);
 				involvement = generation;
-				entity.getProvQualifiedGeneration().add(generation);				
+				entity.getProvQualifiedGeneration().add(generation);
 				generation.getProvActivity().add(activity);
 			}
 
 			String processerName = null;
 			if (port.getProcessorId() != null) {
 				// Not a workflow port
-				ProvenanceProcessor p = provenanceAccess.getProvenanceProcessor(port.getProcessorId());
+				ProvenanceProcessor p = provenanceAccess
+						.getProvenanceProcessor(port.getProcessorId());
 				processerName = p.getProcessorName();
-			}			
+			}
 			port.getProcessorId();
 			String portURI = uriGenerator.makePortURI(port.getWorkflowId(),
-					processerName, port.getPortName(),
-					port.isInputPort());
-			Role portRole = elmoManager.create(new QName(portURI), Role.class);			
+					processerName, port.getPortName(), port.isInputPort());
+			Role portRole = elmoManager.create(new QName(portURI), Role.class);
 			involvement.getProvHadRole().add(portRole);
 
-//			elmoManager.persist(entity);
+			// elmoManager.persist(entity);
 		}
 
 	}

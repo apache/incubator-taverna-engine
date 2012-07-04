@@ -10,7 +10,8 @@
 	<name>W3 Provenance ontology Elmo bindings</name>
 	<properties>
 		<elmo.version>1.5</elmo.version>
-		<sesame.version>2.3.2</sesame.version>
+		<!--  Because of Raven this must match whatever Elmo depends on! :( -->
+		<sesame.version>2.2.4</sesame.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
