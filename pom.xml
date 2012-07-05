@@ -17,7 +17,7 @@
 		<t2.ui.api.version>1.4</t2.ui.api.version>
 		<t2.ui.impl.version>1.4</t2.ui.impl.version>
 		<t2.ui.components.version>1.4.1</t2.ui.components.version>
-		<t2.workbench.version>2.4.1</t2.workbench.version>
+		<t2.workbench.version>2.4.0</t2.workbench.version>
 	</properties>
 
 	<build>
