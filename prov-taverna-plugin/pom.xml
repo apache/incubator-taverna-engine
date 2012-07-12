@@ -2,13 +2,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>no.s11.w3.prov</groupId>
+		<groupId>org.purl.wf4ever.provtaverna</groupId>
 		<artifactId>prov-taverna</artifactId>
 		<version>1.2-SNAPSHOT</version>
 	</parent>
 	<artifactId>prov-taverna-plugin</artifactId>
 	<packaging>taverna-plugin</packaging>
-	<name>Example Taverna plugin</name>
+	<name>Taverna PROV plugin</name>
 
 	<build>
 		<plugins>
@@ -18,7 +18,7 @@
 				<version>0.1.1</version>
 				<extensions>true</extensions>
 				<configuration>
-					<provider>no.s11.w3.prov</provider>
+					<provider>org.purl.wf4ever</provider>
 					<tavernaVersion>${t2.workbench.version}</tavernaVersion>
 				</configuration>
 			</plugin>
@@ -29,7 +29,7 @@
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>prov-taverna-ui</artifactId>
-			<version>1.2-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 </project>
