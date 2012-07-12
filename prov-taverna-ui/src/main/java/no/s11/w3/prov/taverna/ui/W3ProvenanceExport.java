@@ -132,7 +132,7 @@ java.lang.AbstractMethodError: info.aduna.lang.service.ServiceRegistry.add(Ljava
 //				RepositoryFactory.class);
 //		repopulateRegistry(SailRegistry.getInstance(), SailFactory.class);
 		
-		/* So instead we just do a minimal workaround */
+		/* So instead we just do a silly, minimal workaround for what we need */
 		QueryParserRegistry.getInstance().add(new SPARQLParserFactory());
 	}
 	
