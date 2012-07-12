@@ -3,9 +3,11 @@ package no.s11.w3.prov.taverna.ui;
 import info.aduna.lang.service.ServiceRegistry;
 
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
@@ -30,32 +32,14 @@ import org.apache.log4j.Logger;
 import org.openrdf.elmo.ElmoModule;
 import org.openrdf.elmo.sesame.SesameManager;
 import org.openrdf.elmo.sesame.SesameManagerFactory;
-import org.openrdf.query.algebra.evaluation.function.Function;
-import org.openrdf.query.algebra.evaluation.function.FunctionRegistry;
-import org.openrdf.query.parser.QueryParserFactory;
+import org.openrdf.model.impl.URIImpl;
 import org.openrdf.query.parser.QueryParserRegistry;
 import org.openrdf.query.parser.sparql.SPARQLParserFactory;
-import org.openrdf.query.resultio.BooleanQueryResultParserFactory;
-import org.openrdf.query.resultio.BooleanQueryResultParserRegistry;
-import org.openrdf.query.resultio.BooleanQueryResultWriterFactory;
-import org.openrdf.query.resultio.BooleanQueryResultWriterRegistry;
-import org.openrdf.query.resultio.TupleQueryResultParserFactory;
-import org.openrdf.query.resultio.TupleQueryResultParserRegistry;
-import org.openrdf.query.resultio.TupleQueryResultWriterFactory;
-import org.openrdf.query.resultio.TupleQueryResultWriterRegistry;
 import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.config.RepositoryFactory;
-import org.openrdf.repository.config.RepositoryRegistry;
 import org.openrdf.repository.contextaware.ContextAwareConnection;
 import org.openrdf.rio.RDFHandlerException;
-import org.openrdf.rio.RDFParserFactory;
-import org.openrdf.rio.RDFParserRegistry;
-import org.openrdf.rio.RDFWriterFactory;
-import org.openrdf.rio.RDFWriterRegistry;
 import org.openrdf.rio.helpers.OrganizedRDFWriter;
 import org.openrdf.rio.turtle.TurtleWriter;
-import org.openrdf.sail.config.SailFactory;
-import org.openrdf.sail.config.SailRegistry;
 import org.w3.prov.Activity;
 import org.w3.prov.Agent;
 import org.w3.prov.Association;
@@ -73,6 +57,8 @@ public class W3ProvenanceExport {
 
 	private static final int NANOSCALE = 9;
 
+	private static final URIImpl SAMEAS = new URIImpl("http://www.w3.org/2002/07/owl#sameAs");
+
 	private ProvenanceAccess provenanceAccess;
 
 	private DatatypeFactory datatypeFactory;
@@ -80,6 +66,12 @@ public class W3ProvenanceExport {
 	private ProvenanceURIGenerator uriGenerator = new ProvenanceURIGenerator();
 
 	private String workflowRunId;
+
+	private Map<File, T2Reference> fileToT2Reference = Collections.emptyMap();
+
+	public Map<File, T2Reference> getFileToT2Reference() {
+		return fileToT2Reference;
+	}
 
 	public SesameManager makeElmoManager() {
 		ElmoModule module = new ElmoModule(getClass().getClassLoader());
@@ -370,6 +362,7 @@ java.lang.AbstractMethodError: info.aduna.lang.service.ServiceRegistry.add(Ljava
 		connection.setNamespace("owl", "http://www.w3.org/2002/07/owl#");
 		// connection.export(new OrganizedRDFWriter(new
 		// RDFXMLPrettyWriter(outStream)));
+//		connection.export(new OrganizedRDFWriter(new RDFXMLPrettyWriter(outStream)));
 		connection.export(new OrganizedRDFWriter(new TurtleWriter(outStream)));
 
 	}
@@ -391,6 +384,22 @@ java.lang.AbstractMethodError: info.aduna.lang.service.ServiceRegistry.add(Ljava
 
 		Map<Port, T2Reference> inputs = provenanceAccess
 				.getDataBindings(dataBindingId);
+
+		for (Entry<File, T2Reference> entry : getFileToT2Reference().entrySet()) {
+			File file = entry.getKey();
+			T2Reference t2Ref = entry.getValue();
+			String dataURI = uriGenerator.makeT2ReferenceURI(t2Ref.toUri()
+					.toASCIIString());
+			try {
+				elmoManager.getConnection().add(new URIImpl(dataURI), SAMEAS,
+						new URIImpl(file.toURI().toASCIIString()));
+			} catch (RepositoryException e) {
+				// FIXME: Fail properly
+				throw new RuntimeException("Can't store reference for " + file, e);
+			}
+		}
+
+		
 		for (Entry<Port, T2Reference> inputEntry : inputs.entrySet()) {
 			Port port = inputEntry.getKey();
 			T2Reference t2Ref = inputEntry.getValue();
@@ -401,6 +410,8 @@ java.lang.AbstractMethodError: info.aduna.lang.service.ServiceRegistry.add(Ljava
 			Entity entity = elmoManager
 					.create(new QName(dataURI), Entity.class);
 
+
+			
 			if (direction == Direction.INPUTS) {
 				activity.getProvUsed().add(entity);
 			} else {
@@ -459,6 +470,10 @@ java.lang.AbstractMethodError: info.aduna.lang.service.ServiceRegistry.add(Ljava
 
 	public void setWorkflowRunId(String workflowRunId) {
 		this.workflowRunId = workflowRunId;
+	}
+
+	public void setFileToT2Reference(Map<File, T2Reference> fileToT2Reference) {
+		this.fileToT2Reference = fileToT2Reference;		
 	}
 
 }
