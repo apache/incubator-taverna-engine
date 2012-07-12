@@ -2,19 +2,21 @@ package no.s11.w3.prov.taverna.ui;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
 
 import net.sf.taverna.t2.lang.results.ResultsUtils;
 import net.sf.taverna.t2.provenance.api.ProvenanceAccess;
-import net.sf.taverna.t2.provenance.client.ProvenanceExporter;
 import net.sf.taverna.t2.reference.ErrorDocument;
 import net.sf.taverna.t2.reference.ExternalReferenceSPI;
 import net.sf.taverna.t2.reference.Identified;
@@ -33,54 +35,84 @@ import eu.medsea.mimeutil.MimeType;
 
 public class SaveProvAction extends SaveAllResultsSPI {
 
-	public SaveProvAction(){
+	public SaveProvAction() {
 		super();
 		putValue(NAME, "Save provenance");
 		putValue(SMALL_ICON, WorkbenchIcons.saveAllIcon);
 	}
-	
+
+	ThreadLocal<Map<File, T2Reference>> fileToId = new ThreadLocal<Map<File, T2Reference>>();
+
 	public AbstractAction getAction() {
 		return this;
 	}
-	
+
 	@Override
 	public void setProvenanceEnabledForRun(boolean isProvenanceEnabledForRun) {
 		super.setProvenanceEnabledForRun(isProvenanceEnabledForRun);
 		setEnabled(isProvenanceEnabledForRun);
-	}	
-	
+	}
+
 	/**
-	 * Saves the result data as a file structure 
-	 * @throws IOException 
+	 * Saves the result data as a file structure
+	 * 
+	 * @throws IOException
 	 */
-	protected void saveData(File file) throws IOException {
-		// First convert map of references to objects into a map of real result objects
-//		for (String portName : chosenReferences.keySet()) {
-//			writeToFileSystem(chosenReferences.get(portName), file, portName);
-//		}
-//		
+	protected void saveData(File folder) throws IOException {
+		String folderName = folder.getName();
+		if (folderName.endsWith(".")) {
+			folder = new File(folder.getParentFile(), folderName.substring(0,
+					folderName.length()-1));
+		}
+		fileToId.set(new HashMap<File, T2Reference>());
+		try {
+			saveToFolder(folder);
+		} finally {
+			fileToId.remove();
+		}
+
+	}
+
+	protected void saveToFolder(File folder) throws IOException,
+			FileNotFoundException {
+		folder.mkdir();
+		if (!folder.isDirectory()) {
+			throw new IOException("Could not make/use folder: " + folder);
+		}
+
+		// First convert map of references to objects into a map of real result
+		// objects
+		for (String portName : chosenReferences.keySet()) {
+			writeToFileSystem(chosenReferences.get(portName), folder, portName);
+		}
+
 		String connectorType = DataManagementConfiguration.getInstance()
 				.getConnectorType();
-		ProvenanceAccess provenanceAccess = new ProvenanceAccess(connectorType, getContext());
-		W3ProvenanceExport export = new W3ProvenanceExport(provenanceAccess, getRunId());
+		ProvenanceAccess provenanceAccess = new ProvenanceAccess(connectorType,
+				getContext());
+		W3ProvenanceExport export = new W3ProvenanceExport(provenanceAccess,
+				getRunId());
+		export.setFileToT2Reference(fileToId.get());
+		File provenanceFile = new File(folder, "workflowrun.prov.ttl");
 		BufferedOutputStream outStream = new BufferedOutputStream(
-				new FileOutputStream(file));		
+				new FileOutputStream(provenanceFile ));
 		try {
 			export.exportAsW3Prov(outStream);
 		} catch (Exception e) {
-			logger.error("Failed to save the provenance graph to " + file, e);
+			logger.error("Failed to save the provenance graph to "
+					+ provenanceFile, e);
 			JOptionPane.showMessageDialog(null,
-					"Failed to save the provenance graph to " + file,
-					"Failed to save provenance graph", JOptionPane.ERROR_MESSAGE);
+					"Failed to save the provenance graph to " + provenanceFile,
+					"Failed to save provenance graph",
+					JOptionPane.ERROR_MESSAGE);
 		} finally {
 			try {
 				outStream.close();
 			} catch (IOException e) {
 			}
 		}
-		
 	}
-	
+
 	public File writeToFileSystem(T2Reference ref, File destination, String name)
 			throws IOException {
 		Identified identified = referenceService.resolveIdentifier(ref, null,
@@ -92,9 +124,9 @@ public class SaveProvAction extends SaveAllResultsSPI {
 		} else if (identified instanceof ErrorDocument) {
 			fileExtension = ".err";
 		}
-		
-		File writtenFile = writeObjectToFileSystem(destination, name,
-				ref, fileExtension);
+
+		File writtenFile = writeObjectToFileSystem(destination, name, ref,
+				fileExtension);
 		return writtenFile;
 	}
 
@@ -130,10 +162,13 @@ public class SaveProvAction extends SaveAllResultsSPI {
 		if (identified instanceof IdentifiedList) {
 			// Create a new directory, iterate over the collection recursively
 			// calling this method
-			File targetDir = new File(destination.toString() + File.separatorChar + name);
+			File targetDir = new File(destination.toString()
+					+ File.separatorChar + name);
 			targetDir.mkdir();
+			fileToId.get().put(targetDir, identified.getId());
 			int count = 0;
-			List<T2Reference> elements = referenceService.getListService().getList(ref);
+			List<T2Reference> elements = referenceService.getListService()
+					.getList(ref);
 			for (T2Reference subRef : elements) {
 				writeDataObject(targetDir, "" + count++, subRef,
 						defaultExtension);
@@ -157,7 +192,8 @@ public class SaveProvAction extends SaveAllResultsSPI {
 							}
 						});
 				for (ExternalReferenceSPI externalReference : externalReferences) {
-					if (externalReference.getDataNature().equals(ReferencedDataNature.TEXT)) {
+					if (externalReference.getDataNature().equals(
+							ReferencedDataNature.TEXT)) {
 						break;
 					}
 					mimeTypes.addAll(ResultsUtils.getMimeTypes(
@@ -179,13 +215,17 @@ public class SaveProvAction extends SaveAllResultsSPI {
 				}
 				File targetFile = new File(destination.toString()
 						+ File.separatorChar + name + fileExtension);
-				IOUtils.copyLarge(externalReferences.get(0)
-						.openStream(context), new FileOutputStream(targetFile));
+				IOUtils.copyLarge(
+						externalReferences.get(0).openStream(context),
+						new FileOutputStream(targetFile));
+				fileToId.get().put(targetFile, identified.getId());
 				return targetFile;
 			} else {
 				File targetFile = new File(destination.toString()
 						+ File.separatorChar + name + ".err");
-				FileUtils.writeStringToFile(targetFile, ((ErrorDocument) identified).getMessage());
+				FileUtils.writeStringToFile(targetFile,
+						((ErrorDocument) identified).getMessage());
+				fileToId.get().put(targetFile, identified.getId());
 				return targetFile;
 			}
 
@@ -194,7 +234,7 @@ public class SaveProvAction extends SaveAllResultsSPI {
 
 	@Override
 	protected String getFilter() {
-		return "prov.rdf";
+		return "";
 	}
-	
+
 }

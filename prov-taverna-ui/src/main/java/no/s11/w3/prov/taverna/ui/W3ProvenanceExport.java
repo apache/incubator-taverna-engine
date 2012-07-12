@@ -1,7 +1,9 @@
 package no.s11.w3.prov.taverna.ui;
 
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.sql.Timestamp;
+import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
@@ -24,11 +26,13 @@ import net.sf.taverna.t2.reference.T2Reference;
 import org.openrdf.elmo.ElmoModule;
 import org.openrdf.elmo.sesame.SesameManager;
 import org.openrdf.elmo.sesame.SesameManagerFactory;
+import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.contextaware.ContextAwareConnection;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.helpers.OrganizedRDFWriter;
-import org.openrdf.rio.rdfxml.util.RDFXMLPrettyWriter;
+import org.openrdf.rio.rdfxml.RDFXMLWriter;
+import org.openrdf.rio.turtle.TurtleWriter;
 import org.w3.provo.Activity;
 import org.w3.provo.Agent;
 import org.w3.provo.Entity;
@@ -42,6 +46,8 @@ import org.w3.time.Instant;
 
 public class W3ProvenanceExport {
 
+	private static final URIImpl SAMEAS = new URIImpl("http://www.w3.org/2002/07/owl#sameAs");
+
 	private ProvenanceAccess provenanceAccess;
 
 	private DatatypeFactory datatypeFactory;
@@ -49,6 +55,12 @@ public class W3ProvenanceExport {
 	private ProvenanceURIGenerator uriGenerator = new ProvenanceURIGenerator() ;
 
 	private String workflowRunId;
+
+	private Map<File, T2Reference> fileToT2Reference = Collections.emptyMap();
+
+	public Map<File, T2Reference> getFileToT2Reference() {
+		return fileToT2Reference;
+	}
 
 	public SesameManager makeElmoManager() {
 		ElmoModule module = new ElmoModule(getClass().getClassLoader());
@@ -220,8 +232,8 @@ public class W3ProvenanceExport {
 		connection
 				.setNamespace("prov", "http://www.w3.org/ns/prov-o/");
 		connection.setNamespace("owl", "http://www.w3.org/2002/07/owl#");
-		connection.export(new OrganizedRDFWriter(new RDFXMLPrettyWriter(outStream)));
-//		connection.export(new OrganizedRDFWriter(new TurtleWriter(outStream)));
+//		connection.export(new OrganizedRDFWriter(new RDFXMLPrettyWriter(outStream)));
+		connection.export(new OrganizedRDFWriter(new TurtleWriter(outStream)));
 
 	}
 
@@ -245,6 +257,22 @@ public class W3ProvenanceExport {
 
 		Map<Port, T2Reference> inputs = provenanceAccess
 				.getDataBindings(dataBindingId);
+
+		for (Entry<File, T2Reference> entry : getFileToT2Reference().entrySet()) {
+			File file = entry.getKey();
+			T2Reference t2Ref = entry.getValue();
+			String dataURI = uriGenerator.makeT2ReferenceURI(t2Ref.toUri()
+					.toASCIIString());
+			try {
+				elmoManager.getConnection().add(new URIImpl(dataURI), SAMEAS,
+						new URIImpl(file.toURI().toASCIIString()));
+			} catch (RepositoryException e) {
+				// FIXME: Fail properly
+				throw new RuntimeException("Can't store reference for " + file, e);
+			}
+		}
+
+		
 		for (Entry<Port, T2Reference> inputEntry : inputs.entrySet()) {
 			Port port = inputEntry.getKey();
 			T2Reference t2Ref = inputEntry.getValue();
@@ -255,6 +283,8 @@ public class W3ProvenanceExport {
 			Entity entity = elmoManager
 					.create(new QName(dataURI), Entity.class);
 
+
+			
 			if (direction == Direction.INPUTS) {
 				activity.getProvUsed().add(entity);
 			} else {
@@ -312,6 +342,10 @@ public class W3ProvenanceExport {
 
 	public void setWorkflowRunId(String workflowRunId) {
 		this.workflowRunId = workflowRunId;
+	}
+
+	public void setFileToT2Reference(Map<File, T2Reference> fileToT2Reference) {
+		this.fileToT2Reference = fileToT2Reference;		
 	}
 
 }
