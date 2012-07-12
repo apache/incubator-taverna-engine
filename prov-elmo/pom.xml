@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.purl.wf4ever.provtaverna</groupId>
 		<artifactId>prov-taverna</artifactId>
-		<version>1.2</version>
+		<version>1.3-SNAPSHOT</version>
 	</parent>
 	<artifactId>prov-elmo</artifactId>
 	<name>Taverna PROV W3 Provenance ontology Elmo bindings</name>
