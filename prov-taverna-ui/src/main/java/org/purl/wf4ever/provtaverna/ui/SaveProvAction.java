@@ -1,4 +1,4 @@
-package no.s11.w3.prov.taverna.ui;
+package org.purl.wf4ever.provtaverna.ui;
 
 import java.io.BufferedOutputStream;
 import java.io.File;

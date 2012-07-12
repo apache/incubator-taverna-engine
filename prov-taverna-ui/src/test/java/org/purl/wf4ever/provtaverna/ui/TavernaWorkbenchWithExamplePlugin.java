@@ -1,4 +1,4 @@
-package no.s11.w3.prov.taverna.ui;
+package org.purl.wf4ever.provtaverna.ui;
 
 import net.sf.taverna.t2.workbench.dev.DeveloperWorkbench;
 

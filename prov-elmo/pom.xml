@@ -2,12 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>no.s11.w3.prov</groupId>
+		<groupId>org.purl.wf4ever.provtaverna</groupId>
 		<artifactId>prov-taverna</artifactId>
 		<version>1.2-SNAPSHOT</version>
 	</parent>
 	<artifactId>prov-elmo</artifactId>
-	<name>W3 Provenance ontology Elmo bindings</name>
+	<name>Taverna PROV W3 Provenance ontology Elmo bindings</name>
 	<properties>
 		<elmo.version>1.5</elmo.version>
 		<!--  Because of Raven this must match whatever Elmo depends on! :( -->
@@ -92,7 +92,7 @@
 									<arg value="-j" />
 									<arg value="target/prov-ontology.jar" />
 									<!-- <arg value="-p" /> <arg value="" /> -->
-									<arg value="src/main/resources/no/s11/w3/prov/ProvenanceOntology.owl" />
+									<arg value="src/main/resources/org/purl/wf4ever/provtaverna/ProvenanceOntology.owl" />
 									<classpath refid="maven.plugin.classpath" />
 									<classpath>
 										<pathelement path="." />
@@ -299,4 +299,5 @@
 			<url>http://repo.aduna-software.org/maven2/releases</url>
 		</pluginRepository>
 	</pluginRepositories>
+	<groupId>org.purl.wf4ever.provtaverna</groupId>
 </project>

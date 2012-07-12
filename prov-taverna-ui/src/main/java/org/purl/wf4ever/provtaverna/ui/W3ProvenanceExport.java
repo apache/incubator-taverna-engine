@@ -1,4 +1,4 @@
-package no.s11.w3.prov.taverna.ui;
+package org.purl.wf4ever.provtaverna.ui;
 
 import info.aduna.lang.service.ServiceRegistry;
 
@@ -103,7 +103,7 @@ public class W3ProvenanceExport {
 	/* For some reason this fails with:
 	 * ERROR 2012-07-04 16:06:22,830 (net.sf.taverna.t2.workbench.ui.impl.Workbench:115) - Uncaught exception in Thread[SaveAllResults: Saving results to /home/stain/Desktop/popopopo.prov.ttl,6,main]
 java.lang.VerifyError: (class: no/s11/w3/prov/taverna/ui/W3ProvenanceExport, method: initializeRegistries signature: ()V) Incompatible argument to function
-	at no.s11.w3.prov.taverna.ui.SaveProvAction.saveData(SaveProvAction.java:65)
+	at org.purl.wf4ever.provtaverna.ui.SaveProvAction.saveData(SaveProvAction.java:65)
 	at net.sf.taverna.t2.workbench.views.results.saveactions.SaveAllResultsSPI$2.run(SaveAllResultsSPI.java:177)
 
 
@@ -111,10 +111,10 @@ or with java -noverify (..)
 
 ERROR 2012-07-04 16:28:47,814 (net.sf.taverna.t2.workbench.ui.impl.Workbench:115) - Uncaught exception in Thread[SaveAllResults: Saving results to /home/stain/Desktop/ppp.prov.ttl,6,main]
 java.lang.AbstractMethodError: info.aduna.lang.service.ServiceRegistry.add(Ljava/lang/Object;)Ljava/lang/Object;
-	at no.s11.w3.prov.taverna.ui.W3ProvenanceExport.repopulateRegistry(W3ProvenanceExport.java:132)
-	at no.s11.w3.prov.taverna.ui.W3ProvenanceExport.initializeRegistries(W3ProvenanceExport.java:111)
-	at no.s11.w3.prov.taverna.ui.W3ProvenanceExport.<init>(W3ProvenanceExport.java:162)
-	at no.s11.w3.prov.taverna.ui.SaveProvAction.saveData(SaveProvAction.java:65)
+	at org.purl.wf4ever.provtaverna.ui.W3ProvenanceExport.repopulateRegistry(W3ProvenanceExport.java:132)
+	at org.purl.wf4ever.provtaverna.ui.W3ProvenanceExport.initializeRegistries(W3ProvenanceExport.java:111)
+	at org.purl.wf4ever.provtaverna.ui.W3ProvenanceExport.<init>(W3ProvenanceExport.java:162)
+	at org.purl.wf4ever.provtaverna.ui.SaveProvAction.saveData(SaveProvAction.java:65)
 	at net.sf.taverna.t2.workbench.views.results.saveactions.SaveAllResultsSPI$2.run(SaveAllResultsSPI.java:177)
 
 
