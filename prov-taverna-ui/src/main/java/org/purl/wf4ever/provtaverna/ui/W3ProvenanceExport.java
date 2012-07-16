@@ -415,7 +415,7 @@ java.lang.AbstractMethodError: info.aduna.lang.service.ServiceRegistry.add(Ljava
 			if (direction == Direction.INPUTS) {
 				activity.getProvUsed().add(entity);
 			} else {
-				if (entity.getProvWasGeneratedBy() != null) {
+				if (! entity.getProvWasGeneratedBy().isEmpty()) {
 					// Double-output, alias the entity with a fresh one
 					// to avoid double-generation
 					Entity viewOfEntity = elmoManager.create(Entity.class);
