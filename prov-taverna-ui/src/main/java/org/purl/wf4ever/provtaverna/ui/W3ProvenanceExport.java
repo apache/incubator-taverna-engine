@@ -243,7 +243,7 @@ java.lang.AbstractMethodError: info.aduna.lang.service.ServiceRegistry.add(Ljava
 		Agent tavernaAgent = elmoManager.create(Agent.class);
 		Activity storeProvenance = elmoManager.create(Activity.class);
 
-		storeProvenance.setProvStartedAtTime(datatypeFactory
+		storeProvenance.getProvStartedAtTime().add(datatypeFactory
 				.newXMLGregorianCalendar(startedProvExportAt));
 		storeProvenance.getProvWasAssociatedWith().add(tavernaAgent);
 		// The agent is an execution of the Taverna software (e.g. also an
@@ -282,9 +282,9 @@ java.lang.AbstractMethodError: info.aduna.lang.service.ServiceRegistry.add(Ljava
 		Plan plan = elmoManager.create(new QName(wfUri), Plan.class);
 		association.getProvHadPlan().add(plan);
 
-		wfProcess.setProvStartedAtTime(timestampToXmlGreg(dataflowInvocation
+		wfProcess.getProvStartedAtTime().add(timestampToXmlGreg(dataflowInvocation
 				.getInvocationStarted()));
-		wfProcess.setProvEndedAtTime(timestampToXmlGreg(dataflowInvocation
+		wfProcess.getProvEndedAtTime().add(timestampToXmlGreg(dataflowInvocation
 				.getInvocationEnded()));
 
 		// Workflow inputs and outputs
@@ -315,9 +315,9 @@ java.lang.AbstractMethodError: info.aduna.lang.service.ServiceRegistry.add(Ljava
 			Activity parentProcess = elmoManager.designate(
 					new QName(parentURI), Activity.class);
 			process.getProvWasInformedBy().add(parentProcess);
-			process.setProvStartedAtTime(timestampToXmlGreg(pe
+			process.getProvStartedAtTime().add(timestampToXmlGreg(pe
 					.getEnactmentStarted()));
-			process.setProvEndedAtTime(timestampToXmlGreg(pe
+			process.getProvEndedAtTime().add(timestampToXmlGreg(pe
 					.getEnactmentEnded()));
 
 			// TODO: Linking to the processor in the workflow definition?
@@ -351,7 +351,7 @@ java.lang.AbstractMethodError: info.aduna.lang.service.ServiceRegistry.add(Ljava
 		}
 
 		GregorianCalendar endedProvExportAt = new GregorianCalendar();
-		storeProvenance.setProvEndedAtTime(datatypeFactory
+		storeProvenance.getProvEndedAtTime().add(datatypeFactory
 				.newXMLGregorianCalendar(endedProvExportAt));
 
 		// Save the whole thing
