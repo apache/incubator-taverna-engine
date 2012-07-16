@@ -37,7 +37,7 @@ public class SaveProvAction extends SaveAllResultsSPI {
 
 	public SaveProvAction() {
 		super();
-		putValue(NAME, "Save provenance");
+		putValue(NAME, "Save provenance (PROV)");
 		putValue(SMALL_ICON, WorkbenchIcons.saveAllIcon);
 	}
 
@@ -177,7 +177,7 @@ public class SaveProvAction extends SaveAllResultsSPI {
 		}
 
 		else {
-			String fileExtension = ".text";
+			String fileExtension = ".txt";
 			if (identified instanceof ReferenceSet) {
 				List<MimeType> mimeTypes = new ArrayList<MimeType>();
 				ReferenceSet referenceSet = (ReferenceSet) identified;
