@@ -21,6 +21,22 @@
 			<artifactId>provenanceconnector</artifactId>
 			<version>${t2.core.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>net.sf.taverna.t2.lang</groupId>
+			<artifactId>results</artifactId>
+			<version>${t2.results.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.sun</groupId>
+					<artifactId>tools</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.taverna.t2.ui-impl</groupId>
+			<artifactId>data-management-config</artifactId>
+			<version>${t2.ui.impl.version}</version>
+		</dependency>
 	</dependencies>
 
 </project>

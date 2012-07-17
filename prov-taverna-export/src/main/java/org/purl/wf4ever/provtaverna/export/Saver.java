@@ -1,4 +1,4 @@
-package org.purl.wf4ever.provtaverna.ui;
+package org.purl.wf4ever.provtaverna.export;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -31,7 +31,6 @@ import net.sf.taverna.t2.workbench.reference.config.DataManagementConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
-import org.purl.wf4ever.provtaverna.export.W3ProvenanceExport;
 
 import eu.medsea.mimeutil.MimeType;
 
