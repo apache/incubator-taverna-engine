@@ -52,8 +52,8 @@ public class TestProvCommandLineLauncher extends LaunchSafely {
 	public void runWithoutProv() throws Exception {
 		int status = launchSafely("-outputdir", outDir.getPath(),
 				"-inputvalue", "name", "Fred", t2flow.getPath());
-		System.err.println(getErr());
-		System.out.println(getOut());
+//		System.err.println(getErr());
+//		System.out.println(getOut());
 		assertEquals(0, status);
 		File[] outputs = outDir.listFiles();
 		assertEquals(1, outputs.length);
@@ -68,12 +68,18 @@ public class TestProvCommandLineLauncher extends LaunchSafely {
 				"-provenance", "-embedded",
 				"-inputvalue", "name", "Fred", 
 				t2flow.getPath());
-		System.err.println(getErr());
-		System.out.println(getOut());
+//		System.err.println(getErr());
+//		System.out.println(getOut());
 		assertEquals(0, status);
 		File[] outputs = outDir.listFiles();
 		assertEquals(2, outputs.length);
-		assertTrue(new File(outDir, "workflowrun.prov.ttl").isFile());
+		File provFile = new File(outDir, "workflowrun.prov.ttl");
+		assertTrue(provFile.isFile());
+		String prov = FileUtils.readFileToString(provFile, "utf-8");
+		
+		// FIXME: Test actual content
+		assertTrue(prov.contains("@prefix prov:"));
+		assertTrue(prov.contains("greeting"));
 	}
 	
 }
