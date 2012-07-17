@@ -18,7 +18,7 @@
 		<dependency>
 			<groupId>net.sf.taverna.t2.taverna-commandline</groupId>
 			<artifactId>taverna-commandline-common</artifactId>
-			<version>${t2.taverna-commandline.version}</version>#
+			<version>${t2.taverna-commandline.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>com.sun</groupId>
