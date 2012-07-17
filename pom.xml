@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.purl.wf4ever.provtaverna</groupId>
@@ -9,9 +10,7 @@
 	<name>Taverna PROV</name>
 
 	<properties>
-		<!--  Update according to latest Taverna version in 
-		www.mygrid.org.uk/dev/wiki/display/developer/Maven+module+version+numbers
-		 -->
+		<!-- Update according to latest Taverna version in www.mygrid.org.uk/dev/wiki/display/developer/Maven+module+version+numbers -->
 		<t2.core.version>1.4</t2.core.version>
 		<t2.activities.version>1.4</t2.activities.version>
 		<t2.ui.api.version>1.4</t2.ui.api.version>
@@ -19,6 +18,7 @@
 		<t2.ui.components.version>1.4.1</t2.ui.components.version>
 		<t2.workbench.version>2.4.0</t2.workbench.version>
 		<t2.results.version>1.4</t2.results.version>
+		<t2.taverna-commandline.version>1.4</t2.taverna-commandline.version>
 	</properties>
 
 	<build>
@@ -126,34 +126,35 @@
 		<repository>
 			<id>my-repository</id>
 			<name>My Plugin Site</name>
-            <url>file:///${user.home}/src/prov-taverna-pages/</url>
+			<url>file:///${user.home}/src/prov-taverna-pages/</url>
 		</repository>
 		<snapshotRepository>
 			<id>my-test-repository</id>
 			<name>My Test Plugin Site</name>
-            <url>file:///${user.home}/src/prov-taverna-pages/</url>
+			<url>file:///${user.home}/src/prov-taverna-pages/</url>
 		</snapshotRepository>
 	</distributionManagement>
-  <scm>
-    <url>https://github.com/wf4ever/taverna-prov</url>
-    <connection>scm:git:git://github.com/wf4ever/taverna-prov.git</connection>
-    <developerConnection>scm:git:git@github.com:wf4ever/taverna-prov.git</developerConnection>
-  </scm>
-  <issueManagement>
-    <system>github</system>
-    <url>https://github.com/wf4ever/taverna-prov/issues</url>
-  </issueManagement>
-  <organization>
-    <name>Wf4Ever</name>
-    <url>http://www.wf4ever-project.org/</url>
-  </organization>
-  <url>http://wf4ever.github.com/taverna-prov/</url>
-    
+	<scm>
+		<url>https://github.com/wf4ever/taverna-prov</url>
+		<connection>scm:git:git://github.com/wf4ever/taverna-prov.git</connection>
+		<developerConnection>scm:git:git@github.com:wf4ever/taverna-prov.git</developerConnection>
+	</scm>
+	<issueManagement>
+		<system>github</system>
+		<url>https://github.com/wf4ever/taverna-prov/issues</url>
+	</issueManagement>
+	<organization>
+		<name>Wf4Ever</name>
+		<url>http://www.wf4ever-project.org/</url>
+	</organization>
+	<url>http://wf4ever.github.com/taverna-prov/</url>
 
-  <modules>
-    <module>prov-taverna-ui</module>
-    <module>prov-taverna-plugin</module>
-    <module>prov-elmo</module>
-    <module>prov-taverna-export</module>
-  </modules>
+
+	<modules>
+		<module>prov-taverna-ui</module>
+		<module>prov-taverna-plugin</module>
+		<module>prov-elmo</module>
+		<module>prov-taverna-export</module>
+		<module>prov-taverna-cmdline</module>
+	</modules>
 </project>
