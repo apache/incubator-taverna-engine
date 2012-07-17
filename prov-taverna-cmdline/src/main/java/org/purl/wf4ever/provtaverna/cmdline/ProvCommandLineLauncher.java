@@ -1,8 +1,12 @@
 package org.purl.wf4ever.provtaverna.cmdline;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 
 import net.sf.taverna.t2.commandline.CommandLineLauncher;
 import net.sf.taverna.t2.commandline.CommandLineResultListener;
@@ -24,7 +28,7 @@ import net.sf.taverna.t2.workflowmodel.serialization.DeserializationException;
 
 public class ProvCommandLineLauncher extends CommandLineLauncher {
 	
-	private ThreadLocal<CommandLineOptions> options = new ThreadLocal<CommandLineOptions>();
+	private CommandLineOptions options = null;
 
 	@Override
 	public int setupAndExecute(String[] args, CommandLineOptions options)
@@ -33,12 +37,9 @@ public class ProvCommandLineLauncher extends CommandLineLauncher {
 			TokenOrderException, ReadInputException, OpenDataflowException,
 			DatabaseConfigurationException, CMException {
 		// Steal the options for later use by executeWorkflow() 
-		this.options.set(options);
-		try {
-			return super.setupAndExecute(args, options);
-		} finally {
-			this.options.remove();
-		}
+		this.options = options;		
+		return super.setupAndExecute(args, options);
+		
 	}
 	
 	@Override
@@ -50,17 +51,17 @@ public class ProvCommandLineLauncher extends CommandLineLauncher {
 		
 		// Rather than trying to modify the options, we'll just say that
 		// some options are not supported
-		String outputDirectory = options.get().getOutputDirectory();
+		String outputDirectory = options.getOutputDirectory();
 		if (outputDirectory == null) {
 			error("Option -outputdir mandatory");			
 		}
-		if (options.get().getOutputDocument() != null) {
+		if (options.getOutputDocument() != null) {
 			error("Option -outputdoc not supported");			
 		}
-		if (options.get().getJanus() != null) {
+		if (options.getJanus() != null) {
 			error("Option -janus not supported");			
 		}
-		if (options.get().getOPM() != null) {
+		if (options.getOPM() != null) {
 			error("Option -opm not supported");			
 		}
 
@@ -77,7 +78,7 @@ public class ProvCommandLineLauncher extends CommandLineLauncher {
 					+ e.getMessage());
 		}
 
-		File outputDir = new File(outputDirectory);
+		final File outputDir = new File(outputDirectory);
 		
 		Map<String, Integer> outputPortNamesAndDepth = new HashMap<String, Integer>();
 		for (DataflowOutputPort port : dataflow.getOutputPorts()) {
@@ -93,7 +94,13 @@ public class ProvCommandLineLauncher extends CommandLineLauncher {
 				true, false, false, false, facade.getWorkflowRunId()) {
 			@Override
 			public void saveProvenance() {
-				System.out.println("Here we will save provenance!");
+				if (options.isProvenanceEnabled()) {
+					// TODO: Actually save provenance
+					try {
+						FileUtils.writeStringToFile(new File(outputDir, "workflowrun.prov.ttl"), "Not real");
+					} catch (IOException e) {
+					}
+				}
 			}
 		};
 		

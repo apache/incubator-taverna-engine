@@ -38,7 +38,7 @@ public class TestProvCommandLineLauncher extends LaunchSafely {
 	public void testHelp() throws Exception {
 		assertEquals(0, launchSafely("--help"));
 		assertTrue(getOut().contains("usage:"));
-		// System.out.println(getOut());
+//		System.out.println(getOut());
 	}
 
 	@Before
@@ -61,4 +61,19 @@ public class TestProvCommandLineLauncher extends LaunchSafely {
 		// FIXME: Output file should have been written with utf-8, not system encoding!
 		assertEquals("Hello, Fred", FileUtils.readFileToString(outputs[0]));
 	}
+	
+	@Test
+	public void runWithProv() throws Exception {
+		int status = launchSafely("-outputdir", outDir.getPath(),
+				"-provenance", "-embedded",
+				"-inputvalue", "name", "Fred", 
+				t2flow.getPath());
+		System.err.println(getErr());
+		System.out.println(getOut());
+		assertEquals(0, status);
+		File[] outputs = outDir.listFiles();
+		assertEquals(2, outputs.length);
+		assertTrue(new File(outDir, "workflowrun.prov.ttl").isFile());
+	}
+	
 }
