@@ -4,7 +4,6 @@ import info.aduna.lang.service.ServiceRegistry;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Arrays;
@@ -33,7 +32,6 @@ import org.apache.log4j.Logger;
 import org.openrdf.elmo.ElmoModule;
 import org.openrdf.elmo.sesame.SesameManager;
 import org.openrdf.elmo.sesame.SesameManagerFactory;
-import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.query.parser.QueryParserRegistry;
 import org.openrdf.query.parser.sparql.SPARQLParserFactory;
@@ -41,8 +39,6 @@ import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.contextaware.ContextAwareConnection;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.helpers.OrganizedRDFWriter;
-import org.openrdf.rio.turtle.TurtleUtil;
-import org.openrdf.rio.turtle.TurtleWriter;
 import org.w3.prov.Activity;
 import org.w3.prov.Agent;
 import org.w3.prov.Association;
@@ -372,39 +368,7 @@ java.lang.AbstractMethodError: info.aduna.lang.service.ServiceRegistry.add(Ljava
 		// connection.export(new OrganizedRDFWriter(new
 		// RDFXMLPrettyWriter(outStream)));
 //		connection.export(new OrganizedRDFWriter(new RDFXMLPrettyWriter(outStream)));
-		connection.export(new OrganizedRDFWriter(new TurtleWriter(outStream) {
-			protected void writeURI(URI uri)
-				throws IOException
-			{
-//				String uriString = uri.toString();
-				
-				java.net.URI baseURI = getBaseFolder().toURI();
-				java.net.URI netURI = java.net.URI.create(uri.toString());
-				String uriString = baseURI.relativize(netURI).toASCIIString();
-				
-				// Try to find a prefix for the URI's namespace
-				String prefix = null;
-
-				int splitIdx = TurtleUtil.findURISplitIndex(uriString);
-				if (splitIdx > 0) {
-					String namespace = uriString.substring(0, splitIdx);
-					prefix = namespaceTable.get(namespace);
-				}
-
-				if (prefix != null) {
-					// Namespace is mapped to a prefix; write abbreviated URI
-					writer.write(prefix);
-					writer.write(":");
-					writer.write(uriString.substring(splitIdx));
-				}
-				else {
-					// Write full URI
-					writer.write("<");
-					writer.write(TurtleUtil.encodeURIString(uriString));
-					writer.write(">");
-				}
-			}
-		}));
+		connection.export(new OrganizedRDFWriter(new TurtleWriterWithBase(outStream, getBaseFolder().toURI())));
 
 	}
 
