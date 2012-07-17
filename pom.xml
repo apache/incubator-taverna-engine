@@ -153,5 +153,6 @@
     <module>prov-taverna-ui</module>
     <module>prov-taverna-plugin</module>
     <module>prov-elmo</module>
+    <module>prov-taverna-export</module>
   </modules>
 </project>

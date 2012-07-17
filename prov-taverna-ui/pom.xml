@@ -103,11 +103,11 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-
-
+		
+		
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>prov-elmo</artifactId>
+			<artifactId>prov-taverna-export</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -120,11 +120,7 @@
 			<artifactId>contextual-views-api</artifactId>
 			<version>${t2.ui.api.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>net.sf.taverna.t2.core</groupId>
-			<artifactId>provenanceconnector</artifactId>
-			<version>${t2.core.version}</version>
-		</dependency>
+		
 		<dependency>
 			<groupId>net.sf.taverna.t2.ui-components</groupId>
 			<artifactId>results-view</artifactId>
