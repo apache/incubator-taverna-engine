@@ -43,23 +43,23 @@ public class Saver {
 	 * @param saveProvAction
 	 */
 	public Saver(ReferenceService referenceService, InvocationContext context, String runId, Map<String, T2Reference> chosenReferences) {
-		this.referenceService = referenceService;
-		this.context = context;
-		this.runId = runId;
-		this.chosenReferences = chosenReferences;
+		this.setReferenceService(referenceService);
+		this.setContext(context);
+		this.setRunId(runId);
+		this.setChosenReferences(chosenReferences);
 	}
 
 	protected ThreadLocal<Map<File, T2Reference>> fileToId = new ThreadLocal<Map<File, T2Reference>>();
 
-	private final ReferenceService referenceService;
+	private ReferenceService referenceService;
 
-	private final InvocationContext context;
+	private InvocationContext context;
 
-	private final String runId;
+	private String runId;
 
-	private final Map<String, T2Reference> chosenReferences;
+	private Map<String, T2Reference> chosenReferences;
 
-	void saveData(File folder) throws FileNotFoundException, IOException {
+	public void saveData(File folder) throws FileNotFoundException, IOException {
 		String folderName = folder.getName();
 		if (folderName.endsWith(".")) {
 			folder = new File(folder.getParentFile(), folderName.substring(0,
@@ -67,13 +67,13 @@ public class Saver {
 		}
 		fileToId.set(new HashMap<File, T2Reference>());
 		try {
-			saveToFolder(folder, chosenReferences, referenceService);
+			saveToFolder(folder, getChosenReferences(), getReferenceService());
 		} finally {
 			fileToId.remove();
 		}
 	}
 
-	private void saveToFolder(File folder, Map<String, T2Reference> chosenReferences, ReferenceService referenceService) throws IOException,
+	protected void saveToFolder(File folder, Map<String, T2Reference> chosenReferences, ReferenceService referenceService) throws IOException,
 			FileNotFoundException {
 		folder.mkdir();
 		if (!folder.isDirectory()) {
@@ -89,9 +89,9 @@ public class Saver {
 		String connectorType = DataManagementConfiguration.getInstance()
 				.getConnectorType();
 		ProvenanceAccess provenanceAccess = new ProvenanceAccess(connectorType,
-				context);
+				getContext());
 		W3ProvenanceExport export = new W3ProvenanceExport(provenanceAccess,
-				runId);
+				getRunId());
 		export.setFileToT2Reference(fileToId.get());
 		export.setBaseFolder(folder);
 		File provenanceFile = new File(folder, "workflowrun.prov.ttl");
@@ -114,10 +114,10 @@ public class Saver {
 		}
 	}
 
-	private File writeDataObject(File destination, String name,
+	protected File writeDataObject(File destination, String name,
 			T2Reference ref, String defaultExtension) throws IOException {
-		Identified identified = referenceService.resolveIdentifier(ref, null,
-				context);
+		Identified identified = getReferenceService().resolveIdentifier(ref, null,
+				getContext());
 	
 		if (identified instanceof IdentifiedList) {
 			// Create a new directory, iterate over the collection recursively
@@ -127,7 +127,7 @@ public class Saver {
 			targetDir.mkdir();
 			fileToId.get().put(targetDir, identified.getId());
 			int count = 0;
-			List<T2Reference> elements = referenceService.getListService()
+			List<T2Reference> elements = getReferenceService().getListService()
 					.getList(ref);
 			for (T2Reference subRef : elements) {
 				writeDataObject(targetDir, "" + count++, subRef,
@@ -157,7 +157,7 @@ public class Saver {
 						break;
 					}
 					mimeTypes.addAll(ResultsUtils.getMimeTypes(
-							externalReference, context));
+							externalReference, getContext()));
 				}
 				if (!mimeTypes.isEmpty()) {
 	
@@ -176,7 +176,7 @@ public class Saver {
 				File targetFile = new File(destination.toString()
 						+ File.separatorChar + name + fileExtension);
 				IOUtils.copyLarge(
-						externalReferences.get(0).openStream(context),
+						externalReferences.get(0).openStream(getContext()),
 						new FileOutputStream(targetFile));
 				fileToId.get().put(targetFile, identified.getId());
 				return targetFile;
@@ -197,7 +197,7 @@ public class Saver {
 	 * about the object and so is not particularly clever. A File object
 	 * representing the file or directory that has been written is returned.
 	 */
-	private File writeObjectToFileSystem(File destination, String name,
+	protected File writeObjectToFileSystem(File destination, String name,
 			T2Reference ref, String defaultExtension) throws IOException {
 		// If the destination is not a directory then set the destination
 		// directory to the parent and the name to the filename
@@ -216,10 +216,10 @@ public class Saver {
 		return writtenFile;
 	}
 
-	private File writeToFileSystem(T2Reference ref, File destination, String name, ReferenceService referenceService)
+	protected File writeToFileSystem(T2Reference ref, File destination, String name, ReferenceService referenceService)
 			throws IOException {
 		Identified identified = referenceService.resolveIdentifier(ref, null,
-				context);
+				getContext());
 	
 		String fileExtension = "";
 		if (identified instanceof ReferenceSet) {
@@ -231,6 +231,38 @@ public class Saver {
 		File writtenFile = writeObjectToFileSystem(destination, name, ref,
 				fileExtension);
 		return writtenFile;
+	}
+
+	public ReferenceService getReferenceService() {
+		return referenceService;
+	}
+
+	public void setReferenceService(ReferenceService referenceService) {
+		this.referenceService = referenceService;
+	}
+
+	public InvocationContext getContext() {
+		return context;
+	}
+
+	public void setContext(InvocationContext context) {
+		this.context = context;
+	}
+
+	public String getRunId() {
+		return runId;
+	}
+
+	public void setRunId(String runId) {
+		this.runId = runId;
+	}
+
+	public Map<String, T2Reference> getChosenReferences() {
+		return chosenReferences;
+	}
+
+	public void setChosenReferences(Map<String, T2Reference> chosenReferences) {
+		this.chosenReferences = chosenReferences;
 	}
 
 }
