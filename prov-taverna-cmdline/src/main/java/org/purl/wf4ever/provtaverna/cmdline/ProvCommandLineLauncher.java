@@ -28,6 +28,21 @@ import net.sf.taverna.t2.workflowmodel.serialization.DeserializationException;
 
 import org.purl.wf4ever.provtaverna.export.Saver;
 
+/**
+ * An extension of CommandLineLauncher to store PROV-O provenance.
+ * <p>
+ * To export provenance, run with parameters:
+ * <pre>
+ * 		executeworkflow -Draven.launcher.app.main=org.purl.wf4ever.provtaverna.cmdline.ProvCommandLineLauncher \ 
+ *           -embedded -provenance -outputdir X ...
+ * </pre> 
+ * <p>
+ * Note: Various tricks are needed as CommandLineLauncher was not written 
+ * for extensibility.  
+ * 
+ * @author Stian Soiland-Reyes
+ *
+ */
 public class ProvCommandLineLauncher extends CommandLineLauncher {
 	
 	private CommandLineOptions options = null;
@@ -49,7 +64,6 @@ public class ProvCommandLineLauncher extends CommandLineLauncher {
 			Map<String, WorkflowDataToken> inputs,
 			CommandLineResultListener resultListener)
 			throws TokenOrderException {		
-
 		
 		// Rather than trying to modify the options, we'll just say that
 		// some options are not supported
@@ -89,8 +103,8 @@ public class ProvCommandLineLauncher extends CommandLineLauncher {
 			outputPortNamesAndDepth.put(port.getName(), port.getDepth());
 		}
 		
-		final Map<File, T2Reference> fileToId = new HashMap<File, T2Reference>();
-		
+		// Capture which file got which reference
+		final Map<File, T2Reference> fileToId = new HashMap<File, T2Reference>();		
 		SaveResultsHandler resultsHandler = new SaveResultsHandler(
 				outputPortNamesAndDepth, outputDir, null, null, null) {
 			@Override
@@ -98,7 +112,6 @@ public class ProvCommandLineLauncher extends CommandLineLauncher {
 					T2Reference reference, File dataFile,
 					InvocationContext context) {				
 				super.saveIndividualDataFile(reference, dataFile, context);
-				// Capture which file got which reference
 				fileToId.put(dataFile, reference);
 			}
 		};
