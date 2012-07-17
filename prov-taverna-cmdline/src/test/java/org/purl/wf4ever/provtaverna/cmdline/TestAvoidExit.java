@@ -12,9 +12,7 @@ public class TestAvoidExit {
 		} catch (SecurityException ex) {
 			System.out.println("OK");
 		}
-		System.out.println("Uninstalling");
 		avoidExit.uninstall();
-		System.out.println("Uninstalled");
 	}
 
 }

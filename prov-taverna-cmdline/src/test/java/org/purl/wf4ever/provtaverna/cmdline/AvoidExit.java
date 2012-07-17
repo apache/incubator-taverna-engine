@@ -1,7 +1,6 @@
 package org.purl.wf4ever.provtaverna.cmdline;
 
 import java.security.Permission;
-import java.util.Stack;
 
 /**
  * A security manager that disallows System.exit().
@@ -30,8 +29,15 @@ public final class AvoidExit extends SecurityManager {
 	boolean exitAllowed = false;
 
 	public static class ExitNotAllowed extends SecurityException {
-		public ExitNotAllowed() {
-			super("Exit not allowed");
+		private final int status;
+
+		public ExitNotAllowed(int status) {
+			super("Exit not allowed! Status: " + status);
+			this.status = status;
+		}
+
+		public int getStatus() {
+			return status;
 		}
 	}
 
@@ -45,7 +51,7 @@ public final class AvoidExit extends SecurityManager {
 	@Override
 	public void checkExit(int status) {
 		if (!exitAllowed) {
-			throw new ExitNotAllowed();
+			throw new ExitNotAllowed(status);
 		}
 	}
 
@@ -57,7 +63,10 @@ public final class AvoidExit extends SecurityManager {
 			// before as we we got installed
 			return;
 		}
-		super.checkPermission(perm);
+		if (oldSecurityManager != null) {
+			oldSecurityManager.checkPermission(perm);
+		}
+		// Otherwise, allow anything
 	}
 
 	/**
