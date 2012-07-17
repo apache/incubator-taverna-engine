@@ -1,98 +1,64 @@
 package org.purl.wf4ever.provtaverna.cmdline;
 
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
+import java.io.BufferedWriter;
+import java.io.CharArrayWriter;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.URL;
 
-import org.junit.After;
+import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-public class TestProvCommandLineLauncher {
+public class TestProvCommandLineLauncher extends LaunchSafely {
 
-	private AvoidExit avoidExit;
-	private ProvCommandLineLauncher launcher;
-	private ByteArrayOutputStream out;
-	private ByteArrayOutputStream err;
-	private PrintStream oldOut;
-	private PrintStream oldErr;
+	private static final String HELLOANYONE_T2FLOW = "/helloanyone.t2flow";
+	private File t2flow;
+	private File outDir;
 
-	// Note: Does not work with @BeforeClass in Eclipse!
-	@Before
-	public void avoidExit() {
-		avoidExit = AvoidExit.install();
-	}
-
-	@Test(expected = AvoidExit.ExitNotAllowed.class)
-	public void exit() throws Exception {
-		System.exit(-1);
+	public TestProvCommandLineLauncher() {
+		super(new ProvCommandLineLauncher());
 	}
 
 	@Before
-	public void makeLauncher() {
-		launcher = new ProvCommandLineLauncher();
-	}
-
-	public void captureErrOut() {
-		oldOut = System.out;
-		oldErr = System.err;
-		out = new ByteArrayOutputStream();
-		err = new ByteArrayOutputStream();
-		try {
-			System.setOut(new PrintStream(out, true, "utf-8"));
-			System.setErr(new PrintStream(err, true, "utf-8"));
-		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	public void restoreErrOut() {
-		System.setErr(oldErr);
-		System.setOut(oldOut);
-	}
-
-	public String getOut() {
-		try {
-			return out.toString("utf-8");
-		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	public String getErr() {
-		try {
-			return err.toString("utf-8");
-		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	public int launchSafely(String... args) {
-		captureErrOut();
-		// This AvoidExit magic would not have been needed if the Launchable
-		// return type had actually been used rather than calling System.exit
-		// manually
-		try {
-			return launcher.launch(args);
-		} catch (AvoidExit.ExitNotAllowed ex) {
-			return ex.getStatus();
-		} finally {
-			restoreErrOut();
-		}
+	public void writeT2Flow() throws IOException {
+		t2flow = File.createTempFile("test", ".t2flow");
+		URL resource = getClass().getResource(HELLOANYONE_T2FLOW);
+		assertNotNull("Could not find " + HELLOANYONE_T2FLOW, resource);
+		FileUtils.copyURLToFile(resource, t2flow);
 	}
 
 	@Test
-	public void testLaunchSafely() throws Exception {
-		assertEquals(0, launchSafely("executeworkflow", "--help"));
-		System.out.println(getOut());
+	public void testHelp() throws Exception {
+		assertEquals(0, launchSafely("--help"));
 		assertTrue(getOut().contains("usage:"));
+		// System.out.println(getOut());
 	}
 
-	@After
-	public void allowExit() {
-		avoidExit.uninstall();
+	@Before
+	public void outputDir() throws IOException {
+		outDir = File.createTempFile("test", "");
+		outDir.delete();
+		//outDir.mkdir();
+	}
+
+	@Test
+	public void runWithoutProv() throws Exception {
+		int status = launchSafely("-outputdir", outDir.getPath(),
+				"-inputvalue", "name", "Fred", t2flow.getPath());
+		System.err.println(getErr());
+		System.out.println(getOut());
+		assertEquals(0, status);
+		File[] outputs = outDir.listFiles();
+		assertEquals(1, outputs.length);
+		assertEquals("greeting", outputs[0].getName());
+		// FIXME: Output file should have been written with utf-8, not system encoding!
+		assertEquals("Hello, Fred", FileUtils.readFileToString(outputs[0]));
 	}
 }
