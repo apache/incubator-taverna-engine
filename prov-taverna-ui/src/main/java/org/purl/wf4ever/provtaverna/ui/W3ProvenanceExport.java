@@ -4,6 +4,7 @@ import info.aduna.lang.service.ServiceRegistry;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Arrays;
@@ -32,6 +33,7 @@ import org.apache.log4j.Logger;
 import org.openrdf.elmo.ElmoModule;
 import org.openrdf.elmo.sesame.SesameManager;
 import org.openrdf.elmo.sesame.SesameManagerFactory;
+import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.query.parser.QueryParserRegistry;
 import org.openrdf.query.parser.sparql.SPARQLParserFactory;
@@ -39,6 +41,7 @@ import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.contextaware.ContextAwareConnection;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.helpers.OrganizedRDFWriter;
+import org.openrdf.rio.turtle.TurtleUtil;
 import org.openrdf.rio.turtle.TurtleWriter;
 import org.w3.prov.Activity;
 import org.w3.prov.Agent;
@@ -68,6 +71,12 @@ public class W3ProvenanceExport {
 	private String workflowRunId;
 
 	private Map<File, T2Reference> fileToT2Reference = Collections.emptyMap();
+
+	private File baseFolder;
+
+	public File getBaseFolder() {
+		return baseFolder;
+	}
 
 	public Map<File, T2Reference> getFileToT2Reference() {
 		return fileToT2Reference;
@@ -363,7 +372,39 @@ java.lang.AbstractMethodError: info.aduna.lang.service.ServiceRegistry.add(Ljava
 		// connection.export(new OrganizedRDFWriter(new
 		// RDFXMLPrettyWriter(outStream)));
 //		connection.export(new OrganizedRDFWriter(new RDFXMLPrettyWriter(outStream)));
-		connection.export(new OrganizedRDFWriter(new TurtleWriter(outStream)));
+		connection.export(new OrganizedRDFWriter(new TurtleWriter(outStream) {
+			protected void writeURI(URI uri)
+				throws IOException
+			{
+//				String uriString = uri.toString();
+				
+				java.net.URI baseURI = getBaseFolder().toURI();
+				java.net.URI netURI = java.net.URI.create(uri.toString());
+				String uriString = baseURI.relativize(netURI).toASCIIString();
+				
+				// Try to find a prefix for the URI's namespace
+				String prefix = null;
+
+				int splitIdx = TurtleUtil.findURISplitIndex(uriString);
+				if (splitIdx > 0) {
+					String namespace = uriString.substring(0, splitIdx);
+					prefix = namespaceTable.get(namespace);
+				}
+
+				if (prefix != null) {
+					// Namespace is mapped to a prefix; write abbreviated URI
+					writer.write(prefix);
+					writer.write(":");
+					writer.write(uriString.substring(splitIdx));
+				}
+				else {
+					// Write full URI
+					writer.write("<");
+					writer.write(TurtleUtil.encodeURIString(uriString));
+					writer.write(">");
+				}
+			}
+		}));
 
 	}
 
@@ -390,13 +431,17 @@ java.lang.AbstractMethodError: info.aduna.lang.service.ServiceRegistry.add(Ljava
 			T2Reference t2Ref = entry.getValue();
 			String dataURI = uriGenerator.makeT2ReferenceURI(t2Ref.toUri()
 					.toASCIIString());
-			try {
-				elmoManager.getConnection().add(new URIImpl(dataURI), SAMEAS,
-						new URIImpl(file.toURI().toASCIIString()));
-			} catch (RepositoryException e) {
-				// FIXME: Fail properly
-				throw new RuntimeException("Can't store reference for " + file, e);
-			}
+//			try {
+				Entity entity = elmoManager
+						.create(new QName(dataURI), Entity.class);
+				entity.getProvAlternateOf().add(
+						elmoManager.create(new QName(file.toURI().toASCIIString()), Entity.class));
+//				elmoManager.getConnection().add(new URIImpl(dataURI), SAMEAS,
+//						new URIImpl(file.toURI().toASCIIString()));
+//			} catch (RepositoryException e) {
+//				// FIXME: Fail properly
+//				throw new RuntimeException("Can't store reference for " + file, e);
+//			}
 		}
 
 		
@@ -474,6 +519,11 @@ java.lang.AbstractMethodError: info.aduna.lang.service.ServiceRegistry.add(Ljava
 
 	public void setFileToT2Reference(Map<File, T2Reference> fileToT2Reference) {
 		this.fileToT2Reference = fileToT2Reference;		
+	}
+
+	public void setBaseFolder(File baseFolder) {
+		this.baseFolder = baseFolder;
+		
 	}
 
 }

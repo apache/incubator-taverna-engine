@@ -93,6 +93,7 @@ public class SaveProvAction extends SaveAllResultsSPI {
 		W3ProvenanceExport export = new W3ProvenanceExport(provenanceAccess,
 				getRunId());
 		export.setFileToT2Reference(fileToId.get());
+		export.setBaseFolder(folder);
 		File provenanceFile = new File(folder, "workflowrun.prov.ttl");
 		BufferedOutputStream outStream = new BufferedOutputStream(
 				new FileOutputStream(provenanceFile ));
