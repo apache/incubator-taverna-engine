@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import org.openrdf.model.URI;
+import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.turtle.TurtleUtil;
 import org.openrdf.rio.turtle.TurtleWriter;
 
@@ -19,6 +20,27 @@ public class TurtleWriterWithBase extends TurtleWriter {
 			super(out);
 			setReplaceBaseURI(replaceBaseURI);
 			setNewBaseURI(newBaseURI);
+		}
+
+		@Override
+		public void startRDF() throws RDFHandlerException {
+			super.startRDF();
+			java.net.URI base = newBaseURI != null ? newBaseURI : replaceBaseURI;
+			try {
+				if (newBaseURI == null) {					
+					// We'll include original base as a comment
+					writer.write("# ");
+				}
+				writer.write("@base ");
+				writer.write("<");
+				writer.write(base.toASCIIString());
+				writer.write(">");
+				writer.write(" .") ;
+				writer.writeEOL();
+			} catch (IOException e) {
+				throw new RDFHandlerException(e);
+			}
+	
 		}
 		
 		protected void writeURI(URI uri)
@@ -56,6 +78,9 @@ public class TurtleWriterWithBase extends TurtleWriter {
 		}
 
 		public void setReplaceBaseURI(java.net.URI replaceBaseURI) {
+			if (replaceBaseURI == null) {
+				throw new NullPointerException("replaceBaseURI can't be null");
+			}
 			this.replaceBaseURI = replaceBaseURI;
 		}
 
