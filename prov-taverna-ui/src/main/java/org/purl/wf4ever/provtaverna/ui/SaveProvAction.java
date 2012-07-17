@@ -30,6 +30,7 @@ import net.sf.taverna.t2.workbench.views.results.saveactions.SaveAllResultsSPI;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.purl.wf4ever.provtaverna.export.W3ProvenanceExport;
 
 import eu.medsea.mimeutil.MimeType;
 

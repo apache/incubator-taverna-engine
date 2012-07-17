@@ -1,4 +1,4 @@
-package org.purl.wf4ever.provtaverna.ui;
+package org.purl.wf4ever.provtaverna.export;
 
 import java.io.IOException;
 import java.io.OutputStream;
