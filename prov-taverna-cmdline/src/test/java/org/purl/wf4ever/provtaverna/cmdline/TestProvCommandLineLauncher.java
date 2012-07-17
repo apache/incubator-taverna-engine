@@ -1,15 +1,11 @@
 package org.purl.wf4ever.provtaverna.cmdline;
 
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.BufferedWriter;
-import java.io.CharArrayWriter;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.URL;
 
 import org.apache.commons.io.FileUtils;

@@ -1,15 +1,10 @@
 package org.purl.wf4ever.provtaverna.cmdline;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.purl.wf4ever.provtaverna.export.Saver;
 
 import net.sf.taverna.t2.commandline.CommandLineLauncher;
 import net.sf.taverna.t2.commandline.CommandLineResultListener;
@@ -30,6 +25,8 @@ import net.sf.taverna.t2.workflowmodel.DataflowOutputPort;
 import net.sf.taverna.t2.workflowmodel.EditException;
 import net.sf.taverna.t2.workflowmodel.InvalidDataflowException;
 import net.sf.taverna.t2.workflowmodel.serialization.DeserializationException;
+
+import org.purl.wf4ever.provtaverna.export.Saver;
 
 public class ProvCommandLineLauncher extends CommandLineLauncher {
 	

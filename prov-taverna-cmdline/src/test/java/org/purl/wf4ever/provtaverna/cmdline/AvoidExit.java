@@ -29,6 +29,10 @@ public final class AvoidExit extends SecurityManager {
 	boolean exitAllowed = false;
 
 	public static class ExitNotAllowed extends SecurityException {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 		private final int status;
 
 		public ExitNotAllowed(int status) {
