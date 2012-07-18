@@ -96,19 +96,11 @@
 			<url>http://www.mygrid.org.uk/maven/repository</url>
 		</repository>
 		<repository>
+            <releases />
+            <snapshots />
 			<!-- The repository that your jars are deployed to -->
-			<id>my-repository</id>
-			<name>My Repository</name>
-			<url>http://wf4ever.github.com/taverna-prov/</url>
-		</repository>
-		<repository>
-			<!-- The repository that your snapshot jars are deployed to -->
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-			<snapshots />
-			<id>my-snapshot-repository</id>
-			<name>My snapshot Repository</name>
+			<id>taverna-prov</id>
+			<name>Taverna Prov Repository</name>
 			<url>http://wf4ever.github.com/taverna-prov/</url>
 		</repository>
 	</repositories>
@@ -126,12 +118,12 @@
 		<repository>
 			<id>my-repository</id>
 			<name>My Plugin Site</name>
-			<url>file:///${user.home}/src/prov-taverna-pages/</url>
+			<url>file:///${user.home}/src/taverna-prov-gh/</url>
 		</repository>
 		<snapshotRepository>
 			<id>my-test-repository</id>
 			<name>My Test Plugin Site</name>
-			<url>file:///${user.home}/src/prov-taverna-pages/</url>
+            <url>file:///${user.home}/src/taverna-prov-gh/</url>
 		</snapshotRepository>
 	</distributionManagement>
 	<scm>
