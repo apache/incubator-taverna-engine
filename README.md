@@ -2,81 +2,82 @@ Taverna PROV support
 ====================
 
 This is a plugin for the Taverna Workbench and Taverna Command Line
-which allows export of the provenance of a workflow run 
+which allows export of the provenance of a workflow run
+according to the proposed [PROV-O standard](http://www.w3.org/TR/prov-o/).
 
 
 Installation
 ------------
-Installation of an releaed version of this plugin does not require
+Installation of an released version of this plugin does not require
 compilation, but uses Taverna's plugin mechanism.
 
 You need:
 * [Taverna Workbench 2.4.0](http://www.taverna.org.uk/download/workbench/2-4/)
-* [Patch update for Taverna 2.4.1](http://www.mail-archive.com/taverna-users@lists.sourceforge.net/msg01828.html)
-* A network connection
+* [Patch update for Taverna 2.4.1](http://markmail.org/thread/rd2zpaq27eiqiean)
+* Internet connectivity
 
 To install:
-* Start Taverna workbench
-* In the menu, click *Advanced* -> *Updates and plugins*
-* If Taverna does not say "An update is available" , click *Find
-  updates*
-* To install the required 2.4.1 patches, click *Update* for each of:
-  * _External tool service_
-  * _Service catalogue_
-  * _Services_
-  * _Workbench_
- Note: Click *OK* in the warning message about restart; you do not need
- to restart Taverna for each of these as we'll do that in the end
-* Click *Find new plugins*, then *Add update site* and fill in:
-** Site name: Taverna PROV
-** Site URL: http://wf4ever.github.com/taverna-prov/ 
-** Click *OK*
-* Under _Taverna PROV_, tick to select _Taverna PROV plugin 1.x_
-* Click *Install*
-* Click *Close*
-* Exit and Restart Taverna workbench
+1. Start Taverna workbench
+2. In the menu, click **Advanced** -> **Updates and plugins**
+3. If Taverna does not say "An update is available" , click **Find
+   updates**
+4. To install the required 2.4.1 patches, click **Update** for each of:
+    * _External tool service_
+    * _Service catalogue_
+    * _Services_
+    * _Workbench_
+    Note: Click **OK** in the warning message about restart; you do not need
+    to restart Taverna for each of these as we'll do that in the end
+5. Click **Find new plugins**, then **Add update site** and fill in:
+    * Site name: Taverna PROV
+    * Site URL: `http://wf4ever.github.com/taverna-prov/`
+6. Click **OK**
+7. Under _Taverna PROV_, tick to select _Taverna PROV plugin 1.x_
+8. Click **Install**
+9. Click **Close**
+10. Exit and Restart Taverna workbench
 
 
 Usage in workbench
 ------------------
 In order for PROV export to be possible from the Taverna Workbench,
-click *Preferences* from the *File* or *Taverna* menu, then go to the 
+click **Preferences** from the **File** or **Taverna** menu, then go to the 
 [Preferences for Data and Provenance](http://dev.mygrid.org.uk/wiki/display24/taverna/Data+and+provenance+preferences).
-Ensure that _Provenance capture_ is enabled. (This is the default in 2.4).
+Ensure that **Provenance capture** is enabled. (This is the default in 2.4).
 
 If you would like Taverna to keep the provenance data between runs
 of the workbench (in order to export at a later time), then you need to
-also tick to *disable* _In memory storage_; note that this may slow
+also tick to *disable* **In memory storage**; note that this may slow
 down executions of some workflows.
 
 Open and run a workflow to export provenance for. As a quick example,
 try the very simple
-[helloanyone.t2flow](http://www.myexperiment.org/workflows/2649/download/hello_anyone_895936.t2flow).
-from [myExperiment](http://www.myexperiment.org/workflows/2649) (or
-examples/ in this source code).
+[helloanyone.t2flow](http://www.myexperiment.org/workflows/2649/download/hello_anyone_895936.t2flow)
+from [myExperiment](http://www.myexperiment.org/workflows/2649)
+(included in `examples/` folder of this source code).
 
 Exporting PROV from Taverna is done similar to the [export of OPM and
 Janus provenance](http://dev.mygrid.org.uk/wiki/display/taverna24/Provenance+export+to+OPM+and+Janus).
 
-The difference is that you need to click *Save provenance (PROV)*, and
-that in the file dialogue you need to give the name of what will become
-a folder, rather than a single file.
+The difference is that you need to click **Save provenance (PROV)**, and
+in the file dialogue give the name of what will become
+a _folder_, rather than a single file.
 
 In short:
-* Click *Results* perspective
-* Select a run on the left
-* Click *Show workflow results* button (in case you are viewing
-  intermediates)
-* Click *Save all values*
-* Ensure all boxes are ticked
-* Click *Save Provenance (PROV)*
-* Browse and type the name of a folder for the results (which will be created)
-* Click OK
+1. Click **Results** perspective
+2. Select a run on the left
+3. Click **Show workflow results** button (in case you are viewing
+.  intermediates)
+4. Click **Save all values**
+5. Ensure all boxes are ticked
+6. Click **Save Provenance (PROV)**
+7. Browse and type the name of a folder for the results (which will be created)
+8. Click **OK**
 
 Browse the folder using Explorer/Finder etc. You should find a set of
 files for the input and output ports of the workflow, in addition to a
-file _workflowrun.prov.ttl_ which contains the PROV-O export of the
-complete workflow run in RDF Turtle format:
+file `workflowrun.prov.ttl` which contains the PROV-O export of the
+complete workflow run in [RDF Turtle format](http://www.w3.org/TR/turtle/):
 
     stain@ahtissuntu:~/src/taverna-prov/example/helloanyone$ ls
     greeting.txt  name.txt  workflowrun.prov.ttl
@@ -100,7 +101,7 @@ complete workflow run in RDF Turtle format:
 Querying
 --------
 
-Example SPARQL query:
+Example [SPARQL query](http://www.w3.org/TR/sparql11-query/):
 
     stain@ahtissuntu:~/src/taverna-prov/example/helloanyone$ cat test.sparql 
     PREFIX prov: <http://www.w3.org/ns/prov#> 
@@ -122,13 +123,15 @@ Note: Future versions of the PROV-O export will use custom subproperties of
 prov:alternateOf to proper distinguish values at workflow level,
 processor level and file level.
 
-Query using rdfproc (apt-get install redland-utils):
+Query using [rdfproc](http://librdf.org/utils/rdfproc.html) (`apt-get install redland-utils`):
     stain@ahtissuntu:~/src/taverna-prov/example/helloanyone$ rdfproc test parse workflowrun.prov.ttl turtle
     rdfproc: Parsing URI file:///home/stain/src/taverna-prov/example/helloanyone/workflowrun.prov.ttl with turtle parser
 
     stain@ahtissuntu:~/src/taverna-prov/example/helloanyone$ rdfproc test query sparql - "$(cat test.sparql)" 
     rdfproc: Query returned bindings results:
-    result: [name=<file:///home/stain/src/taverna-prov/example/helloanyone/name.txt>, plan=<http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/processor/hello/>, ended="2012-07-18T12:40:20.543Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>]
+    result: [name=<file:///home/stain/src/taverna-prov/example/helloanyone/name.txt>, 
+             plan=<http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/processor/hello/>, 
+             ended="2012-07-18T12:40:20.543Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>]
     rdfproc: Query returned 1 results
 
 
@@ -139,24 +142,28 @@ Troubleshooting
 If the *Save Provenance (PROV)* button is not listed, then the plugin
 was most likely not installed correctly. 
 
-Check:
+Check that:
 * You installed all the 2.4.1 updates (duplicate icons in toolbar indicates no)
 * You restarted Taverna after installation
 * Taverna can access the Internet; check [proxy settings](http://dev.mygrid.org.uk/wiki/display/taverna24/HTTP+proxy+preferences)
 * The plugin and its dependences downloaded correctly
-** Check the logs in the [Taverna home directory](http://dev.mygrid.org.uk/wiki/display/taverna24/Taverna+home+directory) for any error messages relating to PROV or Sesame
-** To force a new download of plugin, delete _repository_ from the above folder (*not* the installation folder) and restart Taverna
-** To start clean and reinstall the plugin, delete everything from the [Taverna home directory](http://dev.mygrid.org.uk/wiki/display/taverna24/Taverna+home+directory) and restart Taverna
-* Check your Java version with *java -version*
+  * Check the `logs/` in the [Taverna home
+    directory](http://dev.mygrid.org.uk/wiki/display/taverna24/Taverna+home+directory)
+    for any error messages relating to PROV or Sesame
+  * To force a new download of plugin, delete `repository/` from the
+    above folder (*not* the installation folder) and restart Taverna
+  * To start clean and reinstall the plugin, delete everything from the
+    [Taverna home directory](http://dev.mygrid.org.uk/wiki/display/taverna24/Taverna+home+directory)
+    and restart Taverna
+* Check your Java version with `java -version`
 * Reinstall Taverna
 * Contact myGrid for support <support@mygrid.org.uk>
 
 
 
-
 Installation for command line tool
 ----------------------------------
-To be done
+_To be done_
 
 
 Building
@@ -166,11 +173,11 @@ from the above plugin site is the preferred way to install this plugin.
 
 You need:
 * Java JDK 1.6 or newer (Tested with OpenJDK 1.7.0\_03)
-** Note: Do not use the OpenJDK 1.6 (default in Ubuntu), as this is
+  * Note: Do not use the OpenJDK 1.6 (default in Ubuntu), as this is
    buggy with GUI and File operations, both used by Taverna workbench.
-* Maven 2.2 or newer (Tested with Maven 3.0.4)
+* Maven 2.2 or newer (Tested with [Maven 3.0.4](http://maven.apache.org/download.html))
 
-To compile, run "mvn clean install"
+To compile, run `mvn clean install`
 
 On first run this will download various third-party libraries from Maven
 repositories, including required modules of Taverna 2.4. These JARs, and the
@@ -178,6 +185,7 @@ compiled JARs from this source code, are installed into
 $HOME/.m2/repository/ by default.  
 
 Example compilation:
+
     stain@ahtissuntu:~/src/taverna-prov$ mvn clean install
     [INFO] Scanning for projects...
     [INFO] ------------------------------------------------------------------------
@@ -220,11 +228,11 @@ On first run this will download various third-party libraries from Maven
 repositories, including required modules of Taverna 2.4. Depending on
 your bandwith, this might take about 5 minutes in total.  These JARs,
 and the compiled JARs from this source code, are installed into
-$HOME/.m2/repository/ by default.  
+`$HOME/.m2/repository/` by default.  
 
 Note that to work with Taverna's plugin system, the build is specific
 for a particular Taverna version. To build this plugin for a different
-version of Taverna, modify the <properties> section of {pom.xml} to
+version of Taverna, modify the `<properties>` section of `pom.xml` to
 match the [Maven module
 versions](http://dev.mygrid.org.uk/wiki/display/developer/Maven+module+version+numbers)
 for the specific Taverna release.
@@ -236,6 +244,7 @@ directory](http://dev.mygrid.org.uk/wiki/display/taverna24/Taverna+home+director
 (run Taverna once to create the file) to include this section right
 before the final </plugins:plugins>.
 
+```xml
      <plugin>
         <provider>org.purl.wf4ever</provider>
         <identifier>org.purl.wf4ever.provtaverna.prov-taverna-plugin</identifier>
@@ -274,19 +283,22 @@ before the final </plugins:plugins>.
             </application>
         </compatibility>
     </plugin>
+```
 
-Modify the line 
+Modify the line:
     <repository>file:///home/fred/.m2/repository/</repository>
+
 to match your $HOME/.m2/repository. On Windows this path should look like:
+
     <repository>file:///C:/Users/fred/.m2/repository/</repository>    
 
 NOTE: You must remove the official installation of this plugin if this
-is already present in plugins.xml, look for
-{{org.purl.wf4ever.provtaverna}}.
+is already present in `plugins.xml`, look for
+`org.purl.wf4ever.provtaverna`.
 
-Take care that the <version> of the <plugin> and prov-taverna-ui matches
-the <version> specified in this pom.xml (typically 1.x-SNAPSHOT)
+Take care that the `<version>` of the `<plugin>` and `prov-taverna-ui` matches
+the `<version>` specified in the `pom.xml` of this source code (typically `1.x-SNAPSHOT`).
 
-If you are building for a different Taverna, check that the <application><version> 
+If you are building for a different Taverna, check that the `<application><version>`
 matches the Taverna version (compare with the existing plugins)
 
