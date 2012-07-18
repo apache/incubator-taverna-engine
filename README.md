@@ -65,7 +65,7 @@ Open and run a workflow to export provenance for. As a quick example,
 try the very simple
 [helloanyone.t2flow](http://www.myexperiment.org/workflows/2649/download/hello_anyone_895936.t2flow)
 from [myExperiment](http://www.myexperiment.org/workflows/2649)
-(included in `examples/` folder of this source code).
+(included in the `example/` folder of this source code).
 
 Exporting PROV from Taverna is done similar to the [export of OPM and
 Janus provenance](http://dev.mygrid.org.uk/wiki/display/taverna24/Provenance+export+to+OPM+and+Janus).
@@ -93,9 +93,10 @@ The folder selected will contain each of the selected input and output
 ports. Ports with multiple values are stored as a folder with numbered
 outputs, starting from `0`. Values representing errors have extension `.err`.
 
-In addition to a
-file `workflowrun.prov.ttl` which contains the PROV-O export of the
-workflow run (including nested workflows) in [RDF Turtle format](http://www.w3.org/TR/turtle/):
+In you will find the file `workflowrun.prov.ttl` which contains the PROV-O export of the
+workflow run (including nested workflows) in [RDF Turtle format](http://www.w3.org/TR/turtle/).
+
+Example listing:
 
     stain@ahtissuntu:~/src/taverna-prov/example/helloanyone$ ls
     greeting.txt  name.txt  workflowrun.prov.ttl
@@ -121,6 +122,7 @@ Querying
 
 Example [SPARQL query](http://www.w3.org/TR/sparql11-query/):
 
+```sparql
     stain@ahtissuntu:~/src/taverna-prov/example/helloanyone$ cat test.sparql 
     PREFIX prov: <http://www.w3.org/ns/prov#> 
 
@@ -136,9 +138,10 @@ Example [SPARQL query](http://www.w3.org/TR/sparql11-query/):
     ?concatenate prov:used ?string2 .
     ?string2 prov:alternateOf ?name .
     }
+```
 
 Note: Future versions of the PROV-O export will use custom subproperties of
-prov:alternateOf to proper distinguish values at workflow level,
+`prov:alternateOf` to proper distinguish values at workflow level,
 processor level and file level.
 
 Query using [rdfproc](http://librdf.org/utils/rdfproc.html) (`apt-get install redland-utils`):
