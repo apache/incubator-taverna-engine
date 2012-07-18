@@ -151,7 +151,7 @@
     <licenses>
 		<license>
 			<name>GNU Lesser General Public License 2.1</name>
-			<url>http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt</url>
+			<url>http://www.gnu.org/licenses/lgpl-2.1.txt</url>
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
