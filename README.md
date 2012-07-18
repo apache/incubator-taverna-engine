@@ -1,9 +1,10 @@
 Taverna PROV support
 ====================
 
-This is a plugin for the Taverna Workbench and Taverna Command Line
-which allows export of the provenance of a workflow run
-according to the proposed [PROV-O standard](http://www.w3.org/TR/prov-o/).
+This is a plugin for the [Taverna](http://www.taverna.org.uk/) Workbench
+and Taverna Command Line which allows export of the provenance of a
+workflow run according to the proposed [PROV-O
+standard](http://www.w3.org/TR/prov-o/).
 
 
 Source code and license
@@ -13,8 +14,8 @@ This plugin is distributed under the [GNU Lesser General Public License
 for this plugin is available at https://github.com/wf4ever/taverna-prov
 
 
-Installation
-------------
+Installation for Taverna workbench
+----------------------------------
 Installation of an released version of this plugin does not require
 compilation, but uses Taverna's plugin mechanism.
 
@@ -91,6 +92,100 @@ In short:
 6.  Click **Save Provenance (PROV)**
 7.  Browse and type the name of a folder for the results (which will be created)
 8.  Click **OK**
+9.  The provenance and results values should have been saved to the
+    requested folder.
+
+
+Installation for Taverna Command line tool
+------------------------------------------
+Installation for the [Taverna command line tool](http://www.taverna.org.uk/download/command-line-tool/2-4/)
+is slightly more manual as it has no GUI for installing plugins.
+
+1.  To install, extract the **separate download** [Taverna command line
+    tool 2.4](http://www.taverna.org.uk/download/command-line-tool/2-4/)
+    to a folder of your choice
+2.  Edit the file `plugins/plugin.xml` of the unpacked installation, and
+    add this section right before `</plugins:plugin>` at the end of the
+    file:
+
+    ```xml
+    <plugin>
+        <provider>org.purl.wf4ever</provider>
+        <identifier>org.purl.wf4ever.provtaverna.cmdline</identifier>
+        <version>1.4</version>
+        <name>Taverna PROV command line</name>
+        <description/>
+        <enabled>true</enabled>
+        <repositories>
+            <repository>http://wf4ever.github.com/taverna-prov/</repository>
+            <repository>http://www.mygrid.org.uk/maven/repository/</repository>
+            <repository>http://uk.maven.org/maven2/</repository>
+            <repository>http://repo.aduna-software.org/maven2/releases/</repository>
+            <repository>http://repo.aduna-software.org/maven2/snapshots/</repository>
+            <repository>http://repo.aduna-software.org/maven2/ext/</repository>
+            <repository>http://repository.aduna-software.org/maven2/</repository>
+            <repository>http://repository.aduna-software.org/maven2-snapshots/</repository>
+            <repository>http://people.apache.org/repo/m2-snapshot-repository/</repository>
+            <repository>http://nexus.codehaus.org/snapshots/</repository>
+        </repositories>
+        <profile>
+            <dependency>
+                <groupId>org.purl.wf4ever.provtaverna</groupId>
+                <artifactId>prov-taverna-cmdline</artifactId>
+                <version>1.4</version>
+            </dependency>
+        </profile>
+        <compatibility>
+            <application>
+                <version>2.4.0</version>
+            </application>
+        </compatibility>
+    </plugin>
+
+    ```
+
+    You should replace `<version>1.4</version>` with whatever is the
+    latest version [listed on the taverna-prov plugin site](http://wf4ever.github.com/taverna-prov/pluginlist.xml).
+
+3.  Start the command line tool without parameters to force downloading
+    of plugins (this might take a few minutes the first time):
+
+    ```
+    stain@ahtissuntu:~/software/taverna-commandline-2.4.0$ sh executeworkflow.sh 
+    WARN  2012-07-18 16:44:36,323 (net.sf.taverna.raven.repository.impl.LocalRepository:85) - Could not find artifact org.purl.wf4ever.provtaverna:prov-taverna-cmdline:1.4
+    usage: executeworkflow [options] [workflow]
+     -clientserver                           Connect as a client to a derby
+                                             server instance.
+     -cmdir <directory path>                 Absolute path to a directory
+    (..)
+    ```
+
+    Note that Taverna will copy the content of this file to
+    `$HOME/.taverna-cmd-2.4.0/plugins/plugins.xml` only on first start, so
+    if you do further edits, you will need to delete the file in
+    `$HOME/.taverna-cmd-2.4.0/plugins/`.
+
+4.  If you get an error such as:
+
+    ```
+    WARN  2012-07-18 16:44:36,323 (net.sf.taverna.raven.repository.impl.LocalRepository:85) - Could not find artifact org.purl.wf4ever.provtaverna:prov-taverna-cmdline:1.4
+    net.sf.taverna.raven.repository.ArtifactNotFoundException: Could not find artifact org.purl.wf4ever.provtaverna:prov-taverna-cmdline:1.4: Can't find artifact for: org.purl.wf4ever.provtaverna:prov-taverna-cmdline:1.4
+        at net.sf.taverna.raven.repository.impl.LocalRepository.fetch(LocalRepository.java:820)
+    ```
+
+    then check if you need to [configure Java for using proxies](http://docs.oracle.com/javase/6/docs/technotes/guides/net/proxies.html) by modifying the `java` command line in `executeworkflow.sh` or `executeworkflow.bat`.
+  
+5.  Modify the file `conf/raven-launcher.conf` so that the line with `raven.launcher.app.main` says:
+    ```properties
+    raven.launcher.app.main=org.purl.wf4ever.provtaverna.cmdline.ProvCommandLineLauncher
+    ```
+
+6.  Execute without parameters to ensure the modified launcher is
+    working:
+
+    ```
+    sh executeworkflow.sh
+    ```
 
 
 Structure of exported provenance
@@ -188,11 +283,6 @@ Check that:
 * Reinstall Taverna
 * Contact myGrid for support <support@mygrid.org.uk>
 
-
-
-Installation for command line tool
-----------------------------------
-_To be done_
 
 
 
