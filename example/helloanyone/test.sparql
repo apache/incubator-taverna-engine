@@ -1,0 +1,15 @@
+PREFIX prov: <http://www.w3.org/ns/prov#> 
+
+SELECT ?name ?plan ?ended
+WHERE {
+    ?greeting prov:alternateOf <greeting.txt> .
+    ?output prov:alternateOf ?greeting .
+    ?output prov:wasGeneratedBy ?concatenate .
+    ?concatenate prov:endedAtTime ?ended ;
+        prov:qualifiedAssociation [
+            prov:hadPlan ?plan
+    ] .
+    ?concatenate prov:used ?string2 .
+    ?string2 prov:alternateOf ?name .
+}
+
