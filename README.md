@@ -17,6 +17,7 @@ You need:
 * Internet connectivity
 
 To install:
+
 1.  Start Taverna workbench
 2.  In the menu, click **Advanced** -> **Updates and plugins**
 3.  If Taverna does not say "An update is available" , click **Find
@@ -64,6 +65,7 @@ in the file dialogue give the name of what will become
 a _folder_, rather than a single file.
 
 In short:
+
 1.  Click **Results** perspective
 2.  Select a run on the left
 3.  Click **Show workflow results** button (in case you are viewing intermediates)
@@ -198,10 +200,13 @@ You need:
 
 To compile, run `mvn clean install`
 
-On first run this will download various third-party libraries from Maven
-repositories, including required modules of Taverna 2.4. These JARs, and the
-compiled JARs from this source code, are installed into
-`$HOME/.m2/repository/` by default.  
+On first run this will download various open-source third-party
+libraries from Maven repositories, including required modules of Taverna 2.4. 
+These JARs, and the compiled JARs from this source code, are
+installed into `$HOME/.m2/repository/` [by
+default](http://maven.apache.org/settings.html#Quick_Overview).
+Depending on your network connection, this first run might take about 5
+minutes to complete.
 
 Example compilation:
 
@@ -243,12 +248,6 @@ Example compilation:
     [INFO] ------------------------------------------------------------------------
     
 
-On first run this will download various third-party libraries from Maven
-repositories, including required modules of Taverna 2.4. Depending on
-your bandwith, this might take about 5 minutes in total.  These JARs,
-and the compiled JARs from this source code, are installed into
-`$HOME/.m2/repository/` by default.  
-
 Note that to work with Taverna's plugin system, the build is specific
 for a particular Taverna version. To build this plugin for a different
 version of Taverna, modify the `<properties>` section of `pom.xml` to
@@ -263,9 +262,9 @@ directory](http://dev.mygrid.org.uk/wiki/display/taverna24/Taverna+home+director
 (run Taverna once to create the file) to include this section right
 before the final `</plugins:plugins>`.
 
-NOTE: You must remove the official installation of this plugin if this
-is already present in `plugins.xml`, look for
-`org.purl.wf4ever.provtaverna`.
+NOTE: If you have already installed the official plugin, first *Remove*
+it from within Taverna. To check, look for `org.purl.wf4ever.provtaverna`
+in `plugins/plugins.xml`.
 
 
 ```xml
@@ -336,5 +335,9 @@ the `repository/org/purl/wf4ever` folder of the  [Taverna home
 directory](http://dev.mygrid.org.uk/wiki/display/taverna24/Taverna+home+directory)
 Taverna has downloaded the SNAPSHOT versions from the myGrid repository
 instead (for instance because you used the wrong `<repository>` path).
+
+To make the plugin installation system-side (ie. multiple UNIX users or
+customized Taverna distribution for the Taverna Server), copy `plugins/`
+and `repository` with overwrite onto the Taverna installation directory. 
 
 
