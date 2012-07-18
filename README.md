@@ -111,22 +111,15 @@ is slightly more manual as it has no GUI for installing plugins.
     ```xml
     <plugin>
         <provider>org.purl.wf4ever</provider>
-        <identifier>org.purl.wf4ever.provtaverna.cmdline</identifier>
+        <identifier>org.purl.wf4ever.provtaverna.prov-taverna-plugin</identifier>
         <version>1.4</version>
-        <name>Taverna PROV command line</name>
+        <name>Taverna PROV plugin</name>
         <description/>
         <enabled>true</enabled>
         <repositories>
             <repository>http://wf4ever.github.com/taverna-prov/</repository>
-            <repository>http://www.mygrid.org.uk/maven/repository/</repository>
-            <repository>http://uk.maven.org/maven2/</repository>
             <repository>http://repo.aduna-software.org/maven2/releases/</repository>
-            <repository>http://repo.aduna-software.org/maven2/snapshots/</repository>
-            <repository>http://repo.aduna-software.org/maven2/ext/</repository>
-            <repository>http://repository.aduna-software.org/maven2/</repository>
-            <repository>http://repository.aduna-software.org/maven2-snapshots/</repository>
-            <repository>http://people.apache.org/repo/m2-snapshot-repository/</repository>
-            <repository>http://nexus.codehaus.org/snapshots/</repository>
+            <repository>http://uk.maven.org/maven2/</repository>
         </repositories>
         <profile>
             <dependency>
@@ -141,7 +134,6 @@ is slightly more manual as it has no GUI for installing plugins.
             </application>
         </compatibility>
     </plugin>
-
     ```
 
     You should replace `<version>1.4</version>` with whatever is the
