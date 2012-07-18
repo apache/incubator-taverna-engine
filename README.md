@@ -6,6 +6,13 @@ which allows export of the provenance of a workflow run
 according to the proposed [PROV-O standard](http://www.w3.org/TR/prov-o/).
 
 
+Source code and license
+-----------------------
+This plugin is distributed under the [GNU Lesser General Public License
+2.1](http://www.gnu.org/licenses/lgpl-2.1.html) (LGPL). The source code
+for this plugin is available at https://github.com/wf4ever/taverna-prov
+
+
 Installation
 ------------
 Installation of an released version of this plugin does not require
