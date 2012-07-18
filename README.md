@@ -17,24 +17,24 @@ You need:
 * Internet connectivity
 
 To install:
-1. Start Taverna workbench
-2. In the menu, click **Advanced** -> **Updates and plugins**
-3. If Taverna does not say "An update is available" , click **Find
-   updates**
-4. To install the required 2.4.1 patches, click **Update** for each of:
+1.  Start Taverna workbench
+2.  In the menu, click **Advanced** -> **Updates and plugins**
+3.  If Taverna does not say "An update is available" , click **Find
+    updates**
+4.  To install the required 2.4.1 patches, click **Update** for each of:
     * _External tool service_
     * _Service catalogue_
     * _Services_
     * _Workbench_
     Note: Click **OK** in the warning message about restart; you do not need
     to restart Taverna for each of these as we'll do that in the end
-5. Click **Find new plugins**, then **Add update site** and fill in:
+5.  Click **Find new plugins**, then **Add update site** and fill in:
     * Site name: Taverna PROV
     * Site URL: `http://wf4ever.github.com/taverna-prov/`
-6. Click **OK**
-7. Under _Taverna PROV_, tick to select _Taverna PROV plugin 1.x_
-8. Click **Install**
-9. Click **Close**
+6.  Click **OK**
+7.  Under _Taverna PROV_, tick to select _Taverna PROV plugin 1.x_
+8.  Click **Install**
+9.  Click **Close**
 10. Exit and Restart Taverna workbench
 
 
@@ -47,7 +47,7 @@ Ensure that **Provenance capture** is enabled. (This is the default in 2.4).
 
 If you would like Taverna to keep the provenance data between runs
 of the workbench (in order to export at a later time), then you need to
-also tick to *disable* **In memory storage**; note that this may slow
+also untick to *disable* **In memory storage**; note however that this may slow
 down executions of some workflows.
 
 Open and run a workflow to export provenance for. As a quick example,
@@ -64,20 +64,26 @@ in the file dialogue give the name of what will become
 a _folder_, rather than a single file.
 
 In short:
-1. Click **Results** perspective
-2. Select a run on the left
-3. Click **Show workflow results** button (in case you are viewing
-.  intermediates)
-4. Click **Save all values**
-5. Ensure all boxes are ticked
-6. Click **Save Provenance (PROV)**
-7. Browse and type the name of a folder for the results (which will be created)
-8. Click **OK**
+1.  Click **Results** perspective
+2.  Select a run on the left
+3.  Click **Show workflow results** button (in case you are viewing intermediates)
+4.  Click **Save all values**
+5.  Ensure all ports are ticked
+6.  Click **Save Provenance (PROV)**
+7.  Browse and type the name of a folder for the results (which will be created)
+8.  Click **OK**
 
-Browse the folder using Explorer/Finder etc. You should find a set of
-files for the input and output ports of the workflow, in addition to a
+
+Structure of exported provenance
+--------------------------------
+
+The folder selected will contain each of the selected input and output
+ports. Ports with multiple values are stored as a folder with numbered
+outputs, starting from `0`. Values representing errors have extension `.err`.
+
+In addition to a
 file `workflowrun.prov.ttl` which contains the PROV-O export of the
-complete workflow run in [RDF Turtle format](http://www.w3.org/TR/turtle/):
+workflow run (including nested workflows) in [RDF Turtle format](http://www.w3.org/TR/turtle/):
 
     stain@ahtissuntu:~/src/taverna-prov/example/helloanyone$ ls
     greeting.txt  name.txt  workflowrun.prov.ttl
@@ -124,6 +130,7 @@ prov:alternateOf to proper distinguish values at workflow level,
 processor level and file level.
 
 Query using [rdfproc](http://librdf.org/utils/rdfproc.html) (`apt-get install redland-utils`):
+
     stain@ahtissuntu:~/src/taverna-prov/example/helloanyone$ rdfproc test parse workflowrun.prov.ttl turtle
     rdfproc: Parsing URI file:///home/stain/src/taverna-prov/example/helloanyone/workflowrun.prov.ttl with turtle parser
 
@@ -166,6 +173,18 @@ Installation for command line tool
 _To be done_
 
 
+
+TODO
+----
+* Document command line tool installation
+* Export intermediate values
+* Taverna/workflow specific extension
+* Separate input and output ports (in case they have the same port name)
+* Include workflow definition
+
+See also [outstanding issues](https://jira.man.poznan.pl/jira/browse/WFE-513).
+
+
 Building
 --------
 Note - you do not normally need to build from source code, installation
@@ -182,7 +201,7 @@ To compile, run `mvn clean install`
 On first run this will download various third-party libraries from Maven
 repositories, including required modules of Taverna 2.4. These JARs, and the
 compiled JARs from this source code, are installed into
-$HOME/.m2/repository/ by default.  
+`$HOME/.m2/repository/` by default.  
 
 Example compilation:
 
@@ -239,10 +258,15 @@ for the specific Taverna release.
 
 In order for Taverna to find your install of the plugin rather than
 download from the official plugin site, you will need to manually edit
-*plugins/plugins.xml* of the [Taverna home
+`plugins/plugins.xml` of the [Taverna home
 directory](http://dev.mygrid.org.uk/wiki/display/taverna24/Taverna+home+directory)
 (run Taverna once to create the file) to include this section right
-before the final </plugins:plugins>.
+before the final `</plugins:plugins>`.
+
+NOTE: You must remove the official installation of this plugin if this
+is already present in `plugins.xml`, look for
+`org.purl.wf4ever.provtaverna`.
+
 
 ```xml
      <plugin>
@@ -285,20 +309,32 @@ before the final </plugins:plugins>.
     </plugin>
 ```
 
-Modify the line:
-    <repository>file:///home/fred/.m2/repository/</repository>
+1.  Modify the line:
+    ```xml
+        <repository>file:///home/fred/.m2/repository/</repository>
+    ```
 
-to match your $HOME/.m2/repository. On Windows this path should look like:
+    to match your $HOME/.m2/repository. On Windows this path should look like:
 
-    <repository>file:///C:/Users/fred/.m2/repository/</repository>    
+    ```xml
+        <repository>file:///C:/Users/fred/.m2/repository/</repository>    
+    ```
 
-NOTE: You must remove the official installation of this plugin if this
-is already present in `plugins.xml`, look for
-`org.purl.wf4ever.provtaverna`.
+2.  Take care that the `<version>` of the `<plugin>` and `prov-taverna-ui` matches
+    the `<version>` specified in the `pom.xml` of this source code (typically `1.x-SNAPSHOT`).
 
-Take care that the `<version>` of the `<plugin>` and `prov-taverna-ui` matches
-the `<version>` specified in the `pom.xml` of this source code (typically `1.x-SNAPSHOT`).
+3.  If you are building for a different Taverna, check that the `<application><version>`
+    matches the Taverna version (compare with the existing plugins)
 
-If you are building for a different Taverna, check that the `<application><version>`
-matches the Taverna version (compare with the existing plugins)
+4.  Start Taverna Workbench.    
+
+You only need to do this plugin installation once - if you later
+recompile the source code without changing the version numbers, next
+start of Taverna will use the newer JARs from `mvn clean install` as 
+Taverna will prefer accessing `$HOME/.m2/repository`. You might however need to delete
+the `repository/org/purl/wf4ever` folder of the  [Taverna home
+directory](http://dev.mygrid.org.uk/wiki/display/taverna24/Taverna+home+directory)
+Taverna has downloaded the SNAPSHOT versions from the myGrid repository
+instead (for instance because you used the wrong `<repository>` path).
+
 
