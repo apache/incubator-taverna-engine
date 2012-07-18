@@ -19,23 +19,33 @@ You need:
 To install:
 
 1.  Start Taverna workbench
+
 2.  In the menu, click **Advanced** -> **Updates and plugins**
+
 3.  If Taverna does not say "An update is available" , click **Find
     updates**
+
 4.  To install the required 2.4.1 patches, click **Update** for each of:
     * _External tool service_
     * _Service catalogue_
     * _Services_
     * _Workbench_
+
     Note: Click **OK** in the warning message about restart; you do not need
     to restart Taverna for each of these as we'll do that in the end
+
 5.  Click **Find new plugins**, then **Add update site** and fill in:
     * Site name: Taverna PROV
     * Site URL: `http://wf4ever.github.com/taverna-prov/`
+
 6.  Click **OK**
+
 7.  Under _Taverna PROV_, tick to select _Taverna PROV plugin 1.x_
+
 8.  Click **Install**
+
 9.  Click **Close**
+
 10. Exit and Restart Taverna workbench
 
 
