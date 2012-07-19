@@ -92,7 +92,7 @@
 									<arg value="-j" />
 									<arg value="target/prov-ontology.jar" />
 									<!-- <arg value="-p" /> <arg value="" /> -->
-									<arg value="src/main/resources/org/purl/wf4ever/provtaverna/ProvenanceOntology.owl" />
+									<arg value="src/main/resources/org/purl/wf4ever/provtaverna/prov-20120724.owl" />
 									<classpath refid="maven.plugin.classpath" />
 									<classpath>
 										<pathelement path="." />
