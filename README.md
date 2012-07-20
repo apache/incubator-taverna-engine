@@ -99,7 +99,7 @@ In short:
 Installation for Taverna Command line tool
 ------------------------------------------
 Installation for the [Taverna command line tool](http://www.taverna.org.uk/download/command-line-tool/2-4/)
-is slightly more manual as it has no GUI for installing plugins.
+is slightly manual as it has no GUI for installing plugins.
 
 These instructions assumes a Linux environment, but the plugin should
 work also on Windows or OS X. Note that the [Taverna home
@@ -195,7 +195,7 @@ command line tool has a separate home directory from the workbench)
   
 6.  Modify the script `executeworkflow.sh` so that the line with `raven.launcher.app.main` says:
     ```
-    -Draven.launcher.app.main=org.purl.wf4ever.provtaverna.cmdline.ProvCommandLineLauncher
+    -Draven.launcher.app.main=org.purl.wf4ever.provtaverna.cmdline.ProvCommandLineLauncher \
     ```
     or for `executeworkflow.bat`:
     ```
@@ -222,7 +222,7 @@ command line tool has a separate home directory from the workbench)
     ```
     Then check that org.purl.wf4ever is listed in
     `$HOME/.taverna-cmd-2.4.0/plugins/plugins.xml` - if not, then delete
-    that file so that it is restored from the installation.
+    that file so that it is restored from the installation directory.
 
 8.  (Optional) Copy the downloaded repository content to the
     installation folder:
@@ -233,7 +233,7 @@ command line tool has a separate home directory from the workbench)
     ```
 
     This is useful if several users will run the same Taverna
-    installation (Such as in a Taverna Server installation), or if you
+    installation (such as in a Taverna Server installation), or if you
     are going to repackage the installation, as those users would not
     need to wait for the initial download of the plugin libraries.
 
@@ -249,8 +249,8 @@ the regular Taverna command line, output has to be saved using
 `-outputdir`, as the PROV export refers to files in the output
 directory.
 
-To enable provenance capture for the workflow run and PROV export, add
-the parameter `-provenance`, which requires the parameter `-embedded` or
+To enable PROV export for the workflow run, add the parameter
+`-provenance`, which requires the parameter `-embedded` or
 `-clientserver`. 
 
 Note: `-embedded` allows only one concurrent execution at a time due to
@@ -259,12 +259,16 @@ database locking. To support multiple concurrent runs, start
 use `executeworkflow -provenance -clientserver` for the workflow
 executions.
 
-Alternatively, provide the system property `taverna.home` as `-Dtaverna.home=/tmp/taverna-$$` to store the database in a temporary directory per run.
 
 Example:
 ```
-stain@ralph-ubuntu:~/src/taverna-prov/example$ executeworkflow -embedded -provenance -outputdir hello -inputvalue name fred helloanyone.t2flow 
+stain@ralph-ubuntu:~/src/taverna-prov/example$ executeworkflow -embedded \
+  -provenance -outputdir hello -inputvalue name fred helloanyone.t2flow 
+
 Outputs will be saved to the directory: /home/stain/src/taverna-prov/example/hello
+
+stain@ralph-ubuntu:~/src/taverna-prov/example$ ls hello
+greeting  workflowrun.prov.ttl
 
 ```
 
