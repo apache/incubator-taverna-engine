@@ -9,6 +9,9 @@
 	<name>Taverna PROV</name>
 
 	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
 		<!-- Update according to latest Taverna version in www.mygrid.org.uk/dev/wiki/display/developer/Maven+module+version+numbers -->
 		<t2.core.version>1.4</t2.core.version>
 		<t2.activities.version>1.4</t2.activities.version>
@@ -17,7 +20,7 @@
 		<t2.ui.components.version>1.4.1</t2.ui.components.version>
 		<t2.workbench.version>2.4.0</t2.workbench.version>
 		<t2.results.version>1.4</t2.results.version>
-		<t2.taverna-commandline.version>1.4</t2.taverna-commandline.version>
+		<t2.taverna-commandline.version>1.4</t2.taverna-commandline.version>		
 	</properties>
 
 	<build>
