@@ -101,10 +101,37 @@ Installation for Taverna Command line tool
 Installation for the [Taverna command line tool](http://www.taverna.org.uk/download/command-line-tool/2-4/)
 is slightly more manual as it has no GUI for installing plugins.
 
+These instructions assumes a Linux environment, but the plugin should
+work also on Windows or OS X. Note that the [Taverna home
+directory](http://dev.mygrid.org.uk/wiki/display/taverna/Taverna+home+directory)
+has a different locations on those operating systems, replace
+`$HOME/.taverna-cmd-2.4.0` for the equivalent path. (Note that the
+command line tool has a separate home directory from the workbench)
+
+
 1.  To install, extract the **separate download** [Taverna command line
     tool 2.4](http://www.taverna.org.uk/download/command-line-tool/2-4/)
-    to a folder of your choice
-2.  Edit the file `plugins/plugin.xml` of the unpacked installation, and
+    to a folder of your choice. 
+    
+2.  (Optionally, Linux): Make execution shortcut in $HOME/bin
+
+    ```
+    stain@ralph-ubuntu:~/software/taverna-commandline-2.4.0$ chmod 755 executeworkflow.sh 
+
+    stain@ralph-ubuntu:~/software/taverna-commandline-2.4.0$ mkdir ~/bin 
+    mkdir: cannot create directory `/home/stain/bin': File exists
+
+    stain@ralph-ubuntu:~/software/taverna-commandline-2.4.0$ cd ~/bin
+
+    stain@ralph-ubuntu:~/bin$ ln -s ~/software/taverna-commandline-2.4.0/executeworkflow.sh executeworkflow
+
+    stain@ralph-ubuntu:~/bin$ . ~/.profile
+
+    stain@ralph-ubuntu:~/bin$ type executeworkflow
+    executeworkflow is hashed (/home/stain/bin/executeworkflow)
+    ```
+
+3.  Edit the file `plugins/plugin.xml` of the unpacked installation, and
     add this section right before `</plugins:plugin>` at the end of the
     file:
 
@@ -139,12 +166,11 @@ is slightly more manual as it has no GUI for installing plugins.
     You should replace `<version>1.4</version>` with whatever is the
     latest version [listed on the taverna-prov plugin site](http://wf4ever.github.com/taverna-prov/pluginlist.xml).
 
-3.  Start the command line tool without parameters to force downloading
+4.  Start the command line tool without parameters to force downloading
     of plugins (this might take a few minutes the first time):
 
     ```
     stain@ahtissuntu:~/software/taverna-commandline-2.4.0$ sh executeworkflow.sh 
-    WARN  2012-07-18 16:44:36,323 (net.sf.taverna.raven.repository.impl.LocalRepository:85) - Could not find artifact org.purl.wf4ever.provtaverna:prov-taverna-cmdline:1.4
     usage: executeworkflow [options] [workflow]
      -clientserver                           Connect as a client to a derby
                                              server instance.
@@ -157,7 +183,7 @@ is slightly more manual as it has no GUI for installing plugins.
     if you do further edits, you will need to delete the file in
     `$HOME/.taverna-cmd-2.4.0/plugins/`.
 
-4.  If you get an error such as:
+5.  If you get an error such as:
 
     ```
     WARN  2012-07-18 16:44:36,323 (net.sf.taverna.raven.repository.impl.LocalRepository:85) - Could not find artifact org.purl.wf4ever.provtaverna:prov-taverna-cmdline:1.4
@@ -167,17 +193,80 @@ is slightly more manual as it has no GUI for installing plugins.
 
     then check if you need to [configure Java for using proxies](http://docs.oracle.com/javase/6/docs/technotes/guides/net/proxies.html) by modifying the `java` command line in `executeworkflow.sh` or `executeworkflow.bat`.
   
-5.  Modify the file `conf/raven-launcher.conf` so that the line with `raven.launcher.app.main` says:
-    ```properties
-    raven.launcher.app.main=org.purl.wf4ever.provtaverna.cmdline.ProvCommandLineLauncher
+6.  Modify the script `executeworkflow.sh` so that the line with `raven.launcher.app.main` says:
+    ```
+    -Draven.launcher.app.main=org.purl.wf4ever.provtaverna.cmdline.ProvCommandLineLauncher
+    ```
+    or for `executeworkflow.bat`:
+    ```
+    set ARGS=%ARGS% -Draven.launcher.app.main=org.purl.wf4ever.provtaverna.cmdline.ProvCommandLineLauncher
+    
     ```
 
-6.  Execute without parameters to ensure the modified launcher is
+7.  Execute without parameters to ensure the modified launcher is
     working:
 
     ```
-    sh executeworkflow.sh
+    stain@ahtissuntu:~/software/taverna-commandline-2.4.0$ sh executeworkflow.sh 
+    usage: executeworkflow [options] [workflow]
+     -clientserver                           Connect as a client to a derby
+                                             server instance.
+     -cmdir <directory path>                 Absolute path to a directory
+    (..)
     ```
+
+8.  If you get this error:
+    ```
+    Could not find class: org.purl.wf4ever.provtaverna.cmdline.ProvCommandLineLauncher
+    java.lang.ClassNotFoundException: Could not find org.purl.wf4ever.provtaverna.cmdline.ProvCommandLineLauncher
+    ```
+    Then check that org.purl.wf4ever is listed in
+    `$HOME/.taverna-cmd-2.4.0/plugins/plugins.xml` - if not, then delete
+    that file so that it is restored from the installation.
+
+8.  (Optional) Copy the downloaded repository content to the
+    installation folder:
+    
+    ```
+    stain@ralph-ubuntu:~/software/taverna-commandline-2.4.0$ cp -r ~/.taverna-cmd-2.4.0/repository .
+    
+    ```
+
+    This is useful if several users will run the same Taverna
+    installation (Such as in a Taverna Server installation), or if you
+    are going to repackage the installation, as those users would not
+    need to wait for the initial download of the plugin libraries.
+
+
+Usage on command line
+---------------------
+The Taverna documentation has general information about [how to use the
+Taverna Command line
+tool](http://dev.mygrid.org.uk/wiki/display/taverna/Command+Line+Tool).
+
+The Taverna-PROV command line does not support all the output options of
+the regular Taverna command line, output has to be saved using
+`-outputdir`, as the PROV export refers to files in the output
+directory.
+
+To enable provenance capture for the workflow run and PROV export, add
+the parameter `-provenance`, which requires the parameter `-embedded` or
+`-clientserver`. 
+
+Note: `-embedded` allows only one concurrent execution at a time due to
+database locking. To support multiple concurrent runs, start
+`executeworkflow -startdb` separately to start the database server, and
+use `executeworkflow -provenance -clientserver` for the workflow
+executions.
+
+Alternatively, provide the system property `taverna.home` as `-Dtaverna.home=/tmp/taverna-$$` to store the database in a temporary directory per run.
+
+Example:
+```
+stain@ralph-ubuntu:~/src/taverna-prov/example$ executeworkflow -embedded -provenance -outputdir hello -inputvalue name fred helloanyone.t2flow 
+Outputs will be saved to the directory: /home/stain/src/taverna-prov/example/hello
+
+```
 
 
 Structure of exported provenance
