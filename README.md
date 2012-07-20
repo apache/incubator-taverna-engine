@@ -139,7 +139,7 @@ command line tool has a separate home directory from the workbench)
     <plugin>
         <provider>org.purl.wf4ever</provider>
         <identifier>org.purl.wf4ever.provtaverna.prov-taverna-plugin</identifier>
-        <version>1.4</version>
+        <version>1.5</version>
         <name>Taverna PROV plugin</name>
         <description/>
         <enabled>true</enabled>
@@ -152,7 +152,7 @@ command line tool has a separate home directory from the workbench)
             <dependency>
                 <groupId>org.purl.wf4ever.provtaverna</groupId>
                 <artifactId>prov-taverna-cmdline</artifactId>
-                <version>1.4</version>
+                <version>1.5</version>
             </dependency>
         </profile>
         <compatibility>
@@ -163,7 +163,7 @@ command line tool has a separate home directory from the workbench)
     </plugin>
     ```
 
-    You should replace `<version>1.4</version>` with whatever is the
+    You should replace `<version>1.5</version>` with whatever is the
     latest version [listed on the taverna-prov plugin site](http://wf4ever.github.com/taverna-prov/pluginlist.xml).
 
 4.  Start the command line tool without parameters to force downloading
@@ -186,8 +186,8 @@ command line tool has a separate home directory from the workbench)
 5.  If you get an error such as:
 
     ```
-    WARN  2012-07-18 16:44:36,323 (net.sf.taverna.raven.repository.impl.LocalRepository:85) - Could not find artifact org.purl.wf4ever.provtaverna:prov-taverna-cmdline:1.4
-    net.sf.taverna.raven.repository.ArtifactNotFoundException: Could not find artifact org.purl.wf4ever.provtaverna:prov-taverna-cmdline:1.4: Can't find artifact for: org.purl.wf4ever.provtaverna:prov-taverna-cmdline:1.4
+    WARN  2012-07-18 16:44:36,323 (net.sf.taverna.raven.repository.impl.LocalRepository:85) - Could not find artifact org.purl.wf4ever.provtaverna:prov-taverna-cmdline:1.5
+    net.sf.taverna.raven.repository.ArtifactNotFoundException: Could not find artifact org.purl.wf4ever.provtaverna:prov-taverna-cmdline:1.5: Can't find artifact for: org.purl.wf4ever.provtaverna:prov-taverna-cmdline:1.5
         at net.sf.taverna.raven.repository.impl.LocalRepository.fetch(LocalRepository.java:820)
     ```
 
@@ -366,10 +366,8 @@ Check that:
 
 
 
-
 TODO
 ----
-* Document command line tool installation
 * Export intermediate values
 * Taverna/workflow specific extension
 * Separate input and output ports (in case they have the same port name)
@@ -414,20 +412,20 @@ Example compilation:
     [INFO] PROV Taverna command line
     [INFO]                                                                         
     [INFO] ------------------------------------------------------------------------
-    [INFO] Building Taverna PROV 1.4-SNAPSHOT
+    [INFO] Building Taverna PROV 1.6-SNAPSHOT
     [INFO] ------------------------------------------------------------------------
     (..)
     Downloading: http://www.mygrid.org.uk/maven/repository/net/sf/taverna/t2/taverna-workbench/workbench-dev/2.4.0/workbench-dev-2.4.0.pom
     Downloaded: http://www.mygrid.org.uk/maven/repository/net/sf/taverna/t2/taverna-workbench/workbench-dev/2.4.0/workbench-dev-2.4.0.pom (3 KB at 5.4 KB/sec)
     (..)
-    [INFO] Installing /home/stain/src/taverna-prov/prov-taverna-cmdline/target/prov-taverna-cmdline-1.4-SNAPSHOT-tests.jar to /home/stain/.m2/repository/org/purl/wf4ever/provtaverna/prov-taverna-cmdline/1.4-SNAPSHOT/prov-taverna-cmdline-1.4-SNAPSHOT-tests.jar
+    [INFO] Installing /home/stain/src/taverna-prov/prov-taverna-cmdline/target/prov-taverna-cmdline-1.6-SNAPSHOT-tests.jar to /home/stain/.m2/repository/org/purl/wf4ever/provtaverna/prov-taverna-cmdline/1.6-SNAPSHOT/prov-taverna-cmdline-1.6-SNAPSHOT-tests.jar
     [INFO] ------------------------------------------------------------------------
     [INFO] Reactor Summary:
     [INFO] 
     [INFO] Taverna PROV ...................................... SUCCESS [4.109s]
-    [INFO] Taverna PROV W3 Provenance ontology Elmo bindings . SUCCESS [1:45.270s]
+    [INFO] Taverna PROV W3 Provenance ontology Elmo bindings . SUCCESS [1.55.270s]
     [INFO] Taverna PROV export ............................... SUCCESS [45.873s]
-    [INFO] Taverna PROV activity UI bindings ................. SUCCESS [1:46.572s]
+    [INFO] Taverna PROV activity UI bindings ................. SUCCESS [1.56.572s]
     [INFO] Taverna PROV plugin ............................... SUCCESS [15.028s]
     [INFO] PROV Taverna command line ......................... SUCCESS [1:12.093s]
     [INFO] ------------------------------------------------------------------------
@@ -462,12 +460,12 @@ in `plugins/plugins.xml`.
      <plugin>
         <provider>org.purl.wf4ever</provider>
         <identifier>org.purl.wf4ever.provtaverna.prov-taverna-plugin</identifier>
-        <version>1.3</version>
+        <version>1.6-SNAPSHOT</version>
         <name>Taverna PROV plugin</name>
         <description/>
         <enabled>true</enabled>
         <repositories>
-            <repository>file:///home/fred/.m2/repository/</repository>
+            <repository>file:///home/johndoe/.m2/repository/</repository>
             <repository>http://www.mygrid.org.uk/maven/repository/</repository>
             <repository>http://uk.maven.org/maven2/</repository>
             <repository>http://repo.aduna-software.org/maven2/releases/</repository>
@@ -483,7 +481,7 @@ in `plugins/plugins.xml`.
             <dependency>
                 <groupId>org.purl.wf4ever.provtaverna</groupId>
                 <artifactId>prov-taverna-ui</artifactId>
-                <version>1.4-SNAPSHOT</version>
+                <version>1.6-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>junit</groupId>
@@ -501,13 +499,13 @@ in `plugins/plugins.xml`.
 
 1.  Modify the line:
     ```xml
-        <repository>file:///home/fred/.m2/repository/</repository>
+        <repository>file:///home/johndoe/.m2/repository/</repository>
     ```
 
     to match your $HOME/.m2/repository. On Windows this path should look like:
 
     ```xml
-        <repository>file:///C:/Users/fred/.m2/repository/</repository>    
+        <repository>file:///C:/Users/johndoe/.m2/repository/</repository>    
     ```
 
 2.  Take care that the `<version>` of the `<plugin>` and `prov-taverna-ui` matches
@@ -522,13 +520,14 @@ You only need to do this plugin installation once - if you later
 recompile the source code without changing the version numbers, next
 start of Taverna will use the newer JARs from `mvn clean install` as 
 Taverna will prefer accessing `$HOME/.m2/repository`. You might however need to delete
-the `repository/org/purl/wf4ever` folder of the  [Taverna home
-directory](http://dev.mygrid.org.uk/wiki/display/taverna24/Taverna+home+directory)
+the `repository/org/purl/wf4ever` folder of the  [Taverna home directory](http://dev.mygrid.org.uk/wiki/display/taverna24/Taverna+home+directory) if 
 Taverna has downloaded the SNAPSHOT versions from the myGrid repository
-instead (for instance because you used the wrong `<repository>` path).
+instead (for instance because you used the wrong `<repository>` path or
+did not update `<version>`).
 
 To make the plugin installation system-side (ie. multiple UNIX users or
-customized Taverna distribution for the Taverna Server), copy `plugins/`
-and `repository` with overwrite onto the Taverna installation directory. 
+to make a customized Taverna distribution), copy `plugins/`
+and `repository` with overwrite onto the Taverna installation directory.
+(See _Installation for Taverna Command Line_ above)
 
 
