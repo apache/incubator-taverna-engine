@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import net.sf.taverna.raven.launcher.Launchable;
 import net.sf.taverna.t2.commandline.CommandLineLauncher;
 import net.sf.taverna.t2.commandline.CommandLineResultListener;
 import net.sf.taverna.t2.commandline.data.SaveResultsHandler;
@@ -32,18 +33,20 @@ import org.purl.wf4ever.provtaverna.export.Saver;
  * An extension of CommandLineLauncher to store PROV-O provenance.
  * <p>
  * To export provenance, run with parameters:
+ * 
  * <pre>
  * 		executeworkflow -Draven.launcher.app.main=org.purl.wf4ever.provtaverna.cmdline.ProvCommandLineLauncher \ 
  *           -embedded -provenance -outputdir X ...
- * </pre> 
+ * </pre>
  * <p>
- * Note: Various tricks are needed as CommandLineLauncher was not written 
- * for extensibility.  
+ * Note: Various tricks are needed as CommandLineLauncher was not written for
+ * extensibility.
  * 
  * @author Stian Soiland-Reyes
- *
+ * 
  */
-public class ProvCommandLineLauncher extends CommandLineLauncher {
+public class ProvCommandLineLauncher extends CommandLineLauncher implements
+		Launchable {
 	
 	private CommandLineOptions options = null;
 
