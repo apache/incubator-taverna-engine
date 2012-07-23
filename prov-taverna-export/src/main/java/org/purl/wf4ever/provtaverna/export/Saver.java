@@ -49,7 +49,7 @@ public class Saver {
 		this.setChosenReferences(chosenReferences);
 	}
 
-	protected ThreadLocal<Map<File, T2Reference>> fileToId = new ThreadLocal<Map<File, T2Reference>>();
+	private Map<File, T2Reference> fileToId = new HashMap<File, T2Reference>();
 
 	private ReferenceService referenceService;
 
@@ -59,18 +59,14 @@ public class Saver {
 
 	private Map<String, T2Reference> chosenReferences;
 
+	
 	public void saveData(File folder) throws FileNotFoundException, IOException {
 		String folderName = folder.getName();
 		if (folderName.endsWith(".")) {
 			folder = new File(folder.getParentFile(), folderName.substring(0,
 					folderName.length()-1));
-		}
-		fileToId.set(new HashMap<File, T2Reference>());
-		try {
-			saveToFolder(folder, getChosenReferences(), getReferenceService());
-		} finally {
-			fileToId.remove();
-		}
+		}		
+		saveToFolder(folder, getChosenReferences(), getReferenceService());
 	}
 
 	protected void saveToFolder(File folder, Map<String, T2Reference> chosenReferences, ReferenceService referenceService) throws IOException,
@@ -92,7 +88,7 @@ public class Saver {
 				getContext());
 		W3ProvenanceExport export = new W3ProvenanceExport(provenanceAccess,
 				getRunId());
-		export.setFileToT2Reference(fileToId.get());
+		export.setFileToT2Reference(getFileToId());
 		export.setBaseFolder(folder);
 		File provenanceFile = new File(folder, "workflowrun.prov.ttl");
 		BufferedOutputStream outStream = new BufferedOutputStream(
@@ -125,7 +121,7 @@ public class Saver {
 			File targetDir = new File(destination.toString()
 					+ File.separatorChar + name);
 			targetDir.mkdir();
-			fileToId.get().put(targetDir, identified.getId());
+			getFileToId().put(targetDir, identified.getId());
 			int count = 0;
 			List<T2Reference> elements = getReferenceService().getListService()
 					.getList(ref);
@@ -178,14 +174,14 @@ public class Saver {
 				IOUtils.copyLarge(
 						externalReferences.get(0).openStream(getContext()),
 						new FileOutputStream(targetFile));
-				fileToId.get().put(targetFile, identified.getId());
+				getFileToId().put(targetFile, identified.getId());
 				return targetFile;
 			} else {
 				File targetFile = new File(destination.toString()
 						+ File.separatorChar + name + ".err");
 				FileUtils.writeStringToFile(targetFile,
 						((ErrorDocument) identified).getMessage());
-				fileToId.get().put(targetFile, identified.getId());
+				getFileToId().put(targetFile, identified.getId());
 				return targetFile;
 			}
 	
@@ -263,6 +259,14 @@ public class Saver {
 
 	public void setChosenReferences(Map<String, T2Reference> chosenReferences) {
 		this.chosenReferences = chosenReferences;
+	}
+
+	public Map<File, T2Reference> getFileToId() {
+		return fileToId;
+	}
+
+	public void setFileToId(Map<File, T2Reference> fileToId) {
+		this.fileToId = fileToId;
 	}
 
 }

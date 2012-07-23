@@ -75,7 +75,7 @@ public class TestProvCommandLineLauncher extends LaunchSafely {
 		
 		// FIXME: Test actual content
 		assertTrue(prov.contains("@prefix prov:"));
-		assertTrue(prov.contains("greeting"));
+		assertTrue(prov.contains("<greeting>"));
 	}
 	
 }

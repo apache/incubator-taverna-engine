@@ -134,6 +134,7 @@ public class ProvCommandLineLauncher extends CommandLineLauncher implements
 					Saver saver = new Saver(realFacade.getContext().getReferenceService(), 
 							realFacade.getContext(), realFacade.getWorkflowRunId(),
 							chosenReferences);
+					saver.setFileToId(fileToId);
 					try {
 						saver.saveData(outputDir);
 					} catch (IOException e1) {
