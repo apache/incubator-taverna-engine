@@ -64,8 +64,8 @@ public class TestProvCommandLineLauncher extends LaunchSafely {
 				"-provenance", "-embedded",
 				"-inputvalue", "name", "Fred", 
 				t2flow.getPath());
-//		System.err.println(getErr());
-//		System.out.println(getOut());
+		System.err.println(getErr());
+		System.out.println(getOut());
 		assertEquals(0, status);
 		File[] outputs = outDir.listFiles();
 		assertEquals(2, outputs.length);

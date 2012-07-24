@@ -292,6 +292,8 @@ java.lang.AbstractMethodError: info.aduna.lang.service.ServiceRegistry.add(Ljava
 		wfProcess.getProvEndedAtTime().add(timestampToXmlGreg(dataflowInvocation
 				.getInvocationEnded()));
 
+		storeFileReferences(elmoManager);
+		
 		// Workflow inputs and outputs
 		storeEntitities(dataflowInvocation.getInputsDataBindingId(), wfProcess,
 				Direction.INPUTS, elmoManager);
@@ -311,8 +313,10 @@ java.lang.AbstractMethodError: info.aduna.lang.service.ServiceRegistry.add(Ljava
 			} else {
 				// inside nested wf - this will be parent processenactment
 				parentURI = uriGenerator.makeProcessExecution(
-						pe.getWorkflowRunId(), pe.getProcessEnactmentId());
+						pe.getWorkflowRunId(), pe.getProcessEnactmentId());			
 			}
+			
+			
 			String processURI = uriGenerator.makeProcessExecution(
 					pe.getWorkflowRunId(), pe.getProcessEnactmentId());
 			Activity process = elmoManager.create(new QName(processURI),
@@ -384,11 +388,7 @@ java.lang.AbstractMethodError: info.aduna.lang.service.ServiceRegistry.add(Ljava
 		return xmlCal;
 	}
 
-	private void storeEntitities(String dataBindingId, Activity activity,
-			Direction direction, SesameManager elmoManager) {
-
-		Map<Port, T2Reference> inputs = provenanceAccess
-				.getDataBindings(dataBindingId);
+	protected void storeFileReferences(SesameManager elmoManager) {
 
 		for (Entry<File, T2Reference> entry : getFileToT2Reference().entrySet()) {
 			File file = entry.getKey();
@@ -407,8 +407,15 @@ java.lang.AbstractMethodError: info.aduna.lang.service.ServiceRegistry.add(Ljava
 //				throw new RuntimeException("Can't store reference for " + file, e);
 //			}
 		}
-
+	}
 		
+	protected void storeEntitities(String dataBindingId, Activity activity,
+				Direction direction, SesameManager elmoManager) {
+		
+
+		Map<Port, T2Reference> inputs = provenanceAccess
+					.getDataBindings(dataBindingId);
+			
 		for (Entry<Port, T2Reference> inputEntry : inputs.entrySet()) {
 			Port port = inputEntry.getKey();
 			T2Reference t2Ref = inputEntry.getValue();
