@@ -1,0 +1,239 @@
+@prefix : <http://ns.taverna.org.uk/2012/tavernaprov/#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix scufl2: <http://ns.taverna.org.uk/2010/scufl2#> .
+@prefix tavernaprov: <http://ns.taverna.org.uk/2012/tavernaprov/> .
+@base <http://ns.taverna.org.uk/2012/tavernaprov/> .
+
+<http://ns.taverna.org.uk/2012/tavernaprov/> rdf:type owl:Ontology ;
+                                             
+                                             owl:imports <http://ns.taverna.org.uk/2010/scufl2> ;
+                                             
+                                             owl:versionIRI <http://ns.taverna.org.uk/2012/tavernaprov/0.1-SNAPSHOT/> ;
+                                             
+                                             owl:imports <http://purl.org/wf4ever/wfdesc> ,
+                                                         <http://purl.org/wf4ever/wfprov> ,
+                                                         prov:null .
+
+
+#################################################################
+#
+#    Datatypes
+#
+#################################################################
+
+
+
+
+#################################################################
+#
+#    Object Properties
+#
+#################################################################
+
+
+###  http://ns.taverna.org.uk/2010/scufl2#datalink
+
+scufl2:datalink rdfs:subPropertyOf <http://purl.org/wf4ever/wfdesc#hasDataLink> .
+
+
+
+###  http://ns.taverna.org.uk/2010/scufl2#receivesFrom
+
+scufl2:receivesFrom rdfs:subPropertyOf <http://purl.org/wf4ever/wfdesc#hasSource> .
+
+
+
+###  http://ns.taverna.org.uk/2010/scufl2#sendsTo
+
+scufl2:sendsTo rdfs:subPropertyOf <http://purl.org/wf4ever/wfdesc#hasSink> .
+
+
+
+###  http://purl.org/wf4ever/wfdesc#hasDataLink
+
+<http://purl.org/wf4ever/wfdesc#hasDataLink> rdfs:subPropertyOf <http://purl.org/dc/terms/hasPart> .
+
+
+
+###  http://purl.org/wf4ever/wfdesc#hasInput
+
+<http://purl.org/wf4ever/wfdesc#hasInput> rdfs:subPropertyOf <http://purl.org/dc/terms/hasPart> .
+
+
+
+###  http://purl.org/wf4ever/wfdesc#hasOutput
+
+<http://purl.org/wf4ever/wfdesc#hasOutput> rdfs:subPropertyOf <http://purl.org/dc/terms/hasPart> .
+
+
+
+###  http://purl.org/wf4ever/wfdesc#hasSubProcess
+
+<http://purl.org/wf4ever/wfdesc#hasSubProcess> rdfs:subPropertyOf <http://purl.org/dc/terms/hasPart> .
+
+
+
+###  http://purl.org/wf4ever/wfprov#usedInput
+
+<http://purl.org/wf4ever/wfprov#usedInput> rdfs:subPropertyOf prov:used .
+
+
+
+###  http://purl.org/wf4ever/wfprov#wasOutputFrom
+
+<http://purl.org/wf4ever/wfprov#wasOutputFrom> rdfs:subPropertyOf prov:wasGeneratedBy .
+
+
+
+
+
+#################################################################
+#
+#    Data properties
+#
+#################################################################
+
+
+###  http://ns.taverna.org.uk/2012/tavernaprov/errorMessage
+
+tavernaprov:errorMessage rdf:type owl:DatatypeProperty ;
+                         
+                         rdfs:subPropertyOf <http://purl.org/dc/terms/description> ;
+                         
+                         rdfs:range rdf:PlainLiteral .
+
+
+
+###  http://ns.taverna.org.uk/2012/tavernaprov/stackTrace
+
+tavernaprov:stackTrace rdf:type owl:DatatypeProperty ;
+                       
+                       rdfs:domain tavernaprov:Error ;
+                       
+                       rdfs:range xsd:string .
+
+
+
+###  http://purl.org/dc/terms/description
+
+<http://purl.org/dc/terms/description> rdf:type owl:DatatypeProperty ;
+                                       
+                                       rdfs:domain tavernaprov:Error .
+
+
+
+
+
+#################################################################
+#
+#    Classes
+#
+#################################################################
+
+
+###  http://ns.taverna.org.uk/2010/scufl2#DataLink
+
+scufl2:DataLink rdfs:subClassOf <http://purl.org/wf4ever/wfdesc#DataLink> .
+
+
+
+###  http://ns.taverna.org.uk/2010/scufl2#Processor
+
+scufl2:Processor rdfs:subClassOf <http://purl.org/wf4ever/wfdesc#Process> .
+
+
+
+###  http://ns.taverna.org.uk/2010/scufl2#ReceiverPort
+
+scufl2:ReceiverPort rdfs:subClassOf <http://purl.org/wf4ever/wfdesc#Input> .
+
+
+
+###  http://ns.taverna.org.uk/2010/scufl2#SenderPort
+
+scufl2:SenderPort rdfs:subClassOf <http://purl.org/wf4ever/wfdesc#Output> .
+
+
+
+###  http://ns.taverna.org.uk/2010/scufl2#Workflow
+
+scufl2:Workflow rdfs:subClassOf <http://purl.org/wf4ever/wfdesc#WorkflowTemplate> .
+
+
+
+###  http://ns.taverna.org.uk/2012/tavernaprov/Error
+
+tavernaprov:Error rdf:type owl:Class ;
+                  
+                  rdfs:subClassOf <http://purl.org/wf4ever/wfdesc#Artifact> .
+
+
+
+###  http://ns.taverna.org.uk/2012/tavernaprov/TavernaEngine
+
+tavernaprov:TavernaEngine rdf:type owl:Class ;
+                          
+                          rdfs:subClassOf <http://purl.org/wf4ever/wfprov#WorkflowEngine> .
+
+
+
+###  http://purl.org/wf4ever/wfdesc#Artifact
+
+<http://purl.org/wf4ever/wfdesc#Artifact> rdfs:subClassOf prov:Entity .
+
+
+
+###  http://purl.org/wf4ever/wfdesc#Parameter
+
+<http://purl.org/wf4ever/wfdesc#Parameter> rdfs:subClassOf prov:Role .
+
+
+
+###  http://purl.org/wf4ever/wfdesc#Process
+
+<http://purl.org/wf4ever/wfdesc#Process> rdfs:subClassOf prov:Plan .
+
+
+
+###  http://purl.org/wf4ever/wfprov#ProcessRun
+
+<http://purl.org/wf4ever/wfprov#ProcessRun> rdfs:subClassOf prov:Activity .
+
+
+
+###  http://purl.org/wf4ever/wfprov#WorkflowEngine
+
+<http://purl.org/wf4ever/wfprov#WorkflowEngine> rdfs:subClassOf prov:Agent .
+
+
+
+
+
+#################################################################
+#
+#    Individuals
+#
+#################################################################
+
+
+###  http://ns.taverna.org.uk/2012/tavernaprov/testerror
+
+tavernaprov:testerror rdf:type tavernaprov:Error ,
+                               owl:NamedIndividual ;
+                      
+                      tavernaprov:stackTrace "This is the stack trace"^^xsd:string ;
+                      
+                      tavernaprov:errorMessage "asdasd"^^xsd:string ,
+                                               "sadfasf" ,
+                                               "This is an error message"@en .
+
+
+
+
+###  Generated by the OWL API (version 3.3.1957) http://owlapi.sourceforge.net
+
