@@ -1,4 +1,5 @@
 @prefix : <http://ns.taverna.org.uk/2012/tavernaprov/#> .
+@prefix cnt: <http://www.w3.org/2011/content#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix xml: <http://www.w3.org/XML/1998/namespace> .
@@ -17,7 +18,25 @@
                                              
                                              owl:imports <http://purl.org/wf4ever/wfdesc> ,
                                                          <http://purl.org/wf4ever/wfprov> ,
+                                                         <http://www.w3.org/2011/content> ,
                                                          prov:null .
+
+
+#################################################################
+#
+#    Annotation properties
+#
+#################################################################
+
+
+tavernaprov:errorMessage rdf:type owl:AnnotationProperty .
+
+
+
+<http://purl.org/dc/terms/description> rdfs:domain tavernaprov:Error .
+
+
+
 
 
 #################################################################
@@ -51,6 +70,16 @@ scufl2:receivesFrom rdfs:subPropertyOf <http://purl.org/wf4ever/wfdesc#hasSource
 ###  http://ns.taverna.org.uk/2010/scufl2#sendsTo
 
 scufl2:sendsTo rdfs:subPropertyOf <http://purl.org/wf4ever/wfdesc#hasSink> .
+
+
+
+###  http://ns.taverna.org.uk/2012/tavernaprov/content
+
+tavernaprov:content rdf:type owl:ObjectProperty ;
+                    
+                    rdfs:range tavernaprov:Content ;
+                    
+                    rdfs:domain <http://purl.org/wf4ever/wfdesc#Artifact> .
 
 
 
@@ -99,6 +128,24 @@ scufl2:sendsTo rdfs:subPropertyOf <http://purl.org/wf4ever/wfdesc#hasSink> .
 #################################################################
 
 
+###  http://ns.taverna.org.uk/2012/tavernaprov/byteCount
+
+tavernaprov:byteCount rdf:type owl:DatatypeProperty ;
+                      
+                      rdfs:domain tavernaprov:Content ;
+                      
+                      rdfs:range xsd:nonNegativeInteger .
+
+
+
+###  http://ns.taverna.org.uk/2012/tavernaprov/checksum
+
+tavernaprov:checksum rdf:type owl:DatatypeProperty ;
+                     
+                     rdfs:domain tavernaprov:Content .
+
+
+
 ###  http://ns.taverna.org.uk/2012/tavernaprov/errorMessage
 
 tavernaprov:errorMessage rdf:type owl:DatatypeProperty ;
@@ -106,6 +153,26 @@ tavernaprov:errorMessage rdf:type owl:DatatypeProperty ;
                          rdfs:subPropertyOf <http://purl.org/dc/terms/description> ;
                          
                          rdfs:range rdf:PlainLiteral .
+
+
+
+###  http://ns.taverna.org.uk/2012/tavernaprov/sha1
+
+tavernaprov:sha1 rdf:type owl:DatatypeProperty ;
+                 
+                 rdfs:subPropertyOf tavernaprov:checksum ;
+                 
+                 rdfs:range xsd:hexBinary .
+
+
+
+###  http://ns.taverna.org.uk/2012/tavernaprov/sha512
+
+tavernaprov:sha512 rdf:type owl:DatatypeProperty ;
+                   
+                   rdfs:subPropertyOf tavernaprov:checksum ;
+                   
+                   rdfs:range xsd:hexBinary .
 
 
 
@@ -121,9 +188,7 @@ tavernaprov:stackTrace rdf:type owl:DatatypeProperty ;
 
 ###  http://purl.org/dc/terms/description
 
-<http://purl.org/dc/terms/description> rdf:type owl:DatatypeProperty ;
-                                       
-                                       rdfs:domain tavernaprov:Error .
+<http://purl.org/dc/terms/description> rdf:type owl:DatatypeProperty .
 
 
 
@@ -163,6 +228,14 @@ scufl2:SenderPort rdfs:subClassOf <http://purl.org/wf4ever/wfdesc#Output> .
 ###  http://ns.taverna.org.uk/2010/scufl2#Workflow
 
 scufl2:Workflow rdfs:subClassOf <http://purl.org/wf4ever/wfdesc#WorkflowTemplate> .
+
+
+
+###  http://ns.taverna.org.uk/2012/tavernaprov/Content
+
+tavernaprov:Content rdf:type owl:Class ;
+                    
+                    rdfs:subClassOf cnt:Content .
 
 
 
@@ -209,6 +282,18 @@ tavernaprov:TavernaEngine rdf:type owl:Class ;
 ###  http://purl.org/wf4ever/wfprov#WorkflowEngine
 
 <http://purl.org/wf4ever/wfprov#WorkflowEngine> rdfs:subClassOf prov:Agent .
+
+
+
+###  http://www.w3.org/2011/content#ContentAsBase64
+
+cnt:ContentAsBase64 rdfs:subClassOf tavernaprov:Content .
+
+
+
+###  http://www.w3.org/2011/content#ContentAsText
+
+cnt:ContentAsText rdfs:subClassOf tavernaprov:Content .
 
 
 
