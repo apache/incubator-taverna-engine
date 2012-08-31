@@ -56,7 +56,8 @@ public class W3ProvenanceExport {
 
 	private static final int NANOSCALE = 9;
 
-	private static final URIImpl SAMEAS = new URIImpl("http://www.w3.org/2002/07/owl#sameAs");
+	private static final URIImpl SAMEAS = new URIImpl(
+			"http://www.w3.org/2002/07/owl#sameAs");
 
 	private ProvenanceAccess provenanceAccess;
 
@@ -69,6 +70,12 @@ public class W3ProvenanceExport {
 	private Map<File, T2Reference> fileToT2Reference = Collections.emptyMap();
 
 	private File baseFolder;
+
+	private File intermediatesDirectory;
+
+	public File getIntermediatesDirectory() {
+		return intermediatesDirectory;
+	}
 
 	public File getBaseFolder() {
 		return baseFolder;
@@ -97,50 +104,66 @@ public class W3ProvenanceExport {
 		// info.aduna.lang.service.ServiceRegistry<String, SailFactory>
 		// as far as Eclipse could find..
 
-	/* For some reason this fails with:
-	 * ERROR 2012-07-04 16:06:22,830 (net.sf.taverna.t2.workbench.ui.impl.Workbench:115) - Uncaught exception in Thread[SaveAllResults: Saving results to /home/stain/Desktop/popopopo.prov.ttl,6,main]
-java.lang.VerifyError: (class: no/s11/w3/prov/taverna/ui/W3ProvenanceExport, method: initializeRegistries signature: ()V) Incompatible argument to function
-	at org.purl.wf4ever.provtaverna.export.SaveProvAction.saveData(SaveProvAction.java:65)
-	at net.sf.taverna.t2.workbench.views.results.saveactions.SaveAllResultsSPI$2.run(SaveAllResultsSPI.java:177)
+		/*
+		 * For some reason this fails with: ERROR 2012-07-04 16:06:22,830
+		 * (net.sf.taverna.t2.workbench.ui.impl.Workbench:115) - Uncaught
+		 * exception in Thread[SaveAllResults: Saving results to
+		 * /home/stain/Desktop/popopopo.prov.ttl,6,main] java.lang.VerifyError:
+		 * (class: no/s11/w3/prov/taverna/ui/W3ProvenanceExport, method:
+		 * initializeRegistries signature: ()V) Incompatible argument to
+		 * function at
+		 * org.purl.wf4ever.provtaverna.export.SaveProvAction.saveData
+		 * (SaveProvAction.java:65) at
+		 * net.sf.taverna.t2.workbench.views.results.
+		 * saveactions.SaveAllResultsSPI$2.run(SaveAllResultsSPI.java:177)
+		 * 
+		 * 
+		 * or with java -noverify (..)
+		 * 
+		 * ERROR 2012-07-04 16:28:47,814
+		 * (net.sf.taverna.t2.workbench.ui.impl.Workbench:115) - Uncaught
+		 * exception in Thread[SaveAllResults: Saving results to
+		 * /home/stain/Desktop/ppp.prov.ttl,6,main]
+		 * java.lang.AbstractMethodError:
+		 * info.aduna.lang.service.ServiceRegistry
+		 * .add(Ljava/lang/Object;)Ljava/lang/Object; at
+		 * org.purl.wf4ever.provtaverna
+		 * .export.W3ProvenanceExport.repopulateRegistry
+		 * (W3ProvenanceExport.java:132) at
+		 * org.purl.wf4ever.provtaverna.export.W3ProvenanceExport
+		 * .initializeRegistries(W3ProvenanceExport.java:111) at
+		 * org.purl.wf4ever
+		 * .provtaverna.export.W3ProvenanceExport.<init>(W3ProvenanceExport
+		 * .java:162) at
+		 * org.purl.wf4ever.provtaverna.export.SaveProvAction.saveData
+		 * (SaveProvAction.java:65) at
+		 * net.sf.taverna.t2.workbench.views.results.
+		 * saveactions.SaveAllResultsSPI$2.run(SaveAllResultsSPI.java:177)
+		 */
 
+		// repopulateRegistry(BooleanQueryResultParserRegistry.getInstance(),
+		// BooleanQueryResultParserFactory.class);
+		// repopulateRegistry(BooleanQueryResultWriterRegistry.getInstance(),
+		// BooleanQueryResultWriterFactory.class);
+		// repopulateRegistry(RDFParserRegistry.getInstance(),
+		// RDFParserFactory.class);
+		// repopulateRegistry(RDFWriterRegistry.getInstance(),
+		// RDFWriterFactory.class);
+		// repopulateRegistry(TupleQueryResultParserRegistry.getInstance(),
+		// TupleQueryResultParserFactory.class);
+		// repopulateRegistry(TupleQueryResultWriterRegistry.getInstance(),
+		// TupleQueryResultWriterFactory.class);
+		// repopulateRegistry(FunctionRegistry.getInstance(), Function.class);
+		// repopulateRegistry(QueryParserRegistry.getInstance(),
+		// QueryParserFactory.class);
+		// repopulateRegistry(RepositoryRegistry.getInstance(),
+		// RepositoryFactory.class);
+		// repopulateRegistry(SailRegistry.getInstance(), SailFactory.class);
 
-or with java -noverify (..)
-
-ERROR 2012-07-04 16:28:47,814 (net.sf.taverna.t2.workbench.ui.impl.Workbench:115) - Uncaught exception in Thread[SaveAllResults: Saving results to /home/stain/Desktop/ppp.prov.ttl,6,main]
-java.lang.AbstractMethodError: info.aduna.lang.service.ServiceRegistry.add(Ljava/lang/Object;)Ljava/lang/Object;
-	at org.purl.wf4ever.provtaverna.export.W3ProvenanceExport.repopulateRegistry(W3ProvenanceExport.java:132)
-	at org.purl.wf4ever.provtaverna.export.W3ProvenanceExport.initializeRegistries(W3ProvenanceExport.java:111)
-	at org.purl.wf4ever.provtaverna.export.W3ProvenanceExport.<init>(W3ProvenanceExport.java:162)
-	at org.purl.wf4ever.provtaverna.export.SaveProvAction.saveData(SaveProvAction.java:65)
-	at net.sf.taverna.t2.workbench.views.results.saveactions.SaveAllResultsSPI$2.run(SaveAllResultsSPI.java:177)
-
-
-		*/
-		
-		
-//		repopulateRegistry(BooleanQueryResultParserRegistry.getInstance(),
-//				BooleanQueryResultParserFactory.class);
-//		repopulateRegistry(BooleanQueryResultWriterRegistry.getInstance(),
-//				BooleanQueryResultWriterFactory.class);
-//		repopulateRegistry(RDFParserRegistry.getInstance(),
-//				RDFParserFactory.class);
-//		repopulateRegistry(RDFWriterRegistry.getInstance(),
-//				RDFWriterFactory.class);
-//		repopulateRegistry(TupleQueryResultParserRegistry.getInstance(),
-//				TupleQueryResultParserFactory.class);
-//		repopulateRegistry(TupleQueryResultWriterRegistry.getInstance(),
-//				TupleQueryResultWriterFactory.class);
-//		repopulateRegistry(FunctionRegistry.getInstance(), Function.class);
-//		repopulateRegistry(QueryParserRegistry.getInstance(),
-//				QueryParserFactory.class);
-//		repopulateRegistry(RepositoryRegistry.getInstance(),
-//				RepositoryFactory.class);
-//		repopulateRegistry(SailRegistry.getInstance(), SailFactory.class);
-		
 		/* So instead we just do a silly, minimal workaround for what we need */
 		QueryParserRegistry.getInstance().add(new SPARQLParserFactory());
 	}
-	
+
 	protected <I> void repopulateRegistry(ServiceRegistry<?, I> registry,
 			Class<I> spi) {
 		ClassLoader cl = classLoaderForServiceLoader(spi);
@@ -150,19 +173,17 @@ java.lang.AbstractMethodError: info.aduna.lang.service.ServiceRegistry.add(Ljava
 		}
 	}
 
-	
 	private ClassLoader classLoaderForServiceLoader(Class<?> mustHave) {
-		List<ClassLoader> possibles = Arrays.asList(
-				Thread.currentThread().getContextClassLoader(), 
-				getClass().getClassLoader(), 
-				mustHave.getClassLoader());
+		List<ClassLoader> possibles = Arrays.asList(Thread.currentThread()
+				.getContextClassLoader(), getClass().getClassLoader(), mustHave
+				.getClassLoader());
 
 		for (ClassLoader cl : possibles) {
 			if (cl == null) {
 				continue;
 			}
 			try {
-				if (cl.loadClass(mustHave.getCanonicalName()) == mustHave) {				
+				if (cl.loadClass(mustHave.getCanonicalName()) == mustHave) {
 					return cl;
 				}
 			} catch (ClassNotFoundException e) {
@@ -227,7 +248,17 @@ java.lang.AbstractMethodError: info.aduna.lang.service.ServiceRegistry.add(Ljava
 	}
 
 	enum Direction {
-		INPUTS, OUTPUTS;
+		INPUTS("in"), OUTPUTS("out");
+		private final String path;
+
+		Direction(String path) {
+			this.path = path;
+
+		}
+
+		public String getPath() {
+			return path;
+		}
 	}
 
 	public void exportAsW3Prov(BufferedOutputStream outStream)
@@ -248,8 +279,8 @@ java.lang.AbstractMethodError: info.aduna.lang.service.ServiceRegistry.add(Ljava
 		Agent tavernaAgent = elmoManager.create(Agent.class);
 		Activity storeProvenance = elmoManager.create(Activity.class);
 
-		storeProvenance.getProvStartedAtTime().add(datatypeFactory
-				.newXMLGregorianCalendar(startedProvExportAt));
+		storeProvenance.getProvStartedAtTime().add(
+				datatypeFactory.newXMLGregorianCalendar(startedProvExportAt));
 		storeProvenance.getProvWasAssociatedWith().add(tavernaAgent);
 		// The agent is an execution of the Taverna software (e.g. also an
 		// Activity)
@@ -287,19 +318,21 @@ java.lang.AbstractMethodError: info.aduna.lang.service.ServiceRegistry.add(Ljava
 		Plan plan = elmoManager.create(new QName(wfUri), Plan.class);
 		association.getProvHadPlan().add(plan);
 
-		wfProcess.getProvStartedAtTime().add(timestampToXmlGreg(dataflowInvocation
-				.getInvocationStarted()));
-		wfProcess.getProvEndedAtTime().add(timestampToXmlGreg(dataflowInvocation
-				.getInvocationEnded()));
+		wfProcess.getProvStartedAtTime().add(
+				timestampToXmlGreg(dataflowInvocation.getInvocationStarted()));
+		wfProcess.getProvEndedAtTime().add(
+				timestampToXmlGreg(dataflowInvocation.getInvocationEnded()));
 
 		storeFileReferences(elmoManager);
-		
+
 		// Workflow inputs and outputs
 		storeEntitities(dataflowInvocation.getInputsDataBindingId(), wfProcess,
-				Direction.INPUTS, elmoManager);
+				Direction.INPUTS, elmoManager, 
+						getIntermediatesDirectory());
 		// FIXME: These entities come out as "generated" by multiple processes
 		storeEntitities(dataflowInvocation.getOutputsDataBindingId(),
-				wfProcess, Direction.OUTPUTS, elmoManager);
+				wfProcess, Direction.OUTPUTS, elmoManager, 
+						getIntermediatesDirectory());
 		// elmoManager.persist(wfProcess);
 
 		List<ProcessorEnactment> processorEnactments = provenanceAccess
@@ -313,10 +346,9 @@ java.lang.AbstractMethodError: info.aduna.lang.service.ServiceRegistry.add(Ljava
 			} else {
 				// inside nested wf - this will be parent processenactment
 				parentURI = uriGenerator.makeProcessExecution(
-						pe.getWorkflowRunId(), pe.getProcessEnactmentId());			
+						pe.getWorkflowRunId(), pe.getProcessEnactmentId());
 			}
-			
-			
+
 			String processURI = uriGenerator.makeProcessExecution(
 					pe.getWorkflowRunId(), pe.getProcessEnactmentId());
 			Activity process = elmoManager.create(new QName(processURI),
@@ -324,10 +356,10 @@ java.lang.AbstractMethodError: info.aduna.lang.service.ServiceRegistry.add(Ljava
 			Activity parentProcess = elmoManager.designate(
 					new QName(parentURI), Activity.class);
 			process.getProvWasInformedBy().add(parentProcess);
-			process.getProvStartedAtTime().add(timestampToXmlGreg(pe
-					.getEnactmentStarted()));
-			process.getProvEndedAtTime().add(timestampToXmlGreg(pe
-					.getEnactmentEnded()));
+			process.getProvStartedAtTime().add(
+					timestampToXmlGreg(pe.getEnactmentStarted()));
+			process.getProvEndedAtTime().add(
+					timestampToXmlGreg(pe.getEnactmentEnded()));
 
 			// TODO: Linking to the processor in the workflow definition?
 			ProvenanceProcessor provenanceProcessor = provenanceAccess
@@ -350,18 +382,20 @@ java.lang.AbstractMethodError: info.aduna.lang.service.ServiceRegistry.add(Ljava
 
 			// TODO: Activity/service details from definition?
 
+			File path = getIntermediatesDirectory();
+
 			// Inputs and outputs
 			storeEntitities(pe.getInitialInputsDataBindingId(), process,
-					Direction.INPUTS, elmoManager);
+					Direction.INPUTS, elmoManager, path);
 			storeEntitities(pe.getFinalOutputsDataBindingId(), process,
-					Direction.OUTPUTS, elmoManager);
+					Direction.OUTPUTS, elmoManager, path);
 
 			// elmoManager.persist(process);
 		}
 
 		GregorianCalendar endedProvExportAt = new GregorianCalendar();
-		storeProvenance.getProvEndedAtTime().add(datatypeFactory
-				.newXMLGregorianCalendar(endedProvExportAt));
+		storeProvenance.getProvEndedAtTime().add(
+				datatypeFactory.newXMLGregorianCalendar(endedProvExportAt));
 
 		// Save the whole thing
 		ContextAwareConnection connection = elmoManager.getConnection();
@@ -371,11 +405,12 @@ java.lang.AbstractMethodError: info.aduna.lang.service.ServiceRegistry.add(Ljava
 		connection.setNamespace("owl", "http://www.w3.org/2002/07/owl#");
 		// connection.export(new OrganizedRDFWriter(new
 		// RDFXMLPrettyWriter(outStream)));
-//		connection.export(new OrganizedRDFWriter(new RDFXMLPrettyWriter(outStream)));
-		connection.export(new OrganizedRDFWriter(new TurtleWriterWithBase(outStream, getBaseFolder().toURI())));
+		// connection.export(new OrganizedRDFWriter(new
+		// RDFXMLPrettyWriter(outStream)));
+		connection.export(new OrganizedRDFWriter(new TurtleWriterWithBase(
+				outStream, getBaseFolder().toURI())));
 
 	}
-
 	protected XMLGregorianCalendar timestampToXmlGreg(
 			Timestamp invocationStarted) {
 		GregorianCalendar cal = new GregorianCalendar();
@@ -395,27 +430,28 @@ java.lang.AbstractMethodError: info.aduna.lang.service.ServiceRegistry.add(Ljava
 			T2Reference t2Ref = entry.getValue();
 			String dataURI = uriGenerator.makeT2ReferenceURI(t2Ref.toUri()
 					.toASCIIString());
-//			try {
-				Entity entity = elmoManager
-						.create(new QName(dataURI), Entity.class);
-				entity.getProvAlternateOf().add(
-						elmoManager.create(new QName(file.toURI().toASCIIString()), Entity.class));
-//				elmoManager.getConnection().add(new URIImpl(dataURI), SAMEAS,
-//						new URIImpl(file.toURI().toASCIIString()));
-//			} catch (RepositoryException e) {
-//				// FIXME: Fail properly
-//				throw new RuntimeException("Can't store reference for " + file, e);
-//			}
+			// try {
+			Entity entity = elmoManager
+					.create(new QName(dataURI), Entity.class);
+			entity.getProvAlternateOf().add(
+					elmoManager.create(new QName(file.toURI().toASCIIString()),
+							Entity.class));
+			// elmoManager.getConnection().add(new URIImpl(dataURI), SAMEAS,
+			// new URIImpl(file.toURI().toASCIIString()));
+			// } catch (RepositoryException e) {
+			// // FIXME: Fail properly
+			// throw new RuntimeException("Can't store reference for " + file,
+			// e);
+			// }
 		}
 	}
-		
+
 	protected void storeEntitities(String dataBindingId, Activity activity,
-				Direction direction, SesameManager elmoManager) {
-		
+			Direction direction, SesameManager elmoManager, File path) {
 
 		Map<Port, T2Reference> inputs = provenanceAccess
-					.getDataBindings(dataBindingId);
-			
+				.getDataBindings(dataBindingId);
+
 		for (Entry<Port, T2Reference> inputEntry : inputs.entrySet()) {
 			Port port = inputEntry.getKey();
 			T2Reference t2Ref = inputEntry.getValue();
@@ -426,12 +462,20 @@ java.lang.AbstractMethodError: info.aduna.lang.service.ServiceRegistry.add(Ljava
 			Entity entity = elmoManager
 					.create(new QName(dataURI), Entity.class);
 
-
+//			saveReference(
+//					new File(new File(path, direction.getPath()),
+//							port.getPortName()), t2Ref);
+			String id = t2Ref.getLocalPart();
+			String prefix = id.substring(0, 2);
 			
+			File prefixDir = new File(path, prefix);
+			saveReference(new File(prefixDir, id), t2Ref);
+
+
 			if (direction == Direction.INPUTS) {
 				activity.getProvUsed().add(entity);
 			} else {
-				if (! entity.getProvWasGeneratedBy().isEmpty()) {
+				if (!entity.getProvWasGeneratedBy().isEmpty()) {
 					// Double-output, alias the entity with a fresh one
 					// to avoid double-generation
 					Entity viewOfEntity = elmoManager.create(Entity.class);
@@ -472,6 +516,14 @@ java.lang.AbstractMethodError: info.aduna.lang.service.ServiceRegistry.add(Ljava
 
 	}
 
+	public void saveReference(File path, T2Reference t2Ref) {
+		if (getIntermediatesDirectory() == null) {
+			return;
+		}
+		
+		/// ...
+	}
+
 	public ProvenanceAccess getProvenanceAccess() {
 		return provenanceAccess;
 	}
@@ -489,12 +541,18 @@ java.lang.AbstractMethodError: info.aduna.lang.service.ServiceRegistry.add(Ljava
 	}
 
 	public void setFileToT2Reference(Map<File, T2Reference> fileToT2Reference) {
-		this.fileToT2Reference = fileToT2Reference;		
+		this.fileToT2Reference = fileToT2Reference;
 	}
 
 	public void setBaseFolder(File baseFolder) {
 		this.baseFolder = baseFolder;
-		
+
+	}
+
+	public void setIntermediatesDirectory(File intermediatesDirectory) {
+		this.intermediatesDirectory = intermediatesDirectory;
+		// TODO Auto-generated method stub
+
 	}
 
 }

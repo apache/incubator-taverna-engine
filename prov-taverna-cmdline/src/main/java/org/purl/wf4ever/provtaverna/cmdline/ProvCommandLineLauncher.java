@@ -135,6 +135,9 @@ public class ProvCommandLineLauncher extends CommandLineLauncher implements
 							realFacade.getContext(), realFacade.getWorkflowRunId(),
 							chosenReferences);
 					saver.setFileToId(fileToId);
+					File intermediatesDirectory = new File(outputDir, "intermediates");
+					intermediatesDirectory.mkdir();
+					saver.setIntermediatesDirectory(intermediatesDirectory);
 					try {
 						saver.saveData(outputDir);
 					} catch (IOException e1) {

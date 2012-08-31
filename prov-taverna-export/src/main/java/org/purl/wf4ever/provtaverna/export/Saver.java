@@ -59,7 +59,13 @@ public class Saver {
 
 	private Map<String, T2Reference> chosenReferences;
 
+	private File intermediatesDirectory;
+
 	
+	public File getIntermediatesDirectory() {
+		return intermediatesDirectory;
+	}
+
 	public void saveData(File folder) throws FileNotFoundException, IOException {
 		String folderName = folder.getName();
 		if (folderName.endsWith(".")) {
@@ -81,7 +87,9 @@ public class Saver {
 		for (String portName : chosenReferences.keySet()) {
 			writeToFileSystem(chosenReferences.get(portName), folder, portName, referenceService);
 		}
-	
+		
+		
+		
 		String connectorType = DataManagementConfiguration.getInstance()
 				.getConnectorType();
 		ProvenanceAccess provenanceAccess = new ProvenanceAccess(connectorType,
@@ -90,6 +98,7 @@ public class Saver {
 				getRunId());
 		export.setFileToT2Reference(getFileToId());
 		export.setBaseFolder(folder);
+		export.setIntermediatesDirectory(getIntermediatesDirectory());
 		File provenanceFile = new File(folder, "workflowrun.prov.ttl");
 		BufferedOutputStream outStream = new BufferedOutputStream(
 				new FileOutputStream(provenanceFile ));
@@ -267,6 +276,10 @@ public class Saver {
 
 	public void setFileToId(Map<File, T2Reference> fileToId) {
 		this.fileToId = fileToId;
+	}
+
+	public void setIntermediatesDirectory(File intermediatesDirectory) {
+		this.intermediatesDirectory = intermediatesDirectory;
 	}
 
 }
