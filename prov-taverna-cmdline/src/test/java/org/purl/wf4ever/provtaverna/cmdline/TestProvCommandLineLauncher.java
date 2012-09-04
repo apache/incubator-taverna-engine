@@ -68,7 +68,7 @@ public class TestProvCommandLineLauncher extends LaunchSafely {
 		System.out.println(getOut());
 		assertEquals(0, status);
 		File[] outputs = outDir.listFiles();
-		assertEquals(2, outputs.length);
+		assertEquals(3, outputs.length);
 		File provFile = new File(outDir, "workflowrun.prov.ttl");
 		assertTrue(provFile.isFile());
 		String prov = FileUtils.readFileToString(provFile, "utf-8");
@@ -76,6 +76,10 @@ public class TestProvCommandLineLauncher extends LaunchSafely {
 		// FIXME: Test actual content
 		assertTrue(prov.contains("@prefix prov:"));
 		assertTrue(prov.contains("<greeting>"));
+		
+		File intermediates = new File(outDir, "intermediates");
+		assertTrue(intermediates.isDirectory());
+		
 	}
 	
 }
