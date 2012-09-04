@@ -4,15 +4,19 @@ import info.aduna.lang.service.ServiceRegistry;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.ServiceLoader;
+import java.util.Set;
+import java.util.UUID;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
@@ -20,13 +24,16 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
 
 import net.sf.taverna.raven.appconfig.ApplicationConfig;
+import net.sf.taverna.t2.invocation.InvocationContext;
 import net.sf.taverna.t2.provenance.api.ProvenanceAccess;
 import net.sf.taverna.t2.provenance.lineageservice.URIGenerator;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DataflowInvocation;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Port;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProcessorEnactment;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
+import net.sf.taverna.t2.reference.Identified;
 import net.sf.taverna.t2.reference.T2Reference;
+import net.sf.taverna.t2.reference.T2ReferenceType;
 
 import org.apache.log4j.Logger;
 import org.openrdf.elmo.ElmoModule;
@@ -54,6 +61,8 @@ public class W3ProvenanceExport {
 
 	private static Logger logger = Logger.getLogger(W3ProvenanceExport.class);
 
+	protected Set<T2Reference> seenReferences = new HashSet<T2Reference>();
+	
 	private static final int NANOSCALE = 9;
 
 	private static final URIImpl SAMEAS = new URIImpl(
@@ -72,6 +81,8 @@ public class W3ProvenanceExport {
 	private File baseFolder;
 
 	private File intermediatesDirectory;
+
+	private Saver saver;
 
 	public File getIntermediatesDirectory() {
 		return intermediatesDirectory;
@@ -194,7 +205,8 @@ public class W3ProvenanceExport {
 	}
 
 	public W3ProvenanceExport(ProvenanceAccess provenanceAccess,
-			String workflowRunId) {
+			String workflowRunId, Saver saver) {
+		this.saver = saver;
 		this.setWorkflowRunId(workflowRunId);
 		this.setProvenanceAccess(provenanceAccess);
 		initializeRegistries();
@@ -262,7 +274,7 @@ public class W3ProvenanceExport {
 	}
 
 	public void exportAsW3Prov(BufferedOutputStream outStream)
-			throws RepositoryException, RDFHandlerException {
+			throws RepositoryException, RDFHandlerException, IOException {
 
 		GregorianCalendar startedProvExportAt = new GregorianCalendar();
 
@@ -447,14 +459,14 @@ public class W3ProvenanceExport {
 	}
 
 	protected void storeEntitities(String dataBindingId, Activity activity,
-			Direction direction, SesameManager elmoManager, File path) {
+			Direction direction, SesameManager elmoManager, File path) throws IOException {
 
-		Map<Port, T2Reference> inputs = provenanceAccess
+		Map<Port, T2Reference> bindings = provenanceAccess
 				.getDataBindings(dataBindingId);
 
-		for (Entry<Port, T2Reference> inputEntry : inputs.entrySet()) {
-			Port port = inputEntry.getKey();
-			T2Reference t2Ref = inputEntry.getValue();
+		for (Entry<Port, T2Reference> binding : bindings.entrySet()) {
+			Port port = binding.getKey();
+			T2Reference t2Ref = binding.getValue();
 
 			String dataURI = uriGenerator.makeT2ReferenceURI(t2Ref.toUri()
 					.toASCIIString());
@@ -462,15 +474,12 @@ public class W3ProvenanceExport {
 			Entity entity = elmoManager
 					.create(new QName(dataURI), Entity.class);
 
-//			saveReference(
-//					new File(new File(path, direction.getPath()),
-//							port.getPortName()), t2Ref);
+			saveReference(t2Ref);
+			
 			String id = t2Ref.getLocalPart();
 			String prefix = id.substring(0, 2);
 			
 			File prefixDir = new File(path, prefix);
-			saveReference(new File(prefixDir, id), t2Ref);
-
 
 			if (direction == Direction.INPUTS) {
 				activity.getProvUsed().add(entity);
@@ -516,12 +525,40 @@ public class W3ProvenanceExport {
 
 	}
 
-	public void saveReference(File path, T2Reference t2Ref) {
-		if (getIntermediatesDirectory() == null) {
-			return;
+	
+	private void saveReference(T2Reference t2Ref) throws IOException {
+		String extension = "";
+		if (t2Ref.getReferenceType() == T2ReferenceType.IdentifiedList) {
+			extension = ".list";
+		} else if (t2Ref.getReferenceType() == T2ReferenceType.ErrorDocument) {
+			extension = ".err";
 		}
 		
-		/// ...
+		File file = referencePath(t2Ref);
+		file.getParentFile().mkdirs();
+		saver.writeDataObject(file.getParentFile(), file.getName(), t2Ref, extension);
+		getFileToT2Reference().put(file, t2Ref);
+		
+	}
+
+	private File referencePath(T2Reference t2Ref) {				
+		String local = t2Ref.getLocalPart();
+		try {
+			local = UUID.fromString(local).toString();
+		} catch (IllegalArgumentException ex) {
+			// Fallback - use full namespace/localpart
+			return new File(new File(getIntermediatesDirectory(), t2Ref.getNamespacePart()), t2Ref.getLocalPart());
+		}
+		return new File(new File(getIntermediatesDirectory(), local.substring(0, 2)), local);
+	}
+
+	private boolean seenReference(T2Reference t2Ref) throws IOException {
+		boolean isNewRef = seenReferences.add(t2Ref);
+		if (isNewRef) {
+			saveReference(t2Ref);
+		}
+		return isNewRef;
+		
 	}
 
 	public ProvenanceAccess getProvenanceAccess() {
@@ -542,6 +579,7 @@ public class W3ProvenanceExport {
 
 	public void setFileToT2Reference(Map<File, T2Reference> fileToT2Reference) {
 		this.fileToT2Reference = fileToT2Reference;
+		this.seenReferences.addAll(fileToT2Reference.values());
 	}
 
 	public void setBaseFolder(File baseFolder) {
@@ -551,8 +589,6 @@ public class W3ProvenanceExport {
 
 	public void setIntermediatesDirectory(File intermediatesDirectory) {
 		this.intermediatesDirectory = intermediatesDirectory;
-		// TODO Auto-generated method stub
-
 	}
 
 }

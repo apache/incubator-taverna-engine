@@ -95,7 +95,7 @@ public class Saver {
 		ProvenanceAccess provenanceAccess = new ProvenanceAccess(connectorType,
 				getContext());
 		W3ProvenanceExport export = new W3ProvenanceExport(provenanceAccess,
-				getRunId());
+				getRunId(), this);
 		export.setFileToT2Reference(getFileToId());
 		export.setBaseFolder(folder);
 		export.setIntermediatesDirectory(getIntermediatesDirectory());
@@ -221,7 +221,7 @@ public class Saver {
 		return writtenFile;
 	}
 
-	protected File writeToFileSystem(T2Reference ref, File destination, String name, ReferenceService referenceService)
+	public File writeToFileSystem(T2Reference ref, File destination, String name, ReferenceService referenceService)
 			throws IOException {
 		Identified identified = referenceService.resolveIdentifier(ref, null,
 				getContext());
