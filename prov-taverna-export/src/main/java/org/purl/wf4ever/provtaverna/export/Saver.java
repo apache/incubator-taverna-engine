@@ -85,7 +85,12 @@ public class Saver {
 		// First convert map of references to objects into a map of real result
 		// objects
 		for (String portName : chosenReferences.keySet()) {
-			writeToFileSystem(chosenReferences.get(portName), folder, portName, referenceService);
+			T2Reference ref = chosenReferences.get(portName);
+			if (ref == null) {
+				logger.warn("No reference for port " + portName + ", workflow unfinished?");
+				continue;
+			}
+			writeToFileSystem(ref, folder, portName, referenceService);
 		}
 		
 		

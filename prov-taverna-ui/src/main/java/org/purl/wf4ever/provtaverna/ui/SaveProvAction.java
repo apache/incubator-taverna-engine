@@ -37,7 +37,18 @@ public class SaveProvAction extends SaveAllResultsSPI {
 	 * @throws IOException
 	 */
 	protected void saveData(File folder) throws IOException {
+		String folderName = folder.getName();
+		if (folderName.endsWith(".")) {
+			folder = new File(folder.getParentFile(), folderName.substring(0,
+					folderName.length()-1));
+		}
+		
 		Saver saver = new Saver(getReferenceService(), getContext(), getRunId(), getChosenReferences());
+		
+		File intermediatesDirectory = new File(folder, "intermediates");
+		intermediatesDirectory.mkdir();
+		saver.setIntermediatesDirectory(intermediatesDirectory);
+		
 		saver.saveData(folder);
 	}
 

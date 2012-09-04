@@ -346,7 +346,6 @@ public class W3ProvenanceExport {
 				wfProcess, Direction.OUTPUTS, elmoManager, 
 						getIntermediatesDirectory());
 		// elmoManager.persist(wfProcess);
-
 		List<ProcessorEnactment> processorEnactments = provenanceAccess
 				.getProcessorEnactments(getWorkflowRunId());
 		// This will also include processor enactments in nested workflows
@@ -557,7 +556,7 @@ public class W3ProvenanceExport {
 			IdentifiedList<T2Reference> list = saver.getReferenceService().getListService().getList(t2Ref);
 			FileWriterWithEncoding writer = new FileWriterWithEncoding(file, "utf-8");			
 			for (T2Reference ref : list) {
-				File refFile = saveReference(t2Ref);
+				File refFile = saveReference(ref);
 				URI relRef = parent.toURI().relativize(refFile.toURI());
 				writer.append(relRef.toASCIIString() + "\n");	
 			}
