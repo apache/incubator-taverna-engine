@@ -57,7 +57,11 @@ import org.w3.prov.Plan;
 import org.w3.prov.Role;
 import org.w3.prov.Usage;
 
+import uk.org.taverna.scufl2.api.common.URITools;
+
 public class W3ProvenanceExport {
+	
+	private URITools uriTools = new URITools();
 
 	private static Logger logger = Logger.getLogger(W3ProvenanceExport.class);
 
@@ -541,12 +545,7 @@ public class W3ProvenanceExport {
 			return f;
 		}
 		
-		String extension = "";
-		if (t2Ref.getReferenceType() == T2ReferenceType.IdentifiedList) {
-			extension = ".list";
-		} else if (t2Ref.getReferenceType() == T2ReferenceType.ErrorDocument) {
-			extension = ".err";
-		}
+		
 		
 		File file = referencePath(t2Ref);
 		File parent = file.getParentFile();
@@ -554,14 +553,21 @@ public class W3ProvenanceExport {
 		if (t2Ref.getReferenceType() == T2ReferenceType.IdentifiedList) {
 			// Write a kind of text/uri-list (but with relative URIs)			
 			IdentifiedList<T2Reference> list = saver.getReferenceService().getListService().getList(t2Ref);
+			file = new File(file.getParentFile(), file.getName() + ".list");
 			FileWriterWithEncoding writer = new FileWriterWithEncoding(file, "utf-8");			
 			for (T2Reference ref : list) {
-				File refFile = saveReference(ref);
-				URI relRef = parent.toURI().relativize(refFile.toURI());
+				File refFile = saveReference(ref).getAbsoluteFile();
+				URI relRef = uriTools.relativePath(parent.getAbsoluteFile().toURI(), refFile.getAbsoluteFile().toURI());
 				writer.append(relRef.toASCIIString() + "\n");	
 			}
-			
+			writer.close();
 		} else {
+			
+			String extension = "";
+			if (t2Ref.getReferenceType() == T2ReferenceType.ErrorDocument) {
+				extension = ".err";
+			}
+			
 			// Capture filename with extension
 			file = saver.writeDataObject(parent, file.getName(), t2Ref, extension);
 			// FIXME: The above will save the same reference every time!
