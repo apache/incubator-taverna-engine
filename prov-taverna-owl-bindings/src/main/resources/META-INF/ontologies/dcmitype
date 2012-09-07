@@ -1,0 +1,90 @@
+@base             <http://purl.org/NET/dc_owl2dl/dcmitype> .
+@prefix dc:       <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms:  <http://purl.org/dc/terms/> .
+@prefix dcmitype: <http://purl.org/dc/dcmitype/> .
+@prefix dcam:     <http://purl.org/dc/dcam/> .
+
+@prefix rdf:      <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:     <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:      <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:      <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos:     <http://www.w3.org/2004/02/skos/core#> .
+
+<> a owl:Ontology ;
+	rdfs:label "DCMI Type Vocabulary"@en ;
+	rdfs:comment "OWL 2 DL ontology for the Dublin Core type vocabulary from the http://purl.org/dc/dcmitype/ namespace"@en ;
+	owl:imports <http://purl.org/NET/dc_owl2dl/dcam> .
+
+dcmitype:Collection a owl:Class ;
+	rdfs:label "Collection"@en-us ;
+	skos:definition "An aggregation of resources."@en-us ;
+	rdfs:comment "A collection is described as a group; its parts may also be separately described."@en-us ;
+	dcam:memberOf <http://purl.org/dc/terms/DCMIType> .
+
+dcmitype:Dataset a owl:Class ;
+	rdfs:label "Dataset"@en-us ;
+	skos:definition "Data encoded in a defined structure."@en-us ;
+	rdfs:comment "Examples include lists, tables, and databases. A dataset may be useful for direct machine processing."@en-us ;
+	dcam:memberOf <http://purl.org/dc/terms/DCMIType> .
+
+dcmitype:Event a owl:Class ;
+	rdfs:label "Event"@en-us ;
+	skos:definition "A non-persistent, time-based occurrence."@en-us ;
+	rdfs:comment "Metadata for an event provides descriptive information that is the basis for discovery of the purpose, location, duration, and responsible agents associated with an event. Examples include an exhibition, webcast, conference, workshop, open day, performance, battle, trial, wedding, tea party, conflagration."@en-us ;
+	dcam:memberOf <http://purl.org/dc/terms/DCMIType> .
+
+dcmitype:Image a owl:Class ;
+	rdfs:label "Image"@en-us ;
+	skos:definition "A visual representation other than text."@en-us ;
+	rdfs:comment "Examples include images and photographs of physical objects, paintings, prints, drawings, other images and graphics, animations and moving pictures, film, diagrams, maps, musical notation. Note that Image may include both electronic and physical representations."@en-us ;
+	dcam:memberOf <http://purl.org/dc/terms/DCMIType> .
+
+dcmitype:InteractiveResource a owl:Class ;
+	rdfs:label "Interactive Resource"@en-us ;
+	skos:definition "A resource requiring interaction from the user to be understood, executed, or experienced."@en-us ;
+	rdfs:comment "Examples include forms on Web pages, applets, multimedia learning objects, chat services, or virtual reality environments."@en-us ;
+	dcam:memberOf <http://purl.org/dc/terms/DCMIType> .
+
+dcmitype:MovingImage a owl:Class ;
+	rdfs:label "Moving Image"@en-us ;
+	skos:definition "A series of visual representations imparting an impression of motion when shown in succession."@en-us ;
+	rdfs:comment "Examples include animations, movies, television programs, videos, zoetropes, or visual output from a simulation. Instances of the type Moving Image must also be describable as instances of the broader type Image."@en-us ;
+	rdfs:subClassOf dcmitype:Image ;
+	dcam:memberOf <http://purl.org/dc/terms/DCMIType> .
+
+dcmitype:PhysicalObject a owl:Class ;
+	rdfs:label "Physical Object"@en-us ;
+	skos:definition "An inanimate, three-dimensional object or substance."@en-us ;
+	rdfs:comment "Note that digital representations of, or surrogates for, these objects should use Image, Text or one of the other types."@en-us ;
+	dcam:memberOf <http://purl.org/dc/terms/DCMIType> .
+
+dcmitype:Service a owl:Class ;
+	rdfs:label "Service"@en-us ;
+	skos:definition "A system that provides one or more functions."@en-us ;
+	rdfs:comment "Examples include a photocopying service, a banking service, an authentication service, interlibrary loans, a Z39.50 or Web server."@en-us ;
+	dcam:memberOf <http://purl.org/dc/terms/DCMIType> .
+
+dcmitype:Software a owl:Class ;
+	rdfs:label "Software"@en-us ;
+	skos:definition "A computer program in source or compiled form."@en-us ;
+	rdfs:comment "Examples include a C source file, MS-Windows .exe executable, or Perl script."@en-us ;
+	dcam:memberOf <http://purl.org/dc/terms/DCMIType> .
+
+dcmitype:Sound a owl:Class ;
+	rdfs:label "Sound"@en-us ;
+	skos:definition "A resource primarily intended to be heard."@en-us ;
+	rdfs:comment "Examples include a music playback file format, an audio compact disc, and recorded speech or sounds."@en-us ;
+	dcam:memberOf <http://purl.org/dc/terms/DCMIType> .
+
+dcmitype:StillImage a owl:Class ;
+	rdfs:label "Still Image"@en-us ;
+	skos:definition "A static visual representation."@en-us ;
+	rdfs:comment "Examples include paintings, drawings, graphic designs, plans and maps. Recommended best practice is to assign the type Text to images of textual materials. Instances of the type Still Image must also be describable as instances of the broader type Image."@en-us ;
+	rdfs:subClassOf dcmitype:Image ;
+	dcam:memberOf <http://purl.org/dc/terms/DCMIType> .
+
+dcmitype:Text a owl:Class ;
+	rdfs:label "Text"@en-us ;
+	skos:definition "A resource consisting primarily of words for reading."@en-us ;
+	rdfs:comment "Examples include books, letters, dissertations, poems, newspapers, articles, archives of mailing lists. Note that facsimiles or images of texts are still of the genre Text."@en-us ;
+	dcam:memberOf <http://purl.org/dc/terms/DCMIType> .

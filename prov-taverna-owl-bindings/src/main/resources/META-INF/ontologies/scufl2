@@ -1,0 +1,1019 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <title>Scufl2 Ontology - Developer documentation - myGrid developer wiki</title>
+
+        
+
+                        
+    
+
+            <!-- Deprecated since 3.4. To be removed in a future version of Confluence; use AJS.Confluence.getContextPath() -->
+<meta id="confluence-context-path" name="confluence-context-path" content="/wiki">
+<meta name="ajs-context-path" content="/wiki">
+<meta name="ajs-build-number" content="2036">
+<meta id="atlassian-token" name="atlassian-token" content="ba727468c41158b0f377373254edea7eacfaccf4">
+<meta id="confluence-space-key" name="confluence-space-key" content="developer">
+<meta name="ajs-remote-user" content="">
+<meta name="ajs-static-resource-url-prefix" content="/wiki/s/2036/6/_">
+
+<script type="text/javascript">
+    // Deprecated global variables. To be removed in a future version of Confluence.
+    var contextPath = '/wiki';
+</script>
+
+    
+
+<!-- include system css resources -->
+<link type="text/css" rel="stylesheet" href="/wiki/s/2036/6/2/_/download/superbatch/css/batch.css" media="all">
+<!--[if IE]>
+<link type="text/css" rel="stylesheet" href="/wiki/s/2036/6/2/_/download/superbatch/css/batch.css?ieonly=true" media="all">
+<![endif]-->
+<link type="text/css" rel="stylesheet" href="/wiki/s/2036/6/2/_/download/superbatch/css/batch.css?media=print" media="print">
+<link type="text/css" rel="stylesheet" href="/wiki/s/2036/6/1.20/_/download/batch/com.atlassian.confluence.plugins.pagetree:pagetree-resources/com.atlassian.confluence.plugins.pagetree:pagetree-resources.css" media="all">
+<link type="text/css" rel="stylesheet" href="/wiki/s/2036/6/1.0/_/download/batch/confluence.web.resources:view-comment/confluence.web.resources:view-comment.css" media="all">
+<!--[if IE]>
+<link type="text/css" rel="stylesheet" href="/wiki/s/2036/6/1.0/_/download/batch/confluence.web.resources:view-comment/confluence.web.resources:view-comment.css?ieonly=true" media="all">
+<![endif]-->
+<link type="text/css" rel="stylesheet" href="/wiki/s/2036/6/1.12.3/_/download/batch/confluence.macros.advanced:fancy-box/confluence.macros.advanced:fancy-box.css" media="all">
+<link type="text/css" rel="stylesheet" href="/wiki/s/2036/6/1.0.8/_/download/batch/com.atlassian.confluence.plugins.drag-and-drop:support/com.atlassian.confluence.plugins.drag-and-drop:support.css" media="all">
+<link type="text/css" rel="stylesheet" href="/wiki/s/2036/6/1.0/_/download/resources/confluence.web.resources:aui-forms/confluence-forms.css" media="all">
+<!--[if IE]>
+<link type="text/css" rel="stylesheet" href="/wiki/s/2036/6/1.0/_/download/batch/confluence.web.resources:aui-forms/confluence.web.resources:aui-forms.css?ieonly=true" media="all">
+<![endif]-->
+<link type="text/css" rel="stylesheet" href="/wiki/s/2036/6/0.7/_/download/batch/com.atlassian.plugins.shortcuts.atlassian-shortcuts-module:shortcuts/com.atlassian.plugins.shortcuts.atlassian-shortcuts-module:shortcuts.css" media="all">
+<link type="text/css" rel="stylesheet" href="/wiki/s/2036/6/3.4.6/_/download/batch/com.atlassian.confluence.keyboardshortcuts:confluence-keyboard-shortcuts/com.atlassian.confluence.keyboardshortcuts:confluence-keyboard-shortcuts.css" media="all">
+
+<!-- end system css resources -->
+
+    <link rel="stylesheet" href="/wiki/s/2036/6/10/_/styles/combined.css?spaceKey=developer" type="text/css">
+
+    <meta name="confluence-request-time" content="1347029176167">
+
+<meta name="loggedInUsername" content="">
+            <meta name="ajs-keyboardshortcut-hash" content="511e0b3add3641846ac15a0ff99d0c17">
+    <!-- Deprecated since 3.4. To be removed in a future version of Confluence; use atl.header -->
+            <meta name="ajs-use-keyboard-shortcuts" content="true">
+    
+    <link rel="shortcut icon" href="/wiki/favicon.ico">
+    <link rel="icon" type="image/png" href="/wiki/s/2036/6/_/images/logo/confluence_16.png">
+
+<link rel="search" type="application/opensearchdescription+xml" href="/wiki/opensearch/osd.action" title="myGrid developer wiki"/>
+
+        <!-- include system javascript resources -->
+                        
+    
+    <script type="text/javascript" src="/wiki/s/2036/6/2/_/download/superbatch/js/batch.js" ></script>
+<script type="text/javascript" src="/wiki/s/2036/6/1.20/_/download/batch/com.atlassian.confluence.plugins.pagetree:pagetree-resources/com.atlassian.confluence.plugins.pagetree:pagetree-resources.js" ></script>
+<script type="text/javascript" src="/wiki/s/2036/6/1.12.3/_/download/batch/confluence.macros.advanced:fancy-box/confluence.macros.advanced:fancy-box.js" ></script>
+<script type="text/javascript" src="/wiki/s/2036/6/1.12.3/_/download/batch/confluence.macros.advanced:thumbnail-images/confluence.macros.advanced:thumbnail-images.js" ></script>
+<script type="text/javascript" src="/wiki/s/2036/6/1.0.8/_/download/batch/com.atlassian.confluence.plugins.drag-and-drop:support/com.atlassian.confluence.plugins.drag-and-drop:support.js" ></script>
+<script type="text/javascript" src="/wiki/s/2036/6/1.0.8/_/download/batch/com.atlassian.confluence.plugins.drag-and-drop:drag-and-drop-for-view-content/com.atlassian.confluence.plugins.drag-and-drop:drag-and-drop-for-view-content.js" ></script>
+<script type="text/javascript" src="/wiki/s/2036/6/1.6/_/download/batch/com.atlassian.confluence.plugins.doctheme:splitter/com.atlassian.confluence.plugins.doctheme:splitter.js" ></script>
+<script type="text/javascript" src="/wiki/s/2036/6/0.7/_/download/batch/com.atlassian.plugins.shortcuts.atlassian-shortcuts-module:shortcuts/com.atlassian.plugins.shortcuts.atlassian-shortcuts-module:shortcuts.js" ></script>
+<script type="text/javascript" src="/wiki/s/2036/6/3.4.6/_/download/batch/com.atlassian.confluence.keyboardshortcuts:confluence-keyboard-shortcuts/com.atlassian.confluence.keyboardshortcuts:confluence-keyboard-shortcuts.js" ></script>
+<script type="text/javascript" src="/wiki/s/2036/6/1.0/_/download/batch/legacy.confluence.web.resources:prototype/legacy.confluence.web.resources:prototype.js" ></script>
+
+    
+    <!-- end system javascript resources -->
+
+    
+
+    
+    <link rel="canonical" href="http://www.mygrid.org.uk/dev/wiki/display/developer/Scufl2+Ontology">
+    <link rel="shortlink" href="http://www.mygrid.org.uk/dev/wiki/x/zoRP">
+    <meta name="wikilink" content="[developer:Scufl2 Ontology]">
+
+</head>
+
+<body             onload="placeFocus()"
+     id="com-atlassian-confluence" class="theme-documentation ">
+<div id="full-height-container">
+
+
+
+<fieldset class="hidden parameters">
+    <input type="hidden" id="statusDialogHeading" value="What are you working on?">
+    <input type="hidden" id="statusDialogAccessibilityLabel" value="Enter your status (140 character limit)">
+    <input type="hidden" id="statusDialogLatestLabel" value="Last update:">
+    <input type="hidden" id="statusDialogUpdateButtonLabel" value="Update">
+    <input type="hidden" id="statusDialogCancelButtonLabel" value="Cancel">
+</fieldset>
+
+<fieldset class="hidden parameters">
+    <input type="hidden" id="globalSettingsAttachmentMaxSize" value="104857600">
+    <input type="hidden" id="userLocale" value="en_GB">
+    <input type="hidden" id="staticResourceUrlPrefix" value="/wiki/s/2036/6/_">
+    <input type="hidden" id="contextPath" value="/wiki">
+</fieldset>
+
+    
+<div id="header" class="sectionbottom ">
+        <form id="quick-search" class="quick-search" method="get" action="/wiki/dosearchsite.action">
+                <fieldset>
+            <input type="hidden" name="spaceSearch" value="false">
+        </fieldset>
+        <fieldset>
+            <legend>Quick Search</legend>
+            <input class="quick-search-query" id="quick-search-query-hacked" type="text" accessKey="q" autocomplete="off" name="queryString" size="25" />
+            <input class="quick-search-submit" id="quick-search-submit" type="submit"  value="Search Confluence" />
+            <div class="aui-dd-parent quick-nav-drop-down"><!-- Quick nav appears here --></div>
+        </fieldset>
+        <fieldset class="hidden parameters">
+            <input type="hidden" id="quickNavEnabled" value="true" />
+                    </fieldset>
+    </form>
+
+    <ul id="header-menu-bar" class="ajs-menu-bar">
+                    
+        
+            <li class="normal ajs-menu-item">
+        <a id="browse-menu-link" class="browse trigger ajs-menu-title" href="#"><span><span>Browse</span></span></a>         <div class="assistive ajs-drop-down">
+                        <ul  id="browse-menu-link-leading"                 class="section-leading first">
+                                        <li>
+    
+        
+    
+    <a  id="space-pages-link" href="/wiki/pages/listpages.action?key=developer"  class=""   title="Browse pages in the Developer documentation space">
+                   <span>Pages</span></a>        </li>
+                                        <li>
+    
+        
+    
+    <a  id="space-blogposts-link" href="/wiki/pages/viewrecentblogposts.action?key=developer"  class=""   title="Browse blogs in the Developer documentation space">
+                   <span>Blog</span></a>        </li>
+                                        <li>
+    
+        
+    
+    <a  id="space-labels-link" href="/wiki/labels/listlabels-heatmap.action?key=developer"  class=""   title="Browse labels in the Developer documentation space">
+                   <span>Labels</span></a>        </li>
+                                        <li>
+    
+        
+    
+    <a  id="space-attachments-link" href="/wiki/spaces/listattachmentsforspace.action?key=developer"  class=""   title="Browse attachments in the Developer documentation space">
+                   <span>Attachments</span></a>        </li>
+                                        <li>
+    
+        
+    
+    <a  href="/wiki/spaces/space-bookmarks.action?spaceKey=developer"  class=""   title="Browse bookmarks in the Developer documentation space">
+                   <span>Bookmarks</span></a>        </li>
+                                        <li>
+    
+        
+    
+    <a  id="space-mail-link" href="/wiki/spaces/viewmailarchive.action?key=developer"  class=""   title="Browse mail in the Developer documentation space">
+                   <span>Mail</span></a>        </li>
+                                        <li>
+    
+        
+    
+    <a  id="space-advanced-link" href="/wiki/spaces/viewspacesummary.action?key=developer"  class=""   title="Browse additional space functions in the Developer documentation space">
+                   <span>Advanced</span></a>        </li>
+                            </ul>
+                        <ul  id="browse-menu-link-global"                 class="section-global">
+                                        <li>
+    
+        
+    
+    <a  id="keyboard-shortcuts-link" href="/wiki"  class=""   title="View available keyboard shortcuts">
+                   <span>Keyboard Shortcuts</span></a>        </li>
+                                        <li>
+    
+        
+    
+    <a  id="gadget-directory-link" href="/wiki"  class="user-item administration-link"   title="Browse gadgets provided by Confluence">
+                   <span>Confluence Gadgets</span></a>        </li>
+                            </ul>
+                    </div>
+    </li>
+        
+                                                         <li class="ajs-menu-item normal">
+        
+        
+    
+    <a  id="login-link" href="/wiki/login.action?os_destination=%2Fdisplay%2Fdeveloper%2FScufl2%2BOntology"  class="user-item login-link"   title="">
+                   <span>Log In</span></a>        </li>
+                                <li class="normal ajs-menu-item">
+            <div id="splitter-button" class="hidden" title="Show or hide sidebar"></div>
+        </li>
+
+    </ul>
+    
+    
+    <ol id="breadcrumbs">
+                    
+                        
+        <li class="first" >
+                                    <span><a href="/wiki/dashboard.action" title="Go to Dashboard">Dashboard</a></span>
+                </li>
+                    
+                
+        <li>
+                                    <span><a href="/wiki/display/developer">Developer documentation</a></span>
+                </li>
+                                        <li id="ellipsis" title="    &#8230;
+                    Home
+             &gt;         Developers Guide
+             &gt;         SCUFL2
+        &#8230;
+"><span><strong>&#8230;</strong></span></li>
+                                    
+                
+        <li class="hidden-crumb" >
+                                    <span><a href="/wiki/display/developer/Home">Home</a></span>
+                </li>
+                                
+                
+        <li class="hidden-crumb" >
+                                    <span><a href="/wiki/display/developer/Developers+Guide">Developers Guide</a></span>
+                </li>
+                                
+                
+        <li class="hidden-crumb" >
+                                    <span><a href="/wiki/display/developer/SCUFL2">SCUFL2</a></span>
+                </li>
+                    
+                
+        <li>
+                                    <span><a href="/wiki/display/developer/SCUFL2+language">SCUFL2 language</a></span>
+                </li>
+                    
+                
+        <li>
+                                    <span>Scufl2 Ontology</span>
+                </li>
+        </ol>
+
+</div>
+
+    <div id="splitter">
+    <div id="splitter-sidebar" >
+        
+
+                    
+        
+    
+
+<div class="plugin_pagetree">
+
+                <div id="pagetreesearch">
+            <form method="POST" action="/wiki/plugins/pagetreesearch/pagetreesearch.action" name="pagetreesearchform">
+                                    <input type="hidden" name="ancestorId" value="917927">
+                                <input type="hidden" name="spaceKey" value="developer">
+                <input type="text"  size="20" name="queryString">
+                <input type="submit" value="Search">
+            </form>
+        </div>
+    
+        
+    <ul class="plugin_pagetree_children_list plugin_pagetree_children_list_noleftspace">
+        <div class="plugin_pagetree_children">
+        </div>
+    </ul>
+
+    <fieldset class="hidden">
+        <input type="hidden" name="treeId" value="">
+        <input type="hidden" name="treeRequestId" value="/wiki/plugins/pagetree/naturalchildren.action?decorator=none&amp;excerpt=false&amp;sort=position&amp;reverse=false&amp;disableLinks=false">
+        <input type="hidden" name="treePageId" value="5211342">
+
+        <input type="hidden" name="noRoot" value="false">
+        <input type="hidden" name="rootPageId" value="917927">
+
+        <input type="hidden" name="rootPage" value="">
+        <input type="hidden" name="startDepth" value="0">
+        <input type="hidden" name="spaceKey" value="developer" >
+
+        <input type="hidden" name="i18n-pagetree.loading" value="Loading...">
+        <input type="hidden" name="i18n-pagetree.error.permission" value="Unable to load page tree. It seems that you do not have permission to view the root page.">
+        <input type="hidden" name="i18n-pagetree.eeror.general" value="There was a problem retrieving the page tree. Please check the server log file for more information.">
+        <input type="hidden" name="loginUrl" value="/wiki/login.action?os_destination=%2Fdisplay%2Fdeveloper%2FScufl2%2BOntology">
+
+                <fieldset class="hidden">
+                                                <input type="hidden" name="ancestorId" value="13107710">
+                                    <input type="hidden" name="ancestorId" value="3572756">
+                                    <input type="hidden" name="ancestorId" value="6291753">
+                                    <input type="hidden" name="ancestorId" value="917927">
+                                    </fieldset>
+    </fieldset>
+</div>
+
+
+
+            </div>
+    <div id="splitter-content">
+
+                    <script type="text/javascript" src="/wiki/s/2036/6/1.6/_/download/resources/com.atlassian.confluence.plugins.doctheme:resources/doc-theme.js"></script>
+    
+            
+    
+<div id="main" >
+    <div id="main-header">
+	    
+	    
+    <div id="navigation" class="content-navigation view">
+        <fieldset class="hidden parameters">
+            <input type="hidden" id="pageId" value="5211342">
+        </fieldset>
+        <ul class="ajs-menu-bar">
+                                
+                        
+            <li class="normal ajs-menu-item">
+        <a id="action-menu-link" class="action trigger ajs-menu-title" href="#"><span><span>Tools</span></span></a>         <div class="assistive ajs-drop-down">
+                        <ul  id="action-menu-link-primary"                 class="section-primary first">
+                                        <li>
+    
+        
+    
+    <a  id="view-attachments-link" href="/wiki/pages/viewpageattachments.action?pageId=5211342"  class="action-view-attachments"  accessKey="a"  title="View Attachments">
+                   <span><u>A</u>ttachments (0)</span></a>        </li>
+                                        <li>
+    
+        
+    
+    <a  id="action-view-history-link" href="/wiki/pages/viewpreviousversions.action?pageId=5211342"  class="action-view-history"   title="">
+                   <span>Page History</span></a>        </li>
+                                        <li>
+    
+        
+    
+    <a  id="action-page-permissions-link" href="/wiki/pages/viewinfo.action?pageId=5211342"  class="action-page-permissions"   title="Edit restrictions">
+                   <span>Restrictions</span></a>        </li>
+                            </ul>
+                        <ul  id="action-menu-link-secondary"                 class="section-secondary">
+                                        <li>
+    
+        
+    
+    <a  id="view-page-info-link" href="/wiki/pages/viewinfo.action?pageId=5211342"  class="action-view-info"   title="">
+                   <span>Info</span></a>        </li>
+                                        <li>
+    
+        
+    
+    <a  id="link-to-page-link" href="/wiki/pages/viewinfo.action?pageId=5211342"  class=""   title="Link to this Page">
+                   <span>Link to this Page&hellip;</span></a>        </li>
+                                        <li>
+    
+        
+    
+    <a  id="view-in-hierarchy-link" href="/wiki/pages/listpages-dirview.action?key=developer&openId=5211342#selectedPageInHierarchy"  class=""   title="">
+                   <span>View in Hierarchy</span></a>        </li>
+                                        <li>
+    
+        
+    
+    <a  id="action-view-source-link" href="/wiki/pages/viewpagesrc.action?pageId=5211342"  class="action-view-source popup-link"   title="">
+                   <span>View Wiki Markup</span></a>        </li>
+                            </ul>
+                    </div>
+    </li>
+            </ul>
+    </div>
+
+	    
+	    <h1 id="title-heading" class="pagetitle">
+	        	            <a href="/wiki/display/developer"><img class="logo space custom" src="/wiki/download/attachments/917926/developer?version=1&modificationDate=1289308626000" alt=""></a>	        	
+			<span id="title-text">
+							            <a href="/wiki/display/developer/Scufl2+Ontology">Scufl2 Ontology</a>
+    						</span>
+	    </h1>
+	</div>
+
+    
+
+    
+    
+    
+    <div id="content" class="page view">
+    
+
+
+
+<fieldset id="link-to-page-fields" class="hidden parameters">
+    <input type="hidden" id="linkToThisPageHeading" value="Link to this Page">
+    <input type="hidden" id="linkToThisPageLink" value="Link">
+    <input type="hidden" id="linkToThisPageTinyLink" value="Tiny Link">
+    <input type="hidden" id="linkToThisPageWikiMarkup" value="Wiki Markup">
+    <input type="hidden" id="linkToThisPageClose" value="Close">
+</fieldset>
+<fieldset class="hidden parameters">
+    <input type="hidden" title="movePageDialogViewPageTitle" value="Move Page &ndash; &#8216;Scufl2 Ontology&#8217;">
+    <input type="hidden" title="movePageDialogEditPageTitle" value="Set Page Location">
+    <input type="hidden" title="movePageDialogMoveButton" value="Move">
+    <input type="hidden" title="movePageDialogOkButton" value="OK">
+    <input type="hidden" title="movePageDialogCancelButton" value="Cancel">
+    <input type="hidden" title="movePageDialogBrowsePanelTip" value="Click to select the new parent page for this page and its children.">
+    <input type="hidden" title="movePageDialogSearchPanel" value="Search">
+    <input type="hidden" title="movePageDialogHistoryPanel" value="Recently Viewed">
+    <input type="hidden" title="movePageDialogHistoryNoResults" value="There were no recently viewed pages found.">
+    <input type="hidden" title="movePageDialogLocationPanel" value="Known Location">
+    <input type="hidden" title="movePageDialogLocationNotFound" value="The specified page was not found.">
+    <input type="hidden" title="movePageDialogBrowsePanel" value="Browse">
+    <input type="hidden" title="movePageDialogPanelLoadErrorMsg" value="Error reading the panel content from the server.">
+    <input type="hidden" title="movePageDialogPanelLoadErrorTip" value="You could try reloading the page and launching the dialog again.">
+    <input type="hidden" title="movePageDialogPanelLoadErrorStatus" value="HTTP Status">
+    <input type="hidden" title="movePageDialogNoSelectionErrorMsg" value="You must make a selection in the tree before you can move the page.">
+    <input type="hidden" title="movePageDialogSearchError" value="Failed to retrieve search results from the server.">
+    <input type="hidden" title="movePageDialogSearchNoResults" value="There were no pages found containing <b>{0}</b>.">
+    <input type="hidden" title="movePageDialogSearchResultCount" value="Showing <b>{0}</b>-<b>{1}</b> of <b>{2}</b> pages containing <b>{3}</b>.">
+    <input type="hidden" title="movePageDialogMoveFailed" value="Move failed. There was a problem contacting the server.">
+    <input type="hidden" title="movePageDialogCannotChangeSpace" value="You cannot move this page to another space because you do not have permission to remove it from this space.">
+    <input type="hidden" title="pageTitle" value="Scufl2 Ontology"/>
+    <input type="hidden" title="parentPageTitle" value="SCUFL2 language"/>
+    <input type="hidden" title="fromPageTitle" value=""/>
+    <input type="hidden" title="spaceKey" value="developer"/>
+    <input type="hidden" title="spaceName" value="Developer documentation"/>
+    <input type="hidden" title="movePageDialogInvalidLocation" value="You cannot move a page to be underneath itself or its children."/>
+    <input type="hidden" title="movePageDialogOrderingTitle" value="Page Ordering"/>
+    <input type="hidden" title="movePageDialogBackButton" value="Back"/>
+    <input type="hidden" title="movePageDialogMoveAndOrderButton" value="Reorder"/>
+    <input type="hidden" title="movePageDialogNextButton" value="Move"/>
+</fieldset>
+
+<script type="text/x-template" title="movePageDialog">
+    <div class="row information">
+        <div class="inner">
+            <div class="element">
+                Specify the new parent page for this page and its children by space and title.
+            </div>
+        </div>
+    </div>
+    <div class="form">
+        <fieldset>
+            
+
+    <legend class="assistive"><span>Change the Parent Page to a Known Page</span></legend>
+            <div class="row">
+                <label for="new-space">New space:</label>
+                <div class="value new-space-value">
+                    <input id="new-space-key" name="new-space-key" type="hidden" value="developer">
+                                            <span class="space-input">
+                            <input id="new-space" name="new-space" value="Developer documentation" disabled="disabled">
+                        </span>
+                        <span class="description warning">You cannot move this page to another space because you do not have permission to remove it from this space.</span>
+                                        <div class="new-space-dropdown aui-dd-parent autocomplete"></div>
+                </div>
+            </div>
+            <div class="row">
+                <label for="new-parent-page">New parent page:</label>
+                <div class="value new-parent-page-value">
+                    <span class="page-input">
+                        <input id="new-parent-page" name="new-parent-page" value="SCUFL2 language">
+                    </span>
+                    <span class="description">Start typing a page title to see a list of suggestions.</span>
+                    <div class="new-parent-page-dropdown aui-dd-parent autocomplete"></div>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+    <div class="location-info">
+        <div class="row">
+            <label>Current location:</label>
+            <div class="value breadcrumbs-container">
+                <div class="breadcrumbs-line">
+                    <ul id="current-parent-breadcrumbs" class="breadcrumbs">
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <label>New location:</label>
+            <div class="value breadcrumbs-container">
+                <div class="breadcrumbs-line">
+                    <ul id="new-parent-breadcrumbs" class="breadcrumbs">
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+<script type="text/x-template" title="movePageErrors">
+    <div id="move-errors" class="hidden warning"></div>
+</script>
+<script type="text/x-template" title="movePageBreadcrumb">
+    <li><a class="{2}" title="{3}" tabindex="-1"><span>{0}</span></a></li>
+</script>
+<script type="text/x-template" title="movePageBreadcrumbLoading">
+    <li class="loading"><span>Loading breadcrumbs&hellip;</span></li>
+</script>
+<script type="text/x-template" title="movePageBreadcrumbError">
+    <li class="warning last"><span>Error retrieving breadcrumbs.</span></li>
+</script>
+<script type="text/x-template" title="movePageNoMatchingPages">
+    <ol><li><span class="warning">No matching pages found.</span></li></ol>
+</script>
+<script type="text/x-template" title="movePageNoMatchingSpaces">
+    <ol><li><span class="warning">No matching spaces found.</span></li></ol>
+</script>
+
+<script type="text/x-template" title="movePageSearchPanel">
+    <div class="row information">
+        <div class="inner">
+            <div class="element">
+                Search for and select the new parent page for this page and its children.
+            </div>
+        </div>
+    </div>
+    <div id="move-page-search-container" class="row">
+        <div class="search-form">
+            <fieldset>
+                
+
+    <legend class="assistive"><span>Search for a New Parent Page</span></legend>
+                
+
+    <label  for="move-page-search-query" class="assistive">Search keywords</label>
+                <input class="search-query" id="move-page-search-query">
+                
+
+    <label  for="move-page-search-space" class="assistive">Search in space</label>
+                                    <select id="move-page-search-space" class="search-space" disabled="disabled">
+                        <option value="developer" selected="selected">Developer documentation</option>
+                    </select>
+                                <input type="button" value="Search">
+                                    <div class="description warning">You cannot move this page to another space because you do not have permission to remove it from this space.</div>
+                            </fieldset>
+        </div>
+        <div class="search-results">
+        </div>
+    </div>
+</script>
+<script type="text/x-template" title="movePageSearchResultsLoading">
+    <div class="searching">Searching…</div>
+</script>
+
+<script type="text/x-template" title="movePageHistoryPanel">
+    <div class="row information">
+        <div class="inner">
+            <div class="element">
+                Select the new parent page for this page and its children from your history.
+            </div>
+        </div>
+    </div>
+    <div id="move-page-search-container" class="row">
+        <div class="search-results">
+        </div>
+    </div>
+</script>
+<script type="text/x-template" title="movePageHistoryLoading">
+    <div class="searching">Loading…</div>
+</script>
+<script type="text/x-template" title="movePageBrowsePanel">
+    <div class="row information">
+        <div class="inner">
+            <div class="element">
+                Click to select the new parent page for this page and its children.
+            </div>
+        </div>
+    </div>
+    <div class="tree"></div>
+</script>
+<script type="text/x-template" title="movePagePanelLoading">
+    <span>Loading…</span>
+</script>
+<script type="text/x-template" title="movePageBrowsePanelSpace">
+    <ul><li id='tree-root-node-item' class='root-node-list-item'><a class='root-node' href='#'>{0}</a></li></ul>
+</script>
+<script type="text/x-template" title="orderingPagePanel">
+<div id="orderingPlaceHolder"></div>
+</script>
+<script type="text/x-template" title="reorderCheckbox">
+<span id="reorderRequirement"><input id="reorderCheck" type="checkbox" name="reorderFlag" title="Choose the position of this page within the list of child pages."/><label for="reorderCheck" title="Choose the position of this page within the list of child pages.">Reorder</label></span>
+</script>
+<script type="text/x-template" title="move-help-link">
+    <div class="dialog-help-link">
+            <a href="http://docs.atlassian.com/confluence/docs-34/Moving+a+Page" target="_blank">Help</a>
+    </div>
+</script>
+<script type="text/x-template" title="searchResultsGrid">
+    <table>
+        <thead>
+            <tr class="header">
+                <th class="search-result-title">Page Title</th>
+                <th class="search-result-space">Space</th>
+                <th class="search-result-date">Updated</th>
+            </tr>
+        </thead>
+    </table>
+</script>
+<script type="text/x-template" title="searchResultsGridCount">
+    <p class="search-result-count">{0}</p>
+</script>
+<script type="text/x-template" title="searchResultsGridRow">
+    <tr class="search-result">
+        <th class="search-result-title"><a href="{1}" class="content-type-{2}"><span>{0}</span></a></th>
+        <td class="search-result-space"><a class="space" href="/wiki/display/{4}/" title="{3}">{3}</a></td>
+        <td class="search-result-date"><span class="date" title="{6}">{5}</span></td>
+    </tr>
+</script>
+<!-- Start restrictions section -->
+<fieldset class="hidden parameters i18n">
+        <input type="hidden" title="i18n.page.perms.error.invalid.entity.names" value="Unknown user or group:">
+        <input type="hidden" title="i18n.page.perms.dialog.heading" value="Page Restrictions">
+        <input type="hidden" title="i18n.page.perms.editing.restricted.to" value="Editing restricted to:">
+        <input type="hidden" title="i18n.cancel.name" value="Cancel">
+        <input type="hidden" title="i18n.close.name" value="Close">
+        <input type="hidden" title="i18n.update.name" value="Save">
+</fieldset>
+
+<script type="text/x-template" title="page-permissions-div">
+<div id="page-permissions-div">
+    <div id="page-permissions-editor-form">
+
+                <div id="page-permissions-error-div" class="hidden">
+            <a href="#" id="permissions-error-div-close">Ok</a>
+            <div></div>
+        </div>
+
+                <div id="page-permissions-type-radios" class="page-permissions-label-rows">
+            <div>
+                <input id="restrictViewRadio" type="radio" checked="checked" name="pagePermissionTypeRadio" value="view"/>
+                <label for="restrictViewRadio">Restrict viewing of this page</label>
+                <input id="restrictEditRadio" type="radio" name="pagePermissionTypeRadio" value="edit"/>
+                <label for="restrictEditRadio">Restrict editing of this page</label>
+            </div>
+        </div>
+        <div id="page-permissions-input" class="page-permissions-label-rows">
+            <div class="page-permissions-label">To:</div>
+            <div id="page-permissions-chooser-box">
+                                <span id="page-permissions-choose-user" class="ajs-button">
+                    
+
+
+
+    
+
+
+
+<a href="#" id='userpicker-popup-link-image' onClick="var picker = window.open('/wiki/spaces/openuserpicker.action?key=developer&amp;startIndex=0&amp;onPopupSubmit=AJS.PagePermissions.addUserPermissions', 'EntitiesPicker', 'status=yes,resizable=yes,top=100,left=200,width=700,height=680,scrollbars=yes'); picker.focus(); return false;"><img src="/wiki/s/2036/6/_/images/icons/user_16.gif" height=16 width=16 border=0 align="absmiddle"  title="Choose users" /></a>
+<a href="#" id='userpicker-popup-link-text' onClick="var picker = window.open('/wiki/spaces/openuserpicker.action?key=developer&amp;startIndex=0&amp;onPopupSubmit=AJS.PagePermissions.addUserPermissions', 'EntitiesPicker', 'status=yes,resizable=yes,top=100,left=200,width=700,height=680,scrollbars=yes'); picker.focus(); return false;">Person...</a>
+
+
+                </span>
+                <span id="page-permissions-choose-group" class="ajs-button">
+                    
+
+
+
+    
+
+ 
+
+<a href="#" id='grouppicker-popup-link-image' onClick="var picker = window.open('/wiki/spaces/opengrouppicker.action?key=developer&amp;startIndex=0&amp;actionName=dosearchgroups.action&amp;onPopupSubmit=AJS.PagePermissions.addGroupPermissions', 'EntitiesPicker', 'status=yes,resizable=yes,top=100,left=200,width=580,height=550,scrollbars=yes'); picker.focus(); return false;"><img src="/wiki/s/2036/6/_/images/icons/group_16.gif" height=16 width=16 border=0 align="absmiddle"  title="Choose groups" /></a>
+<a href="#" id='grouppicker-popup-link-text' onClick="var picker = window.open('/wiki/spaces/opengrouppicker.action?key=developer&amp;startIndex=0&amp;actionName=dosearchgroups.action&amp;onPopupSubmit=AJS.PagePermissions.addGroupPermissions', 'EntitiesPicker', 'status=yes,resizable=yes,top=100,left=200,width=580,height=550,scrollbars=yes'); picker.focus(); return false;">Group...</a>
+
+
+                </span>
+            </div>
+            <div id="page-permissions-input-box">
+                                <span>
+                    <input type="text" id="page-permissions-names-input" class="input-placeholder" value="Enter user or group name" name="permissionNames" size="30" autocomplete="off"/>
+                </span>
+                <input
+    type="hidden"
+                            id="page-permissions-names-hidden"           />                <img height="16px" width="1px" src="/wiki/s/2036/6/_/images/border/spacer.gif"/>
+                <input type="button" id="add-typed-names" value="Restrict">
+            </div>
+        </div>
+    </div>
+    <div id="page-permissions-tables">
+        <div id="page-permissions-table-div">
+                        <table id="page-permissions-table" class="page-permissions-table">
+                <tr id="page-permissions-no-views" class="marker-row">
+                    <td colspan="3" class="page-permissions-marker-cell"><span>No view restrictions are defined for this page</span></td>
+                </tr>
+                <tr id="page-permissions-no-edits" class="marker-row">
+                    <td colspan="3" class="page-permissions-marker-cell"><span>No edit restrictions are defined for this page</span></td>
+                </tr>
+            </table>
+        </div>
+        <div id="page-inherited-permissions-table-div" class="hidden">
+            <span id="page-inherited-permissions-table-desc">
+                <a class="icon twisty-closed">Show/Hide</a>
+                <a id="toggle-inherited-permissions" title="Click to see inherited restrictions">This page has restricted parent pages. It can only be seen by users who can see those parent pages.</a>
+            </span>
+            <div id="page-inherited-permissions-tables" class="hidden page-inheritance-togglable"></div>
+        </div>
+    </div>
+</div>
+</script>
+
+<script type="text/x-template" title="permissions-row-template">
+    <tr class="permission-row">
+                                
+                <td class="page-permissions-marker-cell" width="20%">
+            <span>Viewing restricted to:</span>
+        </td>
+                <td class="permission-entity" nowrap="true" width="40%">
+            <span class="entity-container">
+                <img class="permission-entity-picture"/>
+                <span class="permission-entity-display-name"></span>
+                <span class="permission-entity-name-wrap">&nbsp;(<span class="permission-entity-name"></span>)</span>
+            </span>
+        </td>
+        <td class="permission-detail-column">
+            <div class="permission-remove-div">
+                <a href="#" class="remove-permission-link">Remove restriction</a>
+            </div>
+        </td>
+    </tr>
+</script>
+<script type="text/x-template" title="permissions-username-no-suggestion-template">
+    <ol>
+        <li><a href="#" class="message"><span>No matches</span></a></li>
+    </ol>
+</script>
+<script type="text/x-template" title="page-inherited-permissions-table-div-template">
+        <div class="page-inherited-permissions-owner-div">
+        <div class="page-inherited-permissions-table-desc">Viewing restrictions apply to “<a></a>”. In order to see “<span></span>”, a user must be in the following list of users and groups:</div>
+        <table class="page-permissions-table"></table>
+    </div>
+</script>
+<script type="text/x-template" title="page-restrictions-help-link">
+    <div class="dialog-help-link">
+            <a href="http://docs.atlassian.com/confluence/docs-34/Page+Restrictions" target="_blank">Help</a>
+    </div>
+</script>
+<!-- End restrictions section -->
+
+<fieldset class="hidden parameters">
+    <input type="hidden" title="spaceKeyEncoded" value="developer">
+    <input type="hidden" title="spaceKeyDecoded" value="developer">
+</fieldset>
+
+
+        
+    
+    
+        <fieldset class="hidden parameters">
+            <input type="hidden" title="parentPageId" value="13107710">
+        </fieldset>
+
+        
+                            
+    
+
+                    
+
+        
+        <a href="#page-metadata-end" class="assistive">Skip to end of metadata</a>
+<div id="page-metadata-start" class="assistive"></div>
+
+    <div class="page-metadata">
+        <ul>
+                            <li class="page-metadata-item noprint">
+    
+            
+    
+    <a  id="content-metadata-page-restrictions" href="#"  class="page-metadata-icon page-restrictions hidden"   title="Page restrictions apply. Click the lock icon to view or edit the restriction.">
+                   <span>Page restrictions apply</span></a>        </li>
+                        <li class="page-metadata-modification-info">
+                                    Added by <a href="/wiki/display/~stain"
+                          class="url fn"
+                   >Stian Soiland-Reyes</a>, last edited by <a href="/wiki/display/~stain"
+                          class="url fn"
+                   >Stian Soiland-Reyes</a> on 2012-01-31
+                                                                <span class="noprint">&nbsp;(<a id="view-change-link" href="/wiki/pages/diffpages.action?pageId=5211342&originalId=13107751">view change</a>)</span>
+                                                </li>
+                    </ul>
+          <div id="version-comment" class="noteMacro" style="display: none;">
+      <strong>Comment:</strong>
+      <br />
+  </div>
+    </div>
+
+
+<a href="#page-metadata-start" class="assistive">Go to start of metadata</a>
+<div id="page-metadata-end" class="assistive"></div>
+        
+        <fieldset class="hidden parameters">
+                        <input type="hidden" title="browsePageTreeMode" value="view">
+        </fieldset>
+
+        <div class="wiki-content">
+           <!-- wiki content -->
+            <p>A draft specification of the SCUFL2 ontology/model.</p>
+
+<div class='panelMacro'><table class='noteMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="/wiki/images/icons/emoticons/warning.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Incomplete</b><br />This section is currently incomplete. Some of the pages below might be outdated and use an earlier RDF syntax .</td></tr></table></div>
+
+
+<p>See the OWL version at:</p>
+<ul>
+	<li><span class="nobr"><a href="https://github.com/myGrid/scufl2/tree/master/scufl2-rdf/src/main/resources" class="external-link" rel="nofollow">https://github.com/myGrid/scufl2/tree/master/scufl2-rdf/src/main/resources<sup><img class="rendericon" src="/wiki/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"/></sup></a></span></li>
+</ul>
+
+
+<p>This has yet to be verified and published at the official SCUFL2 namespaces <tt><span class="nobr"><a href="http://ns.taverna.org.uk/2010/scufl2#" class="external-link" rel="nofollow">http://ns.taverna.org.uk/2010/scufl2#<sup><img class="rendericon" src="/wiki/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"/></sup></a></span></tt> and <tt><span class="nobr"><a href="http://ns.taverna.org.uk/2010/taverna/2.2/" class="external-link" rel="nofollow">http://ns.taverna.org.uk/2010/taverna/2.2/<sup><img class="rendericon" src="/wiki/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"/></sup></a></span></tt></p>
+
+<ul><li><a href="/wiki/display/developer/Scufl2-WorkflowBundle" title="Scufl2-WorkflowBundle">Scufl2-WorkflowBundle</a><ul><li><a href="/wiki/display/developer/Scufl2-Profile" title="Scufl2-Profile">Scufl2-Profile</a></li><li><a href="/wiki/display/developer/Scufl2-Workflow" title="Scufl2-Workflow">Scufl2-Workflow</a><ul><li><a href="/wiki/display/developer/Scufl2-DataLink" title="Scufl2-DataLink">Scufl2-DataLink</a></li><li><a href="/wiki/display/developer/Scufl2-Processors" title="Scufl2-Processors">Scufl2-Processors</a></li></ul></li></ul></li></ul>
+        </div>
+
+        <!--
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:dc="http://purl.org/dc/elements/1.1/"
+         xmlns:trackback="http://madskills.com/public/xml/rss/module/trackback/">
+         <rdf:Description
+    rdf:about="http://www.mygrid.org.uk/dev/wiki/display/developer/Scufl2+Ontology"
+    dc:identifier="http://www.mygrid.org.uk/dev/wiki/display/developer/Scufl2+Ontology"
+    dc:title="Scufl2 Ontology"
+    trackback:ping="http://www.mygrid.org.uk/dev/wiki/rpc/trackback/5211342"/>
+</rdf:RDF>
+-->
+
+            
+    
+
+
+<fieldset class="hidden parameters">
+    <legend>Labels parameters</legend>
+    <input type="hidden" id="editLabel" value="Edit">
+    <input type="hidden" id="addLabel" value="Add Labels">
+    <input type="hidden" id="domainName" value="http://www.mygrid.org.uk/dev/wiki">
+    <input type="hidden" id="pageId" value="5211342">
+    <input type="hidden" id="spaceKey" value="developer">
+</fieldset>
+
+<div id="labels-section" class="pageSection">
+    <div id="default-labels-header" class="section-header">
+        <h2 id="labels-section-title" class="section-title  hidden ">Labels</h2>
+            </div>
+
+    <div class="labels-editor">
+        <div id="labelsList">
+                    </div>
+
+        <span class="errorMessage error" id="errorSpan"></span>
+        <form method="GET" action="" id="add-labels-form">
+            <div id="labelInputSpan" class="labels-input">
+                <div id="labelOperationErrorContainer" class="hidden">
+                    <span class="error"><span class="errorMessage" id="labelOperationErrorMessage"></span></span>
+                </div>
+
+                <div class="caption">Enter labels to add to this page:</div>
+                <div id="label-input-fields">
+                    <input autocomplete="off" id="labelsString" name="labelsString" value="" size="40">
+                    <input id="add-labels-editor-button" type="submit" class="add-labels" value="Add">
+                    <input id="close-labels-editor-button" type="submit" class="hide-labels-editor" value="Done">
+                </div>
+                <div id="waitImageAndStatus">
+                    <img class="waiting" alt="Please wait" src="/wiki/s/2036/6/_/images/icons/wait.gif">&nbsp;
+                    <span id="labelOperationStatus" class="smalltext"></span>
+                </div>
+                <div id="labelsAutocompleteList" class="aui-dd-parent"></div>
+                <div class="labels-tip">
+                    <div id="suggestedLabelsSpan"></div>
+                    Looking for a label? Just start typing.
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+                    <div id="children-section" class="pageSection">
+        
+        <div class="section-header ">
+            <h2 id="children-section-title" class="section-title">
+                <a name="children">Child Pages (1)    </a>
+            </h2>
+            <span class="noprint">
+                &nbsp;
+                                    <a id="hide-children-link" class="grey" href="/wiki/display/developer/Scufl2+Ontology?showChildren=false&#0035;children">Hide Child Pages</a>
+                
+                &nbsp;|&nbsp; <a class="grey" href="/wiki/pages/listpages-dirview.action?key=developer&amp;openId=5211342#selectedPageInHierarchy">Reorder Pages</a>
+                            </span>
+        </div>
+                    <div id="page-children" class="pageSectionBody">
+                                                     <span class="icon icon-page" title=Page>Page:</span>
+                         <a href="/wiki/display/developer/Scufl2-WorkflowBundle">Scufl2-WorkflowBundle</a>
+                             <br>
+                            </div>
+                </div>
+    
+            
+
+
+
+
+            
+    
+
+        
+<fieldset class="parameters hidden">
+    <input type="hidden" id="deleteCommentConfirmMessage" value="Are you sure you want to remove the comment?">
+    <input type="hidden" id="collapseTooltip" value="Click to toggle the display of this comment.">
+        </fieldset>
+
+<fieldset class="hidden parameters i18n">
+        <input type="hidden" title="i18n.cancel.name" value="Cancel">
+</fieldset>
+
+
+
+
+
+
+<div id="comments-section" class="pageSection">
+    
+    
+    
+    
+                                    </div>
+
+
+            
+</div>
+
+
+    
+
+
+
+
+    
+    
+
+    
+    
+    
+
+
+<fieldset class="hidden parameters">
+        <input type="hidden" title="i18n.done.name" value="Done">
+        <input type="hidden" title="i18n.manage.watchers.dialog.title" value="Manage Watchers">
+        <input type="hidden" title="i18n.manage.watchers.unable.to.remove.error" value="Failed to remove watcher. Refresh page to see latest status.">
+        <input type="hidden" title="i18n.manage.watchers.status.adding.watcher" value="Adding watcher&amp;hellip;">
+</fieldset>
+<script type="text/x-template" title="manage-watchers-dialog">
+<div class="dialog-content">
+    <div class="column page-watchers">
+        <h3>Watching this page</h3>
+        <p class="description">These people are notified when the page is changed. You can add or remove people from this list.</p>
+        <form action="/wiki/json/addwatch.action" method="POST">
+                <input type="hidden" name="atl_token" value="ba727468c41158b0f377373254edea7eacfaccf4">
+            <input type="hidden" name="pageId" value="5211342"/>
+            <input type="hidden" id="add-watcher-username" name="username" value=""/>
+            <label for="add-watcher-user">User</label>
+            <input id="add-watcher-user" name="userFullName" type="search" class="autocomplete-user"
+               value="" placeholder="Full name or username" autocomplete="off"
+               data-max="10" data-target="#add-watcher-username" data-dropdown-target="#add-watcher-dropdown"
+               data-template="{title}" data-none-message="No matching users found.">
+            <input id="add-watcher-submit" type="submit" name="add" value="Add">
+            <div id="add-watcher-dropdown" class="aui-dd-parent autocomplete"></div>
+            <div class="status hidden"></div>
+        </form>
+        <ul class="user-list">
+            <li class="loading">Loading&hellip;</li>
+            <li class="no-users hidden">No page watchers</li>
+        </ul>
+    </div>
+    <div class="column space-watchers">
+        <h3>Watching this space</h3>
+        <p class="description">These people are notified when any content in the space is changed. You cannot modify this list.</p>
+        <ul class="user-list">
+            <li class="loading">Loading&hellip;</li>
+            <li class="no-users hidden">No space watchers</li>
+        </ul>
+    </div>
+</div>
+</script>
+<script type="text/x-template" title="manage-watchers-user">
+    <li class="watch-user">
+        <img class="profile-picture confluence-userlink" src="{iconUrl}" data-username="{username}">
+        <a class="confluence-userlink" href="{url}" data-username="{username}">{fullName} <span class="username">({username})</span></a>
+        <span class="remove-watch" title="Remove"
+            data-username="{username}">Remove</span>
+    </li>
+</script>
+<script type="text/x-template" title="manage-watchers-help-link">
+    <div class="dialog-help-link">
+            <a href="http://docs.atlassian.com/confluence/docs-34/Managing+Watchers" target="_blank">Help</a>
+    </div>
+</script>
+    <br class="clear">
+</div>
+  
+    </div>
+</div>
+
+<div id="footer">
+                                                <p class="license license-opensource">
+                  Powered by a free <b>Atlassian Confluence Open Source Project License</b> granted to myGrid. <a href="http://www.atlassian.com/c/conf/11461">Evaluate Confluence today</a>.<br>
+                </p>
+                        
+    <ul id="poweredby">
+        <li class="noprint">Powered by <a href="http://www.atlassian.com/software/confluence" class="hover-footer-link">Atlassian Confluence</a> 3.4.6, the <a href="http://www.atlassian.com/software/confluence/tour/enterprise-wiki.jsp" class="hover-footer-link">Enterprise Wiki</a></li>
+        <li class="print-only">Printed by Atlassian Confluence 3.4.6, the Enterprise Wiki.</li>        
+        <li class="noprint"> &nbsp; |&nbsp; <a href="http://jira.atlassian.com/secure/BrowseProject.jspa?id=10470" class="hover-footer-link">Report a bug</a></li>
+        <li class="noprint"> &nbsp;|&nbsp; <a href="http://www.atlassian.com/about/connected.jsp?s_kwcid=Confluence-stayintouch" class="hover-footer-link">Atlassian News</a></li>
+    </ul>
+
+    
+
+            
+    </div></div>
+</body>
+</html>

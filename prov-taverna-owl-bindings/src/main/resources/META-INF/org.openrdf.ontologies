@@ -1,0 +1,13 @@
+META-INF/ontologies/taverna-prov.ttl
+META-INF/ontologies/scufl2
+META-INF/ontologies/wfdesc
+META-INF/ontologies/wfprov
+META-INF/ontologies/content
+META-INF/ontologies/prov
+META-INF/ontologies/terms_od
+META-INF/ontologies///purl.org/dc/terms
+META-INF/ontologies/rdf-schema
+META-INF/ontologies///xmlns.com/foaf/0.1
+META-INF/ontologies/dcam
+META-INF/ontologies/dcmitype
+META-INF/ontologies/skos-owl1-dl.rdf
