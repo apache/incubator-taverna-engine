@@ -325,7 +325,9 @@ public class W3ProvenanceExport {
 		
 		Agent tavernaAgent = createObject(Agent.class);
 		Activity storeProvenance = createObject(Activity.class);
-
+		
+		
+		
 		storeProvenance.getProvStartedAtTime().add(
 				datatypeFactory.newXMLGregorianCalendar(startedProvExportAt));
 		storeProvenance.getProvWasAssociatedWith().add(tavernaAgent);
@@ -459,7 +461,10 @@ public class W3ProvenanceExport {
 
 	}
 	private <T> T createObject(Class<T> type) throws RepositoryException {
-		return objCon.addDesignation(objFact.createObject(), type);
+		T obj = objCon.addDesignation(objFact.createObject(), type);
+		// A refresh to force set initialization
+		objCon.getObject(objCon.addObject(obj));
+		return obj;
 	}
 
 	protected XMLGregorianCalendar timestampToXmlGreg(
