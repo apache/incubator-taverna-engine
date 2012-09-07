@@ -8,11 +8,7 @@
 	</parent>
 	<artifactId>prov-taverna-owl-bindings</artifactId>
 	<name>Taverna PROV OWL bindings</name>
-	<properties>
-		<alibaba.version>2.0-rc4</alibaba.version>
-		<!--  Because of Raven this must match whatever Elmo/Alibaba depends on! :( -->
-		<sesame.version>2.6.6</sesame.version>		
-	</properties>
+	
 	<build>
 		<plugins>
 			<plugin>
