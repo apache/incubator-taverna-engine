@@ -85,12 +85,22 @@
 								<java classname="org.openrdf.elmo.codegen.OntologyConverter" fork="true" failonerror="true" maxmemory="128m">
 									<arg value="-b" />
 									<arg value="org.w3.prov=http://www.w3.org/ns/prov#" />									
+									<arg value="-b" />
+									<arg value="uk.org.taverna.ns.tavernaprov=http://ns.taverna.org.uk/2012/tavernaprov/" />	
 									<arg value="-p" />
 									<arg value="prov" />	
 									<arg value="-j" />
 									<arg value="target/prov-ontology.jar" />
 									<!-- <arg value="-p" /> <arg value="" /> -->
 									<arg value="src/main/resources/org/purl/wf4ever/provtaverna/prov-20120724.owl" />
+									<arg value="src/main/resources/org/purl/wf4ever/provtaverna/content.rdf" />
+									 <arg value="src/main/resources/org/purl/wf4ever/provtaverna/wfdesc.owl" />
+									<arg value="src/main/resources/org/purl/wf4ever/provtaverna/wfprov.owl" />
+									<arg value="src/main/resources/org/purl/wf4ever/provtaverna/taverna-prov.ttl" />
+									<!-- 
+									<arg value="src/main/resources/org/purl/wf4ever/provtaverna/foaf.rdf" />
+									 -->
+									
 									<classpath refid="maven.plugin.classpath" />
 									<classpath>
 										<pathelement path="." />
