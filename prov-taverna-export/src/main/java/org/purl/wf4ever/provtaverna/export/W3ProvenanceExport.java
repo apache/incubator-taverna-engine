@@ -240,12 +240,12 @@ public class W3ProvenanceExport {
 			throw new IllegalStateException("Could not make object repository", e);
 		}
 
-//		try {
-//			datatypeFactory = DatatypeFactory.newInstance();
-//		} catch (DatatypeConfigurationException e) {
-//			throw new IllegalStateException(
-//					"Can't find a DatatypeFactory implementation", e);
-//		}
+		try {
+			datatypeFactory = DatatypeFactory.newInstance();
+		} catch (DatatypeConfigurationException e) {
+			throw new IllegalStateException(
+					"Can't find a DatatypeFactory implementation", e);
+		}
 	}
 
 	private final class ProvenanceURIGenerator extends URIGenerator {
