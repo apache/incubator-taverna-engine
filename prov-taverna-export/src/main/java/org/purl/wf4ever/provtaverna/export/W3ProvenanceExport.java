@@ -317,7 +317,7 @@ public class W3ProvenanceExport {
 		// FIXME: Should this not be an Account instead?
 		
 
-		Bundle bundle = objFact.createObject(runURI + " bundle", Bundle.class);
+		Bundle bundle = objFact.createObject(runURI + "bundle", Bundle.class);
 		objCon.addObject(bundle);
 		
 
