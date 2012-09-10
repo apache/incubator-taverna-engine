@@ -1,0 +1,27 @@
+@base             <http://purl.org/NET/dc_owl2dl/dcam> .
+@prefix dc:       <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms:  <http://purl.org/dc/terms/> .
+@prefix dcmitype: <http://purl.org/dc/dcmitype/> .
+@prefix dcam:     <http://purl.org/dc/dcam/> .
+
+@prefix rdf:      <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:     <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:      <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:      <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos:     <http://www.w3.org/2004/02/skos/core#> .
+
+<> a owl:Ontology ;
+	rdfs:label "DCMI Abstract Model"@en ;
+	rdfs:comment "OWL 2 DL ontology for a few terms of the DCMI abstract model from the http://purl.org/dc/dcam/ namespace"@en ;
+	owl:imports <http://www.w3.org/TR/skos-reference/skos-owl1-dl.rdf> .
+
+dcam:memberOf a owl:ObjectProperty ;
+	rdfs:label "Member Of"@en-us ;
+	skos:definition "A relationship between a resource and a vocabulary encoding scheme which indicates that the resource is a member of a set."@en-us ;
+	rdfs:isDefinedBy <http://dublincore.org/documents/2007/06/04/abstract-model/> ;
+	rdfs:range dcam:VocabularyEncodingScheme . # Not formally in http://dublincore.org/documents/dcmi-terms/#H8 but explained in the definition.
+
+dcam:VocabularyEncodingScheme a owl:Class ;
+	rdfs:label "Vocabulary Encoding Scheme"@en-us ;
+	skos:definition "An enumerated set of resources."@en-us ;
+	rdfs:isDefinedBy <http://dublincore.org/documents/2007/06/04/abstract-model/> .

@@ -112,10 +112,10 @@ public class Saver {
 		} catch (Exception e) {
 			logger.error("Failed to save the provenance graph to "
 					+ provenanceFile, e);
-			JOptionPane.showMessageDialog(null,
-					"Failed to save the provenance graph to " + provenanceFile,
-					"Failed to save provenance graph",
-					JOptionPane.ERROR_MESSAGE);
+//			JOptionPane.showMessageDialog(null,
+//					"Failed to save the provenance graph to " + provenanceFile,
+//					"Failed to save provenance graph",
+//					JOptionPane.ERROR_MESSAGE);
 		} finally {
 			try {
 				outStream.close();
