@@ -103,7 +103,8 @@ public class W3ProvenanceExport {
 	public SesameManager makeElmoManager() {
 		ElmoModule module = new ElmoModule(getClass().getClassLoader());
 		SesameManagerFactory factory = new SesameManagerFactory(module);
-		factory.setInferencingEnabled(true);
+		// Avoid noisy prov:influenced and prov:generated
+		factory.setInferencingEnabled(false);
 		return factory.createElmoManager();
 	}
 
@@ -304,8 +305,8 @@ public class W3ProvenanceExport {
 
 		// Qualify it to add the plan
 		Association association = elmoManager.create(Association.class);
-		association.getProvAgent().add(tavernaAgent);
 		storeProvenance.getProvQualifiedAssociation().add(association);
+		association.getProvAgent().add(tavernaAgent);
 		association.getProvHadPlan().add(
 				elmoManager.create(
 						new QName("http://ns.taverna.org.uk/2011/software/",
@@ -324,9 +325,10 @@ public class W3ProvenanceExport {
 		Activity wfProcess = elmoManager.create(new QName(runURI),
 				Activity.class);
 		wfProcess.getProvWasAssociatedWith().add(tavernaAgent);
+		
 		association = elmoManager.create(Association.class);
-		association.getProvAgent().add(tavernaAgent);
 		wfProcess.getProvQualifiedAssociation().add(association);
+		association.getProvAgent().add(tavernaAgent);
 
 		String wfUri = uriGenerator.makeWorkflowURI(dataflowInvocation
 				.getWorkflowId());
@@ -384,8 +386,8 @@ public class W3ProvenanceExport {
 					provenanceProcessor.getWorkflowId());
 			// TODO: Also make the plan a Scufl2 Processor
 
-			process.getProvQualifiedAssociation().add(association);
 			association = elmoManager.create(Association.class);
+			process.getProvQualifiedAssociation().add(association);
 			association.getProvAgent().add(tavernaAgent);
 			plan = elmoManager.create(new QName(processorURI), Plan.class);
 			association.getProvHadPlan().add(plan);
