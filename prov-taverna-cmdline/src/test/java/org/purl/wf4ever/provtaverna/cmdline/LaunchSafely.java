@@ -1,5 +1,6 @@
 package org.purl.wf4ever.provtaverna.cmdline;
 
+import java.awt.GraphicsEnvironment;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
@@ -64,6 +65,7 @@ public class LaunchSafely {
 
 	public int launchSafely(String... args) throws Exception {
 		captureErrOut();
+		System.setProperty("java.awt.headless", "true");
 		// This AvoidExit magic would not have been needed if the Launchable
 		// return type had actually been used rather than calling System.exit
 		// manually

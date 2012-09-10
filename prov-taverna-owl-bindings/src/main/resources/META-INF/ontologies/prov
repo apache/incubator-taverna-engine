@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <title>PROV namespace</title>
+    <style type="text/css">
+    /*<![CDATA[*/
+    /*]]>*/
+    </style>
+    <link href="../../../StyleSheets/base.css" rel="stylesheet" type="text/css"/>
+  </head>
+
+  <body xml:lang="en" lang="en">
+    <div class="nav">
+    <p><a href="../../"><img src="../../Icons/w3c_home" alt="W3C" height="48" width="72" /></a></p>
+    </div>
+
+    <h1 id="title">PROV Namespace</h1>
+
+    <p>The namespace name <code>http://www.w3.org/ns/prov#</code> is intended for use with the set of PROV specifications. The terms defined within this namespace are identified in these specifications. 
+    <ul>
+      <li><a href="http://www.w3.org/TR/prov-dm/">The PROV Data Model</a></li>
+      <li><a href="http://www.w3.org/TR/prov-o/">The PROV Ontology</a></li>
+      <li><a href="http://www.w3.org/TR/prov-aq/">PROV-AQ: Provenance Access and Query</a></li>
+    </ul>
+
+<p><b>Warning</b>: Until the specification reaches W3C Candidate Recommendation
+ (CR) status, this namespace name may be reused by any update in such
+ a way as to cause documents written using the namespace to become
+ invalid or to change in meaning.
+</p>
+
+<p><em>This document is intended to comply with <a
+href="http://www.w3.org/1999/10/nsuri">W3C policy for XML namespace
+names</a>.</em></p>
+
+
+
+    <hr />
+    <address>
+
+  <a href="../..//People/Sandro/">Sandro Hawke</a>, W3C Team Contact for the <a href="../../2011/prov">Provenance Working Group</a> <tt>&lt;<a href="mailto:eric@w3.org">sandro@w3.org</a>&gt;</tt><br />
+  <a href="http://www.few.vu.nl/~pgroth/">Paul Groth</a>, co-chair, Provenance Working Group<br />
+  <small>$Revision: 1.1 $ of $Date: 2012/04/27 11:11:02 $</small>
+</address>
+  </body>
+</html>

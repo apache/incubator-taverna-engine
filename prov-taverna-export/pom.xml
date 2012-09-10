@@ -12,7 +12,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>prov-elmo</artifactId>
+			<artifactId>prov-taverna-owl-bindings</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
