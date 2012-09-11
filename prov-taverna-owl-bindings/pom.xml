@@ -96,14 +96,9 @@
 								</unzip>
 							</target>
 						</configuration>
-						<!-- Disabled because this fails with 2.0-rc4.
-						See src/main/java and src/main/resources instead, made using 2.0-rc5
-						on the command line. 2.0-rc5 is not available in Maven repository
-						as of 2012-09-07.
 						<goals>
 							<goal>run</goal>
 						</goals>
-						 -->
 					</execution>
 				</executions>
 				<dependencies>
