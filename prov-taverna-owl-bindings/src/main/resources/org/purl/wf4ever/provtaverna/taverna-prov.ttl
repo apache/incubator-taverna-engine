@@ -79,7 +79,7 @@ tavernaprov:content rdf:type owl:ObjectProperty ;
                     
                     rdfs:range tavernaprov:Content ;
                     
-                    rdfs:domain <http://purl.org/wf4ever/wfdesc#Artifact> .
+                    rdfs:domain <http://purl.org/wf4ever/wfprov#Artifact> .
 
 
 
@@ -255,9 +255,7 @@ tavernaprov:TavernaEngine rdf:type owl:Class ;
 
 
 
-###  http://purl.org/wf4ever/wfdesc#Artifact
-
-<http://purl.org/wf4ever/wfdesc#Artifact> rdfs:subClassOf prov:Entity .
+<http://purl.org/wf4ever/wfprov#Artifact> rdfs:subClassOf prov:Entity .
 
 
 
