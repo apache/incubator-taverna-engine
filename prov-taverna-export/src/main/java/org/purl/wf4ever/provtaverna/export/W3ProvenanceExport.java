@@ -62,7 +62,9 @@ import prov.Generation;
 import prov.Plan;
 import prov.Role;
 import prov.Usage;
+import tavernaprov.Content;
 import uk.org.taverna.scufl2.api.common.URITools;
+import wfprov.Artifact;
 
 public class W3ProvenanceExport {
 	
@@ -479,7 +481,7 @@ public class W3ProvenanceExport {
 		return xmlCal;
 	}
 
-	protected void storeFileReferences() {
+	protected void storeFileReferences() throws RepositoryException {
 
 		for (Entry<File, T2Reference> entry : getFileToT2Reference().entrySet()) {
 			File file = entry.getKey();
@@ -487,17 +489,17 @@ public class W3ProvenanceExport {
 			String dataURI = uriGenerator.makeT2ReferenceURI(t2Ref.toUri()
 					.toASCIIString());
 			// try {
+			
+			
+			
 			Entity entity = objFact.createObject(dataURI, Entity.class);
-			entity.getProvAlternateOf().add(
-					entity = objFact.createObject(file.toURI().toASCIIString(),
-							Entity.class));
-			// elmoManager.getConnection().add(new URIImpl(dataURI), SAMEAS,
-			// new URIImpl(file.toURI().toASCIIString()));
-			// } catch (RepositoryException e) {
-			// // FIXME: Fail properly
-			// throw new RuntimeException("Can't store reference for " + file,
-			// e);
-			// }
+			Content content = objFact.createObject(file.toURI().toASCIIString(), Content.class);
+			objCon.addDesignation(entity, Artifact.class).getTavernaprovContents().add(content);
+			
+//			entity.getProvAlternateOf().add(
+//					entity = objFact.createObject(file.toURI().toASCIIString(),
+//							Entity.class));
+			
 		}
 	}
 
