@@ -531,13 +531,6 @@ public class W3ProvenanceExport {
 			if (direction == Direction.INPUTS) {
 				activity.getProvUsed().add(entity);
 			} else {
-				if (!entity.getProvWasGeneratedBy().isEmpty()) {
-					// Double-output, alias the entity with a fresh one
-					// to avoid double-generation
-					Entity viewOfEntity = createObject(Entity.class);
-					viewOfEntity.getProvAlternateOf().add(entity);
-					entity = viewOfEntity;
-				}
 				entity.getProvWasGeneratedBy().add(activity);
 			}
 
