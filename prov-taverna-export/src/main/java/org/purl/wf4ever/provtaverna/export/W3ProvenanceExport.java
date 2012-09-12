@@ -50,6 +50,7 @@ import org.openrdf.repository.object.ObjectRepository;
 import org.openrdf.repository.object.config.ObjectRepositoryFactory;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFHandlerException;
+import org.openrdf.sail.inferencer.fc.ForwardChainingRDFSInferencer;
 import org.openrdf.sail.memory.MemoryStore;
 
 import prov.Activity;
@@ -117,13 +118,16 @@ public class W3ProvenanceExport {
 
 	protected void makeObjectRepository() throws OpenRDFException {
 		
-		Repository myRepository = new SailRepository(new MemoryStore());
+		Repository myRepository = new SailRepository(
+				// For RDFS reasoning
+				new ForwardChainingRDFSInferencer(
+						new MemoryStore()));		
 		myRepository.initialize();
 
 		
 		ObjectRepositoryFactory factory = new ObjectRepositoryFactory();
 		objRepo = factory.createRepository(myRepository);
-		
+		objRepo.setIncludeInferred(true);
 		objCon = objRepo.getConnection();
 		valFact = objCon.getValueFactory();
 		objFact = objCon.getObjectFactory();
@@ -496,9 +500,6 @@ public class W3ProvenanceExport {
 			Content content = objFact.createObject(file.toURI().toASCIIString(), Content.class);
 			objCon.addDesignation(entity, Artifact.class).getTavernaprovContents().add(content);
 			
-//			entity.getProvAlternateOf().add(
-//					entity = objFact.createObject(file.toURI().toASCIIString(),
-//							Entity.class));
 			
 		}
 	}
@@ -530,14 +531,7 @@ public class W3ProvenanceExport {
 
 			if (direction == Direction.INPUTS) {
 				activity.getProvUsed().add(entity);
-			} else {
-				if (!entity.getProvWasGeneratedBy().isEmpty()) {
-					// Double-output, alias the entity with a fresh one
-					// to avoid double-generation
-					Entity viewOfEntity = createObject(Entity.class);
-					viewOfEntity.getProvAlternateOf().add(entity);
-					entity = viewOfEntity;
-				}
+			} else {				
 				entity.getProvWasGeneratedBy().add(activity);
 			}
 
