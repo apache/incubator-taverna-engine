@@ -71,13 +71,13 @@ import wfprov.Artifact;
 import wfprov.WorkflowRun;
 
 public class W3ProvenanceExport {
-	
+
 	private URITools uriTools = new URITools();
 
 	private static Logger logger = Logger.getLogger(W3ProvenanceExport.class);
 
 	protected Map<T2Reference, File> seenReferences = new HashMap<T2Reference, File>();
-	
+
 	private static final int NANOSCALE = 9;
 
 	private static final URIImpl SAMEAS = new URIImpl(
@@ -120,14 +120,12 @@ public class W3ProvenanceExport {
 	}
 
 	protected void makeObjectRepository() throws OpenRDFException {
-		
+
 		Repository myRepository = new SailRepository(
-				// For RDFS reasoning
-				new ForwardChainingRDFSInferencer(
-						new MemoryStore()));		
+		// For RDFS reasoning
+				new ForwardChainingRDFSInferencer(new MemoryStore()));
 		myRepository.initialize();
 
-		
 		ObjectRepositoryFactory factory = new ObjectRepositoryFactory();
 		objRepo = factory.createRepository(myRepository);
 		objRepo.setIncludeInferred(true);
@@ -246,7 +244,8 @@ public class W3ProvenanceExport {
 		try {
 			makeObjectRepository();
 		} catch (OpenRDFException e) {
-			throw new IllegalStateException("Could not make object repository", e);
+			throw new IllegalStateException("Could not make object repository",
+					e);
 		}
 
 		try {
@@ -317,25 +316,23 @@ public class W3ProvenanceExport {
 
 		// TODO: Make this thread safe using contexts?
 		objCon.clear();
-		
-		GregorianCalendar startedProvExportAt = new GregorianCalendar();
 
+		GregorianCalendar startedProvExportAt = new GregorianCalendar();
 
 		String runURI = uriGenerator.makeWFInstanceURI(getWorkflowRunId());
 		// FIXME: Should this be "" to indicate the current file?
 		// FIXME: Should this not be an Account instead?
-		
 
 		Bundle bundle = objFact.createObject(runURI + "bundle", Bundle.class);
 		objCon.addObject(bundle);
-		
 
-		// Mini-provenance about this provenance trace. Unkown URI for agent/activity
-		
+		// Mini-provenance about this provenance trace. Unkown URI for
+		// agent/activity
+
 		Agent tavernaAgent = createObject(TavernaEngine.class);
 		Activity storeProvenance = createObject(Activity.class);
 		label(storeProvenance, "taverna-prov export of workflow run provenance");
-		
+
 		storeProvenance.getProvStartedAtTime().add(
 				datatypeFactory.newXMLGregorianCalendar(startedProvExportAt));
 		storeProvenance.getProvWasAssociatedWith().add(tavernaAgent);
@@ -348,28 +345,24 @@ public class W3ProvenanceExport {
 		association.getProvAgents_1().add(tavernaAgent);
 		storeProvenance.getProvQualifiedAssociations().add(association);
 		association.getProvHadPlans().add(
-			objFact.createObject("http://ns.taverna.org.uk/2011/software/" + versionName, Plan.class));
+				objFact.createObject("http://ns.taverna.org.uk/2011/software/"
+						+ versionName, Plan.class));
 
 		bundle.getProvWasGeneratedBy().add(storeProvenance);
 		// The store-provenance-process used the workflow run as input
-		Activity wfProcess = objFact.createObject(runURI,
-				Activity.class);
+		Activity wfProcess = objFact.createObject(runURI, Activity.class);
 
 		DataflowInvocation dataflowInvocation = provenanceAccess
 				.getDataflowInvocation(getWorkflowRunId());
-		String workflowName = provenanceAccess.getWorkflowNameByWorkflowID(dataflowInvocation
-				.getWorkflowId());
+		String workflowName = provenanceAccess
+				.getWorkflowNameByWorkflowID(dataflowInvocation.getWorkflowId());
 		label(wfProcess, "Workflow run of " + workflowName);
-		
-		storeProvenance.getProvWasInformedBy().add(
-				wfProcess);
+
+		storeProvenance.getProvWasInformedBy().add(wfProcess);
 		objCon.addDesignation(wfProcess, WorkflowRun.class);
-		
-		
+
 		storeProvenance.getProvWasInformedBy().add(wfProcess);
 
-		
-			
 		wfProcess.getProvWasAssociatedWith().add(tavernaAgent);
 		association = createObject(Association.class);
 		association.getProvAgents_1().add(tavernaAgent);
@@ -386,16 +379,12 @@ public class W3ProvenanceExport {
 		wfProcess.getProvEndedAtTime().add(
 				timestampToXmlGreg(dataflowInvocation.getInvocationEnded()));
 
-		
-
 		// Workflow inputs and outputs
 		storeEntitities(dataflowInvocation.getInputsDataBindingId(), wfProcess,
-				Direction.INPUTS,  
-						getIntermediatesDirectory());
+				Direction.INPUTS, getIntermediatesDirectory());
 		// FIXME: These entities come out as "generated" by multiple processes
 		storeEntitities(dataflowInvocation.getOutputsDataBindingId(),
-				wfProcess, Direction.OUTPUTS,  
-						getIntermediatesDirectory());
+				wfProcess, Direction.OUTPUTS, getIntermediatesDirectory());
 		// elmoManager.persist(wfProcess);
 		List<ProcessorEnactment> processorEnactments = provenanceAccess
 				.getProcessorEnactments(getWorkflowRunId());
@@ -413,11 +402,10 @@ public class W3ProvenanceExport {
 
 			String processURI = uriGenerator.makeProcessExecution(
 					pe.getWorkflowRunId(), pe.getProcessEnactmentId());
-			Activity process = objFact.createObject(processURI,
+			Activity process = objFact.createObject(processURI, Activity.class);
+
+			Activity parentProcess = objFact.createObject(parentURI,
 					Activity.class);
-			
-			Activity parentProcess = objFact.createObject(
-					parentURI, Activity.class);
 			process.getProvWasInformedBy().add(parentProcess);
 			process.getProvStartedAtTime().add(
 					timestampToXmlGreg(pe.getEnactmentStarted()));
@@ -430,15 +418,19 @@ public class W3ProvenanceExport {
 			String processorURI = uriGenerator.makeProcessorURI(
 					provenanceProcessor.getProcessorName(),
 					provenanceProcessor.getWorkflowId());
-			
-			label(process, "Processor execution " + provenanceProcessor.getProcessorName() + " (" + pe.getProcessIdentifier() + ")");
+
+			label(process,
+					"Processor execution "
+							+ provenanceProcessor.getProcessorName() + " ("
+							+ pe.getProcessIdentifier() + ")");
 			// TODO: Also make the plan a Scufl2 Processor
 
-			association =  createObject(Association.class);
+			association = createObject(Association.class);
 			process.getProvQualifiedAssociations().add(association);
 			association.getProvAgents_1().add(tavernaAgent);
 			plan = objFact.createObject(processorURI, Plan.class);
-			label(plan, "Processor " + provenanceProcessor.getProcessorName() + "");
+			label(plan, "Processor " + provenanceProcessor.getProcessorName()
+					+ "");
 			association.getProvHadPlans().add(plan);
 
 			// TODO: How to link together iterations on a single processor and
@@ -460,34 +452,39 @@ public class W3ProvenanceExport {
 		}
 
 		storeFileReferences();
-		
+
 		GregorianCalendar endedProvExportAt = new GregorianCalendar();
 		storeProvenance.getProvEndedAtTime().add(
 				datatypeFactory.newXMLGregorianCalendar(endedProvExportAt));
 
 		// Save the whole thing
 		ContextAwareConnection connection = objCon;
-		// Taken from @prefix in prov-taverna-owl-bindings/src/test/resources/handmade.ttl
+		// Taken from @prefix in
+		// prov-taverna-owl-bindings/src/test/resources/handmade.ttl
 		connection.setNamespace("owl", "http://www.w3.org/2002/07/owl#");
 		connection.setNamespace("xsd", "http://www.w3.org/2001/XMLSchema#");
-		connection.setNamespace("rdfs", "http://www.w3.org/2000/01/rdf-schema#");
+		connection
+				.setNamespace("rdfs", "http://www.w3.org/2000/01/rdf-schema#");
 		connection.setNamespace("prov", "http://www.w3.org/ns/prov#");
 		connection.setNamespace("wfprov", "http://purl.org/wf4ever/wfprov#");
 		connection.setNamespace("wfdesc", "http://purl.org/wf4ever/wfdesc#");
-		connection.setNamespace("tavernaprov", "http://purl.org/wf4ever/wfdesc#");
+		connection.setNamespace("tavernaprov",
+				"http://purl.org/wf4ever/wfdesc#");
 		connection.setNamespace("doap", "http://usefulinc.com/ns/doap#");
 		connection.setNamespace("cnt", "http://www.w3.org/2011/content#");
 		connection.setNamespace("dcterms", "http://purl.org/dc/terms/");
-		connection.setNamespace("scufl2", "http://ns.taverna.org.uk/2010/scufl2#");
-		
+		connection.setNamespace("scufl2",
+				"http://ns.taverna.org.uk/2010/scufl2#");
+
 		// connection.export(new OrganizedRDFWriter(new
 		// RDFXMLPrettyWriter(outStream)));
 		// connection.export(new OrganizedRDFWriter(new
 		// RDFXMLPrettyWriter(outStream)));
-		connection.export(new TurtleWriterWithBase(
-				outStream, getBaseFolder().toURI()));
+		connection.export(new TurtleWriterWithBase(outStream, getBaseFolder()
+				.toURI()));
 
 	}
+
 	protected void label(Object obj, String label) throws RepositoryException {
 		Resource resource = objCon.addDesignation(obj, Resource.class);
 		resource.getRdfsLabels().add(label);
@@ -519,17 +516,19 @@ public class W3ProvenanceExport {
 			T2Reference t2Ref = entry.getValue();
 			String dataURI = uriGenerator.makeT2ReferenceURI(t2Ref.toUri()
 					.toASCIIString());
-			
+
 			Entity entity = objFact.createObject(dataURI, Entity.class);
-			Content content = objFact.createObject(file.toURI().toASCIIString(), Content.class);
-			objCon.addDesignation(entity, Artifact.class).getTavernaprovContents().add(content);
-			
-			
+			Content content = objFact.createObject(
+					file.toURI().toASCIIString(), Content.class);
+			objCon.addDesignation(entity, Artifact.class)
+					.getTavernaprovContents().add(content);
+
 		}
 	}
 
 	protected void storeEntitities(String dataBindingId, Activity activity,
-			Direction direction, File path) throws IOException, RepositoryException {
+			Direction direction, File path) throws IOException,
+			RepositoryException {
 
 		Map<Port, T2Reference> bindings = provenanceAccess
 				.getDataBindings(dataBindingId);
@@ -543,19 +542,18 @@ public class W3ProvenanceExport {
 
 			Entity entity = objFact.createObject(dataURI, Entity.class);
 
-			if (! seenReference(t2Ref)) {
+			if (!seenReference(t2Ref)) {
 				saveReference(t2Ref);
 			}
-				
-			
+
 			String id = t2Ref.getLocalPart();
 			String prefix = id.substring(0, 2);
-			
+
 			File prefixDir = new File(path, prefix);
 
 			if (direction == Direction.INPUTS) {
 				activity.getProvUsed().add(entity);
-			} else {				
+			} else {
 				entity.getProvWasGeneratedBy().add(activity);
 			}
 
@@ -594,7 +592,7 @@ public class W3ProvenanceExport {
 								+ (port.isInputPort() ? " input " : " output ")
 								+ port.getPortName());
 			}
-			
+
 			involvement.getProvHadRoles().add(portRole);
 
 			// elmoManager.persist(entity);
@@ -602,7 +600,6 @@ public class W3ProvenanceExport {
 
 	}
 
-	
 	private boolean seenReference(T2Reference t2Ref) {
 		return seenReferences.containsKey(t2Ref);
 	}
@@ -613,55 +610,59 @@ public class W3ProvenanceExport {
 		if (f != null) {
 			return f;
 		}
-		
-		
-		
+
 		File file = referencePath(t2Ref);
 		File parent = file.getParentFile();
 		parent.mkdirs();
 		if (t2Ref.getReferenceType() == T2ReferenceType.IdentifiedList) {
-			// Write a kind of text/uri-list (but with relative URIs)			
-			IdentifiedList<T2Reference> list = saver.getReferenceService().getListService().getList(t2Ref);
+			// Write a kind of text/uri-list (but with relative URIs)
+			IdentifiedList<T2Reference> list = saver.getReferenceService()
+					.getListService().getList(t2Ref);
 			file = new File(file.getParentFile(), file.getName() + ".list");
-			FileWriterWithEncoding writer = new FileWriterWithEncoding(file, "utf-8");			
+			FileWriterWithEncoding writer = new FileWriterWithEncoding(file,
+					"utf-8");
 			for (T2Reference ref : list) {
 				File refFile = saveReference(ref).getAbsoluteFile();
-				URI relRef = uriTools.relativePath(parent.getAbsoluteFile().toURI(), refFile.getAbsoluteFile().toURI());
-				writer.append(relRef.toASCIIString() + "\n");	
+				URI relRef = uriTools.relativePath(parent.getAbsoluteFile()
+						.toURI(), refFile.getAbsoluteFile().toURI());
+				writer.append(relRef.toASCIIString() + "\n");
 			}
 			writer.close();
 		} else {
-			
+
 			String extension = "";
 			if (t2Ref.getReferenceType() == T2ReferenceType.ErrorDocument) {
 				extension = ".err";
 			}
-			
+
 			// Capture filename with extension
-			file = saver.writeDataObject(parent, file.getName(), t2Ref, extension);
+			file = saver.writeDataObject(parent, file.getName(), t2Ref,
+					extension);
 			// FIXME: The above will save the same reference every time!
 		}
-		seenReference(t2Ref, file);		
-		return file;		
+		seenReference(t2Ref, file);
+		return file;
 	}
 
-	private File referencePath(T2Reference t2Ref) {				
+	private File referencePath(T2Reference t2Ref) {
 		String local = t2Ref.getLocalPart();
 		try {
 			local = UUID.fromString(local).toString();
 		} catch (IllegalArgumentException ex) {
 			// Fallback - use full namespace/localpart
-			return new File(new File(getIntermediatesDirectory(), t2Ref.getNamespacePart()), t2Ref.getLocalPart());
+			return new File(new File(getIntermediatesDirectory(),
+					t2Ref.getNamespacePart()), t2Ref.getLocalPart());
 		}
-		return new File(new File(getIntermediatesDirectory(), local.substring(0, 2)), local);
+		return new File(new File(getIntermediatesDirectory(), local.substring(
+				0, 2)), local);
 	}
 
 	private boolean seenReference(T2Reference t2Ref, File file) {
 		getFileToT2Reference().put(file, t2Ref);
-		if (seenReference(t2Ref)) { 
+		if (seenReference(t2Ref)) {
 			return true;
 		}
-		return seenReferences.put(t2Ref, file) != null;		
+		return seenReferences.put(t2Ref, file) != null;
 	}
 
 	public ProvenanceAccess getProvenanceAccess() {
@@ -682,9 +683,9 @@ public class W3ProvenanceExport {
 
 	public void setFileToT2Reference(Map<File, T2Reference> fileToT2Reference) {
 		this.fileToT2Reference = new HashMap<File, T2Reference>();
-		for (Entry<File, T2Reference> entry : fileToT2Reference.entrySet()) { 
+		for (Entry<File, T2Reference> entry : fileToT2Reference.entrySet()) {
 			seenReference(entry.getValue(), entry.getKey());
-		}	
+		}
 	}
 
 	public void setBaseFolder(File baseFolder) {
