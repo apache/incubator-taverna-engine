@@ -467,10 +467,19 @@ public class W3ProvenanceExport {
 
 		// Save the whole thing
 		ContextAwareConnection connection = objCon;
-		connection.setNamespace("scufl2",
-				"http://ns.taverna.org.uk/2010/scufl2#");
-		connection.setNamespace("prov", "http://www.w3.org/ns/prov#");
+		// Taken from @prefix in prov-taverna-owl-bindings/src/test/resources/handmade.ttl
 		connection.setNamespace("owl", "http://www.w3.org/2002/07/owl#");
+		connection.setNamespace("xsd", "http://www.w3.org/2001/XMLSchema#");
+		connection.setNamespace("rdfs", "http://www.w3.org/2000/01/rdf-schema#");
+		connection.setNamespace("prov", "http://www.w3.org/ns/prov#");
+		connection.setNamespace("wfprov", "http://purl.org/wf4ever/wfprov#");
+		connection.setNamespace("wfdesc", "http://purl.org/wf4ever/wfdesc#");
+		connection.setNamespace("tavernaprov", "http://purl.org/wf4ever/wfdesc#");
+		connection.setNamespace("doap", "http://usefulinc.com/ns/doap#");
+		connection.setNamespace("cnt", "http://www.w3.org/2011/content#");
+		connection.setNamespace("dcterms", "http://purl.org/dc/terms/");
+		connection.setNamespace("scufl2", "http://ns.taverna.org.uk/2010/scufl2#");
+		
 		// connection.export(new OrganizedRDFWriter(new
 		// RDFXMLPrettyWriter(outStream)));
 		// connection.export(new OrganizedRDFWriter(new
@@ -510,9 +519,6 @@ public class W3ProvenanceExport {
 			T2Reference t2Ref = entry.getValue();
 			String dataURI = uriGenerator.makeT2ReferenceURI(t2Ref.toUri()
 					.toASCIIString());
-			// try {
-			
-			
 			
 			Entity entity = objFact.createObject(dataURI, Entity.class);
 			Content content = objFact.createObject(file.toURI().toASCIIString(), Content.class);
