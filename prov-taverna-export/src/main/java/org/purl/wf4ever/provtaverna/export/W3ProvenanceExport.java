@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.net.URI;
 import java.sql.Timestamp;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -21,7 +22,6 @@ import java.util.UUID;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
-import javax.xml.namespace.QName;
 
 import net.sf.taverna.raven.appconfig.ApplicationConfig;
 import net.sf.taverna.t2.provenance.api.ProvenanceAccess;
@@ -30,15 +30,15 @@ import net.sf.taverna.t2.provenance.lineageservice.utils.DataflowInvocation;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Port;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProcessorEnactment;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
+import net.sf.taverna.t2.reference.ErrorDocument;
 import net.sf.taverna.t2.reference.IdentifiedList;
+import net.sf.taverna.t2.reference.StackTraceElementBean;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.reference.T2ReferenceType;
 
 import org.apache.commons.io.output.FileWriterWithEncoding;
 import org.apache.log4j.Logger;
 import org.openrdf.OpenRDFException;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.URIImpl;
 import org.openrdf.query.parser.QueryParserRegistry;
 import org.openrdf.query.parser.sparql.SPARQLParserFactory;
 import org.openrdf.repository.Repository;
@@ -58,6 +58,7 @@ import prov.Agent;
 import prov.Association;
 import prov.AssociationOrEndOrGenerationOrInvalidationOrStartOrUsage;
 import prov.Bundle;
+import prov.Collection;
 import prov.Entity;
 import prov.Generation;
 import prov.Plan;
@@ -66,6 +67,7 @@ import prov.Usage;
 import rdfs.Resource;
 import tavernaprov.Content;
 import tavernaprov.TavernaEngine;
+import tavernaprov.Error;
 import uk.org.taverna.scufl2.api.common.URITools;
 import wfprov.Artifact;
 import wfprov.WorkflowRun;
@@ -79,9 +81,6 @@ public class W3ProvenanceExport {
 	protected Map<T2Reference, File> seenReferences = new HashMap<T2Reference, File>();
 
 	private static final int NANOSCALE = 9;
-
-	private static final URIImpl SAMEAS = new URIImpl(
-			"http://www.w3.org/2002/07/owl#sameAs");
 
 	private ProvenanceAccess provenanceAccess;
 
@@ -103,9 +102,9 @@ public class W3ProvenanceExport {
 
 	private ObjectConnection objCon;
 
-	private ValueFactory valFact;
-
 	private ObjectFactory objFact;
+
+	private Map<String, Entity> describedEntities = new HashMap<String, Entity>();
 
 	public File getIntermediatesDirectory() {
 		return intermediatesDirectory;
@@ -130,7 +129,6 @@ public class W3ProvenanceExport {
 		objRepo = factory.createRepository(myRepository);
 		objRepo.setIncludeInferred(true);
 		objCon = objRepo.getConnection();
-		valFact = objCon.getValueFactory();
 		objFact = objCon.getObjectFactory();
 	}
 
@@ -385,7 +383,6 @@ public class W3ProvenanceExport {
 		// FIXME: These entities come out as "generated" by multiple processes
 		storeEntitities(dataflowInvocation.getOutputsDataBindingId(),
 				wfProcess, Direction.OUTPUTS, getIntermediatesDirectory());
-		// elmoManager.persist(wfProcess);
 		List<ProcessorEnactment> processorEnactments = provenanceAccess
 				.getProcessorEnactments(getWorkflowRunId());
 		// This will also include processor enactments in nested workflows
@@ -403,7 +400,6 @@ public class W3ProvenanceExport {
 			String processURI = uriGenerator.makeProcessExecution(
 					pe.getWorkflowRunId(), pe.getProcessEnactmentId());
 			Activity process = objFact.createObject(processURI, Activity.class);
-
 			Activity parentProcess = objFact.createObject(parentURI,
 					Activity.class);
 			process.getProvWasInformedBy().add(parentProcess);
@@ -447,8 +443,6 @@ public class W3ProvenanceExport {
 					Direction.INPUTS, path);
 			storeEntitities(pe.getFinalOutputsDataBindingId(), process,
 					Direction.OUTPUTS, path);
-
-			// elmoManager.persist(process);
 		}
 
 		storeFileReferences();
@@ -475,14 +469,8 @@ public class W3ProvenanceExport {
 		connection.setNamespace("dcterms", "http://purl.org/dc/terms/");
 		connection.setNamespace("scufl2",
 				"http://ns.taverna.org.uk/2010/scufl2#");
-
-		// connection.export(new OrganizedRDFWriter(new
-		// RDFXMLPrettyWriter(outStream)));
-		// connection.export(new OrganizedRDFWriter(new
-		// RDFXMLPrettyWriter(outStream)));
 		connection.export(new TurtleWriterWithBase(outStream, getBaseFolder()
 				.toURI()));
-
 	}
 
 	protected void label(Object obj, String label) throws RepositoryException {
@@ -522,7 +510,6 @@ public class W3ProvenanceExport {
 					file.toURI().toASCIIString(), Content.class);
 			objCon.addDesignation(entity, Artifact.class)
 					.getTavernaprovContents().add(content);
-
 		}
 	}
 
@@ -537,19 +524,13 @@ public class W3ProvenanceExport {
 			Port port = binding.getKey();
 			T2Reference t2Ref = binding.getValue();
 
-			String dataURI = uriGenerator.makeT2ReferenceURI(t2Ref.toUri()
-					.toASCIIString());
-
-			Entity entity = objFact.createObject(dataURI, Entity.class);
-
+			Entity entity = describeEntity(t2Ref);
 			if (!seenReference(t2Ref)) {
 				saveReference(t2Ref);
 			}
 
 			String id = t2Ref.getLocalPart();
 			String prefix = id.substring(0, 2);
-
-			File prefixDir = new File(path, prefix);
 
 			if (direction == Direction.INPUTS) {
 				activity.getProvUsed().add(entity);
@@ -595,16 +576,55 @@ public class W3ProvenanceExport {
 
 			involvement.getProvHadRoles().add(portRole);
 
-			// elmoManager.persist(entity);
 		}
 
+	}
+
+	protected Entity describeEntity(T2Reference t2Ref)
+			throws RepositoryException, IOException {
+		String dataURI = uriGenerator.makeT2ReferenceURI(t2Ref.toUri()
+				.toASCIIString());
+
+		Entity entity = describedEntities.get(dataURI);
+		if (entity != null) {
+			return entity;
+		}
+		entity = objFact.createObject(dataURI, Entity.class);
+		describedEntities.put(dataURI, entity);
+
+		if (t2Ref.getReferenceType() == T2ReferenceType.ErrorDocument) {
+			tavernaprov.Error error = objFact.createObject(dataURI,
+					tavernaprov.Error.class);
+
+			ErrorDocument errorDoc = saver.getReferenceService()
+					.getErrorDocumentService().getError(t2Ref);
+			addMessageIfNonEmpty(error, errorDoc.getMessage());
+			// getExceptionMEssage added by addStackTrace
+			addStackTrace(error, errorDoc);
+		} else if (t2Ref.getReferenceType() == T2ReferenceType.IdentifiedList) {
+			IdentifiedList<T2Reference> list = saver.getReferenceService()
+					.getListService().getList(t2Ref);
+			Collection coll = objFact.createObject(dataURI, Collection.class);
+
+			for (T2Reference ref : list) {
+				String itemURI = uriGenerator.makeT2ReferenceURI(ref.toUri()
+						.toASCIIString());
+				coll.getProvHadMembers().add(
+						objFact.createObject(itemURI, Entity.class));
+				describeEntity(ref);
+				// TODO: Record list position as well!
+			}
+		}
+
+		return entity;
 	}
 
 	private boolean seenReference(T2Reference t2Ref) {
 		return seenReferences.containsKey(t2Ref);
 	}
 
-	private File saveReference(T2Reference t2Ref) throws IOException {
+	private File saveReference(T2Reference t2Ref) throws IOException,
+			RepositoryException {
 		// Avoid double-saving
 		File f = seenReferences.get(t2Ref);
 		if (f != null) {
@@ -627,6 +647,7 @@ public class W3ProvenanceExport {
 						.toURI(), refFile.getAbsoluteFile().toURI());
 				writer.append(relRef.toASCIIString() + "\n");
 			}
+
 			writer.close();
 		} else {
 
@@ -642,6 +663,60 @@ public class W3ProvenanceExport {
 		}
 		seenReference(t2Ref, file);
 		return file;
+	}
+
+	protected void addStackTrace(Error error, ErrorDocument errorDoc)
+			throws RepositoryException, IOException {
+		StringBuffer sb = new StringBuffer();
+		addStackTrace(sb, errorDoc);
+		if (sb.length() > 0) {
+			error.getTavernaprovStackTrace().add(sb.toString());
+		}
+
+		for (T2Reference errRef : errorDoc.getErrorReferences()) {
+			String errorURI = uriGenerator.makeT2ReferenceURI(errRef.toUri()
+					.toASCIIString());
+			tavernaprov.Error nested = objFact.createObject(errorURI,
+					tavernaprov.Error.class);
+			Entity errEntity = objCon.addDesignation(error, Entity.class);
+			errEntity.getProvWasDerivedFrom().add(
+					objCon.addDesignation(nested, Entity.class));
+			describeEntity(errRef);
+		}
+	}
+
+	protected void addStackTrace(StringBuffer sb, ErrorDocument errorDoc) {
+		if (errorDoc.getExceptionMessage() != null
+				&& !errorDoc.getExceptionMessage().isEmpty()) {
+			sb.append(errorDoc.getExceptionMessage());
+			sb.append("\n");
+		}
+		if (errorDoc.getStackTraceStrings() == null) {
+			return;
+		}
+		if (sb.length() == 0) {
+			sb.append("Stack trace:\n");
+		}
+		// Attempt to recreate Java stacktrace style
+		for (StackTraceElementBean trace : errorDoc.getStackTraceStrings()) {
+			sb.append("        at ");
+			sb.append(trace.getClassName());
+			sb.append(".");
+			sb.append(trace.getMethodName());
+			sb.append("(");
+			sb.append(trace.getFileName());
+			sb.append(":");
+			sb.append(trace.getLineNumber());
+			sb.append(")");
+			sb.append("\n");
+		}
+	}
+
+	protected void addMessageIfNonEmpty(Error error, String message) {
+		if (message == null || message.isEmpty()) {
+			return;
+		}
+		error.getTavernaprovErrorMessage().add(message);
 	}
 
 	private File referencePath(T2Reference t2Ref) {
