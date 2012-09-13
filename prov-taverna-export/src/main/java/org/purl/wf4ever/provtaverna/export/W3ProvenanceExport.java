@@ -542,7 +542,7 @@ public class W3ProvenanceExport {
 			throws RepositoryException, IOException {
 		String dataURI = uriGenerator.makeT2ReferenceURI(t2Ref.toUri()
 				.toASCIIString());
-		
+
 		Entity entity = describedEntities.get(dataURI);
 		if (entity != null) {
 			return entity;
@@ -550,7 +550,6 @@ public class W3ProvenanceExport {
 		entity = objFact.createObject(dataURI, Entity.class);
 		describedEntities.put(dataURI, entity);
 
-		
 		if (t2Ref.getReferenceType() == T2ReferenceType.ErrorDocument) {
 			tavernaprov.Error error = objFact.createObject(dataURI,
 					tavernaprov.Error.class);
@@ -574,7 +573,7 @@ public class W3ProvenanceExport {
 				// TODO: Record list position as well!
 			}
 		}
-		
+
 		return entity;
 	}
 
