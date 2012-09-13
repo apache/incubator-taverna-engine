@@ -63,9 +63,12 @@ import prov.Generation;
 import prov.Plan;
 import prov.Role;
 import prov.Usage;
+import rdfs.Resource;
 import tavernaprov.Content;
+import tavernaprov.TavernaEngine;
 import uk.org.taverna.scufl2.api.common.URITools;
 import wfprov.Artifact;
+import wfprov.WorkflowRun;
 
 public class W3ProvenanceExport {
 	
@@ -329,10 +332,9 @@ public class W3ProvenanceExport {
 
 		// Mini-provenance about this provenance trace. Unkown URI for agent/activity
 		
-		Agent tavernaAgent = createObject(Agent.class);
+		Agent tavernaAgent = createObject(TavernaEngine.class);
 		Activity storeProvenance = createObject(Activity.class);
-		
-		
+		label(storeProvenance, "taverna-prov export of workflow run provenance");
 		
 		storeProvenance.getProvStartedAtTime().add(
 				datatypeFactory.newXMLGregorianCalendar(startedProvExportAt));
@@ -350,15 +352,22 @@ public class W3ProvenanceExport {
 
 		bundle.getProvWasGeneratedBy().add(storeProvenance);
 		// The store-provenance-process used the workflow run as input
-		storeProvenance.getProvWasInformedBy().add(
-				objFact.createObject(runURI, Activity.class));
 		Activity wfProcess = objFact.createObject(runURI,
 				Activity.class);
-		
-		storeProvenance.getProvWasInformedBy().add(wfProcess);
 
 		DataflowInvocation dataflowInvocation = provenanceAccess
 				.getDataflowInvocation(getWorkflowRunId());
+		String workflowName = provenanceAccess.getWorkflowNameByWorkflowID(dataflowInvocation
+				.getWorkflowId());
+		label(wfProcess, "Workflow run of " + workflowName);
+		
+		storeProvenance.getProvWasInformedBy().add(
+				wfProcess);
+		objCon.addDesignation(wfProcess, WorkflowRun.class);
+		
+		
+		storeProvenance.getProvWasInformedBy().add(wfProcess);
+
 		
 			
 		wfProcess.getProvWasAssociatedWith().add(tavernaAgent);
@@ -406,6 +415,7 @@ public class W3ProvenanceExport {
 					pe.getWorkflowRunId(), pe.getProcessEnactmentId());
 			Activity process = objFact.createObject(processURI,
 					Activity.class);
+			
 			Activity parentProcess = objFact.createObject(
 					parentURI, Activity.class);
 			process.getProvWasInformedBy().add(parentProcess);
@@ -420,12 +430,15 @@ public class W3ProvenanceExport {
 			String processorURI = uriGenerator.makeProcessorURI(
 					provenanceProcessor.getProcessorName(),
 					provenanceProcessor.getWorkflowId());
+			
+			label(process, "Processor execution " + provenanceProcessor.getProcessorName() + " (" + pe.getProcessIdentifier() + ")");
 			// TODO: Also make the plan a Scufl2 Processor
 
 			association =  createObject(Association.class);
 			process.getProvQualifiedAssociations().add(association);
 			association.getProvAgents_1().add(tavernaAgent);
 			plan = objFact.createObject(processorURI, Plan.class);
+			label(plan, "Processor " + provenanceProcessor.getProcessorName() + "");
 			association.getProvHadPlans().add(plan);
 
 			// TODO: How to link together iterations on a single processor and
@@ -466,6 +479,11 @@ public class W3ProvenanceExport {
 				outStream, getBaseFolder().toURI()));
 
 	}
+	protected void label(Object obj, String label) throws RepositoryException {
+		Resource resource = objCon.addDesignation(obj, Resource.class);
+		resource.getRdfsLabels().add(label);
+	}
+
 	private <T> T createObject(Class<T> type) throws RepositoryException {
 		T obj = objCon.addDesignation(objFact.createObject(), type);
 		// A refresh to force set initialization
@@ -548,17 +566,29 @@ public class W3ProvenanceExport {
 				generation.getProvActivities_1().add(activity);
 			}
 
-			String processerName = null;
+			String processorName = null;
 			if (port.getProcessorId() != null) {
 				// Not a workflow port
 				ProvenanceProcessor p = provenanceAccess
 						.getProvenanceProcessor(port.getProcessorId());
-				processerName = p.getProcessorName();
+				processorName = p.getProcessorName();
 			}
 			port.getProcessorId();
 			String portURI = uriGenerator.makePortURI(port.getWorkflowId(),
-					processerName, port.getPortName(), port.isInputPort());
+					processorName, port.getPortName(), port.isInputPort());
 			Role portRole = objFact.createObject(portURI, Role.class);
+			if (processorName == null) {
+				label(portRole,
+						"Workflow "
+								+ (port.isInputPort() ? " input " : " output ")
+								+ port.getPortName());
+			} else {
+				label(portRole,
+						processorName
+								+ (port.isInputPort() ? " input " : " output ")
+								+ port.getPortName());
+			}
+			
 			involvement.getProvHadRoles().add(portRole);
 
 			// elmoManager.persist(entity);

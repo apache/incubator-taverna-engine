@@ -8,6 +8,8 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix scufl2: <http://ns.taverna.org.uk/2010/scufl2#> .
 @prefix tavernaprov: <http://ns.taverna.org.uk/2012/tavernaprov/> .
+@prefix wfdesc: <http://purl.org/wf4ever/wfdesc#>
+@prefix wfprov: <http://purl.org/wf4ever/wfprov#>
 @base <http://ns.taverna.org.uk/2012/tavernaprov/> .
 
 <http://ns.taverna.org.uk/2012/tavernaprov/> rdf:type owl:Ontology ;
