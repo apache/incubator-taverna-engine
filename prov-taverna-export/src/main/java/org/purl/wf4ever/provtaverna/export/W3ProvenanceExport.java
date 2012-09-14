@@ -9,7 +9,6 @@ import java.math.BigDecimal;
 import java.net.URI;
 import java.sql.Timestamp;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -54,22 +53,29 @@ import org.openrdf.sail.inferencer.fc.ForwardChainingRDFSInferencer;
 import org.openrdf.sail.memory.MemoryStore;
 
 import prov.Activity;
-import prov.Agent;
 import prov.Association;
 import prov.AssociationOrEndOrGenerationOrInvalidationOrStartOrUsage;
 import prov.Bundle;
 import prov.Collection;
+import prov.EmptyCollection;
 import prov.Entity;
 import prov.Generation;
 import prov.Plan;
 import prov.Role;
 import prov.Usage;
 import rdfs.Resource;
+import scufl2.Processor;
+import scufl2.Workflow;
 import tavernaprov.Content;
-import tavernaprov.TavernaEngine;
 import tavernaprov.Error;
+import tavernaprov.TavernaEngine;
 import uk.org.taverna.scufl2.api.common.URITools;
+import wfdesc.Input;
+import wfdesc.Output;
+import wfdesc.Parameter;
+import wfdesc.WorkflowTemplate;
 import wfprov.Artifact;
+import wfprov.ProcessRun;
 import wfprov.WorkflowRun;
 
 public class W3ProvenanceExport {
@@ -104,7 +110,7 @@ public class W3ProvenanceExport {
 
 	private ObjectFactory objFact;
 
-	private Map<String, Entity> describedEntities = new HashMap<String, Entity>();
+	private Map<String, Artifact> describedEntities = new HashMap<String, Artifact>();
 
 	public File getIntermediatesDirectory() {
 		return intermediatesDirectory;
@@ -327,7 +333,7 @@ public class W3ProvenanceExport {
 		// Mini-provenance about this provenance trace. Unkown URI for
 		// agent/activity
 
-		Agent tavernaAgent = createObject(TavernaEngine.class);
+		TavernaEngine tavernaAgent = createObject(TavernaEngine.class);
 		Activity storeProvenance = createObject(Activity.class);
 		label(storeProvenance, "taverna-prov export of workflow run provenance");
 
@@ -348,8 +354,8 @@ public class W3ProvenanceExport {
 
 		bundle.getProvWasGeneratedBy().add(storeProvenance);
 		// The store-provenance-process used the workflow run as input
-		Activity wfProcess = objFact.createObject(runURI, Activity.class);
-
+		WorkflowRun wfProcess = objFact.createObject(runURI, WorkflowRun.class);
+		
 		DataflowInvocation dataflowInvocation = provenanceAccess
 				.getDataflowInvocation(getWorkflowRunId());
 		String workflowName = provenanceAccess
@@ -366,17 +372,20 @@ public class W3ProvenanceExport {
 		association.getProvAgents_1().add(tavernaAgent);
 		wfProcess.getProvQualifiedAssociations().add(association);
 
+		wfProcess.getWfprovWasEnactedBy().add(tavernaAgent);
+		
 		String wfUri = uriGenerator.makeWorkflowURI(dataflowInvocation
 				.getWorkflowId());
-		// TODO: Also make the recipe a Scufl2 Workflow?
-		Plan plan = objFact.createObject(wfUri, Plan.class);
-		association.getProvHadPlans().add(plan);
+		WorkflowTemplate wfplan = objFact.createObject(wfUri, Workflow.class);
+		association.getProvHadPlans().add(wfplan);
+		wfProcess.getWfprovDescribedByWorkflows().add(wfplan);
 
 		wfProcess.getProvStartedAtTime().add(
 				timestampToXmlGreg(dataflowInvocation.getInvocationStarted()));
 		wfProcess.getProvEndedAtTime().add(
 				timestampToXmlGreg(dataflowInvocation.getInvocationEnded()));
 
+		
 		// Workflow inputs and outputs
 		storeEntitities(dataflowInvocation.getInputsDataBindingId(), wfProcess,
 				Direction.INPUTS, getIntermediatesDirectory());
@@ -399,36 +408,43 @@ public class W3ProvenanceExport {
 
 			String processURI = uriGenerator.makeProcessExecution(
 					pe.getWorkflowRunId(), pe.getProcessEnactmentId());
-			Activity process = objFact.createObject(processURI, Activity.class);
-			Activity parentProcess = objFact.createObject(parentURI,
-					Activity.class);
-			process.getProvWasInformedBy().add(parentProcess);
+			ProcessRun process = objFact.createObject(processURI, ProcessRun.class);
+			WorkflowRun parentProcess = objFact.createObject(parentURI,
+					WorkflowRun.class);
+			process.getWfprovWasPartOfWorkflowRun().add(parentProcess);
+			objCon.addDesignation(parentProcess, Resource.class).getDctermsHasPart().add(process);
+			
 			process.getProvStartedAtTime().add(
 					timestampToXmlGreg(pe.getEnactmentStarted()));
 			process.getProvEndedAtTime().add(
 					timestampToXmlGreg(pe.getEnactmentEnded()));
 
-			// TODO: Linking to the processor in the workflow definition?
 			ProvenanceProcessor provenanceProcessor = provenanceAccess
 					.getProvenanceProcessor(pe.getProcessorId());
+			
 			String processorURI = uriGenerator.makeProcessorURI(
 					provenanceProcessor.getProcessorName(),
 					provenanceProcessor.getWorkflowId());
-
+			
 			label(process,
 					"Processor execution "
 							+ provenanceProcessor.getProcessorName() + " ("
 							+ pe.getProcessIdentifier() + ")");
-			// TODO: Also make the plan a Scufl2 Processor
-
 			association = createObject(Association.class);
 			process.getProvQualifiedAssociations().add(association);
 			association.getProvAgents_1().add(tavernaAgent);
-			plan = objFact.createObject(processorURI, Plan.class);
-			label(plan, "Processor " + provenanceProcessor.getProcessorName()
-					+ "");
-			association.getProvHadPlans().add(plan);
+			Processor procPlan = objFact.createObject(processorURI, Processor.class);
+			
+			label(procPlan, "Processor " + provenanceProcessor.getProcessorName());
+			association.getProvHadPlans().add(procPlan);
+			process.getWfprovDescribedByProcesses_1().add(procPlan);			
 
+			String parentWfUri = uriGenerator.makeWorkflowURI(provenanceProcessor.getWorkflowId());
+			Workflow parentWf = objFact.createObject(parentWfUri, Workflow.class);
+			parentWf.getWfdescHasSubProcesses().add(procPlan);
+			objCon.addDesignation(parentWf, Resource.class).getDctermsHasPart().add(procPlan);
+			
+			
 			// TODO: How to link together iterations on a single processor and
 			// the collections
 			// they are iterating over and creating?
@@ -505,15 +521,14 @@ public class W3ProvenanceExport {
 			String dataURI = uriGenerator.makeT2ReferenceURI(t2Ref.toUri()
 					.toASCIIString());
 
-			Entity entity = objFact.createObject(dataURI, Entity.class);
+			Artifact entity = objFact.createObject(dataURI, Artifact.class);
 			Content content = objFact.createObject(
 					file.toURI().toASCIIString(), Content.class);
-			objCon.addDesignation(entity, Artifact.class)
-					.getTavernaprovContents().add(content);
+			entity.getTavernaprovContents().add(content);
 		}
 	}
 
-	protected void storeEntitities(String dataBindingId, Activity activity,
+	protected void storeEntitities(String dataBindingId, ProcessRun activity,
 			Direction direction, File path) throws IOException,
 			RepositoryException {
 
@@ -524,7 +539,7 @@ public class W3ProvenanceExport {
 			Port port = binding.getKey();
 			T2Reference t2Ref = binding.getValue();
 
-			Entity entity = describeEntity(t2Ref);
+			Artifact entity = describeEntity(t2Ref);
 			if (!seenReference(t2Ref)) {
 				saveReference(t2Ref);
 			}
@@ -534,8 +549,10 @@ public class W3ProvenanceExport {
 
 			if (direction == Direction.INPUTS) {
 				activity.getProvUsed().add(entity);
+				activity.getWfprovUsedInputs_1().add(entity);				
 			} else {
 				entity.getProvWasGeneratedBy().add(activity);
+				entity.getWfprovWasOutputFrom_1().add(activity);
 			}
 
 			AssociationOrEndOrGenerationOrInvalidationOrStartOrUsage involvement;
@@ -561,7 +578,7 @@ public class W3ProvenanceExport {
 			port.getProcessorId();
 			String portURI = uriGenerator.makePortURI(port.getWorkflowId(),
 					processorName, port.getPortName(), port.isInputPort());
-			Role portRole = objFact.createObject(portURI, Role.class);
+			Parameter portRole = objFact.createObject(portURI, port.isInputPort() ? Input.class : Output.class);
 			if (processorName == null) {
 				label(portRole,
 						"Workflow "
@@ -573,27 +590,28 @@ public class W3ProvenanceExport {
 								+ (port.isInputPort() ? " input " : " output ")
 								+ port.getPortName());
 			}
-
+			entity.getWfprovDescribedByParameters().add(portRole);
+			
 			involvement.getProvHadRoles().add(portRole);
 
 		}
 
 	}
 
-	protected Entity describeEntity(T2Reference t2Ref)
+	protected Artifact describeEntity(T2Reference t2Ref)
 			throws RepositoryException, IOException {
 		String dataURI = uriGenerator.makeT2ReferenceURI(t2Ref.toUri()
 				.toASCIIString());
 
-		Entity entity = describedEntities.get(dataURI);
-		if (entity != null) {
-			return entity;
+		Artifact artifact = describedEntities.get(dataURI);
+		if (artifact != null) {
+			return artifact;
 		}
-		entity = objFact.createObject(dataURI, Entity.class);
-		describedEntities.put(dataURI, entity);
+		artifact = objFact.createObject(dataURI, Artifact.class);
+		describedEntities.put(dataURI, artifact);
 
 		if (t2Ref.getReferenceType() == T2ReferenceType.ErrorDocument) {
-			tavernaprov.Error error = objFact.createObject(dataURI,
+			tavernaprov.Error error = objCon.addDesignation(artifact,
 					tavernaprov.Error.class);
 
 			ErrorDocument errorDoc = saver.getReferenceService()
@@ -604,19 +622,22 @@ public class W3ProvenanceExport {
 		} else if (t2Ref.getReferenceType() == T2ReferenceType.IdentifiedList) {
 			IdentifiedList<T2Reference> list = saver.getReferenceService()
 					.getListService().getList(t2Ref);
-			Collection coll = objFact.createObject(dataURI, Collection.class);
+			Collection coll = objCon.addDesignation(artifact, Collection.class);
 
 			for (T2Reference ref : list) {
 				String itemURI = uriGenerator.makeT2ReferenceURI(ref.toUri()
 						.toASCIIString());
 				coll.getProvHadMembers().add(
-						objFact.createObject(itemURI, Entity.class));
+						objFact.createObject(itemURI, Artifact.class));
 				describeEntity(ref);
 				// TODO: Record list position as well!
 			}
+			if (list.isEmpty()){
+				objCon.addDesignation(coll, EmptyCollection.class);
+			}
 		}
 
-		return entity;
+		return artifact;
 	}
 
 	private boolean seenReference(T2Reference t2Ref) {
