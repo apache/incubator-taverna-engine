@@ -315,7 +315,7 @@ public class W3ProvenanceExport {
 		}
 	}
 
-	public void exportAsW3Prov(BufferedOutputStream outStream)
+	public void exportAsW3Prov(BufferedOutputStream outStream, URI base)
 			throws RepositoryException, RDFHandlerException, IOException {
 
 		// TODO: Make this thread safe using contexts?
@@ -327,14 +327,15 @@ public class W3ProvenanceExport {
 		// FIXME: Should this be "" to indicate the current file?
 		// FIXME: Should this not be an Account instead?
 
-		Bundle bundle = objFact.createObject(runURI + "bundle", Bundle.class);
+		Bundle bundle = objFact.createObject(base.toASCIIString(), Bundle.class);
 		objCon.addObject(bundle);
 
 		// Mini-provenance about this provenance trace. Unkown URI for
 		// agent/activity
 
-		TavernaEngine tavernaAgent = createObject(TavernaEngine.class);
-		Activity storeProvenance = createObject(Activity.class);
+		TavernaEngine tavernaAgent = objFact.createObject(base.resolve("#taverna-engine").toASCIIString(), 
+				TavernaEngine.class);
+		Activity storeProvenance = objFact.createObject(base.resolve("#taverna-prov-export").toASCIIString(), Activity.class);
 		label(storeProvenance, "taverna-prov export of workflow run provenance");
 
 		storeProvenance.getProvStartedAtTime().add(
@@ -581,7 +582,7 @@ public class W3ProvenanceExport {
 			Parameter portRole = objFact.createObject(portURI, port.isInputPort() ? Input.class : Output.class);
 			if (processorName == null) {
 				label(portRole,
-						"Workflow "
+						"Workflow"
 								+ (port.isInputPort() ? " input " : " output ")
 								+ port.getPortName());
 			} else {

@@ -108,7 +108,7 @@ public class Saver {
 		BufferedOutputStream outStream = new BufferedOutputStream(
 				new FileOutputStream(provenanceFile ));
 		try {
-			export.exportAsW3Prov(outStream);
+			export.exportAsW3Prov(outStream, provenanceFile.getAbsoluteFile().toURI());
 		} catch (Exception e) {
 			logger.error("Failed to save the provenance graph to "
 					+ provenanceFile, e);
