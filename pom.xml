@@ -188,8 +188,8 @@
 	<url>http://wf4ever.github.com/taverna-prov/</url>
 	<licenses>
 		<license>
-			<name>GNU Lesser General Public License 2.1</name>
-			<url>http://www.gnu.org/licenses/lgpl-2.1.txt</url>
+			<name>GNU Lesser General Public License 3.0</name>
+			<url>http://www.gnu.org/licenses/lgpl-3.0</url>
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
