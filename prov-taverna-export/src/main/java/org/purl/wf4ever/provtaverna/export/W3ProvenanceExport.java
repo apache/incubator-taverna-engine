@@ -479,7 +479,7 @@ public class W3ProvenanceExport {
 		connection.setNamespace("wfprov", "http://purl.org/wf4ever/wfprov#");
 		connection.setNamespace("wfdesc", "http://purl.org/wf4ever/wfdesc#");
 		connection.setNamespace("tavernaprov",
-				"http://purl.org/wf4ever/wfdesc#");
+				"http://ns.taverna.org.uk/2012/tavernaprov/");
 		connection.setNamespace("doap", "http://usefulinc.com/ns/doap#");
 		connection.setNamespace("cnt", "http://www.w3.org/2011/content#");
 		connection.setNamespace("dcterms", "http://purl.org/dc/terms/");
