@@ -29,6 +29,8 @@ import net.sf.taverna.t2.reference.ReferencedDataNature;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.workbench.reference.config.DataManagementConfiguration;
 
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
@@ -52,8 +54,8 @@ public class Saver {
 
 	private Map<File, T2Reference> fileToId = new HashMap<File, T2Reference>();
 
-	private Map<File, byte[]> sha1sums = new HashMap<File, byte[]>();
-	private Map<File, byte[]> sha512sums = new HashMap<File, byte[]>();
+	private Map<File, String> sha1sums = new HashMap<File, String>();
+	private Map<File, String> sha512sums = new HashMap<File, String>();
 	
 	private ReferenceService referenceService;
 
@@ -208,10 +210,13 @@ public class Saver {
 						output);
 				output.close();
 				if (sha != null) {
-					getSha1sums().put(targetFile.getAbsoluteFile(), sha.digest());
+					getSha1sums().put(targetFile.getAbsoluteFile(), 
+							hexOfDigest(sha));
 				}
 				if (sha512 != null) {
-					getSha512sums().put(targetFile.getAbsoluteFile(), sha512.digest());
+					sha512.digest();					
+					getSha512sums().put(targetFile.getAbsoluteFile(), 
+							hexOfDigest(sha512));
 				}
 				getFileToId().put(targetFile, identified.getId());
 				return targetFile;
@@ -226,6 +231,10 @@ public class Saver {
 			}
 	
 		}
+	}
+
+	private String hexOfDigest(MessageDigest sha) {
+		return new String(Hex.encodeHex(sha.digest()));
 	}
 
 	/**
@@ -313,11 +322,11 @@ public class Saver {
 		this.intermediatesDirectory = intermediatesDirectory;
 	}
 
-	public Map<File, byte[]> getSha1sums() {
+	public Map<File, String> getSha1sums() {
 		return sha1sums;
 	}
 
-	public Map<File, byte[]> getSha512sums() {
+	public Map<File, String> getSha512sums() {
 		return sha512sums;
 	}
 

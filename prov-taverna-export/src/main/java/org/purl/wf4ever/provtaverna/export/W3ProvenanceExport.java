@@ -486,7 +486,8 @@ public class W3ProvenanceExport {
 		connection.setNamespace("dcterms", "http://purl.org/dc/terms/");
 		connection.setNamespace("scufl2",
 				"http://ns.taverna.org.uk/2010/scufl2#");
-		connection.export(new OrganizedRDFWriter(new TurtleWriterWithBase(outStream, base)));
+		//connection.export(new TurtleWriterWithBase(outStream, base));
+		connection.export(new ArrangedWriter(new TurtleWriterWithBase(outStream, base)));
 	}
 
 	protected void label(Object obj, String label) throws RepositoryException {
@@ -524,18 +525,18 @@ public class W3ProvenanceExport {
 			Artifact entity = objFact.createObject(dataURI, Artifact.class);
 			Content content = objFact.createObject(
 					file.toURI().toASCIIString(), Content.class);
+			entity.getTavernaprovContents().add(content);
 
 			// Add checksums
-			byte[] sha1 = saver.getSha1sums().get(file.getAbsoluteFile());
+			String sha1 = saver.getSha1sums().get(file.getAbsoluteFile());
 			if (sha1 != null) {
 				content.getTavernaprovSha1s().add(sha1);
 			}			
-			byte[] sha512 = saver.getSha512sums().get(file.getAbsoluteFile());
+			String sha512 = saver.getSha512sums().get(file.getAbsoluteFile());
 			if (sha512 != null) {
 				content.getTavernaprovSha512s().add(sha512);
 			}			
 			
-			entity.getTavernaprovContents().add(content);
 		}
 	}
 
