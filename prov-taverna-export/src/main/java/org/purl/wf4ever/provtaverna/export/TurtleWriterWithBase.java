@@ -8,7 +8,12 @@ import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.turtle.TurtleUtil;
 import org.openrdf.rio.turtle.TurtleWriter;
 
+import uk.org.taverna.scufl2.api.common.URITools;
+
 public class TurtleWriterWithBase extends TurtleWriter {
+	
+		private URITools uriTools = new URITools();
+	
 		private java.net.URI replaceBaseURI;
 		private java.net.URI newBaseURI = null;
 
@@ -48,8 +53,8 @@ public class TurtleWriterWithBase extends TurtleWriter {
 		{
 //				String uriString = uri.toString();			
 			java.net.URI netURI = java.net.URI.create(uri.toString());
-			String uriString = getReplaceBaseURI().relativize(netURI).toASCIIString();
-			
+			//String uriString = getReplaceBaseURI().relativize(netURI).toASCIIString();
+			String uriString = uriTools.relativePath(getReplaceBaseURI(), netURI).toASCIIString();
 			// Try to find a prefix for the URI's namespace
 			String prefix = null;
 
@@ -57,6 +62,10 @@ public class TurtleWriterWithBase extends TurtleWriter {
 			if (splitIdx > 0) {
 				String namespace = uriString.substring(0, splitIdx);
 				prefix = namespaceTable.get(namespace);
+				if (prefix == null && ! namespaceTable.containsKey("") && namespace.equals("#")) {
+					prefix = ""; // Empty namespace defaults to "#"
+				}
+				
 			}
 
 			if (prefix != null) {
