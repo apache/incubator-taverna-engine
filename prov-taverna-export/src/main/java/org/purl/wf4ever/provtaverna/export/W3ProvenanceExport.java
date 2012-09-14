@@ -471,7 +471,7 @@ public class W3ProvenanceExport {
 		// Save the whole thing
 		ContextAwareConnection connection = objCon;
 		// Taken from @prefix in
-		// prov-taverna-owl-bindings/src/test/resources/handmade.ttl
+		// prov-taverna-owl-bindings/src/test/storeFileReferencesresources/handmade.ttl
 		connection.setNamespace("owl", "http://www.w3.org/2002/07/owl#");
 		connection.setNamespace("xsd", "http://www.w3.org/2001/XMLSchema#");
 		connection
@@ -486,8 +486,7 @@ public class W3ProvenanceExport {
 		connection.setNamespace("dcterms", "http://purl.org/dc/terms/");
 		connection.setNamespace("scufl2",
 				"http://ns.taverna.org.uk/2010/scufl2#");
-		connection.export(new TurtleWriterWithBase(outStream, getBaseFolder()
-				.toURI()));
+		connection.export(new OrganizedRDFWriter(new TurtleWriterWithBase(outStream, base)));
 	}
 
 	protected void label(Object obj, String label) throws RepositoryException {
@@ -525,6 +524,17 @@ public class W3ProvenanceExport {
 			Artifact entity = objFact.createObject(dataURI, Artifact.class);
 			Content content = objFact.createObject(
 					file.toURI().toASCIIString(), Content.class);
+
+			// Add checksums
+			byte[] sha1 = saver.getSha1sums().get(file.getAbsoluteFile());
+			if (sha1 != null) {
+				content.getTavernaprovSha1s().add(sha1);
+			}			
+			byte[] sha512 = saver.getSha512sums().get(file.getAbsoluteFile());
+			if (sha512 != null) {
+				content.getTavernaprovSha512s().add(sha512);
+			}			
+			
 			entity.getTavernaprovContents().add(content);
 		}
 	}
@@ -681,7 +691,8 @@ public class W3ProvenanceExport {
 			// Capture filename with extension
 			file = saver.writeDataObject(parent, file.getName(), t2Ref,
 					extension);
-			// FIXME: The above will save the same reference every time!
+		
+			
 		}
 		seenReference(t2Ref, file);
 		return file;

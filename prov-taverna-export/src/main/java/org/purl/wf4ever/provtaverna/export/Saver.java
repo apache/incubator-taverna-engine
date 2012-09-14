@@ -5,14 +5,16 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.security.DigestOutputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.swing.JOptionPane;
 
 import net.sf.taverna.t2.invocation.InvocationContext;
 import net.sf.taverna.t2.lang.results.ResultsUtils;
@@ -21,7 +23,6 @@ import net.sf.taverna.t2.reference.ErrorDocument;
 import net.sf.taverna.t2.reference.ExternalReferenceSPI;
 import net.sf.taverna.t2.reference.Identified;
 import net.sf.taverna.t2.reference.IdentifiedList;
-import net.sf.taverna.t2.reference.ReferenceContext;
 import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.ReferenceSet;
 import net.sf.taverna.t2.reference.ReferencedDataNature;
@@ -51,6 +52,9 @@ public class Saver {
 
 	private Map<File, T2Reference> fileToId = new HashMap<File, T2Reference>();
 
+	private Map<File, byte[]> sha1sums = new HashMap<File, byte[]>();
+	private Map<File, byte[]> sha512sums = new HashMap<File, byte[]>();
+	
 	private ReferenceService referenceService;
 
 	private InvocationContext context;
@@ -185,9 +189,30 @@ public class Saver {
 				}
 				File targetFile = new File(destination.toString()
 						+ File.separatorChar + name + fileExtension);
+				
+				OutputStream output = new FileOutputStream(targetFile);
+				MessageDigest sha = null;
+				MessageDigest sha512 = null;
+				try {
+					sha = MessageDigest.getInstance("SHA");
+					output = new DigestOutputStream(output, sha);
+
+					sha512 = MessageDigest.getInstance("SHA-512");
+					output = new DigestOutputStream(output, sha512);
+				} catch (NoSuchAlgorithmException e) {	
+					logger.info("Could not find digest", e);
+				}
+				
 				IOUtils.copyLarge(
 						externalReferences.get(0).openStream(getContext()),
-						new FileOutputStream(targetFile));
+						output);
+				output.close();
+				if (sha != null) {
+					getSha1sums().put(targetFile.getAbsoluteFile(), sha.digest());
+				}
+				if (sha512 != null) {
+					getSha512sums().put(targetFile.getAbsoluteFile(), sha512.digest());
+				}
 				getFileToId().put(targetFile, identified.getId());
 				return targetFile;
 			} else {
@@ -195,6 +220,7 @@ public class Saver {
 						+ File.separatorChar + name + ".err");
 				FileUtils.writeStringToFile(targetFile,
 						((ErrorDocument) identified).getMessage());
+				// We don't care about checksums for errors
 				getFileToId().put(targetFile, identified.getId());
 				return targetFile;
 			}
@@ -285,6 +311,14 @@ public class Saver {
 
 	public void setIntermediatesDirectory(File intermediatesDirectory) {
 		this.intermediatesDirectory = intermediatesDirectory;
+	}
+
+	public Map<File, byte[]> getSha1sums() {
+		return sha1sums;
+	}
+
+	public Map<File, byte[]> getSha512sums() {
+		return sha512sums;
 	}
 
 }
