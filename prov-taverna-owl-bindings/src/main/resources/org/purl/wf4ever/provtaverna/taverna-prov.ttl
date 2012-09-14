@@ -35,12 +35,6 @@ tavernaprov:errorMessage rdf:type owl:AnnotationProperty .
 
 
 
-<http://purl.org/dc/terms/description> rdfs:domain tavernaprov:Error .
-
-
-
-
-
 #################################################################
 #
 #    Datatypes
@@ -57,24 +51,6 @@ tavernaprov:errorMessage rdf:type owl:AnnotationProperty .
 #################################################################
 
 
-###  http://ns.taverna.org.uk/2010/scufl2#datalink
-
-scufl2:datalink rdfs:subPropertyOf <http://purl.org/wf4ever/wfdesc#hasDataLink> .
-
-
-
-###  http://ns.taverna.org.uk/2010/scufl2#receivesFrom
-
-scufl2:receivesFrom rdfs:subPropertyOf <http://purl.org/wf4ever/wfdesc#hasSource> .
-
-
-
-###  http://ns.taverna.org.uk/2010/scufl2#sendsTo
-
-scufl2:sendsTo rdfs:subPropertyOf <http://purl.org/wf4ever/wfdesc#hasSink> .
-
-
-
 ###  http://ns.taverna.org.uk/2012/tavernaprov/content
 
 tavernaprov:content rdf:type owl:ObjectProperty ;
@@ -82,7 +58,6 @@ tavernaprov:content rdf:type owl:ObjectProperty ;
                     rdfs:range tavernaprov:Content ;
                     
                     rdfs:domain <http://purl.org/wf4ever/wfprov#Artifact> .
-
 
 
 ###  http://purl.org/wf4ever/wfdesc#hasDataLink
