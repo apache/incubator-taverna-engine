@@ -26,7 +26,7 @@
 		<alibaba.version>2.0-rc5</alibaba.version>
 		<!-- Because of Raven this must match whatever Elmo/Alibaba depends on! 
 			:( -->
-		<sesame.version>2.6.6</sesame.version>
+		<sesame.version>2.6.9</sesame.version>
 	</properties>
 
 	<build>
