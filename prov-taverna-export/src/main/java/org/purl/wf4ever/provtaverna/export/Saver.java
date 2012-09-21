@@ -39,6 +39,8 @@ import eu.medsea.mimeutil.MimeType;
 
 public class Saver {
 
+	private static final String WORKFLOWRUN_PROV_TTL = "workflowrun.prov.ttl";
+
 	private static Logger logger = Logger.getLogger(Saver.class);
 	
 
@@ -52,6 +54,7 @@ public class Saver {
 		this.setChosenReferences(chosenReferences);
 	}
 
+	
 	private Map<File, T2Reference> fileToId = new HashMap<File, T2Reference>();
 
 	private Map<File, String> sha1sums = new HashMap<File, String>();
@@ -83,6 +86,7 @@ public class Saver {
 
 	protected void saveToFolder(File folder, Map<String, T2Reference> chosenReferences, ReferenceService referenceService) throws IOException,
 			FileNotFoundException {
+		logger.info("Saving provenance and outputs to " + folder.getAbsolutePath());
 		folder.mkdir();
 		if (!folder.isDirectory()) {
 			throw new IOException("Could not make/use folder: " + folder);
@@ -98,7 +102,7 @@ public class Saver {
 			}
 			writeToFileSystem(ref, folder, portName, referenceService);
 		}
-		
+		logger.info("Saved outputs to " + folder);
 		
 		
 		String connectorType = DataManagementConfiguration.getInstance()
@@ -110,24 +114,24 @@ public class Saver {
 		export.setFileToT2Reference(getFileToId());
 		export.setBaseFolder(folder);
 		export.setIntermediatesDirectory(getIntermediatesDirectory());
-		File provenanceFile = new File(folder, "workflowrun.prov.ttl");
+		File provFile = new File(folder, WORKFLOWRUN_PROV_TTL).getAbsoluteFile();
+		// FIXME: Refactor out and use SafeFileOutputStream
 		BufferedOutputStream outStream = new BufferedOutputStream(
-				new FileOutputStream(provenanceFile ));
+				new SafeFileOutputStream(provFile));
 		try {
-			export.exportAsW3Prov(outStream, provenanceFile.getAbsoluteFile().toURI());
+			logger.debug("Saving provenance to " + provFile.getAbsolutePath());
+			export.exportAsW3Prov(outStream, provFile.toURI());
+			logger.info("Saved provenance to " + provFile.getAbsolutePath());
 		} catch (Exception e) {
 			logger.error("Failed to save the provenance graph to "
-					+ provenanceFile, e);
-//			JOptionPane.showMessageDialog(null,
-//					"Failed to save the provenance graph to " + provenanceFile,
-//					"Failed to save provenance graph",
-//					JOptionPane.ERROR_MESSAGE);
+					+ provFile, e);
 		} finally {
 			try {
 				outStream.close();
 			} catch (IOException e) {
+				logger.error("Potential error on saving " + provFile);
 			}
-		}
+ 		}
 	}
 
 	protected File writeDataObject(File destination, String name,
@@ -149,6 +153,7 @@ public class Saver {
 				writeDataObject(targetDir, "" + count++, subRef,
 						defaultExtension);
 			}
+			logger.debug("Saved list " + targetDir + " from " + identified.getId().toUri());
 			return targetDir;
 		}
 	
@@ -209,6 +214,7 @@ public class Saver {
 						externalReferences.get(0).openStream(getContext()),
 						output);
 				output.close();
+				
 				if (sha != null) {
 					getSha1sums().put(targetFile.getAbsoluteFile(), 
 							hexOfDigest(sha));
@@ -219,6 +225,7 @@ public class Saver {
 							hexOfDigest(sha512));
 				}
 				getFileToId().put(targetFile, identified.getId());
+				logger.debug("Saved value " + targetFile + " from " + identified.getId().toUri());
 				return targetFile;
 			} else {
 				File targetFile = new File(destination.toString()
@@ -227,6 +234,7 @@ public class Saver {
 						((ErrorDocument) identified).getMessage());
 				// We don't care about checksums for errors
 				getFileToId().put(targetFile, identified.getId());
+				logger.debug("Saved error " + targetFile + " from " + identified.getId().toUri());
 				return targetFile;
 			}
 	
@@ -275,6 +283,7 @@ public class Saver {
 	
 		File writtenFile = writeObjectToFileSystem(destination, name, ref,
 				fileExtension);
+		logger.debug("Saved " + writtenFile + " from reference " + ref.toUri());
 		return writtenFile;
 	}
 
