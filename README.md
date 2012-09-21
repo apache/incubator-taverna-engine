@@ -7,6 +7,7 @@ workflow run according to the proposed [PROV-O
 standard](http://www.w3.org/TR/prov-o/).
 
 
+
 Source code and license
 -----------------------
 This plugin is distributed under the [GNU Lesser General Public License
@@ -372,9 +373,6 @@ Check that:
 
 TODO
 ----
-* Export intermediate values
-* Taverna/workflow specific extension
-* Separate input and output ports (in case they have the same port name)
 * Include workflow definition
 
 See also [outstanding issues](https://jira.man.poznan.pl/jira/browse/WFE-513).
