@@ -46,6 +46,7 @@ import org.openrdf.repository.contextaware.ContextAwareConnection;
 import org.openrdf.repository.object.ObjectConnection;
 import org.openrdf.repository.object.ObjectFactory;
 import org.openrdf.repository.object.ObjectRepository;
+import org.openrdf.repository.object.config.ObjectRepositoryConfig;
 import org.openrdf.repository.object.config.ObjectRepositoryFactory;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFHandlerException;
@@ -131,8 +132,10 @@ public class W3ProvenanceExport {
 				new ForwardChainingRDFSInferencer(new MemoryStore()));
 		myRepository.initialize();
 
+		
 		ObjectRepositoryFactory factory = new ObjectRepositoryFactory();
-		objRepo = factory.createRepository(myRepository);
+		ObjectRepositoryConfig config = new ObjectRepositoryConfig(getClass().getClassLoader());
+		objRepo = factory.createRepository(config, myRepository);
 		objRepo.setIncludeInferred(true);
 		objCon = objRepo.getConnection();
 		objFact = objCon.getObjectFactory();
