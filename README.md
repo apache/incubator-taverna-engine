@@ -6,6 +6,24 @@ and Taverna Command Line which allows export of the provenance of a
 workflow run according to the proposed [PROV-O
 standard](http://www.w3.org/TR/prov-o/).
 
+WARNING
+-------
+The version 1.9 of the plugin is unfortunately currently broken, PROV
+export fails with this error message:
+
+    ERROR 2012-09-21 13:59:54,503 (org.purl.wf4ever.provtaverna.export.Saver:119) - Failed to save the provenance graph to /home/stain/Desktop/1/ab/workflowrun.prov.ttl
+    java.lang.ClassCastException: Cannot cast object.proxies._fffffffff6fcf60f._EntityProxyffffffff9de06bd4 to prov.Bundle
+        at java.lang.Class.cast(Class.java:3005)
+        at org.openrdf.repository.object.ObjectFactory.createObject(ObjectFactory.java:170)
+        at org.openrdf.repository.object.ObjectFactory.createObject(ObjectFactory.java:161)
+        at org.purl.wf4ever.provtaverna.export.W3ProvenanceExport.exportAsW3Prov(W3ProvenanceExport.java:330)
+        at org.purl.wf4ever.provtaverna.export.Saver.saveToFolder(Saver.java:117)
+        at org.purl.wf4ever.provtaverna.export.Saver.saveData(Saver.java:81)
+        at org.purl.wf4ever.provtaverna.ui.SaveProvAction.saveData(SaveProvAction.java:52)
+        at net.sf.taverna.t2.workbench.views.results.saveactions.SaveAllResultsSPI$2.run(SaveAllResultsSPI.java:177)
+
+We are trying to work around this bug at the moment.
+
 
 
 Source code and license
