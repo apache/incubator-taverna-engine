@@ -107,6 +107,11 @@ public class StringConstantActivity extends AbstractAsynchronousActivity<StringC
 	}
 	
 	public String getExtraDescription() {
+		if (value.length() > 60)
+	    {
+	        return value.substring(0, 60 - 3) + "...";
+	    }
+
 		return value;
 	}
 
