@@ -25,15 +25,12 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.regex.Pattern;
-
-import org.apache.log4j.Logger;
 
 import net.sf.taverna.t2.annotation.annotationbeans.IdentificationAssertion;
 import net.sf.taverna.t2.workflowmodel.CompoundEdit;
-import net.sf.taverna.t2.workflowmodel.Condition;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
 import net.sf.taverna.t2.workflowmodel.DataflowInputPort;
 import net.sf.taverna.t2.workflowmodel.DataflowOutputPort;
@@ -60,6 +57,8 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityInputPort;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityOutputPort;
 import net.sf.taverna.t2.workflowmodel.processor.activity.DisabledActivity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.NestedDataflow;
+
+import org.apache.log4j.Logger;
 
 /**
  * Various workflow model tools that can be helpful when constructing a
@@ -712,157 +711,7 @@ public class Tools {
 		return ((!processor.getActivityList().isEmpty()) && processor
 				.getActivityList().get(0) instanceof NestedDataflow);
 	}
-
-	/**
-	 * Find processors that a given processor can connect to downstream.
-	 * <p>
-	 * This is calculated as all processors in the dataflow, except the
-	 * processor itself, and any processor <em>upstream</em>, following both
-	 * data links and conditional links.
-	 * 
-	 * @see #possibleUpStreamProcessors(Dataflow, Processor)
-	 * @see #splitProcessors(Collection, Processor)
-	 * 
-	 * @param dataflow
-	 *            Dataflow from where to find processors
-	 * @param processor
-	 *            Processor which is to be connected
-	 * @return A set of possible downstream processors
-	 */
-	public static Set<Processor> possibleDownStreamProcessors(
-			Dataflow dataflow, Processor processor) {
-		ProcessorSplit splitProcessors = splitProcessors(dataflow
-				.getProcessors(), processor);
-		Set<Processor> possibles = new HashSet<Processor>(splitProcessors
-				.getUnconnected());
-		possibles.addAll(splitProcessors.getDownStream());
-		return possibles;
-	}
-
-	/**
-	 * Find processors that a given processor can connect to upstream.
-	 * <p>
-	 * This is calculated as all processors in the dataflow, except the
-	 * processor itself, and any processor <em>downstream</em>, following both
-	 * data links and conditional links.
-	 * 
-	 * @see #possibleDownStreamProcessors(Dataflow, Processor)
-	 * @see #splitProcessors(Collection, Processor)
-	 * 
-	 * @param dataflow
-	 *            Dataflow from where to find processors
-	 * @param processor
-	 *            Processor which is to be connected
-	 * @return A set of possible downstream processors
-	 */
-	public static Set<Processor> possibleUpStreamProcessors(Dataflow dataflow,
-			Processor firstProcessor) {
-		ProcessorSplit splitProcessors = splitProcessors(dataflow
-				.getProcessors(), firstProcessor);
-		Set<Processor> possibles = new HashSet<Processor>(splitProcessors
-				.getUnconnected());
-		possibles.addAll(splitProcessors.getUpStream());
-		return possibles;
-	}
-
-	/**
-	 * 
-	 * @param processors
-	 * @param splitPoint
-	 * @return
-	 */
-	public static ProcessorSplit splitProcessors(
-			Collection<? extends Processor> processors, TokenProcessingEntity splitPoint) {
-		Set<Processor> upStream = new HashSet<Processor>();
-		Set<Processor> downStream = new HashSet<Processor>();
-		Set<TokenProcessingEntity> queue = new HashSet<TokenProcessingEntity>();
-
-		queue.add(splitPoint);
-
-		// First let's go upstream
-		while (!queue.isEmpty()) {
-			TokenProcessingEntity investigate = queue.iterator().next();
-			queue.remove(investigate);
-			if (investigate instanceof Processor) {
-				Processor processor = (Processor) investigate;
-				List<? extends Condition> preConditions = processor
-						.getPreconditionList();
-				for (Condition condition : preConditions) {
-					Processor upstreamProc = condition.getControl();
-					if (!upStream.contains(upstreamProc)) {
-						upStream.add(upstreamProc);
-						queue.add(upstreamProc);
-					}
-				}
-			}
-			for (EventHandlingInputPort inputPort : investigate.getInputPorts()) {
-				Datalink incomingLink = inputPort.getIncomingLink();
-				if (incomingLink == null) {
-					continue;
-				}
-				EventForwardingOutputPort source = incomingLink.getSource();
-				if (source instanceof ProcessorOutputPort) {
-					Processor upstreamProc = ((ProcessorOutputPort) source)
-							.getProcessor();
-					if (!upStream.contains(upstreamProc)) {
-						upStream.add(upstreamProc);
-						queue.add(upstreamProc);
-					}
-				} else if (source instanceof MergeOutputPort) {
-					Merge merge = ((MergeOutputPort) source).getMerge();
-					queue.add(merge);
-					// The merge it self doesn't count as a processor
-				} else {
-					// Ignore
-				}
-			}
-		}
-		// Then downstream
-		queue.add(splitPoint);
-		while (!queue.isEmpty()) {
-			TokenProcessingEntity investigate = queue.iterator().next();
-			queue.remove(investigate);
-			if (investigate instanceof Processor) {
-				Processor processor = (Processor) investigate;
-				List<? extends Condition> controlledConditions = processor
-						.getControlledPreconditionList();
-				for (Condition condition : controlledConditions) {
-					Processor downstreamProc = condition.getTarget();
-					if (!downStream.contains(downstreamProc)) {
-						downStream.add(downstreamProc);
-						queue.add(downstreamProc);
-					}
-				}
-			}
-
-			for (EventForwardingOutputPort outputPort : investigate
-					.getOutputPorts()) {
-				for (Datalink datalink : outputPort.getOutgoingLinks()) {
-					EventHandlingInputPort sink = datalink.getSink();
-					if (sink instanceof ProcessorInputPort) {
-						Processor downstreamProcc = ((ProcessorInputPort) sink)
-								.getProcessor();
-						if (!downStream.contains(downstreamProcc)) {
-							downStream.add(downstreamProcc);
-							queue.add(downstreamProcc);
-						}
-					} else if (sink instanceof MergeInputPort) {
-						Merge merge = ((MergeInputPort) sink).getMerge();
-						queue.add(merge);
-						// The merge it self doesn't count as a processor
-					} else {
-						// Ignore dataflow ports
-					}
-				}
-			}
-		}
-		Set<Processor> undecided = new HashSet<Processor>(processors);
-		undecided.remove(splitPoint);
-		undecided.removeAll(upStream);
-		undecided.removeAll(downStream);
-		return new ProcessorSplit(splitPoint, upStream, downStream, undecided);
-	}
-
+	
 	/**
 	 * Find the first processor that contains an activity that has the given
 	 * activity input port. See #get
@@ -974,88 +823,6 @@ public class Tools {
 			}
 		}
 		return added;
-	}
-
-	/**
-	 * Result bean returned from
-	 * {@link Tools#splitProcessors(Collection, Processor)}.
-	 * 
-	 * @author Stian Soiland-Reyes
-	 * 
-	 */
-	public static class ProcessorSplit {
-
-		private final TokenProcessingEntity splitPoint;
-		private final Set<Processor> upStream;
-		private final Set<Processor> downStream;
-		private final Set<Processor> unconnected;
-
-		/**
-		 * Processor that was used as a split point.
-		 * 
-		 * @return Split point processor
-		 */
-		public TokenProcessingEntity getSplitPoint() {
-			return splitPoint;
-		}
-
-		/**
-		 * Processors that are upstream from the split point.
-		 * 
-		 * @return Upstream processors
-		 */
-		public Set<Processor> getUpStream() {
-			return upStream;
-		}
-
-		/**
-		 * Processors that are downstream from the split point.
-		 * 
-		 * @return Downstream processors
-		 */
-		public Set<Processor> getDownStream() {
-			return downStream;
-		}
-
-		/**
-		 * Processors that are unconnected to the split point.
-		 * <p>
-		 * These are processors in the dataflow that are neither upstream,
-		 * downstream or the split point itself.
-		 * <p>
-		 * Note that this does not imply a total graph separation, for instance
-		 * processors in {@link #getUpStream()} might have some of these
-		 * unconnected processors downstream, but not along the path to the
-		 * {@link #getSplitPoint()}, or they could be upstream from any
-		 * processor in {@link #getDownStream()}.
-		 * 
-		 * @return Processors unconnected from the split point
-		 */
-		public Set<Processor> getUnconnected() {
-			return unconnected;
-		}
-
-		/**
-		 * Construct a new processor split result.
-		 * 
-		 * @param splitPoint
-		 *            Processor used as split point
-		 * @param upStream
-		 *            Processors that are upstream from split point
-		 * @param downStream
-		 *            Processors that are downstream from split point
-		 * @param unconnected
-		 *            The rest of the processors, that are by definition
-		 *            unconnected to split point
-		 */
-		public ProcessorSplit(TokenProcessingEntity splitPoint, Set<Processor> upStream,
-				Set<Processor> downStream, Set<Processor> unconnected) {
-			this.splitPoint = splitPoint;
-			this.upStream = upStream;
-			this.downStream = downStream;
-			this.unconnected = unconnected;
-		}
-
 	}
 
 	/**
