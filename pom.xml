@@ -12,7 +12,6 @@
 	<packaging>pom</packaging>
 	<name>Taverna Platform</name>
 	<modules>
-		<!-- <module>integration-tests</module> -->
 		<module>taverna-capability-api</module>
 		<module>taverna-capability-impl</module>
 		<module>taverna-data-api</module>
@@ -24,6 +23,7 @@
 		<module>taverna-report-api</module>
 		<module>taverna-run-api</module>
 		<module>taverna-run-impl</module>
+		<module>taverna-integration-tests</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>
