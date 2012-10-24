@@ -29,8 +29,9 @@ import java.util.Set;
 import java.util.UUID;
 
 import uk.org.taverna.platform.data.api.Data;
+import uk.org.taverna.platform.data.api.DataNature;
+import uk.org.taverna.platform.data.api.DataReference;
 import uk.org.taverna.platform.data.api.DataService;
-import uk.org.taverna.platform.data.api.ErrorValue;
 
 /**
  * Basic implementation of a DataService that stores data in-memory.
@@ -50,32 +51,20 @@ public class DataServiceImpl implements DataService {
 	public boolean delete(String ID) {
 		return store.remove(ID) != null;
 	}
-
+	
 	@Override
-	public Data create(Object value) {
-		if (value instanceof List) {
-			List<?> listValue = (List<?>) value;
-			List<Data> dataList = new ArrayList<Data>();
-			for (Object object : listValue) {
-				dataList.add(create(object));
-			}
-			return store(new DataImpl(UUID.randomUUID().toString(), dataList));
-		} else if (value instanceof URI) {
-			return store(new DataImpl(UUID.randomUUID().toString(), (URI) value));
-		} else {
-			return store(new DataImpl(UUID.randomUUID().toString(), value));
-		}
-	}
-
-	@Override
-	public ErrorValue createErrorValue(String message, String exceptionMessage,
-			List<StackTraceElement> stackTrace, Set<ErrorValue> causes) {
-		return new ErrorValueImpl(message, exceptionMessage, stackTrace, causes);
+	public Data create(DataNature nature) {
+		return store(new DataImpl(UUID.randomUUID().toString(), nature));
 	}
 
 	private Data store(Data data) {
 		store.put(data.getID(), data);
 		return data;
+	}
+
+	@Override
+	public DataReference createDataReference() {
+		return new DataReferenceImpl(UUID.randomUUID().toString());
 	}
 
 }

@@ -20,11 +20,15 @@
  ******************************************************************************/
 package uk.org.taverna.platform.data.impl;
 
+import java.io.IOException;
 import java.net.URI;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import uk.org.taverna.platform.data.api.Data;
-import uk.org.taverna.platform.data.api.ErrorValue;
+import uk.org.taverna.platform.data.api.DataNature;
+import uk.org.taverna.platform.data.api.DataReference;
 
 /**
  * Implementation of a Data object.
@@ -34,35 +38,25 @@ import uk.org.taverna.platform.data.api.ErrorValue;
 public class DataImpl implements Data {
 
 	private String ID;
+	
+	private DataNature dataNature;
 
-	private URI reference;
+	private Set<DataReference> references;
 
 	private Object value;
 
-	private Data container;
-
 	private List<Data> elements;
+	
+	private long size = -1;
+	
+	public DataImpl(String ID, DataNature nature) {
+		this.dataNature = nature;
+		this.ID = ID;
+	}
 
-	private String mimeType;
-
-	public DataImpl(String ID, Object value) {
+	public DataImpl(String ID, DataNature nature, Object value) {
+		this(ID, nature);
 		this.value = value;
-	}
-
-	public DataImpl(String ID, URI reference) {
-		this.reference = reference;
-	}
-
-	public DataImpl(String ID, URI reference, Object value) {
-		this.reference = reference;
-		this.value = value;
-	}
-
-	public DataImpl(String ID, List<Data> elements) {
-		this.elements = elements;
-//		for (Data element : elements) {
-//			element.container = this;
-//		}
 	}
 
 	@Override
@@ -83,23 +77,13 @@ public class DataImpl implements Data {
 	}
 
 	@Override
-	public boolean isReference() {
-		return reference != null;
+	public boolean hasReferences() {
+		return (references != null) && !references.isEmpty();
 	}
 
 	@Override
-	public URI getReference() {
-		return reference;
-	}
-
-	@Override
-	public Object getValue() {
+	public Object getExplicitValue() {
 		return value;
-	}
-
-	@Override
-	public Data getContainer() {
-		return container;
 	}
 
 	@Override
@@ -107,9 +91,54 @@ public class DataImpl implements Data {
 		return elements;
 	}
 
-	@Override
-	public boolean isError() {
-		return value instanceof ErrorValue;
+	public Set<DataReference> getReferences() {
+		return references;
 	}
+
+	@Override
+	public DataNature getDataNature() {
+		return dataNature;
+	}
+
+	@Override
+	public boolean hasExplicitValue() {
+		return getExplicitValue() != null;
+	}
+
+	@Override
+	public boolean hasDataNature(DataNature nature) {
+		return getDataNature().equals(nature);
+	}
+
+	public void setDataNature(DataNature dataNature) throws IOException {
+		this.dataNature = dataNature;
+	}
+
+	@Override
+	public void setReferences(Set<DataReference> references) {
+		this.references = references;
+	}
+
+	@Override
+	public void setExplicitValue(Object value) throws IOException {
+		this.value = value;
+	}
+
+	@Override
+	public void setElements(List<Data> elements) {
+		this.elements = elements;
+	}
+
+	@Override
+	public long getApproximateSizeInBytes() {
+		return size;
+	}
+
+	@Override
+	public void setApproximateSizeInBytes(long size) throws IOException {
+		this.size = size;
+	}
+
+
 
 }
