@@ -990,7 +990,7 @@ public class RunIT extends PlatformIT {
 			Map<String, Data> inputs = new HashMap<String, Data>();
 			File file = loadFile("/t2flow/input.txt");
 			Data data = dataService.create(file.toURI());
-			assertTrue(data.hasReference());
+			assertTrue(data.isReference());
 			inputs.put("in", data);
 
 			String runId = runService.createRun(new RunProfile(executionEnvironment,
