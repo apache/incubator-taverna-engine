@@ -20,8 +20,10 @@
  ******************************************************************************/
 package uk.org.taverna.platform.data.api;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+import java.util.Set;
 
 /**
  * The data output by a workflow port.
@@ -31,6 +33,12 @@ import java.util.List;
 public interface Data {
 
 	public String getID();
+	
+	public boolean hasDataNature(DataNature nature);
+	
+	public DataNature getDataNature();
+
+	public abstract void setDataNature(DataNature dataNature) throws IOException;
 
 	/**
 	 * Returns the depth of the data. Depth 0 is a single value, depth 1 is a list, depth 2 a list
@@ -41,49 +49,55 @@ public interface Data {
 	public int getDepth();
 
 	/**
-	 * Returns true if a reference to an external source for the data is available.
+	 * Returns true if a reference to an external source for the data is available. If the Data is not a Text or BinaryValue then this will return false.
 	 *
 	 * @return true if a reference to an external source for the data is available
 	 */
-	public boolean isReference();
+	public boolean hasReferences();
 
 	/**
-	 * Returns true if the value is an {@link ErrorValue}.
+	 * Returns references to external sources for the data. Returns an empty set if no
+	 * reference is available. There is no guarantee that the returned references will be resolvable
+	 * nor that they will resolve to the same object returned by getExplicitValue().
 	 *
-	 * @return true if the value is an <code>ErrorValue</code>
+	 * @return a set of references to external sources for the data
+	 * @throws IOException 
 	 */
-	public boolean isError();
-
+	public Set<DataReference> getReferences() throws IOException;
+	
+	public void setReferences(Set<DataReference> references);
+	
 	/**
-	 * Returns a reference to an external source for the data. Returns <code>null</code> if no
-	 * reference is available. There is no guarantee that the returned reference will be resolvable
-	 * nor that it will resolve to the same object returned by getValue().
+	 * Returns true if a value for the data is explicitly specified.
 	 *
-	 * @return a reference to an external source for the data
+	 * @return true if a value for the data is explicitly specified.
 	 */
-	public URI getReference();
+	public boolean hasExplicitValue();
 
 	/**
-	 * Returns the value of this Data object.
+	 * Returns the explicit value of this Data object. It returns null if the Data is not a Text or BinaryValue, or if there is no explicit value
 	 *
 	 * @return
 	 */
-	public Object getValue();
+	public Object getExplicitValue();
+	
+	public void setExplicitValue(Object value) throws IOException;
 
 	/**
-	 * Returns the Data object that contains this element. Returns <code>null</code> if not an
-	 * elements of another Data object.
-	 *
-	 * @return the Data object that contains this element
-	 */
-	public Data getContainer();
-
-	/**
-	 * Returns a list of Data elements if the depth is > 0. If the depth is 0, <code>null</code> is
+	 * Returns a list of Data elements if the depth is > 0. If the depth is 0 or the Data does not have any value, <code>null</code> is
 	 * returned.
 	 *
 	 * @return a list of Data elements
 	 */
 	public List<Data> getElements();
+
+	public void setElements(List<Data> elements);
+	
+	/**
+	 * Returns the approximate size of the data in bytes. -1 if unknown or irrelevant
+	 */
+	public long getApproximateSizeInBytes();
+	
+	public void setApproximateSizeInBytes(long size) throws IOException;
 
 }

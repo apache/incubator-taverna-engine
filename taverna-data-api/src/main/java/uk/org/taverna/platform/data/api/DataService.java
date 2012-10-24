@@ -20,6 +20,8 @@
  ******************************************************************************/
 package uk.org.taverna.platform.data.api;
 
+import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 import java.util.Set;
 
@@ -52,22 +54,10 @@ public interface DataService {
 	/**
 	 * Creates a new Data object.
 	 *
-	 * @param value
-	 *            the value of the Data
-	 * @return
+	 * @throws IOException 
 	 */
-	public Data create(Object value);
+	public Data create(DataNature nature) throws IOException;
 
-	/**
-	 * Creates a value for storing error information.
-	 *
-	 * @param message
-	 * @param exceptionMessage
-	 * @param stackTrace
-	 * @param causes
-	 * @return
-	 */
-	public ErrorValue createErrorValue(String message, String exceptionMessage,
-			List<StackTraceElement> stackTrace, Set<ErrorValue> causes);
+	public DataReference createDataReference();
 
 }
