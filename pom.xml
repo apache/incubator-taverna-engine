@@ -24,6 +24,7 @@
 		<module>taverna-run-api</module>
 		<module>taverna-run-impl</module>
 		<module>taverna-integration-tests</module>
+		<module>taverna-data-general-impl</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>
