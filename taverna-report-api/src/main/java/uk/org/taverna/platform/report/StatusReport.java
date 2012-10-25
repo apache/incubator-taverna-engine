@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import uk.org.taverna.platform.data.api.Data;
+import uk.org.taverna.platform.data.api.DataLocation;
 import uk.org.taverna.scufl2.api.common.WorkflowBean;
 
 /**
@@ -57,9 +57,9 @@ public class StatusReport<SUBJECT extends WorkflowBean, PARENT extends StatusRep
 
 	private List<Date> pausedDates = new ArrayList<Date>(), resumedDates = new ArrayList<Date>();
 
-	private final Map<String, Data> inputs = new HashMap<String, Data>();
+	private final Map<String, DataLocation> inputs = new HashMap<String, DataLocation>();
 
-	private final Map<String, Data> outputs = new HashMap<String, Data>();
+	private final Map<String, DataLocation> outputs = new HashMap<String, DataLocation>();
 
 	/**
 	 * Constructs a new <code>StatusReport</code> for the subject and sets the created date to the
@@ -307,24 +307,24 @@ public class StatusReport<SUBJECT extends WorkflowBean, PARENT extends StatusRep
 	}
 
 	/**
-	 * Returns the inputs for the workflow component.
+	 * Returns the locations of the inputs for the workflow component.
 	 *
 	 * If there are no inputs an empty map is returned.
 	 *
 	 * @return the inputs
 	 */
-	public Map<String, Data> getInputs() {
+	public Map<String, DataLocation> getInputs() {
 		return inputs;
 	}
 
 	/**
-	 * Returns the outputs from the workflow component.
+	 * Returns the locations of the outputs from the workflow component.
 	 *
 	 * If there are no outputs an empty map is returned.
 	 *
 	 * @return the outputs
 	 */
-	public Map<String, Data> getOutputs() {
+	public Map<String, DataLocation> getOutputs() {
 		return outputs;
 	}
 

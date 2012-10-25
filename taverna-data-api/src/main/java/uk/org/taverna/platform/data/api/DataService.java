@@ -31,6 +31,17 @@ import java.util.Set;
  * @author David Withers
  */
 public interface DataService {
+	
+	/**
+	 * Get a way of identifying the DataService
+	 */
+	public URI getURI();
+	
+	/**
+	 * @param data
+	 * @return A DataLocation that provides a means of locating the specified data within this DataService.
+	 */
+	public DataLocation getDataLocation(Data data);
 
 	/**
 	 * Returns the Data for the ID. Returns <code>null</code> if there is no Data for the ID.

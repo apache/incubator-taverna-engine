@@ -18,17 +18,20 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package uk.org.taverna.platform.data.impl;
+package uk.org.taverna.platform.data.inmemory.impl;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import uk.org.taverna.platform.data.api.Data;
+import uk.org.taverna.platform.data.api.DataLocation;
 import uk.org.taverna.platform.data.api.DataNature;
 import uk.org.taverna.platform.data.api.DataReference;
 import uk.org.taverna.platform.data.api.DataService;
@@ -39,6 +42,18 @@ import uk.org.taverna.platform.data.api.DataService;
  * @author David Withers
  */
 public class DataServiceImpl implements DataService {
+	
+	private URI uri;
+	private static Logger logger = Logger.getLogger(DataServiceImpl.class.getName());
+
+	public DataServiceImpl() {
+		super();
+		try {
+			this.uri = new URI("http://www.taverna.org.uk" + UUID.randomUUID().toString());
+		} catch (URISyntaxException e) {
+			logger.severe(e.getMessage());
+		}
+	}
 
 	private Map<String, Data> store = new HashMap<String, Data>();
 
@@ -65,6 +80,16 @@ public class DataServiceImpl implements DataService {
 	@Override
 	public DataReference createDataReference() {
 		return new DataReferenceImpl(UUID.randomUUID().toString());
+	}
+
+	@Override
+	public URI getURI() {
+		return uri;
+	}
+
+	@Override
+	public DataLocation getDataLocation(Data data) {
+		return new DataLocationImpl(getURI(), data.getID());
 	}
 
 }

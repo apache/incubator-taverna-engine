@@ -18,7 +18,7 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package uk.org.taverna.platform.data.impl;
+package uk.org.taverna.platform.data.inmemory.impl;
 
 import java.io.IOException;
 import java.net.URI;
@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Set;
 
 import uk.org.taverna.platform.data.api.Data;
+import uk.org.taverna.platform.data.api.DataLocation;
 import uk.org.taverna.platform.data.api.DataNature;
 import uk.org.taverna.platform.data.api.DataReference;
 
@@ -138,7 +139,5 @@ public class DataImpl implements Data {
 	public void setApproximateSizeInBytes(long size) throws IOException {
 		this.size = size;
 	}
-
-
 
 }

@@ -15,7 +15,7 @@
 		<module>taverna-capability-api</module>
 		<module>taverna-capability-impl</module>
 		<module>taverna-data-api</module>
-		<module>taverna-data-impl</module>
+		<module>taverna-data-inmemory-impl</module>
 		<module>taverna-execution-api</module>
 		<module>taverna-execution-local</module>
 		<module>taverna-execution-remote</module>

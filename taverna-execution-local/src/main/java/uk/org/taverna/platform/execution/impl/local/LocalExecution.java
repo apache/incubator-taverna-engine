@@ -70,7 +70,9 @@ import uk.org.taverna.configuration.database.DatabaseConfiguration;
 import uk.org.taverna.platform.capability.api.ActivityService;
 import uk.org.taverna.platform.capability.api.DispatchLayerService;
 import uk.org.taverna.platform.data.api.Data;
+import uk.org.taverna.platform.data.api.DataNature;
 import uk.org.taverna.platform.data.api.DataService;
+import uk.org.taverna.platform.data.api.DataTools;
 import uk.org.taverna.platform.data.api.ErrorValue;
 import uk.org.taverna.platform.execution.api.AbstractExecution;
 import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
@@ -182,18 +184,11 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 	}
 
 	private T2Reference registerData(Data data, int depth) {
-		T2Reference identifier = null;
-		if (data.isReference()) {
-			URI uri = data.getReference();
-			if (uri.getScheme().equals("file")) {
-				identifier = referenceService.register(new File(uri), depth, true, null);
-			} else {
-				identifier = referenceService.register(uri, depth, true, null);
-			}
-		} else {
-			identifier = referenceService.register(data.getValue(), depth, true, null);
+		Object conversion = DataTools.convertToObject(data);
+		if (conversion == null) {
+			return null;
 		}
-		return identifier;
+		return referenceService.register(conversion, depth, true, null);
 	}
 
 	@Override

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package uk.org.taverna.platform.data.impl;
+package uk.org.taverna.platform.data.inmemory.impl;
 
 import java.io.IOException;
 import java.net.URI;
