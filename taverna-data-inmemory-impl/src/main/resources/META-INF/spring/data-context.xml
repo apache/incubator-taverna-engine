@@ -3,6 +3,6 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
                            http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-	<bean id="dataService" class="uk.org.taverna.platform.data.impl.DataServiceImpl" />
+	<bean id="dataService" class="uk.org.taverna.platform.data.inmemory.impl.DataServiceImpl" />
 
 </beans>
