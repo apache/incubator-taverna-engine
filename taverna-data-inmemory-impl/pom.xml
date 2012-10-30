@@ -7,7 +7,7 @@
 		<version>0.1.3-SNAPSHOT</version>
 	</parent>
 	<groupId>uk.org.taverna.platform</groupId>
-	<artifactId>taverna-data-impl</artifactId>
+	<artifactId>taverna-data-inmemory-impl</artifactId>
 	<packaging>bundle</packaging>
 	<name>Taverna Platform Data Implementation</name>
 	<dependencies>

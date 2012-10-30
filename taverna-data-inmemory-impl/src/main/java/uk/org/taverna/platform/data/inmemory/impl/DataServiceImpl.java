@@ -20,13 +20,11 @@
  ******************************************************************************/
 package uk.org.taverna.platform.data.inmemory.impl;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -69,7 +67,12 @@ public class DataServiceImpl implements DataService {
 	
 	@Override
 	public Data create(DataNature nature) {
-		return store(new DataImpl(UUID.randomUUID().toString(), nature));
+		return create(nature, UUID.randomUUID().toString());
+	}
+
+	@Override
+	public Data create(DataNature nature, String id) {
+		return store(new DataImpl(this, id, nature));
 	}
 
 	private Data store(Data data) {
@@ -89,7 +92,15 @@ public class DataServiceImpl implements DataService {
 
 	@Override
 	public DataLocation getDataLocation(Data data) {
-		return new DataLocationImpl(getURI(), data.getID());
+		return new DataLocation(getURI(), data.getID());
+	}
+
+	@Override
+	public Data get(DataLocation dl) {
+		if (!dl.getDataServiceURI().equals(getURI())) {
+			return null;
+		}
+		return get(dl.getDataID());
 	}
 
 }

@@ -21,8 +21,6 @@
 package uk.org.taverna.platform.data.inmemory.impl;
 
 import java.io.IOException;
-import java.net.URI;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -30,6 +28,7 @@ import uk.org.taverna.platform.data.api.Data;
 import uk.org.taverna.platform.data.api.DataLocation;
 import uk.org.taverna.platform.data.api.DataNature;
 import uk.org.taverna.platform.data.api.DataReference;
+import uk.org.taverna.platform.data.api.DataService;
 
 /**
  * Implementation of a Data object.
@@ -49,14 +48,17 @@ public class DataImpl implements Data {
 	private List<Data> elements;
 	
 	private long size = -1;
+
+	private DataService dataService;
 	
-	public DataImpl(String ID, DataNature nature) {
+	public DataImpl(DataService dataServiceImpl, String ID, DataNature nature) {
+		this.dataService = dataServiceImpl;
 		this.dataNature = nature;
 		this.ID = ID;
 	}
 
-	public DataImpl(String ID, DataNature nature, Object value) {
-		this(ID, nature);
+	public DataImpl(DataService dataServiceImpl, String ID, DataNature nature, Object value) {
+		this(dataServiceImpl, ID, nature);
 		this.value = value;
 	}
 
@@ -138,6 +140,18 @@ public class DataImpl implements Data {
 	@Override
 	public void setApproximateSizeInBytes(long size) throws IOException {
 		this.size = size;
+	}
+
+	/**
+	 * @return the dataService
+	 */
+	public DataService getDataService() {
+		return dataService;
+	}
+
+	@Override
+	public DataLocation getLocation() {
+		return getDataService().getDataLocation(this);
 	}
 
 }
