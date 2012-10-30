@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import uk.org.taverna.platform.data.api.Data;
+import uk.org.taverna.platform.data.api.DataLocation;
 import uk.org.taverna.platform.report.ActivityReport;
 import uk.org.taverna.platform.report.ProcessorReport;
 import uk.org.taverna.platform.report.WorkflowReport;
@@ -54,7 +55,7 @@ public abstract class AbstractExecution implements Execution {
 	private final WorkflowBundle workflowBundle;
 	private final Workflow workflow;
 	private final Profile profile;
-	private final Map<String, Data> inputs;
+	private final Map<String, DataLocation> inputs;
 	private final WorkflowReport workflowReport;
 	private final Scufl2Tools scufl2Tools = new Scufl2Tools();
 	private final URITools uriTools = new URITools();
@@ -76,7 +77,7 @@ public abstract class AbstractExecution implements Execution {
 	 *             if the specified workflow is invalid
 	 */
 	public AbstractExecution(WorkflowBundle workflowBundle, Workflow workflow, Profile profile,
-			Map<String, Data> inputs) {
+			Map<String, DataLocation> inputs) {
 		this.workflowBundle = workflowBundle;
 		this.workflow = workflow;
 		this.profile = profile;
@@ -144,7 +145,7 @@ public abstract class AbstractExecution implements Execution {
 	}
 
 	@Override
-	public Map<String, Data> getInputs() {
+	public Map<String, DataLocation> getInputs() {
 		return inputs;
 	}
 

@@ -30,6 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import uk.org.taverna.platform.data.api.Data;
+import uk.org.taverna.platform.data.api.DataLocation;
 import uk.org.taverna.platform.report.ActivityReport;
 import uk.org.taverna.platform.report.ProcessorReport;
 import uk.org.taverna.platform.report.WorkflowReport;
@@ -53,7 +54,7 @@ public class AbstractExecutionTest {
 
 	private Profile profile;
 
-	private Map<String, Data> inputs;
+	private Map<String, DataLocation> inputs;
 
 	/**
 	 * @throws java.lang.Exception
@@ -63,7 +64,7 @@ public class AbstractExecutionTest {
 		workflowBundle = new WorkflowBundle();
 		workflow = new Workflow();
 		profile = new Profile();
-		inputs = new HashMap<String, Data>();
+		inputs = new HashMap<String, DataLocation>();
 		execution = new AbstractExecution(workflowBundle, workflow, profile, inputs) {
 			@Override
 			public void start() {}

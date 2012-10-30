@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import uk.org.taverna.platform.data.api.Data;
+import uk.org.taverna.platform.data.api.DataLocation;
 import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.Workflow;
@@ -69,7 +70,7 @@ public abstract class AbstractExecutionService implements ExecutionService {
 
 	@Override
 	public String createExecution(ExecutionEnvironment executionEnvironment, WorkflowBundle workflowBundle, Workflow workflow,
-			Profile profile, Map<String, Data> inputs)
+			Profile profile, Map<String, DataLocation> inputs)
 			throws InvalidWorkflowException {
 		Execution execution = createExecutionImpl(workflowBundle, workflow, profile, inputs);
 		executionMap.put(execution.getID(), execution);
@@ -96,7 +97,7 @@ public abstract class AbstractExecutionService implements ExecutionService {
 	 *             if the specified workflow is invalid
 	 */
 	protected abstract Execution createExecutionImpl(WorkflowBundle workflowBundle,
-			Workflow workflow, Profile profile, Map<String, Data> inputs) throws InvalidWorkflowException;
+			Workflow workflow, Profile profile, Map<String, DataLocation> inputs) throws InvalidWorkflowException;
 
 	@Override
 	public WorkflowReport getWorkflowReport(String executionID) throws InvalidExecutionIdException {

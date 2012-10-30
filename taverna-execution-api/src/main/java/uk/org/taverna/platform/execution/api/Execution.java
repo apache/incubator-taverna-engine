@@ -23,6 +23,7 @@ package uk.org.taverna.platform.execution.api;
 import java.util.Map;
 
 import uk.org.taverna.platform.data.api.Data;
+import uk.org.taverna.platform.data.api.DataLocation;
 import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.Workflow;
@@ -70,7 +71,7 @@ public interface Execution {
 	 *
 	 * @return the inputs for the <code>Workflow</code>
 	 */
-	public abstract Map<String, Data> getInputs();
+	public abstract Map<String, DataLocation> getInputs();
 
 	/**
 	 * Returns the <code>WorkflowReport</code> for the execution.
