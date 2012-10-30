@@ -26,6 +26,7 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 import uk.org.taverna.platform.data.api.Data;
+import uk.org.taverna.platform.data.api.DataLocation;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
 import uk.org.taverna.platform.execution.api.InvalidExecutionIdException;
 import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
@@ -49,7 +50,7 @@ public class Run {
 
 	private final String ID, executionID;
 
-	private final Map<String, Data> inputs;
+	private final Map<String, DataLocation> inputs;
 
 	private final ExecutionEnvironment executionEnvironment;
 
@@ -158,7 +159,7 @@ public class Run {
 	 *
 	 * @return the inputs for the <code>Workflow</code>
 	 */
-	public Map<String, Data> getInputs() {
+	public Map<String, DataLocation> getInputs() {
 		return inputs;
 	}
 
@@ -169,7 +170,7 @@ public class Run {
 	 *
 	 * @return the outputs for the <code>Workflow</code>
 	 */
-	public Map<String, Data> getOutputs() {
+	public Map<String, DataLocation> getOutputs() {
 		return workflowReport.getOutputs();
 	}
 
