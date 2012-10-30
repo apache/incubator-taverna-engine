@@ -48,7 +48,9 @@ import org.osgi.framework.BundleContext;
 
 import uk.org.taverna.osgi.starter.TavernaStarter;
 import uk.org.taverna.platform.data.api.Data;
+import uk.org.taverna.platform.data.api.DataLocation;
 import uk.org.taverna.platform.data.api.DataService;
+import uk.org.taverna.platform.data.api.DataTools;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
 import uk.org.taverna.platform.report.State;
 import uk.org.taverna.platform.report.WorkflowReport;
@@ -110,8 +112,8 @@ public class RunIT extends PlatformIT {
 				.getExecutionEnvironments(workflowBundle);
 		assertTrue(executionEnvironments.size() > 0);
 		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
-			Map<String, Data> inputs = new HashMap<String, Data>();
-			inputs.put("in", dataService.create("test-input"));
+			Map<String, DataLocation> inputs = new HashMap<String, DataLocation>();
+			inputs.put("in", DataTools.createExplicitTextData(dataService, "test-input").getLocation());
 
 			String runId = runService.createRun(new RunProfile(executionEnvironment,
 					workflowBundle, inputs));
@@ -125,11 +127,11 @@ public class RunIT extends PlatformIT {
 					|| runService.getState(runId).equals(State.COMPLETED));
 			System.out.println(report);
 
-			Map<String, Data> results = runService.getOutputs(runId);
+			Map<String, DataLocation> results = runService.getOutputs(runId);
 			assertNotNull(results);
 			waitForResults(results, runService.getWorkflowReport(runId), "out");
 
-			assertTrue(checkResult(results.get("out"), "test-input"));
+			assertTrue(checkResult(dataService.get(results.get("out")), "test-input"));
 
 			assertEquals(State.COMPLETED, runService.getState(runId));
 			System.out.println(report);
@@ -144,8 +146,8 @@ public class RunIT extends PlatformIT {
 				.getExecutionEnvironments(workflowBundle);
 		assertTrue(executionEnvironments.size() > 0);
 		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
-			Map<String, Data> inputs = new HashMap<String, Data>();
-			inputs.put("in", dataService.create("test-input"));
+			Map<String, DataLocation> inputs = new HashMap<String, DataLocation>();
+			inputs.put("in", DataTools.createExplicitTextData(dataService, "test-input").getLocation());
 
 			String runId = runService.createRun(new RunProfile(executionEnvironment,
 					workflowBundle, inputs));
@@ -159,11 +161,11 @@ public class RunIT extends PlatformIT {
 					|| runService.getState(runId).equals(State.COMPLETED));
 			System.out.println(report);
 
-			Map<String, Data> results = runService.getOutputs(runId);
+			Map<String, DataLocation> results = runService.getOutputs(runId);
 			assertNotNull(results);
 			waitForResults(results, report, "out");
 
-			assertTrue(checkResult(results.get("out"), "TEST-INPUT"));
+			assertTrue(checkResult(dataService.get(results.get("out")), "TEST-INPUT"));
 
 			assertEquals(State.COMPLETED, runService.getState(runId));
 			System.out.println(report);
@@ -178,8 +180,8 @@ public class RunIT extends PlatformIT {
 				.getExecutionEnvironments(workflowBundle);
 		assertTrue(executionEnvironments.size() > 0);
 		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
-			Map<String, Data> inputs = new HashMap<String, Data>();
-			inputs.put("in", dataService.create("test-input"));
+			Map<String, DataLocation> inputs = new HashMap<String, DataLocation>();
+			inputs.put("in", DataTools.createExplicitTextData(dataService, "test-input").getLocation());
 
 			String runId = runService.createRun(new RunProfile(executionEnvironment,
 					workflowBundle, inputs));
@@ -193,13 +195,13 @@ public class RunIT extends PlatformIT {
 					|| runService.getState(runId).equals(State.COMPLETED));
 			System.out.println(report);
 
-			Map<String, Data> results = runService.getOutputs(runId);
+			Map<String, DataLocation> results = runService.getOutputs(runId);
 			assertNotNull(results);
 			waitForResults(results, report, "out");
 
-			List<Data> result = results.get("out").getElements();
+			List<Data> result = dataService.get(results.get("out")).getElements();
 			assertEquals(1000, result.size());
-			assertEquals("test-input:0", result.get(0).getValue());
+			assertEquals("test-input:0", result.get(0).getExplicitValue());
 			assertEquals(State.COMPLETED, runService.getState(runId));
 			System.out.println(report);
 		}
@@ -225,13 +227,13 @@ public class RunIT extends PlatformIT {
 					|| runService.getState(runId).equals(State.COMPLETED));
 			System.out.println(report);
 
-			Map<String, Data> results = runService.getOutputs(runId);
+			Map<String, DataLocation> results = runService.getOutputs(runId);
 			assertNotNull(results);
 			waitForResults(results, report, "out");
 
-			List<Data> result = results.get("out").getElements();
+			List<Data> result = dataService.get(results.get("out")).getElements();
 			assertEquals(5, result.size());
-			assertEquals("ENSBTAG00000018854", result.get(0).getValue());
+			assertEquals("ENSBTAG00000018854", result.get(0).getExplicitValue());
 			assertEquals(State.COMPLETED, runService.getState(runId));
 			System.out.println(report);
 		}
@@ -259,11 +261,11 @@ public class RunIT extends PlatformIT {
 					|| runService.getState(runId).equals(State.COMPLETED));
 			System.out.println(report);
 
-			Map<String, Data> results = runService.getOutputs(runId);
+			Map<String, DataLocation> results = runService.getOutputs(runId);
 			assertNotNull(results);
 			waitForResults(results, report, "out");
 
-			List<Data> result = results.get("out").getElements();
+			List<Data> result = dataService.get(results.get("out")).getElements();
 			assertEquals(5, result.size());
 			assertEquals("ENSBTAG00000018854", result.get(0));
 			assertEquals(State.COMPLETED, runService.getState(runId));
@@ -279,8 +281,8 @@ public class RunIT extends PlatformIT {
 				.getExecutionEnvironments(workflowBundle);
 		assertTrue(executionEnvironments.size() > 0);
 		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
-			Map<String, Data> inputs = new HashMap<String, Data>();
-			inputs.put("in", dataService.create("test input"));
+			Map<String, DataLocation> inputs = new HashMap<String, DataLocation>();
+			inputs.put("in", DataTools.createExplicitTextData(dataService, "test input").getLocation());
 
 			String runId = runService.createRun(new RunProfile(executionEnvironment,
 					workflowBundle, inputs));
@@ -293,10 +295,10 @@ public class RunIT extends PlatformIT {
 			assertFalse(runService.getState(runId).equals(State.CREATED));
 			System.out.println(report);
 
-			Map<String, Data> results = runService.getOutputs(runId);
+			Map<String, DataLocation> results = runService.getOutputs(runId);
 			waitForResults(results, report, "out");
 
-			assertTrue(checkResult(results.get("out"), "nested dataflow : test input"));
+			assertTrue(checkResult(dataService.get(results.get("out")), "nested dataflow : test input"));
 
 			assertEquals(State.COMPLETED, runService.getState(runId));
 			System.out.println(report);
@@ -311,8 +313,8 @@ public class RunIT extends PlatformIT {
 				.getExecutionEnvironments(workflowBundle);
 		assertTrue(executionEnvironments.size() > 0);
 		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
-			Map<String, Data> inputs = new HashMap<String, Data>();
-			inputs.put("in", dataService.create("Tom"));
+			Map<String, DataLocation> inputs = new HashMap<String, DataLocation>();
+			inputs.put("in", DataTools.createExplicitTextData(dataService, "Tom").getLocation());
 
 			String runId = runService.createRun(new RunProfile(executionEnvironment,
 					workflowBundle, inputs));
@@ -326,11 +328,11 @@ public class RunIT extends PlatformIT {
 					|| runService.getState(runId).equals(State.COMPLETED));
 			System.out.println(report);
 
-			Map<String, Data> results = runService.getOutputs(runId);
+			Map<String, DataLocation> results = runService.getOutputs(runId);
 			assertNotNull(results);
 			waitForResults(results, report, "out");
 
-			assertTrue(checkResult(results.get("out"), "Hello Tom"));
+			assertTrue(checkResult(dataService.get(results.get("out")), "Hello Tom"));
 
 			assertEquals(State.COMPLETED, runService.getState(runId));
 			System.out.println(report);
@@ -356,10 +358,10 @@ public class RunIT extends PlatformIT {
 			assertEquals(State.RUNNING, runService.getState(runId));
 			System.out.println(report);
 
-			Map<String, Data> results = runService.getOutputs(runId);
+			Map<String, DataLocation> results = runService.getOutputs(runId);
 			waitForResults(results, report, "out");
 
-			Object outResult = results.get("out").getValue();
+			Object outResult = dataService.get(results.get("out")).getExplicitValue();
 			if (outResult instanceof byte[]) {
 				outResult = new String((byte[]) outResult);
 			}
@@ -395,11 +397,11 @@ public class RunIT extends PlatformIT {
 			assertEquals(State.RUNNING, runService.getState(runId));
 			System.out.println(report);
 
-			Map<String, Data> results = runService.getOutputs(runId);
+			Map<String, DataLocation> results = runService.getOutputs(runId);
 			waitForResults(results, report, "out");
 
 			assertTrue(checkResult(
-					results.get("out"),
+					dataService.get(results.get("out")),
 					"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">\n"
 							+ "<HTML><HEAD><TITLE>Apache Tomcat Examples</TITLE>\n"
 							+ "<META http-equiv=Content-Type content=\"text/html\">\n"
@@ -444,11 +446,11 @@ public class RunIT extends PlatformIT {
 			assertEquals(State.RUNNING, runService.getState(runId));
 			System.out.println(report);
 
-			Map<String, Data> results = runService.getOutputs(runId);
+			Map<String, DataLocation> results = runService.getOutputs(runId);
 			waitForResults(results, report, "out");
 
 			assertTrue(checkResult(
-					results.get("out"),
+					dataService.get(results.get("out")),
 					"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">\n"
 							+ "<HTML><HEAD><TITLE>Apache Tomcat Examples</TITLE>\n"
 							+ "<META http-equiv=Content-Type content=\"text/html\">\n"
@@ -486,11 +488,11 @@ public class RunIT extends PlatformIT {
 			assertEquals(State.RUNNING, runService.getState(runId));
 			System.out.println(report);
 
-			Map<String, Data> results = runService.getOutputs(runId);
+			Map<String, DataLocation> results = runService.getOutputs(runId);
 			waitForResults(results, report, "out");
 
 			assertTrue(checkResult(
-					results.get("out"),
+					dataService.get(results.get("out")),
 					"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">\n"
 							+ "<HTML><HEAD><TITLE>Apache Tomcat Examples</TITLE>\n"
 							+ "<META http-equiv=Content-Type content=\"text/html\">\n"
@@ -535,11 +537,11 @@ public class RunIT extends PlatformIT {
 			assertEquals(State.RUNNING, runService.getState(runId));
 			System.out.println(report);
 
-			Map<String, Data> results = runService.getOutputs(runId);
+			Map<String, DataLocation> results = runService.getOutputs(runId);
 			waitForResults(results, report, "out");
 
 			assertTrue(checkResult(
-					results.get("out"),
+					dataService.get(results.get("out")),
 					"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">\n"
 							+ "<HTML><HEAD><TITLE>Apache Tomcat Examples</TITLE>\n"
 							+ "<META http-equiv=Content-Type content=\"text/html\">\n"
@@ -574,13 +576,13 @@ public class RunIT extends PlatformIT {
 			assertEquals(State.RUNNING, runService.getState(runId));
 			System.out.println(report);
 
-			Map<String, Data> results = runService.getOutputs(runId);
+			Map<String, DataLocation> results = runService.getOutputs(runId);
 			waitForResults(results, report, "out");
 
-			List<Data> result = results.get("out").getElements();
+			List<Data> result = dataService.get(results.get("out")).getElements();
 			assertEquals(35, result.size());
-			assertEquals("1971.0", result.get(1).getValue());
-			assertEquals("2004.0", result.get(34).getValue());
+			assertEquals("1971.0", result.get(1).getExplicitValue());
+			assertEquals("2004.0", result.get(34).getExplicitValue());
 
 			assertEquals(State.COMPLETED, runService.getState(runId));
 			System.out.println(report);
@@ -606,10 +608,10 @@ public class RunIT extends PlatformIT {
 			assertEquals(State.RUNNING, runService.getState(runId));
 			System.out.println(report);
 
-			Map<String, Data> results = runService.getOutputs(runId);
+			Map<String, DataLocation> results = runService.getOutputs(runId);
 			waitForResults(results, report, "sequence");
 
-			assertTrue(checkResult(results.get("sequence"),
+			assertTrue(checkResult(dataService.get(results.get("sequence")),
 					"ID   X52524; SV 1; linear; genomic DNA; STD; INV; 4507 BP."));
 
 			assertEquals(State.COMPLETED, runService.getState(runId));
@@ -634,10 +636,10 @@ public class RunIT extends PlatformIT {
 			assertTrue(runService.getState(runId).equals(State.RUNNING)
 					|| runService.getState(runId).equals(State.COMPLETED));
 
-			Map<String, Data> results = runService.getOutputs(runId);
+			Map<String, DataLocation> results = runService.getOutputs(runId);
 			waitForResults(results, report, "out");
 
-			assertTrue(checkResult(results.get("out"), "Test Value"));
+			assertTrue(checkResult(dataService.get(results.get("out")), "Test Value"));
 
 			assertEquals(State.COMPLETED, runService.getState(runId));
 		}
@@ -660,10 +662,10 @@ public class RunIT extends PlatformIT {
 			assertTrue(runService.getState(runId).equals(State.RUNNING)
 					|| runService.getState(runId).equals(State.COMPLETED));
 
-			Map<String, Data> results = runService.getOutputs(runId);
+			Map<String, DataLocation> results = runService.getOutputs(runId);
 			waitForResults(results, report, "out");
 
-			assertTrue(checkResult(results.get("out"), "HelloWorld"));
+			assertTrue(checkResult(dataService.get(results.get("out")), "HelloWorld"));
 
 			assertEquals(State.COMPLETED, runService.getState(runId));
 		}
@@ -677,8 +679,8 @@ public class RunIT extends PlatformIT {
 				.getExecutionEnvironments(workflowBundle);
 		assertTrue(executionEnvironments.size() > 0);
 		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
-			Map<String, Data> inputs = new HashMap<String, Data>();
-			inputs.put("in", dataService.create("test"));
+			Map<String, DataLocation> inputs = new HashMap<String, DataLocation>();
+			inputs.put("in", DataTools.createExplicitTextData(dataService, "test").getLocation());
 
 			String runId = runService.createRun(new RunProfile(executionEnvironment,
 					workflowBundle, inputs));
@@ -691,49 +693,49 @@ public class RunIT extends PlatformIT {
 			assertEquals(State.RUNNING, runService.getState(runId));
 			System.out.println(report);
 
-			Map<String, Data> results = runService.getOutputs(runId);
+			Map<String, DataLocation> results = runService.getOutputs(runId);
 
 			waitForResults(results, report, "cross");
-			List<Data> crossResult = results.get("cross").getElements();
+			List<Data> crossResult = dataService.get(results.get("cross")).getElements();
 			assertEquals(10, crossResult.size());
 			assertEquals(10, crossResult.get(0).getElements().size());
 			assertEquals(10, crossResult.get(5).getElements().size());
-			assertEquals("test:0test:0", crossResult.get(0).getElements().get(0).getValue());
-			assertEquals("test:0test:1", crossResult.get(0).getElements().get(1).getValue());
-			assertEquals("test:4test:2", crossResult.get(4).getElements().get(2).getValue());
-			assertEquals("test:7test:6", crossResult.get(7).getElements().get(6).getValue());
+			assertEquals("test:0test:0", crossResult.get(0).getElements().get(0).getExplicitValue());
+			assertEquals("test:0test:1", crossResult.get(0).getElements().get(1).getExplicitValue());
+			assertEquals("test:4test:2", crossResult.get(4).getElements().get(2).getExplicitValue());
+			assertEquals("test:7test:6", crossResult.get(7).getElements().get(6).getExplicitValue());
 
 			waitForResults(results, report, "dot");
 
-			List<Data> dotResult = results.get("dot").getElements();
+			List<Data> dotResult = dataService.get(results.get("dot")).getElements();
 			assertEquals(10, dotResult.size());
-			assertEquals("test:0test:0", dotResult.get(0).getValue());
-			assertEquals("test:5test:5", dotResult.get(5).getValue());
+			assertEquals("test:0test:0", dotResult.get(0).getExplicitValue());
+			assertEquals("test:5test:5", dotResult.get(5).getExplicitValue());
 
 			waitForResults(results, report, "crossdot");
 
-			List<Data> crossdotResult = results.get("crossdot").getElements();
+			List<Data> crossdotResult = dataService.get(results.get("crossdot")).getElements();
 			assertEquals(10, crossdotResult.size());
 			assertEquals(10, crossdotResult.get(0).getElements().size());
 			assertEquals(10, crossdotResult.get(5).getElements().size());
-			assertEquals("test:0test:0test", crossdotResult.get(0).getElements().get(0).getValue());
-			assertEquals("test:0test:1test", crossdotResult.get(0).getElements().get(1).getValue());
-			assertEquals("test:4test:2test", crossdotResult.get(4).getElements().get(2).getValue());
-			assertEquals("test:7test:6test", crossdotResult.get(7).getElements().get(6).getValue());
+			assertEquals("test:0test:0test", crossdotResult.get(0).getElements().get(0).getExplicitValue());
+			assertEquals("test:0test:1test", crossdotResult.get(0).getElements().get(1).getExplicitValue());
+			assertEquals("test:4test:2test", crossdotResult.get(4).getElements().get(2).getExplicitValue());
+			assertEquals("test:7test:6test", crossdotResult.get(7).getElements().get(6).getExplicitValue());
 
 			waitForResults(results, report, "dotcross");
 
-			List<Data> dotcrossResult = results.get("dotcross").getElements();
+			List<Data> dotcrossResult = dataService.get(results.get("dotcross")).getElements();
 			assertEquals(10, dotResult.size());
-			assertEquals("test:0test:0test", dotcrossResult.get(0).getValue());
-			assertEquals("test:5test:5test", dotcrossResult.get(5).getValue());
+			assertEquals("test:0test:0test", dotcrossResult.get(0).getExplicitValue());
+			assertEquals("test:5test:5test", dotcrossResult.get(5).getExplicitValue());
 
 			waitForResults(results, report, "dotdot");
 
-			List<Data> dotdotResult = results.get("dotdot").getElements();
+			List<Data> dotdotResult = dataService.get(results.get("dotdot")).getElements();
 			assertEquals(10, dotResult.size());
-			assertEquals("test:0test:0test:0", dotdotResult.get(0).getValue());
-			assertEquals("test:5test:5test:5", dotdotResult.get(5).getValue());
+			assertEquals("test:0test:0test:0", dotdotResult.get(0).getExplicitValue());
+			assertEquals("test:5test:5test:5", dotdotResult.get(5).getExplicitValue());
 
 			assertEquals(State.COMPLETED, runService.getState(runId));
 			System.out.println(report);
@@ -759,12 +761,12 @@ public class RunIT extends PlatformIT {
 			assertEquals(State.RUNNING, runService.getState(runId));
 			System.out.println(report);
 
-			Map<String, Data> results = runService.getOutputs(runId);
+			Map<String, DataLocation> results = runService.getOutputs(runId);
 			waitForResults(results, report, "out");
 
 			// assertTrue(checkResult(results.get("out"),
 			// "Apache Axis version: 1.4\nBuilt on Apr 22, 2006 (06:55:48 PDT)"));
-			assertTrue(checkResult(results.get("out"),
+			assertTrue(checkResult(dataService.get(results.get("out")),
 					"Apache Axis version: 1.2\nBuilt on May 03, 2005 (02:20:24 EDT)"));
 
 			assertEquals(State.COMPLETED, runService.getState(runId));
@@ -796,10 +798,10 @@ public class RunIT extends PlatformIT {
 			assertEquals(State.RUNNING, runService.getState(runId));
 			System.out.println(report);
 
-			Map<String, Data> results = runService.getOutputs(runId);
+			Map<String, DataLocation> results = runService.getOutputs(runId);
 			waitForResults(results, report, "out");
 
-			assertTrue(checkResult(results.get("out"), "Hello Alan!"));
+			assertTrue(checkResult(dataService.get(results.get("out")), "Hello Alan!"));
 
 			assertEquals(State.COMPLETED, runService.getState(runId));
 			System.out.println(report);
@@ -842,14 +844,14 @@ public class RunIT extends PlatformIT {
 			assertEquals(State.RUNNING, runService.getState(runId));
 			System.out.println(report);
 
-			Map<String, Data> results = runService.getOutputs(runId);
+			Map<String, DataLocation> results = runService.getOutputs(runId);
 			waitForResults(results, report, "out_plaintext", "out_digest", "out_digest_timestamp",
 					"out_plaintext_timestamp");
 
-			assertTrue(checkResult(results.get("out_plaintext"), "Hello Alan!"));
-			assertTrue(checkResult(results.get("out_digest"), "Hello Stian!"));
-			assertTrue(checkResult(results.get("out_digest_timestamp"), "Hello David!"));
-			assertTrue(checkResult(results.get("out_plaintext_timestamp"), "Hello Alex!"));
+			assertTrue(checkResult(dataService.get(results.get("out_plaintext")), "Hello Alan!"));
+			assertTrue(checkResult(dataService.get(results.get("out_digest")), "Hello Stian!"));
+			assertTrue(checkResult(dataService.get(results.get("out_digest_timestamp")), "Hello David!"));
+			assertTrue(checkResult(dataService.get(results.get("out_plaintext_timestamp")), "Hello Alex!"));
 
 			assertEquals(State.COMPLETED, runService.getState(runId));
 			System.out.println(report);
@@ -899,14 +901,14 @@ public class RunIT extends PlatformIT {
 			assertEquals(State.RUNNING, runService.getState(runId));
 			System.out.println(report);
 
-			Map<String, Data> results = runService.getOutputs(runId);
+			Map<String, DataLocation> results = runService.getOutputs(runId);
 			waitForResults(results, report, "out_plaintext", "out_digest", "out_digest_timestamp",
 					"out_plaintext_timestamp");
 
-			assertTrue(checkResult(results.get("out_plaintext"), "Hello Alan!"));
-			assertTrue(checkResult(results.get("out_digest"), "Hello Stian!"));
-			assertTrue(checkResult(results.get("out_digest_timestamp"), "Hello David!"));
-			assertTrue(checkResult(results.get("out_plaintext_timestamp"), "Hello Alex!"));
+			assertTrue(checkResult(dataService.get(results.get("out_plaintext")), "Hello Alan!"));
+			assertTrue(checkResult(dataService.get(results.get("out_digest")), "Hello Stian!"));
+			assertTrue(checkResult(dataService.get(results.get("out_digest_timestamp")), "Hello David!"));
+			assertTrue(checkResult(dataService.get(results.get("out_plaintext_timestamp")), "Hello Alex!"));
 
 			assertEquals(State.COMPLETED, runService.getState(runId));
 			System.out.println(report);
@@ -921,10 +923,10 @@ public class RunIT extends PlatformIT {
 				.getExecutionEnvironments(workflowBundle);
 		assertTrue(executionEnvironments.size() > 0);
 		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
-			Map<String, Data> inputs = new HashMap<String, Data>();
-			inputs.put("firstName", dataService.create("John"));
-			inputs.put("lastName", dataService.create("Smith"));
-			inputs.put("age", dataService.create("21"));
+			Map<String, DataLocation> inputs = new HashMap<String, DataLocation>();
+			inputs.put("firstName", DataTools.createExplicitTextData(dataService, "John").getLocation());
+			inputs.put("lastName", DataTools.createExplicitTextData(dataService, "Smith").getLocation());
+			inputs.put("age", DataTools.createExplicitTextData(dataService, "21").getLocation());
 
 			String runId = runService.createRun(new RunProfile(executionEnvironment,
 					workflowBundle, inputs));
@@ -938,10 +940,10 @@ public class RunIT extends PlatformIT {
 					|| runService.getState(runId).equals(State.COMPLETED));
 			System.out.println(report);
 
-			Map<String, Data> results = runService.getOutputs(runId);
+			Map<String, DataLocation> results = runService.getOutputs(runId);
 			waitForResults(results, report, "out");
 
-			assertTrue(checkResult(results.get("out"),
+			assertTrue(checkResult(dataService.get(results.get("out")),
 					"John Smith (21) of 40, Oxford Road. Manchester."));
 
 			assertEquals(State.COMPLETED, runService.getState(runId));
@@ -969,10 +971,10 @@ public class RunIT extends PlatformIT {
 					|| runService.getState(runId).equals(State.COMPLETED));
 			System.out.println(report);
 
-			Map<String, Data> results = runService.getOutputs(runId);
+			Map<String, DataLocation> results = runService.getOutputs(runId);
 			waitForResults(results, report, "out");
 
-			assertTrue(checkResult(results.get("out"), "<test-element>test</test-element>"));
+			assertTrue(checkResult(dataService.get(results.get("out")), "<test-element>test</test-element>"));
 
 			assertEquals(State.COMPLETED, runService.getState(runId));
 			System.out.println(report);
@@ -987,11 +989,11 @@ public class RunIT extends PlatformIT {
 				.getExecutionEnvironments(workflowBundle);
 		assertTrue(executionEnvironments.size() > 0);
 		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
-			Map<String, Data> inputs = new HashMap<String, Data>();
+			Map<String, DataLocation> inputs = new HashMap<String, DataLocation>();
 			File file = loadFile("/t2flow/input.txt");
-			Data data = dataService.create(file.toURI());
-			assertTrue(data.isReference());
-			inputs.put("in", data);
+			Data data = DataTools.createSingleReferenceTextData(dataService, "/t2flow/input.txt");
+			assertTrue(data.hasReferences());
+			inputs.put("in", data.getLocation());
 
 			String runId = runService.createRun(new RunProfile(executionEnvironment,
 					workflowBundle, inputs));
@@ -1005,11 +1007,11 @@ public class RunIT extends PlatformIT {
 					|| runService.getState(runId).equals(State.COMPLETED));
 			System.out.println(report);
 
-			Map<String, Data> results = runService.getOutputs(runId);
+			Map<String, DataLocation> results = runService.getOutputs(runId);
 			assertNotNull(results);
 			waitForResults(results, runService.getWorkflowReport(runId), "out");
 
-			assertTrue(checkResult(results.get("out"), "test input value"));
+			assertTrue(checkResult(dataService.get(results.get("out")), "test input value"));
 
 			assertEquals(State.COMPLETED, runService.getState(runId));
 			System.out.println(report);

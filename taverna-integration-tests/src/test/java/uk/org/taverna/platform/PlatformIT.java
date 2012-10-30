@@ -32,7 +32,8 @@ import java.net.URL;
 import java.util.Map;
 
 import uk.org.taverna.platform.data.api.Data;
-import uk.org.taverna.platform.data.api.ErrorValue;
+import uk.org.taverna.platform.data.api.DataLocation;
+import uk.org.taverna.platform.data.api.DataNature;
 import uk.org.taverna.platform.report.State;
 import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
@@ -61,7 +62,7 @@ public class PlatformIT {
 	}
 
 	public void printErrors(Data data) {
-		ErrorValue error = (ErrorValue) data.getValue();
+/*		ErrorValue error = (ErrorValue) data.getValue();
 		String message = error.getMessage();
 		if (message != null) {
 			System.out.println(message);
@@ -74,15 +75,15 @@ public class PlatformIT {
 			System.out.println(stackTraceElement.getClassName());
 			System.out.println(stackTraceElement.getMethodName());
 			System.out.println(stackTraceElement.getLineNumber());
-		}
+		}*/
 	}
 
 	public boolean checkResult(Data result, String expectedResult) {
-		if (result.isError()) {
+		if (result.hasDataNature(DataNature.WILL_NOT_COME)) {
 			printErrors(result);
 			return false;
-		} else {
-			Object resultObject = result.getValue();
+		} else if (result.hasExplicitValue()){
+			Object resultObject = result.getExplicitValue();
 			String resultValue = null;
 			if (resultObject instanceof byte[]) {
 				resultValue = new String((byte[]) resultObject);
@@ -96,6 +97,9 @@ public class PlatformIT {
 				System.out.println("Expected: " + expectedResult + ", Actual: " + resultValue);
 				return false;
 			}
+		} else {
+			System.out.println("Expected an explicit value got a " + result.getDataNature());
+			return false;
 		}
 	}
 
@@ -114,7 +118,7 @@ public class PlatformIT {
 		return report.getState().equals(state);
 	}
 
-	public void waitForResults(Map<String, Data> results, WorkflowReport report, String... ports)
+	public void waitForResults(Map<String, DataLocation> results, WorkflowReport report, String... ports)
 			throws InterruptedException {
 		int wait = 0;
 		while (!resultsReady(results, ports) && wait++ < 20) {
@@ -123,7 +127,7 @@ public class PlatformIT {
 		}
 	}
 
-	private boolean resultsReady(Map<String, Data> results, String... ports) {
+	private boolean resultsReady(Map<String, DataLocation> results, String... ports) {
 		for (String port : ports) {
 			if (!results.containsKey(port)) {
 				return false;
