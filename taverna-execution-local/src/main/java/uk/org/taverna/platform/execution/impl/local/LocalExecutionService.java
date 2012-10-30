@@ -31,6 +31,7 @@ import uk.org.taverna.configuration.database.DatabaseConfiguration;
 import uk.org.taverna.platform.capability.api.ActivityService;
 import uk.org.taverna.platform.capability.api.DispatchLayerService;
 import uk.org.taverna.platform.data.api.Data;
+import uk.org.taverna.platform.data.api.DataLocation;
 import uk.org.taverna.platform.data.api.DataService;
 import uk.org.taverna.platform.execution.api.AbstractExecutionService;
 import uk.org.taverna.platform.execution.api.Execution;
@@ -79,7 +80,7 @@ public class LocalExecutionService extends AbstractExecutionService {
 
 	@Override
 	protected Execution createExecutionImpl(WorkflowBundle workflowBundle, Workflow workflow,
-			Profile profile, Map<String, Data> inputs) throws InvalidWorkflowException {
+			Profile profile, Map<String, DataLocation> inputs) throws InvalidWorkflowException {
 		return new LocalExecution(workflowBundle, workflow, profile, inputs, dataService,
 				referenceService, edits, activityService, dispatchLayerService, databaseConfiguration,
 				provenanceConnectorFactories);

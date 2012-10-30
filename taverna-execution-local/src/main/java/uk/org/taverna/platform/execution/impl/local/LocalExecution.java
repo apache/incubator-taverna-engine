@@ -21,7 +21,9 @@
 package uk.org.taverna.platform.execution.impl.local;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -70,10 +72,10 @@ import uk.org.taverna.configuration.database.DatabaseConfiguration;
 import uk.org.taverna.platform.capability.api.ActivityService;
 import uk.org.taverna.platform.capability.api.DispatchLayerService;
 import uk.org.taverna.platform.data.api.Data;
+import uk.org.taverna.platform.data.api.DataLocation;
 import uk.org.taverna.platform.data.api.DataNature;
 import uk.org.taverna.platform.data.api.DataService;
 import uk.org.taverna.platform.data.api.DataTools;
-import uk.org.taverna.platform.data.api.ErrorValue;
 import uk.org.taverna.platform.execution.api.AbstractExecution;
 import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
 import uk.org.taverna.platform.report.ActivityReport;
@@ -131,7 +133,7 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 	 *             if the specified workflow is invalid
 	 */
 	public LocalExecution(WorkflowBundle workflowBundle, Workflow workflow, Profile profile,
-			Map<String, Data> inputs, DataService dataService, ReferenceService referenceService,
+			Map<String, DataLocation> inputs, DataService dataService, ReferenceService referenceService,
 			Edits edits, ActivityService activityService,
 			DispatchLayerService dispatchLayerService, DatabaseConfiguration databaseConfiguration,
 			Set<ProvenanceConnectorFactory> provenanceConnectorFactories)
@@ -167,9 +169,9 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 		facade.addResultListener(this);
 		facade.fire();
 		if (getInputs() != null) {
-			for (Entry<String, Data> entry : getInputs().entrySet()) {
+			for (Entry<String, DataLocation> entry : getInputs().entrySet()) {
 				String portName = entry.getKey();
-				Data data = entry.getValue();
+				Data data = dataService.get(entry.getValue().getDataID());
 				T2Reference identifier = registerData(data, inputPorts.get(portName).getDepth());
 				int[] index = new int[] {};
 				WorkflowDataToken token = new WorkflowDataToken("", index, identifier,
@@ -285,9 +287,16 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 	@Override
 	public void resultTokenProduced(WorkflowDataToken token, String portName) {
 		if (token.getIndex().length == 0) {
-			Object object = convertReferenceToObject(token.getData(),
-					referenceService, token.getContext());
-			getWorkflowReport().getOutputs().put(portName, dataService.create(object));
+			DataLocation dl = null;
+			try {
+				dl = T2ReferenceConverter.convertReferenceToDataLocation(token.getData(),
+						referenceService, token.getContext(), dataService);
+			} catch (IOException e) {
+				logger.log(Level.SEVERE, "Unable to convert T2Reference");
+			} catch (URISyntaxException e) {
+				logger.log(Level.SEVERE, "Unable to convert T2Reference");
+			}
+			getWorkflowReport().getOutputs().put(portName, dl);
 
 		}
 	}
@@ -339,98 +348,6 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 			System.out.println(indent + inputPortNode.getPortName() + "("
 					+ inputPortNode.getCardinality() + ")");
 		}
-	}
-
-	private Object convertReferenceToObject(T2Reference reference,
-			ReferenceService referenceService, InvocationContext context) {
-
-		if (reference.getReferenceType() == T2ReferenceType.ReferenceSet) {
-
-			ReferenceSet rs = referenceService.getReferenceSetService().getReferenceSet(reference);
-			if (rs == null) {
-				throw new ReferenceServiceException("Could not find ReferenceSet " + reference);
-			}
-			// Check that there are references in the set
-			if (rs.getExternalReferences().isEmpty()) {
-				throw new ReferenceServiceException("ReferenceSet " + reference + " is empty");
-			}
-
-			ReferencedDataNature dataNature = ReferencedDataNature.UNKNOWN;
-			for (ExternalReferenceSPI ers : rs.getExternalReferences()) {
-				ReferencedDataNature erDataNature = ers.getDataNature();
-				if (!erDataNature.equals(ReferencedDataNature.UNKNOWN)) {
-					dataNature = erDataNature;
-					break;
-				}
-			}
-
-			// Dereference the object
-			Object dataValue;
-			try {
-				if (dataNature.equals(ReferencedDataNature.TEXT)) {
-					dataValue = referenceService.renderIdentifier(reference, String.class, context);
-				} else {
-					dataValue = referenceService.renderIdentifier(reference, byte[].class, context);
-				}
-			} catch (ReferenceServiceException rse) {
-				logger.log(Level.SEVERE, "Problem rendering T2Reference", rse);
-				throw rse;
-			}
-			return dataValue;
-		} else if (reference.getReferenceType() == T2ReferenceType.ErrorDocument) {
-			return createErrorValue(reference);
-		} else { // it is an IdentifiedList<T2Reference>
-			IdentifiedList<T2Reference> identifiedList = referenceService.getListService().getList(
-					reference);
-			List<Object> list = new ArrayList<Object>();
-
-			for (int j = 0; j < identifiedList.size(); j++) {
-				T2Reference ref = identifiedList.get(j);
-				list.add(convertReferenceToObject(ref, referenceService, context));
-			}
-			return list;
-		}
-	}
-
-	private ErrorValue createErrorValue(T2Reference reference) {
-		// Dereference the ErrorDocument
-		ErrorDocument errorDocument = referenceService.getErrorDocumentService().getError(reference);
-		List<StackTraceElement> stackTrace = getStackTrace(errorDocument.getStackTraceStrings());
-		Set<ErrorValue> errorValues = new HashSet<ErrorValue>();
-		// dereference error references
-		Set<T2Reference> errorReferences = errorDocument.getErrorReferences();
-		for (T2Reference errorReference : errorReferences) {
-			if (errorReference.getReferenceType() == T2ReferenceType.ErrorDocument) {
-				errorValues.add(createErrorValue(errorReference));
-			} else if (errorReference.getReferenceType() == T2ReferenceType.IdentifiedList) {
-				errorValues.addAll(createErrorValues(errorReference));
-			}
-		}
-		return dataService.createErrorValue(errorDocument.getMessage(), errorDocument.getExceptionMessage(),
-				stackTrace, errorValues);
-	}
-
-	private List<ErrorValue> createErrorValues(T2Reference reference) {
-		List<ErrorValue> errorValues = new ArrayList<ErrorValue>();
-		IdentifiedList<T2Reference> identifiedList = referenceService.getListService().getList(
-				reference);
-		for (T2Reference t2Reference : identifiedList) {
-			if (t2Reference.getReferenceType() == T2ReferenceType.ErrorDocument) {
-				errorValues.add(createErrorValue(t2Reference));
-			} else if (t2Reference.getReferenceType() == T2ReferenceType.IdentifiedList) {
-				errorValues.addAll(createErrorValues(t2Reference));
-			}
-		}
-		return errorValues;
-	}
-
-	private List<StackTraceElement> getStackTrace(List<StackTraceElementBean> stackTraceBeans) {
-		List<StackTraceElement> stackTrace = new ArrayList<StackTraceElement>();
-		for (StackTraceElementBean stackTraceBean : stackTraceBeans) {
-			stackTrace.add(new StackTraceElement(stackTraceBean.getClassName(), stackTraceBean.getMethodName(),
-					stackTraceBean.getFileName(), stackTraceBean.getLineNumber()));
-		}
-		return stackTrace;
 	}
 
 }
