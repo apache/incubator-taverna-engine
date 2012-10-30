@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -67,8 +68,13 @@ public class DataTools {
 
 	private static DataReference createSimpleDataReference(
 			DataService service, String webAddress) throws URISyntaxException, IOException {
+		return createSimpleDataReference(service, new URI(webAddress));
+	}
+	
+	private static DataReference createSimpleDataReference(
+			DataService service, URI uri) throws URISyntaxException, IOException {
 		DataReference result = service.createDataReference();
-		result.setURI(new URI(webAddress));
+		result.setURI(uri);
 		return result;
 	}
 	
@@ -131,5 +137,19 @@ public class DataTools {
 			}
 		}
 		return result;
+	}
+
+	public static void addDataReference(Data d, DataReference dr) throws IOException {
+		Set<DataReference> refs = d.getReferences();
+		refs.add(dr);
+		d.setReferences(refs);
+	}
+
+	public static void addDataReference(DataService dataservice, Data d, URI uri,
+			Charset charset) throws URISyntaxException, IOException {
+		DataReference dr = createSimpleDataReference(dataservice, uri);
+		dr.setCharset(charset);
+		addDataReference(d, dr);
+		
 	}
 }

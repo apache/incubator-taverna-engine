@@ -9,16 +9,23 @@ import java.net.URI;
  * @author alanrw
  *
  */
-public interface DataLocation {
+public class DataLocation {
 	
-	/**
-	 * @return The URI identifying the DataService where the corresponding Data is located
-	 */
-	public URI getDataServiceURI();
+	private URI dataServiceURI;
+	private String dataID;
 	
-	/**
-	 * @return The identification of the Data within the DataService
-	 */
-	public String getDataID();
+	public DataLocation(URI uri, String id) {
+		this.dataServiceURI = uri;
+		this.dataID = id;
+	}
+
+	public URI getDataServiceURI() {
+		return dataServiceURI;
+	}
+
+	public String getDataID() {
+		return dataID;
+	}
+
 
 }

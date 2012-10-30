@@ -51,6 +51,8 @@ public interface DataService {
 	 * @return the Data for the ID
 	 */
 	public Data get(String ID);
+	
+	public Data get(DataLocation dl);
 
 	/**
 	 * Deletes the Data for the ID. Returns <code>true</code> if Data existed for the ID and was
@@ -64,9 +66,12 @@ public interface DataService {
 
 	/**
 	 * Creates a new Data object.
+	 * @param string 
 	 *
 	 * @throws IOException 
 	 */
+	public Data create(DataNature nature, String id) throws IOException;
+
 	public Data create(DataNature nature) throws IOException;
 
 	public DataReference createDataReference();

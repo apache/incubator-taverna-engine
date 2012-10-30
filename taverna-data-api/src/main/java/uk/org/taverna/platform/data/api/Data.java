@@ -34,6 +34,8 @@ public interface Data {
 
 	public String getID();
 	
+	public DataService getDataService();
+	
 	public boolean hasDataNature(DataNature nature);
 	
 	public DataNature getDataNature();
@@ -99,5 +101,7 @@ public interface Data {
 	public long getApproximateSizeInBytes();
 	
 	public void setApproximateSizeInBytes(long size) throws IOException;
+
+	public DataLocation getLocation();
 
 }
