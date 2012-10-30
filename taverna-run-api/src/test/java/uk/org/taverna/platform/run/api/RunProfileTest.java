@@ -31,6 +31,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import uk.org.taverna.platform.data.api.Data;
+import uk.org.taverna.platform.data.api.DataLocation;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
 import uk.org.taverna.platform.execution.impl.local.LocalExecutionEnvironment;
 import uk.org.taverna.platform.execution.impl.local.LocalExecutionService;
@@ -51,7 +52,7 @@ public class RunProfileTest {
 	private LocalExecutionService executionService;
 	private Workflow workflow, mainWorkflow;
 	private Profile profile, mainProfile;
-	private Map<String, Data> inputs;
+	private Map<String, DataLocation> inputs;
 
 	/**
 	 * @throws java.lang.Exception
@@ -68,7 +69,7 @@ public class RunProfileTest {
 		executionService = new LocalExecutionService();
 		executionEnvironment = new LocalExecutionEnvironment(executionService, null, null);
 
-		inputs = new HashMap<String, Data>();
+		inputs = new HashMap<String, DataLocation>();
 		runProfile = new RunProfile(executionEnvironment, workflowBundle, workflow.getName(), profile.getName(), inputs);
 	}
 

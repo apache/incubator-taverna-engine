@@ -3,6 +3,7 @@ package uk.org.taverna.platform.run.api;
 import java.util.Map;
 
 import uk.org.taverna.platform.data.api.Data;
+import uk.org.taverna.platform.data.api.DataLocation;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 
@@ -17,7 +18,7 @@ public class RunProfile {
 	private WorkflowBundle workflowBundle;
 	private String workflowName;
 	private String profileName;
-	private Map<String, Data> inputs;
+	private Map<String, DataLocation> inputs;
 
 	/**
 	 * Constructs a <code>RunProfile</code> that specifies the parameters required to run a
@@ -47,7 +48,7 @@ public class RunProfile {
 	 *            inputs
 	 */
 	public RunProfile(ExecutionEnvironment executionEnvironment, WorkflowBundle workflowBundle,
-			Map<String, Data> inputs) {
+			Map<String, DataLocation> inputs) {
 		this(executionEnvironment, workflowBundle, null, null, inputs);
 	}
 
@@ -70,7 +71,7 @@ public class RunProfile {
 	 *            inputs
 	 */
 	public RunProfile(ExecutionEnvironment executionEnvironment, WorkflowBundle workflowBundle,
-			String workflowName, String profileName, Map<String, Data> inputs) {
+			String workflowName, String profileName, Map<String, DataLocation> inputs) {
 		this.executionEnvironment = executionEnvironment;
 		this.workflowBundle = workflowBundle;
 		this.workflowName = workflowName;
@@ -160,7 +161,7 @@ public class RunProfile {
 	 *
 	 * @return the inputs for the <code>Workflow</code>
 	 */
-	public Map<String, Data> getInputs() {
+	public Map<String, DataLocation> getInputs() {
 		return inputs;
 	}
 
@@ -170,7 +171,7 @@ public class RunProfile {
 	 * @param inputs
 	 *            the inputs for the <code>Workflow</code>
 	 */
-	public void setInputs(Map<String, Data> inputs) {
+	public void setInputs(Map<String, DataLocation> inputs) {
 		this.inputs = inputs;
 	}
 
