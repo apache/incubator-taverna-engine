@@ -11,6 +11,19 @@
 	<packaging>bundle</packaging>
 	<name>Taverna Platform Execution Environment Service Implementation</name>
 	<description>A Service for executing Taverna workflows</description>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<configuration>
+					<instructions>
+						<Export-Package>uk.org.taverna.platform.execution.api;provide:=true</Export-Package>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 	<dependencies>
 		<dependency>
 			<groupId>uk.org.taverna.platform</groupId>

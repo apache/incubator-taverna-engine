@@ -10,6 +10,19 @@
 	<artifactId>taverna-capability-impl</artifactId>
 	<packaging>bundle</packaging>
 	<name>Taverna Platform Capability Implementation</name>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<configuration>
+					<instructions>
+						<Export-Package>uk.org.taverna.platform.capability.api;provide:=true</Export-Package>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 	<dependencies>
 		<dependency>
 			<groupId>uk.org.taverna.platform</groupId>
