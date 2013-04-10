@@ -22,10 +22,12 @@ package uk.org.taverna.platform.capability.api;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Set;
 
 import uk.org.taverna.scufl2.api.activity.Activity;
 import uk.org.taverna.scufl2.api.configurations.Configuration;
 import uk.org.taverna.scufl2.api.configurations.ConfigurationDefinition;
+import uk.org.taverna.scufl2.api.port.ActivityPort;
 
 /**
  * Service for discovering available activities and the properties required to configure the
@@ -39,30 +41,65 @@ public interface ActivityService {
 	 * Returns a list URI's that identify available activities.
 	 *
 	 * @return a list URI's that identify available activities
+	 * @deprecated use {@link getActivityTypes}
 	 */
+	@Deprecated
 	public List<URI> getActivityURIs();
 
 	/**
-	 * Returns true iff an activity exists for the specified URI.
+	 * Returns the available activity types.
+	 *
+	 * @return the available activity types
+	 */
+	public Set<URI> getActivityTypes();
+
+	/**
+	 * Returns true iff the activity type exists.
 	 *
 	 * @param uri
-	 *            the activity URI to check
-	 * @return true if an activity exists for the specified URI
+	 *            the activity type to check
+	 * @return true iff the activity type exists
 	 */
-	public boolean activityExists(URI uri);
+	public boolean activityExists(URI activityType);
 
 	/**
 	 * Returns a definition of the configuration required by an activity.
 	 *
-	 * @param uri
-	 *            a URI that identifies an activity
+	 * @param activityType
+	 *            the activity type
 	 * @return a definition of the configuration required by an activity
 	 * @throws ActivityNotFoundException
 	 *             if an activity cannot be found for the specified URI
 	 * @throws ActivityConfigurationException
 	 *             if the ConfigurationDefinition cannot be created
 	 */
-	public ConfigurationDefinition getActivityConfigurationDefinition(URI uri)
+	public ConfigurationDefinition getActivityConfigurationDefinition(URI activityType)
+			throws ActivityNotFoundException, ActivityConfigurationException;
+
+	/**
+	 * Returns the ports for an activity configured with the configuration.
+	 *
+	 * @param configuration an activity configuration
+	 * @return the ports for an activity configured with the configuration
+	 */
+
+	/**
+	 * Returns the ports that would be created by configuring the activity type with the
+	 * configuration.
+	 *
+	 * If a configuration does not create any ports for the activity an empty set is returned.
+	 *
+	 * @param activityType
+	 *            the type of the activity
+	 * @param configuration
+	 *            the configuration for the activity
+	 * @throws ActivityNotFoundException
+	 *             if a configurable version of the activity cannot be found
+	 * @throws ActivityConfigurationException
+	 *             if the activity cannot be configured
+	 * @return
+	 */
+	public Set<ActivityPort> getActivityPorts(URI activityType, Configuration configuration)
 			throws ActivityNotFoundException, ActivityConfigurationException;
 
 	/**
@@ -84,21 +121,21 @@ public interface ActivityService {
 			throws ActivityNotFoundException, ActivityConfigurationException;
 
 	/**
-	 * Returns the activity for the specified URI.
+	 * Returns the activity for the specified activity type.
 	 *
 	 * If configuration is not null the returned activity will be configured.
 	 *
-	 * @param uri
-	 *            a URI that identifies an activity
+	 * @param activityType
+	 *            the activity type
 	 * @param configuration
 	 *            the configuration for the activity, can be <code>null</code>
-	 * @return the activity for the specified URI
+	 * @return the activity for the specified activityType
 	 * @throws ActivityNotFoundException
-	 *             if an activity cannot be found for the specified URI
+	 *             if an activity cannot be found for the specified activity type
 	 * @throws ActivityConfigurationException
 	 *             if the configuration is not valid
 	 */
-	public net.sf.taverna.t2.workflowmodel.processor.activity.Activity<?> createActivity(URI uri,
+	public net.sf.taverna.t2.workflowmodel.processor.activity.Activity<?> createActivity(URI activityType,
 			Configuration configuration) throws ActivityNotFoundException,
 			ActivityConfigurationException;
 

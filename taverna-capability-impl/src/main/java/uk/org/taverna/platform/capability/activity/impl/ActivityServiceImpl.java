@@ -27,6 +27,7 @@ import java.net.URI;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -50,6 +51,7 @@ import uk.org.taverna.scufl2.api.configurations.PropertyDefinition;
 import uk.org.taverna.scufl2.api.configurations.PropertyReferenceDefinition;
 import uk.org.taverna.scufl2.api.configurations.PropertyResourceDefinition;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
+import uk.org.taverna.scufl2.api.port.ActivityPort;
 import uk.org.taverna.scufl2.api.port.InputActivityPort;
 import uk.org.taverna.scufl2.api.port.OutputActivityPort;
 import uk.org.taverna.scufl2.api.property.PropertyException;
@@ -64,11 +66,16 @@ public class ActivityServiceImpl implements ActivityService {
 
 	@Override
 	public List<URI> getActivityURIs() {
-		List<URI> activityURIs = new ArrayList<URI>();
+		return new ArrayList<URI>(getActivityTypes());
+	}
+
+	@Override
+	public Set<URI> getActivityTypes() {
+		Set<URI> activityTypes = new HashSet<URI>();
 		for (ActivityFactory activityFactory : activityFactories) {
-			activityURIs.add(activityFactory.getActivityURI());
+			activityTypes.add(activityFactory.getActivityURI());
 		}
-		return activityURIs;
+		return activityTypes;
 	}
 
 	@Override
@@ -89,9 +96,9 @@ public class ActivityServiceImpl implements ActivityService {
 	}
 
 	@Override
-	public Activity<?> createActivity(URI uri, Configuration configuration)
+	public Activity<?> createActivity(URI activityType, Configuration configuration)
 			throws ActivityNotFoundException, ActivityConfigurationException {
-		ActivityFactory factory = getActivityFactory(uri);
+		ActivityFactory factory = getActivityFactory(activityType);
 
 		// create the activity and inject the edits
 		Activity<?> activity = factory.createActivity();
@@ -103,10 +110,10 @@ public class ActivityServiceImpl implements ActivityService {
 					.getConfigures();
 			if (configurable instanceof uk.org.taverna.scufl2.api.activity.Activity) {
 				uk.org.taverna.scufl2.api.activity.Activity scufl2Activity = (uk.org.taverna.scufl2.api.activity.Activity) configurable;
-				if (!scufl2Activity.getConfigurableType().equals(uri)) {
+				if (!scufl2Activity.getConfigurableType().equals(activityType)) {
 					String message = MessageFormat.format(
 							"Expected a configuration for {0} but got a configuration for {1}",
-							uri, scufl2Activity.getConfigurableType());
+							activityType, scufl2Activity.getConfigurableType());
 					logger.fine(message);
 					throw new ActivityConfigurationException(message);
 				}
@@ -117,14 +124,14 @@ public class ActivityServiceImpl implements ActivityService {
 			}
 			// create the configuration bean
 			Object configurationBean = factory.createActivityConfiguration();
-			ConfigurationDefinition definition = createConfigurationDefinition(uri,
+			ConfigurationDefinition definition = createConfigurationDefinition(activityType,
 					configurationBean.getClass());
 			WorkflowBundle workflowBundle = configuration.getParent().getParent();
 			try {
 				// set the properties on the configuration bean
 				setConfigurationProperties(configurationBean, configuration,
 						configuration.getPropertyResource(),
-						definition.getPropertyResourceDefinition(), uri, workflowBundle);
+						definition.getPropertyResourceDefinition(), activityType, workflowBundle);
 				// configure the activity with the configuration bean
 				((Configurable) activity).configure(configurationBean);
 			} catch (PropertyException e) {
@@ -156,6 +163,29 @@ public class ActivityServiceImpl implements ActivityService {
 			outputActivityPort.setDepth(outputPort.getDepth());
 			outputActivityPort.setGranularDepth(outputPort.getGranularDepth());
 		}
+	}
+
+	@Override
+	public Set<ActivityPort> getActivityPorts(URI activityType, Configuration configuration)
+			throws ActivityNotFoundException, ActivityConfigurationException {
+		Set<ActivityPort> activityPorts = new HashSet<ActivityPort>();
+		Activity<?> activity = createActivity(configuration.getType(), configuration);
+		Set<ActivityInputPort> inputPorts = activity.getInputPorts();
+		for (ActivityInputPort inputPort : inputPorts) {
+			InputActivityPort inputActivityPort = new InputActivityPort();
+			inputActivityPort.setName(inputPort.getName());
+			inputActivityPort.setDepth(inputPort.getDepth());
+			activityPorts.add(inputActivityPort);
+		}
+		Set<OutputPort> outputPorts = activity.getOutputPorts();
+		for (OutputPort outputPort : outputPorts) {
+			OutputActivityPort outputActivityPort = new OutputActivityPort();
+			outputActivityPort.setName(outputPort.getName());
+			outputActivityPort.setDepth(outputPort.getDepth());
+			outputActivityPort.setGranularDepth(outputPort.getGranularDepth());
+			activityPorts.add(outputActivityPort);
+		}
+		return activityPorts;
 	}
 
 	/**
@@ -199,7 +229,8 @@ public class ActivityServiceImpl implements ActivityService {
 				propertyResourceDefinition.setPropertyDefinitions(Collections
 						.singletonList(referenceDefinition));
 			} else {
-				throw new ActivityConfigurationException("Configuration bean for "+uri+" is not annotated");
+				throw new ActivityConfigurationException("Configuration bean for " + uri
+						+ " is not annotated");
 			}
 		} else {
 			uri = URI.create(configurationBean.uri());
@@ -211,13 +242,13 @@ public class ActivityServiceImpl implements ActivityService {
 		return configurationDefinition;
 	}
 
-	private ActivityFactory getActivityFactory(URI uri) throws ActivityNotFoundException {
+	private ActivityFactory getActivityFactory(URI activityType) throws ActivityNotFoundException {
 		for (ActivityFactory activityFactory : activityFactories) {
-			if (activityFactory.getActivityURI().equals(uri)) {
+			if (activityFactory.getActivityURI().equals(activityType)) {
 				return activityFactory;
 			}
 		}
-		throw new ActivityNotFoundException("Could not find an activity for " + uri);
+		throw new ActivityNotFoundException("Could not find an activity for " + activityType);
 	}
 
 }
