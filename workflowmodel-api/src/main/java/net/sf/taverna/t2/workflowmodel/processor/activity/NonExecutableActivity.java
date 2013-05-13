@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package net.sf.taverna.t2.workflowmodel.processor.activity;
 
@@ -19,6 +19,8 @@ import org.apache.log4j.Logger;
 
 public abstract class NonExecutableActivity<T> extends
 		AbstractAsynchronousActivity<T> {
+
+	public static final String URI = "http://ns.taverna.org.uk/2010/activity/nonExecutable";
 
 	private static Logger logger = Logger.getLogger(DisabledActivity.class);
 
@@ -48,7 +50,7 @@ public abstract class NonExecutableActivity<T> extends
 
 	/**
 	 * Add an output to the NonExecutableActivity with the specified name
-	 * 
+	 *
 	 * @param portName
 	 */
 	public void addProxyOutput(String portName) {
@@ -57,7 +59,7 @@ public abstract class NonExecutableActivity<T> extends
 
 	/**
 	 * Add an output to the NonExecutableActivity with the specified name and depth
-	 * 
+	 *
 	 * @param portName
 	 * @param depth
 	 */
@@ -65,9 +67,9 @@ public abstract class NonExecutableActivity<T> extends
 		super.addOutput(portName, depth);
 	}
 
-	/* 
+	/*
 	 * Attempting to run a NonExecutableActivity will always fail.
-	 * 
+	 *
 	 * (non-Javadoc)
 	 * @see net.sf.taverna.t2.workflowmodel.processor.activity.AbstractAsynchronousActivity#executeAsynch(java.util.Map, net.sf.taverna.t2.workflowmodel.processor.activity.AsynchronousActivityCallback)
 	 */
@@ -81,5 +83,5 @@ public abstract class NonExecutableActivity<T> extends
 			}
 		});
 	}
-	
+
 }

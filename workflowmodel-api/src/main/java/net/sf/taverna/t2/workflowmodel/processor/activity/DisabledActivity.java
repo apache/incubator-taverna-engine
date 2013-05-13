@@ -1,19 +1,19 @@
 /*******************************************************************************
- * Copyright (C) 2007-2011 The University of Manchester   
- * 
+ * Copyright (C) 2007-2011 The University of Manchester
+ *
  *  Modifications to the initial code base are copyright of their
  *  respective authors, or their employers as appropriate.
- * 
+ *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public License
  *  as published by the Free Software Foundation; either version 2.1 of
  *  the License, or (at your option) any later version.
- *    
+ *
  *  This program is distributed in the hope that it will be useful, but
  *  WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *    
+ *
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -33,12 +33,14 @@ import org.apache.log4j.Logger;
  * activity as special code needs to be used to create the ports of the disabled
  * activity that, obviously, cannot be done by confighuring the offline
  * activity.
- * 
+ *
  * @author alanrw
- * 
+ *
  */
 public final class DisabledActivity extends
 		NonExecutableActivity<ActivityAndBeanWrapper> {
+
+	public static final String URI = "http://ns.taverna.org.uk/2010/activity/disabled";
 
 	private static Logger logger = Logger.getLogger(DisabledActivity.class);
 
@@ -62,7 +64,7 @@ public final class DisabledActivity extends
 	 * specified class with the specified configuration. This constructor is
 	 * commonly used when reading in an Activity which cannot be initially
 	 * configured because it is offline.
-	 * 
+	 *
 	 * @param activityClass
 	 *            The class of Activity that is offline.
 	 * @param config
@@ -80,7 +82,7 @@ public final class DisabledActivity extends
 	/**
 	 * Create a DisabledActivity that represents a specific Activity with its
 	 * configuration.
-	 * 
+	 *
 	 * @param activity
 	 *            The Activity that is offline
 	 * @param config
@@ -104,7 +106,7 @@ public final class DisabledActivity extends
 	 * case, the ports of the DisabledActivity and their mapping to the
 	 * containing Processor's ports can be inherited from the Activity that is
 	 * now disabled.
-	 * 
+	 *
 	 * @param activity The Activity that is now disabled.
 	 */
 	public DisabledActivity(Activity<?> activity) {
@@ -157,7 +159,7 @@ public final class DisabledActivity extends
 	public boolean configurationWouldWork() {
 		return configurationWouldWork(conf.getBean());
 	}
-	
+
 	public boolean configurationWouldWork(Object newConfig) {
 		boolean result = true;
 		lastWorkingConfiguration = null;
@@ -173,7 +175,7 @@ public final class DisabledActivity extends
 				currentInputNames.remove(aip.getName());
 			}
 			unknownPort = !currentInputNames.isEmpty();
-			
+
 			if (!unknownPort) {
 				Map<String, String> currentOutputPortMap = this
 				.getOutputPortMapping();
