@@ -265,7 +265,7 @@ public class WorkflowToDataflowMapper {
 		net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchStack dataflowDispatchStack = dataflowProcessor
 				.getDispatchStack();
 		DispatchStack dispatchStack = processor.getDispatchStack();
-		if (dispatchStack == null) {
+		if (dispatchStack == null || dispatchStack.isEmpty()) {
 			edits.getDefaultDispatchStackEdit(dataflowProcessor).doEdit();
 		} else {
 			for (int layer = 0; layer < dispatchStack.size(); layer++) {
