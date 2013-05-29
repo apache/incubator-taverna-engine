@@ -6,25 +6,6 @@ and Taverna Command Line which allows export of the provenance of a
 workflow run according to the proposed [PROV-O
 standard](http://www.w3.org/TR/prov-o/).
 
-WARNING
--------
-The version 1.9 of the plugin is unfortunately currently broken, PROV
-export fails with this error message:
-
-    ERROR 2012-09-21 13:59:54,503 (org.purl.wf4ever.provtaverna.export.Saver:119) - Failed to save the provenance graph to /home/stain/Desktop/1/ab/workflowrun.prov.ttl
-    java.lang.ClassCastException: Cannot cast object.proxies._fffffffff6fcf60f._EntityProxyffffffff9de06bd4 to prov.Bundle
-        at java.lang.Class.cast(Class.java:3005)
-        at org.openrdf.repository.object.ObjectFactory.createObject(ObjectFactory.java:170)
-        at org.openrdf.repository.object.ObjectFactory.createObject(ObjectFactory.java:161)
-        at org.purl.wf4ever.provtaverna.export.W3ProvenanceExport.exportAsW3Prov(W3ProvenanceExport.java:330)
-        at org.purl.wf4ever.provtaverna.export.Saver.saveToFolder(Saver.java:117)
-        at org.purl.wf4ever.provtaverna.export.Saver.saveData(Saver.java:81)
-        at org.purl.wf4ever.provtaverna.ui.SaveProvAction.saveData(SaveProvAction.java:52)
-        at net.sf.taverna.t2.workbench.views.results.saveactions.SaveAllResultsSPI$2.run(SaveAllResultsSPI.java:177)
-
-We are trying to work around this bug at the moment.
-
-
 
 Source code and license
 -----------------------
@@ -432,13 +413,13 @@ Example compilation:
     [INFO] PROV Taverna command line
     [INFO]                                                                         
     [INFO] ------------------------------------------------------------------------
-    [INFO] Building Taverna PROV 1.6-SNAPSHOT
+    [INFO] Building Taverna PROV 1.11-SNAPSHOT
     [INFO] ------------------------------------------------------------------------
     (..)
     Downloading: http://www.mygrid.org.uk/maven/repository/net/sf/taverna/t2/taverna-workbench/workbench-dev/2.4.0/workbench-dev-2.4.0.pom
     Downloaded: http://www.mygrid.org.uk/maven/repository/net/sf/taverna/t2/taverna-workbench/workbench-dev/2.4.0/workbench-dev-2.4.0.pom (3 KB at 5.4 KB/sec)
     (..)
-    [INFO] Installing /home/stain/src/taverna-prov/prov-taverna-cmdline/target/prov-taverna-cmdline-1.6-SNAPSHOT-tests.jar to /home/stain/.m2/repository/org/purl/wf4ever/provtaverna/prov-taverna-cmdline/1.6-SNAPSHOT/prov-taverna-cmdline-1.6-SNAPSHOT-tests.jar
+    [INFO] Installing /home/stain/src/taverna-prov/prov-taverna-cmdline/target/prov-taverna-cmdline-1.11-SNAPSHOT-tests.jar to /home/stain/.m2/repository/org/purl/wf4ever/provtaverna/prov-taverna-cmdline/1.11-SNAPSHOT/prov-taverna-cmdline-1.11-SNAPSHOT-tests.jar
     [INFO] ------------------------------------------------------------------------
     [INFO] Reactor Summary:
     [INFO] 
@@ -480,7 +461,7 @@ in `plugins/plugins.xml`.
      <plugin>
         <provider>org.purl.wf4ever</provider>
         <identifier>org.purl.wf4ever.provtaverna.prov-taverna-plugin</identifier>
-        <version>1.6-SNAPSHOT</version>
+        <version>1.11-SNAPSHOT</version>
         <name>Taverna PROV plugin</name>
         <description/>
         <enabled>true</enabled>
@@ -501,7 +482,7 @@ in `plugins/plugins.xml`.
             <dependency>
                 <groupId>org.purl.wf4ever.provtaverna</groupId>
                 <artifactId>prov-taverna-ui</artifactId>
-                <version>1.6-SNAPSHOT</version>
+                <version>1.11-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>junit</groupId>
