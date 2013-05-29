@@ -1,0 +1,17 @@
+PREFIX prov: <http://www.w3.org/ns/prov#> 
+PREFIX wfprov: <http://purl.org/wf4ever/wfprov#> 
+PREFIX tavernaprov: <http://ns.taverna.org.uk/2012/tavernaprov/>
+
+SELECT DISTINCT ?name ?plan ?ended
+WHERE {
+    ?greeting tavernaprov:content <greeting.txt> .
+    ?greeting prov:wasGeneratedBy ?concatenate .
+    ?concatenate prov:endedAtTime ?ended ;
+        prov:qualifiedAssociation [
+            prov:hadPlan ?plan
+    ] ;
+        wfprov:wasPartOfWorkflowRun ?run .
+    ?concatenate wfprov:usedInput ?string2 .
+    ?string2 tavernaprov:content ?name .
+}
+
