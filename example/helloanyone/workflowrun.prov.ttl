@@ -10,6 +10,7 @@
 @prefix wfdesc: <http://purl.org/wf4ever/wfdesc#> .
 @prefix wfprov: <http://purl.org/wf4ever/wfprov#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix : <#> .
 
 :taverna-prov-export rdfs:label "taverna-prov export of workflow run provenance" ;
 	prov:qualifiedAssociation _:node17rnpj0m5x1 ;
