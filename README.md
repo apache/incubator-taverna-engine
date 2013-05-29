@@ -286,6 +286,7 @@ workflow run (including nested workflows) in [RDF Turtle format](http://www.w3.o
 Intermediate values are stored in the `intermediates/` folder.
 
 Example listing:
+
     stain@vmint ~/src/taverna-prov/example/helloanyone $ ls .
     greeting.txt  intermediates  name.txt  workflowrun.prov.ttl
 
@@ -327,7 +328,7 @@ Querying
 Example [SPARQL query](http://www.w3.org/TR/sparql11-query/) from [test.sparql](example/test.sparql):
 
 ```sparql
-    stain@vmint:~/src/taverna-prov/example/helloanyone$ cat ../test.sparql 
+stain@vmint:~/src/taverna-prov/example/helloanyone$ cat ../test.sparql 
 PREFIX prov: <http://www.w3.org/ns/prov#> 
 PREFIX wfprov: <http://purl.org/wf4ever/wfprov#> 
 PREFIX tavernaprov: <http://ns.taverna.org.uk/2012/tavernaprov/>
@@ -390,9 +391,8 @@ Check that:
 
 TODO
 ----
-* Include workflow definition
-
-See also [outstanding issues](https://jira.man.poznan.pl/jira/browse/WFE-513).
+* Include workflow definition as t2flow and wfdesc
+* Save as RO bundle (single ZIP file)
 
 
 Building
@@ -456,9 +456,29 @@ Example compilation:
     [INFO] ------------------------------------------------------------------------
     
 
-The compilation *does not work on Windows* due to a [bug in
-Alibaba](http://www.openrdf.org/issues/browse/ALI-18). The plugin will
-however install and work in Taverna running on Windows.
+
+WARNING:
+
+Building currently fails for unknown reasons that may indicate a bug in our dependency Alibaba or in our OWL ontologies:
+
+     [java] C:\Users\stain\AppData\Local\Temp\OWLCompiler777760187968267646\rdf\IsNil.java:5: error: cannot find symbol
+     [java] import owl.NamedIndividual;
+     [java]           ^
+     [java]   symbol:   class NamedIndividual
+     [java]   location: package owl
+     [java] C:\Users\stain\AppData\Local\Temp\OWLCompiler777760187968267646\rdf\IsNil.java:12: error: cannot find symbol
+     [java] public interface IsNil extends Resource, NamedIndividual {
+     [java]                                          ^
+     [java]   symbol: class NamedIndividual
+     ...
+     [java] 5 errors
+     [java] Exception in thread "main" org.openrdf.repository.object.exceptions.ObjectCompileException: Could not compile
+     [java]     at org.openrdf.repository.object.compiler.source.JavaCompiler.compile(JavaCompiler.java:80)
+     [java]     at org.openrdf.repository.object.compiler.OWLCompiler.compile(OWLCompiler.java:384)
+     [java]     at org.openrdf.repository.object.compiler.OWLCompiler.createJar(OWLCompiler.java:353)
+     [java]     at org.openrdf.repository.object.compiler.Compiler.main(Compiler.java:167)
+
+
 
 Note that to work with Taverna's plugin system, the build is specific
 for a particular Taverna version. To build this plugin for a different
