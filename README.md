@@ -170,7 +170,7 @@ command line tool has a separate home directory from the workbench)
     of plugins (this might take a few minutes the first time):
 
     ```
-    stain@ahtissuntu:~/software/taverna-commandline-2.4.0$ sh executeworkflow.sh 
+    stain@vmint:~/software/taverna-commandline-2.4.0$ sh executeworkflow.sh 
     usage: executeworkflow [options] [workflow]
      -clientserver                           Connect as a client to a derby
                                              server instance.
@@ -207,7 +207,7 @@ command line tool has a separate home directory from the workbench)
     working:
 
     ```
-    stain@ahtissuntu:~/software/taverna-commandline-2.4.0$ sh executeworkflow.sh 
+    stain@vmint:~/software/taverna-commandline-2.4.0$ sh executeworkflow.sh 
     usage: executeworkflow [options] [workflow]
      -clientserver                           Connect as a client to a derby
                                              server instance.
@@ -283,66 +283,84 @@ outputs, starting from `0`. Values representing errors have extension `.err`.
 In you will find the file `workflowrun.prov.ttl` which contains the PROV-O export of the
 workflow run (including nested workflows) in [RDF Turtle format](http://www.w3.org/TR/turtle/).
 
+Intermediate values are stored in the `intermediates/` folder.
+
 Example listing:
+    stain@vmint ~/src/taverna-prov/example/helloanyone $ ls .
+    greeting.txt  intermediates  name.txt  workflowrun.prov.ttl
 
-    stain@ahtissuntu:~/src/taverna-prov/example/helloanyone$ ls
-    greeting.txt  name.txt  workflowrun.prov.ttl
+    stain@vmint ~/src/taverna-prov/example/helloanyone $ ls intermediates/*
+    def2e58b-50e2-4949-9980-fd310166621a.txt
 
-    stain@ahtissuntu:~/src/taverna-prov/example/helloanyone$ cat greeting.txt ; echo
+    stain@vmint:~/src/taverna-prov/example/helloanyone$ cat greeting.txt ; echo
     Hello, World!
 
-    stain@ahtissuntu:~/src/taverna-prov/example/helloanyone$ head workflowrun.prov.ttl 
-    # @base <file:/home/stain/src/taverna-prov/example/helloanyone/> .
-    @prefix scufl2: <http://ns.taverna.org.uk/2010/scufl2#> .
-    @prefix prov: <http://www.w3.org/ns/prov#> .
+    stain@vmint ~/src/taverna-prov/example/helloanyone $ cat intermediates/de/def2e58b-50e2-4949-9980-fd310166621a.txt  ; echo
+    Hello, 
+
+    stain@vmint ~/src/taverna-prov/example/helloanyone $ head -n 17 workflowrun.prov.ttl
+    # @base <file:/C:/Users/stain/Desktop/fred/soup/workflowrun.prov.ttl> .
+    @prefix cnt: <http://www.w3.org/2011/content#> .
+    @prefix dcterms: <http://purl.org/dc/terms/> .
+    @prefix doap: <http://usefulinc.com/ns/doap#> .
     @prefix owl: <http://www.w3.org/2002/07/owl#> .
+    @prefix prov: <http://www.w3.org/ns/prov#> .
+    @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+    @prefix scufl2: <http://ns.taverna.org.uk/2010/scufl2#> .
+    @prefix tavernaprov: <http://ns.taverna.org.uk/2012/tavernaprov/> .
+    @prefix wfdesc: <http://purl.org/wf4ever/wfdesc#> .
+    @prefix wfprov: <http://purl.org/wf4ever/wfprov#> .
+    @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+    @prefix : <#> .
 
-    <http://ns.taverna.org.uk/2011/run/5fec72ee-aa48-495b-905c-588203c8c948/> a prov:Activity ;
-        prov:influenced _:node172d1lgacx2 .
+    :taverna-prov-export rdfs:label "taverna-prov export of workflow run provenance" ;
+        prov:qualifiedAssociation _:node17rnpj0m5x1 ;
+        prov:startedAtTime "2013-05-29T10:23:43.074+01:00"^^xsd:dateTime ;
 
-    _:node172d1lgacx2 a prov:Activity ;
-        prov:startedAtTime "2012-07-18T13:40:40.582+01:00"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
-
+This source includes an [example](example/helloanyone/) provenance folder and [example
+provenance graph](example/helloanyone/workflowrun.prov.ttl) from running
+a simple [hello world workflow](example/helloanyone.t2flow).
 
 Querying
 --------
 
-Example [SPARQL query](http://www.w3.org/TR/sparql11-query/):
+Example [SPARQL query](http://www.w3.org/TR/sparql11-query/) from [test.sparql](example/test.sparql):
 
 ```sparql
-    stain@ahtissuntu:~/src/taverna-prov/example/helloanyone$ cat test.sparql 
-    PREFIX prov: <http://www.w3.org/ns/prov#> 
+    stain@vmint:~/src/taverna-prov/example/helloanyone$ cat ../test.sparql 
+PREFIX prov: <http://www.w3.org/ns/prov#> 
+PREFIX wfprov: <http://purl.org/wf4ever/wfprov#> 
+PREFIX tavernaprov: <http://ns.taverna.org.uk/2012/tavernaprov/>
 
-    SELECT ?name ?plan ?ended
-    WHERE {
-    ?greeting prov:alternateOf <greeting.txt> .
-    ?output prov:alternateOf ?greeting .
-    ?output prov:wasGeneratedBy ?concatenate .
+SELECT DISTINCT ?name ?plan ?ended
+WHERE {
+    ?greeting tavernaprov:content <greeting.txt> .
+    ?greeting prov:wasGeneratedBy ?concatenate .
     ?concatenate prov:endedAtTime ?ended ;
         prov:qualifiedAssociation [
             prov:hadPlan ?plan
-    ] .
-    ?concatenate prov:used ?string2 .
-    ?string2 prov:alternateOf ?name .
-    }
+    ] ;
+        wfprov:wasPartOfWorkflowRun ?run .
+    ?concatenate wfprov:usedInput ?string2 .
+    ?string2 tavernaprov:content ?name .
+}
 ```
 
-Note: Future versions of the PROV-O export will use custom subproperties of
-`prov:alternateOf` to proper distinguish values at workflow level,
-processor level and file level.
 
 Query using [rdfproc](http://librdf.org/utils/rdfproc.html) (`apt-get install redland-utils`):
 
-    stain@ahtissuntu:~/src/taverna-prov/example/helloanyone$ rdfproc test parse workflowrun.prov.ttl turtle
+    stain@vmint:~/src/taverna-prov/example/helloanyone$ rdfproc test parse workflowrun.prov.ttl turtle
     rdfproc: Parsing URI file:///home/stain/src/taverna-prov/example/helloanyone/workflowrun.prov.ttl with turtle parser
 
-    stain@ahtissuntu:~/src/taverna-prov/example/helloanyone$ rdfproc test query sparql - "$(cat test.sparql)" 
+    stain@vmint ~/src/taverna-prov/example/helloanyone $ rdfproc test query sparql - "$(cat ../test.sparql)" 
+    rdfproc: Warning - URI file:///home/stain/src/taverna-prov/example/helloanyone/:1: Variable run was bound but is unused in the query
     rdfproc: Query returned bindings results:
-    result: [name=<file:///home/stain/src/taverna-prov/example/helloanyone/name.txt>, 
-             plan=<http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/processor/hello/>, 
-             ended="2012-07-18T12:40:20.543Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>]
-    rdfproc: Query returned 1 results
+    result: [name=<file:///home/stain/src/taverna-prov/example/helloanyone/name.txt>, plan=<http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/processor/Concatenate_two_strings/>, ended="2013-05-29T10:22:09.961+01:00"^^<http://www.w3.org/2001/XMLSchema#dateTime>]
+    result: [name=<file:///home/stain/src/taverna-prov/example/helloanyone/intermediates/de/def2e58b-50e2-4949-9980-fd310166621a.txt>, plan=<http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/processor/Concatenate_two_strings/>, ended="2013-05-29T10:22:09.961+01:00"^^<http://www.w3.org/2001/XMLSchema#dateTime>]
+    rdfproc: Query returned 2 results
 
+This shows how both name.txt and intermediates/de/def...txt are the
+origins of greeting.txt.
 
 
 Troubleshooting
@@ -400,7 +418,7 @@ minutes to complete.
 
 Example compilation:
 
-    stain@ahtissuntu:~/src/taverna-prov$ mvn clean install
+    stain@vmint:~/src/taverna-prov$ mvn clean install
     [INFO] Scanning for projects...
     [INFO] ------------------------------------------------------------------------
     [INFO] Reactor Build Order:
@@ -437,6 +455,10 @@ Example compilation:
     [INFO] Final Memory: 72M/274M
     [INFO] ------------------------------------------------------------------------
     
+
+The compilation *does not work on Windows* due to a [bug in
+Alibaba](http://www.openrdf.org/issues/browse/ALI-18). The plugin will
+however install and work in Taverna running on Windows.
 
 Note that to work with Taverna's plugin system, the build is specific
 for a particular Taverna version. To build this plugin for a different
