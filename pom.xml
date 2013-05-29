@@ -22,10 +22,10 @@
 		<t2.results.version>1.4</t2.results.version>
 		<t2.taverna-commandline.version>1.4</t2.taverna-commandline.version>
 
-		<alibaba.version>2.0-rc5</alibaba.version>
+		<alibaba.version>2.0-rc7</alibaba.version>
 		<!-- Because of Raven this must match whatever Elmo/Alibaba depends on! 
 			:( -->
-		<sesame.version>2.6.9</sesame.version>
+		<sesame.version>2.6.10</sesame.version>
 	</properties>
 
 	<build>
