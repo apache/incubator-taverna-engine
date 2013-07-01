@@ -23,7 +23,7 @@ package net.sf.taverna.t2.workflowmodel.processor.dispatch;
 import java.net.URI;
 import java.util.Set;
 
-import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Factory for creating {@link DispatchLayer} instances.
@@ -55,6 +55,6 @@ public interface DispatchLayerFactory {
 	 *            the type of the <code>DispatchLayer</code>
 	 * @return the JSON Schema for the configuration required by the <code>DispatchLayer</code>
 	 */
-	public JsonSchema getDispatchLayerConfigurationSchema(URI dispatchLayerType);
+	public JsonNode getDispatchLayerConfigurationSchema(URI dispatchLayerType);
 
 }
