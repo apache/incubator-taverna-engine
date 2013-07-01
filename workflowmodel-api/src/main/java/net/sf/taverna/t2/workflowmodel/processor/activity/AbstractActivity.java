@@ -1,19 +1,19 @@
 /*******************************************************************************
- * Copyright (C) 2007 The University of Manchester   
- * 
+ * Copyright (C) 2007 The University of Manchester
+ *
  *  Modifications to the initial code base are copyright of their
  *  respective authors, or their employers as appropriate.
- * 
+ *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public License
  *  as published by the Free Software Foundation; either version 2.1 of
  *  the License, or (at your option) any later version.
- *    
+ *
  *  This program is distributed in the hope that it will be useful, but
  *  WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *    
+ *
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -32,7 +32,6 @@ import net.sf.taverna.t2.annotation.annotationbeans.MimeType;
 import net.sf.taverna.t2.reference.ExternalReferenceSPI;
 import net.sf.taverna.t2.workflowmodel.EditException;
 import net.sf.taverna.t2.workflowmodel.Edits;
-import net.sf.taverna.t2.workflowmodel.OutputPort;
 import net.sf.taverna.t2.workflowmodel.processor.activity.config.ActivityInputPortDefinitionBean;
 import net.sf.taverna.t2.workflowmodel.processor.activity.config.ActivityOutputPortDefinitionBean;
 import net.sf.taverna.t2.workflowmodel.processor.activity.config.ActivityPortsDefinitionBean;
@@ -54,10 +53,10 @@ import org.apache.log4j.Logger;
  * wish to specify some kind of abstract definition of a process which will be
  * bound at workflow invocation time to a particular concrete activity through
  * the action of a custom dispatch stack layer (which you will also provide)
- * 
+ *
  * @author Tom Oinn
  * @author Stuart Owen
- * 
+ *
  * @param <ConfigType>
  *            type of configuration object to be used to hold configuration
  *            information
@@ -69,15 +68,15 @@ public abstract class AbstractActivity<ConfigType> extends
 	.getLogger(AbstractActivity.class);
 
 	protected Edits edits;
-	
+
 	protected Map<String, String> inputPortMapping = new HashMap<String, String>();
 
 	protected Map<String, String> outputPortMapping = new HashMap<String, String>();
 
-	protected Set<OutputPort> outputPorts = new HashSet<OutputPort>();
+	protected Set<ActivityOutputPort> outputPorts = new HashSet<ActivityOutputPort>();
 
 	protected Set<ActivityInputPort> inputPorts = new HashSet<ActivityInputPort>();
-	
+
 	public void setEdits(Edits edits) {
 		this.edits = edits;
 	}
@@ -95,7 +94,7 @@ public abstract class AbstractActivity<ConfigType> extends
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.sf.taverna.t2.workflowmodel.processor.activity.Activity#getInputPortMapping()
 	 */
 	public final Map<String, String> getInputPortMapping() {
@@ -104,7 +103,7 @@ public abstract class AbstractActivity<ConfigType> extends
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.sf.taverna.t2.workflowmodel.processor.activity.Activity#getInputPorts()
 	 */
 	public final Set<ActivityInputPort> getInputPorts() {
@@ -113,7 +112,7 @@ public abstract class AbstractActivity<ConfigType> extends
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.sf.taverna.t2.workflowmodel.processor.activity.Activity#getOutputPortMapping()
 	 */
 	public final Map<String, String> getOutputPortMapping() {
@@ -122,16 +121,16 @@ public abstract class AbstractActivity<ConfigType> extends
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.sf.taverna.t2.workflowmodel.processor.activity.Activity#getOutputPorts()
 	 */
-	public final Set<OutputPort> getOutputPorts() {
+	public final Set<ActivityOutputPort> getOutputPorts() {
 		return outputPorts;
 	}
 
 	/**
 	 * Creates and adds a new input port with the provided properties.
-	 * 
+	 *
 	 * @see #removeInputs()
 	 * @param portName -
 	 *            the name of the port to be created.
@@ -154,7 +153,7 @@ public abstract class AbstractActivity<ConfigType> extends
 
 	/**
 	 * Creates and adds a new output port with the provided properties.
-	 * 
+	 *
 	 * @see #removeOutputs()
 	 * @param portName -
 	 *            the name of the port to be created.
@@ -175,7 +174,7 @@ public abstract class AbstractActivity<ConfigType> extends
 	 * Convenience method, creates a new output port with depth and granular
 	 * depth both set to the value for depth, i.e. no streaming behaviour.
 	 * <p>
-	 * 
+	 *
 	 * @see #removeOutputs()
 	 * @param portName
 	 * @param portDepth
@@ -193,7 +192,7 @@ public abstract class AbstractActivity<ConfigType> extends
 	 * For an Activity that has ports that are defined dynamically it is natural
 	 * that is ConfigType will not implement this interface.
 	 * </p>
-	 * 
+	 *
 	 * @param configBean
 	 */
 	protected void configurePorts(ActivityPortsDefinitionBean configBean) {
@@ -211,7 +210,7 @@ public abstract class AbstractActivity<ConfigType> extends
 
 		for (ActivityOutputPortDefinitionBean outputDef : configBean
 				.getOutputPortDefinitions()) {
-			OutputPort createActivityOutputPort = edits.createActivityOutputPort(
+			ActivityOutputPort createActivityOutputPort = edits.createActivityOutputPort(
 					outputDef.getName(), outputDef.getDepth(), outputDef
 					.getGranularDepth());
 //			addOutput(outputDef.getName(), outputDef.getDepth(), outputDef
@@ -232,7 +231,7 @@ public abstract class AbstractActivity<ConfigType> extends
 
 	/**
 	 * Remove existing output ports.
-	 * 
+	 *
 	 */
 	protected void removeOutputs() {
 		outputPorts.clear();
@@ -240,7 +239,7 @@ public abstract class AbstractActivity<ConfigType> extends
 
 	/**
 	 * Remove existing input ports
-	 * 
+	 *
 	 */
 	protected void removeInputs() {
 		inputPorts.clear();

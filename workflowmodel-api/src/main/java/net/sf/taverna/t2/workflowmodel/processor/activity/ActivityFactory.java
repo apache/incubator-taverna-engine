@@ -22,7 +22,7 @@ package net.sf.taverna.t2.workflowmodel.processor.activity;
 
 import java.net.URI;
 
-import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Factory for creating {@link Activity} instances.
@@ -50,6 +50,6 @@ public interface ActivityFactory {
 	 *
 	 * @return the JSON Schema for the configuration required by the <code>Activity</code>
 	 */
-	public JsonSchema getActivityConfigurationSchema();
+	public JsonNode getActivityConfigurationSchema();
 
 }

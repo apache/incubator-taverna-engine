@@ -1,19 +1,19 @@
 /*******************************************************************************
- * Copyright (C) 2007 The University of Manchester   
- * 
+ * Copyright (C) 2007 The University of Manchester
+ *
  *  Modifications to the initial code base are copyright of their
  *  respective authors, or their employers as appropriate.
- * 
+ *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public License
  *  as published by the Free Software Foundation; either version 2.1 of
  *  the License, or (at your option) any later version.
- *    
+ *
  *  This program is distributed in the hope that it will be useful, but
  *  WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *    
+ *
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -52,12 +52,12 @@ import net.sf.taverna.t2.workflowmodel.InvalidDataflowException;
 import net.sf.taverna.t2.workflowmodel.Merge;
 import net.sf.taverna.t2.workflowmodel.MergeInputPort;
 import net.sf.taverna.t2.workflowmodel.OrderedPair;
-import net.sf.taverna.t2.workflowmodel.OutputPort;
 import net.sf.taverna.t2.workflowmodel.Processor;
 import net.sf.taverna.t2.workflowmodel.ProcessorInputPort;
 import net.sf.taverna.t2.workflowmodel.ProcessorOutputPort;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityInputPort;
+import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityOutputPort;
 import net.sf.taverna.t2.workflowmodel.processor.activity.impl.ActivityInputPortImpl;
 import net.sf.taverna.t2.workflowmodel.processor.activity.impl.ActivityOutputPortImpl;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayer;
@@ -71,7 +71,7 @@ import net.sf.taverna.t2.workflowmodel.processor.iteration.impl.IterationStrateg
 
 /**
  * Implementation of {@link Edits}
- * 
+ *
  */
 public class EditsImpl implements Edits {
 
@@ -159,7 +159,7 @@ public class EditsImpl implements Edits {
 			DispatchLayer<?> layer) {
 		return new DeleteDispatchLayerEdit(stack, layer);
 	}
-	
+
 	public Edit<Merge> getRenameMergeEdit(Merge merge,
 			String newName) {
 		return new RenameMergeEdit(merge, newName);
@@ -205,7 +205,7 @@ public class EditsImpl implements Edits {
 		return new AnnotationChainImpl();
 	}
 
-	
+
 	@SuppressWarnings("unchecked")
 	public Edit<AnnotationChain> getAddAnnotationAssertionEdit(
 			AnnotationChain annotationChain,
@@ -244,7 +244,7 @@ public class EditsImpl implements Edits {
 	/**
 	 * @return a new instance of ConnectMergedDatalinkEdit constructed from the
 	 *         provided parameters.
-	 * 
+	 *
 	 * @param merge
 	 *            a Merge instance
 	 * @param sourcePort
@@ -277,7 +277,7 @@ public class EditsImpl implements Edits {
 	public IterationStrategy createIterationStrategy() {
 		return new IterationStrategyImpl();
 	}
-	
+
 	/**
 	 * Builds an instance of {@link ActivityInputPortImpl}
 	 */
@@ -295,7 +295,7 @@ public class EditsImpl implements Edits {
 	/**
 	 * Builds an instance of {@link ActivityOutputPortImpl}
 	 */
-	public OutputPort createActivityOutputPort(String portName, int portDepth,
+	public ActivityOutputPort createActivityOutputPort(String portName, int portDepth,
 			int portGranularDepth) {
 		return new ActivityOutputPortImpl(portName, portDepth,
 				portGranularDepth);
@@ -413,7 +413,7 @@ public class EditsImpl implements Edits {
 	}
 
 	public Edit<Activity<?>> getAddActivityOutputPortEdit(Activity<?> activity,
-			OutputPort activityOutputPort) {
+			ActivityOutputPort activityOutputPort) {
 		return new AddActivityOutputPortEdit(activity, activityOutputPort);
 	}
 
@@ -436,7 +436,7 @@ public class EditsImpl implements Edits {
 	}
 
 	public Edit<Activity<?>> getRemoveActivityOutputPortEdit(
-			Activity<?> activity, OutputPort activityOutputPort) {
+			Activity<?> activity, ActivityOutputPort activityOutputPort) {
 		return new RemoveActivityOutputPortEdit(activity, activityOutputPort);
 	}
 
