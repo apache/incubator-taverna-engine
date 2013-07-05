@@ -21,6 +21,7 @@
 package net.sf.taverna.t2.workflowmodel.processor.activity;
 
 import java.net.URI;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -51,5 +52,33 @@ public interface ActivityFactory {
 	 * @return the JSON Schema for the configuration required by the <code>Activity</code>
 	 */
 	public JsonNode getActivityConfigurationSchema();
+
+	/**
+	 * Returns the <code>ActivityInputPort</code>s that the <code>Activity</code> requires to be
+	 * present in order to execute with the specified configuration.
+	 * <p>
+	 * If the <code>Activity</code> does not require any input port for the configuration then an
+	 * empty set is returned.
+	 *
+	 * @param configuration
+	 *            the configuration
+	 * @return the <code>ActivityInputPort</code>s that the <code>Activity</code> requires to be
+	 *         present in order to execute
+	 */
+	public Set<ActivityInputPort> getInputPorts(JsonNode configuration) throws ActivityConfigurationException;
+
+	/**
+	 * Returns the <code>ActivityOutputPort</code>s that the <code>Activity</code> requires to be
+	 * present in order to execute with the specified configuration.
+	 * <p>
+	 * If the <code>Activity</code> does not require any output ports for the configuration then an
+	 * empty set is returned.
+	 *
+	 * @param configuration
+	 *            the configuration
+	 * @return the <code>ActivityOutputPort</code>s that the <code>Activity</code> requires to be
+	 *         present in order to execute
+	 */
+	public Set<ActivityOutputPort> getOutputPorts(JsonNode configuration) throws ActivityConfigurationException;
 
 }
