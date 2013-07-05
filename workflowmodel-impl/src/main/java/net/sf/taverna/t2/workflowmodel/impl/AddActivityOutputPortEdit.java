@@ -34,9 +34,9 @@ public class AddActivityOutputPortEdit extends AbstractActivityEdit {
 
 	private ActivityOutputPort activityOutputPort;
 
-	public AddActivityOutputPortEdit(Activity<?> activity, ActivityOutputPort activityInputPort) {
+	public AddActivityOutputPortEdit(Activity<?> activity, ActivityOutputPort activityOutputPort) {
 		super(activity);
-		this.activityOutputPort = activityInputPort;
+		this.activityOutputPort = activityOutputPort;
 	}
 
 	@Override
