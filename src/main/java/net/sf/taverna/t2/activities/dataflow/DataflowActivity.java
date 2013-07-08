@@ -1,26 +1,25 @@
 /*******************************************************************************
- * Copyright (C) 2007 The University of Manchester   
- * 
+ * Copyright (C) 2007 The University of Manchester
+ *
  *  Modifications to the initial code base are copyright of their
  *  respective authors, or their employers as appropriate.
- * 
+ *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public License
  *  as published by the Free Software Foundation; either version 2.1 of
  *  the License, or (at your option) any later version.
- *    
+ *
  *  This program is distributed in the hope that it will be useful, but
  *  WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *    
+ *
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
 package net.sf.taverna.t2.activities.dataflow;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,11 +27,8 @@ import net.sf.taverna.t2.facade.ResultListener;
 import net.sf.taverna.t2.facade.WorkflowInstanceFacade;
 import net.sf.taverna.t2.invocation.TokenOrderException;
 import net.sf.taverna.t2.invocation.WorkflowDataToken;
-import net.sf.taverna.t2.reference.ExternalReferenceSPI;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
-import net.sf.taverna.t2.workflowmodel.DataflowInputPort;
-import net.sf.taverna.t2.workflowmodel.DataflowOutputPort;
 import net.sf.taverna.t2.workflowmodel.InvalidDataflowException;
 import net.sf.taverna.t2.workflowmodel.processor.activity.AbstractAsynchronousActivity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityConfigurationException;
@@ -41,36 +37,35 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.NestedDataflow;
 
 import org.apache.log4j.Logger;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 /**
- * <p>
  * An Activity providing nested Dataflow functionality.
- * </p>
- * 
+ *
  * @author David Withers
  */
-public class DataflowActivity extends
-		AbstractAsynchronousActivity<Dataflow> implements NestedDataflow{
+public class DataflowActivity extends AbstractAsynchronousActivity<JsonNode> implements NestedDataflow {
 
 	public static final String URI = "http://ns.taverna.org.uk/2010/activity/nested-workflow";
 
 	@SuppressWarnings("unused")
-	private static final Logger logger = Logger
-			.getLogger(DataflowActivity.class);
+	private static final Logger logger = Logger.getLogger(DataflowActivity.class);
 
 	private Dataflow dataflow;
-	
+
+	private JsonNode json;
+
 	@Override
-	public void configure(Dataflow dataflow)
-			throws ActivityConfigurationException {
-		this.dataflow=dataflow;
-		dataflow.checkValidity();
-		buildInputPorts();
-		buildOutputPorts();
+	public void configure(JsonNode json) throws ActivityConfigurationException {
+		this.json = json;
+//		dataflow.checkValidity();
+//		buildInputPorts();
+//		buildOutputPorts();
 	}
 
 	@Override
-	public Dataflow getConfiguration() {
-		return dataflow;
+	public JsonNode getConfiguration() {
+		return json;
 	}
 
 	@Override
@@ -82,10 +77,8 @@ public class DataflowActivity extends
 
 				final WorkflowInstanceFacade facade;
 				try {
-					facade = edits
-							.createWorkflowInstanceFacade(dataflow, callback
-									.getContext(), callback
-									.getParentProcessIdentifier());
+					facade = edits.createWorkflowInstanceFacade(dataflow, callback.getContext(),
+							callback.getParentProcessIdentifier());
 				} catch (InvalidDataflowException ex) {
 					callback.fail("Invalid workflow", ex);
 					return;
@@ -96,8 +89,7 @@ public class DataflowActivity extends
 
 					Map<String, T2Reference> outputData = new HashMap<String, T2Reference>();
 
-					public void resultTokenProduced(
-							WorkflowDataToken dataToken, String port) {
+					public void resultTokenProduced(WorkflowDataToken dataToken, String port) {
 						if (dataToken.getIndex().length == 0) {
 							outputData.put(port, dataToken.getData());
 							synchronized (this) {
@@ -112,13 +104,11 @@ public class DataflowActivity extends
 
 				facade.fire();
 
-				for (Map.Entry<String, T2Reference> entry : data
-						.entrySet()) {
+				for (Map.Entry<String, T2Reference> entry : data.entrySet()) {
 					try {
-						WorkflowDataToken token = new WorkflowDataToken(
-								callback.getParentProcessIdentifier(),
-								new int[] {}, entry.getValue(), callback
-										.getContext());
+						WorkflowDataToken token = new WorkflowDataToken(callback
+								.getParentProcessIdentifier(), new int[] {}, entry.getValue(),
+								callback.getContext());
 						facade.pushData(token, entry.getKey());
 					} catch (TokenOrderException e) {
 						callback.fail("Failed to push data into facade", e);
@@ -130,27 +120,30 @@ public class DataflowActivity extends
 		});
 	}
 
-	private void buildInputPorts() throws ActivityConfigurationException {
-		inputPorts.clear();
-		for (DataflowInputPort dataflowInputPort : dataflow.getInputPorts()) {
-			addInput(dataflowInputPort.getName(), dataflowInputPort.getDepth(),
-					true, new ArrayList<Class<? extends ExternalReferenceSPI>>(),
-					null);
-		}
-	}
+//	private void buildInputPorts() throws ActivityConfigurationException {
+//		inputPorts.clear();
+//		for (DataflowInputPort dataflowInputPort : dataflow.getInputPorts()) {
+//			addInput(dataflowInputPort.getName(), dataflowInputPort.getDepth(), true,
+//					new ArrayList<Class<? extends ExternalReferenceSPI>>(), null);
+//		}
+//	}
 
-	private void buildOutputPorts() throws ActivityConfigurationException {
-		outputPorts.clear();
-		//granular depth same as depth - no streaming of results
-		for (DataflowOutputPort dataflowOutputPort : dataflow.getOutputPorts()) {
-			addOutput(dataflowOutputPort.getName(), dataflowOutputPort
-					.getDepth(), dataflowOutputPort
-					.getDepth());
-		}
-	}
+//	private void buildOutputPorts() throws ActivityConfigurationException {
+//		outputPorts.clear();
+//		// granular depth same as depth - no streaming of results
+//		for (DataflowOutputPort dataflowOutputPort : dataflow.getOutputPorts()) {
+//			addOutput(dataflowOutputPort.getName(), dataflowOutputPort.getDepth(),
+//					dataflowOutputPort.getDepth());
+//		}
+//	}
 
 	public Dataflow getNestedDataflow() {
-		return getConfiguration();
+		return dataflow;
+	}
+
+	@Override
+	public void setNestedDataflow(Dataflow dataflow) {
+		this.dataflow = dataflow;
 	}
 
 }

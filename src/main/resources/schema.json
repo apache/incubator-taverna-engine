@@ -1,0 +1,19 @@
+{
+    "$schema": "http://json-schema.org/draft-03/schema#",
+    "id": "http://ns.taverna.org.uk/2010/activity/dataflow.schema.json",
+    "title": "Dataflow activity configuration",
+    "type": "object",
+    "properties": {
+        "@context": {
+            "description": "JSON-LD context for interpreting the configuration as RDF",
+            "required": true,
+            "enum": ["http://ns.taverna.org.uk/2010/activity/dataflow.context.json"]
+        },
+        "workflow": {
+            "title": "Nested Workflow",
+            "description": "Location of the nested workflow",
+            "type": "string",
+            "required": true
+        }
+    }
+}
