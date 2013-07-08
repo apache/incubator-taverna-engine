@@ -21,6 +21,12 @@
 			<artifactId>scufl2-api</artifactId>
 			<version>${scufl2.version}</version>
 		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.2.2</version>
+		</dependency>
 	</dependencies>
 	<repositories>
 		<repository>

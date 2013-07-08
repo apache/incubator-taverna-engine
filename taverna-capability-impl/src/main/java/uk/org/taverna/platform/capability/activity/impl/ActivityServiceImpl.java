@@ -20,60 +20,32 @@
  ******************************************************************************/
 package uk.org.taverna.platform.capability.activity.impl;
 
-import static uk.org.taverna.platform.capability.configuration.impl.ConfigurationUtils.createPropertyDefinitions;
-import static uk.org.taverna.platform.capability.configuration.impl.ConfigurationUtils.setConfigurationProperties;
-
 import java.net.URI;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Logger;
 
-import net.sf.taverna.t2.workflowmodel.Configurable;
-import net.sf.taverna.t2.workflowmodel.Dataflow;
-import net.sf.taverna.t2.workflowmodel.Edits;
-import net.sf.taverna.t2.workflowmodel.OutputPort;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityFactory;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityInputPort;
-import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationBean;
-
+import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityOutputPort;
 import uk.org.taverna.platform.capability.api.ActivityConfigurationException;
 import uk.org.taverna.platform.capability.api.ActivityNotFoundException;
 import uk.org.taverna.platform.capability.api.ActivityService;
-import uk.org.taverna.platform.capability.api.ConfigurationException;
-import uk.org.taverna.scufl2.api.configurations.Configuration;
-import uk.org.taverna.scufl2.api.configurations.ConfigurationDefinition;
-import uk.org.taverna.scufl2.api.configurations.PropertyDefinition;
-import uk.org.taverna.scufl2.api.configurations.PropertyReferenceDefinition;
-import uk.org.taverna.scufl2.api.configurations.PropertyResourceDefinition;
-import uk.org.taverna.scufl2.api.container.WorkflowBundle;
-import uk.org.taverna.scufl2.api.port.ActivityPort;
 import uk.org.taverna.scufl2.api.port.InputActivityPort;
 import uk.org.taverna.scufl2.api.port.OutputActivityPort;
-import uk.org.taverna.scufl2.api.property.PropertyException;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 public class ActivityServiceImpl implements ActivityService {
 
-	private static Logger logger = Logger.getLogger(ActivityServiceImpl.class.getName());
-
 	private List<ActivityFactory> activityFactories;
-
-	private Edits edits;
-
-	@Override
-	public List<URI> getActivityURIs() {
-		return new ArrayList<URI>(getActivityTypes());
-	}
 
 	@Override
 	public Set<URI> getActivityTypes() {
 		Set<URI> activityTypes = new HashSet<URI>();
 		for (ActivityFactory activityFactory : activityFactories) {
-			activityTypes.add(activityFactory.getActivityURI());
+			activityTypes.add(activityFactory.getActivityType());
 		}
 		return activityTypes;
 	}
@@ -81,7 +53,7 @@ public class ActivityServiceImpl implements ActivityService {
 	@Override
 	public boolean activityExists(URI uri) {
 		for (ActivityFactory activityFactory : activityFactories) {
-			if (activityFactory.getActivityURI().equals(uri)) {
+			if (activityFactory.getActivityType().equals(uri)) {
 				return true;
 			}
 		}
@@ -89,56 +61,21 @@ public class ActivityServiceImpl implements ActivityService {
 	}
 
 	@Override
-	public ConfigurationDefinition getActivityConfigurationDefinition(URI uri)
-			throws ActivityNotFoundException, ActivityConfigurationException {
-		ActivityFactory factory = getActivityFactory(uri);
-		return createConfigurationDefinition(uri, factory.createActivityConfiguration().getClass());
+	public JsonNode getActivityConfigurationSchema(URI activityType)
+			throws ActivityNotFoundException {
+		ActivityFactory factory = getActivityFactory(activityType);
+		return factory.getActivityConfigurationSchema();
 	}
 
 	@Override
-	public Activity<?> createActivity(URI activityType, Configuration configuration)
+	public Activity<?> createActivity(URI activityType, JsonNode configuration)
 			throws ActivityNotFoundException, ActivityConfigurationException {
 		ActivityFactory factory = getActivityFactory(activityType);
-
-		// create the activity and inject the edits
-		Activity<?> activity = factory.createActivity();
-		activity.setEdits(edits);
-
+		Activity<JsonNode> activity = (Activity<JsonNode>) factory.createActivity();
 		if (configuration != null) {
-			// check configuration is for the correct activity
-			uk.org.taverna.scufl2.api.common.Configurable configurable = configuration
-					.getConfigures();
-			if (configurable instanceof uk.org.taverna.scufl2.api.activity.Activity) {
-				uk.org.taverna.scufl2.api.activity.Activity scufl2Activity = (uk.org.taverna.scufl2.api.activity.Activity) configurable;
-				if (!scufl2Activity.getConfigurableType().equals(activityType)) {
-					String message = MessageFormat.format(
-							"Expected a configuration for {0} but got a configuration for {1}",
-							activityType, scufl2Activity.getConfigurableType());
-					logger.fine(message);
-					throw new ActivityConfigurationException(message);
-				}
-			} else {
-				String message = "Configuration does not configure an Activity";
-				logger.fine(message);
-				throw new ActivityConfigurationException(message);
-			}
-			// create the configuration bean
-			Object configurationBean = factory.createActivityConfiguration();
-			ConfigurationDefinition definition = createConfigurationDefinition(activityType,
-					configurationBean.getClass());
-			WorkflowBundle workflowBundle = configuration.getParent().getParent();
 			try {
-				// set the properties on the configuration bean
-				setConfigurationProperties(configurationBean, configuration,
-						configuration.getPropertyResource(),
-						definition.getPropertyResourceDefinition(), activityType, workflowBundle);
-				// configure the activity with the configuration bean
-				((Configurable) activity).configure(configurationBean);
-			} catch (PropertyException e) {
-				throw new ActivityConfigurationException(e);
-			} catch (net.sf.taverna.t2.workflowmodel.ConfigurationException e) {
-				throw new ActivityConfigurationException(e);
-			} catch (ConfigurationException e) {
+				activity.configure(configuration);
+			} catch (net.sf.taverna.t2.workflowmodel.processor.activity.ActivityConfigurationException e) {
 				throw new ActivityConfigurationException(e);
 			}
 		}
@@ -146,63 +83,43 @@ public class ActivityServiceImpl implements ActivityService {
 	}
 
 	@Override
-	public void addDynamicPorts(uk.org.taverna.scufl2.api.activity.Activity scufl2Activity,
-			Configuration configuration) throws ActivityNotFoundException,
-			ActivityConfigurationException {
-		Activity<?> activity = createActivity(scufl2Activity.getConfigurableType(), configuration);
-		Set<ActivityInputPort> inputPorts = activity.getInputPorts();
-		for (ActivityInputPort inputPort : inputPorts) {
-			InputActivityPort inputActivityPort = new InputActivityPort(scufl2Activity,
-					inputPort.getName());
-			inputActivityPort.setDepth(inputPort.getDepth());
+	public Set<InputActivityPort> getActivityInputPorts(URI activityType, JsonNode configuration)
+			throws ActivityNotFoundException, ActivityConfigurationException {
+		Set<InputActivityPort> inputPorts = new HashSet<>();
+		try {
+			for (ActivityInputPort port : getActivityFactory(activityType).getInputPorts(configuration)) {
+				InputActivityPort inputActivityPort = new InputActivityPort();
+				inputActivityPort.setName(port.getName());
+				inputActivityPort.setDepth(port.getDepth());
+				inputPorts.add(inputActivityPort);
+			}
+		} catch (net.sf.taverna.t2.workflowmodel.processor.activity.ActivityConfigurationException e) {
+			throw new ActivityConfigurationException(e);
 		}
-		Set<OutputPort> outputPorts = activity.getOutputPorts();
-		for (OutputPort outputPort : outputPorts) {
-			OutputActivityPort outputActivityPort = new OutputActivityPort(scufl2Activity,
-					outputPort.getName());
-			outputActivityPort.setDepth(outputPort.getDepth());
-			outputActivityPort.setGranularDepth(outputPort.getGranularDepth());
-		}
+		return inputPorts;
 	}
 
 	@Override
-	public Set<ActivityPort> getActivityPorts(URI activityType, Configuration configuration)
+	public Set<OutputActivityPort> getActivityOutputPorts(URI activityType, JsonNode configuration)
 			throws ActivityNotFoundException, ActivityConfigurationException {
-		Set<ActivityPort> activityPorts = new HashSet<ActivityPort>();
-		Activity<?> activity = createActivity(configuration.getType(), configuration);
-		Set<ActivityInputPort> inputPorts = activity.getInputPorts();
-		for (ActivityInputPort inputPort : inputPorts) {
-			InputActivityPort inputActivityPort = new InputActivityPort();
-			inputActivityPort.setName(inputPort.getName());
-			inputActivityPort.setDepth(inputPort.getDepth());
-			activityPorts.add(inputActivityPort);
+		Set<OutputActivityPort> outputPorts = new HashSet<>();
+		try {
+			for (ActivityOutputPort port : getActivityFactory(activityType).getOutputPorts(
+					configuration)) {
+				OutputActivityPort outputActivityPort = new OutputActivityPort();
+				outputActivityPort.setName(port.getName());
+				outputActivityPort.setDepth(port.getDepth());
+				outputActivityPort.setGranularDepth(port.getGranularDepth());
+				outputPorts.add(outputActivityPort);
+			}
+		} catch (net.sf.taverna.t2.workflowmodel.processor.activity.ActivityConfigurationException e) {
+			throw new ActivityConfigurationException(e);
 		}
-		Set<OutputPort> outputPorts = activity.getOutputPorts();
-		for (OutputPort outputPort : outputPorts) {
-			OutputActivityPort outputActivityPort = new OutputActivityPort();
-			outputActivityPort.setName(outputPort.getName());
-			outputActivityPort.setDepth(outputPort.getDepth());
-			outputActivityPort.setGranularDepth(outputPort.getGranularDepth());
-			activityPorts.add(outputActivityPort);
-		}
-		return activityPorts;
-	}
-
-	/**
-	 * Sets the workflow model Edits service.
-	 *
-	 * In a production environment this should be set by Spring DM.
-	 *
-	 * @param edits
-	 *            the workflow model Edits service
-	 */
-	public void setEdits(Edits edits) {
-		this.edits = edits;
+		return outputPorts;
 	}
 
 	/**
 	 * Sets the list of available <code>ActivityFactory</code>s.
-	 *
 	 * In a production environment this should be set by Spring DM.
 	 *
 	 * @param activityFactories
@@ -212,39 +129,10 @@ public class ActivityServiceImpl implements ActivityService {
 		this.activityFactories = activityFactories;
 	}
 
-	private ConfigurationDefinition createConfigurationDefinition(URI uri,
-			Class<?> configurationClass) throws ActivityConfigurationException {
-
-		ConfigurationDefinition configurationDefinition = new ConfigurationDefinition(uri);
-		PropertyResourceDefinition propertyResourceDefinition = configurationDefinition
-				.getPropertyResourceDefinition();
-
-		ConfigurationBean configurationBean = configurationClass
-				.getAnnotation(ConfigurationBean.class);
-		if (configurationBean == null) {
-			if (Dataflow.class.isAssignableFrom(configurationClass)) {
-				PropertyDefinition referenceDefinition = new PropertyReferenceDefinition(
-						uri.resolve("#workflow"), "workflow", "Nested workflow", "", true, false,
-						false);
-				propertyResourceDefinition.setPropertyDefinitions(Collections
-						.singletonList(referenceDefinition));
-			} else {
-				throw new ActivityConfigurationException("Configuration bean for " + uri
-						+ " is not annotated");
-			}
-		} else {
-			uri = URI.create(configurationBean.uri());
-			propertyResourceDefinition.setTypeURI(uri);
-			propertyResourceDefinition
-					.setPropertyDefinitions(createPropertyDefinitions(configurationClass));
-		}
-
-		return configurationDefinition;
-	}
-
-	private ActivityFactory getActivityFactory(URI activityType) throws ActivityNotFoundException {
+	private ActivityFactory getActivityFactory(URI activityType)
+			throws ActivityNotFoundException {
 		for (ActivityFactory activityFactory : activityFactories) {
-			if (activityFactory.getActivityURI().equals(activityType)) {
+			if (activityFactory.getActivityType().equals(activityType)) {
 				return activityFactory;
 			}
 		}

@@ -5,7 +5,6 @@
 
 	<bean id="activityService" class="uk.org.taverna.platform.capability.activity.impl.ActivityServiceImpl">
 		<property name="activityFactories" ref="activityFactories" />
-		<property name="edits" ref="workflowModelEdits" />
 	</bean>
 
 	<bean id="dispatchLayerService" class="uk.org.taverna.platform.capability.dispatch.impl.DispatchLayerServiceImpl">

@@ -21,11 +21,12 @@
 package uk.org.taverna.platform.capability.api;
 
 import java.net.URI;
-import java.util.List;
+import java.util.Set;
 
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayer;
 import uk.org.taverna.scufl2.api.configurations.Configuration;
-import uk.org.taverna.scufl2.api.configurations.ConfigurationDefinition;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Service for discovering available dispatch layers and the properties required to configure the
@@ -36,33 +37,33 @@ import uk.org.taverna.scufl2.api.configurations.ConfigurationDefinition;
 public interface DispatchLayerService {
 
 	/**
-	 * Returns a list URI's that identify available dispatch layers.
+	 * Returns the available dispatch layer types.
 	 *
-	 * @return a list URI's that identify available dispatch layers
+	 * @return a  the available dispatch layer types
 	 */
-	public List<URI> getDispatchLayerURIs();
+	public Set<URI> getDispatchLayerTypes();
 
 	/**
 	 * Returns true iff a dispatch layer exists for the specified URI.
 	 *
-	 * @param uri
-	 *            the dispatch layer URI to check
+	 * @param dispatchLayerType
+	 *            the dispatch layer type to check
 	 * @return true if a dispatch layer exists for the specified URI
 	 */
-	public boolean dispatchLayerExists(URI uri);
+	public boolean dispatchLayerExists(URI dispatchLayerType);
 
 	/**
-	 * Returns a definition of the configuration required by a dispatch layer.
+	 * Returns the JSON Schema for the configuration required by a dispatch layer.
 	 *
-	 * @param uri
-	 *            a URI that identifies a dispatch layer
-	 * @return a definition of the configuration required by a dispatch layer
+	 * @param activityType
+	 *            the activity type
+	 * @return the JSON Schema for the configuration required by a dispatch layer
 	 * @throws DispatchLayerNotFoundException
 	 *             if a dispatch layer cannot be found for the specified URI
 	 * @throws DispatchLayerConfigurationException
-	 *             if the ConfigurationDefinition cannot be created
+	 *             if the JSON Schema cannot be created
 	 */
-	public ConfigurationDefinition getDispatchLayerConfigurationDefinition(URI uri)
+	public JsonNode getDispatchLayerConfigurationSchema(URI dispatchLayerType)
 			throws DispatchLayerNotFoundException, DispatchLayerConfigurationException;
 
 	/**

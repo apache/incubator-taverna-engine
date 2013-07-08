@@ -21,13 +21,12 @@
 package uk.org.taverna.platform.capability.api;
 
 import java.net.URI;
-import java.util.List;
 import java.util.Set;
 
-import uk.org.taverna.scufl2.api.activity.Activity;
-import uk.org.taverna.scufl2.api.configurations.Configuration;
-import uk.org.taverna.scufl2.api.configurations.ConfigurationDefinition;
-import uk.org.taverna.scufl2.api.port.ActivityPort;
+import uk.org.taverna.scufl2.api.port.InputActivityPort;
+import uk.org.taverna.scufl2.api.port.OutputActivityPort;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Service for discovering available activities and the properties required to configure the
@@ -36,15 +35,6 @@ import uk.org.taverna.scufl2.api.port.ActivityPort;
  * @author David Withers
  */
 public interface ActivityService {
-
-	/**
-	 * Returns a list URI's that identify available activities.
-	 *
-	 * @return a list URI's that identify available activities
-	 * @deprecated use {@link getActivityTypes}
-	 */
-	@Deprecated
-	public List<URI> getActivityURIs();
 
 	/**
 	 * Returns the available activity types.
@@ -63,66 +53,59 @@ public interface ActivityService {
 	public boolean activityExists(URI activityType);
 
 	/**
-	 * Returns a definition of the configuration required by an activity.
+	 * Returns the JSON Schema for the configuration required by an activity.
 	 *
 	 * @param activityType
 	 *            the activity type
-	 * @return a definition of the configuration required by an activity
+	 * @return the JSON Schema for the configuration required by an activity
 	 * @throws ActivityNotFoundException
 	 *             if an activity cannot be found for the specified URI
 	 * @throws ActivityConfigurationException
-	 *             if the ConfigurationDefinition cannot be created
+	 *             if the JSON Schema cannot be created
 	 */
-	public ConfigurationDefinition getActivityConfigurationDefinition(URI activityType)
+	public JsonNode getActivityConfigurationSchema(URI activityType)
 			throws ActivityNotFoundException, ActivityConfigurationException;
 
 	/**
-	 * Returns the ports for an activity configured with the configuration.
+	 * Returns the input ports that the activity type requires to be present in order to execute
+	 * with the specified configuration.
+	 * <p>
+	 * If the activity does not require any input port for the configuration then an empty set is
+	 * returned.
 	 *
-	 * @param configuration an activity configuration
-	 * @return the ports for an activity configured with the configuration
-	 */
-
-	/**
-	 * Returns the ports that would be created by configuring the activity type with the
-	 * configuration.
-	 *
-	 * If a configuration does not create any ports for the activity an empty set is returned.
-	 *
-	 * @param activityType
-	 *            the type of the activity
 	 * @param configuration
-	 *            the configuration for the activity
+	 *            the activity configuration
 	 * @throws ActivityNotFoundException
-	 *             if a configurable version of the activity cannot be found
+	 *             if the activity cannot be found
 	 * @throws ActivityConfigurationException
-	 *             if the activity cannot be configured
-	 * @return
+	 *             if the activity configuration is incorrect
+	 * @return the input ports that the activity requires to be present in order to execute
 	 */
-	public Set<ActivityPort> getActivityPorts(URI activityType, Configuration configuration)
-			throws ActivityNotFoundException, ActivityConfigurationException;
+	public Set<InputActivityPort> getActivityInputPorts(URI activityType,
+			JsonNode configuration) throws ActivityNotFoundException,
+			ActivityConfigurationException;
 
 	/**
-	 * Adds ports to the activity that would be created by configuring the activity with the
-	 * configuration.
+	 * Returns the output ports that the activity type requires to be present in order to execute
+	 * with the specified configuration.
+	 * <p>
+	 * If the activity type does not require any output ports for the configuration then an empty
+	 * set is returned.
 	 *
-	 * A configuration may not create any dynamic ports for the activity.
-	 *
-	 * @param activity
-	 *            the activity to add ports to
 	 * @param configuration
-	 *            the configuration for the activity
+	 *            the activity configuration
 	 * @throws ActivityNotFoundException
-	 *             if a configurable version of the activity cannot be found
+	 *             if the activity cannot be found
 	 * @throws ActivityConfigurationException
-	 *             if the activity cannot be configured
+	 *             if the activity configuration is incorrect
+	 * @return the output ports that the activity requires to be present in order to execute
 	 */
-	public void addDynamicPorts(Activity activity, Configuration configuration)
-			throws ActivityNotFoundException, ActivityConfigurationException;
+	public Set<OutputActivityPort> getActivityOutputPorts(URI activityType,
+			JsonNode configuration) throws ActivityNotFoundException,
+			ActivityConfigurationException;
 
 	/**
 	 * Returns the activity for the specified activity type.
-	 *
 	 * If configuration is not null the returned activity will be configured.
 	 *
 	 * @param activityType
@@ -135,8 +118,8 @@ public interface ActivityService {
 	 * @throws ActivityConfigurationException
 	 *             if the configuration is not valid
 	 */
-	public net.sf.taverna.t2.workflowmodel.processor.activity.Activity<?> createActivity(URI activityType,
-			Configuration configuration) throws ActivityNotFoundException,
+	public net.sf.taverna.t2.workflowmodel.processor.activity.Activity<?> createActivity(
+			URI activityType, JsonNode configuration) throws ActivityNotFoundException,
 			ActivityConfigurationException;
 
 }

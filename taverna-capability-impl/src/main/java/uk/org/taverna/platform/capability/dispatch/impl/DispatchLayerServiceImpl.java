@@ -20,30 +20,22 @@
  ******************************************************************************/
 package uk.org.taverna.platform.capability.dispatch.impl;
 
-import static uk.org.taverna.platform.capability.configuration.impl.ConfigurationUtils.createPropertyDefinitions;
-import static uk.org.taverna.platform.capability.configuration.impl.ConfigurationUtils.setConfigurationProperties;
-
 import java.net.URI;
 import java.text.MessageFormat;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
-import net.sf.taverna.t2.workflowmodel.Configurable;
-import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationBean;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayer;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayerFactory;
-
-import uk.org.taverna.platform.capability.api.ConfigurationException;
 import uk.org.taverna.platform.capability.api.DispatchLayerConfigurationException;
 import uk.org.taverna.platform.capability.api.DispatchLayerNotFoundException;
 import uk.org.taverna.platform.capability.api.DispatchLayerService;
 import uk.org.taverna.scufl2.api.configurations.Configuration;
-import uk.org.taverna.scufl2.api.configurations.ConfigurationDefinition;
-import uk.org.taverna.scufl2.api.configurations.PropertyResourceDefinition;
-import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.dispatchstack.DispatchStackLayer;
-import uk.org.taverna.scufl2.api.property.PropertyException;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  *
@@ -56,18 +48,18 @@ public class DispatchLayerServiceImpl implements DispatchLayerService {
 	private List<DispatchLayerFactory> dispatchLayerFactories;
 
 	@Override
-	public List<URI> getDispatchLayerURIs() {
-		List<URI> dispatchLayerURIs = new ArrayList<URI>();
+	public Set<URI> getDispatchLayerTypes() {
+		Set<URI> dispatchLayerTypes = new HashSet<>();
 		for (DispatchLayerFactory dispatchLayerFactory : dispatchLayerFactories) {
-			dispatchLayerURIs.addAll(dispatchLayerFactory.getDispatchLayerURIs());
+			dispatchLayerTypes.addAll(dispatchLayerFactory.getDispatchLayerTypes());
 		}
-		return dispatchLayerURIs;
+		return dispatchLayerTypes;
 	}
 
 	@Override
-	public boolean dispatchLayerExists(URI uri) {
+	public boolean dispatchLayerExists(URI dispatchLayerType) {
 		for (DispatchLayerFactory dispatchLayerFactory : dispatchLayerFactories) {
-			if (dispatchLayerFactory.getDispatchLayerURIs().contains(uri)) {
+			if (dispatchLayerFactory.getDispatchLayerTypes().contains(dispatchLayerType)) {
 				return true;
 			}
 		}
@@ -75,27 +67,26 @@ public class DispatchLayerServiceImpl implements DispatchLayerService {
 	}
 
 	@Override
-	public ConfigurationDefinition getDispatchLayerConfigurationDefinition(URI uri)
-			throws DispatchLayerNotFoundException, DispatchLayerConfigurationException {
-		DispatchLayerFactory factory = getDispatchLayerFactory(uri);
-		return createConfigurationDefinition(uri, factory.createDispatchLayerConfiguration(uri).getClass());
+	public JsonNode getDispatchLayerConfigurationSchema(URI dispatchLayerType) throws DispatchLayerNotFoundException {
+		DispatchLayerFactory factory = getDispatchLayerFactory(dispatchLayerType);
+		return factory.getDispatchLayerConfigurationSchema(dispatchLayerType);
 	}
 
 	@Override
-	public DispatchLayer<?> createDispatchLayer(URI uri, Configuration configuration)
+	public DispatchLayer<?> createDispatchLayer(URI dispatchLayerType, Configuration configuration)
 			throws DispatchLayerNotFoundException, DispatchLayerConfigurationException {
-		DispatchLayerFactory factory = getDispatchLayerFactory(uri);
-		DispatchLayer<?> dispatchLayer = factory.createDispatchLayer(uri);
+		DispatchLayerFactory factory = getDispatchLayerFactory(dispatchLayerType);
+		DispatchLayer<JsonNode> dispatchLayer = (DispatchLayer<JsonNode>) factory.createDispatchLayer(dispatchLayerType);
 
 		if (configuration != null) {
 			// check configuration is for the correct dispatch layer
 			uk.org.taverna.scufl2.api.common.Configurable configurable = configuration.getConfigures();
 			if (configurable instanceof DispatchStackLayer) {
 				DispatchStackLayer scufl2DispatchLayer = (DispatchStackLayer) configurable;
-				if (!scufl2DispatchLayer.getConfigurableType().equals(uri)) {
+				if (!scufl2DispatchLayer.getType().equals(dispatchLayerType)) {
 					String message = MessageFormat.format(
 							"Expected a configuration for {0} but got a configuration for {1}",
-							uri, scufl2DispatchLayer.getConfigurableType());
+							dispatchLayerType, scufl2DispatchLayer.getType());
 					logger.fine(message);
 					throw new DispatchLayerConfigurationException(message);
 				}
@@ -104,45 +95,14 @@ public class DispatchLayerServiceImpl implements DispatchLayerService {
 				logger.fine(message);
 				throw new DispatchLayerConfigurationException(message);
 			}
-			// create the configuration bean
-			Object configurationBean = factory.createDispatchLayerConfiguration(uri);
-			ConfigurationDefinition definition = createConfigurationDefinition(uri, configurationBean.getClass());
-			WorkflowBundle workflowBundle = configuration.getParent().getParent();
+			// set the configuration bean
 			try {
-				// set the properties on the configuration bean
-				setConfigurationProperties(configurationBean, configuration, configuration.getPropertyResource(),
-						definition.getPropertyResourceDefinition(), uri, workflowBundle);
-				// configure the dispatchLayer with the configuration bean
-				((Configurable) dispatchLayer).configure(configurationBean);
-			} catch (PropertyException e) {
-				throw new DispatchLayerConfigurationException(e);
+				dispatchLayer.configure(configuration.getJson());
 			} catch (net.sf.taverna.t2.workflowmodel.ConfigurationException e) {
-				throw new DispatchLayerConfigurationException(e);
-			} catch (ConfigurationException e) {
 				throw new DispatchLayerConfigurationException(e);
 			}
 		}
 		return dispatchLayer;
-	}
-
-	private ConfigurationDefinition createConfigurationDefinition(URI uri,
-			Class<?> configurationClass) throws DispatchLayerConfigurationException {
-
-		ConfigurationDefinition configurationDefinition = new ConfigurationDefinition(uri);
-		PropertyResourceDefinition propertyResourceDefinition = configurationDefinition
-				.getPropertyResourceDefinition();
-
-		ConfigurationBean configurationBean = configurationClass.getAnnotation(ConfigurationBean.class);
-		if (configurationBean == null) {
-			throw new DispatchLayerConfigurationException("Configuration bean for "+uri+" is not annotated");
-		} else {
-			uri = URI.create(configurationBean.uri());
-			propertyResourceDefinition.setTypeURI(uri);
-			propertyResourceDefinition
-					.setPropertyDefinitions(createPropertyDefinitions(configurationClass));
-		}
-
-		return configurationDefinition;
 	}
 
 	/**
@@ -157,13 +117,13 @@ public class DispatchLayerServiceImpl implements DispatchLayerService {
 		this.dispatchLayerFactories = dispatchLayerFactories;
 	}
 
-	private DispatchLayerFactory getDispatchLayerFactory(URI uri) throws DispatchLayerNotFoundException {
+	private DispatchLayerFactory getDispatchLayerFactory(URI dispatchLayerType) throws DispatchLayerNotFoundException {
 		for (DispatchLayerFactory dispatchLayerFactory : dispatchLayerFactories) {
-			if (dispatchLayerFactory.getDispatchLayerURIs().contains(uri)) {
+			if (dispatchLayerFactory.getDispatchLayerTypes().contains(dispatchLayerType)) {
 				return dispatchLayerFactory;
 			}
 		}
-		throw new DispatchLayerNotFoundException("Could not find a dispatch layer for " + uri);
+		throw new DispatchLayerNotFoundException("Could not find a dispatch layer for " + dispatchLayerType);
 	}
 
 }
