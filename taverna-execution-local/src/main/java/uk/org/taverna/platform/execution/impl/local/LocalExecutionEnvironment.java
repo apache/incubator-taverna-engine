@@ -21,7 +21,7 @@
 package uk.org.taverna.platform.execution.impl.local;
 
 import java.net.URI;
-import java.util.List;
+import java.util.Set;
 
 import uk.org.taverna.platform.capability.api.ActivityConfigurationException;
 import uk.org.taverna.platform.capability.api.ActivityNotFoundException;
@@ -30,7 +30,8 @@ import uk.org.taverna.platform.capability.api.DispatchLayerConfigurationExceptio
 import uk.org.taverna.platform.capability.api.DispatchLayerNotFoundException;
 import uk.org.taverna.platform.capability.api.DispatchLayerService;
 import uk.org.taverna.platform.execution.api.AbstractExecutionEnvironment;
-import uk.org.taverna.scufl2.api.configurations.ConfigurationDefinition;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Execution Environment for a local Taverna Dataflow Engine
@@ -51,8 +52,8 @@ public class LocalExecutionEnvironment extends AbstractExecutionEnvironment {
 	}
 
 	@Override
-	public List<URI> getActivityURIs() {
-		return activityService.getActivityURIs();
+	public Set<URI> getActivityTypes() {
+		return activityService.getActivityTypes();
 	}
 
 	@Override
@@ -61,14 +62,14 @@ public class LocalExecutionEnvironment extends AbstractExecutionEnvironment {
 	}
 
 	@Override
-	public ConfigurationDefinition getActivityConfigurationDefinition(URI uri)
+	public JsonNode getActivityConfigurationSchema(URI uri)
 			throws ActivityNotFoundException, ActivityConfigurationException {
-		return activityService.getActivityConfigurationDefinition(uri);
+		return activityService.getActivityConfigurationSchema(uri);
 	}
 
 	@Override
-	public List<URI> getDispatchLayerURIs() {
-		return dispatchLayerService.getDispatchLayerURIs();
+	public Set<URI> getDispatchLayerTypes() {
+		return dispatchLayerService.getDispatchLayerTypes();
 	}
 
 	@Override
@@ -77,9 +78,9 @@ public class LocalExecutionEnvironment extends AbstractExecutionEnvironment {
 	}
 
 	@Override
-	public ConfigurationDefinition getDispatchLayerConfigurationDefinition(URI uri)
+	public JsonNode getDispatchLayerConfigurationSchema(URI uri)
 			throws DispatchLayerNotFoundException, DispatchLayerConfigurationException {
-		return dispatchLayerService.getDispatchLayerConfigurationDefinition(uri);
+		return dispatchLayerService.getDispatchLayerConfigurationSchema(uri);
 	}
 
 }

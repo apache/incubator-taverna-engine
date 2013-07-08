@@ -58,11 +58,11 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 
 	private Map<Processor, LocalProcessorReport> processorReports;
 
-	private Map<Activity<?>, ActivityReport> activityReports;
+	private Map<Activity, ActivityReport> activityReports;
 
 	private Map<Processor, AtomicInteger> processorInvocations;
 
-	private Map<Activity<?>, AtomicInteger> activityInvocations;
+	private Map<Activity, AtomicInteger> activityInvocations;
 
 	private final String facadeId;
 
@@ -72,8 +72,8 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 		workflowReports = new HashMap<Dataflow, WorkflowReport>();
 		processorReports = new HashMap<Processor, LocalProcessorReport>();
 		processorInvocations = new HashMap<Processor, AtomicInteger>();
-		activityReports = new HashMap<Activity<?>, ActivityReport>();
-		activityInvocations = new HashMap<Activity<?>, AtomicInteger>();
+		activityReports = new HashMap<Activity, ActivityReport>();
+		activityInvocations = new HashMap<Activity, AtomicInteger>();
 		mapReports(workflowReport, mapping);
 	}
 
@@ -84,7 +84,7 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 			processorReports.put(processor, (LocalProcessorReport) processorReport);
 			processorInvocations.put(processor, new AtomicInteger());
 			for (ActivityReport activityReport : processorReport.getChildReports()) {
-				Activity<?> activity = mapping.getDataflowActivity(activityReport.getSubject());
+				Activity activity = mapping.getDataflowActivity(activityReport.getSubject());
 				activityReports.put(activity, activityReport);
 				activityInvocations.put(activity, new AtomicInteger());
 				for (WorkflowReport nestedWorkflowReport : activityReport.getChildReports()) {
@@ -124,7 +124,7 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 				processorReport.addProperties(properties);
 			}
 		} else if (dataflowObject instanceof Activity) {
-			Activity<?> activity = (Activity<?>) dataflowObject;
+			Activity activity = (Activity) dataflowObject;
 			if (activityInvocations.get(activity).getAndIncrement() == 0) {
 				ActivityReport activityReport = activityReports.get(activity);
 				ProcessorReport parentReport = activityReport.getParentReport();
@@ -147,7 +147,7 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 				processorReport.setCompletedDate(new Date());
 			}
 		} else if (dataflowObject instanceof Activity) {
-			Activity<?> activity = (Activity<?>) dataflowObject;
+			Activity activity = (Activity) dataflowObject;
 			if (activityInvocations.get(activity).decrementAndGet() == 0) {
 				ActivityReport activityReport = activityReports.get(activity);
 				activityReport.setCompletedDate(new Date());

@@ -21,13 +21,14 @@
 package uk.org.taverna.platform.execution.api;
 
 import java.net.URI;
-import java.util.List;
+import java.util.Set;
 
 import uk.org.taverna.platform.capability.api.ActivityConfigurationException;
 import uk.org.taverna.platform.capability.api.ActivityNotFoundException;
 import uk.org.taverna.platform.capability.api.DispatchLayerConfigurationException;
 import uk.org.taverna.platform.capability.api.DispatchLayerNotFoundException;
-import uk.org.taverna.scufl2.api.configurations.ConfigurationDefinition;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * The ExecutionEnvironment specifies the capabilities of a workflow execution environment.
@@ -65,11 +66,11 @@ public interface ExecutionEnvironment {
 	public ExecutionService getExecutionService();
 
 	/**
-	 * Returns a list URI's that identify activities available in this ExecutionEnvironment.
+	 * Returns the activity types available in this ExecutionEnvironment.
 	 *
-	 * @return a list URI's that identify activities available in this ExecutionEnvironment
+	 * @return the activity types available in this ExecutionEnvironment
 	 */
-	public List<URI> getActivityURIs();
+	public Set<URI> getActivityTypes();
 
 	/**
 	 * Returns true iff an activity exists for the specified URI in this ExecutionEnvironment.
@@ -81,25 +82,25 @@ public interface ExecutionEnvironment {
 	public boolean activityExists(URI uri);
 
 	/**
-	 * Returns a definition of the configuration required by an activity.
+	 * Returns a JSON Schema for the configuration required by an activity.
 	 *
 	 * @param uri
 	 *            a URI that identifies an activity
-	 * @return a definition of the configuration required by an activity
+	 * @return a JSON Schema for the configuration required by an activity
 	 * @throws ActivityNotFoundException
 	 *             if an activity cannot be found for the specified URI
 	 * @throws ActivityConfigurationException
 	 *             if the ConfigurationDefinition cannot be created
 	 */
-	public ConfigurationDefinition getActivityConfigurationDefinition(URI uri)
+	public JsonNode getActivityConfigurationSchema(URI uri)
 			throws ActivityNotFoundException, ActivityConfigurationException;
 
 	/**
-	 * Returns a list URI's that identify dispatch layers available in this ExecutionEnvironment.
+	 * Returns the dispatch layer types available in this ExecutionEnvironment.
 	 *
-	 * @return a list URI's that identify dispatch layers available in this ExecutionEnvironment
+	 * @return the dispatch layer types available in this ExecutionEnvironment
 	 */
-	public List<URI> getDispatchLayerURIs();
+	public Set<URI> getDispatchLayerTypes();
 
 	/**
 	 * Returns true iff a dispatch layer exists for the specified URI in this ExecutionEnvironment.
@@ -111,18 +112,18 @@ public interface ExecutionEnvironment {
 	public boolean dispatchLayerExists(URI uri);
 
 	/**
-	 * Returns a definition of the configuration required by a dispatch layer.
+	 * Returns a JSON Schema for the configuration required by a dispatch layer.
 	 *
 	 * @param uri
 	 *            a URI that identifies a dispatch layer
 	 * @return
-	 * @return a definition of the configuration required by a dispatch layer
+	 * @return a JSON Schema for the configuration required by a dispatch layer
 	 * @throws DispatchLayerNotFoundException
 	 *             if a dispatch layer cannot be found for the specified URI
 	 * @throws DispatchLayerConfigurationException
 	 *             if the ConfigurationDefinition cannot be created
 	 */
-	public ConfigurationDefinition getDispatchLayerConfigurationDefinition(URI uri)
+	public JsonNode getDispatchLayerConfigurationSchema(URI uri)
 			throws DispatchLayerNotFoundException, DispatchLayerConfigurationException;
 
 }

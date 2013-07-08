@@ -11,4 +11,6 @@
 
     <reference id="executionEnvironmentService" interface="uk.org.taverna.platform.execution.api.ExecutionEnvironmentService"/>
 
+	<reference id="eventAdmin" interface="org.osgi.service.event.EventAdmin" />
+
 </beans:beans>

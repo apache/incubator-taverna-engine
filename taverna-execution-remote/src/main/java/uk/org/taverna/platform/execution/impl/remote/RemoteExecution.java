@@ -20,10 +20,8 @@
  ******************************************************************************/
 package uk.org.taverna.platform.execution.impl.remote;
 
-import java.util.Map;
+import org.purl.wf4ever.robundle.Bundle;
 
-import uk.org.taverna.platform.data.api.Data;
-import uk.org.taverna.platform.data.api.DataLocation;
 import uk.org.taverna.platform.execution.api.AbstractExecution;
 import uk.org.taverna.platform.report.ActivityReport;
 import uk.org.taverna.platform.report.ProcessorReport;
@@ -42,7 +40,7 @@ import uk.org.taverna.scufl2.api.profiles.Profile;
 public class RemoteExecution extends AbstractExecution {
 
 	public RemoteExecution(WorkflowBundle workflowBundle, Workflow workflow, Profile profile,
-			Map<String, DataLocation> inputs) {
+			Bundle inputs) {
 		super(workflowBundle, workflow, profile, inputs);
 		// TODO Auto-generated constructor stub
 	}

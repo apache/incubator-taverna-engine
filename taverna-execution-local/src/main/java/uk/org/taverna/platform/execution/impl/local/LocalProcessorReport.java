@@ -140,5 +140,9 @@ public class LocalProcessorReport extends ProcessorReport {
 		}
 		return sb.toString();
 	}
-
+public static void main(String[] args) {
+	int result = -1;
+	result =  (Integer) null;
+	System.out.println(result);
+}
 }

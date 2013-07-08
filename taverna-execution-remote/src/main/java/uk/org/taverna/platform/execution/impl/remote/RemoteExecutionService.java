@@ -21,11 +21,10 @@
 package uk.org.taverna.platform.execution.impl.remote;
 
 import java.util.Collections;
-import java.util.Map;
 import java.util.Set;
 
-import uk.org.taverna.platform.data.api.Data;
-import uk.org.taverna.platform.data.api.DataLocation;
+import org.purl.wf4ever.robundle.Bundle;
+
 import uk.org.taverna.platform.execution.api.AbstractExecutionService;
 import uk.org.taverna.platform.execution.api.Execution;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
@@ -48,7 +47,7 @@ public class RemoteExecutionService extends AbstractExecutionService {
 
 	@Override
 	protected Execution createExecutionImpl(WorkflowBundle workflowBundle, Workflow workflow,
-			Profile profile, Map<String, DataLocation> inputs)
+			Profile profile, Bundle inputs)
 			throws InvalidWorkflowException {
 		return new RemoteExecution(workflowBundle, workflow, profile, inputs);
 	}

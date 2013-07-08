@@ -21,13 +21,13 @@
 package uk.org.taverna.platform.execution.impl.local;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.sf.taverna.t2.workflowmodel.Configurable;
-import net.sf.taverna.t2.workflowmodel.ConfigurationException;
+import net.sf.taverna.t2.reference.ExternalReferenceSPI;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
 import net.sf.taverna.t2.workflowmodel.DataflowInputPort;
 import net.sf.taverna.t2.workflowmodel.DataflowOutputPort;
@@ -40,9 +40,15 @@ import net.sf.taverna.t2.workflowmodel.Merge;
 import net.sf.taverna.t2.workflowmodel.MergeInputPort;
 import net.sf.taverna.t2.workflowmodel.ProcessorInputPort;
 import net.sf.taverna.t2.workflowmodel.ProcessorOutputPort;
+import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityInputPort;
+import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityOutputPort;
+import net.sf.taverna.t2.workflowmodel.processor.activity.NestedDataflow;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayer;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationStrategy;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.NamedInputPortNode;
+
+import org.hibernate.PropertyNotFoundException;
+
 import uk.org.taverna.platform.capability.api.ActivityConfigurationException;
 import uk.org.taverna.platform.capability.api.ActivityNotFoundException;
 import uk.org.taverna.platform.capability.api.ActivityService;
@@ -81,10 +87,6 @@ import uk.org.taverna.scufl2.api.profiles.ProcessorBinding;
 import uk.org.taverna.scufl2.api.profiles.ProcessorInputPortBinding;
 import uk.org.taverna.scufl2.api.profiles.ProcessorOutputPortBinding;
 import uk.org.taverna.scufl2.api.profiles.Profile;
-import uk.org.taverna.scufl2.api.property.MultiplePropertiesException;
-import uk.org.taverna.scufl2.api.property.PropertyNotFoundException;
-import uk.org.taverna.scufl2.api.property.PropertyReference;
-import uk.org.taverna.scufl2.api.property.UnexpectedPropertyException;
 
 /**
  * Translates a scufl2 {@link Workflow} into a {@link Dataflow}.
@@ -135,15 +137,15 @@ public class WorkflowToDataflowMapper {
 		this.edits = edits;
 		this.activityService = activityService;
 		this.dispatchLayerService = dispatchLayerService;
-		inputPorts = new IdentityHashMap<Port, EventHandlingInputPort>();
-		outputPorts = new IdentityHashMap<Port, EventForwardingOutputPort>();
-		merges = new IdentityHashMap<Port, Merge>();
-		workflowToDataflow = new IdentityHashMap<Workflow, Dataflow>();
-		dataflowToWorkflow = new HashMap<Dataflow, Workflow>();
-		workflowToDataflowProcessors = new IdentityHashMap<Processor, net.sf.taverna.t2.workflowmodel.Processor>();
-		dataflowToWorkflowProcessors = new HashMap<net.sf.taverna.t2.workflowmodel.Processor, Processor>();
-		workflowToDataflowActivities = new IdentityHashMap<Activity, net.sf.taverna.t2.workflowmodel.processor.activity.Activity<?>>();
-		dataflowToWorkflowActivities = new HashMap<net.sf.taverna.t2.workflowmodel.processor.activity.Activity<?>, Activity>();
+		inputPorts = new IdentityHashMap<>();
+		outputPorts = new IdentityHashMap<>();
+		merges = new IdentityHashMap<>();
+		workflowToDataflow = new IdentityHashMap<>();
+		dataflowToWorkflow = new HashMap<>();
+		workflowToDataflowProcessors = new IdentityHashMap<>();
+		dataflowToWorkflowProcessors = new HashMap<>();
+		workflowToDataflowActivities = new IdentityHashMap<>();
+		dataflowToWorkflowActivities = new HashMap<>();
 	}
 
 	public Workflow getWorkflow(Dataflow dataflow) {
@@ -270,7 +272,7 @@ public class WorkflowToDataflowMapper {
 		} else {
 			for (int layer = 0; layer < dispatchStack.size(); layer++) {
 				DispatchStackLayer dispatchStackLayer = dispatchStack.get(layer);
-				URI dispatchLayerType = dispatchStackLayer.getConfigurableType();
+				URI dispatchLayerType = dispatchStackLayer.getType();
 				Configuration configuration = null;
 				try {
 					configuration = scufl2Tools.configurationFor(dispatchStackLayer, profile);
@@ -346,42 +348,52 @@ public class WorkflowToDataflowMapper {
 	}
 
 	private void addActivity(ProcessorBinding processorBinding) throws EditException,
-			ActivityNotFoundException, PropertyNotFoundException, ActivityConfigurationException,
-			InvalidWorkflowException {
+			ActivityNotFoundException, ActivityConfigurationException, InvalidWorkflowException {
 		net.sf.taverna.t2.workflowmodel.Processor processor = workflowToDataflowProcessors
 				.get(processorBinding.getBoundProcessor());
 		Activity scufl2Activity = processorBinding.getBoundActivity();
-		URI activityType = scufl2Activity.getConfigurableType();
+		URI activityType = scufl2Activity.getType();
 		if (!activityService.activityExists(activityType)) {
 			throw new ActivityNotFoundException("No activity exists for " + activityType);
 		}
 		Configuration configuration = scufl2Tools.configurationFor(scufl2Activity, profile);
 
 		// create the activity
-		net.sf.taverna.t2.workflowmodel.processor.activity.Activity<?> activity = null;
+		net.sf.taverna.t2.workflowmodel.processor.activity.Activity<?> activity = activityService
+				.createActivity(activityType, configuration.getJson());
 		// check if we have a nested workflow
 		if (activityType.equals(NESTED_WORKFLOW_URI)) {
 			activity = activityService.createActivity(activityType, null);
-			try {
-				URI workflowURI = configuration.getPropertyResource().getPropertyAsResourceURI(NESTED_WORKFLOW_URI.resolve("#workflow"));
+			if (activity instanceof NestedDataflow) {
+				URI workflowURI = URI.create(configuration.getJson().get("workflow").textValue());
 				URI profileURI = uriTools.uriForBean(profile);
-				Workflow nestedWorkflow = (Workflow) uriTools.resolveUri(profileURI.resolve(workflowURI), workflowBundle);
+				Workflow nestedWorkflow = (Workflow) uriTools.resolveUri(
+						profileURI.resolve(workflowURI), workflowBundle);
 				Dataflow nestedDataflow = getDataflow(nestedWorkflow);
-				((Configurable) activity).configure(nestedDataflow);
-			} catch (ConfigurationException e) {
-				throw new ActivityConfigurationException(e);
-			} catch (UnexpectedPropertyException e) {
-				throw new ActivityConfigurationException(e);
-			} catch (MultiplePropertiesException e) {
-				throw new ActivityConfigurationException(e);
+				((NestedDataflow) activity).setNestedDataflow(nestedDataflow);
+			} else {
+				throw new ActivityConfigurationException(
+						"Activity is not an instance of NestedDataflow");
 			}
-		} else {
-			activity = activityService.createActivity(activityType, configuration);
 		}
 
 		// add the activity to the processor
 		edits.getAddActivityEdit(processor, activity).doEdit();
 
+		// add input ports
+		for (InputActivityPort inputActivityPort : scufl2Activity.getInputPorts()) {
+			ActivityInputPort activityInputPort = edits.createActivityInputPort(
+					inputActivityPort.getName(), inputActivityPort.getDepth(), false,
+					new ArrayList<Class<? extends ExternalReferenceSPI>>(), String.class);
+			edits.getAddActivityInputPortEdit(activity, activityInputPort).doEdit();
+		}
+		// add output ports
+		for (OutputActivityPort outputActivityPort : scufl2Activity.getOutputPorts()) {
+			ActivityOutputPort activitytOutputPort = edits.createActivityOutputPort(
+					outputActivityPort.getName(), outputActivityPort.getDepth(),
+					outputActivityPort.getGranularDepth());
+			edits.getAddActivityOutputPortEdit(activity, activitytOutputPort).doEdit();
+		}
 		// map input ports
 		for (ProcessorInputPortBinding portBinding : processorBinding.getInputPortBindings()) {
 			InputProcessorPort processorPort = portBinding.getBoundProcessorPort();

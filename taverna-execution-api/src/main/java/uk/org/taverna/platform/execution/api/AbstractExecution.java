@@ -21,11 +21,10 @@
 package uk.org.taverna.platform.execution.api;
 
 import java.net.URI;
-import java.util.Map;
 import java.util.UUID;
 
-import uk.org.taverna.platform.data.api.Data;
-import uk.org.taverna.platform.data.api.DataLocation;
+import org.purl.wf4ever.robundle.Bundle;
+
 import uk.org.taverna.platform.report.ActivityReport;
 import uk.org.taverna.platform.report.ProcessorReport;
 import uk.org.taverna.platform.report.WorkflowReport;
@@ -38,10 +37,6 @@ import uk.org.taverna.scufl2.api.core.Processor;
 import uk.org.taverna.scufl2.api.core.Workflow;
 import uk.org.taverna.scufl2.api.profiles.ProcessorBinding;
 import uk.org.taverna.scufl2.api.profiles.Profile;
-import uk.org.taverna.scufl2.api.property.MultiplePropertiesException;
-import uk.org.taverna.scufl2.api.property.PropertyNotFoundException;
-import uk.org.taverna.scufl2.api.property.PropertyReference;
-import uk.org.taverna.scufl2.api.property.UnexpectedPropertyException;
 
 /**
  * Abstract implementation of an {@link Execution}.
@@ -53,9 +48,9 @@ public abstract class AbstractExecution implements Execution {
 	private static final URI NESTED_WORKFLOW_URI = URI.create("http://ns.taverna.org.uk/2010/activity/nested-workflow");
 	private final String ID;
 	private final WorkflowBundle workflowBundle;
+	private final Bundle inputs;
 	private final Workflow workflow;
 	private final Profile profile;
-	private final Map<String, DataLocation> inputs;
 	private final WorkflowReport workflowReport;
 	private final Scufl2Tools scufl2Tools = new Scufl2Tools();
 	private final URITools uriTools = new URITools();
@@ -71,13 +66,13 @@ public abstract class AbstractExecution implements Execution {
 	 * @param profile
 	 *            the <code>Profile</code> to use when executing the <code>Workflow</code>
 	 * @param inputs
-	 *            the inputs for the <code>Workflow</code>. May be <code>null</code> if the
-	 *            <code>Workflow</code> doesn't require any inputs
+	 *            the <code>Bundle</code> containing inputs for the <code>Workflow</code>. Can
+	 *            be <code>null</code> if there are no inputs
 	 * @throws InvalidWorkflowException
 	 *             if the specified workflow is invalid
 	 */
 	public AbstractExecution(WorkflowBundle workflowBundle, Workflow workflow, Profile profile,
-			Map<String, DataLocation> inputs) {
+			Bundle inputs) {
 		this.workflowBundle = workflowBundle;
 		this.workflow = workflow;
 		this.profile = profile;
@@ -98,28 +93,20 @@ public abstract class AbstractExecution implements Execution {
 			ProcessorReport processorReport = createProcessorReport(processor);
 			processorReport.setParentReport(workflowReport);
 			workflowReport.addChildReport(processorReport);
-			ProcessorBinding processorBinding = scufl2Tools.processorBindingForProcessor(processor,
-					profile);
-			Activity boundActivity = processorBinding.getBoundActivity();
-			ActivityReport activityReport = createActivityReport(boundActivity);
-			activityReport.setParentReport(processorReport);
-			URI activityType = boundActivity.getConfigurableType();
-			if (activityType.equals(NESTED_WORKFLOW_URI)) {
-				Configuration configuration = scufl2Tools.configurationFor(boundActivity, profile);
-				try {
-					URI workflowURI = configuration.getPropertyResource().getPropertyAsResourceURI(NESTED_WORKFLOW_URI.resolve("#workflow"));
+			for (ProcessorBinding processorBinding : scufl2Tools.processorBindingsForProcessor(processor, profile)) {
+				Activity boundActivity = processorBinding.getBoundActivity();
+				ActivityReport activityReport = createActivityReport(boundActivity);
+				activityReport.setParentReport(processorReport);
+				URI activityType = boundActivity.getType();
+				if (activityType.equals(NESTED_WORKFLOW_URI)) {
+					Configuration configuration = scufl2Tools.configurationFor(boundActivity, profile);
+					URI workflowURI = URI.create(configuration.getJson().get("workflow").textValue());
 					URI profileURI = uriTools.uriForBean(profile);
 					Workflow nestedWorkflow = (Workflow) uriTools.resolveUri(profileURI.resolve(workflowURI), workflowBundle);
 					activityReport.addChildReport(generateWorkflowReport(nestedWorkflow));
-				} catch (UnexpectedPropertyException e) {
-					e.printStackTrace();
-				} catch (PropertyNotFoundException e) {
-					e.printStackTrace();
-				} catch (MultiplePropertiesException e) {
-					e.printStackTrace();
 				}
+				processorReport.addChildReport(activityReport);
 			}
-			processorReport.addChildReport(activityReport);
 		}
 		return workflowReport;
 	}
@@ -135,6 +122,11 @@ public abstract class AbstractExecution implements Execution {
 	}
 
 	@Override
+	public Bundle getInputs() {
+		return inputs;
+	}
+
+	@Override
 	public Workflow getWorkflow() {
 		return workflow;
 	}
@@ -142,11 +134,6 @@ public abstract class AbstractExecution implements Execution {
 	@Override
 	public Profile getProfile() {
 		return profile;
-	}
-
-	@Override
-	public Map<String, DataLocation> getInputs() {
-		return inputs;
 	}
 
 	@Override

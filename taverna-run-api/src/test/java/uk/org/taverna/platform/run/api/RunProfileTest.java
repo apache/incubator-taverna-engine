@@ -24,14 +24,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.junit.Before;
 import org.junit.Test;
+import org.purl.wf4ever.robundle.Bundle;
 
-import uk.org.taverna.platform.data.api.Data;
-import uk.org.taverna.platform.data.api.DataLocation;
+import uk.org.taverna.databundle.DataBundles;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
 import uk.org.taverna.platform.execution.impl.local.LocalExecutionEnvironment;
 import uk.org.taverna.platform.execution.impl.local.LocalExecutionService;
@@ -52,7 +49,7 @@ public class RunProfileTest {
 	private LocalExecutionService executionService;
 	private Workflow workflow, mainWorkflow;
 	private Profile profile, mainProfile;
-	private Map<String, DataLocation> inputs;
+	private Bundle inputs;
 
 	/**
 	 * @throws java.lang.Exception
@@ -69,7 +66,7 @@ public class RunProfileTest {
 		executionService = new LocalExecutionService();
 		executionEnvironment = new LocalExecutionEnvironment(executionService, null, null);
 
-		inputs = new HashMap<String, DataLocation>();
+		inputs = DataBundles.createBundle();
 		runProfile = new RunProfile(executionEnvironment, workflowBundle, workflow.getName(), profile.getName(), inputs);
 	}
 
@@ -206,7 +203,7 @@ public class RunProfileTest {
 
 	/**
 	 * Test method for
-	 * {@link uk.org.taverna.platform.run.api.RunProfile#setInputs(java.util.Map)}
+	 * {@link uk.org.taverna.platform.run.api.RunProfile#setInputs(org.purl.wf4ever.robundle.Bundle)}
 	 * .
 	 */
 	@Test

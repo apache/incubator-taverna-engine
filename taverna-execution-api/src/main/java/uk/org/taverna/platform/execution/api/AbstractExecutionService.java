@@ -24,8 +24,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import uk.org.taverna.platform.data.api.Data;
-import uk.org.taverna.platform.data.api.DataLocation;
+import org.purl.wf4ever.robundle.Bundle;
+
 import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.Workflow;
@@ -70,7 +70,7 @@ public abstract class AbstractExecutionService implements ExecutionService {
 
 	@Override
 	public String createExecution(ExecutionEnvironment executionEnvironment, WorkflowBundle workflowBundle, Workflow workflow,
-			Profile profile, Map<String, DataLocation> inputs)
+			Profile profile, Bundle inputs)
 			throws InvalidWorkflowException {
 		Execution execution = createExecutionImpl(workflowBundle, workflow, profile, inputs);
 		executionMap.put(execution.getID(), execution);
@@ -90,14 +90,14 @@ public abstract class AbstractExecutionService implements ExecutionService {
 	 * @param profile
 	 *            the <code>Profile</code> to use when executing the <code>Workflow</code>
 	 * @param inputs
-	 *            the inputs for the <code>Workflow</code>. May be <code>null</code> if the
-	 *            <code>Workflow</code> doesn't require any inputs
+	 *            the <code>Bundle</code> containing inputs for the <code>Workflow</code>. Can
+	 *            be <code>null</code> if there are no inputs
 	 * @return a new Execution implementation
 	 * @throws InvalidWorkflowException
 	 *             if the specified workflow is invalid
 	 */
 	protected abstract Execution createExecutionImpl(WorkflowBundle workflowBundle,
-			Workflow workflow, Profile profile, Map<String, DataLocation> inputs) throws InvalidWorkflowException;
+			Workflow workflow, Profile profile, Bundle inputs) throws InvalidWorkflowException;
 
 	@Override
 	public WorkflowReport getWorkflowReport(String executionID) throws InvalidExecutionIdException {

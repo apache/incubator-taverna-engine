@@ -21,12 +21,11 @@
 package uk.org.taverna.platform.run.impl;
 
 import java.util.Date;
-import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-import uk.org.taverna.platform.data.api.Data;
-import uk.org.taverna.platform.data.api.DataLocation;
+import org.purl.wf4ever.robundle.Bundle;
+
 import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
 import uk.org.taverna.platform.execution.api.InvalidExecutionIdException;
 import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
@@ -50,13 +49,13 @@ public class Run {
 
 	private final String ID, executionID;
 
-	private final Map<String, DataLocation> inputs;
-
 	private final ExecutionEnvironment executionEnvironment;
 
 	private final WorkflowReport workflowReport;
 
 	private final WorkflowBundle workflowBundle;
+
+	private final Bundle inputs;
 
 	private final Workflow workflow;
 
@@ -153,29 +152,42 @@ public class Run {
 	}
 
 	/**
-	 * Returns the inputs of the run.
+	 * Returns the <code>Bundle</code> containing the inputs of the run.
 	 *
 	 * May be <code>null</code> if the <code>Workflow</code> doesn't require any inputs.
 	 *
-	 * @return the inputs for the <code>Workflow</code>
+	 * @return the <code>Bundle</code> containing the inputs for the <code>Workflow</code>
 	 */
-	public Map<String, DataLocation> getInputs() {
+	public Bundle getInputs() {
 		return inputs;
 	}
 
 	/**
-	 * Returns the outputs for the <code>Workflow</code>.
+	 * Returns the <code>Bundle</code> containing the outputs for the <code>Workflow</code>.
 	 *
 	 * May be <code>null</code> if the <code>Workflow</code> hasn't produced any outputs (yet).
 	 *
-	 * @return the outputs for the <code>Workflow</code>
+	 * @return the <code>Bundle</code> containing the outputs for the <code>Workflow</code>
 	 */
-	public Map<String, DataLocation> getOutputs() {
+	public Bundle getOutputs() {
 		return workflowReport.getOutputs();
 	}
 
+	/**
+	 * Returns the status report for the run.
+	 *
+	 * @return the status report for the run
+	 */
 	public WorkflowReport getWorkflowReport() {
 		return workflowReport;
+	}
+
+	public Workflow getWorkflow() {
+		return workflow;
+	}
+
+	public Profile getProfile() {
+		return profile;
 	}
 
 	/**
@@ -193,12 +205,10 @@ public class Run {
 		synchronized (workflowReport) {
 			State state = workflowReport.getState();
 			if (state.equals(State.CREATED)) {
-				workflowReport.setStartedDate(new Date());
 				executionEnvironment.getExecutionService().start(executionID);
 			} else {
 				throw new RunStateException("Cannot start a " + state + " run.");
 			}
-
 		}
 	}
 
@@ -211,7 +221,6 @@ public class Run {
 			} else {
 				throw new RunStateException("Cannot pause a " + state + " run.");
 			}
-
 		}
 	}
 

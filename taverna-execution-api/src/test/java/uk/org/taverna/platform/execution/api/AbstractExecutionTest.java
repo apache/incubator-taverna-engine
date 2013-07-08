@@ -23,14 +23,11 @@ package uk.org.taverna.platform.execution.api;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.junit.Before;
 import org.junit.Test;
+import org.purl.wf4ever.robundle.Bundle;
 
-import uk.org.taverna.platform.data.api.Data;
-import uk.org.taverna.platform.data.api.DataLocation;
+import uk.org.taverna.databundle.DataBundles;
 import uk.org.taverna.platform.report.ActivityReport;
 import uk.org.taverna.platform.report.ProcessorReport;
 import uk.org.taverna.platform.report.WorkflowReport;
@@ -54,7 +51,7 @@ public class AbstractExecutionTest {
 
 	private Profile profile;
 
-	private Map<String, DataLocation> inputs;
+	private Bundle inputs;
 
 	/**
 	 * @throws java.lang.Exception
@@ -64,7 +61,7 @@ public class AbstractExecutionTest {
 		workflowBundle = new WorkflowBundle();
 		workflow = new Workflow();
 		profile = new Profile();
-		inputs = new HashMap<String, DataLocation>();
+		inputs = DataBundles.createBundle();
 		execution = new AbstractExecution(workflowBundle, workflow, profile, inputs) {
 			@Override
 			public void start() {}

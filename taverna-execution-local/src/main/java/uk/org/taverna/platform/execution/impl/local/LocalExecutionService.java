@@ -21,18 +21,17 @@
 package uk.org.taverna.platform.execution.impl.local;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import net.sf.taverna.t2.provenance.ProvenanceConnectorFactory;
 import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.workflowmodel.Edits;
+
+import org.purl.wf4ever.robundle.Bundle;
+
 import uk.org.taverna.configuration.database.DatabaseConfiguration;
 import uk.org.taverna.platform.capability.api.ActivityService;
 import uk.org.taverna.platform.capability.api.DispatchLayerService;
-import uk.org.taverna.platform.data.api.Data;
-import uk.org.taverna.platform.data.api.DataLocation;
-import uk.org.taverna.platform.data.api.DataService;
 import uk.org.taverna.platform.execution.api.AbstractExecutionService;
 import uk.org.taverna.platform.execution.api.Execution;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
@@ -53,8 +52,6 @@ public class LocalExecutionService extends AbstractExecutionService {
 	private ActivityService activityService;
 
 	private DispatchLayerService dispatchLayerService;
-
-	private DataService dataService;
 
 	private ReferenceService referenceService;
 
@@ -80,8 +77,8 @@ public class LocalExecutionService extends AbstractExecutionService {
 
 	@Override
 	protected Execution createExecutionImpl(WorkflowBundle workflowBundle, Workflow workflow,
-			Profile profile, Map<String, DataLocation> inputs) throws InvalidWorkflowException {
-		return new LocalExecution(workflowBundle, workflow, profile, inputs, dataService,
+			Profile profile, Bundle inputs) throws InvalidWorkflowException {
+		return new LocalExecution(workflowBundle, workflow, profile, inputs,
 				referenceService, edits, activityService, dispatchLayerService, databaseConfiguration,
 				provenanceConnectorFactories);
 	}
@@ -114,16 +111,6 @@ public class LocalExecutionService extends AbstractExecutionService {
 	 */
 	public void setDispatchLayerService(DispatchLayerService dispatchLayerService) {
 		this.dispatchLayerService = dispatchLayerService;
-	}
-
-	/**
-	 * Sets the data service.
-	 *
-	 * @param dataService
-	 *            the data service
-	 */
-	public void setDataService(DataService dataService) {
-		this.dataService = dataService;
 	}
 
 	/**

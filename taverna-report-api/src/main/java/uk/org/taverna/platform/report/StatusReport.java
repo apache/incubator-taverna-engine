@@ -20,15 +20,19 @@
  ******************************************************************************/
 package uk.org.taverna.platform.report;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import uk.org.taverna.platform.data.api.DataLocation;
+import org.purl.wf4ever.robundle.Bundle;
+
+import uk.org.taverna.databundle.DataBundles;
 import uk.org.taverna.scufl2.api.common.WorkflowBean;
 
 /**
@@ -44,6 +48,8 @@ import uk.org.taverna.scufl2.api.common.WorkflowBean;
  */
 public class StatusReport<SUBJECT extends WorkflowBean, PARENT extends StatusReport<?, ?, ?>, CHILD extends StatusReport<?, ?, ?>> {
 
+	private static final Logger logger = Logger.getLogger(StatusReport.class.getName());
+
 	private final SUBJECT subject;
 
 	private PARENT parentReport;
@@ -55,11 +61,12 @@ public class StatusReport<SUBJECT extends WorkflowBean, PARENT extends StatusRep
 	private Date createdDate, startedDate, pausedDate, resumedDate, cancelledDate, completedDate,
 			failedDate;
 
-	private List<Date> pausedDates = new ArrayList<Date>(), resumedDates = new ArrayList<Date>();
+	private final List<Date> pausedDates = new ArrayList<Date>(),
+			resumedDates = new ArrayList<Date>();
 
-	private final Map<String, DataLocation> inputs = new HashMap<String, DataLocation>();
+	private Bundle dataBundle;
 
-	private final Map<String, DataLocation> outputs = new HashMap<String, DataLocation>();
+	private List<ReportListener> reportListeners = new ArrayList<>();
 
 	/**
 	 * Constructs a new <code>StatusReport</code> for the subject and sets the created date to the
@@ -71,6 +78,11 @@ public class StatusReport<SUBJECT extends WorkflowBean, PARENT extends StatusRep
 	public StatusReport(SUBJECT subject) {
 		this.subject = subject;
 		setCreatedDate(new Date());
+		try {
+			dataBundle = DataBundles.createBundle();
+		} catch (IOException e) {
+			logger.log(Level.WARNING, "Error creating data bundle", e);
+		}
 	}
 
 	/**
@@ -84,7 +96,7 @@ public class StatusReport<SUBJECT extends WorkflowBean, PARENT extends StatusRep
 
 	/**
 	 * Returns the parent report.
-	 *
+	 * <p>
 	 * Returns null if this report has no parent.
 	 *
 	 * @return the parent report
@@ -95,10 +107,11 @@ public class StatusReport<SUBJECT extends WorkflowBean, PARENT extends StatusRep
 
 	/**
 	 * Sets the parent report.
-	 *
+	 * <p>
 	 * Can be null if this report has no parent.
 	 *
-	 * @param workflowReport the parent report
+	 * @param workflowReport
+	 *            the parent report
 	 */
 	public void setParentReport(PARENT parentReport) {
 		this.parentReport = parentReport;
@@ -106,7 +119,7 @@ public class StatusReport<SUBJECT extends WorkflowBean, PARENT extends StatusRep
 
 	/**
 	 * Returns the child report.
-	 *
+	 * <p>
 	 * Returns an empty set if this report has no child reports.
 	 *
 	 * @return the child report
@@ -127,13 +140,17 @@ public class StatusReport<SUBJECT extends WorkflowBean, PARENT extends StatusRep
 
 	/**
 	 * Returns the current {@link State}.
-	 *
+	 * <p>
 	 * A state can be CREATED, RUNNING, COMPLETED, PAUSED, CANCELLED or FAILED.
 	 *
 	 * @return the current <code>State</code>
 	 */
 	public State getState() {
 		return state;
+	}
+
+	private void setState(State state) {
+		this.state = state;
 	}
 
 	/**
@@ -153,12 +170,13 @@ public class StatusReport<SUBJECT extends WorkflowBean, PARENT extends StatusRep
 	 */
 	public void setCreatedDate(Date createdDate) {
 		this.createdDate = createdDate;
-		state = State.CREATED;
+		setState(State.CREATED);
 	}
 
 	/**
-	 * Returns the date that the status changed to RUNNING. If the status has never been RUNNING
-	 * <code>null</code> is returned.
+	 * Returns the date that the status changed to RUNNING.
+	 * <p>
+	 * If the status has never been RUNNING <code>null</code> is returned.
 	 *
 	 * @return the date that the status changed to started
 	 */
@@ -176,12 +194,13 @@ public class StatusReport<SUBJECT extends WorkflowBean, PARENT extends StatusRep
 		if (this.startedDate == null) {
 			this.startedDate = startedDate;
 		}
-		state = State.RUNNING;
+		setState(State.RUNNING);
 	}
 
 	/**
-	 * Returns the date that the status last changed to PAUSED. If the status has never been PAUSED
-	 * <code>null</code> is returned.
+	 * Returns the date that the status last changed to PAUSED.
+	 * <p>
+	 * If the status has never been PAUSED <code>null</code> is returned.
 	 *
 	 * @return the date that the status last changed to PAUSED
 	 */
@@ -198,12 +217,13 @@ public class StatusReport<SUBJECT extends WorkflowBean, PARENT extends StatusRep
 	public void setPausedDate(Date pausedDate) {
 		this.pausedDate = pausedDate;
 		pausedDates.add(pausedDate);
-		state = State.PAUSED;
+		setState(State.PAUSED);
 	}
 
 	/**
-	 * Returns the date that the status last changed form PAUSED to RUNNING. If the status has never
-	 * changed form PAUSED to RUNNING <code>null</code> is returned.
+	 * Returns the date that the status last changed form PAUSED to RUNNING.
+	 * <p>
+	 * If the status has never changed form PAUSED to RUNNING <code>null</code> is returned.
 	 *
 	 * @return the date that the status last changed form PAUSED to RUNNING
 	 */
@@ -220,12 +240,13 @@ public class StatusReport<SUBJECT extends WorkflowBean, PARENT extends StatusRep
 	public void setResumedDate(Date resumedDate) {
 		this.resumedDate = resumedDate;
 		resumedDates.add(resumedDate);
-		state = State.RUNNING;
+		setState(State.RUNNING);
 	}
 
 	/**
-	 * Returns the date that the status changed to CANCELLED. If the status has never been CANCELLED
-	 * <code>null</code> is returned.
+	 * Returns the date that the status changed to CANCELLED.
+	 * <p>
+	 * If the status has never been CANCELLED <code>null</code> is returned.
 	 *
 	 * @return the date that the status changed to canceled
 	 */
@@ -241,12 +262,13 @@ public class StatusReport<SUBJECT extends WorkflowBean, PARENT extends StatusRep
 	 */
 	public void setCancelledDate(Date cancelledDate) {
 		this.cancelledDate = cancelledDate;
-		state = State.CANCELLED;
+		setState(State.CANCELLED);
 	}
 
 	/**
-	 * Returns the date that the status changed to COMPLETED. If the status never been COMPLETED
-	 * <code>null</code> is returned.
+	 * Returns the date that the status changed to COMPLETED.
+	 * <p>
+	 * If the status never been COMPLETED <code>null</code> is returned.
 	 *
 	 * @return the date that the status changed to COMPLETED
 	 */
@@ -262,7 +284,7 @@ public class StatusReport<SUBJECT extends WorkflowBean, PARENT extends StatusRep
 	 */
 	public void setCompletedDate(Date completedDate) {
 		this.completedDate = completedDate;
-		state = State.COMPLETED;
+		setState(State.COMPLETED);
 	}
 
 	/**
@@ -283,12 +305,13 @@ public class StatusReport<SUBJECT extends WorkflowBean, PARENT extends StatusRep
 	 */
 	public void setFailedDate(Date failedDate) {
 		this.failedDate = failedDate;
-		state = State.FAILED;
+		setState(State.FAILED);
 	}
 
 	/**
-	 * Returns the dates that the status changed to PAUSED. If the status has never been PAUSED an
-	 * empty list is returned.
+	 * Returns the dates that the status changed to PAUSED.
+	 * <p>
+	 * If the status has never been PAUSED an empty list is returned.
 	 *
 	 * @return the dates that the status was paused
 	 */
@@ -297,8 +320,9 @@ public class StatusReport<SUBJECT extends WorkflowBean, PARENT extends StatusRep
 	}
 
 	/**
-	 * Returns the dates that the status changed from PAUSED to RUNNING. If the status has never
-	 * changed from PAUSED to RUNNING an empty list is returned.
+	 * Returns the dates that the status changed from PAUSED to RUNNING.
+	 * <p>
+	 * If the status has never changed from PAUSED to RUNNING an empty list is returned.
 	 *
 	 * @return the dates that the status was resumed
 	 */
@@ -307,25 +331,58 @@ public class StatusReport<SUBJECT extends WorkflowBean, PARENT extends StatusRep
 	}
 
 	/**
-	 * Returns the locations of the inputs for the workflow component.
-	 *
-	 * If there are no inputs an empty map is returned.
+	 * Returns the <code>Bundle</code> containing the inputs for the workflow component.
+	 * <p>
+	 * If there are no inputs a <code>Bundle</code> containing no inputs is returned.
 	 *
 	 * @return the inputs
 	 */
-	public Map<String, DataLocation> getInputs() {
-		return inputs;
+	public Bundle getInputs() {
+		return dataBundle;
 	}
 
 	/**
-	 * Returns the locations of the outputs from the workflow component.
-	 *
-	 * If there are no outputs an empty map is returned.
+	 * Returns the <code>Bundle</code> containing the outputs for the workflow component.
+	 * <p>
+	 * If there are no outputs a <code>Bundle</code> containing no outputs is returned.
 	 *
 	 * @return the outputs
 	 */
-	public Map<String, DataLocation> getOutputs() {
-		return outputs;
+	public Bundle getOutputs() {
+		return dataBundle;
+	}
+
+	/**
+	 * Informs the report that an output value has been added.
+	 * <p>
+	 * Any <code>ReportListener</code>s registered with this report will be notified that an output
+	 * value has been added.
+	 *
+	 * @param path
+	 *            the path that the value was added to
+	 * @param portName
+	 *            the port that the value belongs to
+	 * @param index
+	 *            the position of the value
+	 */
+	public void outputAdded(Path path, String portName, int[] index) {
+		synchronized (reportListeners) {
+			for (ReportListener reportListener : reportListeners) {
+				reportListener.outputAdded(path, portName, index);
+			}
+		}
+	}
+
+	public void addReportListener(ReportListener reportListener) {
+		synchronized (reportListeners) {
+			reportListeners.add(reportListener);
+		}
+	}
+
+	public void removeReportListener(ReportListener reportListener) {
+		synchronized (reportListeners) {
+			reportListeners.remove(reportListener);
+		}
 	}
 
 }

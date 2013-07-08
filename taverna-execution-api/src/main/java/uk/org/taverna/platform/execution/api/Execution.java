@@ -20,10 +20,8 @@
  ******************************************************************************/
 package uk.org.taverna.platform.execution.api;
 
-import java.util.Map;
+import org.purl.wf4ever.robundle.Bundle;
 
-import uk.org.taverna.platform.data.api.Data;
-import uk.org.taverna.platform.data.api.DataLocation;
 import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.Workflow;
@@ -51,6 +49,15 @@ public interface Execution {
 	public abstract WorkflowBundle getWorkflowBundle();
 
 	/**
+	 * Returns the <code>Bundle</code> containing the inputs for the <code>Workflow</code>.
+	 *
+	 * May be <code>null</code> if the <code>Workflow</code> doesn't require any inputs.
+	 *
+	 * @return the <code>Bundle</code> containing the inputs for the <code>Workflow</code>
+	 */
+	public abstract Bundle getInputs();
+
+	/**
 	 * Returns the <code>Workflow</code> to execute.
 	 *
 	 * @return the <code>Workflow</code> to execute
@@ -63,15 +70,6 @@ public interface Execution {
 	 * @return the <code>Profile</code> to use when executing the <code>Workflow</code>
 	 */
 	public abstract Profile getProfile();
-
-	/**
-	 * Returns the inputs for the <code>Workflow</code>.
-	 *
-	 * May be <code>null</code> if the <code>Workflow</code> doesn't require any inputs.
-	 *
-	 * @return the inputs for the <code>Workflow</code>
-	 */
-	public abstract Map<String, DataLocation> getInputs();
 
 	/**
 	 * Returns the <code>WorkflowReport</code> for the execution.

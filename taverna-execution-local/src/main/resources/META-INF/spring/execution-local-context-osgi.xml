@@ -18,8 +18,6 @@
 
 	<reference id="dispatchLayerService" interface="uk.org.taverna.platform.capability.api.DispatchLayerService" />
 
-	<reference id="dataService" interface="uk.org.taverna.platform.data.api.DataService" />
-
 	<reference id="referenceService" interface="net.sf.taverna.t2.reference.ReferenceService" />
 
 	<reference id="databaseConfiguration" interface="uk.org.taverna.configuration.database.DatabaseConfiguration" />

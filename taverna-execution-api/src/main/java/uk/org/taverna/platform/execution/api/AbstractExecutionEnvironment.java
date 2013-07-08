@@ -69,11 +69,11 @@ public abstract class AbstractExecutionEnvironment implements ExecutionEnvironme
 		sb.append(name + "\n");
 		sb.append(description + "\n");
 		sb.append("Activities : \n");
-		for (URI uri : getActivityURIs()) {
+		for (URI uri : getActivityTypes()) {
 			sb.append("  " + uri + "\n");
 		}
 		sb.append("Dispatch Layers : \n");
-		for (URI uri : getDispatchLayerURIs()) {
+		for (URI uri : getDispatchLayerTypes()) {
 			sb.append("  " + uri + "\n");
 		}
 		return sb.toString();

@@ -20,11 +20,10 @@
  ******************************************************************************/
 package uk.org.taverna.platform.execution.api;
 
-import java.util.Map;
 import java.util.Set;
 
-import uk.org.taverna.platform.data.api.Data;
-import uk.org.taverna.platform.data.api.DataLocation;
+import org.purl.wf4ever.robundle.Bundle;
+
 import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.Workflow;
@@ -80,12 +79,13 @@ public interface ExecutionService {
 	 * @param profile
 	 *            the profile to use when executing the workflow
 	 * @param inputs
-	 *            the inputs to the workflow
+	 *            the <code>Bundle</code> containing inputs for the <code>Workflow</code>. Can
+	 *            be <code>null</code> if there are no inputs
 	 * @return the ID of the created workflow execution
 	 * @throws InvalidWorkflowException
 	 */
 	public String createExecution(ExecutionEnvironment executionEnvironment, WorkflowBundle workflowBundle, Workflow workflow, Profile profile,
-			Map<String, DataLocation> inputs)
+			Bundle inputs)
 			throws InvalidWorkflowException;
 
 	/**

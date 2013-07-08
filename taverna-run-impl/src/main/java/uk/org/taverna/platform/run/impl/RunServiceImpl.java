@@ -20,14 +20,18 @@
  ******************************************************************************/
 package uk.org.taverna.platform.run.impl;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import uk.org.taverna.platform.data.api.Data;
-import uk.org.taverna.platform.data.api.DataLocation;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
+import org.purl.wf4ever.robundle.Bundle;
+
 import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironmentService;
 import uk.org.taverna.platform.execution.api.InvalidExecutionIdException;
@@ -40,6 +44,7 @@ import uk.org.taverna.platform.run.api.RunProfileException;
 import uk.org.taverna.platform.run.api.RunService;
 import uk.org.taverna.platform.run.api.RunStateException;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
+import uk.org.taverna.scufl2.api.core.Workflow;
 import uk.org.taverna.scufl2.api.profiles.Profile;
 
 /**
@@ -54,6 +59,8 @@ public class RunServiceImpl implements RunService {
 	private final Map<String, Run> runMap;
 
 	private ExecutionEnvironmentService executionEnvironmentService;
+
+	private EventAdmin eventAdmin;
 
 	public RunServiceImpl() {
 		runs = new ArrayList<String>();
@@ -89,29 +96,49 @@ public class RunServiceImpl implements RunService {
 	}
 
 	@Override
+	public String open(File runFile) throws IOException {
+		return null;
+	}
+
+	@Override
+	public void close(String runID) throws InvalidRunIdException, InvalidExecutionIdException {
+
+	}
+
+	@Override
+	public void save(String runID) throws InvalidRunIdException, InvalidExecutionIdException {
+
+	}
+
+	@Override
 	public void delete(String runID) throws InvalidRunIdException, InvalidExecutionIdException {
 		getRun(runID).delete();
 		runMap.remove(runID);
+		postEvent(RUN_DELETED, runID);
 	}
 
 	@Override
 	public void start(String runID) throws InvalidRunIdException, RunStateException, InvalidExecutionIdException {
 		getRun(runID).start();
+		postEvent(RUN_STARTED, runID);
 	}
 
 	@Override
 	public void pause(String runID) throws InvalidRunIdException, RunStateException, InvalidExecutionIdException {
 		getRun(runID).pause();
+		postEvent(RUN_PAUSED, runID);
 	}
 
 	@Override
 	public void resume(String runID) throws InvalidRunIdException, RunStateException, InvalidExecutionIdException {
 		getRun(runID).resume();
+		postEvent(RUN_RESUMED, runID);
 	}
 
 	@Override
 	public void cancel(String runID) throws InvalidRunIdException, RunStateException, InvalidExecutionIdException {
 		getRun(runID).cancel();
+		postEvent(RUN_STOPPED, runID);
 	}
 
 	@Override
@@ -120,18 +147,28 @@ public class RunServiceImpl implements RunService {
 	}
 
 	@Override
-	public Map<String, DataLocation> getInputs(String runID) throws InvalidRunIdException {
+	public Bundle getInputs(String runID) throws InvalidRunIdException {
 		return getRun(runID).getInputs();
 	}
 
 	@Override
-	public Map<String, DataLocation> getOutputs(String runID) throws InvalidRunIdException {
+	public Bundle getOutputs(String runID) throws InvalidRunIdException {
 		return getRun(runID).getOutputs();
 	}
 
 	@Override
 	public WorkflowReport getWorkflowReport(String runID) throws InvalidRunIdException {
 		return getRun(runID).getWorkflowReport();
+	}
+
+	@Override
+	public Workflow getWorkflow(String runID) throws InvalidRunIdException {
+		return getRun(runID).getWorkflow();
+	}
+
+	@Override
+	public Profile getProfile(String runID) throws InvalidRunIdException {
+		return getRun(runID).getProfile();
 	}
 
 	private Run getRun(String runID) throws InvalidRunIdException {
@@ -142,8 +179,19 @@ public class RunServiceImpl implements RunService {
 		return run;
 	}
 
+	private void postEvent(String topic, String runId) {
+		HashMap<String, String> properties = new HashMap<>();
+		properties.put("RUN_ID", runId);
+		Event event = new Event(topic, properties);
+		eventAdmin.postEvent(event);
+	}
+
 	public void setExecutionEnvironmentService(ExecutionEnvironmentService executionEnvironmentService) {
 		this.executionEnvironmentService = executionEnvironmentService;
+	}
+
+	public void setEventAdmin(EventAdmin eventAdmin) {
+		this.eventAdmin = eventAdmin;
 	}
 
 }

@@ -20,15 +20,13 @@
  ******************************************************************************/
 package uk.org.taverna.platform.execution.impl.local;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -45,14 +43,7 @@ import net.sf.taverna.t2.monitor.MonitorManager;
 import net.sf.taverna.t2.provenance.ProvenanceConnectorFactory;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector;
 import net.sf.taverna.t2.provenance.reporter.ProvenanceReporter;
-import net.sf.taverna.t2.reference.ErrorDocument;
-import net.sf.taverna.t2.reference.ExternalReferenceSPI;
-import net.sf.taverna.t2.reference.IdentifiedList;
 import net.sf.taverna.t2.reference.ReferenceService;
-import net.sf.taverna.t2.reference.ReferenceServiceException;
-import net.sf.taverna.t2.reference.ReferenceSet;
-import net.sf.taverna.t2.reference.ReferencedDataNature;
-import net.sf.taverna.t2.reference.StackTraceElementBean;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.reference.T2ReferenceType;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
@@ -68,14 +59,12 @@ import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationStrategyNode
 import net.sf.taverna.t2.workflowmodel.processor.iteration.NamedInputPortNode;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.TerminalNode;
 
+import org.purl.wf4ever.robundle.Bundle;
+
 import uk.org.taverna.configuration.database.DatabaseConfiguration;
+import uk.org.taverna.databundle.DataBundles;
 import uk.org.taverna.platform.capability.api.ActivityService;
 import uk.org.taverna.platform.capability.api.DispatchLayerService;
-import uk.org.taverna.platform.data.api.Data;
-import uk.org.taverna.platform.data.api.DataLocation;
-import uk.org.taverna.platform.data.api.DataNature;
-import uk.org.taverna.platform.data.api.DataService;
-import uk.org.taverna.platform.data.api.DataTools;
 import uk.org.taverna.platform.execution.api.AbstractExecution;
 import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
 import uk.org.taverna.platform.report.ActivityReport;
@@ -101,8 +90,6 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 
 	private final LocalExecutionMonitor executionMonitor;
 
-	private final DataService dataService;
-
 	private final ReferenceService referenceService;
 
 	private final DatabaseConfiguration databaseConfiguration;
@@ -124,8 +111,8 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 	 * @param profile
 	 *            the <code>Profile</code> to use when executing the <code>Workflow</code>
 	 * @param inputs
-	 *            the inputs for the <code>Workflow</code>. May be <code>null</code> if the
-	 *            <code>Workflow</code> doesn't require any inputs
+	 *            the <code>Bundle</code> containing inputs for the <code>Workflow</code>. Can
+	 *            be <code>null</code> if there are no inputs
 	 * @param referenceService
 	 *            the <code>ReferenceService</code> used to register inputs, outputs and
 	 *            intermediate values
@@ -133,13 +120,12 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 	 *             if the specified workflow is invalid
 	 */
 	public LocalExecution(WorkflowBundle workflowBundle, Workflow workflow, Profile profile,
-			Map<String, DataLocation> inputs, DataService dataService, ReferenceService referenceService,
-			Edits edits, ActivityService activityService,
-			DispatchLayerService dispatchLayerService, DatabaseConfiguration databaseConfiguration,
+			Bundle inputs, ReferenceService referenceService, Edits edits,
+			ActivityService activityService, DispatchLayerService dispatchLayerService,
+			DatabaseConfiguration databaseConfiguration,
 			Set<ProvenanceConnectorFactory> provenanceConnectorFactories)
 			throws InvalidWorkflowException {
 		super(workflowBundle, workflow, profile, inputs);
-		this.dataService = dataService;
 		this.referenceService = referenceService;
 		this.databaseConfiguration = databaseConfiguration;
 		this.provenanceConnectorFactories = provenanceConnectorFactories;
@@ -168,31 +154,31 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 		MonitorManager.getInstance().addObserver(executionMonitor);
 		facade.addResultListener(this);
 		facade.fire();
-		if (getInputs() != null) {
-			for (Entry<String, DataLocation> entry : getInputs().entrySet()) {
-				String portName = entry.getKey();
-				Data data = dataService.get(entry.getValue().getDataID());
-				T2Reference identifier = registerData(data, inputPorts.get(portName).getDepth());
-				int[] index = new int[] {};
-				WorkflowDataToken token = new WorkflowDataToken("", index, identifier,
-						facade.getContext());
-				try {
-					facade.pushData(token, portName);
-				} catch (TokenOrderException e) {
-					logger.log(Level.SEVERE, "Unable to push data for input " + portName, e);
+		if (getInputs() != null && DataBundles.hasInputs(getInputs())) {
+			try {
+				Path inputs = DataBundles.getInputs(getInputs());
+				for (Entry<String, DataflowInputPort> entry : inputPorts.entrySet()) {
+					String portName = entry.getKey();
+					DataflowInputPort port = entry.getValue();
+					Path path = DataBundles.getPort(inputs, portName);
+					if (!DataBundles.isMissing(path)) {
+						Object object = T2ReferenceConverter.convertPathToObject(path);
+						T2Reference identifier = referenceService.register(object, port.getDepth(), true, null);
+						int[] index = new int[] {};
+						WorkflowDataToken token = new WorkflowDataToken("", index, identifier,
+								facade.getContext());
+						try {
+							facade.pushData(token, portName);
+						} catch (TokenOrderException e) {
+							logger.log(Level.SEVERE, "Unable to push data for input " + portName, e);
+						}
+					}
 				}
+			} catch (IOException e) {
+				logger.log(Level.SEVERE, "Error getting input data", e);
 			}
 		}
 	}
-
-	private T2Reference registerData(Data data, int depth) {
-		Object conversion = DataTools.convertToObject(data);
-		if (conversion == null) {
-			return null;
-		}
-		return referenceService.register(conversion, depth, true, null);
-	}
-
 	@Override
 	public void pause() {
 		facade.pauseWorkflowRun();
@@ -225,6 +211,7 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 		return new ActivityReport(activity);
 	}
 
+
 	private InvocationContext createContext() {
 		if (databaseConfiguration.isProvenanceEnabled()) {
 			String connectorType = databaseConfiguration.getConnectorType();
@@ -246,8 +233,7 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 			}
 		}
 		InvocationContext context = new InvocationContext() {
-			private List<Object> entities = Collections
-					.synchronizedList(new ArrayList<Object>());
+			private List<Object> entities = Collections.synchronizedList(new ArrayList<Object>());
 
 			@Override
 			public <T> List<T> getEntities(Class<T> entityType) {
@@ -286,19 +272,32 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 
 	@Override
 	public void resultTokenProduced(WorkflowDataToken token, String portName) {
-		if (token.getIndex().length == 0) {
-			DataLocation dl = null;
+		if (token.getData().getReferenceType() != T2ReferenceType.IdentifiedList) {
+			WorkflowReport workflowReport = getWorkflowReport();
 			try {
-				dl = T2ReferenceConverter.convertReferenceToDataLocation(token.getData(),
-						referenceService, token.getContext(), dataService);
+				Bundle outputBundle = workflowReport.getOutputs();
+				Path outputs = DataBundles.getOutputs(outputBundle);
+				Path port = DataBundles.getPort(outputs, portName);
+				Path path = getPath(port, 0, token.getIndex());
+				T2ReferenceConverter.convertReferenceToPath(path, token.getData(),
+						referenceService, token.getContext());
+				workflowReport.outputAdded(path, portName, token.getIndex());
 			} catch (IOException e) {
 				logger.log(Level.SEVERE, "Unable to convert T2Reference");
 			} catch (URISyntaxException e) {
 				logger.log(Level.SEVERE, "Unable to convert T2Reference");
 			}
-			getWorkflowReport().getOutputs().put(portName, dl);
-
 		}
+	}
+
+	private Path getPath(Path path, int depth, int[] index) throws IOException {
+		if (depth == index.length) {
+			return path;
+		}
+		if (!DataBundles.isList(path)) {
+			DataBundles.createList(path);
+		}
+		return getPath(DataBundles.getListItem(path, index[depth]), depth+1, index);
 	}
 
 	private void printDataflow(Dataflow dataflow) {
@@ -312,7 +311,7 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 					.getStrategies()) {
 				printNode("    ", iterationStrategy.getTerminalNode());
 			}
-			for (Activity<?> activity : processor.getActivityList()) {
+			for (Activity activity : processor.getActivityList()) {
 				System.out.println("    " + activity);
 				System.out.println("    " + activity.getInputPorts());
 				System.out.println("    " + activity.getInputPortMapping());

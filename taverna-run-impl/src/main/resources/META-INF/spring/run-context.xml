@@ -6,6 +6,7 @@
 
     <bean id="runService" class="uk.org.taverna.platform.run.impl.RunServiceImpl" >
     		<property name="executionEnvironmentService" ref="executionEnvironmentService"/>
+    		<property name="eventAdmin" ref="eventAdmin"/>
     </bean>
 
 </beans>
