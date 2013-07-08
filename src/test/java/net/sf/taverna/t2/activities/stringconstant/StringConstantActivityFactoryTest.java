@@ -54,11 +54,11 @@ public class StringConstantActivityFactoryTest {
 	}
 
 	/**
-	 * Test method for {@link net.sf.taverna.t2.activities.beanshell.BeanshellActivityFactory#getActivityURI()}.
+	 * Test method for {@link net.sf.taverna.t2.activities.beanshell.BeanshellActivityFactory#getActivityType()}.
 	 */
 	@Test
 	public void testGetActivityURI() {
-		assertEquals(URI.create(StringConstantActivity.URI), factory.getActivityURI());
+		assertEquals(URI.create(StringConstantActivity.URI), factory.getActivityType());
 	}
 
 }
