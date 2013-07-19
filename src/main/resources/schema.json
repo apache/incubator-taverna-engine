@@ -9,9 +9,9 @@
             "required": true,
             "enum": ["http://ns.taverna.org.uk/2010/activity/dataflow.context.json"]
         },
-        "workflow": {
+        "nestedWorkflow": {
             "title": "Nested Workflow",
-            "description": "Location of the nested workflow",
+            "description": "Name of the nested workflow",
             "type": "string",
             "required": true
         }
