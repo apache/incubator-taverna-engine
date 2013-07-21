@@ -1,23 +1,26 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<artifactId>taverna-parent</artifactId>
 		<groupId>net.sf.taverna</groupId>
 		<version>3.0.1-SNAPSHOT</version>
 	</parent>
-  <groupId>uk.org.taverna.commons</groupId>
-  <artifactId>taverna-commons</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
-  <packaging>pom</packaging>
-  <name>Taverna Commons</name>
-  <description>Taverna modules that are common to multiple products</description>
-  <modules>
-  	<module>taverna-download-api</module>
-  	<module>taverna-download-impl</module>
-  	<module>taverna-plugin-api</module>
-  	<module>taverna-plugin-impl</module>
-  	<module>taverna-update-api</module>
-  	<module>taverna-update-impl</module>
-  	<module>taverna-xml-schemas</module>
-  </modules>
+	<groupId>uk.org.taverna.commons</groupId>
+	<artifactId>taverna-commons</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>Taverna Commons</name>
+	<description>Taverna modules that are common to multiple products</description>
+	<modules>
+		<module>taverna-download-api</module>
+		<module>taverna-download-impl</module>
+		<module>taverna-plugin-api</module>
+		<module>taverna-plugin-impl</module>
+		<module>taverna-update-api</module>
+		<module>taverna-update-impl</module>
+		<module>taverna-xml-schemas</module>
+		<module>taverna-services-api</module>
+		<module>taverna-services-impl</module>
+	</modules>
 </project>
