@@ -20,18 +20,18 @@
  ******************************************************************************/
 package uk.org.taverna.platform.execution.api;
 
-import java.net.URI;
+import java.io.IOException;
+import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
 import org.purl.wf4ever.robundle.Bundle;
 
+import uk.org.taverna.databundle.DataBundles;
 import uk.org.taverna.platform.report.ActivityReport;
 import uk.org.taverna.platform.report.ProcessorReport;
 import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.scufl2.api.activity.Activity;
 import uk.org.taverna.scufl2.api.common.Scufl2Tools;
-import uk.org.taverna.scufl2.api.common.URITools;
-import uk.org.taverna.scufl2.api.configurations.Configuration;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.Processor;
 import uk.org.taverna.scufl2.api.core.Workflow;
@@ -45,7 +45,6 @@ import uk.org.taverna.scufl2.api.profiles.Profile;
  */
 public abstract class AbstractExecution implements Execution {
 
-	private static final URI NESTED_WORKFLOW_URI = URI.create("http://ns.taverna.org.uk/2010/activity/nested-workflow");
 	private final String ID;
 	private final WorkflowBundle workflowBundle;
 	private final Bundle inputs;
@@ -53,7 +52,6 @@ public abstract class AbstractExecution implements Execution {
 	private final Profile profile;
 	private final WorkflowReport workflowReport;
 	private final Scufl2Tools scufl2Tools = new Scufl2Tools();
-	private final URITools uriTools = new URITools();
 
 	/**
 	 * Constructs an abstract implementation of an Execution.
@@ -89,6 +87,16 @@ public abstract class AbstractExecution implements Execution {
 
 	public WorkflowReport generateWorkflowReport(Workflow workflow) {
 		WorkflowReport workflowReport = createWorkflowReport(workflow);
+//		if (inputs != null && DataBundles.hasInputs(inputs)) {
+//			System.out.println("copying inputs");
+//			try {
+//				DataBundles.copyRecursively(DataBundles.getInputs(inputs), DataBundles.getInputs(workflowReport.getInputs()), StandardCopyOption.REPLACE_EXISTING);
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			System.out.println("copying inputs done");
+//		}
 		for (Processor processor : workflow.getProcessors()) {
 			ProcessorReport processorReport = createProcessorReport(processor);
 			processorReport.setParentReport(workflowReport);
@@ -97,12 +105,8 @@ public abstract class AbstractExecution implements Execution {
 				Activity boundActivity = processorBinding.getBoundActivity();
 				ActivityReport activityReport = createActivityReport(boundActivity);
 				activityReport.setParentReport(processorReport);
-				URI activityType = boundActivity.getType();
-				if (activityType.equals(NESTED_WORKFLOW_URI)) {
-					Configuration configuration = scufl2Tools.configurationFor(boundActivity, profile);
-					URI workflowURI = URI.create(configuration.getJson().get("workflow").textValue());
-					URI profileURI = uriTools.uriForBean(profile);
-					Workflow nestedWorkflow = (Workflow) uriTools.resolveUri(profileURI.resolve(workflowURI), workflowBundle);
+				if (scufl2Tools.containsNestedWorkflow(processor, profile)) {
+					Workflow nestedWorkflow = scufl2Tools.nestedWorkflowForProcessor(processor, profile);
 					activityReport.addChildReport(generateWorkflowReport(nestedWorkflow));
 				}
 				processorReport.addChildReport(activityReport);

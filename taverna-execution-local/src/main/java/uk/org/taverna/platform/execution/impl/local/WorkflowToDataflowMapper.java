@@ -58,7 +58,6 @@ import uk.org.taverna.platform.capability.api.DispatchLayerService;
 import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
 import uk.org.taverna.scufl2.api.activity.Activity;
 import uk.org.taverna.scufl2.api.common.Scufl2Tools;
-import uk.org.taverna.scufl2.api.common.URITools;
 import uk.org.taverna.scufl2.api.configurations.Configuration;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.BlockingControlLink;
@@ -101,8 +100,6 @@ public class WorkflowToDataflowMapper {
 	private Edits edits;
 
 	private final Scufl2Tools scufl2Tools = new Scufl2Tools();
-
-	private final URITools uriTools = new URITools();
 
 	private final Map<Port, EventHandlingInputPort> inputPorts;
 
@@ -230,11 +227,13 @@ public class WorkflowToDataflowMapper {
 			dataflowToWorkflowProcessors.put(dataflowProcessor, processor);
 			// add input ports
 			for (InputProcessorPort inputProcessorPort : processor.getInputPorts()) {
-				ProcessorInputPort processorInputPort = edits.createProcessorInputPort(
-						dataflowProcessor, inputProcessorPort.getName(),
-						inputProcessorPort.getDepth());
-				edits.getAddProcessorInputPortEdit(dataflowProcessor, processorInputPort).doEdit();
-				inputPorts.put(inputProcessorPort, processorInputPort);
+				if (!scufl2Tools.datalinksTo(inputProcessorPort).isEmpty()) {
+					ProcessorInputPort processorInputPort = edits.createProcessorInputPort(
+							dataflowProcessor, inputProcessorPort.getName(),
+							inputProcessorPort.getDepth());
+					edits.getAddProcessorInputPortEdit(dataflowProcessor, processorInputPort).doEdit();
+					inputPorts.put(inputProcessorPort, processorInputPort);
+				}
 			}
 			// add output ports
 			for (OutputProcessorPort outputProcessorPort : processor.getOutputPorts()) {
@@ -363,12 +362,8 @@ public class WorkflowToDataflowMapper {
 				.createActivity(activityType, configuration.getJson());
 		// check if we have a nested workflow
 		if (activityType.equals(NESTED_WORKFLOW_URI)) {
-			activity = activityService.createActivity(activityType, null);
 			if (activity instanceof NestedDataflow) {
-				URI workflowURI = URI.create(configuration.getJson().get("workflow").textValue());
-				URI profileURI = uriTools.uriForBean(profile);
-				Workflow nestedWorkflow = (Workflow) uriTools.resolveUri(
-						profileURI.resolve(workflowURI), workflowBundle);
+				Workflow nestedWorkflow = scufl2Tools.nestedWorkflowForProcessor(processorBinding.getBoundProcessor(), profile);
 				Dataflow nestedDataflow = getDataflow(nestedWorkflow);
 				((NestedDataflow) activity).setNestedDataflow(nestedDataflow);
 			} else {
