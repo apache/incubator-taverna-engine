@@ -21,14 +21,12 @@
 package net.sf.taverna.t2.lang.ui.tabselector;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.ButtonGroup;
-import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 /**
@@ -42,29 +40,25 @@ public abstract class TabSelectorComponent<T> extends JPanel {
 
 	private Map<T, Tab<T>> tabMap;
 	private ButtonGroup tabGroup;
-	private JComponent tabBar;
 	private ScrollController scrollController;
 
-	public TabSelectorComponent(Component component) {
+	public TabSelectorComponent() {
 		tabMap = new HashMap<T, Tab<T>>();
 		tabGroup = new ButtonGroup();
 		setLayout(new BorderLayout());
-		tabBar = new JPanel() {
-			@Override
-			protected void paintComponent(Graphics g) {
-				super.paintComponent(g);
-				Graphics2D g2 = (Graphics2D) g.create();
-				g2.setColor(Tab.midGrey);
-				g2.drawLine(0, getHeight() - 1, getWidth(), getHeight() - 1);
-				g2.dispose();
-			}
-		};
-		scrollController = new ScrollController(tabBar);
-		tabBar.add(scrollController.getScrollLeft());
-		tabBar.add(scrollController.getScrollRight());
-		tabBar.setLayout(new TabLayout(scrollController));
-		add(tabBar, BorderLayout.NORTH);
-		add(component, BorderLayout.CENTER);
+		scrollController = new ScrollController(this);
+		add(scrollController.getScrollLeft());
+		add(scrollController.getScrollRight());
+		setLayout(new TabLayout(scrollController));
+	}
+
+	@Override
+	protected void paintComponent(Graphics g) {
+		super.paintComponent(g);
+		Graphics2D g2 = (Graphics2D) g.create();
+		g2.setColor(Tab.midGrey);
+		g2.drawLine(0, getHeight() - 1, getWidth(), getHeight() - 1);
+		g2.dispose();
 	}
 
 	protected abstract Tab<T> createTab(T object);
@@ -73,7 +67,9 @@ public abstract class TabSelectorComponent<T> extends JPanel {
 		Tab<T> button = createTab(object);
 		tabMap.put(object, button);
 		tabGroup.add(button);
-		tabBar.add(button);
+		add(button);
+		revalidate();
+		repaint();
 		button.setSelected(true);
 	}
 
@@ -81,8 +77,8 @@ public abstract class TabSelectorComponent<T> extends JPanel {
 		Tab<T> button = tabMap.remove(object);
 		if (button != null) {
 			tabGroup.remove(button);
-			tabBar.remove(button);
-			tabBar.repaint();
+			remove(button);
+			repaint();
 		}
 	}
 
