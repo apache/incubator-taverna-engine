@@ -1,22 +1,20 @@
 /**
- * 
+ *
  */
 package net.sf.taverna.t2.workflowmodel.processor.activity;
 
 import org.jdom.Element;
 
-import org.apache.log4j.Logger;
-
 /**
  * An unrecognized activity is an activity that was not recognized when the workflow was opened.
- * 
+ *
  * @author alanrw
- * 
+ *
  */
 public final class UnrecognizedActivity extends
 		NonExecutableActivity<Element> {
 
-	private static Logger logger = Logger.getLogger(DisabledActivity.class);
+	public static final String URI = "http://ns.taverna.org.uk/2010/activity/unrecognized";
 
 	private Element conf;
 	/**

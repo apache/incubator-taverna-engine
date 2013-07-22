@@ -37,8 +37,7 @@ import org.apache.log4j.Logger;
  * @author alanrw
  *
  */
-public final class DisabledActivity extends
-		NonExecutableActivity<ActivityAndBeanWrapper> {
+public final class DisabledActivity extends NonExecutableActivity<ActivityAndBeanWrapper> {
 
 	public static final String URI = "http://ns.taverna.org.uk/2010/activity/disabled";
 

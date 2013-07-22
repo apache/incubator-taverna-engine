@@ -7,8 +7,6 @@ import java.util.Map;
 
 import net.sf.taverna.t2.reference.T2Reference;
 
-import org.apache.log4j.Logger;
-
 
 /**
  * A non-executable activity is a wrapper for an Activity that cannot be executed, for example because it is offline or unrecognized.
@@ -17,12 +15,9 @@ import org.apache.log4j.Logger;
  *
  */
 
-public abstract class NonExecutableActivity<T> extends
-		AbstractAsynchronousActivity<T> {
+public abstract class NonExecutableActivity<T> extends AbstractAsynchronousActivity<T> {
 
 	public static final String URI = "http://ns.taverna.org.uk/2010/activity/nonExecutable";
-
-	private static Logger logger = Logger.getLogger(DisabledActivity.class);
 
 	/**
 	 * It is not possible to create a "naked" NonExecutableActivity.
