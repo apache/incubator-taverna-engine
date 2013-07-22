@@ -50,10 +50,11 @@ public abstract class Tab<T> extends JToggleButton {
 	public final static Color lightGrey = new Color(200,200,200);
 
 	protected final T selection;
-	private final String label;
+	private String name;
+	private JLabel label;
 
-	public Tab(String label, T selection) {
-		this.label = label;
+	public Tab(String name, T selection) {
+		this.name = name;
 		this.selection = selection;
 		initialise();
 	}
@@ -67,7 +68,7 @@ public abstract class Tab<T> extends JToggleButton {
 
 		GridBagConstraints c = new GridBagConstraints();
 
-		JLabel label = new JLabel(this.label);
+		label = new JLabel(this.name);
 		c.anchor = GridBagConstraints.WEST;
 		c.fill = GridBagConstraints.BOTH;
 		c.insets = new Insets(0, 5, 0, 5);
@@ -86,6 +87,18 @@ public abstract class Tab<T> extends JToggleButton {
 				clickTabAction();
 			}
 		});
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		if (!this.name.equals(name)) {
+			this.name = name;
+			label.setText(name);
+			repaint();
+		}
 	}
 
 	@Override
