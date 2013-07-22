@@ -1,20 +1,20 @@
 /*******************************************************************************
  * Copyright (C) 2009 Ingo Wassink of University of Twente, Netherlands and
- * The University of Manchester   
- * 
+ * The University of Manchester
+ *
  *  Modifications to the initial code base are copyright of their
  *  respective authors, or their employers as appropriate.
- * 
+ *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public License
  *  as published by the Free Software Foundation; either version 2.1 of
  *  the License, or (at your option) any later version.
- *    
+ *
  *  This program is distributed in the hope that it will be useful, but
  *  WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *    
+ *
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -28,7 +28,6 @@
 package net.sf.taverna.t2.lang.ui;
 
 import java.awt.Color;
-import java.util.HashSet;
 import java.util.Set;
 
 import javax.swing.text.AttributeSet;
@@ -46,7 +45,7 @@ public class KeywordDocument extends DefaultStyledDocument {
 
 	private static Logger logger = Logger
 	.getLogger(KeywordDocument.class);
-	
+
 	private DefaultStyledDocument doc;
 	private Element rootElement;
 
@@ -56,14 +55,14 @@ public class KeywordDocument extends DefaultStyledDocument {
 	private MutableAttributeSet comment;
 	private MutableAttributeSet quote;
 	private MutableAttributeSet port;
-	
-	private Set<String> keywords;
-	
-	private Set<String> ports;
-	
-	
 
-	public KeywordDocument(Set<String> keywords) {
+	private Set<String> keywords;
+
+	private Set<String> ports;
+
+
+
+	public KeywordDocument(Set<String> keywords, Set<String> ports) {
 		doc = this;
 		rootElement = doc.getDefaultRootElement();
 		putProperty(DefaultEditorKit.EndOfLineStringProperty, "\n");
@@ -78,20 +77,18 @@ public class KeywordDocument extends DefaultStyledDocument {
 		keyword = new SimpleAttributeSet();
 		StyleConstants.setForeground(keyword, Color.blue);
 		StyleConstants.setBold(keyword, true);
-		
-				
+
+
 		port = new SimpleAttributeSet();
 		StyleConstants.setForeground(port, Color.magenta);
 
 		quote = new SimpleAttributeSet();
 		StyleConstants.setForeground(quote, Color.red);
-		
+
 		this.keywords = keywords;
-		
-		
-		ports = new HashSet<String>();		
+		this.ports = ports;
 	}
-	
+
 	/**
 	* Method for adding an port
 	* @param name the name of the  port
@@ -100,7 +97,7 @@ public class KeywordDocument extends DefaultStyledDocument {
 	  ports.add(name);
 	  updateText();
 	}
-	
+
 	/**
 	 * Method for removing an  port
 	 * @param name the name of the  port
@@ -108,8 +105,8 @@ public class KeywordDocument extends DefaultStyledDocument {
 	public void removePort(String name){
 	  ports.remove(name);
 	  updateText();
-	} 
-	
+	}
+
 	/**
 	 * Method for checking whether the name represents an input port
 	 * @param name the name of the  port
@@ -118,8 +115,8 @@ public class KeywordDocument extends DefaultStyledDocument {
 	private boolean isPort(String name){
 	  return ports.contains(name);
 	}
-	
-	
+
+
 	/**
 	 * Method for updating the whole text
 	 */
@@ -142,7 +139,7 @@ public class KeywordDocument extends DefaultStyledDocument {
 		super.insertString(offset, str, a);
 		processChangedLines(offset, str.length());
 	}
-	
+
 	/*
 	 * Override to apply syntax highlighting after the document has been updated
 	 */
@@ -384,7 +381,7 @@ public class KeywordDocument extends DefaultStyledDocument {
 	}
 
 	/*
-	 * 
+	 *
 	 */
 	private int getQuoteToken(String content, int startOffset, int endOffset) {
 		String quoteDelimiter = content.substring(startOffset, startOffset + 1);
@@ -418,7 +415,7 @@ public class KeywordDocument extends DefaultStyledDocument {
 	}
 
 	/*
-	 * 
+	 *
 	 */
 	private int getOtherToken(String content, int startOffset, int endOffset) {
 		int endOfToken = startOffset + 1;
@@ -548,7 +545,7 @@ public class KeywordDocument extends DefaultStyledDocument {
 	}
 
 	/*
-	 * 
+	 *
 	 */
 	protected String addMatchingBrace(int offset) throws BadLocationException {
 		StringBuffer whiteSpace = new StringBuffer();
