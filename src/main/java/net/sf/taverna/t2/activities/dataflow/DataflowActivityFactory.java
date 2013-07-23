@@ -25,6 +25,7 @@ import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.sf.taverna.t2.workflowmodel.Edits;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityFactory;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityInputPort;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityOutputPort;
@@ -39,9 +40,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class DataflowActivityFactory implements ActivityFactory {
 
+	private Edits edits;
+
 	@Override
 	public DataflowActivity createActivity() {
-		return new DataflowActivity();
+		DataflowActivity activity = new DataflowActivity();
+		activity.setEdits(edits);
+		return activity;
 	}
 
 	@Override
@@ -53,7 +58,7 @@ public class DataflowActivityFactory implements ActivityFactory {
 	public JsonNode getActivityConfigurationSchema() {
 		ObjectMapper objectMapper = new ObjectMapper();
 		try {
- 			return objectMapper.readTree(getClass().getResource("/schema.json"));
+			return objectMapper.readTree(getClass().getResource("/schema.json"));
 		} catch (IOException e) {
 			return objectMapper.createObjectNode();
 		}
@@ -67,6 +72,10 @@ public class DataflowActivityFactory implements ActivityFactory {
 	@Override
 	public Set<ActivityOutputPort> getOutputPorts(JsonNode configuration) {
 		return new HashSet<>();
+	}
+
+	public void setEdits(Edits edits) {
+		this.edits = edits;
 	}
 
 }
