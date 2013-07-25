@@ -28,6 +28,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import uk.org.taverna.commons.download.DownloadException;
@@ -40,6 +41,7 @@ import uk.org.taverna.configuration.app.ApplicationConfiguration;
  *
  * @author David Withers
  */
+@Ignore
 public class PluginSiteManagerImplTest {
 
 	private PluginSiteManagerImpl pluginSiteManager;
