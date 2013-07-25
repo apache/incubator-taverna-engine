@@ -13,6 +13,7 @@
 	<name>Taverna Commons</name>
 	<description>Taverna modules that are common to multiple products</description>
 	<modules>
+		<module>taverna-configuration</module>
 		<module>taverna-download-api</module>
 		<module>taverna-download-impl</module>
 		<module>taverna-plugin-api</module>
