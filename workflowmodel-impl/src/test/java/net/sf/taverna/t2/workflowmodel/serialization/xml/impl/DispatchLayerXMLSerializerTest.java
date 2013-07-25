@@ -54,7 +54,7 @@ public class DispatchLayerXMLSerializerTest implements XMLSerializationConstants
 		assertEquals("there should be 1 child that describes the class",1,bean.getChildren().size());
 
 		classChild=(Element)bean.getChildren().get(0);
-		assertEquals("the element name should describe the Parallelize child","net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.ParallelizeConfig",classChild.getName());
+		assertEquals("the element name should describe the Parallelize child","com.fasterxml.jackson.databind.node.ObjectNode",classChild.getName());
 	}
 
 }
