@@ -122,6 +122,10 @@ public class Retry extends AbstractErrorHandlerLayer<JsonNode> {
 
 	public void configure(JsonNode config) {
 		this.config = config;
+		if (!config.has("maxRetries")) ((ObjectNode) config).put("maxRetries", 0);
+		if (!config.has("initialDelay")) ((ObjectNode) config).put("initialDelay", 1000);
+		if (!config.has("maxDelay")) ((ObjectNode) config).put("maxDelay", 5000);
+		if (!config.has("backoffFactor")) ((ObjectNode) config).put("backoffFactor", 1.0);
 	}
 
 	public JsonNode getConfiguration() {

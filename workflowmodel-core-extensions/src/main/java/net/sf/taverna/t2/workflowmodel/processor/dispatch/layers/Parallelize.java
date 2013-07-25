@@ -107,7 +107,7 @@ public class Parallelize extends AbstractDispatchLayer<JsonNode>
 	 */
 	public Parallelize(int maxJobs) {
 		super();
-		((ObjectNode)config).put("maximumJobs", maxJobs);
+		((ObjectNode)config).put("maxJobs", maxJobs);
 	}
 
 	public void eventAdded(String owningProcess) {
@@ -130,7 +130,7 @@ public class Parallelize extends AbstractDispatchLayer<JsonNode>
 
 	@Override
 	public void receiveJobQueue(DispatchJobQueueEvent queueEvent) {
-		StateModel model = new StateModel(queueEvent, config.get("maximumJobs").intValue());
+		StateModel model = new StateModel(queueEvent, config.has("maxJobs") ? config.get("maxJobs").intValue() : 1);
 		synchronized(stateMap) {
 			stateMap.put(queueEvent.getOwningProcess(), model);
 		}
