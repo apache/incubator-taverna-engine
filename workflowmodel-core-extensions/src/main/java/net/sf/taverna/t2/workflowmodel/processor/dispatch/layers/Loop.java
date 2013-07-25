@@ -1,19 +1,19 @@
 /*******************************************************************************
- * Copyright (C) 2008 The University of Manchester   
- * 
+ * Copyright (C) 2008 The University of Manchester
+ *
  *  Modifications to the initial code base are copyright of their
  *  respective authors, or their employers as appropriate.
- * 
+ *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public License
  *  as published by the Free Software Foundation; either version 2.1 of
  *  the License, or (at your option) any later version.
- *    
+ *
  *  This program is distributed in the hope that it will be useful, but
  *  WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *    
+ *
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -45,6 +45,9 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchJobQueu
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchResultEvent;
 
 import org.apache.log4j.Logger;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
 /**
  * A layer that allows while-style loops.
@@ -84,25 +87,25 @@ import org.apache.log4j.Logger;
  * {@link Failover failovers} before checking the while condition, such layers
  * should be below LoopLayer.
  * </p>
- * 
+ *
  * @author Stian Soiland-Reyes
- * 
+ *
  */
 
 @SuppressWarnings("unchecked")
-public class Loop extends AbstractDispatchLayer<LoopConfiguration> {
+public class Loop extends AbstractDispatchLayer<JsonNode> {
 
 	public static final String URI = "http://ns.taverna.org.uk/2010/scufl2/taverna/dispatchlayer/Loop";
 
 	private static Logger logger = Logger.getLogger(Loop.class);
 
-	private LoopConfiguration config = new LoopConfiguration();
+	private JsonNode config = JsonNodeFactory.instance.objectNode();
 
 	protected Map<String, AbstractDispatchEvent> incomingJobs = new HashMap<String, AbstractDispatchEvent>();
 
 	protected Map<String, AbstractDispatchEvent> outgoingJobs = new HashMap<String, AbstractDispatchEvent>();
 
-	public void configure(LoopConfiguration config) {
+	public void configure(JsonNode config) {
 		this.config = config;
 	}
 
@@ -125,7 +128,7 @@ public class Loop extends AbstractDispatchLayer<LoopConfiguration> {
 		}
 	}
 
-	public LoopConfiguration getConfiguration() {
+	public JsonNode getConfiguration() {
 		return config;
 	}
 
@@ -134,7 +137,7 @@ public class Loop extends AbstractDispatchLayer<LoopConfiguration> {
 		synchronized (incomingJobs) {
 			incomingJobs.put(jobIdentifier(jobEvent), jobEvent);
 		}
-		if (config.isRunFirst()) {
+		if (config.get("runFirst").asBoolean()) {
 			// We'll do the conditional in receiveResult instead
 			super.receiveJob(jobEvent);
 			return;
@@ -147,7 +150,7 @@ public class Loop extends AbstractDispatchLayer<LoopConfiguration> {
 		synchronized (incomingJobs) {
 			incomingJobs.put(jobIdentifier(jobQueueEvent), jobQueueEvent);
 		}
-		if (config.isRunFirst()) {
+		if (config.get("runFirst").asBoolean()) {
 			// We'll do the conditional in receiveResult instead
 			super.receiveJobQueue(jobQueueEvent);
 			return;
@@ -157,7 +160,7 @@ public class Loop extends AbstractDispatchLayer<LoopConfiguration> {
 
 	@Override
 	public void receiveResult(DispatchResultEvent resultEvent) {
-		Activity<?> condition = config.getCondition();
+		Activity<?> condition = null;//config.getCondition();
 		if (condition == null) {
 			super.receiveResult(resultEvent);
 			return;
@@ -170,7 +173,7 @@ public class Loop extends AbstractDispatchLayer<LoopConfiguration> {
 
 	@Override
 	public void receiveResultCompletion(DispatchCompletionEvent completionEvent) {
-		Activity<?> condition = config.getCondition();
+		Activity<?> condition = null;//config.getCondition();
 		if (condition == null) {
 			super.receiveResultCompletion(completionEvent);
 			return;
@@ -182,8 +185,7 @@ public class Loop extends AbstractDispatchLayer<LoopConfiguration> {
 	}
 
 	private void checkCondition(AbstractDispatchEvent event) {
-		Activity<?> condition;
-		condition = config.getCondition();
+		Activity<?> condition = null;//config.getCondition();
 		if (condition == null) {
 			super.receiveError(new DispatchErrorEvent(event.getOwningProcess(),
 					event.getIndex(), event.getContext(),
@@ -263,8 +265,8 @@ public class Loop extends AbstractDispatchLayer<LoopConfiguration> {
 	}
 
 	public static final String LOOP_PORT = "loop";
-	
-	
+
+
 	public class ConditionCallBack implements AsynchronousActivityCallback {
 		private InvocationContext context;
 		private final String jobIdentifier;
@@ -366,7 +368,7 @@ public class Loop extends AbstractDispatchLayer<LoopConfiguration> {
 				synchronized (outgoingJobs) {
 					outgoingEvent = outgoingJobs.get(jobIdentifier);
 				}
-				if (outgoingEvent == null && !config.isRunFirst()) {
+				if (outgoingEvent == null && !config.get("runFirst").asBoolean()) {
 					fail("Initial loop condition failed");
 				}
 				if (outgoingEvent instanceof DispatchCompletionEvent) {

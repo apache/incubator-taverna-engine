@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package net.sf.taverna.t2.workflowmodel.processor.dispatch.layers;
 
@@ -15,14 +15,16 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.AbstractDispatchLayer;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchJobEvent;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchJobQueueEvent;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 /**
  * This layer allows for the cancellation, pausing and resuming of workflow
  * runs. It does so by intercepting jobs sent to the layer.
- * 
+ *
  * @author alanrw
- * 
+ *
  */
-public class Stop extends AbstractDispatchLayer<Object> {
+public class Stop extends AbstractDispatchLayer<JsonNode> {
 
 	public static final String URI = "http://ns.taverna.org.uk/2010/scufl2/taverna/dispatchlayer/Stop";
 
@@ -43,17 +45,17 @@ public class Stop extends AbstractDispatchLayer<Object> {
 	 */
 	private Map<String, Set<DispatchJobEvent>> suspendedJobEventMap = new HashMap<String, Set<DispatchJobEvent>>();
 
-	public void configure(Object conf) throws ConfigurationException {
+	public void configure(JsonNode conf) throws ConfigurationException {
 		// nothing
 	}
 
-	public Object getConfiguration() {
+	public JsonNode getConfiguration() {
 		return null;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * net.sf.taverna.t2.workflowmodel.processor.dispatch.AbstractDispatchLayer
 	 * #receiveJob
@@ -97,7 +99,7 @@ public class Stop extends AbstractDispatchLayer<Object> {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * net.sf.taverna.t2.workflowmodel.processor.dispatch.AbstractDispatchLayer
 	 * #receiveJobQueue
@@ -110,7 +112,7 @@ public class Stop extends AbstractDispatchLayer<Object> {
 
 	/**
 	 * Cancel the workflow run with the specified id
-	 * 
+	 *
 	 * @param workflowRunId
 	 *            The id of the workflow run to cancel
 	 * @return If the workflow run was cancelled then true. If it was already
@@ -133,7 +135,7 @@ public class Stop extends AbstractDispatchLayer<Object> {
 
 	/**
 	 * Pause the workflow run with the specified id
-	 * 
+	 *
 	 * @param workflowRunId
 	 *            The id of the workflow run to pause
 	 * @return If the workflow run was paused then true. If it was already
@@ -158,7 +160,7 @@ public class Stop extends AbstractDispatchLayer<Object> {
 
 	/**
 	 * Resume the workflow run with the specified id
-	 * 
+	 *
 	 * @param workflowRunId
 	 *            The id of the workflow run to resume
 	 * @return If the workflow run was resumed then true. If the workflow run
@@ -187,7 +189,7 @@ public class Stop extends AbstractDispatchLayer<Object> {
 	/**
 	 * Resume the workflow run with the specified id on this Stop layer. This
 	 * method processes any suspended job events.
-	 * 
+	 *
 	 * @param workflowRunId
 	 *            The id of the workflow run to resume.
 	 */

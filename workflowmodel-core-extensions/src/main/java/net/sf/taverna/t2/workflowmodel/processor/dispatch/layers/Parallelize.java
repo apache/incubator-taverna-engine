@@ -1,19 +1,19 @@
 /*******************************************************************************
- * Copyright (C) 2007 The University of Manchester   
- * 
+ * Copyright (C) 2007 The University of Manchester
+ *
  *  Modifications to the initial code base are copyright of their
  *  respective authors, or their employers as appropriate.
- * 
+ *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public License
  *  as published by the Free Software Foundation; either version 2.1 of
  *  the License, or (at your option) any later version.
- *    
+ *
  *  This program is distributed in the hope that it will be useful, but
  *  WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *    
+ *
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -42,7 +42,6 @@ import net.sf.taverna.t2.workflowmodel.WorkflowStructureException;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Job;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.AbstractDispatchLayer;
-import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayer;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.NotifiableLayer;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.PropertyContributingDispatchLayer;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.description.DispatchLayerErrorReaction;
@@ -58,15 +57,19 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchResultE
 
 import org.apache.log4j.Logger;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 /**
  * Dispatch layer which consumes a queue of events and fires off a fixed number
  * of simultaneous jobs to the layer below. It observes failure, data and
  * completion events coming up and uses these to determine when to push more
  * jobs downwards into the stack as well as when it can safely emit completion
  * events from the queue.
- * 
+ *
  * @author Tom Oinn
- * 
+ *
  */
 @DispatchLayerErrorReaction(emits = {}, relaysUnmodified = true, stateEffects = {
 		REMOVE_PROCESS_STATE, NO_EFFECT })
@@ -76,17 +79,17 @@ import org.apache.log4j.Logger;
 @DispatchLayerResultCompletionReaction(emits = {}, relaysUnmodified = true, stateEffects = {
 		REMOVE_PROCESS_STATE, NO_EFFECT })
 @SupportsStreamedResult
-public class Parallelize extends AbstractDispatchLayer<ParallelizeConfig>
+public class Parallelize extends AbstractDispatchLayer<JsonNode>
 		implements NotifiableLayer,
-		PropertyContributingDispatchLayer<ParallelizeConfig> {
+		PropertyContributingDispatchLayer<JsonNode> {
 
 	public static final String URI = "http://ns.taverna.org.uk/2010/scufl2/taverna/dispatchlayer/Parallelize";
 
 	private static Logger logger = Logger.getLogger(Parallelize.class);
-	
+
 	private Map<String, StateModel> stateMap = new HashMap<String, StateModel>();
 
-	private ParallelizeConfig config = new ParallelizeConfig();
+	private JsonNode config = JsonNodeFactory.instance.objectNode();
 
 	int sentJobsCount = 0;
 
@@ -99,12 +102,12 @@ public class Parallelize extends AbstractDispatchLayer<ParallelizeConfig>
 	/**
 	 * Test constructor, only used by unit tests, should probably not be public
 	 * access here?
-	 * 
+	 *
 	 * @param maxJobs
 	 */
 	public Parallelize(int maxJobs) {
 		super();
-		config.setMaximumJobs(maxJobs);
+		((ObjectNode)config).put("maximumJobs", maxJobs);
 	}
 
 	public void eventAdded(String owningProcess) {
@@ -118,7 +121,7 @@ public class Parallelize extends AbstractDispatchLayer<ParallelizeConfig>
 			 * completion events from upstream
 			 */
 			throw new WorkflowStructureException(
-					"Unknown owning process " + owningProcess);		
+					"Unknown owning process " + owningProcess);
 		}
 		synchronized (stateModel) {
 			stateModel.fillFromQueue();
@@ -127,7 +130,7 @@ public class Parallelize extends AbstractDispatchLayer<ParallelizeConfig>
 
 	@Override
 	public void receiveJobQueue(DispatchJobQueueEvent queueEvent) {
-		StateModel model = new StateModel(queueEvent, config.getMaximumJobs());
+		StateModel model = new StateModel(queueEvent, config.get("maximumJobs").intValue());
 		synchronized(stateMap) {
 			stateMap.put(queueEvent.getOwningProcess(), model);
 		}
@@ -138,7 +141,7 @@ public class Parallelize extends AbstractDispatchLayer<ParallelizeConfig>
 		throw new WorkflowStructureException(
 				"Parallelize layer cannot handle job events");
 	}
-	
+
 
 	@Override
 	public void receiveError(DispatchErrorEvent errorEvent) {
@@ -147,12 +150,12 @@ public class Parallelize extends AbstractDispatchLayer<ParallelizeConfig>
 		synchronized(stateMap) {
 			model = stateMap.get(owningProcess);
 		}
-		getAbove().receiveError(errorEvent);
 		if (model == null) {
 			logger.warn("Error received for unknown owning process: " + owningProcess);
 			return;
 		}
 		model.finishWith(errorEvent.getIndex());
+		getAbove().receiveError(errorEvent);
 	}
 
 	@Override
@@ -163,13 +166,12 @@ public class Parallelize extends AbstractDispatchLayer<ParallelizeConfig>
 		synchronized(stateMap) {
 			model = stateMap.get(owningProcess);
 		}
-		DispatchLayer above = getAbove();
-		above.receiveResult(resultEvent);
 		if (model == null) {
 			logger.warn("Error received for unknown owning process: " + owningProcess);
 			return;
 		}
 		model.finishWith(resultEvent.getIndex());
+		getAbove().receiveResult(resultEvent);
 	}
 
 	/**
@@ -184,12 +186,12 @@ public class Parallelize extends AbstractDispatchLayer<ParallelizeConfig>
 		synchronized(stateMap) {
 			model = stateMap.get(owningProcess);
 		}
-		getAbove().receiveResultCompletion(completionEvent);
 		if (model == null) {
 			logger.warn("Error received for unknown owning process: " + owningProcess);
 			return;
 		}
 		model.finishWith(completionEvent.getIndex());
+		getAbove().receiveResultCompletion(completionEvent);
 	}
 
 	@Override
@@ -202,15 +204,15 @@ public class Parallelize extends AbstractDispatchLayer<ParallelizeConfig>
 				synchronized(stateMap) {
 					stateMap.remove(owningProcess);
 				}
-			}			
+			}
 		}, CLEANUP_DELAY_MS);
 	}
 
-	public void configure(ParallelizeConfig config) {
+	public void configure(JsonNode config) {
 		this.config = config;
 	}
 
-	public ParallelizeConfig getConfiguration() {
+	public JsonNode getConfiguration() {
 		return this.config;
 	}
 
@@ -242,7 +244,7 @@ public class Parallelize extends AbstractDispatchLayer<ParallelizeConfig>
 			}
 
 			public Integer getValue() throws NoSuchPropertyException {
-				
+
 				StateModel model;
 				synchronized(stateMap) {
 					model = stateMap.get(owningProcess);
@@ -299,26 +301,26 @@ public class Parallelize extends AbstractDispatchLayer<ParallelizeConfig>
 
 	/**
 	 * Holds the state for a given owning process
-	 * 
+	 *
 	 * @author Tom Oinn
-	 * 
+	 *
 	 */
 	class StateModel {
-	
+
 		private DispatchJobQueueEvent queueEvent;
-	
+
 		@SuppressWarnings("unchecked")
 		// suppressed to avoid jdk1.5 error messages caused by the declaration
 		// IterationInternalEvent<? extends IterationInternalEvent<?>> e
 		private BlockingQueue<IterationInternalEvent> pendingEvents = new LinkedBlockingQueue<IterationInternalEvent>();
-	
+
 		private int activeJobs = 0;
-	
+
 		private int maximumJobs;
-	
+
 		/**
 		 * Construct state model for a particular owning process
-		 * 
+		 *
 		 * @param owningProcess
 		 *            Process to track parallel execution
 		 * @param queue
@@ -335,11 +337,11 @@ public class Parallelize extends AbstractDispatchLayer<ParallelizeConfig>
 			this.queueEvent = queueEvent;
 			this.maximumJobs = maxJobs;
 		}
-	
+
 		Integer queueSize() {
 			return queueEvent.getQueue().size();
 		}
-	
+
 		/**
 		 * Poll the queue repeatedly until either the queue is empty or we have
 		 * enough jobs pulled from it. The semantics for this are:
@@ -363,7 +365,7 @@ public class Parallelize extends AbstractDispatchLayer<ParallelizeConfig>
 						&& activeJobs < maximumJobs) {
 					final IterationInternalEvent e = queueEvent.getQueue()
 							.remove();
-	
+
 					if (e instanceof Completion && pendingEvents.peek() == null) {
 						new Thread(new Runnable() {
 							public void run() {
@@ -393,12 +395,12 @@ public class Parallelize extends AbstractDispatchLayer<ParallelizeConfig>
 				}
 			}
 		}
-	
+
 		/**
 		 * Returns true if the index matched an existing Job exactly, if this
 		 * method returns false then you have a partial completion event which
 		 * should be sent up the stack without modification.
-		 * 
+		 *
 		 * @param index
 		 * @return
 		 */
@@ -407,7 +409,7 @@ public class Parallelize extends AbstractDispatchLayer<ParallelizeConfig>
 		// IterationInternalEvent<? extends IterationInternalEvent<?>> e
 		protected boolean finishWith(int[] index) {
 			synchronized (this) {
-	
+
 				for (IterationInternalEvent e : new ArrayList<IterationInternalEvent>(
 						pendingEvents)) {
 					if (e instanceof Job) {
@@ -431,7 +433,7 @@ public class Parallelize extends AbstractDispatchLayer<ParallelizeConfig>
 										new DispatchCompletionEvent(c
 												.getOwningProcess(), c
 												.getIndex(), c.getContext()));
-	
+
 							}
 							// Refresh from the queue; as we've just decremented
 							// the active job count there should be a worker
@@ -447,7 +449,7 @@ public class Parallelize extends AbstractDispatchLayer<ParallelizeConfig>
 			}
 			return false;
 		}
-	
+
 		private boolean arrayEquals(int[] a, int[] b) {
 			if (a.length != b.length) {
 				return false;

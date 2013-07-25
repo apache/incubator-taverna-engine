@@ -1,19 +1,19 @@
 /*******************************************************************************
- * Copyright (C) 2007 The University of Manchester   
- * 
+ * Copyright (C) 2007 The University of Manchester
+ *
  *  Modifications to the initial code base are copyright of their
  *  respective authors, or their employers as appropriate.
- * 
+ *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public License
  *  as published by the Free Software Foundation; either version 2.1 of
  *  the License, or (at your option) any later version.
- *    
+ *
  *  This program is distributed in the hope that it will be useful, but
  *  WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *    
+ *
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -32,6 +32,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import net.sf.taverna.t2.invocation.Event;
 import net.sf.taverna.t2.monitor.MonitorableProperty;
@@ -62,9 +64,9 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchResultE
  * layer should be placed immediately below the parallelize layer in most
  * default cases (this will guarantee the processor never sees a failure message
  * though, which may or may not be desirable)
- * 
+ *
  * @author Tom Oinn
- * 
+ *
  */
 @DispatchLayerErrorReaction(emits = { RESULT }, relaysUnmodified = false, stateEffects = {
 		CREATE_PROCESS_STATE, UPDATE_PROCESS_STATE })
@@ -73,8 +75,8 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchResultE
 @DispatchLayerResultReaction(emits = {}, relaysUnmodified = true, stateEffects = {})
 @DispatchLayerResultCompletionReaction(emits = {}, relaysUnmodified = true, stateEffects = {})
 @SupportsStreamedResult
-public class ErrorBounce extends AbstractDispatchLayer<Object> implements
-		PropertyContributingDispatchLayer<Object> {
+public class ErrorBounce extends AbstractDispatchLayer<JsonNode> implements
+		PropertyContributingDispatchLayer<JsonNode> {
 
 	public static final String URI = "http://ns.taverna.org.uk/2010/scufl2/taverna/dispatchlayer/ErrorBounce";
 
@@ -135,7 +137,7 @@ public class ErrorBounce extends AbstractDispatchLayer<Object> implements
 	/**
 	 * Construct and send a new result message with error documents in place of
 	 * all outputs at the appropriate depth
-	 * 
+	 *
 	 * @param event
 	 * @param cause
 	 * @param errorReferences
@@ -165,11 +167,11 @@ public class ErrorBounce extends AbstractDispatchLayer<Object> implements
 		getAbove().receiveResult(dre);
 	}
 
-	public void configure(Object config) {
+	public void configure(JsonNode config) {
 		// Do nothing - no configuration required
 	}
 
-	public Object getConfiguration() {
+	public JsonNode getConfiguration() {
 		// Layer has no configuration associated
 		return null;
 	}
@@ -181,7 +183,7 @@ public class ErrorBounce extends AbstractDispatchLayer<Object> implements
 			@Override
 			public void run() {
 				state.remove(owningProcess);
-			}			
+			}
 		}, CLEANUP_DELAY_MS);
 	}
 
@@ -235,7 +237,7 @@ public class ErrorBounce extends AbstractDispatchLayer<Object> implements
 		};
 		dispatchStack.receiveMonitorableProperty(errorsTranslatedProperty,
 				owningProcess);
-		
+
 		MonitorableProperty<Integer> totalTranslatedTranslatedProperty = new MonitorableProperty<Integer>() {
 			public Date getLastModified() {
 				return new Date();
@@ -251,7 +253,7 @@ public class ErrorBounce extends AbstractDispatchLayer<Object> implements
 		};
 		dispatchStack.receiveMonitorableProperty(totalTranslatedTranslatedProperty,
 				owningProcess);
-		
+
 		MonitorableProperty<Integer> totalReflectedTranslatedProperty = new MonitorableProperty<Integer>() {
 			public Date getLastModified() {
 				return new Date();
@@ -267,16 +269,16 @@ public class ErrorBounce extends AbstractDispatchLayer<Object> implements
 		};
 		dispatchStack.receiveMonitorableProperty(totalReflectedTranslatedProperty,
 				owningProcess);
-		
-		
+
+
 
 	}
 
-	
+
 	public class ErrorBounceState {
 		private int errorsReflected = 0;
 		private int errorsTranslated = 0;
-		
+
 
 		/**
 		 * Number of times the bounce layer has converted an incoming job event
@@ -294,9 +296,9 @@ public class ErrorBounce extends AbstractDispatchLayer<Object> implements
 		int getErrorsTranslated() {
 			return this.errorsTranslated;
 		}
-		
+
 		void incrementErrorsReflected() {
-			 synchronized(this) {				 
+			 synchronized(this) {
 				 errorsReflected++;
 			 }
 			synchronized(ErrorBounce.this) {

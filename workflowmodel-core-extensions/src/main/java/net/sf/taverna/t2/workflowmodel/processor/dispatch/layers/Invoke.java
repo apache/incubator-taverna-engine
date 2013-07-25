@@ -1,19 +1,19 @@
 /*******************************************************************************
- * Copyright (C) 2007 The University of Manchester   
- * 
+ * Copyright (C) 2007 The University of Manchester
+ *
  *  Modifications to the initial code base are copyright of their
  *  respective authors, or their employers as appropriate.
- * 
+ *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public License
  *  as published by the Free Software Foundation; either version 2.1 of
  *  the License, or (at your option) any later version.
- *    
+ *
  *  This program is distributed in the hope that it will be useful, but
  *  WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *    
+ *
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -58,6 +58,8 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchResultE
 
 import org.apache.log4j.Logger;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 /**
  * Context free invoker layer, does not pass index arrays of jobs into activity
  * instances.
@@ -67,19 +69,19 @@ import org.apache.log4j.Logger;
  * this point, i.e. by the insertion of a failover layer.
  * <p>
  * Currently only handles activities implementing {@link AsynchronousActivity}.
- * 
+ *
  * @author Tom Oinn
  * @author Stian Soiland-Reyes
- * 
+ *
  */
 @DispatchLayerJobReaction(emits = { ERROR, RESULT_COMPLETION, RESULT }, relaysUnmodified = false, stateEffects = {})
 @ControlBoundary
-public class Invoke extends AbstractDispatchLayer<Object> {
+public class Invoke extends AbstractDispatchLayer<JsonNode> {
 
 	public static final String URI = "http://ns.taverna.org.uk/2010/scufl2/taverna/dispatchlayer/Invoke";
 
 	private static Logger logger = Logger.getLogger(Invoke.class);
-	
+
 	private static Long invocationCount = 0L;
 
 	private static String getNextProcessID() {
@@ -93,11 +95,11 @@ public class Invoke extends AbstractDispatchLayer<Object> {
 		super();
 	}
 
-	public void configure(Object config) {
+	public void configure(JsonNode config) {
 		// No configuration, do nothing
 	}
 
-	public Object getConfiguration() {
+	public JsonNode getConfiguration() {
 		return null;
 	}
 
@@ -144,9 +146,9 @@ public class Invoke extends AbstractDispatchLayer<Object> {
 				ProvenanceReporter provenanceReporter = context.getProvenanceReporter();
 				if (provenanceReporter != null) {
 					IntermediateProvenance intermediateProvenance = findIntermediateProvenance();
-					if (intermediateProvenance != null) {						
+					if (intermediateProvenance != null) {
 						invocationItem = new InvocationStartedProvenanceItem();
-						IterationProvenanceItem parentItem = intermediateProvenance.getIterationProvItem(jobEvent);						
+						IterationProvenanceItem parentItem = intermediateProvenance.getIterationProvItem(jobEvent);
 						invocationItem.setIdentifier(UUID.randomUUID().toString());
 						invocationItem.setActivity(asyncActivity);
 						invocationItem.setProcessId(jobEvent.getOwningProcess());
@@ -154,10 +156,10 @@ public class Invoke extends AbstractDispatchLayer<Object> {
 						invocationItem.setParentId(parentItem.getIdentifier());
 						invocationItem.setWorkflowId(parentItem.getWorkflowId());
 						invocationItem.setInvocationStarted(new Date(System.currentTimeMillis()));
-						provenanceReporter.addProvenanceItem(invocationItem);							
+						provenanceReporter.addProvenanceItem(invocationItem);
 					}
 				}
-				
+
 				// Create a Map of EntityIdentifiers named appropriately given
 				// the activity mapping
 				Map<String, T2Reference> inputData = new HashMap<String, T2Reference>();
@@ -338,7 +340,7 @@ public class Invoke extends AbstractDispatchLayer<Object> {
 			getAbove().receiveResult(resultEvent);
 
 			sentJob = true;
-		}	
+		}
 
 		public void requestRun(Runnable runMe) {
 			String newThreadName = jobEvent.toString();

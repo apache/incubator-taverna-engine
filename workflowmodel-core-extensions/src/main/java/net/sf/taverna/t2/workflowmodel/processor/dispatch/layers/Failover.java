@@ -1,19 +1,19 @@
 /*******************************************************************************
- * Copyright (C) 2007 The University of Manchester   
- * 
+ * Copyright (C) 2007 The University of Manchester
+ *
  *  Modifications to the initial code base are copyright of their
  *  respective authors, or their employers as appropriate.
- * 
+ *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public License
  *  as published by the Free Software Foundation; either version 2.1 of
  *  the License, or (at your option) any later version.
- *    
+ *
  *  This program is distributed in the hope that it will be useful, but
  *  WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *    
+ *
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -35,6 +35,8 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.description.DispatchLa
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.description.DispatchLayerResultReaction;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchJobEvent;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 /**
  * Failure handling dispatch layer, consumes job events with multiple activities
  * and emits the same job but with only the first activity. On failures the job
@@ -42,17 +44,17 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchJobEven
  * in the original list and so on. If a failure is received and there are no
  * further activities to use the job fails and the failure is sent back up to
  * the layer above.
- * 
+ *
  * @author Tom Oinn
  * @author Stian Soiland-Reyes
- * 
- * 
+ *
+ *
  */
 @DispatchLayerErrorReaction(emits = { JOB }, relaysUnmodified = true, stateEffects = {
 		UPDATE_LOCAL_STATE, REMOVE_LOCAL_STATE })
 @DispatchLayerJobReaction(emits = {}, relaysUnmodified = true, stateEffects = { CREATE_LOCAL_STATE })
 @DispatchLayerResultReaction(emits = {}, relaysUnmodified = true, stateEffects = { REMOVE_LOCAL_STATE })
-public class Failover extends AbstractErrorHandlerLayer<Object> {
+public class Failover extends AbstractErrorHandlerLayer<JsonNode> {
 
 	public static final String URI = "http://ns.taverna.org.uk/2010/scufl2/taverna/dispatchlayer/Failover";
 
@@ -103,11 +105,11 @@ public class Failover extends AbstractErrorHandlerLayer<Object> {
 		}
 	}
 
-	public void configure(Object config) {
+	public void configure(JsonNode config) {
 		// Do nothing - there is no configuration to do
 	}
 
-	public Object getConfiguration() {
+	public JsonNode getConfiguration() {
 		return null;
 	}
 
