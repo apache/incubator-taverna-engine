@@ -23,15 +23,9 @@ package uk.org.taverna.platform.execution.impl;
 import java.net.URI;
 import java.text.MessageFormat;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.logging.Logger;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 
 import uk.org.taverna.platform.capability.api.ActivityConfigurationException;
 import uk.org.taverna.platform.capability.api.ActivityNotFoundException;
@@ -44,15 +38,13 @@ import uk.org.taverna.scufl2.api.activity.Activity;
 import uk.org.taverna.scufl2.api.common.NamedSet;
 import uk.org.taverna.scufl2.api.common.Scufl2Tools;
 import uk.org.taverna.scufl2.api.common.URITools;
-import uk.org.taverna.scufl2.api.common.WorkflowBean;
 import uk.org.taverna.scufl2.api.configurations.Configuration;
-import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.Processor;
 import uk.org.taverna.scufl2.api.dispatchstack.DispatchStackLayer;
-import uk.org.taverna.scufl2.api.port.InputActivityPort;
-import uk.org.taverna.scufl2.api.port.OutputActivityPort;
 import uk.org.taverna.scufl2.api.profiles.ProcessorBinding;
 import uk.org.taverna.scufl2.api.profiles.Profile;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Implementation of the ExecutionEnvironmentService.
