@@ -2,11 +2,14 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<artifactId>taverna-configuration</artifactId>
-		<groupId>uk.org.taverna.configuration</groupId>
-		<version>0.1.1-SNAPSHOT</version>
+		<artifactId>taverna-commons</artifactId>
+		<groupId>uk.org.taverna.commons</groupId>
+		<version>1.0.0-SNAPSHOT</version>
 	</parent>
+	<groupId>uk.org.taverna.configuration</groupId>
+	<version>0.1.1-SNAPSHOT</version>
 	<artifactId>taverna-configuration-api</artifactId>
+	<name>Taverna Configuration API</name>
 	<packaging>bundle</packaging>
 	<dependencies>
 		<dependency>
@@ -48,5 +51,4 @@
 			<url>http://www.mygrid.org.uk/maven/snapshot-repository</url>
 		</repository>
 	</repositories>
-	<name>Taverna Configuration API</name>
 </project>
