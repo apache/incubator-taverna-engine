@@ -9,7 +9,7 @@
 	<artifactId>taverna-download-impl</artifactId>
 	<version>0.1.0-SNAPSHOT</version>
 	<packaging>bundle</packaging>
-	<name>Tavern Download Implemntation</name>
+	<name>Taverna Download implementation</name>
 	<build>
 		<plugins>
 			<plugin>

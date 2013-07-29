@@ -72,4 +72,5 @@
 			<url>http://www.mygrid.org.uk/maven/snapshot-repository</url>
 		</repository>
 	</repositories>
+	<name>Taverna Configuration implementation</name>
 </project>
