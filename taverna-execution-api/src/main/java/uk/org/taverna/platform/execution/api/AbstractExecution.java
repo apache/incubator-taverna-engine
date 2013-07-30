@@ -20,13 +20,10 @@
  ******************************************************************************/
 package uk.org.taverna.platform.execution.api;
 
-import java.io.IOException;
-import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
 import org.purl.wf4ever.robundle.Bundle;
 
-import uk.org.taverna.databundle.DataBundles;
 import uk.org.taverna.platform.report.ActivityReport;
 import uk.org.taverna.platform.report.ProcessorReport;
 import uk.org.taverna.platform.report.WorkflowReport;

@@ -20,7 +20,6 @@
  ******************************************************************************/
 package uk.org.taverna.platform.execution.impl;
 
-import java.net.URI;
 import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.List;
@@ -37,7 +36,6 @@ import uk.org.taverna.platform.execution.api.ExecutionService;
 import uk.org.taverna.scufl2.api.activity.Activity;
 import uk.org.taverna.scufl2.api.common.NamedSet;
 import uk.org.taverna.scufl2.api.common.Scufl2Tools;
-import uk.org.taverna.scufl2.api.common.URITools;
 import uk.org.taverna.scufl2.api.configurations.Configuration;
 import uk.org.taverna.scufl2.api.core.Processor;
 import uk.org.taverna.scufl2.api.dispatchstack.DispatchStackLayer;
@@ -55,11 +53,7 @@ public class ExecutionEnvironmentServiceImpl implements ExecutionEnvironmentServ
 
 	private static final Logger logger = Logger.getLogger(ExecutionEnvironmentServiceImpl.class.getName());
 
-	private static final URI SCUFL2 = URI.create("http://ns.taverna.org.uk/2010/scufl2#");
-
 	private final Scufl2Tools scufl2Tools = new Scufl2Tools();
-
-	private final URITools uriTools = new URITools();
 
 	private Set<ExecutionService> executionServices;
 
