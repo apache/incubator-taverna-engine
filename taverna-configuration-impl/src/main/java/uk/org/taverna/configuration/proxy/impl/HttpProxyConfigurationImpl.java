@@ -58,17 +58,7 @@ public class HttpProxyConfigurationImpl extends AbstractConfigurable implements
 	 */
 	private HttpProxyConfigurationImpl(ConfigurationManager configurationManager) {
 		super(configurationManager);
-		rememberOriginalSystemSettings();
 		changeProxySettings();
-	}
-
-	/**
-	 * Copy the System properties. All the properties are copied, although only
-	 * the HTTP proxy ones are relevant.
-	 */
-	private void rememberOriginalSystemSettings() {
-		originalSystemSettings = new Properties();
-		originalSystemSettings.putAll(System.getProperties());
 	}
 
 	/**
@@ -79,6 +69,10 @@ public class HttpProxyConfigurationImpl extends AbstractConfigurable implements
 	 * @return
 	 */
 	public String getOriginalSystemSetting(String key) {
+		if (originalSystemSettings == null) {
+			originalSystemSettings = new Properties();
+			originalSystemSettings.putAll(System.getProperties());
+		}
 		return originalSystemSettings.getProperty(key);
 	}
 
@@ -131,11 +125,16 @@ public class HttpProxyConfigurationImpl extends AbstractConfigurable implements
 		if (defaultPropertyMap == null) {
 			defaultPropertyMap = new HashMap<String, String>();
 			defaultPropertyMap.put(PROXY_USE_OPTION, USE_SYSTEM_PROPERTIES_OPTION);
-			defaultPropertyMap.put(SYSTEM_PROXY_HOST, getOriginalSystemSetting(PROXY_HOST));
-			defaultPropertyMap.put(SYSTEM_PROXY_PORT, getOriginalSystemSetting(PROXY_PORT));
-			defaultPropertyMap.put(SYSTEM_PROXY_USER, getOriginalSystemSetting(PROXY_USER));
-			defaultPropertyMap.put(SYSTEM_PROXY_PASSWORD, getOriginalSystemSetting(PROXY_PASSWORD));
-			defaultPropertyMap.put(SYSTEM_NON_PROXY_HOSTS, getOriginalSystemSetting(NON_PROXY_HOSTS));
+			String proxyHost = getOriginalSystemSetting(PROXY_HOST);
+			defaultPropertyMap.put(SYSTEM_PROXY_HOST, proxyHost == null ? "" : proxyHost);
+			String proxyPort = getOriginalSystemSetting(PROXY_PORT);
+			defaultPropertyMap.put(SYSTEM_PROXY_PORT, proxyPort == null ? "" : proxyPort);
+			String proxyUser = getOriginalSystemSetting(PROXY_USER);
+			defaultPropertyMap.put(SYSTEM_PROXY_USER, proxyUser == null ? "" : proxyUser);
+			String proxyPassword = getOriginalSystemSetting(PROXY_PASSWORD);
+			defaultPropertyMap.put(SYSTEM_PROXY_PASSWORD, proxyPassword == null ? "" : proxyPassword);
+			String nonProxyHosts = getOriginalSystemSetting(NON_PROXY_HOSTS);
+			defaultPropertyMap.put(SYSTEM_NON_PROXY_HOSTS, nonProxyHosts == null ? "" : nonProxyHosts);
 			defaultPropertyMap.put(TAVERNA_PROXY_HOST, "");
 			defaultPropertyMap.put(TAVERNA_PROXY_PORT, "");
 			defaultPropertyMap.put(TAVERNA_PROXY_USER, "");
