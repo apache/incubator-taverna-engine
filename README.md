@@ -431,13 +431,13 @@ Example compilation:
     [INFO] PROV Taverna command line
     [INFO]                                                                         
     [INFO] ------------------------------------------------------------------------
-    [INFO] Building Taverna PROV 1.11-SNAPSHOT
+    [INFO] Building Taverna PROV 2.0.0-SNAPSHOT
     [INFO] ------------------------------------------------------------------------
     (..)
     Downloading: http://www.mygrid.org.uk/maven/repository/net/sf/taverna/t2/taverna-workbench/workbench-dev/2.4.0/workbench-dev-2.4.0.pom
     Downloaded: http://www.mygrid.org.uk/maven/repository/net/sf/taverna/t2/taverna-workbench/workbench-dev/2.4.0/workbench-dev-2.4.0.pom (3 KB at 5.4 KB/sec)
     (..)
-    [INFO] Installing /home/stain/src/taverna-prov/prov-taverna-cmdline/target/prov-taverna-cmdline-1.11-SNAPSHOT-tests.jar to /home/stain/.m2/repository/org/purl/wf4ever/provtaverna/prov-taverna-cmdline/1.11-SNAPSHOT/prov-taverna-cmdline-1.11-SNAPSHOT-tests.jar
+    [INFO] Installing /home/stain/src/taverna-prov/prov-taverna-cmdline/target/prov-taverna-cmdline-2.0.0-SNAPSHOT-tests.jar to /home/stain/.m2/repository/org/purl/wf4ever/provtaverna/prov-taverna-cmdline/2.0.0-SNAPSHOT/prov-taverna-cmdline-2.0.0-SNAPSHOT-tests.jar
     [INFO] ------------------------------------------------------------------------
     [INFO] Reactor Summary:
     [INFO] 
@@ -503,7 +503,7 @@ in `plugins/plugins.xml`.
      <plugin>
         <provider>org.purl.wf4ever</provider>
         <identifier>org.purl.wf4ever.provtaverna.prov-taverna-plugin</identifier>
-        <version>1.11-SNAPSHOT</version>
+        <version>2.0.0-SNAPSHOT</version>
         <name>Taverna PROV plugin</name>
         <description/>
         <enabled>true</enabled>
@@ -524,7 +524,7 @@ in `plugins/plugins.xml`.
             <dependency>
                 <groupId>org.purl.wf4ever.provtaverna</groupId>
                 <artifactId>prov-taverna-ui</artifactId>
-                <version>1.11-SNAPSHOT</version>
+                <version>2.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>junit</groupId>
