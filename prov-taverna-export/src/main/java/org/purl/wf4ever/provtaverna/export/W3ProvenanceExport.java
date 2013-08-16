@@ -1,7 +1,5 @@
 package org.purl.wf4ever.provtaverna.export;
 
-import info.aduna.lang.service.ServiceRegistry;
-
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -37,47 +35,12 @@ import net.sf.taverna.t2.reference.T2ReferenceType;
 
 import org.apache.commons.io.output.FileWriterWithEncoding;
 import org.apache.log4j.Logger;
-import org.openrdf.OpenRDFException;
-import org.openrdf.query.parser.QueryParserRegistry;
-import org.openrdf.query.parser.sparql.SPARQLParserFactory;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.contextaware.ContextAwareConnection;
-import org.openrdf.repository.object.ObjectConnection;
-import org.openrdf.repository.object.ObjectFactory;
-import org.openrdf.repository.object.ObjectRepository;
-import org.openrdf.repository.object.config.ObjectRepositoryConfig;
-import org.openrdf.repository.object.config.ObjectRepositoryFactory;
-import org.openrdf.repository.sail.SailRepository;
-import org.openrdf.rio.RDFHandlerException;
-import org.openrdf.sail.inferencer.fc.ForwardChainingRDFSInferencer;
-import org.openrdf.sail.memory.MemoryStore;
+import org.purl.wf4ever.provtaverna.owl.ProvModel;
 
-import prov.Activity;
-import prov.Association;
-import prov.AssociationOrEndOrGenerationOrInvalidationOrStartOrUsage;
-import prov.Bundle;
-import prov.Collection;
-import prov.EmptyCollection;
-import prov.Entity;
-import prov.Generation;
-import prov.Plan;
-import prov.Role;
-import prov.Usage;
-import rdfs.Resource;
-import scufl2.Processor;
-import scufl2.Workflow;
-import tavernaprov.Content;
-import tavernaprov.Error;
-import tavernaprov.TavernaEngine;
+import com.hp.hpl.jena.ontology.Individual;
+import com.hp.hpl.jena.rdf.model.Resource;
+
 import uk.org.taverna.scufl2.api.common.URITools;
-import wfdesc.Input;
-import wfdesc.Output;
-import wfdesc.Parameter;
-import wfdesc.WorkflowTemplate;
-import wfprov.Artifact;
-import wfprov.ProcessRun;
-import wfprov.WorkflowRun;
 
 public class W3ProvenanceExport {
 
@@ -105,13 +68,9 @@ public class W3ProvenanceExport {
 
 	private Saver saver;
 
-	private ObjectRepository objRepo;
+	private Map<String, Individual> describedEntities = new HashMap<String, Individual>();
 
-	private ObjectConnection objCon;
-
-	private ObjectFactory objFact;
-
-	private Map<String, Artifact> describedEntities = new HashMap<String, Artifact>();
+    private ProvModel provModel;
 
 	public File getIntermediatesDirectory() {
 		return intermediatesDirectory;
@@ -125,102 +84,14 @@ public class W3ProvenanceExport {
 		return fileToT2Reference;
 	}
 
-	protected void makeObjectRepository() throws OpenRDFException {
-
-		Repository myRepository = new SailRepository(
-		// For RDFS reasoning
-				new ForwardChainingRDFSInferencer(new MemoryStore()));
-		myRepository.initialize();
-
-		
-		ObjectRepositoryFactory factory = new ObjectRepositoryFactory();
-		ObjectRepositoryConfig config = new ObjectRepositoryConfig(getClass().getClassLoader());
-		objRepo = factory.createRepository(config, myRepository);
-		objRepo.setIncludeInferred(true);
-		objCon = objRepo.getConnection();
-		objFact = objCon.getObjectFactory();
-	}
-
-	protected void initializeRegistries() {
-		// Thanks to info.aduna.lang.service.ServiceRegistry for passing down
-		// the classloader
-		// of the interface (!!) rather than the current thread's context class
-		// loader, we'll#
-		// have to do this ourself for these registries to work within Raven or
-		// OSGi.
-
-		// These are all the subclasses of
-		// info.aduna.lang.service.ServiceRegistry<String, SailFactory>
-		// as far as Eclipse could find..
-
-		/*
-		 * For some reason this fails with: ERROR 2012-07-04 16:06:22,830
-		 * (net.sf.taverna.t2.workbench.ui.impl.Workbench:115) - Uncaught
-		 * exception in Thread[SaveAllResults: Saving results to
-		 * /home/stain/Desktop/popopopo.prov.ttl,6,main] java.lang.VerifyError:
-		 * (class: no/s11/w3/prov/taverna/ui/W3ProvenanceExport, method:
-		 * initializeRegistries signature: ()V) Incompatible argument to
-		 * function at
-		 * org.purl.wf4ever.provtaverna.export.SaveProvAction.saveData
-		 * (SaveProvAction.java:65) at
-		 * net.sf.taverna.t2.workbench.views.results.
-		 * saveactions.SaveAllResultsSPI$2.run(SaveAllResultsSPI.java:177)
-		 * 
-		 * 
-		 * or with java -noverify (..)
-		 * 
-		 * ERROR 2012-07-04 16:28:47,814
-		 * (net.sf.taverna.t2.workbench.ui.impl.Workbench:115) - Uncaught
-		 * exception in Thread[SaveAllResults: Saving results to
-		 * /home/stain/Desktop/ppp.prov.ttl,6,main]
-		 * java.lang.AbstractMethodError:
-		 * info.aduna.lang.service.ServiceRegistry
-		 * .add(Ljava/lang/Object;)Ljava/lang/Object; at
-		 * org.purl.wf4ever.provtaverna
-		 * .export.W3ProvenanceExport.repopulateRegistry
-		 * (W3ProvenanceExport.java:132) at
-		 * org.purl.wf4ever.provtaverna.export.W3ProvenanceExport
-		 * .initializeRegistries(W3ProvenanceExport.java:111) at
-		 * org.purl.wf4ever
-		 * .provtaverna.export.W3ProvenanceExport.<init>(W3ProvenanceExport
-		 * .java:162) at
-		 * org.purl.wf4ever.provtaverna.export.SaveProvAction.saveData
-		 * (SaveProvAction.java:65) at
-		 * net.sf.taverna.t2.workbench.views.results.
-		 * saveactions.SaveAllResultsSPI$2.run(SaveAllResultsSPI.java:177)
-		 */
-
-		// repopulateRegistry(BooleanQueryResultParserRegistry.getInstance(),
-		// BooleanQueryResultParserFactory.class);
-		// repopulateRegistry(BooleanQueryResultWriterRegistry.getInstance(),
-		// BooleanQueryResultWriterFactory.class);
-		// repopulateRegistry(RDFParserRegistry.getInstance(),
-		// RDFParserFactory.class);
-		// repopulateRegistry(RDFWriterRegistry.getInstance(),
-		// RDFWriterFactory.class);
-		// repopulateRegistry(TupleQueryResultParserRegistry.getInstance(),
-		// TupleQueryResultParserFactory.class);
-		// repopulateRegistry(TupleQueryResultWriterRegistry.getInstance(),
-		// TupleQueryResultWriterFactory.class);
-		// repopulateRegistry(FunctionRegistry.getInstance(), Function.class);
-		// repopulateRegistry(QueryParserRegistry.getInstance(),
-		// QueryParserFactory.class);
-		// repopulateRegistry(RepositoryRegistry.getInstance(),
-		// RepositoryFactory.class);
-		// repopulateRegistry(SailRegistry.getInstance(), SailFactory.class);
-
-		/* So instead we just do a silly, minimal workaround for what we need */
-		QueryParserRegistry.getInstance().add(new SPARQLParserFactory());
-	}
-
-	protected <I> void repopulateRegistry(ServiceRegistry<?, I> registry,
-			Class<I> spi) {
-		ClassLoader cl = classLoaderForServiceLoader(spi);
-		logger.info("Selected classloader " + cl + " for registry of " + spi);
-		for (I service : ServiceLoader.load(spi, cl)) {
-			registry.add(service);
-		}
-	}
+//	protected <I> void repopulateRegistry(ServiceRegistry<?, I> registry,
+//			Class<I> spi) {
+//		ClassLoader cl = classLoaderForServiceLoader(spi);
+//		logger.info("Selected classloader " + cl + " for registry of " + spi);
+//		for (I service : ServiceLoader.load(spi, cl)) {
+//			registry.add(service);
+//		}
+//	}
 
 	private ClassLoader classLoaderForServiceLoader(Class<?> mustHave) {
 		List<ClassLoader> possibles = Arrays.asList(Thread.currentThread()
@@ -247,14 +118,8 @@ public class W3ProvenanceExport {
 		this.saver = saver;
 		this.setWorkflowRunId(workflowRunId);
 		this.setProvenanceAccess(provenanceAccess);
-		initializeRegistries();
-		try {
-			makeObjectRepository();
-		} catch (OpenRDFException e) {
-			throw new IllegalStateException("Could not make object repository",
-					e);
-		}
 
+		this.provModel = new ProvModel();
 		try {
 			datatypeFactory = DatatypeFactory.newInstance();
 		} catch (DatatypeConfigurationException e) {
@@ -319,10 +184,9 @@ public class W3ProvenanceExport {
 	}
 
 	public void exportAsW3Prov(BufferedOutputStream outStream, URI base)
-			throws RepositoryException, RDFHandlerException, IOException {
+			throws IOException {
 
 		// TODO: Make this thread safe using contexts?
-		objCon.clear();
 
 		GregorianCalendar startedProvExportAt = new GregorianCalendar();
 
@@ -330,33 +194,31 @@ public class W3ProvenanceExport {
 		// FIXME: Should this be "" to indicate the current file?
 		// FIXME: Should this not be an Account instead?
 
-		Bundle bundle = objFact.createObject(base.toASCIIString(), Bundle.class);
-		objCon.addObject(bundle);
+		Individual bundle = provModel.createBundle(base); 
 
 		// Mini-provenance about this provenance trace. Unkown URI for
 		// agent/activity
 
-		TavernaEngine tavernaAgent = objFact.createObject(base.resolve("#taverna-engine").toASCIIString(), 
-				TavernaEngine.class);
-		Activity storeProvenance = objFact.createObject(base.resolve("#taverna-prov-export").toASCIIString(), Activity.class);
-		label(storeProvenance, "taverna-prov export of workflow run provenance");
+		Individual tavernaEgent = provModel.createTavernaEngine(base.resolve("#taverna-engine"));
+		
+		Individual storeProvenance = provModel.createActivity(base.resolve("#taverna-prov-export"));
+		storeProvenance.setLabel("taverna-prov export of workflow run provenance", "en");
 
-		storeProvenance.getProvStartedAtTime().add(
-				datatypeFactory.newXMLGregorianCalendar(startedProvExportAt));
-		storeProvenance.getProvWasAssociatedWith().add(tavernaAgent);
+		provModel.setStartedAtTime(storeProvenance, startedProvExportAt);
+		
+		Individual association = provModel.setWasAssociatedWith(storeProvenance, tavernaAgent);
+		
 		// The agent is an execution of the Taverna software (e.g. also an
 		// Activity)
 		String versionName = ApplicationConfig.getInstance().getName();
 
 		// Qualify it to add the plan
-		Association association = createObject(Association.class);
-		association.getProvAgents_1().add(tavernaAgent);
-		storeProvenance.getProvQualifiedAssociations().add(association);
-		association.getProvHadPlans().add(
-				objFact.createObject("http://ns.taverna.org.uk/2011/software/"
-						+ versionName, Plan.class));
+		
+		provModel.setPlan(association, "http://ns.taverna.org.uk/2011/software/"
+						+ versionName);
+		
+		provModel.setWasGeneratedBy(bundle, storeProvenance);
 
-		bundle.getProvWasGeneratedBy().add(storeProvenance);
 		// The store-provenance-process used the workflow run as input
 		WorkflowRun wfProcess = objFact.createObject(runURI, WorkflowRun.class);
 		
