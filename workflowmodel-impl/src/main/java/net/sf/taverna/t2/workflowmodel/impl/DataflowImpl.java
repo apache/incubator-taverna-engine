@@ -47,7 +47,7 @@ import net.sf.taverna.t2.workflowmodel.NamingException;
 import net.sf.taverna.t2.workflowmodel.Processor;
 import net.sf.taverna.t2.workflowmodel.TokenProcessingEntity;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationTypeMismatchException;
-
+import static net.sf.taverna.t2.workflowmodel.impl.Tools.makeImmutable;
 /**
  * Implementation of Dataflow including implementation of the dataflow level
  * type checker. Other than this the implementation is fairly simple as it's
@@ -834,14 +834,6 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
         immutable = true;
     }
 
-    protected <T> List<T> makeImmutable(List<T> workflowItems) {
-        List<T> list = Collections.unmodifiableList(workflowItems);
-        // TODO: Make workflow immutable throughout processors/ports/dispatchstacks/etc.
-//        for (T item : list) {
-//            item.setImmutable();
-//        }
-        return list;
-    }
 
 
 }
