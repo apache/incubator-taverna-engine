@@ -37,7 +37,7 @@ import net.sf.taverna.t2.invocation.InvocationContext;
  * 
  */
 @ControlBoundary
-public interface Dataflow extends Annotated<Dataflow>, TokenProcessingEntity {
+public interface Dataflow extends Annotated<Dataflow>, TokenProcessingEntity, WorkflowItem {
 
 	/**
 	 * A Dataflow consists of a set of named Processor instances. This method

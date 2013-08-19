@@ -22,7 +22,9 @@ package net.sf.taverna.t2.workflowmodel.processor.iteration;
 
 import java.util.Map;
 
-public interface IterationStrategy {
+import net.sf.taverna.t2.workflowmodel.WorkflowItem;
+
+public interface IterationStrategy extends WorkflowItem {
 
 	/**
 	 * The iteration strategy results in a set of job objects with a particular

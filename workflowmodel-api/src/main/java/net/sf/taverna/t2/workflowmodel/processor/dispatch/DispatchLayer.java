@@ -21,6 +21,7 @@
 package net.sf.taverna.t2.workflowmodel.processor.dispatch;
 
 import net.sf.taverna.t2.workflowmodel.Configurable;
+import net.sf.taverna.t2.workflowmodel.WorkflowItem;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchCompletionEvent;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchErrorEvent;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchJobEvent;

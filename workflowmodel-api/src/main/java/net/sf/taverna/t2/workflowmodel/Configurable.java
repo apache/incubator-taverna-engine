@@ -37,7 +37,7 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityConfigurationE
  * @see ActivityConfigurationException
  * 
  */
-public interface Configurable<ConfigurationType> {
+public interface Configurable<ConfigurationType> extends WorkflowItem {
 
 	/**
 	 * Each item stores configuration within a bean of type ConfigurationType,

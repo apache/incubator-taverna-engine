@@ -29,7 +29,7 @@ import net.sf.taverna.t2.annotation.Annotated;
  * @author Tom Oinn
  * 
  */
-public interface Port extends Annotated<Port> {
+public interface Port extends Annotated<Port>, WorkflowItem {
 
 	public String getName();
 
