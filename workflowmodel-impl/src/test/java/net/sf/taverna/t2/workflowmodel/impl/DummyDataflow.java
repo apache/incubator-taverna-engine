@@ -120,4 +120,10 @@ public class DummyDataflow extends AbstractAnnotatedThing<Dataflow> implements
 		return getIdentifier();
 	}
 
+    @Override
+    public void setImmutable() {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

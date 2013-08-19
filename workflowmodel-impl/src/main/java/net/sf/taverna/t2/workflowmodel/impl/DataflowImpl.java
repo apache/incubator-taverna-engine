@@ -67,6 +67,7 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 	private List<DataflowInputPortImpl> inputs;
 	private List<DataflowOutputPortImpl> outputs;
 	protected String internalIdentifier;
+    private DataflowValidationReport validationReport;
 
 	/**
 	 * Protected constructor, assigns a default name. To build an instance of
@@ -477,12 +478,29 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 		return this.name;
 	}
 
-	/**
-	 * Run the type check algorithm and return a report on any problems found.
-	 * This method must be called prior to actually pushing data through the
-	 * dataflow as it sets various properties as a side effect.
-	 */
-	public synchronized DataflowValidationReport checkValidity() {
+
+    /**
+     * Run the type check algorithm and return a report on any problems found.
+     * This method must be called prior to actually pushing data through the
+     * dataflow as it sets various properties as a side effect.
+     * 
+     * If the workflow has been set immutable with {@link #setImmutable()},
+     * subsequent calls to this method will return the cached
+     * DataflowValidationReport.
+     * 
+     */
+    public DataflowValidationReport checkValidity() {
+        if (! immutable) {
+            // Don't store it!
+            return checkValidityImpl();
+        }
+        if (validationReport == null) {
+            validationReport = checkValidityImpl();
+        }
+        return validationReport;
+    }
+	
+	public synchronized DataflowValidationReport checkValidityImpl() {
 		// First things first - nullify the resolved depths in all datalinks
 		for (Datalink dl : getLinks()) {
 			if (dl instanceof DatalinkImpl) {
@@ -637,6 +655,7 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 	 * received.
 	 */
 	private Map<String, Set<String>> activeProcessIdentifiers = new HashMap<String, Set<String>>();
+    private volatile boolean immutable;
 
 	/**
 	 * Called when a token is received or the dataflow is fired, checks to see
@@ -679,6 +698,9 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 	 * @param localName
 	 */
 	public void setLocalName(String localName) {
+	    if (immutable) { 
+	        throw new UnsupportedOperationException("Dataflow is immutable");
+	    }
 		name=localName;
 	}
 	
@@ -771,7 +793,7 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 	}
 	
 	public void refreshInternalIdentifier() {
-		internalIdentifier=UUID.randomUUID().toString();
+		setIdentifier(UUID.randomUUID().toString());
 	}
 
 	public String getIdentifier() {
@@ -784,6 +806,9 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 	}
 	
 	void setIdentifier(String id) {
+        if (immutable) { 
+            throw new UnsupportedOperationException("Dataflow is immutable");
+        }
 	    this.internalIdentifier=id;
 	}
 
@@ -797,6 +822,26 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 		}
 		return false;	
 	}
+
+    public synchronized void setImmutable() {
+        if (immutable) {
+            return;
+        }
+        processors = makeImmutable(processors);
+        merges = makeImmutable(merges);
+        outputs = makeImmutable(outputs);
+        inputs = makeImmutable(inputs);
+        immutable = true;
+    }
+
+    protected <T> List<T> makeImmutable(List<T> workflowItems) {
+        List<T> list = Collections.unmodifiableList(workflowItems);
+        // TODO: Make workflow immutable throughout processors/ports/dispatchstacks/etc.
+//        for (T item : list) {
+//            item.setImmutable();
+//        }
+        return list;
+    }
 
 
 }

@@ -107,7 +107,11 @@ public interface Dataflow extends Annotated<Dataflow>, TokenProcessingEntity {
 	 * Triggers a check for various basic potential problems with the workflow,
 	 * in particular ones related to type checking. Returns a report object
 	 * containing the state of the workflow and any problems found.
-	 * 
+	 * * 
+     * If the workflow has been set immutable with {@link #setImmutable()},
+     * subsequent calls to this method will return the cached
+     * DataflowValidationReport.
+    
 	 * @return validation report
 	 */
 	public DataflowValidationReport checkValidity();
@@ -153,4 +157,17 @@ public interface Dataflow extends Annotated<Dataflow>, TokenProcessingEntity {
 	 */
 	public boolean isInputPortConnected(DataflowInputPort inputPort);
 
+    /**
+     * Mark this dataflow as immutable.
+     * 
+     * Subsequent edits to its ports, links, merges, input and output ports will
+     * throw a RuntimeException like UnsupportedOperationException.
+     * 
+     * This method should be called before executing a Dataflow with
+     * {@link #fire(String, InvocationContext)}, in order to guarantee that
+     * datalinks, port depths etc. don't change while the dataflow is running.
+     * 
+     */
+	public void setImmutable();
+	
 }
