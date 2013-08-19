@@ -25,7 +25,7 @@ import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationProperty;
 
 @ConfigurationBean(uri = Retry.URI + "#Config")
 public class RetryConfig {
-	private static final long BACKOFF_FACTOR = (long) 1.1;
+	private static final float BACKOFF_FACTOR = 1.0f;
 	private static final int MAX_DELAY = 5000;
 	private static final int INITIAL_DELAY = 1000;
 	private static final int MAX_RETRIES = 0;
