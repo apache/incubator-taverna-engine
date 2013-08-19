@@ -585,29 +585,6 @@ public class Tools {
         }
         return list;
     }
-
-	
-	/**
-	 * Make list of WorkflowItems immutable (recursively).
-	 * <p>
-	 * This helper method is used by {@link WorkflowItem#setImmutable()}.
-	 * <p>
-	 * @return A {@link Collections#unmodifiableList(List)} of {@link WorkflowItem}s
-	 * 
-	 * @param workflowItems
-	 * @return
-	 */
-    public static <T extends WorkflowItem> List<T> makeImmutable(List<T> workflowItems) {
-        List<T> list;
-        synchronized (workflowItems) {
-            list = Collections.unmodifiableList(workflowItems);
-        }
-        for (T item : list) {
-            item.setImmutable();
-        }
-        return list;
-    }
-
 	
 	/**
 	 * 
