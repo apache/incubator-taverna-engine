@@ -581,7 +581,7 @@ public class Tools {
             list = Collections.unmodifiableList(workflowItems);
         }
         for (T item : list) {
-            item.setImmutable();
+//            item.setImmutable();
         }
         return list;
     }
