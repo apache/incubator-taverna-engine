@@ -23,6 +23,8 @@ package net.sf.taverna.t2.workflowmodel.processor.iteration;
 import java.util.List;
 import java.util.Map;
 
+import net.sf.taverna.t2.workflowmodel.WorkflowItem;
+
 /**
  * Stack of iteration strategy containers. The stacking behaviour allows for
  * staged implicit iteration where intermediate strategies are used to drill
@@ -35,7 +37,7 @@ import java.util.Map;
  * @author Tom Oinn
  * 
  */
-public interface IterationStrategyStack {
+public interface IterationStrategyStack extends WorkflowItem {
 
 	/**
 	 * The iteration strategy stack consists of an ordered list of iteration

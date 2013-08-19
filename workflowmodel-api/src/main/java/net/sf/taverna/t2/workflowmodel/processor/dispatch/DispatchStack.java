@@ -30,6 +30,7 @@ import net.sf.taverna.t2.annotation.Annotated;
 import net.sf.taverna.t2.annotation.HierarchyTraversal;
 import net.sf.taverna.t2.monitor.MonitorableProperty;
 import net.sf.taverna.t2.workflowmodel.Processor;
+import net.sf.taverna.t2.workflowmodel.WorkflowItem;
 
 /**
  * The dispatch stack is responsible for consuming a queue of jobs from the
@@ -43,7 +44,7 @@ import net.sf.taverna.t2.workflowmodel.Processor;
  * @author Tom Oinn
  * 
  */
-public interface DispatchStack extends Annotated<DispatchStack> {
+public interface DispatchStack extends Annotated<DispatchStack>, WorkflowItem {
 
 	/**
 	 * The DispatchStack consists of an ordered list of DispatchLayer instances

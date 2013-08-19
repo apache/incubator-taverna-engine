@@ -33,7 +33,7 @@ import net.sf.taverna.t2.annotation.Annotated;
  * @author Tom Oinn
  * 
  */
-public interface Condition extends Annotated<Condition> {
+public interface Condition extends Annotated<Condition>, WorkflowItem {
 
 	/**
 	 * @return the Processor constrained by this condition

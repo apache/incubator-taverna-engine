@@ -29,7 +29,7 @@ import net.sf.taverna.t2.annotation.Annotated;
  * @author Tom Oinn
  * 
  */
-public interface Datalink extends Annotated<Datalink> {
+public interface Datalink extends Annotated<Datalink>, WorkflowItem {
 
 	/**
 	 * Get the sink for events flowing through this link

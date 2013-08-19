@@ -27,6 +27,7 @@ import java.util.Map;
 import javax.swing.tree.MutableTreeNode;
 
 import net.sf.taverna.t2.invocation.Completion;
+import net.sf.taverna.t2.workflowmodel.WorkflowItem;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Job;
 
 /**
@@ -36,7 +37,7 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Job;
  * @author Stian Soiland-Reyes
  * 
  */
-public interface IterationStrategyNode extends MutableTreeNode {
+public interface IterationStrategyNode extends MutableTreeNode, WorkflowItem {
 
 	/**
 	 * Specialised return type of {@link TreeNode#children()}

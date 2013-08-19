@@ -42,7 +42,7 @@ import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationStrategyStac
  * 
  */
 @ControlBoundary
-public interface Processor extends TokenProcessingEntity, Annotated<Processor>, Observable<ProcessorFinishedEvent>  {
+public interface Processor extends TokenProcessingEntity, Annotated<Processor>, Observable<ProcessorFinishedEvent>, WorkflowItem  {
 
 	/**
 	 * The iteration strategy is responsible for combining input data events

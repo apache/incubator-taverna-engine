@@ -29,6 +29,7 @@ import net.sf.taverna.t2.annotation.Annotated;
 import net.sf.taverna.t2.annotation.HierarchyTraversal;
 import net.sf.taverna.t2.workflowmodel.OutputPort;
 import net.sf.taverna.t2.workflowmodel.Configurable;
+import net.sf.taverna.t2.workflowmodel.WorkflowItem;
 
 /**
  * Defines a single abstract or concrete invokable activity. Each Processor

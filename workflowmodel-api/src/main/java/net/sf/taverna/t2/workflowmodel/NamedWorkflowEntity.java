@@ -36,7 +36,7 @@ package net.sf.taverna.t2.workflowmodel;
  * @author Tom Oinn
  * 
  */
-public interface NamedWorkflowEntity {
+public interface NamedWorkflowEntity extends WorkflowItem {
 
 	/**
 	 * Every workflow level entity has a name which is unique within the
