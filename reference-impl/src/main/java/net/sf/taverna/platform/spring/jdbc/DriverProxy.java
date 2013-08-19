@@ -20,10 +20,13 @@
  ******************************************************************************/
 package net.sf.taverna.platform.spring.jdbc;
 
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 /**
  * A proxy implementation of the java.sql.Driver interface, used to act as a
@@ -138,5 +141,23 @@ public class DriverProxy implements Driver {
 		DriverProxy other = (DriverProxy) obj;
 		return this.target.equals(other.target);
 	}
+
+    public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+        // Invoke through reflexion so this works in both JDK 6 and 7
+        try {
+            return (Logger) this.target.getClass().getMethod("getParentLogger")
+                    .invoke(this.target);
+        } catch (InvocationTargetException e) {
+            if (e.getTargetException() instanceof SQLFeatureNotSupportedException) {
+                throw (SQLFeatureNotSupportedException)e.getTargetException();
+            } else if (e.getTargetException() instanceof RuntimeException) {
+                throw (RuntimeException)e.getTargetException();
+            } else {
+                throw new SQLFeatureNotSupportedException(e);
+            }
+        } catch (Exception e) {
+            throw new SQLFeatureNotSupportedException(e);
+        }
+    }
 
 }
