@@ -25,6 +25,7 @@ import java.beans.XMLEncoder;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 import net.sf.taverna.raven.Raven;
@@ -43,6 +44,7 @@ import net.sf.taverna.t2.workflowmodel.OutputPort;
 import net.sf.taverna.t2.workflowmodel.Processor;
 import net.sf.taverna.t2.workflowmodel.ProcessorInputPort;
 import net.sf.taverna.t2.workflowmodel.ProcessorOutputPort;
+import net.sf.taverna.t2.workflowmodel.WorkflowItem;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityConfigurationException;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayer;
@@ -570,6 +572,28 @@ public class Tools {
 		return element;
 	}
 
+	/**
+	 * Make list of WorkflowItems immutable (recursively).
+	 * <p>
+	 * This helper method is used by {@link WorkflowItem#setImmutable()}.
+	 * <p>
+	 * @return A {@link Collections#unmodifiableList(List)} of {@link WorkflowItem}s
+	 * 
+	 * @param workflowItems
+	 * @return
+	 */
+    public static <T extends WorkflowItem> List<T> makeImmutable(List<T> workflowItems) {
+        List<T> list;
+        synchronized (workflowItems) {
+            list = Collections.unmodifiableList(workflowItems);
+        }
+        for (T item : list) {
+            item.setImmutable();
+        }
+        return list;
+    }
+
+	
 	/**
 	 * 
 	 * @see net.sf.taverna.t2.workflowmodel.utils.Tools#uniqueProcessorName(String, Dataflow)
