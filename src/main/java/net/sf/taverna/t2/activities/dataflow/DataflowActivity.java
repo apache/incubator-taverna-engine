@@ -104,8 +104,8 @@ public class DataflowActivity extends
 							outputData.put(port, dataToken.getData());
 							synchronized (this) {
 								if (--outputPortCount == 0) {
+								    facade.removeResultListener(this);
 									callback.receiveResult(outputData, dataToken.getIndex());
-									facade.removeResultListener(this);
 								}
 							}
 						}
