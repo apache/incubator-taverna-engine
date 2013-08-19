@@ -36,6 +36,7 @@ import net.sf.taverna.t2.workflowmodel.DataflowOutputPort;
 import net.sf.taverna.t2.workflowmodel.Edits;
 import net.sf.taverna.t2.workflowmodel.EditsRegistry;
 import net.sf.taverna.t2.workflowmodel.InvalidDataflowException;
+import net.sf.taverna.t2.workflowmodel.impl.DataflowImpl;
 import net.sf.taverna.t2.workflowmodel.processor.activity.AbstractAsynchronousActivity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityConfigurationException;
 import net.sf.taverna.t2.workflowmodel.processor.activity.AsynchronousActivityCallback;
@@ -65,6 +66,7 @@ public class DataflowActivity extends
 	public void configure(Dataflow dataflow)
 			throws ActivityConfigurationException {
 		this.dataflow=dataflow;
+		dataflow.setImmutable();
 		dataflow.checkValidity();
 		buildInputPorts();
 		buildOutputPorts();
