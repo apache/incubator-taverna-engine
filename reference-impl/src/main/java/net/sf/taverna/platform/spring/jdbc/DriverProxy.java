@@ -143,10 +143,10 @@ public class DriverProxy implements Driver {
 	}
 
     public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-        // Invoke through reflexion so this works in both JDK 6 and 7
+        // Invoke through reflection so this works in both JDK 6 and 7
         try {
-            return (Logger) this.target.getClass().getMethod("getParentLogger")
-                    .invoke(this.target);
+            return (Logger) target.getClass().getMethod("getParentLogger")
+                    .invoke(target);
         } catch (InvocationTargetException e) {
             if (e.getTargetException() instanceof SQLFeatureNotSupportedException) {
                 throw (SQLFeatureNotSupportedException)e.getTargetException();
