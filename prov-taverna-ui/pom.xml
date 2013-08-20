@@ -100,6 +100,14 @@
 					<groupId>net.sf.taverna.t2.ui-exts</groupId>
 					<artifactId>perspective-myexperiment</artifactId>
 				</exclusion>
+				<exclusion>
+				    <artifactId>slf4j-api</artifactId>
+				    <groupId>org.slf4j</groupId>
+				</exclusion>
+				<exclusion>
+				    <artifactId>slf4j-log4j12</artifactId>
+				    <groupId>org.slf4j</groupId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		
@@ -128,6 +136,14 @@
 				<exclusion>
 					<groupId>com.sun</groupId>
 					<artifactId>tools</artifactId>
+				</exclusion>
+				<exclusion>
+				    <artifactId>slf4j-api</artifactId>
+				    <groupId>org.slf4j</groupId>
+				</exclusion>
+				<exclusion>
+				    <artifactId>slf4j-log4j12</artifactId>
+				    <groupId>org.slf4j</groupId>
 				</exclusion>
 			</exclusions>
 		</dependency>
