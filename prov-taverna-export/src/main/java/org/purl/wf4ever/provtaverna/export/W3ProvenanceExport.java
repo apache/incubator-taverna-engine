@@ -45,6 +45,8 @@ import uk.org.taverna.scufl2.api.common.URITools;
 
 public class W3ProvenanceExport {
 
+    private static ApplicationConfig applicationConfig = ApplicationConfig.getInstance();
+    
 	private URITools uriTools = new URITools();
 
 	private static Logger logger = Logger.getLogger(W3ProvenanceExport.class);
@@ -209,9 +211,12 @@ public class W3ProvenanceExport {
 		// The agent is an execution of the Taverna software (e.g. also an
 		// Activity)
 		Individual tavernaAgent = provModel.createTavernaEngine(base.resolve("#taverna-engine"));
-		String versionName = ApplicationConfig.getInstance().getName();
-		URI plan = URI.create("http://ns.taverna.org.uk/2011/software/"
-		        + versionName);
+		
+        String versionName = applicationConfig.getName();
+		Individual plan = provModel.createPlan(URI.create("http://ns.taverna.org.uk/2011/software/"
+		        + versionName));
+		plan.setLabel(applicationConfig.getTitle(), "en");
+		
 		Individual association = provModel.setWasAssociatedWith(storeProvenance, tavernaAgent, plan);
 		Individual generation = provModel.setWasGeneratedBy(bundle, storeProvenance);
 
@@ -224,14 +229,13 @@ public class W3ProvenanceExport {
 		label(wfProcess, "Workflow run of " + workflowName);
 
 		provModel.setWasInformedBy(storeProvenance,  wfProcess);
-		
-		provModel.setWasEnactedBy(wfProcess, tavernaAgent);
-		
 		String wfUri = uriGenerator.makeWorkflowURI(dataflowInvocation
-				.getWorkflowId());
+		        .getWorkflowId());
+		Individual wfplan = provModel.createWorkflow(URI.create(wfUri));
+		Individual wfAssoc = provModel.setWasEnactedBy(wfProcess, tavernaAgent, wfplan);
 		
 		
-		WorkflowTemplate wfplan = objFact.createObject(wfUri, Workflow.class);
+		
 		association.getProvHadPlans().add(wfplan);
 		wfProcess.getWfprovDescribedByWorkflows().add(wfplan);
 

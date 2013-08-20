@@ -225,16 +225,19 @@ public class ProvModel {
     }
 
     public Individual setWasAssociatedWith(Individual activity,
-            Individual associatedAgent, URI planUri) {
+            Individual associatedAgent, Individual plan) {
         activity.setPropertyValue(wasAssociatedWith, associatedAgent);
         Individual association = model.createIndividual(Association);
         activity.setPropertyValue(qualifiedAssociation, association);
         association.setPropertyValue(agent, associatedAgent);
-        if (planUri != null) {
-            Individual plan = model.createIndividual(planUri.toString(), Plan);
+        if (plan != null) {
             association.setPropertyValue(hadPlan, plan);
         }
         return association;
+    }
+
+    public Individual createPlan(URI planUri) {
+        return model.createIndividual(planUri.toString(), Plan);
     }
 
     public Individual setWasGeneratedBy(Individual generated,

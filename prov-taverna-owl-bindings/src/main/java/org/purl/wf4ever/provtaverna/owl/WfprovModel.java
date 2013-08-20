@@ -17,8 +17,13 @@ public class WfprovModel extends ProvModel {
     
     protected OntModel wfdesc;
     protected OntModel wfprov;
+    
+    protected OntClass Workflow;
     protected OntClass WorkflowRun;
+
     protected ObjectProperty wasEnactedBy;
+    protected ObjectProperty describedByProcess;
+    protected ObjectProperty describedByWorkflow;
 
     
     @Override
@@ -32,8 +37,9 @@ public class WfprovModel extends ProvModel {
         if (wfdesc != null) {
             return;
         }
-        OntModel ontModel = loadOntologyFromClasspath(WFDESC_OWL, WFDESC);    
-        checkNotNull(ontModel);
+        OntModel ontModel = loadOntologyFromClasspath(WFDESC_OWL, WFDESC);  
+        Workflow = ontModel.getOntClass(WFDESC + "Workflow");
+        checkNotNull(ontModel, Workflow);
 
         wfdesc = ontModel;
     }
@@ -45,9 +51,12 @@ public class WfprovModel extends ProvModel {
         OntModel ontModel = loadOntologyFromClasspath(WFPROV_OWL, WFPROV);    
         
         wasEnactedBy = ontModel.getObjectProperty(WFPROV + "wasEnactedBy");
+        describedByWorkflow = ontModel.getObjectProperty(WFPROV + "describedByWorkflow");
+        describedByProcess = ontModel.getObjectProperty(WFPROV + "describedByProcess");
+
         WorkflowRun = ontModel.getOntClass(WFPROV + "WorkflowRun");
         
-        checkNotNull(ontModel, wasEnactedBy, WorkflowRun);
+        checkNotNull(ontModel, wasEnactedBy, describedByWorkflow, describedByProcess,  WorkflowRun);
         wfprov = ontModel;
     }
     
@@ -55,10 +64,18 @@ public class WfprovModel extends ProvModel {
         return model.createIndividual(runURI.toASCIIString(), WorkflowRun);
     }
     
-    public void setWasEnactedBy(Individual workflowRun, Individual workflowEngine) {
-        setWasAssociatedWith(workflowRun, workflowEngine, null);
+    public Individual setWasEnactedBy(Individual workflowRun, Individual workflowEngine, Individual wfplan) {
+        Individual association = setWasAssociatedWith(workflowRun, workflowEngine, wfplan);
         workflowRun.addProperty(wasEnactedBy, workflowEngine);
-        
+        workflowRun.addProperty(describedByWorkflow, wfplan);
+        return association;
     }
 
+    public Individual createWorkflow(URI wfUri) {
+        Individual wfplan = createPlan(wfUri);
+        wfplan.addRDFType(Workflow);
+        return wfplan;
+    }
+
+    
 }
