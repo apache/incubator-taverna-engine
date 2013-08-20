@@ -67,10 +67,14 @@ public class WfprovModel extends ProvModel {
         OntModel ontModel = loadOntologyFromClasspath(WFDESC_OWL, WFDESC);  
         
         hasSubProcess = ontModel.getObjectProperty(WFDESC + "hasSubProcess");
+        Input = ontModel.getOntClass(WFDESC + "Input");
+//      Input.addSuperClass(Role);
+        Output = ontModel.getOntClass(WFDESC + "Output");
+//    Output.addSuperClass(Role);
 
         Process = ontModel.getOntClass(WFDESC + "Process");
         Workflow = ontModel.getOntClass(WFDESC + "Workflow");
-        checkNotNull(ontModel, hasSubProcess, Process, Workflow);
+        checkNotNull(ontModel, hasSubProcess, Process, Workflow, Input, Output);
 
         wfdesc = ontModel;
     }
@@ -92,10 +96,6 @@ public class WfprovModel extends ProvModel {
         wasPartOfWorkflowRun = ontModel.getObjectProperty(WFPROV + "wasPartOfWorkflowRun");
 //        wasPartOfWorkflowRun.addSuperProperty(hasPart);
 
-        Input = ontModel.getOntClass(WFPROV + "Input");
-//        Input.addSuperClass(Role);
-        Output = ontModel.getOntClass(WFPROV + "Output");
-//      Output.addSuperClass(Role);
         Artifact = ontModel.getOntClass(WFPROV + "Artifact");
 //        Artifact.addSuperClass(Entity);
         ProcessRun = ontModel.getOntClass(WFPROV + "ProcessRun");
@@ -105,7 +105,7 @@ public class WfprovModel extends ProvModel {
         checkNotNull(ontModel, wasEnactedBy, describedByWorkflow, describedByProcess,
                 describedByParameter, 
                 wasPartOfWorkflowRun, usedInput, wasOutputFrom, 
-                Input, Output, Artifact, ProcessRun, WorkflowRun);
+                 Artifact, ProcessRun, WorkflowRun);
         wfprov = ontModel;
     }
     
