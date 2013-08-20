@@ -224,13 +224,13 @@ public class ProvModel {
                 EmptyCollection);
         prov = ontModel;            
     }
-
     
-    protected void checkNotNull(Object... possiblyNulls) {
+    protected void checkNotNull(OntModel model, Object... possiblyNulls) {
         int i=0;
         for (Object check : possiblyNulls) {
             if (check == null) {
-                throw new IllegalStateException("Could not load item #" + i);
+                throw new IllegalStateException("Could not load term #" + i + 
+                        " from ontology");
             }
             i++;
         }
