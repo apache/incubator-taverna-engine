@@ -33,6 +33,8 @@ import net.sf.taverna.t2.reference.StackTraceElementBean;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.reference.T2ReferenceType;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.FileWriterWithEncoding;
 import org.apache.log4j.Logger;
 import org.purl.wf4ever.provtaverna.owl.ProvModel;
@@ -47,6 +49,12 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import uk.org.taverna.scufl2.api.common.URITools;
 
 public class W3ProvenanceExport {
+
+    private static final String TXT = ".txt";
+
+    private static final int EMBEDDED_STRING_MAX_FILESIZE = 1024;
+
+    private static final String UTF_8 = "UTF-8";
 
     private static ApplicationConfig applicationConfig = ApplicationConfig.getInstance();
     
@@ -74,7 +82,7 @@ public class W3ProvenanceExport {
 
 	private Saver saver;
 
-	private Map<String, Individual> describedEntities = new HashMap<String, Individual>();
+	private Map<URI, Individual> describedEntities = new HashMap<URI, Individual>();
 
     private TavernaProvModel provModel = new TavernaProvModel();;
 
@@ -365,24 +373,33 @@ public class W3ProvenanceExport {
 		for (Entry<File, T2Reference> entry : getFileToT2Reference().entrySet()) {
 			File file = entry.getKey();
 			T2Reference t2Ref = entry.getValue();
-			String dataURI = uriGenerator.makeT2ReferenceURI(t2Ref.toUri()
-					.toASCIIString());
+			URI dataURI = URI.create(uriGenerator.makeT2ReferenceURI(t2Ref.toUri()
+					.toASCIIString()));
 
-			Artifact entity = objFact.createObject(dataURI, Artifact.class);
-			Content content = objFact.createObject(
-					file.toURI().toASCIIString(), Content.class);
-			entity.getTavernaprovContents().add(content);
+			Individual entity = provModel.createArtifact(dataURI);
+			
+            Individual content = provModel.setContent(entity, file.toURI());
 
-			// Add checksums
+            // Add checksums
 			String sha1 = saver.getSha1sums().get(file.getAbsoluteFile());
 			if (sha1 != null) {
-				content.getTavernaprovSha1s().add(sha1);
+			    content.addLiteral(provModel.sha1, sha1);
 			}			
 			String sha512 = saver.getSha512sums().get(file.getAbsoluteFile());
 			if (sha512 != null) {
-				content.getTavernaprovSha512s().add(sha512);
-			}			
-			
+                content.addLiteral(provModel.sha512, sha512);
+			}
+			// Add text content if it's "tiny"
+			if (file.getName().endsWith(TXT) && file.length() < EMBEDDED_STRING_MAX_FILESIZE) {
+			    String str;
+                try {
+                    str = FileUtils.readFileToString(file, UTF_8);
+                    content.addLiteral(provModel.chars, str);
+                    content.addLiteral(provModel.characterEncoding, UTF_8);
+                } catch (IOException e) {
+                    logger.warn("Could not read " + file + " as " + UTF_8, e);
+                }
+			}
 		}
 	}
 
@@ -397,7 +414,7 @@ public class W3ProvenanceExport {
 			Port port = binding.getKey();
 			T2Reference t2Ref = binding.getValue();
 
-			Artifact entity = describeEntity(t2Ref);
+			Individual entity = describeEntity(t2Ref);
 			if (!seenReference(t2Ref)) {
 				saveReference(t2Ref);
 			}
@@ -456,22 +473,20 @@ public class W3ProvenanceExport {
 
 	}
 
-	protected Artifact describeEntity(T2Reference t2Ref)
-			throws RepositoryException, IOException {
-		String dataURI = uriGenerator.makeT2ReferenceURI(t2Ref.toUri()
-				.toASCIIString());
+	protected Individual describeEntity(T2Reference t2Ref)
+			throws IOException {
+		URI dataURI = URI.create(uriGenerator.makeT2ReferenceURI(t2Ref.toUri()
+				.toASCIIString()));
 
-		Artifact artifact = describedEntities.get(dataURI);
+		Individual artifact = describedEntities.get(dataURI);
 		if (artifact != null) {
 			return artifact;
 		}
-		artifact = objFact.createObject(dataURI, Artifact.class);
+		artifact = provModel.createArtifact(dataURI);
 		describedEntities.put(dataURI, artifact);
 
 		if (t2Ref.getReferenceType() == T2ReferenceType.ErrorDocument) {
-			tavernaprov.Error error = objCon.addDesignation(artifact,
-					tavernaprov.Error.class);
-
+		    artifact.addRDFType(provModel.Error);
 			ErrorDocument errorDoc = saver.getReferenceService()
 					.getErrorDocumentService().getError(t2Ref);
 			addMessageIfNonEmpty(error, errorDoc.getMessage());
@@ -502,8 +517,7 @@ public class W3ProvenanceExport {
 		return seenReferences.containsKey(t2Ref);
 	}
 
-	private File saveReference(T2Reference t2Ref) throws IOException,
-			RepositoryException {
+	private File saveReference(T2Reference t2Ref) throws IOException {
 		// Avoid double-saving
 		File f = seenReferences.get(t2Ref);
 		if (f != null) {
@@ -545,22 +559,19 @@ public class W3ProvenanceExport {
 		return file;
 	}
 
-	protected void addStackTrace(Error error, ErrorDocument errorDoc)
-			throws RepositoryException, IOException {
+	protected void addStackTrace(Individual error, ErrorDocument errorDoc)
+			throws  IOException {
 		StringBuffer sb = new StringBuffer();
 		addStackTrace(sb, errorDoc);
 		if (sb.length() > 0) {
-			error.getTavernaprovStackTrace().add(sb.toString());
+		    error.addLiteral(provModel.stackTrace, sb.toString());
 		}
 
 		for (T2Reference errRef : errorDoc.getErrorReferences()) {
-			String errorURI = uriGenerator.makeT2ReferenceURI(errRef.toUri()
-					.toASCIIString());
-			tavernaprov.Error nested = objFact.createObject(errorURI,
-					tavernaprov.Error.class);
-			Entity errEntity = objCon.addDesignation(error, Entity.class);
-			errEntity.getProvWasDerivedFrom().add(
-					objCon.addDesignation(nested, Entity.class));
+			URI errorURI = URI.create(uriGenerator.makeT2ReferenceURI(errRef.toUri()
+					.toASCIIString()));
+			Individual nestedErr = provModel.createError(errorURI);
+			provModel.setWasDerivedFrom(error, nestedErr);
 			describeEntity(errRef);
 		}
 	}
@@ -592,11 +603,11 @@ public class W3ProvenanceExport {
 		}
 	}
 
-	protected void addMessageIfNonEmpty(Error error, String message) {
+	protected void addMessageIfNonEmpty(Individual error, String message) {
 		if (message == null || message.isEmpty()) {
 			return;
 		}
-		error.getTavernaprovErrorMessage().add(message);
+		error.addLiteral(provModel.errorMessage, message);
 	}
 
 	private File referencePath(T2Reference t2Ref) {

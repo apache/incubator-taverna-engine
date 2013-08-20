@@ -216,6 +216,11 @@ public class ProvModel {
         return model.createIndividual(uri.toASCIIString(), Activity);
     }
 
+    public Individual createEntity(URI uri) {
+        return model.createIndividual(uri.toASCIIString(), Entity);
+    }
+
+    
     public Individual setEndedAtTime(Individual endedActivity,
             Calendar time) {
         return setEndedAtTime(endedActivity, model.createTypedLiteral(time));
@@ -278,5 +283,9 @@ public class ProvModel {
         return communication;
     }
     
+    public void setWasDerivedFrom(Individual derived, Individual original) {
+        derived.addProperty(wasDerivedFrom, original);
+    }
+
     
 }

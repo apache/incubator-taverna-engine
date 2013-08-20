@@ -100,22 +100,16 @@ public class TavernaProvModel extends WfprovModel {
     }
 
 
+    public Individual setContent(Individual entity, URI uri) {
+        Individual cont = model.createIndividual(uri.toASCIIString(), Content);
+        entity.setPropertyValue(content, cont);
+        return cont;
+    }
 
 
-
-
-
-
-
-
-   
-
-
-
-
-
-
-   
+    public Individual createError(URI errorURI) {
+        return model.createIndividual(errorURI.toASCIIString(), Error);
+    }
 
 
  

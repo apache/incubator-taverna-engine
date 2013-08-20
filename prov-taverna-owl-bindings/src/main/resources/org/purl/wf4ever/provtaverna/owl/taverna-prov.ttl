@@ -218,7 +218,7 @@ tavernaprov:Content rdf:type owl:Class ;
 
 tavernaprov:Error rdf:type owl:Class ;
                   
-                  rdfs:subClassOf wfdesc:Artifact .
+                  rdfs:subClassOf wfprov:Artifact .
 
 
 

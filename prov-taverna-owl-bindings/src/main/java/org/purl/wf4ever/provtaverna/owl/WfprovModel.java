@@ -33,6 +33,7 @@ public class WfprovModel extends ProvModel {
     protected ObjectProperty hasPart;
     protected OntModel dcterms;
     protected ObjectProperty hasSubProcess;
+    private OntClass Artifact;
 
     
     @Override
@@ -77,24 +78,32 @@ public class WfprovModel extends ProvModel {
         OntModel ontModel = loadOntologyFromClasspath(WFPROV_OWL, WFPROV);    
         
         wasEnactedBy = ontModel.getObjectProperty(WFPROV + "wasEnactedBy");
+//        wasEnactedBy.addSuperProperty(wasAssociatedWith);
         describedByWorkflow = ontModel.getObjectProperty(WFPROV + "describedByWorkflow");
         describedByProcess = ontModel.getObjectProperty(WFPROV + "describedByProcess");
         wasPartOfWorkflowRun = ontModel.getObjectProperty(WFPROV + "wasPartOfWorkflowRun");
+//        wasPartOfWorkflowRun.addSuperProperty(hasPart);
 
-        
+        Artifact = ontModel.getOntClass(WFPROV + "Artifact");
+//        Artifact.addSuperClass(Entity);
         ProcessRun = ontModel.getOntClass(WFPROV + "ProcessRun");
+//        ProcessRun.addSuperClass(Activity);
         WorkflowRun = ontModel.getOntClass(WFPROV + "WorkflowRun");
         
-        checkNotNull(ontModel, wasEnactedBy, describedByWorkflow, describedByProcess, wasPartOfWorkflowRun, ProcessRun, WorkflowRun);
+        checkNotNull(ontModel, wasEnactedBy, describedByWorkflow, describedByProcess, wasPartOfWorkflowRun, Artifact, ProcessRun, WorkflowRun);
         wfprov = ontModel;
     }
     
     public Individual createWorkflowRun(URI runURI) {
-        return model.createIndividual(runURI.toASCIIString(), WorkflowRun);
+        Individual a = createActivity(runURI);
+        a.setRDFType(WorkflowRun);
+        return a;
     }
     
     public Individual createProcessRun(URI processURI) {
-        return model.createIndividual(processURI.toASCIIString(), ProcessRun);
+        Individual a = createActivity(processURI);
+        a.setRDFType(ProcessRun);
+        return a;
     }
 
     public void setWasPartOfWorkflowRun(Individual process,
@@ -102,8 +111,6 @@ public class WfprovModel extends ProvModel {
         process.addProperty(wasPartOfWorkflowRun, parentProcess);
         parentProcess.addProperty(hasPart, process);
     }
-
-    
     
     public Individual setWasEnactedBy(Individual workflowRun, Individual workflowEngine, Individual wfplan) {
         Individual association = setWasAssociatedWith(workflowRun, workflowEngine, wfplan);
@@ -139,5 +146,11 @@ public class WfprovModel extends ProvModel {
         return wfplan;
     }
 
-    
+    public Individual createArtifact(URI dataURI) {
+       Individual entity = createEntity(dataURI);
+       entity.addRDFType(Artifact);
+       return entity;
+    }
+
+
 }
