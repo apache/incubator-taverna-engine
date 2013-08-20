@@ -223,21 +223,14 @@ public class W3ProvenanceExport {
 				.getWorkflowNameByWorkflowID(dataflowInvocation.getWorkflowId());
 		label(wfProcess, "Workflow run of " + workflowName);
 
+		provModel.setWasInformedBy(storeProvenance,  wfProcess);
 		
-		storeProvenance.getProvWasInformedBy().add(wfProcess);
-		objCon.addDesignation(wfProcess, WorkflowRun.class);
-
-		storeProvenance.getProvWasInformedBy().add(wfProcess);
-
-		wfProcess.getProvWasAssociatedWith().add(tavernaAgent);
-		association = createObject(Association.class);
-		association.getProvAgents_1().add(tavernaAgent);
-		wfProcess.getProvQualifiedAssociations().add(association);
-
-		wfProcess.getWfprovWasEnactedBy().add(tavernaAgent);
+		provModel.setWasEnactedBy(wfProcess, tavernaAgent);
 		
 		String wfUri = uriGenerator.makeWorkflowURI(dataflowInvocation
 				.getWorkflowId());
+		
+		
 		WorkflowTemplate wfplan = objFact.createObject(wfUri, Workflow.class);
 		association.getProvHadPlans().add(wfplan);
 		wfProcess.getWfprovDescribedByWorkflows().add(wfplan);

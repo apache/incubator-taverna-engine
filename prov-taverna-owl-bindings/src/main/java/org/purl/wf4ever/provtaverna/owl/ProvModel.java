@@ -76,6 +76,20 @@ public class ProvModel {
 
     public ObjectProperty wasInformedBy;
 
+    private ObjectProperty qualifiedCommunication;
+
+    private OntClass Communication;
+
+    private OntClass Start;
+
+    private OntClass End;
+
+    private ObjectProperty qualifiedStart;
+
+    private ObjectProperty qualifiedEnd;
+
+    private DatatypeProperty atTime;
+
     public ProvModel() {
         this(ModelFactory.createOntologyModel(DEFAULT_ONT_MODEL_SPEC));
     }
@@ -111,6 +125,9 @@ public class ProvModel {
         used = ontModel.getObjectProperty(PROV + "used");
         qualifiedUsage = ontModel.getObjectProperty(PROV + "qualifiedUsage");
         wasInformedBy = ontModel.getObjectProperty(PROV + "wasInformedBy");
+        qualifiedCommunication = ontModel.getObjectProperty(PROV + "qualifiedCommunication");
+        qualifiedStart = ontModel.getObjectProperty(PROV + "qualifiedStart");
+        qualifiedEnd = ontModel.getObjectProperty(PROV + "qualifiedEnd");
         
         
         
@@ -121,28 +138,34 @@ public class ProvModel {
         
         startedAtTime = ontModel.getDatatypeProperty(PROV + "startedAtTime");
         endedAtTime = ontModel.getDatatypeProperty(PROV + "endedAtTime");
+        atTime = ontModel.getDatatypeProperty(PROV + "atTime");
         
         Bundle = ontModel.getOntClass(PROV + "Bundle");
         Entity = ontModel.getOntClass(PROV + "Entity");
         Activity = ontModel.getOntClass(PROV + "Activity");
+        Start = ontModel.getOntClass(PROV + "Start");
+        End = ontModel.getOntClass(PROV + "End");
+
+        
         Association = ontModel.getOntClass(PROV + "Association");
+        Plan = ontModel.getOntClass(PROV + "Plan");
         Generation = ontModel.getOntClass(PROV + "Generation");
         Usage = ontModel.getOntClass(PROV + "Usage");
-
-        Plan = ontModel.getOntClass(PROV + "Plan");
+        Communication = ontModel.getOntClass(PROV + "Communication");
 
         
         checkNotNull(ontModel, 
                 wasDerivedFrom, wasAssociatedWith, qualifiedAssociation,
                 wasGeneratedBy, qualifiedGeneration,
                 used, qualifiedUsage,
-                wasInformedBy,
+                wasInformedBy, qualifiedCommunication,
                 agent, entity, activity, hadPlan,
                 
-                startedAtTime, endedAtTime,                 
+                startedAtTime, endedAtTime, atTime,   
+                qualifiedStart, qualifiedEnd,
                 
                 Bundle, Entity, Activity, Association, Plan, 
-                Generation, Usage);
+                Generation, Usage, Communication, Start, End);
         prov = ontModel;            
     }
 
@@ -167,7 +190,11 @@ public class ProvModel {
             throw new IllegalArgumentException("Can't load " + classPathUri);
         }
 //        Ontology ontology = ontModel.createOntology(uri);
-        ontModel.read(inStream, uri);
+        if (classPathUri.endsWith(".ttl")) {
+            ontModel.read(inStream, uri, "TURTLE");
+        } else {
+            ontModel.read(inStream, uri);
+        }
         return ontModel;
     }
 
@@ -188,9 +215,12 @@ public class ProvModel {
         return model.createIndividual(uri.toASCIIString(), Activity);
     }
 
-    public void setStartedAtTime(Individual activity,
+    public Individual setStartedAtTime(Individual activity,
             Calendar time) {
         activity.addLiteral(startedAtTime, time);
+        Individual start = model.createIndividual(Start);
+        start.addLiteral(atTime, time);
+        return start;
         
     }
 
@@ -207,16 +237,23 @@ public class ProvModel {
         return association;
     }
 
-    public Individual setWasGeneratedBy(Individual entity,
+    public Individual setWasGeneratedBy(Individual generated,
             Individual generatingActivity) {
-        entity.setPropertyValue(wasGeneratedBy, generatingActivity);
+        generated.setPropertyValue(wasGeneratedBy, generatingActivity);
         Individual generation = model.createIndividual(Generation);
-        entity.setPropertyValue(qualifiedGeneration, generation);
+        generated.setPropertyValue(qualifiedGeneration, generation);
         generation.setPropertyValue(activity, generatingActivity);
         return generation;
         
     }
-
+    public Individual setWasInformedBy(Individual informed,
+            Individual informer) {
+        informed.setPropertyValue(wasInformedBy, informer);
+        Individual communication = model.createIndividual(Communication);
+        informed.setPropertyValue(qualifiedCommunication, communication);
+        communication.setPropertyValue(activity, informer);
+        return communication;
+    }
     
     
 }

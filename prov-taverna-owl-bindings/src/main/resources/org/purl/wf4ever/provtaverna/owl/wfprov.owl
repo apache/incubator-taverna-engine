@@ -35,7 +35,8 @@ This ontology can be further linked to more specific provenance ontologies like 
         <seeAlso rdf:resource="http://purl.org/wf4ever/ro"/>
         <owl:imports rdf:resource="http://purl.org/wf4ever/wfdesc"/>
         <owl:imports rdf:resource="http://xmlns.com/foaf/0.1/"/>
-        <owl:versionIRI rdf:resource="https://raw.github.com/wf4ever/ro/0.1/wfprov.owl"/>
+        <owl:versionInfo rdf:datatype="&xsd;string">0.1.1</owl:versionInfo>
+        <owl:versionIRI rdf:resource="https://raw.github.com/wf4ever/ro/0.1.1/wfprov.owl"/>
     </owl:Ontology>
     
 

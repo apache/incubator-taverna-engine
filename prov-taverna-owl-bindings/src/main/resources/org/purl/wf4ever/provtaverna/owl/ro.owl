@@ -1,4 +1,4 @@
-
+<?xml version="1.0"?>
 <!-- Processed by Id: cwm.py,v 1.197 2007/12/13 15:38:39 syosi Exp -->
 <!--     using base file:///home/stain/stuff/src/wf4ever/ro/ro.owl-->
 
@@ -15,7 +15,8 @@
         <imports rdf:resource="http://purl.org/ao/core/"/>
         <imports rdf:resource="http://purl.org/wf4ever/ore-owl"/>
         <imports rdf:resource="http://xmlns.com/foaf/0.1/"/>
-        <versionIRI rdf:resource="https://raw.github.com/wf4ever/ro/0.1/ro.owl"/>
+        <versionInfo rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.1.1</versionInfo>
+        <versionIRI rdf:resource="https://raw.github.com/wf4ever/ro/0.1.1/ro.owl"/>
     </Ontology>
 
     <Class rdf:about="http://purl.org/wf4ever/ro#AggregatedAnnotation">

@@ -3,6 +3,7 @@ package org.purl.wf4ever.provtaverna.owl;
 import java.net.URI;
 
 import com.hp.hpl.jena.ontology.Individual;
+import com.hp.hpl.jena.ontology.ObjectProperty;
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 
@@ -13,9 +14,11 @@ public class WfprovModel extends ProvModel {
 
     private static final String WFDESC_OWL = "wfdesc.owl";
     private static final String WFDESC = "http://purl.org/wf4ever/wfdesc#";
-    private OntModel wfdesc;
-    private OntModel wfprov;
-    private OntClass WorkflowRun;
+    
+    protected OntModel wfdesc;
+    protected OntModel wfprov;
+    protected OntClass WorkflowRun;
+    protected ObjectProperty wasEnactedBy;
 
     
     @Override
@@ -29,7 +32,7 @@ public class WfprovModel extends ProvModel {
         if (wfdesc != null) {
             return;
         }
-        OntModel ontModel = loadOntologyFromClasspath(WFPROV_OWL, WFPROV);    
+        OntModel ontModel = loadOntologyFromClasspath(WFDESC_OWL, WFDESC);    
         checkNotNull(ontModel);
 
         wfdesc = ontModel;
@@ -41,13 +44,21 @@ public class WfprovModel extends ProvModel {
         }
         OntModel ontModel = loadOntologyFromClasspath(WFPROV_OWL, WFPROV);    
         
-        WorkflowRun = model.getOntClass(WFPROV + "WorkflowRun");
+        wasEnactedBy = ontModel.getObjectProperty(WFPROV + "wasEnactedBy");
+        WorkflowRun = ontModel.getOntClass(WFPROV + "WorkflowRun");
         
-        checkNotNull(ontModel, WorkflowRun);
+        checkNotNull(ontModel, wasEnactedBy, WorkflowRun);
         wfprov = ontModel;
     }
     
     public Individual createWorkflowRun(URI runURI) {
         return model.createIndividual(runURI.toASCIIString(), WorkflowRun);
     }
+    
+    public void setWasEnactedBy(Individual workflowRun, Individual workflowEngine) {
+        setWasAssociatedWith(workflowRun, workflowEngine, null);
+        workflowRun.addProperty(wasEnactedBy, workflowEngine);
+        
+    }
+
 }
