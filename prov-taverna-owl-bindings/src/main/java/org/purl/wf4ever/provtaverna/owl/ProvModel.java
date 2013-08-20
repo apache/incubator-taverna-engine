@@ -10,6 +10,7 @@ import com.hp.hpl.jena.ontology.ObjectProperty;
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
+import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
@@ -215,15 +216,34 @@ public class ProvModel {
         return model.createIndividual(uri.toASCIIString(), Activity);
     }
 
-    public Individual setStartedAtTime(Individual activity,
+    public Individual setEndedAtTime(Individual endedActivity,
             Calendar time) {
-        activity.addLiteral(startedAtTime, time);
-        Individual start = model.createIndividual(Start);
-        start.addLiteral(atTime, time);
-        return start;
-        
+        return setEndedAtTime(endedActivity, model.createTypedLiteral(time));
     }
 
+    public Individual setEndedAtTime(Individual endedActivity,
+            Literal time) {
+        endedActivity.addLiteral(endedAtTime, time);
+        Individual end = model.createIndividual(End);
+        endedActivity.setPropertyValue(qualifiedEnd, end);        
+        end.addLiteral(atTime, time);
+        return end;
+    }
+    
+    public Individual setStartedAtTime(Individual startedActivity,
+            Calendar time) {
+        return setStartedAtTime(startedActivity, model.createTypedLiteral(time));
+    }
+
+    public Individual setStartedAtTime(Individual startedActivity,
+            Literal time) {
+        startedActivity.addLiteral(startedAtTime, time);
+        Individual start = model.createIndividual(Start);
+        startedActivity.setPropertyValue(qualifiedStart, start);
+        start.addLiteral(atTime, time);
+        return start;
+    }
+    
     public Individual setWasAssociatedWith(Individual activity,
             Individual associatedAgent, Individual plan) {
         activity.setPropertyValue(wasAssociatedWith, associatedAgent);

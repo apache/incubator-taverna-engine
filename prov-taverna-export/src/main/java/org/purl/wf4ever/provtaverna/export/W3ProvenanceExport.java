@@ -38,7 +38,10 @@ import org.apache.log4j.Logger;
 import org.purl.wf4ever.provtaverna.owl.ProvModel;
 import org.purl.wf4ever.provtaverna.owl.TavernaProvModel;
 
+import com.hp.hpl.jena.datatypes.RDFDatatype;
+import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.ontology.Individual;
+import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Resource;
 
 import uk.org.taverna.scufl2.api.common.URITools;
@@ -231,18 +234,14 @@ public class W3ProvenanceExport {
 		provModel.setWasInformedBy(storeProvenance,  wfProcess);
 		String wfUri = uriGenerator.makeWorkflowURI(dataflowInvocation
 		        .getWorkflowId());
-		Individual wfplan = provModel.createWorkflow(URI.create(wfUri));
-		Individual wfAssoc = provModel.setWasEnactedBy(wfProcess, tavernaAgent, wfplan);
+		Individual wfPlan = provModel.createWorkflow(URI.create(wfUri));
+		Individual wfAssoc = provModel.setWasEnactedBy(wfProcess, tavernaAgent, wfPlan);
+		provModel.setDescribedByWorkflow(wfProcess, wfPlan);
 		
-		
-		
-		association.getProvHadPlans().add(wfplan);
-		wfProcess.getWfprovDescribedByWorkflows().add(wfplan);
-
-		wfProcess.getProvStartedAtTime().add(
-				timestampToXmlGreg(dataflowInvocation.getInvocationStarted()));
-		wfProcess.getProvEndedAtTime().add(
-				timestampToXmlGreg(dataflowInvocation.getInvocationEnded()));
+		provModel.setStartedAtTime(wfProcess,
+				timestampToLiteral(dataflowInvocation.getInvocationStarted()));
+		provModel.setStartedAtTime(wfProcess,
+				timestampToLiteral(dataflowInvocation.getInvocationEnded()));
 
 		
 		// Workflow inputs and outputs
@@ -255,55 +254,52 @@ public class W3ProvenanceExport {
 				.getProcessorEnactments(getWorkflowRunId());
 		// This will also include processor enactments in nested workflows
 		for (ProcessorEnactment pe : processorEnactments) {
-			String parentURI = pe.getParentProcessorEnactmentId();
+			String parentId = pe.getParentProcessorEnactmentId();
+			URI parentURI;
 			if (parentURI == null) {
 				// Top-level workflow
 				parentURI = runURI;
 			} else {
 				// inside nested wf - this will be parent processenactment
-				parentURI = uriGenerator.makeProcessExecution(
-						pe.getWorkflowRunId(), pe.getProcessEnactmentId());
+				parentURI = URI.create(uriGenerator.makeProcessExecution(
+						pe.getWorkflowRunId(), pe.getProcessEnactmentId()));
 			}
 
-			String processURI = uriGenerator.makeProcessExecution(
-					pe.getWorkflowRunId(), pe.getProcessEnactmentId());
-			ProcessRun process = objFact.createObject(processURI, ProcessRun.class);
-			WorkflowRun parentProcess = objFact.createObject(parentURI,
-					WorkflowRun.class);
-			process.getWfprovWasPartOfWorkflowRun().add(parentProcess);
-			objCon.addDesignation(parentProcess, Resource.class).getDctermsHasPart().add(process);
+			URI processURI = URI.create(uriGenerator.makeProcessExecution(
+					pe.getWorkflowRunId(), pe.getProcessEnactmentId()));
 			
-			process.getProvStartedAtTime().add(
-					timestampToXmlGreg(pe.getEnactmentStarted()));
-			process.getProvEndedAtTime().add(
-					timestampToXmlGreg(pe.getEnactmentEnded()));
+			Individual process = provModel.createProcessRun(processURI);
+			Individual parentProcess = provModel.createWorkflowRun(parentURI);
+			provModel.setWasPartOfWorkflowRun(process, parentProcess);
+			
+			
+			
+			provModel.setStartedAtTime(process, 
+					timestampToLiteral(pe.getEnactmentStarted()));
+			provModel.setEndedAtTime(process, 
+					timestampToLiteral(pe.getEnactmentEnded()));
 
 			ProvenanceProcessor provenanceProcessor = provenanceAccess
 					.getProvenanceProcessor(pe.getProcessorId());
 			
-			String processorURI = uriGenerator.makeProcessorURI(
+			URI processorURI = URI.create(uriGenerator.makeProcessorURI(
 					provenanceProcessor.getProcessorName(),
-					provenanceProcessor.getWorkflowId());
+					provenanceProcessor.getWorkflowId()));
 			
 			label(process,
 					"Processor execution "
 							+ provenanceProcessor.getProcessorName() + " ("
 							+ pe.getProcessIdentifier() + ")");
-			association = createObject(Association.class);
-			process.getProvQualifiedAssociations().add(association);
-			association.getProvAgents_1().add(tavernaAgent);
-			Processor procPlan = objFact.createObject(processorURI, Processor.class);
-			
+			Individual procPlan = provModel.createProcess(processorURI);
 			label(procPlan, "Processor " + provenanceProcessor.getProcessorName());
-			association.getProvHadPlans().add(procPlan);
-			process.getWfprovDescribedByProcesses_1().add(procPlan);			
-
-			String parentWfUri = uriGenerator.makeWorkflowURI(provenanceProcessor.getWorkflowId());
-			Workflow parentWf = objFact.createObject(parentWfUri, Workflow.class);
-			parentWf.getWfdescHasSubProcesses().add(procPlan);
-			objCon.addDesignation(parentWf, Resource.class).getDctermsHasPart().add(procPlan);
+	        provModel.setWasEnactedBy(process, tavernaAgent, procPlan);
+	        provModel.setDescribedByProcess(process, procPlan);
+	        
+			URI parentWfUri = URI.create(uriGenerator.makeWorkflowURI(provenanceProcessor.getWorkflowId()));
 			
-			
+	        Individual parentWf = provModel.createWorkflow(parentWfUri);
+	        provModel.addSubProcess(parentWf, procPlan);
+	        
 			// TODO: How to link together iterations on a single processor and
 			// the collections
 			// they are iterating over and creating?
@@ -322,37 +318,36 @@ public class W3ProvenanceExport {
 
 		storeFileReferences();
 
-		GregorianCalendar endedProvExportAt = new GregorianCalendar();
-		storeProvenance.getProvEndedAtTime().add(
-				datatypeFactory.newXMLGregorianCalendar(endedProvExportAt));
-
+		provModel.setEndedAtTime(storeProvenance, new GregorianCalendar());
+		
+		provModel.model.write(outStream, "TURTLE", base.toASCIIString());
+		
 		// Save the whole thing
-		ContextAwareConnection connection = objCon;
 		// Taken from @prefix in
 		// prov-taverna-owl-bindings/src/test/storeFileReferencesresources/handmade.ttl
-		connection.setNamespace("owl", "http://www.w3.org/2002/07/owl#");
-		connection.setNamespace("xsd", "http://www.w3.org/2001/XMLSchema#");
-		connection
-				.setNamespace("rdfs", "http://www.w3.org/2000/01/rdf-schema#");
-		connection.setNamespace("prov", "http://www.w3.org/ns/prov#");
-		connection.setNamespace("wfprov", "http://purl.org/wf4ever/wfprov#");
-		connection.setNamespace("wfdesc", "http://purl.org/wf4ever/wfdesc#");
-		connection.setNamespace("tavernaprov",
-				"http://ns.taverna.org.uk/2012/tavernaprov/");
-		connection.setNamespace("doap", "http://usefulinc.com/ns/doap#");
-		connection.setNamespace("cnt", "http://www.w3.org/2011/content#");
-		connection.setNamespace("dcterms", "http://purl.org/dc/terms/");
-		connection.setNamespace("scufl2",
-				"http://ns.taverna.org.uk/2010/scufl2#");
-		//connection.export(new TurtleWriterWithBase(outStream, base));
-		connection.export(new ArrangedWriter(new TurtleWriterWithBase(outStream, base)));
+//		connection.setNamespace("owl", "http://www.w3.org/2002/07/owl#");
+//		connection.setNamespace("xsd", "http://www.w3.org/2001/XMLSchema#");
+//		connection
+//				.setNamespace("rdfs", "http://www.w3.org/2000/01/rdf-schema#");
+//		connection.setNamespace("prov", "http://www.w3.org/ns/prov#");
+//		connection.setNamespace("wfprov", "http://purl.org/wf4ever/wfprov#");
+//		connection.setNamespace("wfdesc", "http://purl.org/wf4ever/wfdesc#");
+//		connection.setNamespace("tavernaprov",
+//				"http://ns.taverna.org.uk/2012/tavernaprov/");
+//		connection.setNamespace("doap", "http://usefulinc.com/ns/doap#");
+//		connection.setNamespace("cnt", "http://www.w3.org/2011/content#");
+//		connection.setNamespace("dcterms", "http://purl.org/dc/terms/");
+//		connection.setNamespace("scufl2",
+//				"http://ns.taverna.org.uk/2010/scufl2#");
+//		//connection.export(new TurtleWriterWithBase(outStream, base));
+//		connection.export(new ArrangedWriter(new TurtleWriterWithBase(outStream, base)));
 	}
 
 	protected void label(Individual obj, String label)  {
 	    obj.setLabel(label, "en");
 	}
 
-	protected XMLGregorianCalendar timestampToXmlGreg(
+	protected Literal timestampToLiteral(
 			Timestamp invocationStarted) {
 		GregorianCalendar cal = new GregorianCalendar();
 		cal.setTime(invocationStarted);
@@ -361,10 +356,11 @@ public class W3ProvenanceExport {
 		// Chop of the trailing 0-s of non-precission
 		xmlCal.setFractionalSecond(BigDecimal.valueOf(
 				invocationStarted.getNanos() / 1000000, NANOSCALE - 6));
-		return xmlCal;
+        return provModel.model.createTypedLiteral(xmlCal.toXMLFormat(),
+                XSDDatatype.XSDdateTime);
 	}
 
-	protected void storeFileReferences() throws RepositoryException {
+	protected void storeFileReferences() {
 
 		for (Entry<File, T2Reference> entry : getFileToT2Reference().entrySet()) {
 			File file = entry.getKey();
@@ -390,9 +386,9 @@ public class W3ProvenanceExport {
 		}
 	}
 
-	protected void storeEntitities(String dataBindingId, ProcessRun activity,
-			Direction direction, File path) throws IOException,
-			RepositoryException {
+	protected void storeEntitities(String dataBindingId, Individual activity,
+			Direction direction, File path) throws IOException
+			 {
 
 		Map<Port, T2Reference> bindings = provenanceAccess
 				.getDataBindings(dataBindingId);
