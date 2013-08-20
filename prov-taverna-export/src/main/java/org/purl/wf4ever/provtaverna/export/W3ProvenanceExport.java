@@ -36,6 +36,7 @@ import net.sf.taverna.t2.reference.T2ReferenceType;
 import org.apache.commons.io.output.FileWriterWithEncoding;
 import org.apache.log4j.Logger;
 import org.purl.wf4ever.provtaverna.owl.ProvModel;
+import org.purl.wf4ever.provtaverna.owl.TavernaProvModel;
 
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.rdf.model.Resource;
@@ -70,7 +71,7 @@ public class W3ProvenanceExport {
 
 	private Map<String, Individual> describedEntities = new HashMap<String, Individual>();
 
-    private ProvModel provModel;
+    private TavernaProvModel provModel = new TavernaProvModel();;
 
 	public File getIntermediatesDirectory() {
 		return intermediatesDirectory;
@@ -119,7 +120,7 @@ public class W3ProvenanceExport {
 		this.setWorkflowRunId(workflowRunId);
 		this.setProvenanceAccess(provenanceAccess);
 
-		this.provModel = new ProvModel();
+
 		try {
 			datatypeFactory = DatatypeFactory.newInstance();
 		} catch (DatatypeConfigurationException e) {
@@ -190,7 +191,7 @@ public class W3ProvenanceExport {
 
 		GregorianCalendar startedProvExportAt = new GregorianCalendar();
 
-		String runURI = uriGenerator.makeWFInstanceURI(getWorkflowRunId());
+		URI runURI = URI.create(uriGenerator.makeWFInstanceURI(getWorkflowRunId()));
 		// FIXME: Should this be "" to indicate the current file?
 		// FIXME: Should this not be an Account instead?
 
@@ -199,28 +200,22 @@ public class W3ProvenanceExport {
 		// Mini-provenance about this provenance trace. Unkown URI for
 		// agent/activity
 
-		Individual tavernaEgent = provModel.createTavernaEngine(base.resolve("#taverna-engine"));
 		
 		Individual storeProvenance = provModel.createActivity(base.resolve("#taverna-prov-export"));
 		storeProvenance.setLabel("taverna-prov export of workflow run provenance", "en");
 
 		provModel.setStartedAtTime(storeProvenance, startedProvExportAt);
 		
-		Individual association = provModel.setWasAssociatedWith(storeProvenance, tavernaAgent);
-		
 		// The agent is an execution of the Taverna software (e.g. also an
 		// Activity)
+		Individual tavernaAgent = provModel.createTavernaEngine(base.resolve("#taverna-engine"));
 		String versionName = ApplicationConfig.getInstance().getName();
+		URI plan = URI.create("http://ns.taverna.org.uk/2011/software/"
+		        + versionName);
+		Individual association = provModel.setWasAssociatedWith(storeProvenance, tavernaAgent, plan);
+		Individual generation = provModel.setWasGeneratedBy(bundle, storeProvenance);
 
-		// Qualify it to add the plan
-		
-		provModel.setPlan(association, "http://ns.taverna.org.uk/2011/software/"
-						+ versionName);
-		
-		provModel.setWasGeneratedBy(bundle, storeProvenance);
-
-		// The store-provenance-process used the workflow run as input
-		WorkflowRun wfProcess = objFact.createObject(runURI, WorkflowRun.class);
+		Individual wfProcess = provModel.createWorkflowRun(runURI);
 		
 		DataflowInvocation dataflowInvocation = provenanceAccess
 				.getDataflowInvocation(getWorkflowRunId());
@@ -228,6 +223,7 @@ public class W3ProvenanceExport {
 				.getWorkflowNameByWorkflowID(dataflowInvocation.getWorkflowId());
 		label(wfProcess, "Workflow run of " + workflowName);
 
+		
 		storeProvenance.getProvWasInformedBy().add(wfProcess);
 		objCon.addDesignation(wfProcess, WorkflowRun.class);
 
@@ -355,16 +351,8 @@ public class W3ProvenanceExport {
 		connection.export(new ArrangedWriter(new TurtleWriterWithBase(outStream, base)));
 	}
 
-	protected void label(Object obj, String label) throws RepositoryException {
-		Resource resource = objCon.addDesignation(obj, Resource.class);
-		resource.getRdfsLabels().add(label);
-	}
-
-	private <T> T createObject(Class<T> type) throws RepositoryException {
-		T obj = objCon.addDesignation(objFact.createObject(), type);
-		// A refresh to force set initialization
-		objCon.getObject(objCon.addObject(obj));
-		return obj;
+	protected void label(Individual obj, String label)  {
+	    obj.setLabel(label, "en");
 	}
 
 	protected XMLGregorianCalendar timestampToXmlGreg(
