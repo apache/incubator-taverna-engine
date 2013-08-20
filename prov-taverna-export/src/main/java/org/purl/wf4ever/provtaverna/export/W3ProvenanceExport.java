@@ -256,7 +256,7 @@ public class W3ProvenanceExport {
 		for (ProcessorEnactment pe : processorEnactments) {
 			String parentId = pe.getParentProcessorEnactmentId();
 			URI parentURI;
-			if (parentURI == null) {
+			if (parentId == null) {
 				// Top-level workflow
 				parentURI = runURI;
 			} else {
