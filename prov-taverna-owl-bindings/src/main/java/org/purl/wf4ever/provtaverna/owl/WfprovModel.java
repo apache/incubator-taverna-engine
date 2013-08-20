@@ -7,7 +7,6 @@ import com.hp.hpl.jena.ontology.ObjectProperty;
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.Resource;
 
 public class WfprovModel extends ProvModel {
 
@@ -33,7 +32,12 @@ public class WfprovModel extends ProvModel {
     protected ObjectProperty hasPart;
     protected OntModel dcterms;
     protected ObjectProperty hasSubProcess;
-    private OntClass Artifact;
+    protected OntClass Artifact;
+    protected ObjectProperty wasOutputFrom;
+    protected ObjectProperty usedInput;
+    protected OntClass Output;
+    protected OntClass Input;
+    protected ObjectProperty describedByParameter;
 
     
     @Override
@@ -81,16 +85,27 @@ public class WfprovModel extends ProvModel {
 //        wasEnactedBy.addSuperProperty(wasAssociatedWith);
         describedByWorkflow = ontModel.getObjectProperty(WFPROV + "describedByWorkflow");
         describedByProcess = ontModel.getObjectProperty(WFPROV + "describedByProcess");
+        describedByParameter = ontModel.getObjectProperty(WFPROV + "describedByParameter");
+        usedInput = ontModel.getObjectProperty(WFPROV + "usedInput");
+        wasOutputFrom = ontModel.getObjectProperty(WFPROV + "wasOutputFrom");
+
         wasPartOfWorkflowRun = ontModel.getObjectProperty(WFPROV + "wasPartOfWorkflowRun");
 //        wasPartOfWorkflowRun.addSuperProperty(hasPart);
 
+        Input = ontModel.getOntClass(WFPROV + "Input");
+//        Input.addSuperClass(Role);
+        Output = ontModel.getOntClass(WFPROV + "Output");
+//      Output.addSuperClass(Role);
         Artifact = ontModel.getOntClass(WFPROV + "Artifact");
 //        Artifact.addSuperClass(Entity);
         ProcessRun = ontModel.getOntClass(WFPROV + "ProcessRun");
 //        ProcessRun.addSuperClass(Activity);
         WorkflowRun = ontModel.getOntClass(WFPROV + "WorkflowRun");
         
-        checkNotNull(ontModel, wasEnactedBy, describedByWorkflow, describedByProcess, wasPartOfWorkflowRun, Artifact, ProcessRun, WorkflowRun);
+        checkNotNull(ontModel, wasEnactedBy, describedByWorkflow, describedByProcess,
+                describedByParameter, 
+                wasPartOfWorkflowRun, usedInput, wasOutputFrom, 
+                Input, Output, Artifact, ProcessRun, WorkflowRun);
         wfprov = ontModel;
     }
     
@@ -151,6 +166,36 @@ public class WfprovModel extends ProvModel {
        entity.addRDFType(Artifact);
        return entity;
     }
+    
 
+    public Individual setUsedInput(Individual activity, Individual entity) {
+        Individual usage = setUsed(activity, entity);
+        activity.addProperty(usedInput, entity);
+        return usage;
+    }
+
+    public Individual setWasOutputFrom(Individual entity, Individual activity) {
+        Individual usage = setWasGeneratedBy(entity, activity);
+        activity.addProperty(wasOutputFrom, entity);
+        return usage;
+    }
+    
+    public Individual createInputParameter(URI portURI) {
+        Individual parameter = createRole(portURI);
+        parameter.addRDFType(Input);
+        return parameter;
+    }
+
+    
+    public Individual createOutputParameter(URI portURI) {
+        Individual parameter = createRole(portURI);
+        parameter.addRDFType(Output);
+        return parameter;
+    }
+
+    public void setDescribedByParameter(Individual entity, Individual portRole, Individual involvement) {
+        setRole(involvement, portRole);        
+        entity.addProperty(describedByParameter, portRole);
+    }
 
 }

@@ -1,11 +1,10 @@
 package org.purl.wf4ever.provtaverna.owl;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.net.URI;
 import java.util.UUID;
 
 import org.junit.Test;
-import org.purl.wf4ever.provtaverna.owl.ProvModel;
 
 import com.hp.hpl.jena.ontology.Individual;
 

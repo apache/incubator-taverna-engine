@@ -114,6 +114,9 @@ public class ProvModel {
     public ObjectProperty hadMember;
 
     public OntClass EmptyCollection;
+    public OntClass Role;
+
+    public ObjectProperty hadRole;
 
     public ProvModel() {
         this(ModelFactory.createOntologyModel(DEFAULT_ONT_MODEL_SPEC));
@@ -182,6 +185,7 @@ public class ProvModel {
         entity = ontModel.getObjectProperty(PROV + "entity");
         activity = ontModel.getObjectProperty(PROV + "activity");
         hadPlan = ontModel.getObjectProperty(PROV + "hadPlan");
+        hadRole = ontModel.getObjectProperty(PROV + "hadRole");
         
         startedAtTime = ontModel.getDatatypeProperty(PROV + "startedAtTime");
         endedAtTime = ontModel.getDatatypeProperty(PROV + "endedAtTime");
@@ -196,6 +200,8 @@ public class ProvModel {
         
         Association = ontModel.getOntClass(PROV + "Association");
         Plan = ontModel.getOntClass(PROV + "Plan");
+        Role = ontModel.getOntClass(PROV + "Role");
+
         Generation = ontModel.getOntClass(PROV + "Generation");
         Usage = ontModel.getOntClass(PROV + "Usage");
         Communication = ontModel.getOntClass(PROV + "Communication");
@@ -209,11 +215,11 @@ public class ProvModel {
                 used, qualifiedUsage,
                 wasInformedBy, qualifiedCommunication,
                 agent, entity, activity, hadPlan,
-                hadMember,
+                hadMember, hadRole,
                 startedAtTime, endedAtTime, atTime,   
                 qualifiedStart, qualifiedEnd,
                 
-                Bundle, Entity, Activity, Association, Plan, 
+                Bundle, Entity, Activity, Association, Plan, Role,
                 Generation, Usage, Communication, Start, End, Collection,
                 EmptyCollection);
         prov = ontModel;            
@@ -355,6 +361,23 @@ public class ProvModel {
        keyPair.addProperty(pairEntity, listItem);
        keyPair.addLiteral(pairKey, position);
        dictionary.addProperty(hadDictionaryMember, keyPair);
+        
+    }
+
+    public Individual setUsed(Individual activity, Individual usedEntity) {
+        activity.addProperty(used, usedEntity);
+        Individual usage = model.createIndividual(Usage);
+        activity.addProperty(qualifiedUsage, usage);
+        usage.addProperty(entity, usedEntity);
+        return usage;
+    }
+
+    public Individual createRole(URI uri) {
+        return model.createIndividual(uri.toASCIIString(), Role);
+    }
+
+    public void setRole(Individual involvement, Individual role) {
+        involvement.addProperty(hadRole, role);
         
     }
     

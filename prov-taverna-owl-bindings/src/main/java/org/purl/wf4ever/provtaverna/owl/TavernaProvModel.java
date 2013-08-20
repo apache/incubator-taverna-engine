@@ -7,8 +7,6 @@ import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.ObjectProperty;
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
-import com.hp.hpl.jena.rdf.model.Literal;
-import com.hp.hpl.jena.rdf.model.Resource;
 
 public class TavernaProvModel extends WfprovModel {
     protected static final String CNT = "http://www.w3.org/2011/content#";
@@ -110,6 +108,11 @@ public class TavernaProvModel extends WfprovModel {
     public Individual createError(URI errorURI) {
         return model.createIndividual(errorURI.toASCIIString(), Error);
     }
+
+
+
+
+
 
 
 

@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.ServiceLoader;
 import java.util.UUID;
 
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -34,21 +33,19 @@ import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.reference.T2ReferenceType;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.FileWriterWithEncoding;
 import org.apache.log4j.Logger;
-import org.purl.wf4ever.provtaverna.owl.ProvModel;
 import org.purl.wf4ever.provtaverna.owl.TavernaProvModel;
-
-import com.hp.hpl.jena.datatypes.RDFDatatype;
-import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
-import com.hp.hpl.jena.ontology.Individual;
-import com.hp.hpl.jena.rdf.model.Literal;
-import com.hp.hpl.jena.rdf.model.Resource;
 
 import uk.org.taverna.scufl2.api.common.URITools;
 
+import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
+import com.hp.hpl.jena.ontology.Individual;
+import com.hp.hpl.jena.rdf.model.Literal;
+
 public class W3ProvenanceExport {
+
+    private static final String EN = "en";
 
     private static final String TXT = ".txt";
 
@@ -215,7 +212,7 @@ public class W3ProvenanceExport {
 
 		
 		Individual storeProvenance = provModel.createActivity(base.resolve("#taverna-prov-export"));
-		storeProvenance.setLabel("taverna-prov export of workflow run provenance", "en");
+		storeProvenance.setLabel("taverna-prov export of workflow run provenance", EN);
 
 		provModel.setStartedAtTime(storeProvenance, startedProvExportAt);
 		
@@ -226,7 +223,7 @@ public class W3ProvenanceExport {
         String versionName = applicationConfig.getName();
 		Individual plan = provModel.createPlan(URI.create("http://ns.taverna.org.uk/2011/software/"
 		        + versionName));
-		plan.setLabel(applicationConfig.getTitle(), "en");
+		plan.setLabel(applicationConfig.getTitle(), EN);
 		
 		Individual association = provModel.setWasAssociatedWith(storeProvenance, tavernaAgent, plan);
 		Individual generation = provModel.setWasGeneratedBy(bundle, storeProvenance);
@@ -352,7 +349,7 @@ public class W3ProvenanceExport {
 	}
 
 	protected void label(Individual obj, String label)  {
-	    obj.setLabel(label, "en");
+	    obj.setLabel(label, EN);
 	}
 
 	protected Literal timestampToLiteral(
@@ -421,26 +418,11 @@ public class W3ProvenanceExport {
 
 			String id = t2Ref.getLocalPart();
 			String prefix = id.substring(0, 2);
-
+			Individual involvement;
 			if (direction == Direction.INPUTS) {
-				activity.getProvUsed().add(entity);
-				activity.getWfprovUsedInputs_1().add(entity);				
+			    involvement = provModel.setUsedInput(activity, entity);
 			} else {
-				entity.getProvWasGeneratedBy().add(activity);
-				entity.getWfprovWasOutputFrom_1().add(activity);
-			}
-
-			AssociationOrEndOrGenerationOrInvalidationOrStartOrUsage involvement;
-			if (direction == Direction.INPUTS) {
-				Usage usage = createObject(Usage.class);
-				involvement = usage;
-				activity.getProvQualifiedUsages().add(usage);
-				usage.getProvEntities_1().add(entity);
-			} else {
-				Generation generation = createObject(Generation.class);
-				involvement = generation;
-				entity.getProvQualifiedGenerations().add(generation);
-				generation.getProvActivities_1().add(activity);
+			    involvement = provModel.setWasOutputFrom(activity, entity);
 			}
 
 			String processorName = null;
@@ -450,24 +432,29 @@ public class W3ProvenanceExport {
 						.getProvenanceProcessor(port.getProcessorId());
 				processorName = p.getProcessorName();
 			}
-			port.getProcessorId();
-			String portURI = uriGenerator.makePortURI(port.getWorkflowId(),
-					processorName, port.getPortName(), port.isInputPort());
-			Parameter portRole = objFact.createObject(portURI, port.isInputPort() ? Input.class : Output.class);
+			URI portURI = URI.create(uriGenerator.makePortURI(port.getWorkflowId(),
+					processorName, port.getPortName(), port.isInputPort()));
+			
+			Individual portRole;
+			if (port.isInputPort()) {
+			    portRole = provModel.createInputParameter(portURI);
+			} else {
+                portRole = provModel.createOutputParameter(portURI);			    
+			}
+			
+			portRole.setLabel(port.getPortName(), "");
 			if (processorName == null) {
-				label(portRole,
+			    portRole.setComment(
 						"Workflow"
 								+ (port.isInputPort() ? " input " : " output ")
-								+ port.getPortName());
+								+ port.getPortName(), EN);
 			} else {
-				label(portRole,
+                portRole.setComment(
 						processorName
 								+ (port.isInputPort() ? " input " : " output ")
-								+ port.getPortName());
+								+ port.getPortName(), EN);
 			}
-			entity.getWfprovDescribedByParameters().add(portRole);
-			
-			involvement.getProvHadRoles().add(portRole);
+			provModel.setDescribedByParameter(entity, portRole, involvement);
 
 		}
 

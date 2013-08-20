@@ -12,7 +12,7 @@ import com.hp.hpl.jena.ontology.Individual;
 public class TestWfprovModel {
     @Test
     public void dummy() throws Exception {
-        WfprovModel provModel = new WfprovModel();
+        ProvModel provModel = new WfprovModel();
         Individual bundle = provModel.createBundle(uuid());
         assertEquals("Bundle", bundle.getOntClass().getLocalName());
         
