@@ -486,7 +486,7 @@ public class W3ProvenanceExport {
 		describedEntities.put(dataURI, artifact);
 
 		if (t2Ref.getReferenceType() == T2ReferenceType.ErrorDocument) {
-		    artifact.addRDFType(provModel.Error);
+		    Individual error = provModel.createError(dataURI);
 			ErrorDocument errorDoc = saver.getReferenceService()
 					.getErrorDocumentService().getError(t2Ref);
 			addMessageIfNonEmpty(error, errorDoc.getMessage());
@@ -495,18 +495,19 @@ public class W3ProvenanceExport {
 		} else if (t2Ref.getReferenceType() == T2ReferenceType.IdentifiedList) {
 			IdentifiedList<T2Reference> list = saver.getReferenceService()
 					.getListService().getList(t2Ref);
-			Collection coll = objCon.addDesignation(artifact, Collection.class);
-
+			Individual dictionary = provModel.createDictionary(dataURI);
+			
+			int pos=0;
 			for (T2Reference ref : list) {
-				String itemURI = uriGenerator.makeT2ReferenceURI(ref.toUri()
-						.toASCIIString());
-				coll.getProvHadMembers().add(
-						objFact.createObject(itemURI, Artifact.class));
+				URI itemURI = URI.create(uriGenerator.makeT2ReferenceURI(ref.toUri()
+						.toASCIIString()));
+				Individual listItem = provModel.createArtifact(itemURI);
+				provModel.addKeyPair(dictionary, pos++, listItem);
 				describeEntity(ref);
-				// TODO: Record list position as well!
 			}
 			if (list.isEmpty()){
-				objCon.addDesignation(coll, EmptyCollection.class);
+			    artifact.addRDFType(provModel.EmptyCollection);
+			    artifact.addRDFType(provModel.EmptyDictionary);
 			}
 		}
 

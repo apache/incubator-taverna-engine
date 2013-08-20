@@ -17,6 +17,8 @@ import com.hp.hpl.jena.rdf.model.Resource;
 
 public class ProvModel {
 
+    protected static final String PROV_DICTIONARY = "http://www.w3.org/ns/prov-dictionary#";
+
     protected static final OntModelSpec DEFAULT_ONT_MODEL_SPEC = OntModelSpec.OWL_MEM_RDFS_INF;
     
     protected static final String PROV = "http://www.w3.org/ns/prov#";
@@ -29,6 +31,8 @@ public class ProvModel {
     protected static final String FOAF_RDF = "foaf.rdf";
     protected static final String PAV_RDF = "pav.rdf";
     protected static final String PROV_O_RDF = "prov-o.rdf";
+    protected static final String PROV_DICTIONARY_TTL = "prov-dictionary.ttl";
+
     protected static final String PROV_AQ_RDF = "prov-aq.rdf";
 
     public Resource Bundle;
@@ -83,13 +87,33 @@ public class ProvModel {
 
     private OntClass Start;
 
-    private OntClass End;
+    public OntClass End;
 
-    private ObjectProperty qualifiedStart;
+    public ObjectProperty qualifiedStart;
 
-    private ObjectProperty qualifiedEnd;
+    public ObjectProperty qualifiedEnd;
 
-    private DatatypeProperty atTime;
+    public DatatypeProperty atTime;
+
+    public OntModel provDict;
+
+    public OntClass Collection;
+
+    public OntClass Dictionary;
+
+    public OntClass EmptyDictionary;
+
+    public ObjectProperty hadDictionaryMember;
+
+    public OntClass KeyEntityPair;
+
+    public ObjectProperty pairEntity;
+
+    public DatatypeProperty pairKey;
+
+    public ObjectProperty hadMember;
+
+    public OntClass EmptyCollection;
 
     public ProvModel() {
         this(ModelFactory.createOntologyModel(DEFAULT_ONT_MODEL_SPEC));
@@ -109,8 +133,29 @@ public class ProvModel {
 
     public void loadOntologies() {
         loadPROVO();
+        loadProvDictionary();
     }
-    
+
+    protected synchronized void loadProvDictionary() {
+        if (provDict != null) {
+            return;
+        }
+        OntModel ontModel = loadOntologyFromClasspath(PROV_DICTIONARY_TTL, PROV_DICTIONARY); 
+        
+        hadDictionaryMember = ontModel.getObjectProperty(PROV + "hadDictionaryMember");
+        pairEntity = ontModel.getObjectProperty(PROV + "pairEntity");
+        pairKey = ontModel.getDatatypeProperty(PROV + "pairKey");
+        
+        Dictionary = ontModel.getOntClass(PROV + "Dictionary");
+        EmptyDictionary = ontModel.getOntClass(PROV + "EmptyDictionary");
+        KeyEntityPair = ontModel.getOntClass(PROV + "KeyEntityPair");
+        
+        checkNotNull(ontModel, 
+                hadDictionaryMember, pairEntity, pairKey,
+                Dictionary, EmptyDictionary, KeyEntityPair);
+        
+        provDict = ontModel;
+    }
 
     protected synchronized void loadPROVO() {
         if (prov != null) {
@@ -129,6 +174,7 @@ public class ProvModel {
         qualifiedCommunication = ontModel.getObjectProperty(PROV + "qualifiedCommunication");
         qualifiedStart = ontModel.getObjectProperty(PROV + "qualifiedStart");
         qualifiedEnd = ontModel.getObjectProperty(PROV + "qualifiedEnd");
+        hadMember = ontModel.getObjectProperty(PROV + "hadMember");
         
         
         
@@ -153,6 +199,8 @@ public class ProvModel {
         Generation = ontModel.getOntClass(PROV + "Generation");
         Usage = ontModel.getOntClass(PROV + "Usage");
         Communication = ontModel.getOntClass(PROV + "Communication");
+        Collection = ontModel.getOntClass(PROV + "Collection");
+        EmptyCollection = ontModel.getOntClass(PROV + "EmptyCollection");
 
         
         checkNotNull(ontModel, 
@@ -161,12 +209,13 @@ public class ProvModel {
                 used, qualifiedUsage,
                 wasInformedBy, qualifiedCommunication,
                 agent, entity, activity, hadPlan,
-                
+                hadMember,
                 startedAtTime, endedAtTime, atTime,   
                 qualifiedStart, qualifiedEnd,
                 
                 Bundle, Entity, Activity, Association, Plan, 
-                Generation, Usage, Communication, Start, End);
+                Generation, Usage, Communication, Start, End, Collection,
+                EmptyCollection);
         prov = ontModel;            
     }
 
@@ -287,5 +336,26 @@ public class ProvModel {
         derived.addProperty(wasDerivedFrom, original);
     }
 
+    public Individual createDictionary(URI uri) {
+        Individual artifact = createEntity(uri);
+        artifact.addRDFType(Collection);
+        artifact.addRDFType(Dictionary);
+        return artifact;
+    }
+    
+    public void setEmptyDictionary(Individual dictionary) {
+        dictionary.addRDFType(EmptyCollection);
+        dictionary.addRDFType(EmptyDictionary);
+    }
+
+
+    public void addKeyPair(Individual dictionary, long position, Individual listItem) {
+       dictionary.addProperty(hadMember, listItem);
+       Individual keyPair = model.createIndividual(KeyEntityPair);
+       keyPair.addProperty(pairEntity, listItem);
+       keyPair.addLiteral(pairKey, position);
+       dictionary.addProperty(hadDictionaryMember, keyPair);
+        
+    }
     
 }
