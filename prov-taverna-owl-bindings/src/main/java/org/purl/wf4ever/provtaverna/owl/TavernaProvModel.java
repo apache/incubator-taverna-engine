@@ -15,40 +15,29 @@ public class TavernaProvModel extends WfprovModel {
 
     protected static final String TAVERNAPROV_TTL = "taverna-prov.ttl";
 
-    public DatatypeProperty byteCount;
-
-    public DatatypeProperty bytes;
-
-    public DatatypeProperty characterEncoding;
-    public DatatypeProperty chars;
-
-    public OntModel cnt;
-
     public ObjectProperty content;
 
     public OntClass Content;
-
     public OntClass ContentAsBase64;
     public OntClass ContentAsText;
-
     public OntClass Error;
-
-    public DatatypeProperty errorMessage;
-
-    public DatatypeProperty sha1;
-
-    public DatatypeProperty sha512;
-
-    public DatatypeProperty stackTrace;
-
     public OntClass TavernaEngine;
-
+    
+    public OntModel cnt;
     public OntModel tavernaProv;
-
+    
+    public DatatypeProperty byteCount;
+    public DatatypeProperty bytes;
+    public DatatypeProperty characterEncoding;
+    public DatatypeProperty chars;
+    public DatatypeProperty errorMessage;
+    public DatatypeProperty sha1;
+    public DatatypeProperty sha512;
+    public DatatypeProperty stackTrace;
+    
     public Individual createTavernaEngine(URI uri) {
         return model.createIndividual(uri.toASCIIString(), TavernaEngine);
     }
-
     
     private void loadCnt() {
         if (cnt != null) {
@@ -72,7 +61,8 @@ public class TavernaProvModel extends WfprovModel {
         super.loadOntologies();
         loadCnt();
         loadTavernaProv();
-
+        model.setNsPrefixes(tavernaProv);
+       
     }
 
     protected synchronized void loadTavernaProv() {

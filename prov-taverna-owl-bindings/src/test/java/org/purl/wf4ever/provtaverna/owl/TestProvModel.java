@@ -1,19 +1,26 @@
 package org.purl.wf4ever.provtaverna.owl;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.net.URI;
 import java.util.UUID;
 
+import org.junit.Before;
 import org.junit.Test;
-import org.purl.wf4ever.provtaverna.owl.ProvModel;
 
 import com.hp.hpl.jena.ontology.Individual;
 
 
 public class TestProvModel {
+
+    private ProvModel provModel;
+
+    @Before
+    public void provModel() {
+        provModel = new ProvModel();
+    }
+    
     @Test
-    public void dummy() throws Exception {
-        ProvModel provModel = new ProvModel();
+    public void createBundle() throws Exception {
         Individual bundle = provModel.createBundle(uuid());
         assertEquals("Bundle", bundle.getOntClass().getLocalName());
         
@@ -21,5 +28,11 @@ public class TestProvModel {
 
     private URI uuid() {
         return URI.create("urn:uuid:" + UUID.randomUUID());
+    }
+    
+    @Test
+    public void createEntity() throws Exception {
+        Individual ent = provModel.createEntity(URI.create("http://example.com/entity"));
+        provModel.model.write(System.out, "TURTLE");
     }
 }

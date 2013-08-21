@@ -46,6 +46,7 @@ public class WfprovModel extends ProvModel {
         loadDcTerms();
         loadWfDesc();
         loadWfprov();
+        model.setNsPrefixes(wfprov);
     }
 
     protected synchronized void loadDcTerms() {
