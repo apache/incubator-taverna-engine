@@ -47,7 +47,7 @@ public class TestProvCommandLineLauncher extends LaunchSafely {
 	@Test
 	public void runWithoutProv() throws Exception {
 		int status = launchSafely("-outputdir", outDir.getPath(),
-				"-inputvalue", "name", "Fred", t2flow.getPath());
+				"-inputvalue", "name", "Fred", t2flow.toURI().getPath());
 //		System.err.println(getErr());
 //		System.out.println(getOut());
 		assertEquals(0, status);
@@ -63,7 +63,7 @@ public class TestProvCommandLineLauncher extends LaunchSafely {
 		int status = launchSafely("-outputdir", outDir.getPath(),
 				"-provenance", "-embedded",
 				"-inputvalue", "name", "Fred", 
-				t2flow.getPath());
+				t2flow.toURI().getPath());
 		System.err.println(getErr());
 		System.out.println(getOut());
 		assertEquals(0, status);

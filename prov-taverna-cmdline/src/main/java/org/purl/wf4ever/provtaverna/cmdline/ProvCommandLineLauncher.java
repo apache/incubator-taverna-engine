@@ -57,7 +57,7 @@ public class ProvCommandLineLauncher extends CommandLineLauncher implements
 			TokenOrderException, ReadInputException, OpenDataflowException,
 			DatabaseConfigurationException, CMException {
 		// Steal the options for later use by executeWorkflow() 
-		this.options = options;		
+		this.options = options;			 
 		return super.setupAndExecute(args, options);
 		
 	}
