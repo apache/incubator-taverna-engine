@@ -34,6 +34,10 @@ import net.sf.taverna.t2.reference.T2ReferenceType;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.output.FileWriterWithEncoding;
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFFormat;
+import org.apache.jena.riot.WriterGraphRIOT;
+import org.apache.jena.riot.system.RiotLib;
 import org.apache.log4j.Logger;
 import org.purl.wf4ever.provtaverna.owl.TavernaProvModel;
 
@@ -41,7 +45,10 @@ import uk.org.taverna.scufl2.api.common.URITools;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.ontology.Individual;
+import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.rdf.model.Literal;
+import com.hp.hpl.jena.sparql.util.Context;
+import com.hp.hpl.jena.sparql.vocabulary.FOAF;
 
 public class W3ProvenanceExport {
 
@@ -78,10 +85,12 @@ public class W3ProvenanceExport {
 	private File intermediatesDirectory;
 
 	private Saver saver;
-
+	
+	private URI baseURI = URI.create("app://" + UUID.randomUUID() + "/");
+	
 	private Map<URI, Individual> describedEntities = new HashMap<URI, Individual>();
 
-    private TavernaProvModel provModel = new TavernaProvModel();;
+    private TavernaProvModel provModel = new TavernaProvModel();
 
 	public File getIntermediatesDirectory() {
 		return intermediatesDirectory;
@@ -194,7 +203,7 @@ public class W3ProvenanceExport {
 		}
 	}
 
-	public void exportAsW3Prov(BufferedOutputStream outStream, URI base)
+	public void exportAsW3Prov(BufferedOutputStream outStream, File provFile)
 			throws IOException {
 
 		// TODO: Make this thread safe using contexts?
@@ -205,20 +214,22 @@ public class W3ProvenanceExport {
 		// FIXME: Should this be "" to indicate the current file?
 		// FIXME: Should this not be an Account instead?
 
-		Individual bundle = provModel.createBundle(base); 
+		URI provFileUri  = toURI(provFile);
+        Individual bundle = provModel.createBundle(provFileUri);
+        
 
 		// Mini-provenance about this provenance trace. Unkown URI for
 		// agent/activity
 
 		
-		Individual storeProvenance = provModel.createActivity(base.resolve("#taverna-prov-export"));
+		Individual storeProvenance = provModel.createActivity(provFileUri.resolve("#taverna-prov-export"));
 		storeProvenance.setLabel("taverna-prov export of workflow run provenance", EN);
 
 		provModel.setStartedAtTime(storeProvenance, startedProvExportAt);
 		
 		// The agent is an execution of the Taverna software (e.g. also an
 		// Activity)
-		Individual tavernaAgent = provModel.createTavernaEngine(base.resolve("#taverna-engine"));
+		Individual tavernaAgent = provModel.createTavernaEngine(provFileUri.resolve("#taverna-engine"));
 		
         String versionName = applicationConfig.getName();
 		Individual plan = provModel.createPlan(URI.create("http://ns.taverna.org.uk/2011/software/"
@@ -229,6 +240,8 @@ public class W3ProvenanceExport {
 		Individual generation = provModel.setWasGeneratedBy(bundle, storeProvenance);
 
 		Individual wfProcess = provModel.createWorkflowRun(runURI);
+		
+		bundle.setPropertyValue(FOAF.primaryTopic, wfProcess);
 		
 		DataflowInvocation dataflowInvocation = provenanceAccess
 				.getDataflowInvocation(getWorkflowRunId());
@@ -325,7 +338,11 @@ public class W3ProvenanceExport {
 
 		provModel.setEndedAtTime(storeProvenance, new GregorianCalendar());
 		
-		provModel.model.write(outStream, "TURTLE", base.toASCIIString());
+//		provModel.model.write(outStream, "TURTLE", provFileUri.toASCIIString());
+		
+		OntModel model = provModel.model;
+		WriterGraphRIOT writer = RDFDataMgr.createGraphWriter(RDFFormat.TURTLE_BLOCKS);
+	    writer.write(outStream, model.getBaseModel().getGraph(), RiotLib.prefixMap(model.getGraph()), provFileUri.toString(), new Context());
 		
 		// Save the whole thing
 		// Taken from @prefix in
@@ -375,7 +392,7 @@ public class W3ProvenanceExport {
 
 			Individual entity = provModel.createArtifact(dataURI);
 			
-            Individual content = provModel.setContent(entity, file.toURI());
+            Individual content = provModel.setContent(entity, toURI(file));
 
             // Add checksums
 			String sha1 = saver.getSha1sums().get(file.getAbsoluteFile());
@@ -386,8 +403,10 @@ public class W3ProvenanceExport {
 			if (sha512 != null) {
                 content.addLiteral(provModel.sha512, sha512);
 			}
+			long byteCount = file.length();
+            content.addLiteral(provModel.byteCount, byteCount);
 			// Add text content if it's "tiny"
-			if (file.getName().endsWith(TXT) && file.length() < EMBEDDED_STRING_MAX_FILESIZE) {
+			if (file.getName().endsWith(TXT) && byteCount < EMBEDDED_STRING_MAX_FILESIZE) {
 			    String str;
                 try {
                     str = FileUtils.readFileToString(file, UTF_8);
@@ -400,7 +419,11 @@ public class W3ProvenanceExport {
 		}
 	}
 
-	protected void storeEntitities(String dataBindingId, Individual activity,
+	protected URI toURI(File file) {
+	    return baseURI.resolve(baseFolder.toURI().relativize(file.toURI()));
+    }
+
+    protected void storeEntitities(String dataBindingId, Individual activity,
 			Direction direction, File path) throws IOException
 			 {
 
@@ -524,8 +547,8 @@ public class W3ProvenanceExport {
 					"utf-8");
 			for (T2Reference ref : list) {
 				File refFile = saveReference(ref).getAbsoluteFile();
-				URI relRef = uriTools.relativePath(parent.getAbsoluteFile()
-						.toURI(), refFile.getAbsoluteFile().toURI());
+				URI relRef = uriTools.relativePath(toURI(parent.getAbsoluteFile()),
+						toURI(refFile.getAbsoluteFile()));
 				writer.append(relRef.toASCIIString() + "\n");
 			}
 

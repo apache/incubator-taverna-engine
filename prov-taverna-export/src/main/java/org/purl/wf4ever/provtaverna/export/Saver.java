@@ -120,7 +120,7 @@ public class Saver {
 				new SafeFileOutputStream(provFile));
 		try {
 			logger.debug("Saving provenance to " + provFile.getAbsolutePath());
-			export.exportAsW3Prov(outStream, provFile.toURI());
+			export.exportAsW3Prov(outStream, provFile);
 			logger.info("Saved provenance to " + provFile.getAbsolutePath());
 		} catch (Exception e) {
 			logger.error("Failed to save the provenance graph to "
