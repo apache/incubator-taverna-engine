@@ -23,6 +23,8 @@
 		<t2.workbench.version>2.4.0</t2.workbench.version>
 		<t2.results.version>1.4</t2.results.version>
 		<t2.taverna-commandline.version>1.4</t2.taverna-commandline.version>
+        <scufl2.version>1.0.0-SNAPSHOT</scufl2.version>
+        <databundle.version>0.1.0-SNAPSHOT</databundle.version>
 	</properties>
 
 	<build>
@@ -98,6 +100,16 @@
 			<name>myGrid Repository</name>
 			<url>http://www.mygrid.org.uk/maven/repository</url>
 		</repository>
+                <repository>
+            <!-- The myGrid repository for Taverna dependencies -->
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots />
+            <id>mygrid-snapshot-repository</id>
+            <name>myGrid Snapshot Repository</name>
+            <url>http://www.mygrid.org.uk/maven/snapshot-repository</url>
+        </repository>
 		<repository>
 			<releases />
 			<snapshots />
@@ -106,41 +118,8 @@
 			<name>Taverna Prov Repository</name>
 			<url>http://wf4ever.github.com/taverna-prov/</url>
 		</repository>
-		<repository>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<id>aduna-opensource.releases</id>
-			<name>Aduna Open Source - Maven releases</name>
-			<url>http://repo.aduna-software.org/maven2/releases</url>
-		</repository>
-		<repository>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<id>aduna-opensource.snapshots</id>
-			<name>Aduna Open Source - Maven snapshots</name>
-			<url>http://repo.aduna-software.org/maven2/snapshots</url>
-		</repository>
 	</repositories>
 	<pluginRepositories>
-		<pluginRepository>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<id>aduna-opensource.releases</id>
-			<name>Aduna Open Source - Maven releases</name>
-			<url>http://repo.aduna-software.org/maven2/releases</url>
-		</pluginRepository>
 		<pluginRepository>
 			<releases>
 				<enabled>true</enabled>
