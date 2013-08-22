@@ -4,15 +4,23 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.Calendar;
 
+import org.apache.jena.riot.IO_Jena;
+import org.apache.jena.riot.system.IO_JenaWriters;
+
+import com.hp.hpl.jena.n3.turtle.TurtleReader;
 import com.hp.hpl.jena.ontology.DatatypeProperty;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.ObjectProperty;
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
+import com.hp.hpl.jena.rdf.arp.JenaReader;
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.impl.NTripleReader;
+import com.hp.hpl.jena.xmloutput.impl.Abbreviated;
+import com.hp.hpl.jena.xmloutput.impl.Basic;
 
 public class ProvModel {
 
@@ -97,6 +105,7 @@ public class ProvModel {
             ontModel = ModelFactory.createOntologyModel(spec, model);
         }
         setModel(ontModel);
+        resetJena();
         loadOntologies();
         
         if (defaultPrefix != null) {
@@ -105,6 +114,26 @@ public class ProvModel {
         } else {
             model.removeNsPrefix(EMPTY_PREFIX);
         }
+    }
+
+    public void resetJena() {
+        // Disabled due to JENA-520 NullPointerException
+//      IO_Jena.resetJena();
+         
+        IO_Jena.registerForModelRead("N-TRIPLES", NTripleReader.class) ;
+        IO_Jena.registerForModelRead("N-Triples",  NTripleReader.class) ;
+        IO_Jena.registerForModelRead("N-TRIPLE",  NTripleReader.class) ;
+        
+        IO_Jena.registerForModelRead("N3",     TurtleReader.class) ;
+        IO_Jena.registerForModelRead("TURTLE", TurtleReader.class) ;
+        IO_Jena.registerForModelRead("Turtle", TurtleReader.class) ;
+        IO_Jena.registerForModelRead("TTL",    TurtleReader.class) ;
+
+        // which somehow does not reset the most important ones:
+        IO_Jena.registerForModelRead( "RDF/XML", JenaReader.class);
+        IO_Jena.registerForModelRead( "RDF/XML-ABBREV", JenaReader.class);
+
+        IO_JenaWriters.resetJena();
     }
 
     public void addKeyPair(Individual dictionary, long position,
@@ -167,6 +196,7 @@ public class ProvModel {
     }
 
     protected OntModel loadOntologyFromClasspath(String classPathUri, String uri) {
+        
         OntModel ontModel = ModelFactory.createOntologyModel();
 
         // Load from classpath
