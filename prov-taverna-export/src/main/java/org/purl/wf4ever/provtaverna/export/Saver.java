@@ -30,7 +30,6 @@ import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.workbench.reference.config.DataManagementConfiguration;
 
 import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;

@@ -34,11 +34,9 @@ import net.sf.taverna.t2.reference.T2ReferenceType;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.output.FileWriterWithEncoding;
-import org.apache.jena.riot.IO_Jena;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.WriterGraphRIOT;
-import org.apache.jena.riot.system.IO_JenaWriters;
 import org.apache.jena.riot.system.RiotLib;
 import org.apache.log4j.Logger;
 import org.purl.wf4ever.provtaverna.owl.TavernaProvModel;
@@ -46,17 +44,11 @@ import org.purl.wf4ever.provtaverna.owl.TavernaProvModel;
 import uk.org.taverna.scufl2.api.common.URITools;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
-import com.hp.hpl.jena.n3.turtle.TurtleReader;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntModel;
-import com.hp.hpl.jena.rdf.arp.JenaReader;
 import com.hp.hpl.jena.rdf.model.Literal;
-import com.hp.hpl.jena.rdf.model.impl.NTripleReader;
-import com.hp.hpl.jena.rdf.model.impl.RDFReaderFImpl;
 import com.hp.hpl.jena.sparql.util.Context;
 import com.hp.hpl.jena.sparql.vocabulary.FOAF;
-import com.hp.hpl.jena.xmloutput.impl.Abbreviated;
-import com.hp.hpl.jena.xmloutput.impl.Basic;
 
 public class W3ProvenanceExport {
 
@@ -244,8 +236,8 @@ public class W3ProvenanceExport {
 		        + versionName));
 		plan.setLabel(applicationConfig.getTitle(), EN);
 		
-		Individual association = provModel.setWasAssociatedWith(storeProvenance, tavernaAgent, plan);
-		Individual generation = provModel.setWasGeneratedBy(bundle, storeProvenance);
+		provModel.setWasAssociatedWith(storeProvenance, tavernaAgent, plan);
+		provModel.setWasGeneratedBy(bundle, storeProvenance);
 
 		Individual wfProcess = provModel.createWorkflowRun(runURI);
 		
@@ -261,7 +253,7 @@ public class W3ProvenanceExport {
 		String wfUri = uriGenerator.makeWorkflowURI(dataflowInvocation
 		        .getWorkflowId());
 		Individual wfPlan = provModel.createWorkflow(URI.create(wfUri));
-		Individual wfAssoc = provModel.setWasEnactedBy(wfProcess, tavernaAgent, wfPlan);
+		provModel.setWasEnactedBy(wfProcess, tavernaAgent, wfPlan);
 		provModel.setDescribedByWorkflow(wfProcess, wfPlan);
 		
 		provModel.setStartedAtTime(wfProcess,
@@ -349,7 +341,7 @@ public class W3ProvenanceExport {
 //		provModel.model.write(outStream, "TURTLE", provFileUri.toASCIIString());
 		
 		OntModel model = provModel.model;
-		try {
+		try {		    
     		WriterGraphRIOT writer = RDFDataMgr.createGraphWriter(RDFFormat.TURTLE_BLOCKS);
     	    writer.write(outStream, model.getBaseModel().getGraph(), RiotLib.prefixMap(model.getGraph()), provFileUri.toString(), new Context());
 		} finally {
@@ -455,7 +447,7 @@ public class W3ProvenanceExport {
 			}
 
 			String id = t2Ref.getLocalPart();
-			String prefix = id.substring(0, 2);
+			//String prefix = id.substring(0, 2);
 			Individual involvement;
 			if (direction == Direction.INPUTS) {
 			    involvement = provModel.setUsedInput(activity, entity);
