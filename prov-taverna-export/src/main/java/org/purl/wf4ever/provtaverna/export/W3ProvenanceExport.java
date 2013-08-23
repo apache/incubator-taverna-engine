@@ -1,10 +1,15 @@
 package org.purl.wf4ever.provtaverna.export;
 
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,6 +31,7 @@ import net.sf.taverna.t2.provenance.lineageservice.utils.DataflowInvocation;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Port;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProcessorEnactment;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
+import net.sf.taverna.t2.provenance.lineageservice.utils.WorkflowRun;
 import net.sf.taverna.t2.reference.ErrorDocument;
 import net.sf.taverna.t2.reference.IdentifiedList;
 import net.sf.taverna.t2.reference.StackTraceElementBean;
@@ -40,13 +46,24 @@ import org.apache.jena.riot.WriterGraphRIOT;
 import org.apache.jena.riot.system.RiotLib;
 import org.apache.log4j.Logger;
 import org.purl.wf4ever.provtaverna.owl.TavernaProvModel;
+import org.purl.wf4ever.robundle.Bundle;
+import org.purl.wf4ever.robundle.manifest.Agent;
+import org.purl.wf4ever.robundle.manifest.Manifest;
+import org.purl.wf4ever.robundle.manifest.PathAnnotation;
 
+import uk.org.taverna.databundle.DataBundles;
 import uk.org.taverna.scufl2.api.common.URITools;
+import uk.org.taverna.scufl2.api.container.WorkflowBundle;
+import uk.org.taverna.scufl2.api.io.ReaderException;
+import uk.org.taverna.scufl2.api.io.WorkflowBundleIO;
+import uk.org.taverna.scufl2.translator.t2flow.T2FlowReader;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.rdf.model.Literal;
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.sparql.util.Context;
 import com.hp.hpl.jena.sparql.vocabulary.FOAF;
 
@@ -245,6 +262,8 @@ public class W3ProvenanceExport {
 		
 		DataflowInvocation dataflowInvocation = provenanceAccess
 				.getDataflowInvocation(getWorkflowRunId());
+		
+		
 		String workflowName = provenanceAccess
 				.getWorkflowNameByWorkflowID(dataflowInvocation.getWorkflowId());
 		label(wfProcess, "Workflow run of " + workflowName);
@@ -351,26 +370,29 @@ public class W3ProvenanceExport {
 	        logger.warn("Reset Jena readers and writers");
 		}
 	    
-		// Save the whole thing
-		// Taken from @prefix in
-		// prov-taverna-owl-bindings/src/test/storeFileReferencesresources/handmade.ttl
-//		connection.setNamespace("owl", "http://www.w3.org/2002/07/owl#");
-//		connection.setNamespace("xsd", "http://www.w3.org/2001/XMLSchema#");
-//		connection
-//				.setNamespace("rdfs", "http://www.w3.org/2000/01/rdf-schema#");
-//		connection.setNamespace("prov", "http://www.w3.org/ns/prov#");
-//		connection.setNamespace("wfprov", "http://purl.org/wf4ever/wfprov#");
-//		connection.setNamespace("wfdesc", "http://purl.org/wf4ever/wfdesc#");
-//		connection.setNamespace("tavernaprov",
-//				"http://ns.taverna.org.uk/2012/tavernaprov/");
-//		connection.setNamespace("doap", "http://usefulinc.com/ns/doap#");
-//		connection.setNamespace("cnt", "http://www.w3.org/2011/content#");
-//		connection.setNamespace("dcterms", "http://purl.org/dc/terms/");
-//		connection.setNamespace("scufl2",
-//				"http://ns.taverna.org.uk/2010/scufl2#");
-//		//connection.export(new TurtleWriterWithBase(outStream, base));
-//		connection.export(new ArrangedWriter(new TurtleWriterWithBase(outStream, base)));
+		// Evil hack - convert folder to DataBundle
+		
+		byte[] dataflow = getDataflow(dataflowInvocation);
+        try {
+            WorkflowBundle wfBundle = wfBundleIO.readBundle(new ByteArrayInputStream(dataflow), 
+                    T2FlowReader.APPLICATION_VND_TAVERNA_T2FLOW_XML);
+            writeBundle(getBaseFolder().toPath(), wfBundle);
+        } catch (ReaderException e) {
+            logger.warn("Could not write bundle", e);
+        }
+		
 	}
+
+    private byte[] getDataflow(DataflowInvocation dataflowInvocation) {
+        // you are not going to believe this...!
+		for (final WorkflowRun run : 
+		        provenanceAccess.listRuns(dataflowInvocation.getWorkflowId(), null)) {
+		    if (getWorkflowRunId().equals(run.getWorkflowRunId())) {
+                return  run.getDataflowBlob();
+		    }
+		}
+		throw new IllegalStateException("Can't find dataflow blob for run " + getWorkflowRunId());
+    }
 
 	protected void label(Individual obj, String label)  {
 	    obj.setLabel(label, EN);
@@ -680,5 +702,128 @@ public class W3ProvenanceExport {
 	public void setIntermediatesDirectory(File intermediatesDirectory) {
 		this.intermediatesDirectory = intermediatesDirectory;
 	}
+	
+	private static final String WFDESC = "http://purl.org/wf4ever/wfdesc#";
+	private static WorkflowBundleIO wfBundleIO = new WorkflowBundleIO();
+
+    public void writeBundle(Path runPath, WorkflowBundle wfBundle) throws IOException  {
+        Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+        // Create a new (temporary) data bundle
+        Bundle dataBundle = DataBundles.createBundle();
+        // In order to preserve existing file extensions we copy as files
+        // rather than using the higher-level methods like
+        // DataBundles.setStringValue()
+
+        // Inputs
+        Path inputs = DataBundles.getInputs(dataBundle);
+        for (String filename : Arrays.asList("MP3URL.txt", "WebServiceAuthenticationVoucher.txt", "GroundTruthURL.txt")) {
+            Files.copy(runPath.resolve(filename), inputs.resolve(filename));
+        }
+
+        // Outputs
+        Path outputs = DataBundles.getOutputs(dataBundle);
+        for (String filename : Arrays.asList("ClassificationAccuracy.txt",
+                "DetailedClassificationResults.txt")) {
+            Files.copy(runPath.resolve(filename), outputs.resolve(filename));
+        }
+
+        // Provenance
+        Path workflowRunProvenance = DataBundles.getWorkflowRunProvenance(dataBundle);
+        Files.copy(runPath.resolve("workflowrun.prov.ttl"),
+                workflowRunProvenance);
+
+        // Workflow
+        DataBundles.setWorkflowBundle(dataBundle, wfBundle);
+
+        
+        
+        // Intermediate values
+        DataBundles.copyRecursively(runPath.resolve("intermediates"),
+                DataBundles.getIntermediates(dataBundle),
+                StandardCopyOption.REPLACE_EXISTING);
+
+        // Generate Manifest
+        // TODO: This should be done automatically on close/save
+        Manifest manifest = new Manifest(dataBundle);
+        manifest.populateFromBundle();
+        
+        // Additional metadata
+        manifest.getAggregation(workflowRunProvenance).setMediatype("text/turtle");
+     
+        
+        Agent taverna = new Agent();
+        taverna.setName("Taverna Workbench 2.4.0");
+        manifest.getAggregation(workflowRunProvenance).setCreatedBy(Arrays.asList(taverna));
+        
+        // Add annotations
+        
+
+        // This RO Bundle is about a run
+        PathAnnotation bundleAboutRun = new PathAnnotation();
+        bundleAboutRun.setAbout(URI.create("http://ns.taverna.org.uk/2011/run/445a1790-4b67-4e44-8287-f8a5838890e2/"));
+        bundleAboutRun.setContent(URI.create("/"));
+        manifest.getAnnotations().add(bundleAboutRun);
+
+        // TODO: Do we need both the "history" link and the annotation below?
+        manifest.setHistory(Arrays.asList(workflowRunProvenance));
+        
+        // This RO Bundle is described in the provenance file
+        PathAnnotation provenanceAboutBundle = new PathAnnotation();
+        provenanceAboutBundle.setAbout(URI.create("/"));
+        provenanceAboutBundle.setContent(URI.create(workflowRunProvenance.toUri().getPath()));
+        manifest.getAnnotations().add(provenanceAboutBundle);
+        
+        // The wfdesc is about the workflow definition 
+        PathAnnotation wfdescAboutWfBundle = new PathAnnotation();
+        Path workflow = DataBundles.getWorkflow(dataBundle);
+        manifest.getAggregation(workflow).setMediatype("application/vnd.taverna.scufl2.workflow-bundle");
+        Path wfdesc = DataBundles.getWorkflowDescription(dataBundle);
+        wfdescAboutWfBundle.setAbout(URI.create(workflow.toUri().getPath()));
+        wfdescAboutWfBundle.setContent(URI.create(wfdesc.toUri().getPath()));
+        manifest.getAnnotations().add(wfdescAboutWfBundle);
+
+        // And the workflow definition is about the workflow
+        PathAnnotation wfBundleAboutWf = new PathAnnotation();
+        URITools uriTools = new URITools();
+        URI mainWorkflow = uriTools.uriForBean(wfBundle.getMainWorkflow());
+        wfBundleAboutWf.setAbout(mainWorkflow);
+        URI wfBundlePath = URI.create(workflow.toUri().getPath());
+        wfBundleAboutWf.setContent(wfBundlePath);
+        manifest.getAnnotations().add(wfBundleAboutWf);
+
+        // hasWorkflowDefinition
+        PathAnnotation hasWorkflowDefinition = new PathAnnotation();
+        hasWorkflowDefinition.setAbout(wfBundlePath);        
+        UUID uuid = UUID.randomUUID();
+        hasWorkflowDefinition.setAnnotation(URI.create("urn:uuid:" + uuid));
+        Path annotationBody = DataBundles.getAnnotations(dataBundle).resolve(uuid + ".ttl");
+        hasWorkflowDefinition.setContent(URI.create(annotationBody.toUri().getPath()));
+        Model model = ModelFactory.createDefaultModel();
+        URI relPathToWfBundle = uriTools.relativePath(annotationBody.toUri(), workflow.toUri());
+        System.out.println(relPathToWfBundle);
+        model.setNsPrefix("wfdesc", WFDESC);
+        model.add(model.createResource(mainWorkflow.toASCIIString()), 
+                model.createProperty(WFDESC + "hasWorkflowDefinition"), 
+                model.createResource(relPathToWfBundle.toASCIIString()));
+        try (OutputStream out = Files.newOutputStream(annotationBody)) {
+            model.write(out, "TURTLE", annotationBody.toUri().toASCIIString());
+        }
+        manifest.getAnnotations().add(hasWorkflowDefinition);
+        
+        
+        PathAnnotation wfBundleAboutWfB = new PathAnnotation();
+        wfBundleAboutWfB.setAbout(wfBundle.getGlobalBaseURI());
+        wfBundleAboutWfB.setContent(URI.create(workflow.toUri().getPath()));
+        manifest.getAnnotations().add(wfBundleAboutWfB);
+        
+        manifest.writeAsJsonLD();
+
+        // Saving a data bundle:
+        Path bundleFile = runPath.getParent().resolve(runPath.getFileName() + ".robundle.zip");
+        DataBundles.closeAndSaveBundle(dataBundle, bundleFile);
+        // NOTE: From now dataBundle and its Path's are CLOSED
+        // and can no longer be accessed
+
+    }
 
 }
