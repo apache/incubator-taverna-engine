@@ -15,9 +15,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NavigableMap;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -714,17 +717,24 @@ public class W3ProvenanceExport {
         // rather than using the higher-level methods like
         // DataBundles.setStringValue()
 
+        NavigableMap<String, Path> portPaths = DataBundles.getPorts(runPath);
+        
         // Inputs
         Path inputs = DataBundles.getInputs(dataBundle);
-        for (String filename : Arrays.asList("MP3URL.txt", "WebServiceAuthenticationVoucher.txt", "GroundTruthURL.txt")) {
-            Files.copy(runPath.resolve(filename), inputs.resolve(filename));
+        Set<String> portsToCopy = new HashSet<>(wfBundle.getMainWorkflow().getInputPorts().getNames());
+        for (String portName : portsToCopy) {
+            Path source = portPaths.get(portName);
+            if (source != null) {
+                Files.copy(source, inputs.resolve(source.getFileName()));
+            }
         }
 
-        // Outputs
         Path outputs = DataBundles.getOutputs(dataBundle);
-        for (String filename : Arrays.asList("ClassificationAccuracy.txt",
-                "DetailedClassificationResults.txt")) {
-            Files.copy(runPath.resolve(filename), outputs.resolve(filename));
+        for (String outputNAme : wfBundle.getMainWorkflow().getOutputPorts().getNames()) {
+            Path source = portPaths.get(outputNAme);
+            if (source != null) {
+                Files.copy(source, outputs.resolve(source.getFileName()));
+            }
         }
 
         // Provenance
