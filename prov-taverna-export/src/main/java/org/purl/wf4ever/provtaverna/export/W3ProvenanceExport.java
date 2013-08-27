@@ -40,6 +40,7 @@ import net.sf.taverna.t2.reference.IdentifiedList;
 import net.sf.taverna.t2.reference.StackTraceElementBean;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.reference.T2ReferenceType;
+import net.sf.taverna.t2.spi.SPIRegistry;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.output.FileWriterWithEncoding;
@@ -59,6 +60,8 @@ import uk.org.taverna.scufl2.api.common.URITools;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.io.ReaderException;
 import uk.org.taverna.scufl2.api.io.WorkflowBundleIO;
+import uk.org.taverna.scufl2.api.io.WorkflowBundleReader;
+import uk.org.taverna.scufl2.api.io.WorkflowBundleWriter;
 import uk.org.taverna.scufl2.translator.t2flow.T2FlowReader;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
@@ -72,8 +75,14 @@ import com.hp.hpl.jena.sparql.vocabulary.FOAF;
 
 public class W3ProvenanceExport {
 
+    // TODO: Avoid this Taverna 2 dependency
+    private static SPIRegistry<WorkflowBundleReader> readerSpi = new SPIRegistry(WorkflowBundleReader.class);
+    private static SPIRegistry<WorkflowBundleWriter> writerSpi = new SPIRegistry(WorkflowBundleWriter.class);
+
+    
     private static final String EN = "en";
 
+    
     private static final String TXT = ".txt";
 
     private static final int EMBEDDED_STRING_MAX_FILESIZE = 1024;
@@ -166,9 +175,19 @@ public class W3ProvenanceExport {
 			throw new IllegalStateException(
 					"Can't find a DatatypeFactory implementation", e);
 		}
+		prepareScufl2();
+		
 	}
 
-	private final class ProvenanceURIGenerator extends URIGenerator {
+	protected void prepareScufl2() {
+	    Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+	    wfBundleIO = new WorkflowBundleIO();
+	    DataBundles.setWfBundleIO(wfBundleIO);
+	    wfBundleIO.setReaders(readerSpi.getInstances());
+	    wfBundleIO.setWriters(writerSpi.getInstances());
+    }
+
+    private final class ProvenanceURIGenerator extends URIGenerator {
 
 		// Make URIs match with Scufl2
 		@Override
@@ -373,6 +392,8 @@ public class W3ProvenanceExport {
 	        logger.warn("Reset Jena readers and writers");
 		}
 	    
+		outStream.close();
+		
 		// Evil hack - convert folder to DataBundle
 		
 		byte[] dataflow = getDataflow(dataflowInvocation);
@@ -707,10 +728,9 @@ public class W3ProvenanceExport {
 	}
 	
 	private static final String WFDESC = "http://purl.org/wf4ever/wfdesc#";
-	private static WorkflowBundleIO wfBundleIO = new WorkflowBundleIO();
+	private static WorkflowBundleIO wfBundleIO;
 
     public void writeBundle(Path runPath, WorkflowBundle wfBundle) throws IOException  {
-        Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
         // Create a new (temporary) data bundle
         Bundle dataBundle = DataBundles.createBundle();
         // In order to preserve existing file extensions we copy as files
@@ -725,7 +745,7 @@ public class W3ProvenanceExport {
         for (String portName : portsToCopy) {
             Path source = portPaths.get(portName);
             if (source != null) {
-                Files.copy(source, inputs.resolve(source.getFileName()));
+                Files.copy(source, inputs.resolve(source.getFileName().toString()));
             }
         }
 
@@ -733,7 +753,7 @@ public class W3ProvenanceExport {
         for (String outputNAme : wfBundle.getMainWorkflow().getOutputPorts().getNames()) {
             Path source = portPaths.get(outputNAme);
             if (source != null) {
-                Files.copy(source, outputs.resolve(source.getFileName()));
+                Files.copy(source, outputs.resolve(source.getFileName().toString()));
             }
         }
 
@@ -837,3 +857,5 @@ public class W3ProvenanceExport {
     }
 
 }
+
+
