@@ -825,7 +825,6 @@ public class W3ProvenanceExport {
         hasWorkflowDefinition.setContent(URI.create(annotationBody.toUri().getPath()));
         Model model = ModelFactory.createDefaultModel();
         URI relPathToWfBundle = uriTools.relativePath(annotationBody.toUri(), workflow.toUri());
-        System.out.println(relPathToWfBundle);
         model.setNsPrefix("wfdesc", WFDESC);
         model.add(model.createResource(mainWorkflow.toASCIIString()), 
                 model.createProperty(WFDESC + "hasWorkflowDefinition"), 
