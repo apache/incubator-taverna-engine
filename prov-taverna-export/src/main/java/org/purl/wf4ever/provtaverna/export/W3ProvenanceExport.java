@@ -10,10 +10,14 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.security.DigestOutputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,6 +33,7 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import net.sf.taverna.raven.appconfig.ApplicationConfig;
+import net.sf.taverna.t2.lang.results.ResultsUtils;
 import net.sf.taverna.t2.provenance.api.ProvenanceAccess;
 import net.sf.taverna.t2.provenance.lineageservice.URIGenerator;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DataflowInvocation;
@@ -37,12 +42,17 @@ import net.sf.taverna.t2.provenance.lineageservice.utils.ProcessorEnactment;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 import net.sf.taverna.t2.provenance.lineageservice.utils.WorkflowRun;
 import net.sf.taverna.t2.reference.ErrorDocument;
+import net.sf.taverna.t2.reference.ExternalReferenceSPI;
 import net.sf.taverna.t2.reference.IdentifiedList;
+import net.sf.taverna.t2.reference.ReferenceSet;
+import net.sf.taverna.t2.reference.ReferenceSetService;
+import net.sf.taverna.t2.reference.ReferencedDataNature;
 import net.sf.taverna.t2.reference.StackTraceElementBean;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.reference.T2ReferenceType;
 import net.sf.taverna.t2.spi.SPIRegistry;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.WriterGraphRIOT;
@@ -71,6 +81,8 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.sparql.util.Context;
 import com.hp.hpl.jena.sparql.vocabulary.FOAF;
+
+import eu.medsea.mimeutil.MimeType;
 
 public class W3ProvenanceExport {
 
@@ -231,9 +243,11 @@ public class W3ProvenanceExport {
 		}
 	}
 
-	public void exportAsW3Prov(BufferedOutputStream outStream, Path provFile)
+	public void exportAsW3Prov()
 			throws IOException {
 
+	    Path provFile = DataBundles.getWorkflowRunProvenance(bundle);
+	    
 		// TODO: Make this thread safe using contexts?
 
 		GregorianCalendar startedProvExportAt = new GregorianCalendar();
@@ -292,12 +306,15 @@ public class W3ProvenanceExport {
 				timestampToLiteral(dataflowInvocation.getInvocationEnded()));
 
 		
+		
+		
+		
 		// Workflow inputs and outputs
 		storeEntitities(dataflowInvocation.getInputsDataBindingId(), wfProcess,
-				Direction.INPUTS);
+				Direction.INPUTS, true);
 		// FIXME: These entities come out as "generated" by multiple processes
 		storeEntitities(dataflowInvocation.getOutputsDataBindingId(),
-				wfProcess, Direction.OUTPUTS);
+				wfProcess, Direction.OUTPUTS, true);
 		List<ProcessorEnactment> processorEnactments = provenanceAccess
 				.getProcessorEnactments(getWorkflowRunId());
 		// This will also include processor enactments in nested workflows
@@ -357,9 +374,9 @@ public class W3ProvenanceExport {
 
 			// Inputs and outputs
 			storeEntitities(pe.getInitialInputsDataBindingId(), process,
-					Direction.INPUTS);
+					Direction.INPUTS, false);
 			storeEntitities(pe.getFinalOutputsDataBindingId(), process,
-					Direction.OUTPUTS);
+					Direction.OUTPUTS, false);
 		}
 
 		storeFileReferences();
@@ -369,7 +386,7 @@ public class W3ProvenanceExport {
 //		provModel.model.write(outStream, "TURTLE", provFileUri.toASCIIString());
 		
 		OntModel model = provModel.model;
-		try {		    
+		try (OutputStream outStream = Files.newOutputStream(provFile)) {		    
     		WriterGraphRIOT writer = RDFDataMgr.createGraphWriter(RDFFormat.TURTLE_BLOCKS);
     	    writer.write(outStream, model.getBaseModel().getGraph(), RiotLib.prefixMap(model.getGraph()), provFileUri.toString(), new Context());
 		} finally {
@@ -379,8 +396,6 @@ public class W3ProvenanceExport {
 	        logger.warn("Reset Jena readers and writers");
 		}
 	    
-		outStream.close();
-		
 		// Evil hack - convert folder to DataBundle
 		
 		byte[] dataflow = getDataflow(dataflowInvocation);
@@ -464,7 +479,7 @@ public class W3ProvenanceExport {
     }
 
     protected void storeEntitities(String dataBindingId, Individual activity,
-			Direction direction) throws IOException
+			Direction direction, boolean isTopLevel) throws IOException
 			 {
 
 		Map<Port, T2Reference> bindings = provenanceAccess
@@ -475,8 +490,18 @@ public class W3ProvenanceExport {
 			T2Reference t2Ref = binding.getValue();
 
 			Individual entity = describeEntity(t2Ref);
-			if (!seenReference(t2Ref)) {
-				saveReference(t2Ref);
+			
+			if (isTopLevel) {
+			    Path ports;
+                if (direction == Direction.INPUTS) {
+                    ports = DataBundles.getInputs(bundle);
+                } else {
+                    ports = DataBundles.getOutputs(bundle); 
+                }
+                Path portPath = DataBundles.getPort(ports, port.getPortName());
+                saveValue(t2Ref, portPath);
+            } else if (!seenReference(t2Ref)) {
+                saveIntermediate(t2Ref);        		
 			}
 
 //			String id = t2Ref.getLocalPart();
@@ -568,13 +593,12 @@ public class W3ProvenanceExport {
 		return seenReferences.containsKey(t2Ref);
 	}
 
-	private Path saveReference(T2Reference t2Ref) throws IOException {
+	private Path saveIntermediate(T2Reference t2Ref) throws IOException {
 		// Avoid double-saving
 		Path f = seenReferences.get(t2Ref);
 		if (f != null) {
 			return f;
 		}
-
 		Path file = referencePath(t2Ref);
 		Path parent = file.getParent();
 		Files.createDirectories(parent);
@@ -582,36 +606,134 @@ public class W3ProvenanceExport {
 			// Write a kind of text/uri-list (but with relative URIs)
 			IdentifiedList<T2Reference> list = saver.getReferenceService()
 					.getListService().getList(t2Ref);
-			file = parent.resolve(file.getFileName() + ".list");
-			List<String> filenames = new ArrayList<>();
 			for (T2Reference ref : list) {
-				Path refFile = saveReference(ref).toRealPath();
+				Path refFile = saveIntermediate(ref).toRealPath();
 				URI relRef = uriTools.relativePath(toURI(parent.toRealPath()),
 						toURI(refFile.toRealPath()));
-				filenames.add(relRef.toASCIIString() + "\n");
 			}
-			Files.write(file, filenames, UTF8);
-
 		} else {
-
 			String extension = "";
 			if (t2Ref.getReferenceType() == T2ReferenceType.ErrorDocument) {
 				extension = ".err";
 			}
-
 			// Capture filename with extension
 			file = saver.writeDataObject(parent, file.getFileName().toString(), t2Ref,
 					extension);
-		
-			
 		}
 		seenReference(t2Ref, file);
 		return file;
 	}
 
-	protected void addStackTrace(Individual error, ErrorDocument errorDoc)
+	   private Path saveValue(T2Reference t2Ref, Path file) throws IOException {
+	       switch (t2Ref.getReferenceType()) {
+	       case IdentifiedList:
+	            DataBundles.createList(file);
+	            IdentifiedList<T2Reference> list = saver.getReferenceService()
+	                    .getListService().getList(t2Ref);
+	            long position = 0;
+	            for (T2Reference ref : list) {
+	                saveValue(ref, DataBundles.getListItem(file, position++));
+	            }
+	            break;
+	       case ErrorDocument:
+	           ErrorDocument errorDoc = saver.getReferenceService()
+                    .getErrorDocumentService().getError(t2Ref);
+	           
+	           StringBuilder trace = new StringBuilder();
+	           addStackTrace(trace, errorDoc);
+	           
+	           List<Path> causes = new ArrayList<>();
+	           for (T2Reference cause : errorDoc.getErrorReferences()) {
+	               causes.add(saveIntermediate(cause));
+	           }
+	           file = DataBundles.setError(file, errorDoc.getMessage(), trace.toString(), 
+	                   causes.toArray(new Path[causes.size()]));
+	           break;
+	       case ReferenceSet:
+	            saveReference(t2Ref, file);
+	        }
+	        seenReference(t2Ref, file);
+	        return file;
+	    }
+
+	
+	private void saveReference(T2Reference t2Ref, Path file) {
+
+        List<MimeType> mimeTypes = new ArrayList<MimeType>();
+        ReferenceSetService refSet = saver.getReferenceService().getReferenceSetService();
+        
+        ReferenceSet referenceSet = refSet.getReferenceSet(t2Ref);
+        List<ExternalReferenceSPI> externalReferences = new ArrayList<ExternalReferenceSPI>(
+                referenceSet.getExternalReferences());
+        Collections.sort(externalReferences,
+                new Comparator<ExternalReferenceSPI>() {
+                    public int compare(ExternalReferenceSPI o1,
+                            ExternalReferenceSPI o2) {
+                        return (int) (o1.getResolutionCost() - o2
+                                .getResolutionCost());
+                    }
+                });
+        for (ExternalReferenceSPI externalReference : externalReferences) {
+            if (externalReference.getDataNature().equals(
+                    ReferencedDataNature.TEXT)) {
+                break;
+            }
+            mimeTypes.addAll(ResultsUtils.getMimeTypes(
+                    externalReference, getContext()));
+        }
+        if (!mimeTypes.isEmpty()) {
+
+            // Check for the most interesting type, if defined
+            String interestingType = mimeTypes.get(0).toString();
+
+            if (interestingType != null
+                    && interestingType.equals("text/plain") == false) {
+                // MIME types look like 'foo/bar'
+                String lastPart = interestingType.split("/")[1];
+                if (lastPart.startsWith("x-") == false) {
+                    fileExtension = "." + lastPart;
+                }
+            }
+        }
+        
+        Path targetFile = destination.resolve(name + fileExtension);
+        
+        OutputStream output = Files.newOutputStream(targetFile);
+        MessageDigest sha = null;
+        MessageDigest sha512 = null;
+        try {
+            sha = MessageDigest.getInstance("SHA");
+            output = new DigestOutputStream(output, sha);
+
+            sha512 = MessageDigest.getInstance("SHA-512");
+            output = new DigestOutputStream(output, sha512);
+        } catch (NoSuchAlgorithmException e) {  
+            logger.info("Could not find digest", e);
+        }
+        
+        // TODO: Set external references as URIs
+        IOUtils.copyLarge(
+                externalReferences.get(0).openStream(getContext()),
+                output);
+        output.close();
+        
+        if (sha != null) {
+            getSha1sums().put(targetFile.toRealPath(),
+                    hexOfDigest(sha));
+        }
+        if (sha512 != null) {
+            sha512.digest();                    
+            getSha512sums().put(targetFile.toRealPath(), 
+                    hexOfDigest(sha512));
+        }
+        getFileToId().put(targetFile, identified.getId());
+
+        
+    }
+
+    protected void addStackTrace(Individual error, ErrorDocument errorDoc)
 			throws  IOException {
-		StringBuffer sb = new StringBuffer();
+	    StringBuilder sb = new StringBuilder();
 		addStackTrace(sb, errorDoc);
 		if (sb.length() > 0) {
 		    error.addLiteral(provModel.stackTrace, sb.toString());
@@ -626,7 +748,7 @@ public class W3ProvenanceExport {
 		}
 	}
 
-	protected void addStackTrace(StringBuffer sb, ErrorDocument errorDoc) {
+	protected void addStackTrace(StringBuilder sb, ErrorDocument errorDoc) {
 		if (errorDoc.getExceptionMessage() != null
 				&& !errorDoc.getExceptionMessage().isEmpty()) {
 			sb.append(errorDoc.getExceptionMessage());

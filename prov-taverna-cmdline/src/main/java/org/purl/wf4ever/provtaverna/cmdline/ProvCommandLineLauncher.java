@@ -115,9 +115,11 @@ public class ProvCommandLineLauncher extends CommandLineLauncher implements
 			@Override
 			protected void saveIndividualDataFile(
 					T2Reference reference, File dataFile,
-					InvocationContext context) {				
-				super.saveIndividualDataFile(reference, dataFile, context);
-				fileToId.put(dataFile.toPath(), reference);
+					InvocationContext context) {
+//			    if (!options.isProvenanceEnabled()) {
+    				super.saveIndividualDataFile(reference, dataFile, context);
+    				fileToId.put(dataFile.toPath(), reference);
+//			    }
 			}
 		};
 		

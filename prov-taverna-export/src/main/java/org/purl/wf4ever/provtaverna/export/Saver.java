@@ -1,6 +1,5 @@
 package org.purl.wf4ever.provtaverna.export;
 
-import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -36,7 +35,6 @@ import org.apache.log4j.Logger;
 import org.purl.wf4ever.robundle.Bundle;
 
 import uk.org.taverna.databundle.DataBundles;
-
 import eu.medsea.mimeutil.MimeType;
 
 public class Saver {
@@ -98,20 +96,6 @@ public class Saver {
 			FileNotFoundException {
 		logger.info("Saving provenance and outputs to " + folder.toRealPath());
 		Files.createDirectories(folder);
-	
-		// First convert map of references to objects into a map of real result
-		// objects
-		for (String portName : chosenReferences.keySet()) {
-			T2Reference ref = chosenReferences.get(portName);
-			if (ref == null) {
-				logger.warn("No reference for port " + portName + ", workflow unfinished?");
-				continue;
-			}
-			writeToFileSystem(ref, folder, portName, referenceService);
-		}
-		logger.info("Saved outputs to " + folder);
-		
-		
 		String connectorType = DataManagementConfiguration.getInstance()
 				.getConnectorType();
 		ProvenanceAccess provenanceAccess = new ProvenanceAccess(connectorType,
@@ -121,23 +105,12 @@ public class Saver {
 		export.setFileToT2Reference(getFileToId());
 		export.setBundle(bundle);
 		
-		Path provFile = DataBundles.getWorkflowRunProvenance(bundle);
-		// FIXME: Refactor out and use SafeFileOutputStream
-		BufferedOutputStream outStream = new BufferedOutputStream(
-				new SafeFileOutputStream(provFile));
 		try {
-			logger.debug("Saving provenance to " + provFile);
-			export.exportAsW3Prov(outStream, provFile);
-			logger.info("Saved provenance to " + provFile);
+		    logger.debug("Saving provenance");
+			export.exportAsW3Prov();
+			logger.info("Saved provenance");
 		} catch (Exception e) {
-			logger.error("Failed to save the provenance graph to "
-					+ provFile, e);
-		} finally {
-			try {
-				outStream.close();
-			} catch (IOException e) {
-				logger.error("Potential error on saving " + provFile);
-			}
+			logger.error("Failed to save the provenance graph", e);
  		}
 	}
 
@@ -249,45 +222,6 @@ public class Saver {
 
 	private String hexOfDigest(MessageDigest sha) {
 		return new String(Hex.encodeHex(sha.digest()));
-	}
-
-	/**
-	 * Write a specific object to the filesystem this has no access to metadata
-	 * about the object and so is not particularly clever. A File object
-	 * representing the file or directory that has been written is returned.
-	 */
-	protected Path writeObjectToFileSystem(Path destination, String name,
-			T2Reference ref, String defaultExtension) throws IOException {
-		// If the destination is not a directory then set the destination
-		// directory to the parent and the name to the filename
-		// i.e. if the destination is /tmp/foo.text and this exists
-		// then set destination to /tmp/ and name to 'foo.text'
-		if (Files.exists(destination) && Files.isRegularFile(destination)) {
-			name = destination.getFileName().toString();
-			destination = destination.getParent();
-		}
-		Files.createDirectories(destination);
-		Path writtenFile = writeDataObject(destination, name, ref,
-				defaultExtension);
-		return writtenFile;
-	}
-
-	public Path writeToFileSystem(T2Reference ref, Path destination, String name, ReferenceService referenceService)
-			throws IOException {
-		Identified identified = referenceService.resolveIdentifier(ref, null,
-				getContext());
-	
-		String fileExtension = "";
-		if (identified instanceof ReferenceSet) {
-	
-		} else if (identified instanceof ErrorDocument) {
-			fileExtension = ".err";
-		}
-	
-		Path writtenFile = writeObjectToFileSystem(destination, name, ref,
-				fileExtension);
-		logger.debug("Saved " + writtenFile + " from reference " + ref.toUri());
-		return writtenFile;
 	}
 
 	public ReferenceService getReferenceService() {
