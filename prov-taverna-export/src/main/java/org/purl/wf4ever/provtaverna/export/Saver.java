@@ -112,14 +112,14 @@ public class Saver {
 		export.setFileToT2Reference(getFileToId());
 		export.setBaseFolder(folder);
 		export.setIntermediatesDirectory(getIntermediatesDirectory());
-		Path provFile = folder.resolve(WORKFLOWRUN_PROV_TTL).toRealPath();
+		Path provFile = folder.resolve(WORKFLOWRUN_PROV_TTL);
 		// FIXME: Refactor out and use SafeFileOutputStream
 		BufferedOutputStream outStream = new BufferedOutputStream(
 				new SafeFileOutputStream(provFile));
 		try {
-			logger.debug("Saving provenance to " + provFile.toRealPath());
+			logger.debug("Saving provenance to " + provFile);
 			export.exportAsW3Prov(outStream, provFile);
-			logger.info("Saved provenance to " + provFile.toRealPath());
+			logger.info("Saved provenance to " + provFile);
 		} catch (Exception e) {
 			logger.error("Failed to save the provenance graph to "
 					+ provFile, e);
