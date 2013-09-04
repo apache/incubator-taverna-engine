@@ -137,11 +137,9 @@ public class ProvCommandLineLauncher extends CommandLineLauncher implements
 							realFacade.getContext(), realFacade.getWorkflowRunId(),
 							chosenReferences);
 					saver.setFileToId(fileToId);
-					Path intermediatesDirectory = outputDir.toPath().resolve("intermediates");
+					Path bundle = outputDir.toPath().resolveSibling(outputDir.getName() + ".robundle.zip");
 					try {
-                        Files.createDirectories(intermediatesDirectory);
-                        saver.setIntermediatesDirectory(intermediatesDirectory);
-						saver.saveData(outputDir.toPath());
+						saver.saveData(bundle);
 					} catch (IOException e1) {
 						System.err.println("Can't store output to " + outputDir + ": " + e1);
 						e1.printStackTrace();

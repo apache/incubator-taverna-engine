@@ -33,6 +33,9 @@ import net.sf.taverna.t2.workbench.reference.config.DataManagementConfiguration;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.purl.wf4ever.robundle.Bundle;
+
+import uk.org.taverna.databundle.DataBundles;
 
 import eu.medsea.mimeutil.MimeType;
 
@@ -40,11 +43,8 @@ public class Saver {
 
 	private static final Charset UTF8 = Charset.forName("UTF-8");
 
-    private static final String WORKFLOWRUN_PROV_TTL = "workflowrun.prov.ttl";
-
 	private static Logger logger = Logger.getLogger(Saver.class);
 	
-
 	/**
 	 * @param saveProvAction
 	 */
@@ -69,23 +69,32 @@ public class Saver {
 
 	private Map<String, T2Reference> chosenReferences;
 
-	private Path intermediatesDirectory;
-
+    private Bundle bundle;
 	
-	public Path getIntermediatesDirectory() {
-		return intermediatesDirectory;
+	/**
+     * @return the bundle
+     */
+    public Bundle getBundle() {
+        return bundle;
+    }
+
+	public void saveData(Path bundlePath) throws FileNotFoundException, IOException {
+	    Bundle bundle = DataBundles.createBundle();
+//		String folderName = bundlePath.getFileName().toString();
+//		if (folderName.endsWith(".")) {
+//            bundlePath = bundlePath.resolveSibling(folderName.substring(0,
+//                    folderName.length() - 1));
+//		}
+	    setBundle(bundle);
+		saveToFolder(bundle.getRoot(), getChosenReferences(), getReferenceService());
+		DataBundles.closeAndSaveBundle(bundle, bundlePath);
 	}
 
-	public void saveData(Path folder) throws FileNotFoundException, IOException {
-		String folderName = folder.getFileName().toString();
-		if (folderName.endsWith(".")) {
-            folder = folder.resolveSibling(folderName.substring(0,
-                    folderName.length() - 1));
-		}		
-		saveToFolder(folder, getChosenReferences(), getReferenceService());
-	}
+	private void setBundle(Bundle bundle) {
+        this.bundle = bundle;
+    }
 
-	protected void saveToFolder(Path folder, Map<String, T2Reference> chosenReferences, ReferenceService referenceService) throws IOException,
+    protected void saveToFolder(Path folder, Map<String, T2Reference> chosenReferences, ReferenceService referenceService) throws IOException,
 			FileNotFoundException {
 		logger.info("Saving provenance and outputs to " + folder.toRealPath());
 		Files.createDirectories(folder);
@@ -110,9 +119,9 @@ public class Saver {
 		W3ProvenanceExport export = new W3ProvenanceExport(provenanceAccess,
 				getRunId(), this);
 		export.setFileToT2Reference(getFileToId());
-		export.setBaseFolder(folder);
-		export.setIntermediatesDirectory(getIntermediatesDirectory());
-		Path provFile = folder.resolve(WORKFLOWRUN_PROV_TTL);
+		export.setBundle(bundle);
+		
+		Path provFile = DataBundles.getWorkflowRunProvenance(bundle);
 		// FIXME: Refactor out and use SafeFileOutputStream
 		BufferedOutputStream outStream = new BufferedOutputStream(
 				new SafeFileOutputStream(provFile));
@@ -319,10 +328,6 @@ public class Saver {
 
 	public void setFileToId(Map<Path, T2Reference> fileToId) {
 		this.fileToId = fileToId;
-	}
-
-	public void setIntermediatesDirectory(Path intermediatesDirectory) {
-		this.intermediatesDirectory = intermediatesDirectory;
 	}
 
 	public Map<Path, String> getSha1sums() {

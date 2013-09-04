@@ -78,9 +78,7 @@ public class W3ProvenanceExport {
     private static SPIRegistry<WorkflowBundleReader> readerSpi = new SPIRegistry<>(WorkflowBundleReader.class);
     private static SPIRegistry<WorkflowBundleWriter> writerSpi = new SPIRegistry<>(WorkflowBundleWriter.class);
 
-    
     private static final String EN = "en";
-
     
     private static final String TXT = ".txt";
 
@@ -108,10 +106,6 @@ public class W3ProvenanceExport {
 
 	private Map<Path, T2Reference> fileToT2Reference = Collections.emptyMap();
 
-	private Path baseFolder;
-
-	private Path intermediatesDirectory;
-
 	private Saver saver;
 	
 	private URI baseURI = URI.create("app://" + UUID.randomUUID() + "/");
@@ -120,12 +114,8 @@ public class W3ProvenanceExport {
 
     private TavernaProvModel provModel = new TavernaProvModel();
 
-	public Path getIntermediatesDirectory() {
-		return intermediatesDirectory;
-	}
-
 	public Path getBaseFolder() {
-		return baseFolder;
+		return bundle.getRoot();
 	}
 
 	public Map<Path, T2Reference> getFileToT2Reference() {
@@ -304,10 +294,10 @@ public class W3ProvenanceExport {
 		
 		// Workflow inputs and outputs
 		storeEntitities(dataflowInvocation.getInputsDataBindingId(), wfProcess,
-				Direction.INPUTS, getIntermediatesDirectory());
+				Direction.INPUTS);
 		// FIXME: These entities come out as "generated" by multiple processes
 		storeEntitities(dataflowInvocation.getOutputsDataBindingId(),
-				wfProcess, Direction.OUTPUTS, getIntermediatesDirectory());
+				wfProcess, Direction.OUTPUTS);
 		List<ProcessorEnactment> processorEnactments = provenanceAccess
 				.getProcessorEnactments(getWorkflowRunId());
 		// This will also include processor enactments in nested workflows
@@ -365,13 +355,11 @@ public class W3ProvenanceExport {
 
 			// TODO: Activity/service details from definition?
 
-			Path path = getIntermediatesDirectory();
-
 			// Inputs and outputs
 			storeEntitities(pe.getInitialInputsDataBindingId(), process,
-					Direction.INPUTS, path);
+					Direction.INPUTS);
 			storeEntitities(pe.getFinalOutputsDataBindingId(), process,
-					Direction.OUTPUTS, path);
+					Direction.OUTPUTS);
 		}
 
 		storeFileReferences();
@@ -472,11 +460,11 @@ public class W3ProvenanceExport {
 	}
 
 	protected URI toURI(Path file) {
-	    return baseURI.resolve(baseFolder.toUri().relativize(file.toUri()));
+	    return baseURI.resolve(getBaseFolder().toUri().relativize(file.toUri()));
     }
 
     protected void storeEntitities(String dataBindingId, Individual activity,
-			Direction direction, Path path) throws IOException
+			Direction direction) throws IOException
 			 {
 
 		Map<Port, T2Reference> bindings = provenanceAccess
@@ -672,14 +660,14 @@ public class W3ProvenanceExport {
 		error.addLiteral(provModel.errorMessage, message);
 	}
 
-	private Path referencePath(T2Reference t2Ref) {
+	private Path referencePath(T2Reference t2Ref) throws IOException {
 		String local = t2Ref.getLocalPart();
 		try {
-			local = UUID.fromString(local).toString();
+			return DataBundles.getIntermediate(bundle, UUID.fromString(local));
 		} catch (IllegalArgumentException ex) {
-		    return getIntermediatesDirectory().resolve(t2Ref.getNamespacePart()).resolve(t2Ref.getLocalPart());
+		    return DataBundles.getIntermediates(bundle).resolve(t2Ref.getNamespacePart()).resolve(t2Ref.getLocalPart());
 		}
-		return getIntermediatesDirectory().resolve(local.substring(0,2)).resolve(local);
+		
 	}
 
 	private boolean seenReference(T2Reference t2Ref, Path file) {
@@ -713,17 +701,16 @@ public class W3ProvenanceExport {
 		}
 	}
 
-	public void setBaseFolder(Path baseFolder) {
-		this.baseFolder = baseFolder;
-
-	}
-
-	public void setIntermediatesDirectory(Path intermediatesDirectory) {
-		this.intermediatesDirectory = intermediatesDirectory;
-	}
-	
 	private static final String WFDESC = "http://purl.org/wf4ever/wfdesc#";
 	private static WorkflowBundleIO wfBundleIO;
+    private Bundle bundle;
+
+    /**
+     * @return the bundle
+     */
+    public Bundle getBundle() {
+        return bundle;
+    }
 
     public void writeBundle(Path runPath, WorkflowBundle wfBundle) throws IOException  {
         // Create a new (temporary) data bundle
@@ -848,6 +835,10 @@ public class W3ProvenanceExport {
         // NOTE: From now dataBundle and its Path's are CLOSED
         // and can no longer be accessed
 
+    }
+
+    public void setBundle(Bundle bundle) {
+        this.bundle = bundle;
     }
 
 }

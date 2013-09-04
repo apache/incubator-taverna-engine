@@ -15,6 +15,8 @@ import net.sf.taverna.t2.workbench.views.results.saveactions.SaveAllResultsSPI;
 
 import org.purl.wf4ever.provtaverna.export.Saver;
 
+import uk.org.taverna.databundle.DataBundles;
+
 
 
 public class SaveProvAction extends SaveAllResultsSPI {
@@ -27,6 +29,7 @@ public class SaveProvAction extends SaveAllResultsSPI {
 				
 	}
 
+    
 	public AbstractAction getAction() {
 		return this;
 	}
@@ -42,23 +45,15 @@ public class SaveProvAction extends SaveAllResultsSPI {
 	 * 
 	 * @throws IOException
 	 */
-	protected void saveData(File folder) throws IOException {
-		String folderName = folder.getName();		
-		if (folderName.endsWith(".")) {
-			folder = new File(folder.getParentFile(), 
-					folderName.substring(0, folderName.length()-1));
-		} 
-		
-		
+	protected void saveData(File bundle) throws IOException {
+//		String folderName = folder.getName();		
+//		if (folderName.endsWith(".")) {
+//			folder = new File(folder.getParentFile(), 
+//					folderName.substring(0, folderName.length()-1));
+//		} 
 		Saver saver = new Saver(getReferenceService(), getContext(), getRunId(), getChosenReferences());
-		
-		
-		Path intermediatesDirectory = folder.toPath().resolve("intermediates");
-		Files.createDirectories(intermediatesDirectory);
-		saver.setIntermediatesDirectory(intermediatesDirectory);
-		
-		saver.saveData(folder.toPath());
-		final String msg = "Saved provenance data to:\n" + folder;
+		saver.saveData(bundle.toPath());
+		final String msg = "Saved provenance data to:\n" + bundle;
 		logger.info(msg);
 		SwingUtilities.invokeLater(new Runnable() {			
 			@Override
@@ -71,7 +66,7 @@ public class SaveProvAction extends SaveAllResultsSPI {
 
 	@Override
 	protected String getFilter() {
-		return "";
+		return "bundle.zip";
 	}
 
 }
