@@ -143,7 +143,8 @@ public class ProvCommandLineLauncher extends CommandLineLauncher implements
                         saver.setIntermediatesDirectory(intermediatesDirectory);
 						saver.saveData(outputDir.toPath());
 					} catch (IOException e1) {
-						System.err.println("Can't store output to " + outputDir + ": " + e1.getMessage());
+						System.err.println("Can't store output to " + outputDir + ": " + e1);
+						e1.printStackTrace();
 					}
 				}
 			}
