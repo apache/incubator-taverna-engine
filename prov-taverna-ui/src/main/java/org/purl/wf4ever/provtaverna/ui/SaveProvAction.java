@@ -2,6 +2,8 @@ package org.purl.wf4ever.provtaverna.ui;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
@@ -16,8 +18,9 @@ import org.purl.wf4ever.provtaverna.export.Saver;
 
 
 public class SaveProvAction extends SaveAllResultsSPI {
+    private static final long serialVersionUID = 1L;
 
-	public SaveProvAction() {
+    public SaveProvAction() {
 		super();
 		putValue(NAME, "Save provenance (PROV)");
 		putValue(SMALL_ICON, WorkbenchIcons.saveAllIcon);
@@ -49,11 +52,12 @@ public class SaveProvAction extends SaveAllResultsSPI {
 		
 		Saver saver = new Saver(getReferenceService(), getContext(), getRunId(), getChosenReferences());
 		
-		File intermediatesDirectory = new File(folder, "intermediates");
-		intermediatesDirectory.mkdir();
+		
+		Path intermediatesDirectory = folder.toPath().resolve("intermediates");
+		Files.createDirectories(intermediatesDirectory);
 		saver.setIntermediatesDirectory(intermediatesDirectory);
 		
-		saver.saveData(folder);
+		saver.saveData(folder.toPath());
 		final String msg = "Saved provenance data to:\n" + folder;
 		logger.info(msg);
 		SwingUtilities.invokeLater(new Runnable() {			
