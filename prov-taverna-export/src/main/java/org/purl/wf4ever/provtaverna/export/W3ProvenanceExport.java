@@ -2,15 +2,16 @@ package org.purl.wf4ever.provtaverna.export;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.GregorianCalendar;
@@ -42,8 +43,6 @@ import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.reference.T2ReferenceType;
 import net.sf.taverna.t2.spi.SPIRegistry;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.output.FileWriterWithEncoding;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.WriterGraphRIOT;
@@ -76,8 +75,8 @@ import com.hp.hpl.jena.sparql.vocabulary.FOAF;
 public class W3ProvenanceExport {
 
     // TODO: Avoid this Taverna 2 dependency
-    private static SPIRegistry<WorkflowBundleReader> readerSpi = new SPIRegistry(WorkflowBundleReader.class);
-    private static SPIRegistry<WorkflowBundleWriter> writerSpi = new SPIRegistry(WorkflowBundleWriter.class);
+    private static SPIRegistry<WorkflowBundleReader> readerSpi = new SPIRegistry<>(WorkflowBundleReader.class);
+    private static SPIRegistry<WorkflowBundleWriter> writerSpi = new SPIRegistry<>(WorkflowBundleWriter.class);
 
     
     private static final String EN = "en";
@@ -87,7 +86,7 @@ public class W3ProvenanceExport {
 
     private static final int EMBEDDED_STRING_MAX_FILESIZE = 1024;
 
-    private static final String UTF_8 = "UTF-8";
+    private static final Charset UTF8 = Charset.forName("UTF-8");
 
     private static ApplicationConfig applicationConfig = ApplicationConfig.getInstance();
     
@@ -95,7 +94,7 @@ public class W3ProvenanceExport {
 
 	private static Logger logger = Logger.getLogger(W3ProvenanceExport.class);
 
-	protected Map<T2Reference, File> seenReferences = new HashMap<T2Reference, File>();
+	protected Map<T2Reference, Path> seenReferences = new HashMap<>();
 
 	private static final int NANOSCALE = 9;
 
@@ -107,11 +106,11 @@ public class W3ProvenanceExport {
 
 	private String workflowRunId;
 
-	private Map<File, T2Reference> fileToT2Reference = Collections.emptyMap();
+	private Map<Path, T2Reference> fileToT2Reference = Collections.emptyMap();
 
-	private File baseFolder;
+	private Path baseFolder;
 
-	private File intermediatesDirectory;
+	private Path intermediatesDirectory;
 
 	private Saver saver;
 	
@@ -121,15 +120,15 @@ public class W3ProvenanceExport {
 
     private TavernaProvModel provModel = new TavernaProvModel();
 
-	public File getIntermediatesDirectory() {
+	public Path getIntermediatesDirectory() {
 		return intermediatesDirectory;
 	}
 
-	public File getBaseFolder() {
+	public Path getBaseFolder() {
 		return baseFolder;
 	}
 
-	public Map<File, T2Reference> getFileToT2Reference() {
+	public Map<Path, T2Reference> getFileToT2Reference() {
 		return fileToT2Reference;
 	}
 
@@ -142,25 +141,25 @@ public class W3ProvenanceExport {
 //		}
 //	}
 
-	private ClassLoader classLoaderForServiceLoader(Class<?> mustHave) {
-		List<ClassLoader> possibles = Arrays.asList(Thread.currentThread()
-				.getContextClassLoader(), getClass().getClassLoader(), mustHave
-				.getClassLoader());
-
-		for (ClassLoader cl : possibles) {
-			if (cl == null) {
-				continue;
-			}
-			try {
-				if (cl.loadClass(mustHave.getCanonicalName()) == mustHave) {
-					return cl;
-				}
-			} catch (ClassNotFoundException e) {
-			}
-		}
-		// Final fall-back, the old..
-		return ClassLoader.getSystemClassLoader();
-	}
+//	private ClassLoader classLoaderForServiceLoader(Class<?> mustHave) {
+//		List<ClassLoader> possibles = Arrays.asList(Thread.currentThread()
+//				.getContextClassLoader(), getClass().getClassLoader(), mustHave
+//				.getClassLoader());
+//
+//		for (ClassLoader cl : possibles) {
+//			if (cl == null) {
+//				continue;
+//			}
+//			try {
+//				if (cl.loadClass(mustHave.getCanonicalName()) == mustHave) {
+//					return cl;
+//				}
+//			} catch (ClassNotFoundException e) {
+//			}
+//		}
+//		// Final fall-back, the old..
+//		return ClassLoader.getSystemClassLoader();
+//	}
 
 	public W3ProvenanceExport(ProvenanceAccess provenanceAccess,
 			String workflowRunId, Saver saver) {
@@ -215,11 +214,11 @@ public class W3ProvenanceExport {
 			return base + (inputPort ? "in/" : "out/") + escape(vName);
 		}
 
-		public String makeDataflowInvocationURI(String workflowRunId,
-				String dataflowInvocationId) {
-			return makeWFInstanceURI(workflowRunId) + "workflow/"
-					+ dataflowInvocationId + "/";
-		}
+//		public String makeDataflowInvocationURI(String workflowRunId,
+//				String dataflowInvocationId) {
+//			return makeWFInstanceURI(workflowRunId) + "workflow/"
+//					+ dataflowInvocationId + "/";
+//		}
 
 		public String makeProcessExecution(String workflowRunId,
 				String processEnactmentId) {
@@ -242,7 +241,7 @@ public class W3ProvenanceExport {
 		}
 	}
 
-	public void exportAsW3Prov(BufferedOutputStream outStream, File provFile)
+	public void exportAsW3Prov(BufferedOutputStream outStream, Path provFile)
 			throws IOException {
 
 		// TODO: Make this thread safe using contexts?
@@ -366,7 +365,7 @@ public class W3ProvenanceExport {
 
 			// TODO: Activity/service details from definition?
 
-			File path = getIntermediatesDirectory();
+			Path path = getIntermediatesDirectory();
 
 			// Inputs and outputs
 			storeEntitities(pe.getInitialInputsDataBindingId(), process,
@@ -400,7 +399,7 @@ public class W3ProvenanceExport {
         try {
             WorkflowBundle wfBundle = wfBundleIO.readBundle(new ByteArrayInputStream(dataflow), 
                     T2FlowReader.APPLICATION_VND_TAVERNA_T2FLOW_XML);
-            writeBundle(getBaseFolder().toPath(), wfBundle);
+            writeBundle(getBaseFolder(), wfBundle);
         } catch (ReaderException e) {
             logger.warn("Could not write bundle", e);
         }
@@ -437,47 +436,47 @@ public class W3ProvenanceExport {
 
 	protected void storeFileReferences() {
 
-		for (Entry<File, T2Reference> entry : getFileToT2Reference().entrySet()) {
-			File file = entry.getKey();
-			T2Reference t2Ref = entry.getValue();
-			URI dataURI = URI.create(uriGenerator.makeT2ReferenceURI(t2Ref.toUri()
-					.toASCIIString()));
-
-			Individual entity = provModel.createArtifact(dataURI);
-			
-            Individual content = provModel.setContent(entity, toURI(file));
-
-            // Add checksums
-			String sha1 = saver.getSha1sums().get(file.getAbsoluteFile());
-			if (sha1 != null) {
-			    content.addLiteral(provModel.sha1, sha1);
-			}			
-			String sha512 = saver.getSha512sums().get(file.getAbsoluteFile());
-			if (sha512 != null) {
-                content.addLiteral(provModel.sha512, sha512);
-			}
-			long byteCount = file.length();
-            content.addLiteral(provModel.byteCount, byteCount);
-			// Add text content if it's "tiny"
-			if (file.getName().endsWith(TXT) && byteCount < EMBEDDED_STRING_MAX_FILESIZE) {
-			    String str;
-                try {
-                    str = FileUtils.readFileToString(file, UTF_8);
+		for (Entry<Path, T2Reference> entry : getFileToT2Reference().entrySet()) {
+		    Path file = entry.getKey();
+		    try {
+    			T2Reference t2Ref = entry.getValue();
+    			URI dataURI = URI.create(uriGenerator.makeT2ReferenceURI(t2Ref.toUri()
+    					.toASCIIString()));
+    
+    			Individual entity = provModel.createArtifact(dataURI);
+    			
+                Individual content = provModel.setContent(entity, toURI(file));
+    
+                // Add checksums
+    			String sha1 = saver.getSha1sums().get(file.toRealPath());
+    			if (sha1 != null) {
+    			    content.addLiteral(provModel.sha1, sha1);
+    			}			
+    			String sha512 = saver.getSha512sums().get(file.toRealPath());
+    			if (sha512 != null) {
+                    content.addLiteral(provModel.sha512, sha512);
+    			}
+    			long byteCount = Files.size(file);
+                content.addLiteral(provModel.byteCount, byteCount);
+    			// Add text content if it's "tiny"
+    			if (file.getFileName().endsWith(TXT) && byteCount < EMBEDDED_STRING_MAX_FILESIZE) {
+                    byte[] bytes = Files.readAllBytes(file);
+                    String str = new String(bytes, UTF8);
                     content.addLiteral(provModel.chars, str);
-                    content.addLiteral(provModel.characterEncoding, UTF_8);
-                } catch (IOException e) {
-                    logger.warn("Could not read " + file + " as " + UTF_8, e);
-                }
-			}
+                    content.addLiteral(provModel.characterEncoding, UTF8.name());
+        		}
+            } catch (IOException e) {
+                logger.warn("Could not read " + file + " as " + UTF8, e);
+            }
 		}
 	}
 
-	protected URI toURI(File file) {
-	    return baseURI.resolve(baseFolder.toURI().relativize(file.toURI()));
+	protected URI toURI(Path file) {
+	    return baseURI.resolve(baseFolder.toUri().relativize(file.toUri()));
     }
 
     protected void storeEntitities(String dataBindingId, Individual activity,
-			Direction direction, File path) throws IOException
+			Direction direction, Path path) throws IOException
 			 {
 
 		Map<Port, T2Reference> bindings = provenanceAccess
@@ -492,7 +491,7 @@ public class W3ProvenanceExport {
 				saveReference(t2Ref);
 			}
 
-			String id = t2Ref.getLocalPart();
+//			String id = t2Ref.getLocalPart();
 			//String prefix = id.substring(0, 2);
 			Individual involvement;
 			if (direction == Direction.INPUTS) {
@@ -581,31 +580,30 @@ public class W3ProvenanceExport {
 		return seenReferences.containsKey(t2Ref);
 	}
 
-	private File saveReference(T2Reference t2Ref) throws IOException {
+	private Path saveReference(T2Reference t2Ref) throws IOException {
 		// Avoid double-saving
-		File f = seenReferences.get(t2Ref);
+		Path f = seenReferences.get(t2Ref);
 		if (f != null) {
 			return f;
 		}
 
-		File file = referencePath(t2Ref);
-		File parent = file.getParentFile();
-		parent.mkdirs();
+		Path file = referencePath(t2Ref);
+		Path parent = file.getParent();
+		Files.createDirectories(parent);
 		if (t2Ref.getReferenceType() == T2ReferenceType.IdentifiedList) {
 			// Write a kind of text/uri-list (but with relative URIs)
 			IdentifiedList<T2Reference> list = saver.getReferenceService()
 					.getListService().getList(t2Ref);
-			file = new File(file.getParentFile(), file.getName() + ".list");
-			FileWriterWithEncoding writer = new FileWriterWithEncoding(file,
-					"utf-8");
+			file = parent.resolve(file.getFileName() + ".list");
+			List<String> filenames = new ArrayList<>();
 			for (T2Reference ref : list) {
-				File refFile = saveReference(ref).getAbsoluteFile();
-				URI relRef = uriTools.relativePath(toURI(parent.getAbsoluteFile()),
-						toURI(refFile.getAbsoluteFile()));
-				writer.append(relRef.toASCIIString() + "\n");
+				Path refFile = saveReference(ref).toRealPath();
+				URI relRef = uriTools.relativePath(toURI(parent.toRealPath()),
+						toURI(refFile.toRealPath()));
+				filenames.add(relRef.toASCIIString() + "\n");
 			}
+			Files.write(file, filenames, UTF8);
 
-			writer.close();
 		} else {
 
 			String extension = "";
@@ -614,7 +612,7 @@ public class W3ProvenanceExport {
 			}
 
 			// Capture filename with extension
-			file = saver.writeDataObject(parent, file.getName(), t2Ref,
+			file = saver.writeDataObject(parent, file.getFileName().toString(), t2Ref,
 					extension);
 		
 			
@@ -674,20 +672,17 @@ public class W3ProvenanceExport {
 		error.addLiteral(provModel.errorMessage, message);
 	}
 
-	private File referencePath(T2Reference t2Ref) {
+	private Path referencePath(T2Reference t2Ref) {
 		String local = t2Ref.getLocalPart();
 		try {
 			local = UUID.fromString(local).toString();
 		} catch (IllegalArgumentException ex) {
-			// Fallback - use full namespace/localpart
-			return new File(new File(getIntermediatesDirectory(),
-					t2Ref.getNamespacePart()), t2Ref.getLocalPart());
+		    return getIntermediatesDirectory().resolve(t2Ref.getNamespacePart()).resolve(t2Ref.getLocalPart());
 		}
-		return new File(new File(getIntermediatesDirectory(), local.substring(
-				0, 2)), local);
+		return getIntermediatesDirectory().resolve(local.substring(0,2)).resolve(local);
 	}
 
-	private boolean seenReference(T2Reference t2Ref, File file) {
+	private boolean seenReference(T2Reference t2Ref, Path file) {
 		getFileToT2Reference().put(file, t2Ref);
 		if (seenReference(t2Ref)) {
 			return true;
@@ -711,19 +706,19 @@ public class W3ProvenanceExport {
 		this.workflowRunId = workflowRunId;
 	}
 
-	public void setFileToT2Reference(Map<File, T2Reference> fileToT2Reference) {
-		this.fileToT2Reference = new HashMap<File, T2Reference>();
-		for (Entry<File, T2Reference> entry : fileToT2Reference.entrySet()) {
+	public void setFileToT2Reference(Map<Path, T2Reference> fileToT2Reference) {
+		this.fileToT2Reference = new HashMap<>();
+		for (Entry<Path, T2Reference> entry : fileToT2Reference.entrySet()) {
 			seenReference(entry.getValue(), entry.getKey());
 		}
 	}
 
-	public void setBaseFolder(File baseFolder) {
+	public void setBaseFolder(Path baseFolder) {
 		this.baseFolder = baseFolder;
 
 	}
 
-	public void setIntermediatesDirectory(File intermediatesDirectory) {
+	public void setIntermediatesDirectory(Path intermediatesDirectory) {
 		this.intermediatesDirectory = intermediatesDirectory;
 	}
 	
