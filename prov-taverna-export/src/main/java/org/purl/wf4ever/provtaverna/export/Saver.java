@@ -1,11 +1,12 @@
 package org.purl.wf4ever.provtaverna.export;
 
 import java.io.BufferedOutputStream;
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -30,7 +31,6 @@ import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.workbench.reference.config.DataManagementConfiguration;
 
 import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
@@ -38,7 +38,9 @@ import eu.medsea.mimeutil.MimeType;
 
 public class Saver {
 
-	private static final String WORKFLOWRUN_PROV_TTL = "workflowrun.prov.ttl";
+	private static final Charset UTF8 = Charset.forName("UTF-8");
+
+    private static final String WORKFLOWRUN_PROV_TTL = "workflowrun.prov.ttl";
 
 	private static Logger logger = Logger.getLogger(Saver.class);
 	
@@ -54,10 +56,10 @@ public class Saver {
 	}
 
 	
-	private Map<File, T2Reference> fileToId = new HashMap<File, T2Reference>();
+	private Map<Path, T2Reference> fileToId = new HashMap<>();
 
-	private Map<File, String> sha1sums = new HashMap<File, String>();
-	private Map<File, String> sha512sums = new HashMap<File, String>();
+	private Map<Path, String> sha1sums = new HashMap<>();
+	private Map<Path, String> sha512sums = new HashMap<>();
 	
 	private ReferenceService referenceService;
 
@@ -67,29 +69,26 @@ public class Saver {
 
 	private Map<String, T2Reference> chosenReferences;
 
-	private File intermediatesDirectory;
+	private Path intermediatesDirectory;
 
 	
-	public File getIntermediatesDirectory() {
+	public Path getIntermediatesDirectory() {
 		return intermediatesDirectory;
 	}
 
-	public void saveData(File folder) throws FileNotFoundException, IOException {
-		String folderName = folder.getName();
+	public void saveData(Path folder) throws FileNotFoundException, IOException {
+		String folderName = folder.getFileName().toString();
 		if (folderName.endsWith(".")) {
-			folder = new File(folder.getParentFile(), folderName.substring(0,
-					folderName.length()-1));
+            folder = folder.resolveSibling(folderName.substring(0,
+                    folderName.length() - 1));
 		}		
 		saveToFolder(folder, getChosenReferences(), getReferenceService());
 	}
 
-	protected void saveToFolder(File folder, Map<String, T2Reference> chosenReferences, ReferenceService referenceService) throws IOException,
+	protected void saveToFolder(Path folder, Map<String, T2Reference> chosenReferences, ReferenceService referenceService) throws IOException,
 			FileNotFoundException {
-		logger.info("Saving provenance and outputs to " + folder.getAbsolutePath());
-		folder.mkdir();
-		if (!folder.isDirectory()) {
-			throw new IOException("Could not make/use folder: " + folder);
-		}
+		logger.info("Saving provenance and outputs to " + folder.toRealPath());
+		Files.createDirectories(folder);
 	
 		// First convert map of references to objects into a map of real result
 		// objects
@@ -113,14 +112,14 @@ public class Saver {
 		export.setFileToT2Reference(getFileToId());
 		export.setBaseFolder(folder);
 		export.setIntermediatesDirectory(getIntermediatesDirectory());
-		File provFile = new File(folder, WORKFLOWRUN_PROV_TTL).getAbsoluteFile();
+		Path provFile = folder.resolve(WORKFLOWRUN_PROV_TTL).toRealPath();
 		// FIXME: Refactor out and use SafeFileOutputStream
 		BufferedOutputStream outStream = new BufferedOutputStream(
 				new SafeFileOutputStream(provFile));
 		try {
-			logger.debug("Saving provenance to " + provFile.getAbsolutePath());
+			logger.debug("Saving provenance to " + provFile.toRealPath());
 			export.exportAsW3Prov(outStream, provFile);
-			logger.info("Saved provenance to " + provFile.getAbsolutePath());
+			logger.info("Saved provenance to " + provFile.toRealPath());
 		} catch (Exception e) {
 			logger.error("Failed to save the provenance graph to "
 					+ provFile, e);
@@ -133,7 +132,7 @@ public class Saver {
  		}
 	}
 
-	protected File writeDataObject(File destination, String name,
+	protected Path writeDataObject(Path destination, String name,
 			T2Reference ref, String defaultExtension) throws IOException {
 		Identified identified = getReferenceService().resolveIdentifier(ref, null,
 				getContext());
@@ -141,9 +140,8 @@ public class Saver {
 		if (identified instanceof IdentifiedList) {
 			// Create a new directory, iterate over the collection recursively
 			// calling this method
-			File targetDir = new File(destination.toString()
-					+ File.separatorChar + name);
-			targetDir.mkdir();
+		    Path targetDir = destination.resolve(name);
+		    Files.createDirectories(targetDir);
 			getFileToId().put(targetDir, identified.getId());
 			int count = 0;
 			List<T2Reference> elements = getReferenceService().getListService()
@@ -193,10 +191,10 @@ public class Saver {
 						}
 					}
 				}
-				File targetFile = new File(destination.toString()
-						+ File.separatorChar + name + fileExtension);
 				
-				OutputStream output = new FileOutputStream(targetFile);
+				Path targetFile = destination.resolve(name + fileExtension);
+				
+				OutputStream output = Files.newOutputStream(targetFile);
 				MessageDigest sha = null;
 				MessageDigest sha512 = null;
 				try {
@@ -209,28 +207,28 @@ public class Saver {
 					logger.info("Could not find digest", e);
 				}
 				
+				// TODO: Set external references as URIs
 				IOUtils.copyLarge(
 						externalReferences.get(0).openStream(getContext()),
 						output);
 				output.close();
 				
 				if (sha != null) {
-					getSha1sums().put(targetFile.getAbsoluteFile(), 
+					getSha1sums().put(targetFile.toRealPath(),
 							hexOfDigest(sha));
 				}
 				if (sha512 != null) {
 					sha512.digest();					
-					getSha512sums().put(targetFile.getAbsoluteFile(), 
+					getSha512sums().put(targetFile.toRealPath(), 
 							hexOfDigest(sha512));
 				}
 				getFileToId().put(targetFile, identified.getId());
 				logger.debug("Saved value " + targetFile + " from " + identified.getId().toUri());
 				return targetFile;
 			} else {
-				File targetFile = new File(destination.toString()
-						+ File.separatorChar + name + ".err");
-				FileUtils.writeStringToFile(targetFile,
-						((ErrorDocument) identified).getMessage());
+			    Path targetFile = destination.resolve(name + ".err");
+				String message = ((ErrorDocument) identified).getMessage();
+                Files.write(targetFile, Collections.singletonList(message), UTF8);
 				// We don't care about checksums for errors
 				getFileToId().put(targetFile, identified.getId());
 				logger.debug("Saved error " + targetFile + " from " + identified.getId().toUri());
@@ -249,26 +247,23 @@ public class Saver {
 	 * about the object and so is not particularly clever. A File object
 	 * representing the file or directory that has been written is returned.
 	 */
-	protected File writeObjectToFileSystem(File destination, String name,
+	protected Path writeObjectToFileSystem(Path destination, String name,
 			T2Reference ref, String defaultExtension) throws IOException {
 		// If the destination is not a directory then set the destination
 		// directory to the parent and the name to the filename
 		// i.e. if the destination is /tmp/foo.text and this exists
 		// then set destination to /tmp/ and name to 'foo.text'
-		if (destination.exists() && destination.isFile()) {
-			name = destination.getName();
-			destination = destination.getParentFile();
+		if (Files.exists(destination) && Files.isRegularFile(destination)) {
+			name = destination.getFileName().toString();
+			destination = destination.getParent();
 		}
-		if (destination.exists() == false) {
-			// Create the directory structure if not already present
-			destination.mkdirs();
-		}
-		File writtenFile = writeDataObject(destination, name, ref,
+		Files.createDirectories(destination);
+		Path writtenFile = writeDataObject(destination, name, ref,
 				defaultExtension);
 		return writtenFile;
 	}
 
-	public File writeToFileSystem(T2Reference ref, File destination, String name, ReferenceService referenceService)
+	public Path writeToFileSystem(T2Reference ref, Path destination, String name, ReferenceService referenceService)
 			throws IOException {
 		Identified identified = referenceService.resolveIdentifier(ref, null,
 				getContext());
@@ -280,7 +275,7 @@ public class Saver {
 			fileExtension = ".err";
 		}
 	
-		File writtenFile = writeObjectToFileSystem(destination, name, ref,
+		Path writtenFile = writeObjectToFileSystem(destination, name, ref,
 				fileExtension);
 		logger.debug("Saved " + writtenFile + " from reference " + ref.toUri());
 		return writtenFile;
@@ -318,23 +313,23 @@ public class Saver {
 		this.chosenReferences = chosenReferences;
 	}
 
-	public Map<File, T2Reference> getFileToId() {
+	public Map<Path, T2Reference> getFileToId() {
 		return fileToId;
 	}
 
-	public void setFileToId(Map<File, T2Reference> fileToId) {
+	public void setFileToId(Map<Path, T2Reference> fileToId) {
 		this.fileToId = fileToId;
 	}
 
-	public void setIntermediatesDirectory(File intermediatesDirectory) {
+	public void setIntermediatesDirectory(Path intermediatesDirectory) {
 		this.intermediatesDirectory = intermediatesDirectory;
 	}
 
-	public Map<File, String> getSha1sums() {
+	public Map<Path, String> getSha1sums() {
 		return sha1sums;
 	}
 
-	public Map<File, String> getSha512sums() {
+	public Map<Path, String> getSha512sums() {
 		return sha512sums;
 	}
 
