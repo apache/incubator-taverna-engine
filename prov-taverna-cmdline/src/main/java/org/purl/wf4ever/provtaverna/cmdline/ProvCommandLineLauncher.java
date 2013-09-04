@@ -2,6 +2,8 @@ package org.purl.wf4ever.provtaverna.cmdline;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -107,7 +109,7 @@ public class ProvCommandLineLauncher extends CommandLineLauncher implements
 		}
 		
 		// Capture which file got which reference
-		final Map<File, T2Reference> fileToId = new HashMap<File, T2Reference>();		
+		final Map<Path, T2Reference> fileToId = new HashMap<>();		
 		SaveResultsHandler resultsHandler = new SaveResultsHandler(
 				outputPortNamesAndDepth, outputDir, null, null, null) {
 			@Override
@@ -115,7 +117,7 @@ public class ProvCommandLineLauncher extends CommandLineLauncher implements
 					T2Reference reference, File dataFile,
 					InvocationContext context) {				
 				super.saveIndividualDataFile(reference, dataFile, context);
-				fileToId.put(dataFile, reference);
+				fileToId.put(dataFile.toPath(), reference);
 			}
 		};
 		
@@ -135,18 +137,17 @@ public class ProvCommandLineLauncher extends CommandLineLauncher implements
 							realFacade.getContext(), realFacade.getWorkflowRunId(),
 							chosenReferences);
 					saver.setFileToId(fileToId);
-					File intermediatesDirectory = new File(outputDir, "intermediates");
-					intermediatesDirectory.mkdir();
-					saver.setIntermediatesDirectory(intermediatesDirectory);
+					Path intermediatesDirectory = outputDir.toPath().resolve("intermediates");
 					try {
-						saver.saveData(outputDir);
+                        Files.createDirectories(intermediatesDirectory);
+                        saver.setIntermediatesDirectory(intermediatesDirectory);
+						saver.saveData(outputDir.toPath());
 					} catch (IOException e1) {
-						System.err.println("Can't store output to " + outputDir);
+						System.err.println("Can't store output to " + outputDir + ": " + e1.getMessage());
 					}
 				}
 			}
 		};
-		
 		
 		realFacade.addResultListener(myResultListener);		
 		super.executeWorkflow(realFacade, inputs, myResultListener);
