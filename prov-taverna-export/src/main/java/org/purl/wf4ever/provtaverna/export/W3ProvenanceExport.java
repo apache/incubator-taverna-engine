@@ -608,128 +608,58 @@ public class W3ProvenanceExport {
 					.getListService().getList(t2Ref);
 			for (T2Reference ref : list) {
 				Path refFile = saveIntermediate(ref).toRealPath();
-				URI relRef = uriTools.relativePath(toURI(parent.toRealPath()),
-						toURI(refFile.toRealPath()));
+//				URI relRef = uriTools.relativePath(toURI(parent.toRealPath()),
+//						toURI(refFile.toRealPath()));
 			}
 		} else {
-			String extension = "";
+
+		    String extension = "";
 			if (t2Ref.getReferenceType() == T2ReferenceType.ErrorDocument) {
 				extension = ".err";
 			}
 			// Capture filename with extension
-			file = saver.writeDataObject(parent, file.getFileName().toString(), t2Ref,
-					extension);
+			saver.saveReference(t2Ref, file);
 		}
 		seenReference(t2Ref, file);
 		return file;
 	}
 
-	   private Path saveValue(T2Reference t2Ref, Path file) throws IOException {
-	       switch (t2Ref.getReferenceType()) {
-	       case IdentifiedList:
-	            DataBundles.createList(file);
-	            IdentifiedList<T2Reference> list = saver.getReferenceService()
-	                    .getListService().getList(t2Ref);
-	            long position = 0;
-	            for (T2Reference ref : list) {
-	                saveValue(ref, DataBundles.getListItem(file, position++));
-	            }
-	            break;
-	       case ErrorDocument:
-	           ErrorDocument errorDoc = saver.getReferenceService()
-                    .getErrorDocumentService().getError(t2Ref);
-	           
-	           StringBuilder trace = new StringBuilder();
-	           addStackTrace(trace, errorDoc);
-	           
-	           List<Path> causes = new ArrayList<>();
-	           for (T2Reference cause : errorDoc.getErrorReferences()) {
-	               causes.add(saveIntermediate(cause));
-	           }
-	           file = DataBundles.setError(file, errorDoc.getMessage(), trace.toString(), 
-	                   causes.toArray(new Path[causes.size()]));
-	           break;
-	       case ReferenceSet:
-	            saveReference(t2Ref, file);
-	        }
-	        seenReference(t2Ref, file);
-	        return file;
-	    }
-
-	
-	private void saveReference(T2Reference t2Ref, Path file) {
-
-        List<MimeType> mimeTypes = new ArrayList<MimeType>();
-        ReferenceSetService refSet = saver.getReferenceService().getReferenceSetService();
-        
-        ReferenceSet referenceSet = refSet.getReferenceSet(t2Ref);
-        List<ExternalReferenceSPI> externalReferences = new ArrayList<ExternalReferenceSPI>(
-                referenceSet.getExternalReferences());
-        Collections.sort(externalReferences,
-                new Comparator<ExternalReferenceSPI>() {
-                    public int compare(ExternalReferenceSPI o1,
-                            ExternalReferenceSPI o2) {
-                        return (int) (o1.getResolutionCost() - o2
-                                .getResolutionCost());
-                    }
-                });
-        for (ExternalReferenceSPI externalReference : externalReferences) {
-            if (externalReference.getDataNature().equals(
-                    ReferencedDataNature.TEXT)) {
-                break;
+    private Path saveValue(T2Reference t2Ref, Path file) throws IOException {
+        switch (t2Ref.getReferenceType()) {
+        case IdentifiedList:
+            DataBundles.createList(file);
+            IdentifiedList<T2Reference> list = saver.getReferenceService()
+                    .getListService().getList(t2Ref);
+            long position = 0;
+            for (T2Reference ref : list) {
+                saveValue(ref, DataBundles.getListItem(file, position++));
             }
-            mimeTypes.addAll(ResultsUtils.getMimeTypes(
-                    externalReference, getContext()));
+            break;
+        case ErrorDocument:
+            file = saveError(t2Ref, file);
+            break;
+        case ReferenceSet:
+            file = saver.saveReference(t2Ref, file);
         }
-        if (!mimeTypes.isEmpty()) {
-
-            // Check for the most interesting type, if defined
-            String interestingType = mimeTypes.get(0).toString();
-
-            if (interestingType != null
-                    && interestingType.equals("text/plain") == false) {
-                // MIME types look like 'foo/bar'
-                String lastPart = interestingType.split("/")[1];
-                if (lastPart.startsWith("x-") == false) {
-                    fileExtension = "." + lastPart;
-                }
-            }
-        }
-        
-        Path targetFile = destination.resolve(name + fileExtension);
-        
-        OutputStream output = Files.newOutputStream(targetFile);
-        MessageDigest sha = null;
-        MessageDigest sha512 = null;
-        try {
-            sha = MessageDigest.getInstance("SHA");
-            output = new DigestOutputStream(output, sha);
-
-            sha512 = MessageDigest.getInstance("SHA-512");
-            output = new DigestOutputStream(output, sha512);
-        } catch (NoSuchAlgorithmException e) {  
-            logger.info("Could not find digest", e);
-        }
-        
-        // TODO: Set external references as URIs
-        IOUtils.copyLarge(
-                externalReferences.get(0).openStream(getContext()),
-                output);
-        output.close();
-        
-        if (sha != null) {
-            getSha1sums().put(targetFile.toRealPath(),
-                    hexOfDigest(sha));
-        }
-        if (sha512 != null) {
-            sha512.digest();                    
-            getSha512sums().put(targetFile.toRealPath(), 
-                    hexOfDigest(sha512));
-        }
-        getFileToId().put(targetFile, identified.getId());
-
-        
+        seenReference(t2Ref, file);
+        return file;
     }
+
+    private Path saveError(T2Reference t2Ref, Path file) throws IOException {
+        ErrorDocument errorDoc = saver.getReferenceService()
+                .getErrorDocumentService().getError(t2Ref);
+
+        StringBuilder trace = new StringBuilder();
+        addStackTrace(trace, errorDoc);
+
+        List<Path> causes = new ArrayList<>();
+        for (T2Reference cause : errorDoc.getErrorReferences()) {
+            causes.add(saveIntermediate(cause));
+        }
+        file = DataBundles.setError(file, errorDoc.getMessage(),
+                trace.toString(), causes.toArray(new Path[causes.size()]));
+        return file;
+    }	
 
     protected void addStackTrace(Individual error, ErrorDocument errorDoc)
 			throws  IOException {

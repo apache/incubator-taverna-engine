@@ -1,8 +1,15 @@
 package org.purl.wf4ever.provtaverna.export;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.net.ProtocolException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,29 +24,29 @@ import java.util.List;
 import java.util.Map;
 
 import net.sf.taverna.t2.invocation.InvocationContext;
-import net.sf.taverna.t2.lang.results.ResultsUtils;
 import net.sf.taverna.t2.provenance.api.ProvenanceAccess;
-import net.sf.taverna.t2.reference.ErrorDocument;
 import net.sf.taverna.t2.reference.ExternalReferenceSPI;
-import net.sf.taverna.t2.reference.Identified;
-import net.sf.taverna.t2.reference.IdentifiedList;
 import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.ReferenceSet;
-import net.sf.taverna.t2.reference.ReferencedDataNature;
+import net.sf.taverna.t2.reference.ReferenceSetService;
 import net.sf.taverna.t2.reference.T2Reference;
+import net.sf.taverna.t2.reference.ValueCarryingExternalReference;
 import net.sf.taverna.t2.workbench.reference.config.DataManagementConfiguration;
 
+import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.apache.tika.Tika;
+import org.apache.tika.mime.MimeTypeException;
+import org.apache.tika.mime.MimeTypes;
 import org.purl.wf4ever.robundle.Bundle;
 
 import uk.org.taverna.databundle.DataBundles;
-import eu.medsea.mimeutil.MimeType;
 
 public class Saver {
 
-	private static final Charset UTF8 = Charset.forName("UTF-8");
+    private static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
 
 	private static Logger logger = Logger.getLogger(Saver.class);
 	
@@ -68,6 +75,8 @@ public class Saver {
 	private Map<String, T2Reference> chosenReferences;
 
     private Bundle bundle;
+
+    private Map<T2Reference, String> mediaTypes = new HashMap<>();
 	
 	/**
      * @return the bundle
@@ -91,7 +100,185 @@ public class Saver {
 	private void setBundle(Bundle bundle) {
         this.bundle = bundle;
     }
+	
+	
 
+    protected static Tika tika = new Tika();
+
+	
+	public Path saveReference(T2Reference t2Ref, Path file) throws IOException {
+        ReferenceSetService refSet = getReferenceService().getReferenceSetService();
+        ReferenceSet referenceSet = refSet.getReferenceSet(t2Ref);
+        List<ExternalReferenceSPI> externalReferences = new ArrayList<ExternalReferenceSPI>(
+                referenceSet.getExternalReferences());
+        Collections.sort(externalReferences,
+                new Comparator<ExternalReferenceSPI>() {
+                    public int compare(ExternalReferenceSPI o1,
+                            ExternalReferenceSPI o2) {
+                        return (int) (o1.getResolutionCost() - o2
+                                .getResolutionCost());
+                    }
+                });
+        String mimeType = findMimeType(externalReferences);
+
+        Path targetFile = writeIfLocal(externalReferences, file, mimeType);
+        if (targetFile == null) {
+            URI uri = referenceAsURI(externalReferences);
+            if (uri != null) {
+                targetFile = DataBundles.setReference(file, uri);
+            }
+        }
+        
+        if (targetFile != null) {       
+            getMediaTypes().put(t2Ref, mimeType);        
+            getFileToId().put(targetFile, t2Ref);
+        }
+        
+        return targetFile;
+        
+    }
+
+    private Path writeIfLocal(List<ExternalReferenceSPI> externalReferences,
+            Path file, String mimeType) throws IOException {
+
+        ValueCarryingExternalReference<?> valRef = null;
+        for (ExternalReferenceSPI ref : externalReferences) {
+            if (ref instanceof ValueCarryingExternalReference) {
+                valRef = (ValueCarryingExternalReference<?>) ref;
+                break;
+            }
+        }
+
+        if (valRef == null) { 
+            return null;
+        }
+        
+        String fileExtension;
+        try {
+            fileExtension = MimeTypes.getDefaultMimeTypes()
+                    .forName(mimeType).getExtension();
+        } catch (MimeTypeException e1) {
+           fileExtension = "";
+        }
+        Path targetFile;
+        if (fileExtension.isEmpty()) { 
+            targetFile = file;
+        } else {
+            targetFile = file.resolveSibling(file.getFileName() + "."
+                    + fileExtension);
+        }
+
+        MessageDigest sha = null;
+        MessageDigest sha512 = null;
+        OutputStream output = Files.newOutputStream(targetFile);
+        try {
+            try {
+                sha = MessageDigest.getInstance("SHA");
+                output = new DigestOutputStream(output, sha);
+
+                sha512 = MessageDigest.getInstance("SHA-512");
+                output = new DigestOutputStream(output, sha512);
+            } catch (NoSuchAlgorithmException e) {
+                logger.info("Could not find digest", e);
+            }
+
+            IOUtils.copyLarge(valRef.openStream(getContext()), output);
+        } finally {
+            output.close();
+        }
+
+        if (sha != null) {
+            getSha1sums().put(targetFile.toRealPath(), hexOfDigest(sha));
+        }
+        if (sha512 != null) {
+            sha512.digest();
+            getSha512sums().put(targetFile.toRealPath(), hexOfDigest(sha512));
+        }
+
+        return targetFile;
+    }
+
+    private URI referenceAsURI(List<ExternalReferenceSPI> externalReferences) {
+        for (ExternalReferenceSPI ref : externalReferences) {
+            String className = ref.getClass().getName();
+            if (className
+                    .equals("net.sf.taverna.t2.reference.impl.external.http.HttpReference")) {
+                URL url = (URL) getProperty(ref, "httpUrl");
+                try {
+                    return url.toURI();
+                } catch (URISyntaxException e) {
+                    logger.warn("Can't convert HttpReference to URI: "+ url, e);
+                   continue;
+                }
+            } else if (className
+                    .equals("net.sf.taverna.t2.reference.impl.external.file.FileReference")) {
+                File file = (File) getProperty(ref, "file");
+                return file.toURI();
+            } else if (className
+                    .equals("de.uni_luebeck.inb.knowarc.usecases.invocation.ssh.SshReference")) {
+                String host = (String) getProperty(ref, "host");
+                int port = (int) getProperty(ref, "port");
+                String path = (String) getProperty(ref, "fullPath");
+                try {
+                    return new URI("sftp", null, host, port, path, null, null);
+                } catch (URISyntaxException e) {
+                    logger.warn("Can't convert SshReference to URI: sftp://"+ host + ":" + port + path, e);
+                    continue;
+                }
+            }
+        }
+        return null;
+    }
+
+    protected Object getProperty(ExternalReferenceSPI ref, String propertyName) {
+        try {
+            return PropertyUtils.getSimpleProperty(ref, propertyName);
+        } catch (Exception ex) {
+            throw new IllegalArgumentException("Can't look up " + propertyName
+                    + " in bean " + ref, ex);
+        }
+    }
+
+    private String findMimeType(List<ExternalReferenceSPI> externalReferences)
+            throws IOException, ProtocolException {
+        String mimeType = null;
+        for (ExternalReferenceSPI externalReference : externalReferences) {
+            String className = externalReference.getClass().getName();
+            if (className
+                    .equals("net.sf.taverna.t2.reference.impl.external.http.HttpReference")) {
+                URL url = (URL) getProperty(externalReference, "httpUrl");
+                mimeType = tika.detect(url);
+            } else if (className
+                    .equals("net.sf.taverna.t2.reference.impl.external.file.FileReference")) {
+                File file = (File) getProperty(
+                        externalReference, "file");
+                mimeType = tika.detect(file);
+            } else if (className
+                    .equals("de.uni_luebeck.inb.knowarc.usecases.invocation.ssh.SshReference")) {
+                String filename = (String) getProperty(
+                        externalReference, "fileName");
+                try (InputStream instream = externalReference
+                        .openStream(context)) {
+                    mimeType = tika.detect(instream, filename);
+                }
+            } else if (className.equals("net.sf.taverna.t2.reference.impl.external.object.VMObjectReference")) {
+                mimeType = "application/x-java-serialized-object";
+            } else {
+                try (InputStream instream = externalReference
+                        .openStream(context)) {
+                    mimeType = tika.detect(instream);
+                }
+            }
+            if (mimeType != null && !mimeType.equals(APPLICATION_OCTET_STREAM)) {
+                break;
+            }
+        }
+        if (mimeType == null || mimeType.isEmpty()) {
+            return APPLICATION_OCTET_STREAM;
+        }
+        return mimeType;
+    }
+    
     protected void saveToFolder(Path folder, Map<String, T2Reference> chosenReferences, ReferenceService referenceService) throws IOException,
 			FileNotFoundException {
 		logger.info("Saving provenance and outputs to " + folder.toRealPath());
@@ -112,112 +299,6 @@ public class Saver {
 		} catch (Exception e) {
 			logger.error("Failed to save the provenance graph", e);
  		}
-	}
-
-	protected Path writeDataObject(Path destination, String name,
-			T2Reference ref, String defaultExtension) throws IOException {
-		Identified identified = getReferenceService().resolveIdentifier(ref, null,
-				getContext());
-	
-		if (identified instanceof IdentifiedList) {
-			// Create a new directory, iterate over the collection recursively
-			// calling this method
-		    Path targetDir = destination.resolve(name);
-		    Files.createDirectories(targetDir);
-			getFileToId().put(targetDir, identified.getId());
-			int count = 0;
-			List<T2Reference> elements = getReferenceService().getListService()
-					.getList(ref);
-			for (T2Reference subRef : elements) {
-				writeDataObject(targetDir, "" + count++, subRef,
-						defaultExtension);
-			}
-			logger.debug("Saved list " + targetDir + " from " + identified.getId().toUri());
-			return targetDir;
-		}
-	
-		else {
-			String fileExtension = ".txt";
-			if (identified instanceof ReferenceSet) {
-				List<MimeType> mimeTypes = new ArrayList<MimeType>();
-				ReferenceSet referenceSet = (ReferenceSet) identified;
-				List<ExternalReferenceSPI> externalReferences = new ArrayList<ExternalReferenceSPI>(
-						referenceSet.getExternalReferences());
-				Collections.sort(externalReferences,
-						new Comparator<ExternalReferenceSPI>() {
-							public int compare(ExternalReferenceSPI o1,
-									ExternalReferenceSPI o2) {
-								return (int) (o1.getResolutionCost() - o2
-										.getResolutionCost());
-							}
-						});
-				for (ExternalReferenceSPI externalReference : externalReferences) {
-					if (externalReference.getDataNature().equals(
-							ReferencedDataNature.TEXT)) {
-						break;
-					}
-					mimeTypes.addAll(ResultsUtils.getMimeTypes(
-							externalReference, getContext()));
-				}
-				if (!mimeTypes.isEmpty()) {
-	
-					// Check for the most interesting type, if defined
-					String interestingType = mimeTypes.get(0).toString();
-	
-					if (interestingType != null
-							&& interestingType.equals("text/plain") == false) {
-						// MIME types look like 'foo/bar'
-						String lastPart = interestingType.split("/")[1];
-						if (lastPart.startsWith("x-") == false) {
-							fileExtension = "." + lastPart;
-						}
-					}
-				}
-				
-				Path targetFile = destination.resolve(name + fileExtension);
-				
-				OutputStream output = Files.newOutputStream(targetFile);
-				MessageDigest sha = null;
-				MessageDigest sha512 = null;
-				try {
-					sha = MessageDigest.getInstance("SHA");
-					output = new DigestOutputStream(output, sha);
-
-					sha512 = MessageDigest.getInstance("SHA-512");
-					output = new DigestOutputStream(output, sha512);
-				} catch (NoSuchAlgorithmException e) {	
-					logger.info("Could not find digest", e);
-				}
-				
-				// TODO: Set external references as URIs
-				IOUtils.copyLarge(
-						externalReferences.get(0).openStream(getContext()),
-						output);
-				output.close();
-				
-				if (sha != null) {
-					getSha1sums().put(targetFile.toRealPath(),
-							hexOfDigest(sha));
-				}
-				if (sha512 != null) {
-					sha512.digest();					
-					getSha512sums().put(targetFile.toRealPath(), 
-							hexOfDigest(sha512));
-				}
-				getFileToId().put(targetFile, identified.getId());
-				logger.debug("Saved value " + targetFile + " from " + identified.getId().toUri());
-				return targetFile;
-			} else {
-			    Path targetFile = destination.resolve(name + ".err");
-				String message = ((ErrorDocument) identified).getMessage();
-                Files.write(targetFile, Collections.singletonList(message), UTF8);
-				// We don't care about checksums for errors
-				getFileToId().put(targetFile, identified.getId());
-				logger.debug("Saved error " + targetFile + " from " + identified.getId().toUri());
-				return targetFile;
-			}
-	
-		}
 	}
 
 	private String hexOfDigest(MessageDigest sha) {
@@ -267,9 +348,17 @@ public class Saver {
 	public Map<Path, String> getSha1sums() {
 		return sha1sums;
 	}
+	
+	public Map<T2Reference, String> getMediaTypes() {
+	    return mediaTypes;
+	}
 
 	public Map<Path, String> getSha512sums() {
 		return sha512sums;
 	}
+
+    public void setMediaTypes(Map<T2Reference, String> mediaTypes) {
+        this.mediaTypes = mediaTypes;
+    }
 
 }
