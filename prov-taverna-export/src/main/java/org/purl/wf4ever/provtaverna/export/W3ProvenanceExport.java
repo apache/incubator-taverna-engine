@@ -82,8 +82,6 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.sparql.util.Context;
 import com.hp.hpl.jena.sparql.vocabulary.FOAF;
 
-import eu.medsea.mimeutil.MimeType;
-
 public class W3ProvenanceExport {
 
     // TODO: Avoid this Taverna 2 dependency
@@ -402,7 +400,7 @@ public class W3ProvenanceExport {
         try {
             WorkflowBundle wfBundle = wfBundleIO.readBundle(new ByteArrayInputStream(dataflow), 
                     T2FlowReader.APPLICATION_VND_TAVERNA_T2FLOW_XML);
-            writeBundle(getBaseFolder(), wfBundle);
+//            writeBundle(getBaseFolder(), wfBundle);
         } catch (ReaderException e) {
             logger.warn("Could not write bundle", e);
         }
@@ -881,9 +879,9 @@ public class W3ProvenanceExport {
         
         manifest.writeAsJsonLD();
 
-        // Saving a data bundle:
-        Path bundleFile = runPath.getParent().resolve(runPath.getFileName() + ".robundle.zip");
-        DataBundles.closeAndSaveBundle(dataBundle, bundleFile);
+//        // Saving a data bundle:
+//        Path bundleFile = runPath.getParent().resolve(runPath.getFileName() + ".robundle.zip");
+//        DataBundles.closeAndSaveBundle(dataBundle, bundleFile);
         // NOTE: From now dataBundle and its Path's are CLOSED
         // and can no longer be accessed
 

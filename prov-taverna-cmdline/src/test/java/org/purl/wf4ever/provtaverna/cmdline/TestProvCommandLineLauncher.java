@@ -7,6 +7,10 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
@@ -68,17 +72,25 @@ public class TestProvCommandLineLauncher extends LaunchSafely {
 		System.out.println(getOut());
 		assertEquals(0, status);
 		File[] outputs = outDir.listFiles();
-		assertEquals(3, outputs.length);
-		File provFile = new File(outDir, "workflowrun.prov.ttl");
-		assertTrue(provFile.isFile());
-		String prov = FileUtils.readFileToString(provFile, "utf-8");
+		assertEquals(1, outputs.length);
+		assertEquals("greeting", outputs[0].getName());
 		
-		// FIXME: Test actual content
-		assertTrue(prov.contains("@prefix prov:"));
-		assertTrue(prov.contains("<greeting>"));
+		Path zip = outDir.toPath().resolveSibling(outDir.getName() + ".robundle.zip");
+		assertTrue(Files.isRegularFile(zip));
 		
-		File intermediates = new File(outDir, "intermediates");
-		assertTrue(intermediates.isDirectory());
+		try (FileSystem zipFs = FileSystems.newFileSystem(zip, getClass().getClassLoader())) {
+		
+    		Path provFile = zipFs.getPath("workflowrun.prov.ttl");
+    		String prov = new String(Files.readAllBytes(provFile), "utf-8");
+    		
+    		// FIXME: Test actual content
+    		assertTrue(prov.contains("@prefix prov:"));
+//    		System.out.println(prov);
+    		assertTrue(prov.contains("<outputs/greeting.txt>"));
+    		
+    		Path intermediates = zipFs.getPath("intermediates");
+    		assertTrue(Files.isDirectory(intermediates));
+		}
 		
 	}
 	

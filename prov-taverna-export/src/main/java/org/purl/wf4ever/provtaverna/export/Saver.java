@@ -120,6 +120,7 @@ public class Saver {
                     }
                 });
         String mimeType = findMimeType(externalReferences);
+        getMediaTypes().put(t2Ref, mimeType);        
 
         Path targetFile = writeIfLocal(externalReferences, file, mimeType);
         if (targetFile == null) {
@@ -130,7 +131,6 @@ public class Saver {
         }
         
         if (targetFile != null) {       
-            getMediaTypes().put(t2Ref, mimeType);        
             getFileToId().put(targetFile, t2Ref);
         }
         
@@ -160,13 +160,8 @@ public class Saver {
         } catch (MimeTypeException e1) {
            fileExtension = "";
         }
-        Path targetFile;
-        if (fileExtension.isEmpty()) { 
-            targetFile = file;
-        } else {
-            targetFile = file.resolveSibling(file.getFileName() + "."
-                    + fileExtension);
-        }
+        Path targetFile = file.resolveSibling(file.getFileName()
+                + fileExtension);
 
         MessageDigest sha = null;
         MessageDigest sha512 = null;
