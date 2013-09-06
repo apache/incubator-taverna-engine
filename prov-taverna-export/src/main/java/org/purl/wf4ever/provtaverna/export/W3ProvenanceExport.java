@@ -1,6 +1,5 @@
 package org.purl.wf4ever.provtaverna.export;
 
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -10,14 +9,10 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.security.DigestOutputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,7 +28,6 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import net.sf.taverna.raven.appconfig.ApplicationConfig;
-import net.sf.taverna.t2.lang.results.ResultsUtils;
 import net.sf.taverna.t2.provenance.api.ProvenanceAccess;
 import net.sf.taverna.t2.provenance.lineageservice.URIGenerator;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DataflowInvocation;
@@ -42,17 +36,12 @@ import net.sf.taverna.t2.provenance.lineageservice.utils.ProcessorEnactment;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 import net.sf.taverna.t2.provenance.lineageservice.utils.WorkflowRun;
 import net.sf.taverna.t2.reference.ErrorDocument;
-import net.sf.taverna.t2.reference.ExternalReferenceSPI;
 import net.sf.taverna.t2.reference.IdentifiedList;
-import net.sf.taverna.t2.reference.ReferenceSet;
-import net.sf.taverna.t2.reference.ReferenceSetService;
-import net.sf.taverna.t2.reference.ReferencedDataNature;
 import net.sf.taverna.t2.reference.StackTraceElementBean;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.reference.T2ReferenceType;
 import net.sf.taverna.t2.spi.SPIRegistry;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.WriterGraphRIOT;
@@ -250,9 +239,7 @@ public class W3ProvenanceExport {
 
 		GregorianCalendar startedProvExportAt = new GregorianCalendar();
 
-		URI runURI = URI.create(uriGenerator.makeWFInstanceURI(getWorkflowRunId()));
-		// FIXME: Should this be "" to indicate the current file?
-		// FIXME: Should this not be an Account instead?
+		runURI = URI.create(uriGenerator.makeWFInstanceURI(getWorkflowRunId()));
 
 		URI provFileUri  = toURI(provFile);
         Individual bundle = provModel.createBundle(provFileUri);
@@ -400,7 +387,7 @@ public class W3ProvenanceExport {
         try {
             WorkflowBundle wfBundle = wfBundleIO.readBundle(new ByteArrayInputStream(dataflow), 
                     T2FlowReader.APPLICATION_VND_TAVERNA_T2FLOW_XML);
-//            writeBundle(getBaseFolder(), wfBundle);
+            writeBundle(wfBundle);
         } catch (ReaderException e) {
             logger.warn("Could not write bundle", e);
         }
@@ -754,6 +741,7 @@ public class W3ProvenanceExport {
 	private static final String WFDESC = "http://purl.org/wf4ever/wfdesc#";
 	private static WorkflowBundleIO wfBundleIO;
     private Bundle bundle;
+    private URI runURI;
 
     /**
      * @return the bundle
@@ -762,59 +750,31 @@ public class W3ProvenanceExport {
         return bundle;
     }
 
-    public void writeBundle(Path runPath, WorkflowBundle wfBundle) throws IOException  {
-        // Create a new (temporary) data bundle
-        Bundle dataBundle = DataBundles.createBundle();
-        // In order to preserve existing file extensions we copy as files
-        // rather than using the higher-level methods like
-        // DataBundles.setStringValue()
+    public void writeBundle(WorkflowBundle wfBundle) throws IOException  {
 
-        NavigableMap<String, Path> portPaths = DataBundles.getPorts(runPath);
-        
-        // Inputs
-        Path inputs = DataBundles.getInputs(dataBundle);
-        Set<String> portsToCopy = new HashSet<>(wfBundle.getMainWorkflow().getInputPorts().getNames());
-        for (String portName : portsToCopy) {
-            Path source = portPaths.get(portName);
-            if (source != null) {
-                Files.copy(source, inputs.resolve(source.getFileName().toString()));
-            }
-        }
-
-        Path outputs = DataBundles.getOutputs(dataBundle);
-        for (String outputNAme : wfBundle.getMainWorkflow().getOutputPorts().getNames()) {
-            Path source = portPaths.get(outputNAme);
-            if (source != null) {
-                Files.copy(source, outputs.resolve(source.getFileName().toString()));
-            }
-        }
-
-        // Provenance
-        Path workflowRunProvenance = DataBundles.getWorkflowRunProvenance(dataBundle);
-        Files.copy(runPath.resolve("workflowrun.prov.ttl"),
-                workflowRunProvenance);
+        Bundle dataBundle = getBundle();
 
         // Workflow
         DataBundles.setWorkflowBundle(dataBundle, wfBundle);
 
-        
-        
-        // Intermediate values
-        DataBundles.copyRecursively(runPath.resolve("intermediates"),
-                DataBundles.getIntermediates(dataBundle),
-                StandardCopyOption.REPLACE_EXISTING);
 
         // Generate Manifest
         // TODO: This should be done automatically on close/save
         Manifest manifest = new Manifest(dataBundle);
         manifest.populateFromBundle();
         
+        Path workflowRunProvenance = DataBundles.getWorkflowRunProvenance(dataBundle);
         // Additional metadata
         manifest.getAggregation(workflowRunProvenance).setMediatype("text/turtle");
      
         
         Agent taverna = new Agent();
-        taverna.setName("Taverna Workbench 2.4.0");
+        taverna.setName(applicationConfig.getTitle());
+        String versionName = applicationConfig.getName();
+        // TODO: is this the correct uri for the software running on this machine??
+//        taverna.setUri(URI.create("http://ns.taverna.org.uk/2011/software/"
+//                + versionName));
+        
         manifest.getAggregation(workflowRunProvenance).setCreatedBy(Arrays.asList(taverna));
         
         // Add annotations
@@ -822,7 +782,7 @@ public class W3ProvenanceExport {
 
         // This RO Bundle is about a run
         PathAnnotation bundleAboutRun = new PathAnnotation();
-        bundleAboutRun.setAbout(URI.create("http://ns.taverna.org.uk/2011/run/445a1790-4b67-4e44-8287-f8a5838890e2/"));
+        bundleAboutRun.setAbout(runURI);
         bundleAboutRun.setContent(URI.create("/"));
         manifest.getAnnotations().add(bundleAboutRun);
 
@@ -838,7 +798,8 @@ public class W3ProvenanceExport {
         // The wfdesc is about the workflow definition 
         PathAnnotation wfdescAboutWfBundle = new PathAnnotation();
         Path workflow = DataBundles.getWorkflow(dataBundle);
-        manifest.getAggregation(workflow).setMediatype("application/vnd.taverna.scufl2.workflow-bundle");
+        String workflowType = Files.probeContentType(workflow);
+        manifest.getAggregation(workflow).setMediatype(workflowType);
         Path wfdesc = DataBundles.getWorkflowDescription(dataBundle);
         wfdescAboutWfBundle.setAbout(URI.create(workflow.toUri().getPath()));
         wfdescAboutWfBundle.setContent(URI.create(wfdesc.toUri().getPath()));
