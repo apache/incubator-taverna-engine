@@ -799,7 +799,7 @@ public class W3ProvenanceExport {
         PathAnnotation wfdescAboutWfBundle = new PathAnnotation();
         Path workflow = DataBundles.getWorkflow(dataBundle);
         String workflowType = Files.probeContentType(workflow);
-        manifest.getAggregation(workflow).setMediatype(workflowType);
+        manifest.getAggregation(workflow).setMediatype("application/vnd.taverna.scufl2.workflow-bundle");
         Path wfdesc = DataBundles.getWorkflowDescription(dataBundle);
         wfdescAboutWfBundle.setAbout(URI.create(workflow.toUri().getPath()));
         wfdescAboutWfBundle.setContent(URI.create(wfdesc.toUri().getPath()));
