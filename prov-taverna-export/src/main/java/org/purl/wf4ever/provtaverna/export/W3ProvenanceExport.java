@@ -73,6 +73,7 @@ import com.hp.hpl.jena.sparql.vocabulary.FOAF;
 
 public class W3ProvenanceExport {
 
+    private static final String WORKFLOW_BUNDLE = "application/vnd.taverna.scufl2.workflow-bundle";
     // TODO: Avoid this Taverna 2 dependency
     private static SPIRegistry<WorkflowBundleReader> readerSpi = new SPIRegistry<>(WorkflowBundleReader.class);
     private static SPIRegistry<WorkflowBundleWriter> writerSpi = new SPIRegistry<>(WorkflowBundleWriter.class);
@@ -426,13 +427,16 @@ public class W3ProvenanceExport {
 
 		for (Entry<Path, T2Reference> entry : getFileToT2Reference().entrySet()) {
 		    Path file = entry.getKey();
+		  
 		    try {
     			T2Reference t2Ref = entry.getValue();
     			URI dataURI = URI.create(uriGenerator.makeT2ReferenceURI(t2Ref.toUri()
     					.toASCIIString()));
     
     			Individual entity = provModel.createArtifact(dataURI);
-    			
+    			if (! Files.exists(file)) {
+    	            continue;
+    	        }
                 Individual content = provModel.setContent(entity, toURI(file));
     
                 // Add checksums
@@ -578,39 +582,36 @@ public class W3ProvenanceExport {
 		return seenReferences.containsKey(t2Ref);
 	}
 
-	private Path saveIntermediate(T2Reference t2Ref) throws IOException {
-		// Avoid double-saving
-		Path f = seenReferences.get(t2Ref);
-		if (f != null) {
-			return f;
-		}
-		Path file = referencePath(t2Ref);
-		Path parent = file.getParent();
-		Files.createDirectories(parent);
-		if (t2Ref.getReferenceType() == T2ReferenceType.IdentifiedList) {
-			// Write a kind of text/uri-list (but with relative URIs)
-			IdentifiedList<T2Reference> list = saver.getReferenceService()
-					.getListService().getList(t2Ref);
-			for (T2Reference ref : list) {
-				Path refFile = saveIntermediate(ref).toRealPath();
-//				URI relRef = uriTools.relativePath(toURI(parent.toRealPath()),
-//						toURI(refFile.toRealPath()));
-			}
-		} else {
+    private Path saveIntermediate(T2Reference t2Ref) throws IOException {
+        // Avoid double-saving
+        Path f = seenReferences.get(t2Ref);
+        if (f != null) {
+            return f;
+        }
+        Path file = referencePath(t2Ref);
+        
+        if (t2Ref.getReferenceType() == T2ReferenceType.IdentifiedList) {
+            IdentifiedList<T2Reference> list = saver.getReferenceService()
+                    .getListService().getList(t2Ref);
+            for (T2Reference ref : list) {
+                Path refFile = saveIntermediate(ref).toRealPath();
+                // URI relRef =
+                // uriTools.relativePath(toURI(parent.toRealPath()),
+                // toURI(refFile.toRealPath()));
+            }
+            seenReference(t2Ref, file);
+            return file;
+        } else {
+            return saveValue(t2Ref, file);
+        }
 
-		    String extension = "";
-			if (t2Ref.getReferenceType() == T2ReferenceType.ErrorDocument) {
-				extension = ".err";
-			}
-			// Capture filename with extension
-			saver.saveReference(t2Ref, file);
-		}
-		seenReference(t2Ref, file);
-		return file;
-	}
+    }
 
     private Path saveValue(T2Reference t2Ref, Path file) throws IOException {
+        Path parent = file.getParent();
+
         switch (t2Ref.getReferenceType()) {
+
         case IdentifiedList:
             DataBundles.createList(file);
             IdentifiedList<T2Reference> list = saver.getReferenceService()
@@ -621,9 +622,11 @@ public class W3ProvenanceExport {
             }
             break;
         case ErrorDocument:
+            Files.createDirectories(parent);
             file = saveError(t2Ref, file);
             break;
         case ReferenceSet:
+            Files.createDirectories(parent);
             file = saver.saveReference(t2Ref, file);
         }
         seenReference(t2Ref, file);
@@ -799,7 +802,7 @@ public class W3ProvenanceExport {
         PathAnnotation wfdescAboutWfBundle = new PathAnnotation();
         Path workflow = DataBundles.getWorkflow(dataBundle);
         String workflowType = Files.probeContentType(workflow);
-        manifest.getAggregation(workflow).setMediatype("application/vnd.taverna.scufl2.workflow-bundle");
+        manifest.getAggregation(workflow).setMediatype(WORKFLOW_BUNDLE);
         Path wfdesc = DataBundles.getWorkflowDescription(dataBundle);
         wfdescAboutWfBundle.setAbout(URI.create(workflow.toUri().getPath()));
         wfdescAboutWfBundle.setContent(URI.create(wfdesc.toUri().getPath()));
