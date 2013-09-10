@@ -130,6 +130,8 @@ public class Saver {
         
         if (targetFile != null) {       
             getFileToId().put(targetFile, t2Ref);
+        } else {
+            logger.warn("Could not write out reference " + t2Ref);
         }
         
         return targetFile;
