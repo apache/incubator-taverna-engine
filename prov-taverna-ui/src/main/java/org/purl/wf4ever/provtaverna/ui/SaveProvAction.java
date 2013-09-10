@@ -24,7 +24,7 @@ public class SaveProvAction extends SaveAllResultsSPI {
 
     public SaveProvAction() {
 		super();
-		putValue(NAME, "Save provenance (PROV)");
+		putValue(NAME, "Save provenance bundle");
 		putValue(SMALL_ICON, WorkbenchIcons.saveAllIcon);
 				
 	}
