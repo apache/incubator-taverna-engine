@@ -109,10 +109,9 @@ public class WorkflowDataProcessor {
 
 			PortBinding vb = null;
 
-			try {
-				logger.debug("storing tree for var "+portName+" in workflow with ID "+workflowId+" and instance "+workflowRunId);
+							logger.debug("storing tree for var "+portName+" in workflow with ID "+workflowId+" and instance "+workflowRunId);
 				for (WorkflowDataNode node:tree) {
-
+				    try {
 					if (!node.getWorkflowID().equals(workflowId)) continue;
 
 					if (node.getIndex().equals("[]")) {
@@ -130,7 +129,9 @@ public class WorkflowDataProcessor {
 						logger.debug("creating collection entry for "+
 								node.value+" with index "+
 								node.index);
-
+						
+			                
+			            
 						if (node.getParent()!=null) {
 							logger.debug(" and parent "+node.parent.index);
 							// write a collection record to DB
@@ -148,6 +149,7 @@ public class WorkflowDataProcessor {
 									portName, 
 									workflowRunId);							
 						}
+						
 
 					} else {
 						logger.debug("creating PortBinding for "+node.value+" with index "+node.index);
@@ -165,6 +167,7 @@ public class WorkflowDataProcessor {
 						vb.setValue(node.getValue());
 
 						if (node.getParent()!=null) {
+						    
 							logger.debug(" in collection "+node.getParent().value+
 									" with index "+node.getParent().getIndex());
 
@@ -173,15 +176,23 @@ public class WorkflowDataProcessor {
 
 						} else {
 							vb.setPositionInColl(1);  // default							
-						}						
-						getPw().addPortBinding(vb);
+						}
+						
+						try {
+    						getPw().addPortBinding(vb);
+						} catch (SQLException e) {
+			                logger.debug("Problem processing trees for workflow: " +workflowId + " instance: " + workflowRunId + " : "+
+			                        " updating instead of inserting");
+			                getPw().updatePortBinding(vb);
+						}
 					}
+				    } catch (SQLException e) {
+                    logger.debug(
+                            "Database problem processing trees for workflow: "
+                                    + workflowId + " instance: "
+                                    + workflowRunId + " : " + workflowId, e);
+                    }
 				}
-			} catch (SQLException e) {
-				logger.debug("Problem processing trees for workflow: " +workflowId + " instance: " + workflowRunId + " : "+
-						" updating instead of inserting");
-				getPw().updatePortBinding(vb);
-			}
 
 		}
 		
