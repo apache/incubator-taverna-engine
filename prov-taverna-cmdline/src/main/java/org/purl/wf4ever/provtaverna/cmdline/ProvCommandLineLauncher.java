@@ -136,7 +136,7 @@ public class ProvCommandLineLauncher extends CommandLineLauncher implements
 					Saver saver = new Saver(realFacade.getContext().getReferenceService(), 
 							realFacade.getContext(), realFacade.getWorkflowRunId(),
 							chosenReferences);
-					saver.setFileToId(fileToId);
+					//saver.setFileToId(fileToId);
 					Path bundle = outputDir.toPath().resolveSibling(outputDir.getName() + ".robundle.zip");
 					try {
 						saver.saveData(bundle);

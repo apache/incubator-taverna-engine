@@ -104,8 +104,6 @@ public class W3ProvenanceExport {
 
 	private Saver saver;
 	
-	private URI baseURI = URI.create("app://" + UUID.randomUUID() + "/");
-	
 	private Map<URI, Individual> describedEntities = new HashMap<URI, Individual>();
 
     private TavernaProvModel provModel = new TavernaProvModel();
@@ -496,7 +494,7 @@ public class W3ProvenanceExport {
 	}
 
 	protected URI toURI(Path file) {
-	    return baseURI.resolve(getBaseFolder().toUri().relativize(file.toUri()));
+	    return file.toUri();
     }
 
     protected void storeEntitities(String dataBindingId, Individual activity,
