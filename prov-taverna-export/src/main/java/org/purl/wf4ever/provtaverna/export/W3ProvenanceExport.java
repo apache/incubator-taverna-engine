@@ -411,14 +411,17 @@ public class W3ProvenanceExport {
 	}
 
 	protected Literal timestampToLiteral(
-			Timestamp invocationStarted) {
+			Timestamp timestamp) {
+	    if (timestamp == null) { 
+	        return null;
+	    }
 		GregorianCalendar cal = new GregorianCalendar();
-		cal.setTime(invocationStarted);
+		cal.setTime(timestamp);
 		XMLGregorianCalendar xmlCal = datatypeFactory
 				.newXMLGregorianCalendar(cal);
 		// Chop of the trailing 0-s of non-precission
 		xmlCal.setFractionalSecond(BigDecimal.valueOf(
-				invocationStarted.getNanos() / 1000000, NANOSCALE - 6));
+				timestamp.getNanos() / 1000000, NANOSCALE - 6));
         return provModel.model.createTypedLiteral(xmlCal.toXMLFormat(),
                 XSDDatatype.XSDdateTime);
 	}
@@ -799,15 +802,17 @@ public class W3ProvenanceExport {
         manifest.getAnnotations().add(provenanceAboutBundle);
         
         // The wfdesc is about the workflow definition 
-        PathAnnotation wfdescAboutWfBundle = new PathAnnotation();
         Path workflow = DataBundles.getWorkflow(dataBundle);
-        String workflowType = Files.probeContentType(workflow);
+//            String workflowType = Files.probeContentType(workflow);
         manifest.getAggregation(workflow).setMediatype(WORKFLOW_BUNDLE);
         Path wfdesc = DataBundles.getWorkflowDescription(dataBundle);
-        wfdescAboutWfBundle.setAbout(URI.create(workflow.toUri().getPath()));
-        wfdescAboutWfBundle.setContent(URI.create(wfdesc.toUri().getPath()));
-        manifest.getAnnotations().add(wfdescAboutWfBundle);
-
+        if (Files.exists(wfdesc)) {
+            PathAnnotation wfdescAboutWfBundle = new PathAnnotation();
+            wfdescAboutWfBundle.setAbout(URI.create(workflow.toUri().getPath()));
+            wfdescAboutWfBundle.setContent(URI.create(wfdesc.toUri().getPath()));
+            manifest.getAnnotations().add(wfdescAboutWfBundle);
+        }
+        
         // And the workflow definition is about the workflow
         PathAnnotation wfBundleAboutWf = new PathAnnotation();
         URITools uriTools = new URITools();

@@ -6,6 +6,7 @@ import java.util.Calendar;
 
 import org.apache.jena.riot.IO_Jena;
 import org.apache.jena.riot.system.IO_JenaWriters;
+import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.n3.turtle.TurtleReader;
 import com.hp.hpl.jena.ontology.DatatypeProperty;
@@ -23,6 +24,8 @@ import com.hp.hpl.jena.xmloutput.impl.Abbreviated;
 import com.hp.hpl.jena.xmloutput.impl.Basic;
 
 public class ProvModel {
+    
+    private static Logger logger = Logger.getLogger(ProvModel.class);
 
     private static final String EMPTY_PREFIX = "";
 
@@ -302,10 +305,18 @@ public class ProvModel {
     }
 
     public Individual setEndedAtTime(Individual endedActivity, Calendar time) {
+        if (time == null) {
+            logger.warn("Unknown end time");
+            return null;
+        }
         return setEndedAtTime(endedActivity, model.createTypedLiteral(time));
     }
 
     public Individual setEndedAtTime(Individual endedActivity, Literal time) {
+        if (time == null) {
+            logger.warn("Unknown end time");
+            return null;
+        }
         endedActivity.addLiteral(endedAtTime, time);
         Individual end = model.createIndividual(End);
         endedActivity.setPropertyValue(qualifiedEnd, end);
@@ -323,10 +334,18 @@ public class ProvModel {
     }
 
     public Individual setStartedAtTime(Individual startedActivity, Calendar time) {
+        if (time == null) {
+            logger.warn("Unknown start time");
+            return null;
+        }
         return setStartedAtTime(startedActivity, model.createTypedLiteral(time));
     }
 
     public Individual setStartedAtTime(Individual startedActivity, Literal time) {
+        if (time == null) {
+            logger.warn("Unknown start time");
+            return null;
+        }
         startedActivity.addLiteral(startedAtTime, time);
         Individual start = model.createIndividual(Start);
         startedActivity.setPropertyValue(qualifiedStart, start);
