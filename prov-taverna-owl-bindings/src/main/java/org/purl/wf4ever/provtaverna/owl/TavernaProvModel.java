@@ -36,7 +36,8 @@ public class TavernaProvModel extends WfprovModel {
     public DatatypeProperty stackTrace;
     
     public Individual createTavernaEngine(URI uri) {
-        return model.createIndividual(uri.toASCIIString(), TavernaEngine);
+        Individual engine = model.createIndividual(uri.toASCIIString(), TavernaEngine);
+        return engine;
     }
     
     private void loadCnt() {

@@ -48,6 +48,7 @@ import org.purl.wf4ever.robundle.Bundle;
 import org.purl.wf4ever.robundle.manifest.Agent;
 import org.purl.wf4ever.robundle.manifest.Manifest;
 import org.purl.wf4ever.robundle.manifest.PathAnnotation;
+import org.purl.wf4ever.robundle.manifest.PathMetadata;
 
 import uk.org.taverna.databundle.DataBundles;
 import uk.org.taverna.scufl2.api.common.URITools;
@@ -283,7 +284,7 @@ public class W3ProvenanceExport {
 		
 		provModel.setStartedAtTime(wfProcess,
 				timestampToLiteral(dataflowInvocation.getInvocationStarted()));
-		provModel.setStartedAtTime(wfProcess,
+		provModel.setEndedAtTime(wfProcess,
 				timestampToLiteral(dataflowInvocation.getInvocationEnded()));
 
 		
@@ -334,8 +335,10 @@ public class W3ProvenanceExport {
 			
 			label(process,
 					"Processor execution "
-							+ provenanceProcessor.getProcessorName() + " ("
-							+ pe.getProcessIdentifier() + ")");
+							+ provenanceProcessor.getProcessorName());
+			// The facade identifier is a bit too techie!
+//							+ " ("
+//							+ pe.getProcessIdentifier() + ")");
 			Individual procPlan = provModel.createProcess(processorURI);
 			label(procPlan, "Processor " + provenanceProcessor.getProcessorName());
 	        provModel.setWasEnactedBy(process, tavernaAgent, procPlan);
@@ -421,6 +424,8 @@ public class W3ProvenanceExport {
                 XSDDatatype.XSDdateTime);
 	}
 
+	private static Map<URI, String> mediaTypes = new HashMap<>();
+	
 	protected void storeFileReferences() {
 
 		for (Entry<Path, T2Reference> entry : getFileToT2Reference().entrySet()) {
@@ -432,11 +437,31 @@ public class W3ProvenanceExport {
     					.toASCIIString()));
     
     			Individual entity = provModel.createArtifact(dataURI);
+    			
+    			String mediaType = saver.getMediaTypes().get(t2Ref);
+    			
     			if (! Files.exists(file)) {
     	            continue;
     	        }
-                Individual content = provModel.setContent(entity, toURI(file));
-    
+    			URI contentUri;
+    			if (DataBundles.isReference(file)) {
+    			    // TODO: Do we really need to read this back again from the file?
+    			    contentUri = DataBundles.getReference(file);
+    			} else {
+    			    contentUri = toURI(file);
+    			}
+    			
+                Individual content = provModel.setContent(entity, contentUri);
+                if (mediaType != null) {
+                    mediaTypes.put(contentUri, mediaType);
+                }
+                if (DataBundles.isReference(file)) {
+                    // Don't capture the checksum and content of the REFERENCE!
+                    continue;
+                    
+                }
+
+                
                 // Add checksums
     			String sha1 = saver.getSha1sums().get(file.toRealPath());
     			if (sha1 != null) {
@@ -448,9 +473,9 @@ public class W3ProvenanceExport {
     			}
     			long byteCount = Files.size(file);
                 content.addLiteral(provModel.byteCount, byteCount);
+                
                 if (byteCount < EMBEDDED_MAX_FILESIZE) {
                     // Add content if it's "tiny"
-                    String mediaType = saver.getMediaTypes().get(t2Ref);
                     byte[] bytes = Files.readAllBytes(file);
                     if (mediaType != null && mediaType.startsWith(TEXT)) {
                         // as string - assuming UTF8 (and declaring so)
@@ -786,6 +811,21 @@ public class W3ProvenanceExport {
 //                + versionName));
         
         manifest.getAggregation(workflowRunProvenance).setCreatedBy(Arrays.asList(taverna));
+        
+        // Media types:
+        for (Entry<URI, String> e :  mediaTypes.entrySet()) {
+            URI uri = e.getKey();
+            String mediatype = e.getValue();
+            PathMetadata aggregation = manifest.getAggregation(uri);
+            if (aggregation == null) { 
+                // An external reference? Add it.
+                aggregation = new PathMetadata();
+                aggregation.setUri(uri);
+                manifest.getAggregates().add(aggregation);
+            }
+            aggregation.setMediatype(mediatype);
+        }
+        
         
         // Add annotations
         
