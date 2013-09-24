@@ -177,7 +177,7 @@ public class WfprovModel extends ProvModel {
 
     public Individual setWasOutputFrom(Individual entity, Individual activity) {
         Individual usage = setWasGeneratedBy(entity, activity);
-        activity.addProperty(wasOutputFrom, entity);
+        entity.addProperty(wasOutputFrom, activity);
         return usage;
     }
     

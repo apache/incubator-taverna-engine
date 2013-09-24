@@ -502,7 +502,7 @@ public class W3ProvenanceExport {
 			if (direction == Direction.INPUTS) {
 			    involvement = provModel.setUsedInput(activity, entity);
 			} else {
-			    involvement = provModel.setWasOutputFrom(activity, entity);
+			    involvement = provModel.setWasOutputFrom(entity, activity);
 			}
 
 			String processorName = null;
