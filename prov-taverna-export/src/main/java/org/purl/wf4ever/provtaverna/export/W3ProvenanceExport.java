@@ -8,19 +8,15 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.NavigableMap;
-import java.util.Set;
 import java.util.UUID;
 
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -73,6 +69,7 @@ import com.hp.hpl.jena.sparql.vocabulary.FOAF;
 
 public class W3ProvenanceExport {
 
+    private static final String TEXT = "text/";
     private static final String WORKFLOW_BUNDLE = "application/vnd.taverna.scufl2.workflow-bundle";
     // TODO: Avoid this Taverna 2 dependency
     private static SPIRegistry<WorkflowBundleReader> readerSpi = new SPIRegistry<>(WorkflowBundleReader.class);
@@ -80,9 +77,7 @@ public class W3ProvenanceExport {
 
     private static final String EN = "en";
     
-    private static final String TXT = ".txt";
-
-    private static final int EMBEDDED_STRING_MAX_FILESIZE = 1024;
+    private static final int EMBEDDED_MAX_FILESIZE = 1024;
 
     private static final Charset UTF8 = Charset.forName("UTF-8");
 
@@ -453,14 +448,23 @@ public class W3ProvenanceExport {
     			}
     			long byteCount = Files.size(file);
                 content.addLiteral(provModel.byteCount, byteCount);
-    			// Add text content if it's "tiny"
-    			if (file.getFileName().endsWith(TXT) && byteCount < EMBEDDED_STRING_MAX_FILESIZE) {
+                if (byteCount < EMBEDDED_MAX_FILESIZE) {
+                    // Add content if it's "tiny"
+                    String mediaType = saver.getMediaTypes().get(t2Ref);
                     byte[] bytes = Files.readAllBytes(file);
-                    String str = new String(bytes, UTF8);
-                    content.addLiteral(provModel.chars, str);
-                    content.addLiteral(provModel.characterEncoding, UTF8.name());
-        		}
-            } catch (IOException e) {
+                    if (mediaType != null && mediaType.startsWith(TEXT)) {
+                        // as string - assuming UTF8 (and declaring so)
+                        String str = new String(bytes, UTF8);
+                        content.addLiteral(provModel.chars, str);
+                        content.addLiteral(provModel.characterEncoding, UTF8.name());
+                        content.addRDFType(provModel.ContentAsText);
+                    } else {
+                        // Or base64-encoded bytes
+                        content.addRDFType(provModel.ContentAsBase64);
+            		    content.addLiteral(provModel.bytes, bytes);
+            		}
+                }
+        } catch (IOException e) {
                 logger.warn("Could not read " + file + " as " + UTF8, e);
             }
 		}
