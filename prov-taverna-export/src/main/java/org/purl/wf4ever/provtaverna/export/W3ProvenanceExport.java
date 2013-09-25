@@ -453,7 +453,7 @@ public class W3ProvenanceExport {
                 if (mediaType != null) {
                     mediaTypes.put(contentUri, mediaType);
                 }
-                if (DataBundles.isValue(file)) {
+                if (! DataBundles.isValue(file)) {
                     // Don't capture the checksum and content of references and lists
                     continue;
                 }
