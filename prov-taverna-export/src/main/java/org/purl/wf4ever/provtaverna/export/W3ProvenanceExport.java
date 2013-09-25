@@ -453,12 +453,10 @@ public class W3ProvenanceExport {
                 if (mediaType != null) {
                     mediaTypes.put(contentUri, mediaType);
                 }
-                if (DataBundles.isReference(file)) {
-                    // Don't capture the checksum and content of the REFERENCE!
+                if (DataBundles.isValue(file)) {
+                    // Don't capture the checksum and content of references and lists
                     continue;
-                    
                 }
-
                 
                 // Add checksums
     			String sha1 = saver.getSha1sums().get(file.toRealPath());
