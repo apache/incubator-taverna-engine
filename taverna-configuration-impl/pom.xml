@@ -1,15 +1,31 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-    <parent>
-        <artifactId>taverna-commons</artifactId>
-        <groupId>uk.org.taverna.commons</groupId>
-        <version>1.0.0-SNAPSHOT</version>
-    </parent>
-    <groupId>uk.org.taverna.configuration</groupId>
-    <version>0.1.1-SNAPSHOT</version>
+	<parent>
+		<artifactId>taverna-commons</artifactId>
+		<groupId>uk.org.taverna.commons</groupId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+	<groupId>uk.org.taverna.configuration</groupId>
+	<version>0.1.1-SNAPSHOT</version>
 	<artifactId>taverna-configuration-impl</artifactId>
 	<packaging>bundle</packaging>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<configuration>
+					<instructions>
+						<Import-Package>
+							uk.org.taverna.configuration;provide:=true,
+							uk.org.taverna.configuration.proxy;provide:=true,*
+						</Import-Package>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 	<dependencies>
 		<dependency>
 			<groupId>uk.org.taverna.configuration</groupId>
