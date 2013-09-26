@@ -268,6 +268,10 @@ public class W3ProvenanceExport {
 		DataflowInvocation dataflowInvocation = provenanceAccess
 				.getDataflowInvocation(getWorkflowRunId());
 		
+        // TODO: Should we go through all of getDataflowInvocations() in order to find
+		// the plans etc. for the nested workflow executions and also cover empty 
+		// nested workflow runs?
+		
 		
 		String workflowName = provenanceAccess
 				.getWorkflowNameByWorkflowID(dataflowInvocation.getWorkflowId());
@@ -308,6 +312,15 @@ public class W3ProvenanceExport {
 				// inside nested wf - this will be parent processenactment
 				parentURI = URI.create(uriGenerator.makeProcessExecution(
 						pe.getWorkflowRunId(), pe.getParentProcessorEnactmentId()));
+				
+ 
+				
+				
+				// TODO: Find plan for nested workflow!
+//				String wfUri = uriGenerator.makeWorkflowURI(nestedWfId);
+//				Individual wfPlan = provModel.createWorkflow(URI.create(wfUri));
+//				provModel.setDescribedByWorkflow(wfProcess, wfPlan);
+//		        provModel.setWasEnactedBy(wfProcess, tavernaAgent, wfPlan);
 			}
 
 			URI processURI = URI.create(uriGenerator.makeProcessExecution(
