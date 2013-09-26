@@ -19,6 +19,8 @@ import org.junit.Test;
 public class TestProvCommandLineLauncher extends LaunchSafely {
 
 	private static final String HELLOANYONE_T2FLOW = "/helloanyone.t2flow";
+	private static final String BROKEN_T2FLOW = "/broken.t2flow";
+	
 	private File t2flow;
 	private File outDir;
 
@@ -29,8 +31,8 @@ public class TestProvCommandLineLauncher extends LaunchSafely {
 	@Before
 	public void writeT2Flow() throws IOException {
 		t2flow = File.createTempFile("test", ".t2flow");
-		URL resource = getClass().getResource(HELLOANYONE_T2FLOW);
-		assertNotNull("Could not find " + HELLOANYONE_T2FLOW, resource);
+		URL resource = getClass().getResource(BROKEN_T2FLOW);
+		assertNotNull("Could not find " + BROKEN_T2FLOW, resource);
 		FileUtils.copyURLToFile(resource, t2flow);
 	}
 
