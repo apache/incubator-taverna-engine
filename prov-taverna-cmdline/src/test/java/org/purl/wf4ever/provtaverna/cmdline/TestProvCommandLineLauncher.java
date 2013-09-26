@@ -21,19 +21,18 @@ public class TestProvCommandLineLauncher extends LaunchSafely {
 	private static final String HELLOANYONE_T2FLOW = "/helloanyone.t2flow";
 	private static final String BROKEN_T2FLOW = "/broken.t2flow";
 	
-	private File t2flow;
 	private File outDir;
 
 	public TestProvCommandLineLauncher() {
 		super(new ProvCommandLineLauncher());
 	}
 
-	@Before
-	public void writeT2Flow() throws IOException {
-		t2flow = File.createTempFile("test", ".t2flow");
-		URL resource = getClass().getResource(BROKEN_T2FLOW);
-		assertNotNull("Could not find " + BROKEN_T2FLOW, resource);
+	public File writeT2Flow(String workflowResource) throws IOException {
+		File t2flow = File.createTempFile("test", ".t2flow");
+		URL resource = getClass().getResource(workflowResource);
+		assertNotNull("Could not find " + workflowResource, resource);
 		FileUtils.copyURLToFile(resource, t2flow);
+		return t2flow;
 	}
 
 	@Test
@@ -51,9 +50,11 @@ public class TestProvCommandLineLauncher extends LaunchSafely {
 	}
 
 	@Test
-	public void runWithoutProv() throws Exception {
+	public void helloWithoutProv() throws Exception {
+	    File t2flow = writeT2Flow(HELLOANYONE_T2FLOW);
 		int status = launchSafely("-outputdir", outDir.getPath(),
-				"-inputvalue", "name", "Fred", t2flow.toURI().getPath());
+				"-inputvalue", "name", "Fred", 
+				t2flow.toURI().getPath());
 //		System.err.println(getErr());
 //		System.out.println(getOut());
 		assertEquals(0, status);
@@ -65,8 +66,9 @@ public class TestProvCommandLineLauncher extends LaunchSafely {
 	}
 	
 	@Test
-	public void runWithProv() throws Exception {
-		int status = launchSafely("-outputdir", outDir.getPath(),
+	public void helloWithProv() throws Exception {
+	    File t2flow = writeT2Flow(HELLOANYONE_T2FLOW);
+	    int status = launchSafely("-outputdir", outDir.getPath(),
 				"-provenance", "-embedded",
 				"-inputvalue", "name", "Fred", 
 				t2flow.toURI().getPath());
@@ -95,5 +97,50 @@ public class TestProvCommandLineLauncher extends LaunchSafely {
 		}
 		
 	}
+	
+	@Test
+    public void brokenWithoutProv() throws Exception {
+        File t2flow = writeT2Flow(BROKEN_T2FLOW);
+        int status = launchSafely("-outputdir", outDir.getPath(),                
+                t2flow.toURI().getPath());
+//      System.err.println(getErr());
+//      System.out.println(getOut());
+        assertEquals(0, status);
+        File[] outputs = outDir.listFiles();
+        assertEquals(1, outputs.length);
+        assertEquals("listC", outputs[0].getName());
+    }
+    
+    @Test
+    public void brokenWithProv() throws Exception {
+        File t2flow = writeT2Flow(BROKEN_T2FLOW);
+        int status = launchSafely("-outputdir", outDir.getPath(),
+                "-provenance", "-embedded",
+                t2flow.toURI().getPath());
+        System.err.println(getErr());
+        System.out.println(getOut());
+        assertEquals(0, status);
+        File[] outputs = outDir.listFiles();
+        assertEquals(1, outputs.length);
+        assertEquals("listC", outputs[0].getName());
+        
+        Path zip = outDir.toPath().resolveSibling(outDir.getName() + ".robundle.zip");
+        assertTrue(Files.isRegularFile(zip));
+        
+        try (FileSystem zipFs = FileSystems.newFileSystem(zip, getClass().getClassLoader())) {
+        
+            Path provFile = zipFs.getPath("workflowrun.prov.ttl");
+            String prov = new String(Files.readAllBytes(provFile), "utf-8");
+            
+            // FIXME: Test actual content
+            assertTrue(prov.contains("@prefix prov:"));
+//          System.out.println(prov);
+            assertTrue(prov.contains("<outputs/greeting.txt>"));
+            
+            Path intermediates = zipFs.getPath("intermediates");
+            assertTrue(Files.isDirectory(intermediates));
+        }
+    }
+	
 	
 }
