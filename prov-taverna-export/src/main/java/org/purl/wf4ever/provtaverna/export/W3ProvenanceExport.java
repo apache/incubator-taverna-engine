@@ -307,7 +307,7 @@ public class W3ProvenanceExport {
 			} else {
 				// inside nested wf - this will be parent processenactment
 				parentURI = URI.create(uriGenerator.makeProcessExecution(
-						pe.getWorkflowRunId(), pe.getProcessEnactmentId()));
+						pe.getWorkflowRunId(), pe.getParentProcessorEnactmentId()));
 			}
 
 			URI processURI = URI.create(uriGenerator.makeProcessExecution(

@@ -10,6 +10,12 @@
     <name>Taverna PROV export</name>
     <dependencies>
         <dependency>
+            <!--  Workaround for T2-2104 -->
+            <groupId>net.sf.taverna.t2.core</groupId>
+            <artifactId>provenance-derby</artifactId>
+            <version>1.4.1</version>
+        </dependency>
+        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>prov-taverna-owl-bindings</artifactId>
             <version>${project.version}</version>
