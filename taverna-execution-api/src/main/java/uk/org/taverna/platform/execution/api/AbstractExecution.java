@@ -20,10 +20,15 @@
  ******************************************************************************/
 package uk.org.taverna.platform.execution.api;
 
+import java.io.IOException;
+import java.nio.file.StandardCopyOption;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.purl.wf4ever.robundle.Bundle;
 
+import uk.org.taverna.databundle.DataBundles;
 import uk.org.taverna.platform.report.ActivityReport;
 import uk.org.taverna.platform.report.ProcessorReport;
 import uk.org.taverna.platform.report.WorkflowReport;
@@ -41,6 +46,8 @@ import uk.org.taverna.scufl2.api.profiles.Profile;
  * @author David Withers
  */
 public abstract class AbstractExecution implements Execution {
+
+	private static Logger logger = Logger.getLogger(AbstractExecution.class.getName());
 
 	private final String ID;
 	private final WorkflowBundle workflowBundle;
@@ -84,16 +91,13 @@ public abstract class AbstractExecution implements Execution {
 
 	public WorkflowReport generateWorkflowReport(Workflow workflow) {
 		WorkflowReport workflowReport = createWorkflowReport(workflow);
-//		if (inputs != null && DataBundles.hasInputs(inputs)) {
-//			System.out.println("copying inputs");
-//			try {
-//				DataBundles.copyRecursively(DataBundles.getInputs(inputs), DataBundles.getInputs(workflowReport.getInputs()), StandardCopyOption.REPLACE_EXISTING);
-//			} catch (IOException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//			System.out.println("copying inputs done");
-//		}
+		if (inputs != null && DataBundles.hasInputs(inputs)) {
+			try {
+				DataBundles.copyRecursively(DataBundles.getInputs(inputs), DataBundles.getInputs(workflowReport.getInputs()), StandardCopyOption.REPLACE_EXISTING);
+			} catch (IOException e) {
+				logger.log(Level.SEVERE, "Error while copying input data to workflow report", e);
+			}
+		}
 		for (Processor processor : workflow.getProcessors()) {
 			ProcessorReport processorReport = createProcessorReport(processor);
 			processorReport.setParentReport(workflowReport);
