@@ -148,12 +148,13 @@ public class EventProcessor {
 	 * @throws InstantiationException
 	 *
 	 */
-	public EventProcessor(ProvenanceWriter pw, ProvenanceQuery pq, WorkflowDataProcessor wfdp)
+	public EventProcessor(ProvenanceWriter pw, ProvenanceQuery pq, WorkflowDataProcessor wfdp, XMLSerializer xmlSerializer)
 	throws InstantiationException, IllegalAccessException,
 	ClassNotFoundException, SQLException {
 		this.pw = pw;
 		this.pq = pq;
 		this.wfdp = wfdp;
+		this.xmlSerializer = xmlSerializer;
 
 		logger.setLevel((Level)Level.INFO);
 	}
