@@ -41,6 +41,7 @@ import net.sf.taverna.t2.provenance.lineageservice.ProvenanceWriter;
 import net.sf.taverna.t2.provenance.lineageservice.WorkflowDataProcessor;
 import net.sf.taverna.t2.provenance.reporter.ProvenanceReporter;
 import net.sf.taverna.t2.reference.ReferenceService;
+import net.sf.taverna.t2.workflowmodel.serialization.xml.XMLSerializer;
 
 import org.apache.log4j.Logger;
 
@@ -279,10 +280,12 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 	private WorkflowDataProcessor wfdp;
 	private EventProcessor eventProcessor;
 	private final DatabaseManager databaseManager;
+	private final XMLSerializer xmlSerializer;
 
 
-	public ProvenanceConnector(DatabaseManager databaseManager) {
+	public ProvenanceConnector(DatabaseManager databaseManager, XMLSerializer xmlSerializer) {
 		this.databaseManager = databaseManager;
+		this.xmlSerializer = xmlSerializer;
 	}
 
 	/**
@@ -300,7 +303,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 			getWfdp().setPq(getQuery());
 			getWfdp().setPw(getWriter());
 
-			setEventProcessor(new EventProcessor());
+			setEventProcessor(new EventProcessor(xmlSerializer));
 			getEventProcessor().setPw(getWriter());
 			getEventProcessor().setPq(getQuery());
 			getEventProcessor().setWfdp(getWfdp());

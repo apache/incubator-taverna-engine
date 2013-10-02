@@ -136,7 +136,9 @@ public class EventProcessor {
 	// Backpatching temporarily disabled
 	private static final boolean backpatching = false;
 
-	public EventProcessor() { }
+	public EventProcessor(XMLSerializer xmlSerializer) {
+		this.xmlSerializer = xmlSerializer;
+	}
 
 	/**
 	 * @param pw
