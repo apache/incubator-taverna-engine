@@ -6,7 +6,7 @@
     </prerequisites>
 	<groupId>org.purl.wf4ever.provtaverna</groupId>
 	<artifactId>prov-taverna</artifactId>
-	<version>2.1.0-SNAPSHOT</version>
+	<version>2.1.2</version>
 	<packaging>pom</packaging>
 	<name>Taverna PROV</name>
 
@@ -158,7 +158,8 @@
 		<url>https://github.com/wf4ever/taverna-prov</url>
 		<connection>scm:git:git://github.com/wf4ever/taverna-prov.git</connection>
 		<developerConnection>scm:git:git@github.com:wf4ever/taverna-prov.git</developerConnection>
-	</scm>
+	  <tag>prov-taverna-2.1.2</tag>
+  </scm>
 	<issueManagement>
 		<system>github</system>
 		<url>https://github.com/wf4ever/taverna-prov/issues</url>
