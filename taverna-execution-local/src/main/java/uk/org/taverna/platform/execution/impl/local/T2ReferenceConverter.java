@@ -20,10 +20,12 @@ import net.sf.taverna.t2.reference.IdentifiedList;
 import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.ReferenceServiceException;
 import net.sf.taverna.t2.reference.ReferenceSet;
+import net.sf.taverna.t2.reference.StackTraceElementBean;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.reference.T2ReferenceType;
 import net.sf.taverna.t2.reference.impl.external.file.FileReference;
 import net.sf.taverna.t2.reference.impl.external.http.HttpReference;
+import net.sf.taverna.t2.results.ResultsUtils;
 import uk.org.taverna.databundle.DataBundles;
 
 /**
@@ -81,13 +83,26 @@ public class T2ReferenceConverter {
 					}
 				}
 			}
-
 		} else if (reference.getReferenceType() == T2ReferenceType.ErrorDocument) {
 			ErrorDocument errorDocument = referenceService.getErrorDocumentService().getError(reference);
 			String message = errorDocument.getMessage();
-			// TODO add trace
-			String trace = "";
-			DataBundles.setError(path, message, trace);
+			StringBuilder trace = new StringBuilder();
+			if (errorDocument.getExceptionMessage() != null
+					&& !errorDocument.getExceptionMessage().isEmpty()) {
+				trace.append(errorDocument.getExceptionMessage());
+				trace.append("\n");
+			}
+			List<StackTraceElementBean> stackTraceStrings = errorDocument.getStackTraceStrings();
+			for (StackTraceElementBean stackTraceElement : stackTraceStrings) {
+				trace.append(ResultsUtils.getStackTraceElementString(stackTraceElement));
+				trace.append("\n");
+			}
+			List<Path> causes = new ArrayList<>();
+			// TODO intermediate values
+//			for (T2Reference errorReference : errorDocument.getErrorReferences()) {
+//				causes.add(convertReferenceToPath(errorReference, referenceService, context));
+//			}
+			DataBundles.setError(path, message, trace.toString(), causes.toArray(new Path[causes.size()]));
 		} else { // it is an IdentifiedList<T2Reference>
 			IdentifiedList<T2Reference> identifiedList = referenceService.getListService().getList(
 					reference);
