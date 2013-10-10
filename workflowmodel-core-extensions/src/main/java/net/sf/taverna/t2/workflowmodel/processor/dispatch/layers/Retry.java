@@ -25,6 +25,7 @@ import static net.sf.taverna.t2.workflowmodel.processor.dispatch.description.Dis
 import static net.sf.taverna.t2.workflowmodel.processor.dispatch.description.DispatchLayerStateEffect.UPDATE_LOCAL_STATE;
 import static net.sf.taverna.t2.workflowmodel.processor.dispatch.description.DispatchMessageType.JOB;
 
+import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -58,23 +59,42 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchJobEven
 @DispatchLayerResultReaction(emits = {}, relaysUnmodified = true, stateEffects = { REMOVE_LOCAL_STATE })
 public class Retry extends AbstractErrorHandlerLayer<JsonNode> {
 
-	public static final String URI = "http://ns.taverna.org.uk/2010/scufl2/taverna/dispatchlayer/Retry";
+	private static final String BACKOFF_FACTOR = "backoffFactor";
 
-	private JsonNode config = JsonNodeFactory.instance.objectNode();
+    private static final String MAX_DELAY = "maxDelay";
+
+    private static final String MAX_RETRIES = "maxRetries";
+
+    private static final String INITIAL_DELAY = "initialDelay";
+
+    public static final String URI = "http://ns.taverna.org.uk/2010/scufl2/taverna/dispatchlayer/Retry";
+
+	private ObjectNode config;
+
+    private int maxRetries;
+
+    private int initialDelay;
+
+    private int maxDelay;
+
+    private double backoffFactor;
 
 	private static Timer retryTimer = new Timer("Retry timer", true);
 
 	public Retry() {
 		super();
+		configure(JsonNodeFactory.instance.objectNode());
 	}
 
 	public Retry(int maxRetries, int initialDelay, int maxDelay,
 			float backoffFactor) {
 		super();
-		((ObjectNode) config).put("maxRetries", maxRetries);
-		((ObjectNode) config).put("initialDelay", initialDelay);
-		((ObjectNode) config).put("maxDelay", maxDelay);
-		((ObjectNode) config).put("backoffFactor", backoffFactor);
+		ObjectNode conf = JsonNodeFactory.instance.objectNode();
+		conf.put(MAX_RETRIES, maxRetries);
+		conf.put(INITIAL_DELAY, initialDelay);
+		conf.put(MAX_DELAY, maxDelay);
+		conf.put(BACKOFF_FACTOR, backoffFactor);
+		configure(conf);
 	}
 
 	class RetryState extends JobState {
@@ -94,13 +114,11 @@ public class Retry extends AbstractErrorHandlerLayer<JsonNode> {
 		 */
 		@Override
 		public boolean handleError() {
-			if (currentRetryCount == config.get("maxRetries").intValue()) {
+			if (currentRetryCount >= maxRetries) {
 				return false;
 			}
-			int delay = (int) (config.get("initialDelay").intValue() * (Math.pow(config.get("backoffFactor").doubleValue(), currentRetryCount)));
-			if (delay > config.get("maxRetries").intValue()) {
-				delay = config.get("maxRetries").intValue();
-			}
+			int delay = (int) (initialDelay * (Math.pow(backoffFactor, currentRetryCount)));
+			delay = Math.min(delay, maxDelay);
 			TimerTask task = new TimerTask() {
 				@Override
 				public void run() {
@@ -121,14 +139,58 @@ public class Retry extends AbstractErrorHandlerLayer<JsonNode> {
 	}
 
 	public void configure(JsonNode config) {
-		this.config = config;
-		if (!config.has("maxRetries")) ((ObjectNode) config).put("maxRetries", 0);
-		if (!config.has("initialDelay")) ((ObjectNode) config).put("initialDelay", 1000);
-		if (!config.has("maxDelay")) ((ObjectNode) config).put("maxDelay", 5000);
-		if (!config.has("backoffFactor")) ((ObjectNode) config).put("backoffFactor", 1.0);
+	    ObjectNode defaultConfig = defaultConfig();
+        setAllMissingFields((ObjectNode) config, defaultConfig);
+        checkConfig((ObjectNode)config);
+        this.config = (ObjectNode) config;
+        maxRetries = config.get(MAX_RETRIES).intValue();
+        initialDelay = config.get(INITIAL_DELAY).intValue();
+        maxDelay = config.get(MAX_DELAY).intValue();
+        backoffFactor = config.get(BACKOFF_FACTOR).doubleValue();       
 	}
 
-	public JsonNode getConfiguration() {
+    private void setAllMissingFields(ObjectNode config, ObjectNode defaults) {
+        for (String fieldName : forEach(defaults.fieldNames())) {
+	        if (! config.has(fieldName) || config.get(fieldName).isNull()) {
+	            config.put(fieldName, defaults.get(fieldName));
+	        }
+	    }
+    }
+
+	private <T> Iterable<T> forEach(final Iterator<T> iterator) {
+	    return new Iterable<T>() {
+            @Override
+            public Iterator<T> iterator() {
+                return iterator;
+            }
+        };
+    }
+
+    private void checkConfig(ObjectNode conf) {
+        if (conf.get(MAX_RETRIES).intValue() < 0) {
+            throw new IllegalArgumentException("maxRetries < 0");
+        }
+        if (conf.get(INITIAL_DELAY).intValue() < 0) { 
+            throw new IllegalArgumentException("initialDelay < 0");
+        }
+        if (conf.get(MAX_DELAY).intValue() < conf.get(INITIAL_DELAY).intValue()) {
+            throw new IllegalArgumentException("maxDelay < initialDelay");
+        }
+        if (conf.get(BACKOFF_FACTOR).doubleValue() < 0.0) {
+            throw new IllegalArgumentException("backoffFactor < 0.0");
+        }
+    }
+
+    public static ObjectNode defaultConfig() {
+	    ObjectNode conf = JsonNodeFactory.instance.objectNode();
+	    conf.put(MAX_RETRIES, 0);
+	    conf.put(INITIAL_DELAY, 1000);
+	    conf.put(MAX_DELAY, 5000);
+	    conf.put(BACKOFF_FACTOR, 1.0);
+	    return conf;
+    }
+
+    public JsonNode getConfiguration() {
 		return this.config;
 	}
 }
