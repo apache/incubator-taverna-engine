@@ -78,6 +78,7 @@ public abstract class TabSelectorComponent<T> extends JPanel {
 		if (button != null) {
 			tabGroup.remove(button);
 			remove(button);
+			revalidate();
 			repaint();
 		}
 	}
