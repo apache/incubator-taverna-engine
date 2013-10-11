@@ -47,10 +47,12 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchJobEven
  * <li>maxRetries = 0 (int)</li>
  * <li>initialDelay = 1000 (milliseconds)</li>
  * <li>maxDelay = 2000 (milliseconds)</li>
- * <li>backoffFactor = 1.0 (float)</li>
+ * <li>backoffFactor = 1.0 (double)</li>
  * </ul>
  *
  * @author Tom Oinn
+ * @author David Withers
+ * @author Stian Soiland-Reyes
  *
  */
 @DispatchLayerErrorReaction(emits = { JOB }, relaysUnmodified = true, stateEffects = {
@@ -87,7 +89,7 @@ public class Retry extends AbstractErrorHandlerLayer<JsonNode> {
 	}
 
 	public Retry(int maxRetries, int initialDelay, int maxDelay,
-			float backoffFactor) {
+			double backoffFactor) {
 		super();
 		ObjectNode conf = JsonNodeFactory.instance.objectNode();
 		conf.put(MAX_RETRIES, maxRetries);
