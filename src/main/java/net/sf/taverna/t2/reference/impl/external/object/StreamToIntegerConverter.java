@@ -22,7 +22,7 @@ public class StreamToIntegerConverter implements StreamToValueConverterSPI<Integ
 			ReferencedDataNature dataNature, String charset) {
 		StreamToStringConverter stringConverter = new StreamToStringConverter();
 		String s = stringConverter.renderFrom(stream, dataNature, charset);
-		Integer result  = Integer.valueOf(s);
+		Integer result  = Integer.valueOf(s.trim());
 		return result;
 
 	}

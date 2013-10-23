@@ -22,7 +22,7 @@ public class StreamToBooleanConverter implements StreamToValueConverterSPI<Boole
 			ReferencedDataNature dataNature, String charset) {
 		StreamToStringConverter stringConverter = new StreamToStringConverter();
 		String s = stringConverter.renderFrom(stream, dataNature, charset);
-		Boolean result  = Boolean.valueOf(s);
+		Boolean result  = Boolean.valueOf(s.trim());
 		return result;
 		
 	}
