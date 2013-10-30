@@ -65,6 +65,7 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayer;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchStack;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.ErrorBounce;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.IntermediateProvenance;
+import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.Parallelize;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.Stop;
 
 import org.apache.log4j.Logger;
@@ -159,8 +160,11 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 			workflowItem.setIdentifier(workflowRunId);
 			workflowItem.setParentId(dataflow.getIdentifier());
 			workflowItem.setWorkflowId(dataflow.getIdentifier());
-
-			addProvenanceLayerToProcessors(dataflow, workflowItem);
+			
+			// FIXME: workflowItem is local to each instanceOwningProcessId, but
+			// might be added to the Processor within different concurrent
+			// runs.  (T3-930)
+			addProvenanceLayerToProcessors(workflowItem);
 			context.getProvenanceReporter().setSessionID(workflowRunId);
 
 		}
@@ -175,23 +179,16 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 	
 	}
 
-	private void addProvenanceLayerToProcessors(Dataflow dataflow2, WorkflowProvenanceItem workflowItem) {
+	private void addProvenanceLayerToProcessors(WorkflowProvenanceItem workflowItem) {
 		for (Processor processor : dataflow.getProcessors()) {
-			DispatchStack dispatchStack = processor.getDispatchStack();
-			List<DispatchLayer<?>> layers = dispatchStack.getLayers();
-			boolean provAlreadyAdded = false;
-			for (DispatchLayer<?> layer : layers) {
-				if (layer instanceof IntermediateProvenance) {
-					provAlreadyAdded = true;
-				}
-			}
-			if (provAlreadyAdded) {
-				continue;
-			}
-			for (int j = 0; j < layers.size(); j++) {
-				if (! (layers.get(j) instanceof ErrorBounce)) {
-					continue;
-				}
+		    // Synchronized per processor as we might be modifying its dispatch stack
+		    // (fixes T3-929)
+		    synchronized (processor) {               
+		        DispatchStack dispatchStack = processor.getDispatchStack();
+    			List<DispatchLayer<?>> layers = dispatchStack.getLayers();
+    			if (isProvenanceAlreadyAdded(layers)) {
+    				continue;
+    			}
 				DispatchLayer<?> provenance = new IntermediateProvenance();
 				IntermediateProvenance intermediateProvenance = (IntermediateProvenance) provenance;
 				intermediateProvenance.setWorkflow(workflowItem);
@@ -201,16 +198,39 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 				Edits edits = EditsRegistry.getEdits();
 				try {
 					edits.getAddDispatchLayerEdit(dispatchStack, provenance,
-							j).doEdit();
+					        provenancePosition(layers)).doEdit();
 					break;
 				} catch (EditException e) {
 					logger.warn("adding provenance layer to dispatch stack failed "
 									+ e.toString());
 				}
-
-			}
+		    }
 		}
 	}
+
+    private boolean isProvenanceAlreadyAdded(List<DispatchLayer<?>> layers) {
+        for (DispatchLayer<?> layer : layers) {
+        	if (layer instanceof IntermediateProvenance) {
+        		return true;
+        	}
+        }
+        return false;
+    }
+
+    private int provenancePosition(List<DispatchLayer<?>> layers) {
+        int position=0; // fallback - beginning of list
+        for (int i = 0; i < layers.size(); i++) {
+            DispatchLayer<?> layer = layers.get(i);
+        	if (layer instanceof Parallelize) {
+        	    // Below Parallelize (should be there!)
+        	    position = i+1;
+        	} else if (layer instanceof ErrorBounce) {
+        	    // and inserted just above ErrorBounce (if it's there)
+        		position = i;
+        	}
+        }
+        return position;
+    }
 
 	public void addFailureListener(FailureListener listener) {
 		failureListeners.add(listener);
