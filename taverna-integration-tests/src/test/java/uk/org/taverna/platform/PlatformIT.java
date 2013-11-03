@@ -24,24 +24,27 @@ import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.net.URI;
 import java.net.URL;
-import java.util.Map;
+import java.nio.file.Path;
 
-import uk.org.taverna.platform.data.api.Data;
-import uk.org.taverna.platform.data.api.DataLocation;
-import uk.org.taverna.platform.data.api.DataNature;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.junit.Ignore;
+
+import uk.org.taverna.databundle.DataBundles;
+import uk.org.taverna.databundle.ErrorDocument;
 import uk.org.taverna.platform.report.State;
 import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.io.WorkflowBundleIO;
 
+@Ignore
 public class PlatformIT {
 
-	public WorkflowBundle loadWorkflow(String t2FlowFile, WorkflowBundleIO workflowBundleIO) throws Exception {
+	public WorkflowBundle loadWorkflow(String t2FlowFile, WorkflowBundleIO workflowBundleIO)
+			throws Exception {
 		URL wfResource = getClass().getResource(t2FlowFile);
 		assertNotNull(wfResource);
 		return workflowBundleIO.readBundle(wfResource.openStream(), null);
@@ -49,57 +52,58 @@ public class PlatformIT {
 
 	public File loadFile(String fileName) throws IOException, FileNotFoundException {
 		File file = File.createTempFile("platform-test", null);
-		InputStream inputStream = getClass().getResource(fileName).openStream();
-		OutputStream outputStream = new FileOutputStream(file);
-		byte[] buffer = new byte[64];
-		int length = -1;
-		while ((length = inputStream.read(buffer)) >= 0) {
-			outputStream.write(buffer, 0, length);
-		}
-		outputStream.flush();
-		outputStream.close();
+		file.deleteOnExit();
+		FileUtils.copyURLToFile(getClass().getResource(fileName), file);
 		return file;
 	}
 
-	public void printErrors(Data data) {
-/*		ErrorValue error = (ErrorValue) data.getValue();
-		String message = error.getMessage();
-		if (message != null) {
-			System.out.println(message);
+	public void printErrors(Path error) {
+		try {
+			ErrorDocument errorDocument = DataBundles.getError(error);
+			String message = errorDocument.getMessage();
+			if (message != null) {
+				System.out.println(message);
+			}
+			String trace = errorDocument.getTrace();
+			if (trace != null) {
+				System.out.println(trace);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		String exceptionMessage = error.getExceptionMessage();
-		if (exceptionMessage != null) {
-			System.out.println(exceptionMessage);
-		}
-		for (StackTraceElement stackTraceElement : error.getStackTrace()) {
-			System.out.println(stackTraceElement.getClassName());
-			System.out.println(stackTraceElement.getMethodName());
-			System.out.println(stackTraceElement.getLineNumber());
-		}*/
 	}
 
-	public boolean checkResult(Data result, String expectedResult) {
-		if (result.hasDataNature(DataNature.WILL_NOT_COME)) {
+	public boolean checkResult(Path result, String expectedResult) {
+		if (DataBundles.isError(result)) {
 			printErrors(result);
 			return false;
-		} else if (result.hasExplicitValue()){
-			Object resultObject = result.getExplicitValue();
-			String resultValue = null;
-			if (resultObject instanceof byte[]) {
-				resultValue = new String((byte[]) resultObject);
+		} else {
+			String resultValue;
+			if (DataBundles.isValue(result)) {
+				try {
+					resultValue = DataBundles.getStringValue(result);
+				} catch (IOException e) {
+					e.printStackTrace();
+					return false;
+				}
+			} else if (DataBundles.isReference(result)) {
+				try {
+					URI reference = DataBundles.getReference(result);
+					resultValue = IOUtils.toString(reference);
+				} catch (IOException e) {
+					e.printStackTrace();
+					return false;
+				}
 			} else {
-				resultValue = (String) resultObject;
+				System.out.println("Expected a value or reference");
+				return false;
 			}
-
 			if (resultValue.startsWith(expectedResult)) {
 				return true;
 			} else {
 				System.out.println("Expected: " + expectedResult + ", Actual: " + resultValue);
 				return false;
 			}
-		} else {
-			System.out.println("Expected an explicit value got a " + result.getDataNature());
-			return false;
 		}
 	}
 
@@ -111,25 +115,33 @@ public class PlatformIT {
 			throws InterruptedException {
 		int wait = 0;
 		while (!report.getState().equals(state) && wait++ < 30) {
-			if (printReport)
+			if (printReport) {
 				System.out.println(report);
+			}
 			Thread.sleep(500);
+		}
+		if (printReport) {
+			System.out.println(report);
 		}
 		return report.getState().equals(state);
 	}
 
-	public void waitForResults(Map<String, DataLocation> results, WorkflowReport report, String... ports)
+	public void waitForResults(Path outputs, WorkflowReport report, String... ports)
 			throws InterruptedException {
 		int wait = 0;
-		while (!resultsReady(results, ports) && wait++ < 20) {
+		while (!resultsReady(outputs, ports) && wait++ < 20) {
 			System.out.println(report);
 			Thread.sleep(500);
 		}
 	}
 
-	private boolean resultsReady(Map<String, DataLocation> results, String... ports) {
+	private boolean resultsReady(Path outputs, String... ports) {
 		for (String port : ports) {
-			if (!results.containsKey(port)) {
+			try {
+				if (DataBundles.isMissing(DataBundles.getPort(outputs, port))) {
+					return false;
+				}
+			} catch (IOException e) {
 				return false;
 			}
 		}

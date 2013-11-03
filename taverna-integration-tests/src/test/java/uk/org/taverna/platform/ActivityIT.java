@@ -22,10 +22,10 @@ package uk.org.taverna.platform;
 
 import java.io.File;
 import java.net.URI;
-import java.util.Set;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 
@@ -55,7 +55,7 @@ public class ActivityIT extends PlatformIT {
 	public void testGetActivityURIs() {
 		System.out.println("================= Available Activities ===================");
 		for (ExecutionEnvironment executionEnvironment : runService.getExecutionEnvironments()) {
-			for (URI uri : executionEnvironment.getActivityURIs()) {
+			for (URI uri : executionEnvironment.getActivityTypes()) {
 				System.out.println(uri);
 			}
 		}
@@ -64,8 +64,7 @@ public class ActivityIT extends PlatformIT {
 	}
 
 	public void testCreateActivity() throws Exception {
-//		List<URI> activityURIs = activityService.getActivityURIs();
-//		for (URI uri : activityURIs) {
+//		for (URI uri : activityService.getActivityTypes()) {
 //			System.out.println("Creating activity " + uri);
 //			Activity<?> activity = activityService.createActivity(uri, null);
 //		}
@@ -75,8 +74,8 @@ public class ActivityIT extends PlatformIT {
 	public void testGetActivityConfigurationDefinition() throws Exception {
 		System.out.println("============ Activity Configuration Definitions ==========");
 		for (ExecutionEnvironment executionEnvironment : runService.getExecutionEnvironments()) {
-			for (URI uri : executionEnvironment.getActivityURIs()) {
-				System.out.println(executionEnvironment.getActivityConfigurationDefinition(uri));
+			for (URI uri : executionEnvironment.getActivityTypes()) {
+				System.out.println(executionEnvironment.getActivityConfigurationSchema(uri));
 			}
 		}
 		System.out.println("==========================================================");

@@ -29,11 +29,10 @@ import static org.junit.Assume.assumeTrue;
 import java.io.File;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.Path;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import net.sf.taverna.t2.security.credentialmanager.CredentialManager;
@@ -45,12 +44,10 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
+import org.purl.wf4ever.robundle.Bundle;
 
+import uk.org.taverna.databundle.DataBundles;
 import uk.org.taverna.osgi.starter.TavernaStarter;
-import uk.org.taverna.platform.data.api.Data;
-import uk.org.taverna.platform.data.api.DataLocation;
-import uk.org.taverna.platform.data.api.DataService;
-import uk.org.taverna.platform.data.api.DataTools;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
 import uk.org.taverna.platform.report.State;
 import uk.org.taverna.platform.report.WorkflowReport;
@@ -66,7 +63,6 @@ public class RunIT extends PlatformIT {
 	private static WorkflowBundleIO workflowBundleIO;
 	private static CredentialManager credentialManager;
 	private static RunService runService;
-	private static DataService dataService;
 
 	public WorkflowBundle loadWorkflow(String t2FlowFile) throws Exception {
 		return super.loadWorkflow(t2FlowFile, workflowBundleIO);
@@ -78,7 +74,6 @@ public class RunIT extends PlatformIT {
 		tavernaStarter.start();
 		bundleContext = tavernaStarter.getContext();
 		runService = tavernaStarter.getRunService();
-		dataService = tavernaStarter.getDataService();
 		credentialManager = tavernaStarter.getCredentialManager();
 		workflowBundleIO = tavernaStarter.getWorkflowBundleIO();
 
@@ -112,29 +107,26 @@ public class RunIT extends PlatformIT {
 				.getExecutionEnvironments(workflowBundle);
 		assertTrue(executionEnvironments.size() > 0);
 		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
-			Map<String, DataLocation> inputs = new HashMap<String, DataLocation>();
-			inputs.put("in", DataTools.createExplicitTextData(dataService, "test-input").getLocation());
+			Bundle inputBundle = DataBundles.createBundle();
+			Path inputs = DataBundles.getInputs(inputBundle);
+			Path port = DataBundles.getPort(inputs, "in");
+			DataBundles.setStringValue(port, "test-input");
 
 			String runId = runService.createRun(new RunProfile(executionEnvironment,
-					workflowBundle, inputs));
+					workflowBundle, inputBundle));
 			assertEquals(State.CREATED, runService.getState(runId));
 
 			WorkflowReport report = runService.getWorkflowReport(runId);
 			System.out.println(report);
 
 			runService.start(runId);
-			assertTrue(runService.getState(runId).equals(State.RUNNING)
-					|| runService.getState(runId).equals(State.COMPLETED));
-			System.out.println(report);
+			assertTrue(waitForState(report, State.COMPLETED));
 
-			Map<String, DataLocation> results = runService.getOutputs(runId);
-			assertNotNull(results);
-			waitForResults(results, runService.getWorkflowReport(runId), "out");
+			Bundle outputBundle = runService.getDataBundle(runId);
+			assertNotNull(outputBundle);
+			Path outputs = DataBundles.getOutputs(outputBundle);
 
-			assertTrue(checkResult(dataService.get(results.get("out")), "test-input"));
-
-			assertEquals(State.COMPLETED, runService.getState(runId));
-			System.out.println(report);
+			assertTrue(checkResult(DataBundles.getPort(outputs, "out"), "test-input"));
 		}
 	}
 
@@ -146,29 +138,26 @@ public class RunIT extends PlatformIT {
 				.getExecutionEnvironments(workflowBundle);
 		assertTrue(executionEnvironments.size() > 0);
 		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
-			Map<String, DataLocation> inputs = new HashMap<String, DataLocation>();
-			inputs.put("in", DataTools.createExplicitTextData(dataService, "test-input").getLocation());
+			Bundle inputBundle = DataBundles.createBundle();
+			Path inputs = DataBundles.getInputs(inputBundle);
+			Path port = DataBundles.getPort(inputs, "in");
+			DataBundles.setStringValue(port, "test-input");
 
 			String runId = runService.createRun(new RunProfile(executionEnvironment,
-					workflowBundle, inputs));
+					workflowBundle, inputBundle));
 			assertEquals(State.CREATED, runService.getState(runId));
 
 			WorkflowReport report = runService.getWorkflowReport(runId);
 			System.out.println(report);
 
 			runService.start(runId);
-			assertTrue(runService.getState(runId).equals(State.RUNNING)
-					|| runService.getState(runId).equals(State.COMPLETED));
-			System.out.println(report);
+			assertTrue(waitForState(report, State.COMPLETED));
 
-			Map<String, DataLocation> results = runService.getOutputs(runId);
-			assertNotNull(results);
-			waitForResults(results, report, "out");
+			Bundle outputBundle = runService.getDataBundle(runId);
+			assertNotNull(outputBundle);
+			Path outputs = DataBundles.getOutputs(outputBundle);
 
-			assertTrue(checkResult(dataService.get(results.get("out")), "TEST-INPUT"));
-
-			assertEquals(State.COMPLETED, runService.getState(runId));
-			System.out.println(report);
+			assertTrue(checkResult(DataBundles.getPort(outputs, "out"), "TEST-INPUT"));
 		}
 	}
 
@@ -180,30 +169,30 @@ public class RunIT extends PlatformIT {
 				.getExecutionEnvironments(workflowBundle);
 		assertTrue(executionEnvironments.size() > 0);
 		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
-			Map<String, DataLocation> inputs = new HashMap<String, DataLocation>();
-			inputs.put("in", DataTools.createExplicitTextData(dataService, "test-input").getLocation());
+			Bundle inputBundle = DataBundles.createBundle();
+			Path inputs = DataBundles.getInputs(inputBundle);
+			Path port = DataBundles.getPort(inputs, "in");
+			DataBundles.setStringValue(port, "test-input");
 
 			String runId = runService.createRun(new RunProfile(executionEnvironment,
-					workflowBundle, inputs));
+					workflowBundle, inputBundle));
 			assertEquals(State.CREATED, runService.getState(runId));
 
 			WorkflowReport report = runService.getWorkflowReport(runId);
 			System.out.println(report);
 
 			runService.start(runId);
-			assertTrue(runService.getState(runId).equals(State.RUNNING)
-					|| runService.getState(runId).equals(State.COMPLETED));
-			System.out.println(report);
+			assertTrue(waitForState(report, State.COMPLETED));
 
-			Map<String, DataLocation> results = runService.getOutputs(runId);
-			assertNotNull(results);
-			waitForResults(results, report, "out");
+			Bundle outputBundle = runService.getDataBundle(runId);
+			assertNotNull(outputBundle);
+			Path outputs = DataBundles.getOutputs(outputBundle);
 
-			List<Data> result = dataService.get(results.get("out")).getElements();
+			Path outPort = DataBundles.getPort(outputs, "out");
+			assertTrue(DataBundles.isList(outPort));
+			List<Path> result = DataBundles.getList(outPort);
 			assertEquals(1000, result.size());
-			assertEquals("test-input:0", result.get(0).getExplicitValue());
-			assertEquals(State.COMPLETED, runService.getState(runId));
-			System.out.println(report);
+			assertEquals("test-input:0", DataBundles.getStringValue(result.get(0)));
 		}
 	}
 
@@ -216,26 +205,24 @@ public class RunIT extends PlatformIT {
 		assertTrue(executionEnvironments.size() > 0);
 		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
 			String runId = runService
-					.createRun(new RunProfile(executionEnvironment, workflowBundle));
+					.createRun(new RunProfile(executionEnvironment, workflowBundle, DataBundles.createBundle()));
 			assertEquals(State.CREATED, runService.getState(runId));
 
 			WorkflowReport report = runService.getWorkflowReport(runId);
 			System.out.println(report);
 
 			runService.start(runId);
-			assertTrue(runService.getState(runId).equals(State.RUNNING)
-					|| runService.getState(runId).equals(State.COMPLETED));
-			System.out.println(report);
+			assertTrue(waitForState(report, State.COMPLETED));
 
-			Map<String, DataLocation> results = runService.getOutputs(runId);
-			assertNotNull(results);
-			waitForResults(results, report, "out");
+			Bundle outputBundle = runService.getDataBundle(runId);
+			assertNotNull(outputBundle);
+			Path outputs = DataBundles.getOutputs(outputBundle);
 
-			List<Data> result = dataService.get(results.get("out")).getElements();
-			assertEquals(5, result.size());
-			assertEquals("ENSBTAG00000018854", result.get(0).getExplicitValue());
-			assertEquals(State.COMPLETED, runService.getState(runId));
-			System.out.println(report);
+			Path outPort = DataBundles.getPort(outputs, "out");
+			assertTrue(DataBundles.isList(outPort));
+			List<Path> result = DataBundles.getList(outPort);
+			assertEquals(6, result.size());
+			assertEquals("ENSBTAG00000018278", DataBundles.getStringValue(result.get(0)));
 		}
 	}
 
@@ -250,26 +237,24 @@ public class RunIT extends PlatformIT {
 		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
 
 			String runId = runService
-					.createRun(new RunProfile(executionEnvironment, workflowBundle));
+					.createRun(new RunProfile(executionEnvironment, workflowBundle, DataBundles.createBundle()));
 			assertEquals(State.CREATED, runService.getState(runId));
 
 			WorkflowReport report = runService.getWorkflowReport(runId);
 			System.out.println(report);
 
 			runService.start(runId);
-			assertTrue(runService.getState(runId).equals(State.RUNNING)
-					|| runService.getState(runId).equals(State.COMPLETED));
-			System.out.println(report);
+			assertTrue(waitForState(report, State.COMPLETED));
 
-			Map<String, DataLocation> results = runService.getOutputs(runId);
-			assertNotNull(results);
-			waitForResults(results, report, "out");
+			Bundle outputBundle = runService.getDataBundle(runId);
+			assertNotNull(outputBundle);
+			Path outputs = DataBundles.getOutputs(outputBundle);
 
-			List<Data> result = dataService.get(results.get("out")).getElements();
+			Path outPort = DataBundles.getPort(outputs, "out");
+			assertTrue(DataBundles.isList(outPort));
+			List<Path> result = DataBundles.getList(outPort);
 			assertEquals(5, result.size());
-			assertEquals("ENSBTAG00000018854", result.get(0));
-			assertEquals(State.COMPLETED, runService.getState(runId));
-			System.out.println(report);
+			assertEquals("ENSBTAG00000018854", DataBundles.getStringValue(result.get(0)));
 		}
 	}
 
@@ -281,27 +266,26 @@ public class RunIT extends PlatformIT {
 				.getExecutionEnvironments(workflowBundle);
 		assertTrue(executionEnvironments.size() > 0);
 		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
-			Map<String, DataLocation> inputs = new HashMap<String, DataLocation>();
-			inputs.put("in", DataTools.createExplicitTextData(dataService, "test input").getLocation());
+			Bundle inputBundle = DataBundles.createBundle();
+			Path inputs = DataBundles.getInputs(inputBundle);
+			Path port = DataBundles.getPort(inputs, "in");
+			DataBundles.setStringValue(port, "test-input");
 
 			String runId = runService.createRun(new RunProfile(executionEnvironment,
-					workflowBundle, inputs));
+					workflowBundle, inputBundle));
 			assertEquals(State.CREATED, runService.getState(runId));
 
 			WorkflowReport report = runService.getWorkflowReport(runId);
 			System.out.println(report);
 
 			runService.start(runId);
-			assertFalse(runService.getState(runId).equals(State.CREATED));
-			System.out.println(report);
+			assertTrue(waitForState(report, State.COMPLETED));
 
-			Map<String, DataLocation> results = runService.getOutputs(runId);
-			waitForResults(results, report, "out");
+			Bundle outputBundle = runService.getDataBundle(runId);
+			assertNotNull(outputBundle);
+			Path outputs = DataBundles.getOutputs(outputBundle);
 
-			assertTrue(checkResult(dataService.get(results.get("out")), "nested dataflow : test input"));
-
-			assertEquals(State.COMPLETED, runService.getState(runId));
-			System.out.println(report);
+			assertTrue(checkResult(DataBundles.getPort(outputs, "out"), "nested dataflow : test-input"));
 		}
 	}
 
@@ -313,29 +297,26 @@ public class RunIT extends PlatformIT {
 				.getExecutionEnvironments(workflowBundle);
 		assertTrue(executionEnvironments.size() > 0);
 		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
-			Map<String, DataLocation> inputs = new HashMap<String, DataLocation>();
-			inputs.put("in", DataTools.createExplicitTextData(dataService, "Tom").getLocation());
+			Bundle inputBundle = DataBundles.createBundle();
+			Path inputs = DataBundles.getInputs(inputBundle);
+			Path port = DataBundles.getPort(inputs, "in");
+			DataBundles.setStringValue(port, "Tom");
 
 			String runId = runService.createRun(new RunProfile(executionEnvironment,
-					workflowBundle, inputs));
+					workflowBundle, inputBundle));
 			assertEquals(State.CREATED, runService.getState(runId));
 
 			WorkflowReport report = runService.getWorkflowReport(runId);
 			System.out.println(report);
 
 			runService.start(runId);
-			assertTrue(runService.getState(runId).equals(State.RUNNING)
-					|| runService.getState(runId).equals(State.COMPLETED));
-			System.out.println(report);
+			assertTrue(waitForState(report, State.COMPLETED));
 
-			Map<String, DataLocation> results = runService.getOutputs(runId);
-			assertNotNull(results);
-			waitForResults(results, report, "out");
+			Bundle outputBundle = runService.getDataBundle(runId);
+			assertNotNull(outputBundle);
+			Path outputs = DataBundles.getOutputs(outputBundle);
 
-			assertTrue(checkResult(dataService.get(results.get("out")), "Hello Tom"));
-
-			assertEquals(State.COMPLETED, runService.getState(runId));
-			System.out.println(report);
+			assertTrue(checkResult(DataBundles.getPort(outputs, "out"), "Hello Tom"));
 		}
 	}
 
@@ -348,29 +329,21 @@ public class RunIT extends PlatformIT {
 		assertTrue(executionEnvironments.size() > 0);
 		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
 			String runId = runService
-					.createRun(new RunProfile(executionEnvironment, workflowBundle));
+					.createRun(new RunProfile(executionEnvironment, workflowBundle, DataBundles.createBundle()));
 			assertEquals(State.CREATED, runService.getState(runId));
 
 			WorkflowReport report = runService.getWorkflowReport(runId);
 			System.out.println(report);
 
 			runService.start(runId);
-			assertEquals(State.RUNNING, runService.getState(runId));
-			System.out.println(report);
+			assertTrue(waitForState(report, State.COMPLETED));
 
-			Map<String, DataLocation> results = runService.getOutputs(runId);
-			waitForResults(results, report, "out");
+			Bundle outputBundle = runService.getDataBundle(runId);
+			assertNotNull(outputBundle);
+			Path outputs = DataBundles.getOutputs(outputBundle);
 
-			Object outResult = dataService.get(results.get("out")).getExplicitValue();
-			if (outResult instanceof byte[]) {
-				outResult = new String((byte[]) outResult);
-			}
-			assertTrue(outResult instanceof String);
-			String outString = (String) outResult;
+			String outString = DataBundles.getStringValue(DataBundles.getPort(outputs, "out"));
 			assertTrue(outString.contains("<name>AATM_RABIT</name>"));
-
-			assertEquals(State.COMPLETED, runService.getState(runId));
-			System.out.println(report);
 		}
 	}
 
@@ -387,21 +360,21 @@ public class RunIT extends PlatformIT {
 		assertTrue(executionEnvironments.size() > 0);
 		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
 			String runId = runService
-					.createRun(new RunProfile(executionEnvironment, workflowBundle));
+					.createRun(new RunProfile(executionEnvironment, workflowBundle, DataBundles.createBundle()));
 			assertEquals(State.CREATED, runService.getState(runId));
 
 			WorkflowReport report = runService.getWorkflowReport(runId);
 			System.out.println(report);
 
 			runService.start(runId);
-			assertEquals(State.RUNNING, runService.getState(runId));
-			System.out.println(report);
+			assertTrue(waitForState(report, State.COMPLETED));
 
-			Map<String, DataLocation> results = runService.getOutputs(runId);
-			waitForResults(results, report, "out");
+			Bundle outputBundle = runService.getDataBundle(runId);
+			assertNotNull(outputBundle);
+			Path outputs = DataBundles.getOutputs(outputBundle);
 
 			assertTrue(checkResult(
-					dataService.get(results.get("out")),
+					DataBundles.getPort(outputs, "out"),
 					"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">\n"
 							+ "<HTML><HEAD><TITLE>Apache Tomcat Examples</TITLE>\n"
 							+ "<META http-equiv=Content-Type content=\"text/html\">\n"
@@ -411,12 +384,10 @@ public class RunIT extends PlatformIT {
 							+ "<H3>Secure Apache Tomcat Examples</H3>\n"
 							+ "<P>Congratulations! If you see this page that means that you have authenticated yourself successfully using HTTP Basic Authentication.</P>\n"
 							+ "</BODY></HTML>"));
-
-			assertEquals(State.COMPLETED, runService.getState(runId));
-			System.out.println(report);
 		}
 	}
 
+	@Test
 	public void testRunRestSecureBasicHttps() throws Exception {
 		credentialManager.addUsernameAndPasswordForService(new UsernamePassword("testuser",
 				"testpasswd"), URI
@@ -436,21 +407,21 @@ public class RunIT extends PlatformIT {
 		assertTrue(executionEnvironments.size() > 0);
 		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
 			String runId = runService
-					.createRun(new RunProfile(executionEnvironment, workflowBundle));
+					.createRun(new RunProfile(executionEnvironment, workflowBundle, DataBundles.createBundle()));
 			assertEquals(State.CREATED, runService.getState(runId));
 
 			WorkflowReport report = runService.getWorkflowReport(runId);
 			System.out.println(report);
 
 			runService.start(runId);
-			assertEquals(State.RUNNING, runService.getState(runId));
-			System.out.println(report);
+			assertTrue(waitForState(report, State.COMPLETED));
 
-			Map<String, DataLocation> results = runService.getOutputs(runId);
-			waitForResults(results, report, "out");
+			Bundle outputBundle = runService.getDataBundle(runId);
+			assertNotNull(outputBundle);
+			Path outputs = DataBundles.getOutputs(outputBundle);
 
 			assertTrue(checkResult(
-					dataService.get(results.get("out")),
+					DataBundles.getPort(outputs, "out"),
 					"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">\n"
 							+ "<HTML><HEAD><TITLE>Apache Tomcat Examples</TITLE>\n"
 							+ "<META http-equiv=Content-Type content=\"text/html\">\n"
@@ -460,12 +431,10 @@ public class RunIT extends PlatformIT {
 							+ "<H3>Secure Apache Tomcat Examples</H3>\n"
 							+ "<P>Congratulations! If you see this page that means that you have authenticated yourself successfully using HTTP Basic Authentication.</P>\n"
 							+ "</BODY></HTML>"));
-
-			assertEquals(State.COMPLETED, runService.getState(runId));
-			System.out.println(report);
 		}
 	}
 
+	@Test
 	public void testRunRestSecureDigest() throws Exception {
 		credentialManager.addUsernameAndPasswordForService(new UsernamePassword("testuser",
 				"testpasswd"), URI
@@ -478,21 +447,21 @@ public class RunIT extends PlatformIT {
 		assertTrue(executionEnvironments.size() > 0);
 		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
 			String runId = runService
-					.createRun(new RunProfile(executionEnvironment, workflowBundle));
+					.createRun(new RunProfile(executionEnvironment, workflowBundle, DataBundles.createBundle()));
 			assertEquals(State.CREATED, runService.getState(runId));
 
 			WorkflowReport report = runService.getWorkflowReport(runId);
 			System.out.println(report);
 
 			runService.start(runId);
-			assertEquals(State.RUNNING, runService.getState(runId));
-			System.out.println(report);
+			assertTrue(waitForState(report, State.COMPLETED));
 
-			Map<String, DataLocation> results = runService.getOutputs(runId);
-			waitForResults(results, report, "out");
+			Bundle outputBundle = runService.getDataBundle(runId);
+			assertNotNull(outputBundle);
+			Path outputs = DataBundles.getOutputs(outputBundle);
 
 			assertTrue(checkResult(
-					dataService.get(results.get("out")),
+					DataBundles.getPort(outputs, "out"),
 					"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">\n"
 							+ "<HTML><HEAD><TITLE>Apache Tomcat Examples</TITLE>\n"
 							+ "<META http-equiv=Content-Type content=\"text/html\">\n"
@@ -502,12 +471,10 @@ public class RunIT extends PlatformIT {
 							+ "<H3>Secure Apache Tomcat Examples</H3>\n"
 							+ "<P>Congratulations! If you see this page that means that you have authenticated yourself successfully using HTTP Digest Authentication.</P>\n"
 							+ "</BODY></HTML>"));
-
-			assertEquals(State.COMPLETED, runService.getState(runId));
-			System.out.println(report);
 		}
 	}
 
+	@Test
 	public void testRunRestSecureDigestHttps() throws Exception {
 		credentialManager.addUsernameAndPasswordForService(new UsernamePassword("testuser",
 				"testpasswd"), URI
@@ -527,21 +494,21 @@ public class RunIT extends PlatformIT {
 		assertTrue(executionEnvironments.size() > 0);
 		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
 			String runId = runService
-					.createRun(new RunProfile(executionEnvironment, workflowBundle));
+					.createRun(new RunProfile(executionEnvironment, workflowBundle, DataBundles.createBundle()));
 			assertEquals(State.CREATED, runService.getState(runId));
 
 			WorkflowReport report = runService.getWorkflowReport(runId);
 			System.out.println(report);
 
 			runService.start(runId);
-			assertEquals(State.RUNNING, runService.getState(runId));
-			System.out.println(report);
+			assertTrue(waitForState(report, State.COMPLETED));
 
-			Map<String, DataLocation> results = runService.getOutputs(runId);
-			waitForResults(results, report, "out");
+			Bundle outputBundle = runService.getDataBundle(runId);
+			assertNotNull(outputBundle);
+			Path outputs = DataBundles.getOutputs(outputBundle);
 
 			assertTrue(checkResult(
-					dataService.get(results.get("out")),
+					DataBundles.getPort(outputs, "out"),
 					"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">\n"
 							+ "<HTML><HEAD><TITLE>Apache Tomcat Examples</TITLE>\n"
 							+ "<META http-equiv=Content-Type content=\"text/html\">\n"
@@ -551,9 +518,6 @@ public class RunIT extends PlatformIT {
 							+ "<H3>Secure Apache Tomcat Examples</H3>\n"
 							+ "<P>Congratulations! If you see this page that means that you have authenticated yourself successfully using HTTP Digest Authentication.</P>\n"
 							+ "</BODY></HTML>"));
-
-			assertEquals(State.COMPLETED, runService.getState(runId));
-			System.out.println(report);
 		}
 	}
 
@@ -566,31 +530,31 @@ public class RunIT extends PlatformIT {
 		assertTrue(executionEnvironments.size() > 0);
 		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
 			String runId = runService
-					.createRun(new RunProfile(executionEnvironment, workflowBundle));
+					.createRun(new RunProfile(executionEnvironment, workflowBundle, DataBundles.createBundle()));
 			assertEquals(State.CREATED, runService.getState(runId));
 
 			WorkflowReport report = runService.getWorkflowReport(runId);
 			System.out.println(report);
 
 			runService.start(runId);
-			assertEquals(State.RUNNING, runService.getState(runId));
-			System.out.println(report);
+			assertTrue(waitForState(report, State.COMPLETED));
 
-			Map<String, DataLocation> results = runService.getOutputs(runId);
-			waitForResults(results, report, "out");
+			Bundle outputBundle = runService.getDataBundle(runId);
+			assertNotNull(outputBundle);
+			Path outputs = DataBundles.getOutputs(outputBundle);
 
-			List<Data> result = dataService.get(results.get("out")).getElements();
+			Path outPort = DataBundles.getPort(outputs, "out");
+			assertTrue(DataBundles.isList(outPort));
+			List<Path> result = DataBundles.getList(outPort);
 			assertEquals(35, result.size());
-			assertEquals("1971.0", result.get(1).getExplicitValue());
-			assertEquals("2004.0", result.get(34).getExplicitValue());
-
-			assertEquals(State.COMPLETED, runService.getState(runId));
-			System.out.println(report);
+			assertEquals("1971.0", DataBundles.getStringValue(result.get(1)));
+			assertEquals("2004.0", DataBundles.getStringValue(result.get(34)));
 		}
 	}
 
 	@Test
 	public void testRunSoaplab() throws Exception {
+		// TODO find new soaplab service for testing
 		WorkflowBundle workflowBundle = loadWorkflow("/t2flow/soaplab.t2flow");
 
 		Set<ExecutionEnvironment> executionEnvironments = runService
@@ -598,24 +562,21 @@ public class RunIT extends PlatformIT {
 		assertTrue(executionEnvironments.size() > 0);
 		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
 			String runId = runService
-					.createRun(new RunProfile(executionEnvironment, workflowBundle));
+					.createRun(new RunProfile(executionEnvironment, workflowBundle, DataBundles.createBundle()));
 			assertEquals(State.CREATED, runService.getState(runId));
 
 			WorkflowReport report = runService.getWorkflowReport(runId);
 			System.out.println(report);
 
 			runService.start(runId);
-			assertEquals(State.RUNNING, runService.getState(runId));
-			System.out.println(report);
+			assertTrue(waitForState(report, State.COMPLETED));
 
-			Map<String, DataLocation> results = runService.getOutputs(runId);
-			waitForResults(results, report, "sequence");
+			Bundle outputBundle = runService.getDataBundle(runId);
+			assertNotNull(outputBundle);
+			Path outputs = DataBundles.getOutputs(outputBundle);
 
-			assertTrue(checkResult(dataService.get(results.get("sequence")),
+			assertTrue(checkResult(DataBundles.getPort(outputs, "sequence"),
 					"ID   X52524; SV 1; linear; genomic DNA; STD; INV; 4507 BP."));
-
-			assertEquals(State.COMPLETED, runService.getState(runId));
-			System.out.println(report);
 		}
 	}
 
@@ -628,20 +589,18 @@ public class RunIT extends PlatformIT {
 		assertTrue(executionEnvironments.size() > 0);
 		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
 			String runId = runService
-					.createRun(new RunProfile(executionEnvironment, workflowBundle));
+					.createRun(new RunProfile(executionEnvironment, workflowBundle, DataBundles.createBundle()));
 			WorkflowReport report = runService.getWorkflowReport(runId);
 			assertEquals(State.CREATED, runService.getState(runId));
 
 			runService.start(runId);
-			assertTrue(runService.getState(runId).equals(State.RUNNING)
-					|| runService.getState(runId).equals(State.COMPLETED));
+			assertTrue(waitForState(report, State.COMPLETED));
 
-			Map<String, DataLocation> results = runService.getOutputs(runId);
-			waitForResults(results, report, "out");
+			Bundle outputBundle = runService.getDataBundle(runId);
+			assertNotNull(outputBundle);
+			Path outputs = DataBundles.getOutputs(outputBundle);
 
-			assertTrue(checkResult(dataService.get(results.get("out")), "Test Value"));
-
-			assertEquals(State.COMPLETED, runService.getState(runId));
+			assertTrue(checkResult(DataBundles.getPort(outputs, "out"), "Test Value"));
 		}
 	}
 
@@ -654,20 +613,18 @@ public class RunIT extends PlatformIT {
 		assertTrue(executionEnvironments.size() > 0);
 		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
 			String runId = runService
-					.createRun(new RunProfile(executionEnvironment, workflowBundle));
+					.createRun(new RunProfile(executionEnvironment, workflowBundle, DataBundles.createBundle()));
 			WorkflowReport report = runService.getWorkflowReport(runId);
 			assertEquals(State.CREATED, runService.getState(runId));
 
 			runService.start(runId);
-			assertTrue(runService.getState(runId).equals(State.RUNNING)
-					|| runService.getState(runId).equals(State.COMPLETED));
+			assertTrue(waitForState(report, State.COMPLETED));
 
-			Map<String, DataLocation> results = runService.getOutputs(runId);
-			waitForResults(results, report, "out");
+			Bundle outputBundle = runService.getDataBundle(runId);
+			assertNotNull(outputBundle);
+			Path outputs = DataBundles.getOutputs(outputBundle);
 
-			assertTrue(checkResult(dataService.get(results.get("out")), "HelloWorld"));
-
-			assertEquals(State.COMPLETED, runService.getState(runId));
+			assertTrue(checkResult(DataBundles.getPort(outputs, "out"), "HelloWorld"));
 		}
 	}
 
@@ -679,66 +636,67 @@ public class RunIT extends PlatformIT {
 				.getExecutionEnvironments(workflowBundle);
 		assertTrue(executionEnvironments.size() > 0);
 		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
-			Map<String, DataLocation> inputs = new HashMap<String, DataLocation>();
-			inputs.put("in", DataTools.createExplicitTextData(dataService, "test").getLocation());
+			Bundle inputBundle = DataBundles.createBundle();
+			Path inputs = DataBundles.getInputs(inputBundle);
+			Path port = DataBundles.getPort(inputs, "in");
+			DataBundles.setStringValue(port, "test");
 
 			String runId = runService.createRun(new RunProfile(executionEnvironment,
-					workflowBundle, inputs));
+					workflowBundle, inputBundle));
 			assertEquals(State.CREATED, runService.getState(runId));
 
 			WorkflowReport report = runService.getWorkflowReport(runId);
 			System.out.println(report);
 
 			runService.start(runId);
-			assertEquals(State.RUNNING, runService.getState(runId));
-			System.out.println(report);
+			assertTrue(waitForState(report, State.COMPLETED));
 
-			Map<String, DataLocation> results = runService.getOutputs(runId);
+			Bundle outputBundle = runService.getDataBundle(runId);
+			assertNotNull(outputBundle);
+			Path outputs = DataBundles.getOutputs(outputBundle);
 
-			waitForResults(results, report, "cross");
-			List<Data> crossResult = dataService.get(results.get("cross")).getElements();
+			Path crossPort = DataBundles.getPort(outputs, "cross");
+			assertTrue(DataBundles.isList(crossPort));
+			List<Path> crossResult = DataBundles.getList(crossPort);
 			assertEquals(10, crossResult.size());
-			assertEquals(10, crossResult.get(0).getElements().size());
-			assertEquals(10, crossResult.get(5).getElements().size());
-			assertEquals("test:0test:0", crossResult.get(0).getElements().get(0).getExplicitValue());
-			assertEquals("test:0test:1", crossResult.get(0).getElements().get(1).getExplicitValue());
-			assertEquals("test:4test:2", crossResult.get(4).getElements().get(2).getExplicitValue());
-			assertEquals("test:7test:6", crossResult.get(7).getElements().get(6).getExplicitValue());
+			assertEquals(10, DataBundles.getList(crossResult.get(0)).size());
+			assertEquals(10, DataBundles.getList(crossResult.get(5)).size());
+			assertEquals("test:0test:0", DataBundles.getStringValue(DataBundles.getListItem(DataBundles.getListItem(crossPort, 0), 0)));
+			assertEquals("test:0test:1", DataBundles.getStringValue(DataBundles.getListItem(DataBundles.getListItem(crossPort, 0), 1)));
+			assertEquals("test:4test:2", DataBundles.getStringValue(DataBundles.getListItem(DataBundles.getListItem(crossPort, 4), 2)));
+			assertEquals("test:7test:6", DataBundles.getStringValue(DataBundles.getListItem(DataBundles.getListItem(crossPort, 7), 6)));
 
-			waitForResults(results, report, "dot");
-
-			List<Data> dotResult = dataService.get(results.get("dot")).getElements();
+			Path dotPort = DataBundles.getPort(outputs, "dot");
+			assertTrue(DataBundles.isList(dotPort));
+			List<Path> dotResult = DataBundles.getList(dotPort);
 			assertEquals(10, dotResult.size());
-			assertEquals("test:0test:0", dotResult.get(0).getExplicitValue());
-			assertEquals("test:5test:5", dotResult.get(5).getExplicitValue());
+			assertEquals("test:0test:0", DataBundles.getStringValue(DataBundles.getListItem(dotPort, 0)));
+			assertEquals("test:5test:5", DataBundles.getStringValue(DataBundles.getListItem(dotPort, 5)));
 
-			waitForResults(results, report, "crossdot");
-
-			List<Data> crossdotResult = dataService.get(results.get("crossdot")).getElements();
+			Path crossdotPort = DataBundles.getPort(outputs, "crossdot");
+			assertTrue(DataBundles.isList(crossdotPort));
+			List<Path> crossdotResult = DataBundles.getList(crossdotPort);
 			assertEquals(10, crossdotResult.size());
-			assertEquals(10, crossdotResult.get(0).getElements().size());
-			assertEquals(10, crossdotResult.get(5).getElements().size());
-			assertEquals("test:0test:0test", crossdotResult.get(0).getElements().get(0).getExplicitValue());
-			assertEquals("test:0test:1test", crossdotResult.get(0).getElements().get(1).getExplicitValue());
-			assertEquals("test:4test:2test", crossdotResult.get(4).getElements().get(2).getExplicitValue());
-			assertEquals("test:7test:6test", crossdotResult.get(7).getElements().get(6).getExplicitValue());
+			assertEquals(10, DataBundles.getList(crossdotResult.get(0)).size());
+			assertEquals(10, DataBundles.getList(crossdotResult.get(5)).size());
+			assertEquals("test:0test:0test", DataBundles.getStringValue(DataBundles.getListItem(DataBundles.getListItem(crossdotPort, 0), 0)));
+			assertEquals("test:0test:1test", DataBundles.getStringValue(DataBundles.getListItem(DataBundles.getListItem(crossdotPort, 0), 1)));
+			assertEquals("test:4test:2test", DataBundles.getStringValue(DataBundles.getListItem(DataBundles.getListItem(crossdotPort, 4), 2)));
+			assertEquals("test:7test:6test", DataBundles.getStringValue(DataBundles.getListItem(DataBundles.getListItem(crossdotPort, 7), 6)));
 
-			waitForResults(results, report, "dotcross");
+			Path dotcrossPort = DataBundles.getPort(outputs, "dotcross");
+			assertTrue(DataBundles.isList(dotcrossPort));
+			List<Path> dotcrossResult = DataBundles.getList(crossdotPort);
+			assertEquals(10, dotcrossResult.size());
+			assertEquals("test:0test:0test", DataBundles.getStringValue(DataBundles.getListItem(dotcrossPort, 0)));
+			assertEquals("test:5test:5test", DataBundles.getStringValue(DataBundles.getListItem(dotcrossPort, 5)));
 
-			List<Data> dotcrossResult = dataService.get(results.get("dotcross")).getElements();
-			assertEquals(10, dotResult.size());
-			assertEquals("test:0test:0test", dotcrossResult.get(0).getExplicitValue());
-			assertEquals("test:5test:5test", dotcrossResult.get(5).getExplicitValue());
-
-			waitForResults(results, report, "dotdot");
-
-			List<Data> dotdotResult = dataService.get(results.get("dotdot")).getElements();
-			assertEquals(10, dotResult.size());
-			assertEquals("test:0test:0test:0", dotdotResult.get(0).getExplicitValue());
-			assertEquals("test:5test:5test:5", dotdotResult.get(5).getExplicitValue());
-
-			assertEquals(State.COMPLETED, runService.getState(runId));
-			System.out.println(report);
+			Path dotdotPort = DataBundles.getPort(outputs, "dotdot");
+			assertTrue(DataBundles.isList(dotdotPort));
+			List<Path> dotdotResult = DataBundles.getList(crossdotPort);
+			assertEquals(10, dotdotResult.size());
+			assertEquals("test:0test:0test:0", DataBundles.getStringValue(DataBundles.getListItem(dotdotPort, 0)));
+			assertEquals("test:5test:5test:5", DataBundles.getStringValue(DataBundles.getListItem(dotdotPort, 5)));
 		}
 	}
 
@@ -751,26 +709,23 @@ public class RunIT extends PlatformIT {
 		assertTrue(executionEnvironments.size() > 0);
 		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
 			String runId = runService
-					.createRun(new RunProfile(executionEnvironment, workflowBundle));
+					.createRun(new RunProfile(executionEnvironment, workflowBundle, DataBundles.createBundle()));
 			assertEquals(State.CREATED, runService.getState(runId));
 
 			WorkflowReport report = runService.getWorkflowReport(runId);
 			System.out.println(report);
 
 			runService.start(runId);
-			assertEquals(State.RUNNING, runService.getState(runId));
-			System.out.println(report);
+			assertTrue(waitForState(report, State.COMPLETED));
 
-			Map<String, DataLocation> results = runService.getOutputs(runId);
-			waitForResults(results, report, "out");
+			Bundle outputBundle = runService.getDataBundle(runId);
+			assertNotNull(outputBundle);
+			Path outputs = DataBundles.getOutputs(outputBundle);
 
 			// assertTrue(checkResult(results.get("out"),
 			// "Apache Axis version: 1.4\nBuilt on Apr 22, 2006 (06:55:48 PDT)"));
-			assertTrue(checkResult(dataService.get(results.get("out")),
+			assertTrue(checkResult(DataBundles.getPort(outputs, "out"),
 					"Apache Axis version: 1.2\nBuilt on May 03, 2005 (02:20:24 EDT)"));
-
-			assertEquals(State.COMPLETED, runService.getState(runId));
-			System.out.println(report);
 		}
 	}
 
@@ -788,23 +743,20 @@ public class RunIT extends PlatformIT {
 		assertTrue(executionEnvironments.size() > 0);
 		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
 			String runId = runService
-					.createRun(new RunProfile(executionEnvironment, workflowBundle));
+					.createRun(new RunProfile(executionEnvironment, workflowBundle, DataBundles.createBundle()));
 			assertEquals(State.CREATED, runService.getState(runId));
 
 			WorkflowReport report = runService.getWorkflowReport(runId);
 			System.out.println(report);
 
 			runService.start(runId);
-			assertEquals(State.RUNNING, runService.getState(runId));
-			System.out.println(report);
+			assertTrue(waitForState(report, State.COMPLETED));
 
-			Map<String, DataLocation> results = runService.getOutputs(runId);
-			waitForResults(results, report, "out");
+			Bundle outputBundle = runService.getDataBundle(runId);
+			assertNotNull(outputBundle);
+			Path outputs = DataBundles.getOutputs(outputBundle);
 
-			assertTrue(checkResult(dataService.get(results.get("out")), "Hello Alan!"));
-
-			assertEquals(State.COMPLETED, runService.getState(runId));
-			System.out.println(report);
+			assertTrue(checkResult(DataBundles.getPort(outputs, "out"), "Hello Alan!"));
 		}
 	}
 
@@ -834,27 +786,23 @@ public class RunIT extends PlatformIT {
 		assertTrue(executionEnvironments.size() > 0);
 		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
 			String runId = runService
-					.createRun(new RunProfile(executionEnvironment, workflowBundle));
+					.createRun(new RunProfile(executionEnvironment, workflowBundle, DataBundles.createBundle()));
 			assertEquals(State.CREATED, runService.getState(runId));
 
 			WorkflowReport report = runService.getWorkflowReport(runId);
 			System.out.println(report);
 
 			runService.start(runId);
-			assertEquals(State.RUNNING, runService.getState(runId));
-			System.out.println(report);
+			assertTrue(waitForState(report, State.COMPLETED));
 
-			Map<String, DataLocation> results = runService.getOutputs(runId);
-			waitForResults(results, report, "out_plaintext", "out_digest", "out_digest_timestamp",
-					"out_plaintext_timestamp");
+			Bundle outputBundle = runService.getDataBundle(runId);
+			assertNotNull(outputBundle);
+			Path outputs = DataBundles.getOutputs(outputBundle);
 
-			assertTrue(checkResult(dataService.get(results.get("out_plaintext")), "Hello Alan!"));
-			assertTrue(checkResult(dataService.get(results.get("out_digest")), "Hello Stian!"));
-			assertTrue(checkResult(dataService.get(results.get("out_digest_timestamp")), "Hello David!"));
-			assertTrue(checkResult(dataService.get(results.get("out_plaintext_timestamp")), "Hello Alex!"));
-
-			assertEquals(State.COMPLETED, runService.getState(runId));
-			System.out.println(report);
+			assertTrue(checkResult(DataBundles.getPort(outputs, "out_plaintext"), "Hello Alan!"));
+			assertTrue(checkResult(DataBundles.getPort(outputs, "out_digest"), "Hello Stian!"));
+			assertTrue(checkResult(DataBundles.getPort(outputs, "out_digest_timestamp"), "Hello David!"));
+			assertTrue(checkResult(DataBundles.getPort(outputs, "out_plaintext_timestamp"), "Hello Alex!"));
 		}
 	}
 
@@ -891,27 +839,23 @@ public class RunIT extends PlatformIT {
 		assertTrue(executionEnvironments.size() > 0);
 		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
 			String runId = runService
-					.createRun(new RunProfile(executionEnvironment, workflowBundle));
+					.createRun(new RunProfile(executionEnvironment, workflowBundle, DataBundles.createBundle()));
 			assertEquals(State.CREATED, runService.getState(runId));
 
 			WorkflowReport report = runService.getWorkflowReport(runId);
 			System.out.println(report);
 
 			runService.start(runId);
-			assertEquals(State.RUNNING, runService.getState(runId));
-			System.out.println(report);
+			assertTrue(waitForState(report, State.COMPLETED));
 
-			Map<String, DataLocation> results = runService.getOutputs(runId);
-			waitForResults(results, report, "out_plaintext", "out_digest", "out_digest_timestamp",
-					"out_plaintext_timestamp");
+			Bundle outputBundle = runService.getDataBundle(runId);
+			assertNotNull(outputBundle);
+			Path outputs = DataBundles.getOutputs(outputBundle);
 
-			assertTrue(checkResult(dataService.get(results.get("out_plaintext")), "Hello Alan!"));
-			assertTrue(checkResult(dataService.get(results.get("out_digest")), "Hello Stian!"));
-			assertTrue(checkResult(dataService.get(results.get("out_digest_timestamp")), "Hello David!"));
-			assertTrue(checkResult(dataService.get(results.get("out_plaintext_timestamp")), "Hello Alex!"));
-
-			assertEquals(State.COMPLETED, runService.getState(runId));
-			System.out.println(report);
+			assertTrue(checkResult(DataBundles.getPort(outputs, "out_plaintext"), "Hello Alan!"));
+			assertTrue(checkResult(DataBundles.getPort(outputs, "out_digest"), "Hello Stian!"));
+			assertTrue(checkResult(DataBundles.getPort(outputs, "out_digest_timestamp"), "Hello David!"));
+			assertTrue(checkResult(DataBundles.getPort(outputs, "out_plaintext_timestamp"), "Hello Alex!"));
 		}
 	}
 
@@ -923,31 +867,28 @@ public class RunIT extends PlatformIT {
 				.getExecutionEnvironments(workflowBundle);
 		assertTrue(executionEnvironments.size() > 0);
 		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
-			Map<String, DataLocation> inputs = new HashMap<String, DataLocation>();
-			inputs.put("firstName", DataTools.createExplicitTextData(dataService, "John").getLocation());
-			inputs.put("lastName", DataTools.createExplicitTextData(dataService, "Smith").getLocation());
-			inputs.put("age", DataTools.createExplicitTextData(dataService, "21").getLocation());
+			Bundle inputBundle = DataBundles.createBundle();
+			Path inputs = DataBundles.getInputs(inputBundle);
+			DataBundles.setStringValue(DataBundles.getPort(inputs, "firstName"), "John");
+			DataBundles.setStringValue(DataBundles.getPort(inputs, "lastName"), "Smith");
+			DataBundles.setStringValue(DataBundles.getPort(inputs, "age"), "21");
 
 			String runId = runService.createRun(new RunProfile(executionEnvironment,
-					workflowBundle, inputs));
+					workflowBundle, inputBundle));
 			assertEquals(State.CREATED, runService.getState(runId));
 
 			WorkflowReport report = runService.getWorkflowReport(runId);
 			System.out.println(report);
 
 			runService.start(runId);
-			assertTrue(runService.getState(runId).equals(State.RUNNING)
-					|| runService.getState(runId).equals(State.COMPLETED));
-			System.out.println(report);
+			assertTrue(waitForState(report, State.COMPLETED));
 
-			Map<String, DataLocation> results = runService.getOutputs(runId);
-			waitForResults(results, report, "out");
+			Bundle outputBundle = runService.getDataBundle(runId);
+			assertNotNull(outputBundle);
+			Path outputs = DataBundles.getOutputs(outputBundle);
 
-			assertTrue(checkResult(dataService.get(results.get("out")),
+			assertTrue(checkResult(DataBundles.getPort(outputs, "out"),
 					"John Smith (21) of 40, Oxford Road. Manchester."));
-
-			assertEquals(State.COMPLETED, runService.getState(runId));
-			System.out.println(report);
 		}
 	}
 
@@ -960,24 +901,20 @@ public class RunIT extends PlatformIT {
 		assertTrue(executionEnvironments.size() > 0);
 		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
 			String runId = runService
-					.createRun(new RunProfile(executionEnvironment, workflowBundle));
+					.createRun(new RunProfile(executionEnvironment, workflowBundle, DataBundles.createBundle()));
 			assertEquals(State.CREATED, runService.getState(runId));
 
 			WorkflowReport report = runService.getWorkflowReport(runId);
 			System.out.println(report);
 
 			runService.start(runId);
-			assertTrue(runService.getState(runId).equals(State.RUNNING)
-					|| runService.getState(runId).equals(State.COMPLETED));
-			System.out.println(report);
+			assertTrue(waitForState(report, State.COMPLETED));
 
-			Map<String, DataLocation> results = runService.getOutputs(runId);
-			waitForResults(results, report, "out");
+			Bundle outputBundle = runService.getDataBundle(runId);
+			assertNotNull(outputBundle);
+			Path outputs = DataBundles.getOutputs(outputBundle);
 
-			assertTrue(checkResult(dataService.get(results.get("out")), "<test-element>test</test-element>"));
-
-			assertEquals(State.COMPLETED, runService.getState(runId));
-			System.out.println(report);
+			assertTrue(checkResult(DataBundles.getPort(outputs, "out"), "<test-element>test</test-element>"));
 		}
 	}
 
@@ -989,32 +926,28 @@ public class RunIT extends PlatformIT {
 				.getExecutionEnvironments(workflowBundle);
 		assertTrue(executionEnvironments.size() > 0);
 		for (ExecutionEnvironment executionEnvironment : executionEnvironments) {
-			Map<String, DataLocation> inputs = new HashMap<String, DataLocation>();
+			Bundle inputBundle = DataBundles.createBundle();
+			Path inputs = DataBundles.getInputs(inputBundle);
 			File file = loadFile("/t2flow/input.txt");
-			Data data = DataTools.createSingleReferenceTextData(dataService, "/t2flow/input.txt");
-			assertTrue(data.hasReferences());
-			inputs.put("in", data.getLocation());
+			DataBundles.setReference(DataBundles.getPort(inputs, "in"), file.toURI());
+			assertTrue(DataBundles.isReference(DataBundles.getPort(inputs, "in")));
+			assertFalse(DataBundles.isValue(DataBundles.getPort(inputs, "in")));
 
 			String runId = runService.createRun(new RunProfile(executionEnvironment,
-					workflowBundle, inputs));
+					workflowBundle, inputBundle));
 			assertEquals(State.CREATED, runService.getState(runId));
 
 			WorkflowReport report = runService.getWorkflowReport(runId);
 			System.out.println(report);
 
 			runService.start(runId);
-			assertTrue(runService.getState(runId).equals(State.RUNNING)
-					|| runService.getState(runId).equals(State.COMPLETED));
-			System.out.println(report);
+			assertTrue(waitForState(report, State.COMPLETED));
 
-			Map<String, DataLocation> results = runService.getOutputs(runId);
-			assertNotNull(results);
-			waitForResults(results, runService.getWorkflowReport(runId), "out");
+			Bundle outputBundle = runService.getDataBundle(runId);
+			assertNotNull(outputBundle);
+			Path outputs = DataBundles.getOutputs(outputBundle);
 
-			assertTrue(checkResult(dataService.get(results.get("out")), "test input value"));
-
-			assertEquals(State.COMPLETED, runService.getState(runId));
-			System.out.println(report);
+			assertTrue(checkResult(DataBundles.getPort(outputs, "out"), "test input value"));
 		}
 	}
 
