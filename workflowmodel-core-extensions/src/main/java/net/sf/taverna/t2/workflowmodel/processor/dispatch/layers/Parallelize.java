@@ -28,6 +28,7 @@ import static net.sf.taverna.t2.workflowmodel.processor.dispatch.description.Dis
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.TimerTask;
@@ -36,6 +37,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import net.sf.taverna.t2.invocation.Completion;
 import net.sf.taverna.t2.invocation.IterationInternalEvent;
+import net.sf.taverna.t2.monitor.MonitorManager;
 import net.sf.taverna.t2.monitor.MonitorableProperty;
 import net.sf.taverna.t2.monitor.NoSuchPropertyException;
 import net.sf.taverna.t2.workflowmodel.WorkflowStructureException;
@@ -170,6 +172,9 @@ public class Parallelize extends AbstractDispatchLayer<JsonNode>
 			logger.warn("Error received for unknown owning process: " + owningProcess);
 			return;
 		}
+		MonitorManager.getInstance().registerNode(resultEvent,
+				owningProcess.split(":"),
+				new HashSet<MonitorableProperty<?>>());
 		model.finishWith(resultEvent.getIndex());
 		getAbove().receiveResult(resultEvent);
 	}
@@ -384,13 +389,18 @@ public class Parallelize extends AbstractDispatchLayer<JsonNode>
 							activeJobs++;
 						}
 						sentJobsCount++;
-						getBelow()
-								.receiveJob(
-										new DispatchJobEvent(e
-												.getOwningProcess(), e
-												.getIndex(), e.getContext(),
-												((Job) e).getData(), queueEvent
-														.getActivities()));
+
+						DispatchJobEvent dispatchJobEvent = new DispatchJobEvent(e
+								.getOwningProcess(), e
+								.getIndex(), e.getContext(),
+								((Job) e).getData(), queueEvent
+										.getActivities());
+						// Register with the monitor
+						MonitorManager.getInstance().registerNode(dispatchJobEvent,
+								e.getOwningProcess().split(":"),
+								new HashSet<MonitorableProperty<?>>());
+
+						getBelow().receiveJob(dispatchJobEvent);
 					}
 				}
 			}
