@@ -81,7 +81,7 @@ public interface DispatchLayerService {
 	 * @throws DispatchLayerConfigurationException
 	 *             if the configuration is not valid
 	 */
-	public DispatchLayer<?> createDispatchLayer(URI uri, Configuration configuration)
+	public DispatchLayer<?> createDispatchLayer(URI uri, JsonNode configuration)
 			throws DispatchLayerNotFoundException, DispatchLayerConfigurationException;
 
 }

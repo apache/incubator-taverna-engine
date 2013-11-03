@@ -20,6 +20,7 @@
  ******************************************************************************/
 package uk.org.taverna.platform.execution.impl;
 
+import java.net.URI;
 import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.List;
@@ -38,7 +39,6 @@ import uk.org.taverna.scufl2.api.common.NamedSet;
 import uk.org.taverna.scufl2.api.common.Scufl2Tools;
 import uk.org.taverna.scufl2.api.configurations.Configuration;
 import uk.org.taverna.scufl2.api.core.Processor;
-import uk.org.taverna.scufl2.api.dispatchstack.DispatchStackLayer;
 import uk.org.taverna.scufl2.api.profiles.ProcessorBinding;
 import uk.org.taverna.scufl2.api.profiles.Profile;
 
@@ -109,28 +109,29 @@ public class ExecutionEnvironmentServiceImpl implements ExecutionEnvironmentServ
 				return false;
 			}
 			Processor processor = processorBinding.getBoundProcessor();
-			for (DispatchStackLayer dispatchStackLayer : processor.getDispatchStack()) {
-				if (!executionEnvironment.dispatchLayerExists(dispatchStackLayer
-						.getType())) {
-					logger.fine(MessageFormat.format("{0} does not contain dispatch layer {1}",
-							executionEnvironment.getName(),
-							dispatchStackLayer.getType()));
-					return false;
-				}
-
-				List<Configuration> dispatchLayerConfigurations = scufl2Tools.configurationsFor(dispatchStackLayer, profile);
-				if (dispatchLayerConfigurations.size() > 1) {
-					logger.fine(MessageFormat.format("{0} contains multiple configurations for dispatch layer {1}",
-							executionEnvironment.getName(),
-							dispatchStackLayer.getType()));
-				} else if (dispatchLayerConfigurations.size() == 1) {
-					if (!isValidDispatchLayerConfiguration(executionEnvironment, dispatchLayerConfigurations.get(0), dispatchStackLayer)) {
-						logger.fine(MessageFormat.format("Invalid dispatch layer configuration for {1} in {0}",
-								executionEnvironment.getName(), dispatchStackLayer.getType()));
-						return false;
-					}
-				}
-			}
+			// TODO check that environment has required dispatch layers for processor configuration
+//			for (DispatchStackLayer dispatchStackLayer : processor.getDispatchStack()) {
+//				if (!executionEnvironment.dispatchLayerExists(dispatchStackLayer
+//						.getType())) {
+//					logger.fine(MessageFormat.format("{0} does not contain dispatch layer {1}",
+//							executionEnvironment.getName(),
+//							dispatchStackLayer.getType()));
+//					return false;
+//				}
+//
+//				List<Configuration> dispatchLayerConfigurations = scufl2Tools.configurationsFor(dispatchStackLayer, profile);
+//				if (dispatchLayerConfigurations.size() > 1) {
+//					logger.fine(MessageFormat.format("{0} contains multiple configurations for dispatch layer {1}",
+//							executionEnvironment.getName(),
+//							dispatchStackLayer.getType()));
+//				} else if (dispatchLayerConfigurations.size() == 1) {
+//					if (!isValidDispatchLayerConfiguration(executionEnvironment, dispatchLayerConfigurations.get(0), dispatchStackLayer)) {
+//						logger.fine(MessageFormat.format("Invalid dispatch layer configuration for {1} in {0}",
+//								executionEnvironment.getName(), dispatchStackLayer.getType()));
+//						return false;
+//					}
+//				}
+//			}
 		}
 		return true;
 	}
@@ -155,17 +156,17 @@ public class ExecutionEnvironmentServiceImpl implements ExecutionEnvironmentServ
 	}
 
 	private boolean isValidDispatchLayerConfiguration(ExecutionEnvironment executionEnvironment,
-			Configuration configuration, DispatchStackLayer dispatchLayer) {
+			Configuration configuration, URI dispatchLayerType) {
 		try {
-			JsonNode environmentSchema = executionEnvironment.getDispatchLayerConfigurationSchema(dispatchLayer.getType());
+			JsonNode environmentSchema = executionEnvironment.getDispatchLayerConfigurationSchema(dispatchLayerType);
 			// TODO validate against schema
 		} catch (DispatchLayerNotFoundException e) {
 			logger.fine(MessageFormat.format("{0} does not contain dispatch layer {1}",
-					executionEnvironment.getName(), dispatchLayer.getType()));
+					executionEnvironment.getName(), dispatchLayerType));
 			return false;
 		} catch (DispatchLayerConfigurationException e) {
 			logger.fine(MessageFormat.format("Configuration for {1} is incorrect in {0}",
-					executionEnvironment.getName(), dispatchLayer.getType()));
+					executionEnvironment.getName(), dispatchLayerType));
 			return false;
 		}
 		return true;

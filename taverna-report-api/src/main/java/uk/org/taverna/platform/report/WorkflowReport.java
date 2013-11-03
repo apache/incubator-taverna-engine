@@ -20,18 +20,15 @@
  ******************************************************************************/
 package uk.org.taverna.platform.report;
 
-import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.purl.wf4ever.robundle.Bundle;
 
-import uk.org.taverna.databundle.DataBundles;
 import uk.org.taverna.scufl2.api.core.Workflow;
 
 /**
@@ -51,11 +48,6 @@ public class WorkflowReport extends StatusReport<Workflow, ActivityReport> {
 
 	public WorkflowReport(Workflow workflow) {
 		super(workflow);
-		try {
-			dataBundle = DataBundles.createBundle();
-		} catch (IOException e) {
-			logger.log(Level.WARNING, "Error creating data bundle", e);
-		}
 	}
 
 	public Set<ProcessorReport> getProcessorReports() {
@@ -68,6 +60,10 @@ public class WorkflowReport extends StatusReport<Workflow, ActivityReport> {
 
 	public Bundle getDataBundle() {
 		return dataBundle;
+	}
+
+	public void setDataBundle(Bundle dataBundle) {
+		this.dataBundle = dataBundle;
 	}
 
 	public String toString() {

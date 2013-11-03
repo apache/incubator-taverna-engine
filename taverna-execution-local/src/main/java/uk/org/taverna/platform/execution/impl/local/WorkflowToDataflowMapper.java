@@ -44,6 +44,7 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityInputPort;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityOutputPort;
 import net.sf.taverna.t2.workflowmodel.processor.activity.NestedDataflow;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayer;
+import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchStack;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationStrategy;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.NamedInputPortNode;
 
@@ -65,8 +66,6 @@ import uk.org.taverna.scufl2.api.core.ControlLink;
 import uk.org.taverna.scufl2.api.core.DataLink;
 import uk.org.taverna.scufl2.api.core.Processor;
 import uk.org.taverna.scufl2.api.core.Workflow;
-import uk.org.taverna.scufl2.api.dispatchstack.DispatchStack;
-import uk.org.taverna.scufl2.api.dispatchstack.DispatchStackLayer;
 import uk.org.taverna.scufl2.api.iterationstrategy.CrossProduct;
 import uk.org.taverna.scufl2.api.iterationstrategy.DotProduct;
 import uk.org.taverna.scufl2.api.iterationstrategy.IterationStrategyNode;
@@ -86,6 +85,8 @@ import uk.org.taverna.scufl2.api.profiles.ProcessorBinding;
 import uk.org.taverna.scufl2.api.profiles.ProcessorInputPortBinding;
 import uk.org.taverna.scufl2.api.profiles.ProcessorOutputPortBinding;
 import uk.org.taverna.scufl2.api.profiles.Profile;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Translates a scufl2 {@link Workflow} into a {@link Dataflow}.
@@ -231,7 +232,8 @@ public class WorkflowToDataflowMapper {
 					ProcessorInputPort processorInputPort = edits.createProcessorInputPort(
 							dataflowProcessor, inputProcessorPort.getName(),
 							inputProcessorPort.getDepth());
-					edits.getAddProcessorInputPortEdit(dataflowProcessor, processorInputPort).doEdit();
+					edits.getAddProcessorInputPortEdit(dataflowProcessor, processorInputPort)
+							.doEdit();
 					inputPorts.put(inputProcessorPort, processorInputPort);
 				}
 			}
@@ -263,28 +265,48 @@ public class WorkflowToDataflowMapper {
 			net.sf.taverna.t2.workflowmodel.Processor dataflowProcessor)
 			throws DispatchLayerNotFoundException, DispatchLayerConfigurationException,
 			EditException {
-		net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchStack dataflowDispatchStack = dataflowProcessor
-				.getDispatchStack();
-		DispatchStack dispatchStack = processor.getDispatchStack();
-		if (dispatchStack == null || dispatchStack.isEmpty()) {
-			edits.getDefaultDispatchStackEdit(dataflowProcessor).doEdit();
-		} else {
-			for (int layer = 0; layer < dispatchStack.size(); layer++) {
-				DispatchStackLayer dispatchStackLayer = dispatchStack.get(layer);
-				URI dispatchLayerType = dispatchStackLayer.getType();
-				Configuration configuration = null;
-				try {
-					configuration = scufl2Tools.configurationFor(dispatchStackLayer, profile);
-				} catch (IndexOutOfBoundsException e) {
-					// no configuration for dispatch layer
-				}
-				// create the dispatch layer
-				DispatchLayer<?> dispatchLayer = dispatchLayerService.createDispatchLayer(
-						dispatchLayerType, configuration);
-				// add the dispatch layer to the dispatch layer stack
-				edits.getAddDispatchLayerEdit(dataflowDispatchStack, dispatchLayer, layer).doEdit();
-			}
+		DispatchStack dispatchStack = dataflowProcessor.getDispatchStack();
+
+		JsonNode json = null;
+		try {
+			Configuration configuration = scufl2Tools.configurationFor(processor, profile);
+			json = configuration.getJson();
+		} catch (IndexOutOfBoundsException e) {
+			// no configuration for processor
 		}
+
+		int layer = 0;
+		addDispatchLayer(
+				dispatchStack,
+				URI.create("http://ns.taverna.org.uk/2010/scufl2/taverna/dispatchlayer/Parallelize"),
+				layer++, json == null ? null : json.get("parallelize"));
+		addDispatchLayer(
+				dispatchStack,
+				URI.create("http://ns.taverna.org.uk/2010/scufl2/taverna/dispatchlayer/ErrorBounce"),
+				layer++, null);
+		addDispatchLayer(dispatchStack,
+				URI.create("http://ns.taverna.org.uk/2010/scufl2/taverna/dispatchlayer/Failover"),
+				layer++, null);
+		addDispatchLayer(dispatchStack,
+				URI.create("http://ns.taverna.org.uk/2010/scufl2/taverna/dispatchlayer/Retry"),
+				layer++, json == null ? null : json.get("retry"));
+		addDispatchLayer(dispatchStack,
+				URI.create("http://ns.taverna.org.uk/2010/scufl2/taverna/dispatchlayer/Stop"),
+				layer++, null);
+		addDispatchLayer(dispatchStack,
+				URI.create("http://ns.taverna.org.uk/2010/scufl2/taverna/dispatchlayer/Invoke"),
+				layer++, null);
+
+	}
+
+	private void addDispatchLayer(DispatchStack dispatchStack, URI dispatchLayerType, int layer,
+			JsonNode json) throws DispatchLayerConfigurationException,
+			DispatchLayerNotFoundException, EditException {
+		// create the dispatch layer
+		DispatchLayer<?> dispatchLayer = dispatchLayerService.createDispatchLayer(
+				dispatchLayerType, json);
+		// add the dispatch layer to the dispatch layer stack
+		edits.getAddDispatchLayerEdit(dispatchStack, dispatchLayer, layer).doEdit();
 	}
 
 	private void addIterationStrategy(Processor processor,
@@ -363,7 +385,8 @@ public class WorkflowToDataflowMapper {
 		// check if we have a nested workflow
 		if (activityType.equals(NESTED_WORKFLOW_URI)) {
 			if (activity instanceof NestedDataflow) {
-				Workflow nestedWorkflow = scufl2Tools.nestedWorkflowForProcessor(processorBinding.getBoundProcessor(), profile);
+				Workflow nestedWorkflow = scufl2Tools.nestedWorkflowForProcessor(
+						processorBinding.getBoundProcessor(), profile);
 				Dataflow nestedDataflow = getDataflow(nestedWorkflow);
 				((NestedDataflow) activity).setNestedDataflow(nestedDataflow);
 			} else {

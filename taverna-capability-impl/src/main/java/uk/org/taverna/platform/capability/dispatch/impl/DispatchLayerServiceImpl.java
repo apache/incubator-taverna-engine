@@ -21,7 +21,6 @@
 package uk.org.taverna.platform.capability.dispatch.impl;
 
 import java.net.URI;
-import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,8 +31,6 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayerFactory;
 import uk.org.taverna.platform.capability.api.DispatchLayerConfigurationException;
 import uk.org.taverna.platform.capability.api.DispatchLayerNotFoundException;
 import uk.org.taverna.platform.capability.api.DispatchLayerService;
-import uk.org.taverna.scufl2.api.configurations.Configuration;
-import uk.org.taverna.scufl2.api.dispatchstack.DispatchStackLayer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -73,31 +70,14 @@ public class DispatchLayerServiceImpl implements DispatchLayerService {
 	}
 
 	@Override
-	public DispatchLayer<?> createDispatchLayer(URI dispatchLayerType, Configuration configuration)
+	public DispatchLayer<?> createDispatchLayer(URI dispatchLayerType, JsonNode configuration)
 			throws DispatchLayerNotFoundException, DispatchLayerConfigurationException {
 		DispatchLayerFactory factory = getDispatchLayerFactory(dispatchLayerType);
 		DispatchLayer<JsonNode> dispatchLayer = (DispatchLayer<JsonNode>) factory.createDispatchLayer(dispatchLayerType);
 
 		if (configuration != null) {
-			// check configuration is for the correct dispatch layer
-			uk.org.taverna.scufl2.api.common.Configurable configurable = configuration.getConfigures();
-			if (configurable instanceof DispatchStackLayer) {
-				DispatchStackLayer scufl2DispatchLayer = (DispatchStackLayer) configurable;
-				if (!scufl2DispatchLayer.getType().equals(dispatchLayerType)) {
-					String message = MessageFormat.format(
-							"Expected a configuration for {0} but got a configuration for {1}",
-							dispatchLayerType, scufl2DispatchLayer.getType());
-					logger.fine(message);
-					throw new DispatchLayerConfigurationException(message);
-				}
-			} else {
-				String message = "Configuration does not configure an DispatchLayer";
-				logger.fine(message);
-				throw new DispatchLayerConfigurationException(message);
-			}
-			// set the configuration bean
 			try {
-				dispatchLayer.configure(configuration.getJson());
+				dispatchLayer.configure(configuration);
 			} catch (net.sf.taverna.t2.workflowmodel.ConfigurationException e) {
 				throw new DispatchLayerConfigurationException(e);
 			}
