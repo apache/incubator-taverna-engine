@@ -1,5 +1,6 @@
 package uk.org.taverna.platform.execution.impl.local;
 
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -140,9 +141,5 @@ public class LocalProcessorReport extends ProcessorReport {
 		}
 		return sb.toString();
 	}
-public static void main(String[] args) {
-	int result = -1;
-	result =  (Integer) null;
-	System.out.println(result);
-}
+
 }

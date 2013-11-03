@@ -49,13 +49,11 @@ public interface Execution {
 	public abstract WorkflowBundle getWorkflowBundle();
 
 	/**
-	 * Returns the <code>Bundle</code> containing the inputs for the <code>Workflow</code>.
+	 * Returns the <code>Bundle</code> containing the data values for the <code>Workflow</code>.
 	 *
-	 * May be <code>null</code> if the <code>Workflow</code> doesn't require any inputs.
-	 *
-	 * @return the <code>Bundle</code> containing the inputs for the <code>Workflow</code>
+	 * @return the <code>Bundle</code> containing the data values for the <code>Workflow</code>
 	 */
-	public abstract Bundle getInputs();
+	public abstract Bundle getDataBundle();
 
 	/**
 	 * Returns the <code>Workflow</code> to execute.

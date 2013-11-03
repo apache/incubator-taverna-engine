@@ -55,7 +55,7 @@ public class Run {
 
 	private final WorkflowBundle workflowBundle;
 
-	private final Bundle inputs;
+	private final Bundle dataBundle;
 
 	private final Workflow workflow;
 
@@ -105,11 +105,13 @@ public class Run {
 		} else {
 			profile = workflowBundle.getProfiles().getByName(runProfile.getProfileName());
 		}
-		if (runProfile.getInputs() == null) {
-			String message = "No workflow inputs in the RunProfile";
-			logger.info(message);
+		if (runProfile.getDataBundle() == null) {
+			String message = "No DataBundle specified in the RunProfile";
+			logger.warning(message);
+			throw new RunProfileException(message);
+		} else {
+			dataBundle = runProfile.getDataBundle();
 		}
-		inputs = runProfile.getInputs();
 		if (runProfile.getExecutionEnvironment() == null) {
 			String message = "No ExecutionEnvironment specified in the RunProfile";
 			logger.warning(message);
@@ -119,7 +121,7 @@ public class Run {
 
 		ID = UUID.randomUUID().toString();
 		executionID = executionEnvironment.getExecutionService().createExecution(
-				executionEnvironment, workflowBundle, workflow, profile, inputs);
+				executionEnvironment, workflowBundle, workflow, profile, dataBundle);
 		try {
 			workflowReport = executionEnvironment.getExecutionService().getWorkflowReport(
 					executionID);
@@ -152,25 +154,12 @@ public class Run {
 	}
 
 	/**
-	 * Returns the <code>Bundle</code> containing the inputs of the run.
-	 *
-	 * May be <code>null</code> if the <code>Workflow</code> doesn't require any inputs.
-	 *
-	 * @return the <code>Bundle</code> containing the inputs for the <code>Workflow</code>
+	 * Returns the <code>Bundle</code> containing the data values of the run.
+	 *	 *
+	 * @return the <code>Bundle</code> containing the data values for the <code>Workflow</code>
 	 */
-	public Bundle getInputs() {
-		return inputs;
-	}
-
-	/**
-	 * Returns the <code>Bundle</code> containing the outputs for the <code>Workflow</code>.
-	 *
-	 * May be <code>null</code> if the <code>Workflow</code> hasn't produced any outputs (yet).
-	 *
-	 * @return the <code>Bundle</code> containing the outputs for the <code>Workflow</code>
-	 */
-	public Bundle getOutputs() {
-		return workflowReport.getOutputs();
+	public Bundle getDataBundle() {
+		return dataBundle;
 	}
 
 	/**

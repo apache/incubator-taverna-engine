@@ -40,7 +40,7 @@ import uk.org.taverna.scufl2.api.core.Workflow;
  */
 public class StatusReportTest {
 
-	private StatusReport<Workflow, ?, ?> statusReport;
+	private StatusReport<Workflow, ?> statusReport;
 	private Workflow subject;
 
 	/**
@@ -49,7 +49,7 @@ public class StatusReportTest {
 	@Before
 	public void setUp() throws Exception {
 		subject = new Workflow();
-		statusReport = new StatusReport<Workflow,StatusReport<?,?,?>,StatusReport<?,?,?>>(subject);
+		statusReport = new StatusReport<Workflow,StatusReport<?,?>>(subject);
 	}
 
 	/**
@@ -58,7 +58,7 @@ public class StatusReportTest {
 	@Test
 	public void testStatusReport() {
 		Date preCreationTime = new Date();
-		statusReport = new StatusReport<Workflow,StatusReport<?,?,?>,StatusReport<?,?,?>>(null);
+		statusReport = new StatusReport<Workflow,StatusReport<?,?>>(null);
 		assertFalse(statusReport.getCreatedDate().before(preCreationTime));
 		assertFalse(statusReport.getCreatedDate().after(new Date()));
 		assertEquals(State.CREATED, statusReport.getState());

@@ -15,7 +15,7 @@ public class RunProfile {
 
 	private ExecutionEnvironment executionEnvironment;
 	private WorkflowBundle workflowBundle;
-	private Bundle inputs;
+	private Bundle dataBundle;
 	private String workflowName;
 	private String profileName;
 
@@ -28,27 +28,12 @@ public class RunProfile {
 	 *            the {@link ExecutionEnvironment} used to execute the <code>Workflow</code>
 	 * @param workflowBundle
 	 *            the <code>WorkflowBundle</code> containing the <code>Workflow</code> to run
-	 */
-	public RunProfile(ExecutionEnvironment executionEnvironment, WorkflowBundle workflowBundle) {
-		this(executionEnvironment, workflowBundle, null, null, null);
-	}
-
-	/**
-	 * Constructs a <code>RunProfile</code> that specifies the parameters required to run a
-	 * {@link uk.org.taverna.scufl2.api.core.Workflow}. The main <code>Workflow</code> and
-	 * <code>Profile</code> from the <code>WorkflowBundle</code> are used.
-	 *
-	 * @param executionEnvironment
-	 *            the {@link ExecutionEnvironment} used to execute the <code>Workflow</code>
-	 * @param workflowBundle
-	 *            the <code>WorkflowBundle</code> containing the <code>Workflow</code> to run
-	 * @param inputs
-	 *            the <code>Bundle</code> containing inputs for the <code>Workflow</code>. Can
-	 *            be <code>null</code> if there are no inputs
+	 * @param dataBundle
+	 *            the <code>Bundle</code> containing the data values for the <code>Workflow</code>
 	 */
 	public RunProfile(ExecutionEnvironment executionEnvironment, WorkflowBundle workflowBundle,
-			Bundle inputs) {
-		this(executionEnvironment, workflowBundle, null, null, inputs);
+			Bundle dataBundle) {
+		this(executionEnvironment, workflowBundle, null, null, dataBundle);
 	}
 
 	/**
@@ -66,17 +51,16 @@ public class RunProfile {
 	 *            the {@link uk.org.taverna.scufl2.api.profiles.Profile} to use when running the
 	 *            <code>Workflow</code>. If null uses
 	 *            the main <code>Profile</code> from the <code>WorkflowBundle</code>
-	 * @param inputs
-	 *            the <code>Bundle</code> containing inputs for the <code>Workflow</code>. Can
-	 *            be <code>null</code> if there are no inputs
+	 * @param dataBundle
+	 *            the <code>Bundle</code> containing the data values for the <code>Workflow</code>
 	 */
 	public RunProfile(ExecutionEnvironment executionEnvironment, WorkflowBundle workflowBundle,
-			String workflowName, String profileName, Bundle inputs) {
+			String workflowName, String profileName, Bundle dataBundle) {
 		this.executionEnvironment = executionEnvironment;
 		this.workflowBundle = workflowBundle;
 		this.workflowName = workflowName;
 		this.profileName = profileName;
-		this.inputs = inputs;
+		this.dataBundle = dataBundle;
 	}
 
 	/**
@@ -152,24 +136,22 @@ public class RunProfile {
 	}
 
 	/**
-	 * Returns the <code>Bundle</code> containing the inputs for the <code>Workflow</code>.
-	 * <p>
-	 * May be <code>null</code> if the <code>Workflow</code> doesn't require any inputs.
+	 * Returns the <code>Bundle</code> containing the data values for the <code>Workflow</code>.
 	 *
-	 * @return the inputs for the <code>Workflow</code>
+	 * @return the <code>Bundle</code> containing the data values for the <code>Workflow</code>
 	 */
-	public Bundle getInputs() {
-		return inputs;
+	public Bundle getDataBundle() {
+		return dataBundle;
 	}
 
 	/**
-	 * Sets the <code>Bundle</code> containing the inputs for the <code>Workflow</code>.
+	 * Sets the <code>Bundle</code> containing the data values for the <code>Workflow</code>.
 	 *
-	 * @param inputs
-	 *            the <code>Bundle</code> containing the inputs for the <code>Workflow</code>
+	 * @param dataBundle
+	 *            the <code>Bundle</code> containing the data values for the <code>Workflow</code>
 	 */
-	public void setInputs(Bundle dataBundle) {
-		this.inputs = dataBundle;
+	public void setDataBundle(Bundle dataBundle) {
+		this.dataBundle = dataBundle;
 	}
 
 	/**

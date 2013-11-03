@@ -27,7 +27,9 @@ import uk.org.taverna.scufl2.api.activity.Activity;
  *
  * @author David Withers
  */
-public class ActivityReport extends StatusReport<Activity, ProcessorReport, WorkflowReport> {
+public class ActivityReport extends StatusReport<Activity, ProcessorReport> {
+
+	private WorkflowReport nestedWorkflowReport;
 
 	/**
 	 * Constructs a new <code>ActivityReport</code>.
@@ -36,6 +38,14 @@ public class ActivityReport extends StatusReport<Activity, ProcessorReport, Work
 	 */
 	public ActivityReport(Activity activity) {
 		super(activity);
+	}
+
+	public WorkflowReport getNestedWorkflowReport() {
+		return nestedWorkflowReport;
+	}
+
+	public void setNestedWorkflowReport(WorkflowReport nestedWorkflowReport) {
+		this.nestedWorkflowReport = nestedWorkflowReport;
 	}
 
 }

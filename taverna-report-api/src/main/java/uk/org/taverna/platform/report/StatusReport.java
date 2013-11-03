@@ -20,20 +20,15 @@
  ******************************************************************************/
 package uk.org.taverna.platform.report;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.logging.Level;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.logging.Logger;
 
-import org.purl.wf4ever.robundle.Bundle;
-
-import uk.org.taverna.databundle.DataBundles;
-import uk.org.taverna.scufl2.api.common.WorkflowBean;
+import uk.org.taverna.scufl2.api.common.Ported;
 
 /**
  * Report about the {@link State} of a workflow component.
@@ -43,10 +38,13 @@ import uk.org.taverna.scufl2.api.common.WorkflowBean;
  *            the WorkflowBean that the report is about
  * @param <PARENT>
  *            the parent report type
- * @param <CHILD>
- *            the child report type
  */
-public class StatusReport<SUBJECT extends WorkflowBean, PARENT extends StatusReport<?, ?, ?>, CHILD extends StatusReport<?, ?, ?>> {
+/**
+ * @author David Withers
+ * @param <SUBJECT>
+ * @param <PARENT>
+ */
+public class StatusReport<SUBJECT extends Ported, PARENT extends StatusReport<?, ?>> {
 
 	private static final Logger logger = Logger.getLogger(StatusReport.class.getName());
 
@@ -54,17 +52,15 @@ public class StatusReport<SUBJECT extends WorkflowBean, PARENT extends StatusRep
 
 	private PARENT parentReport;
 
-	private final Set<CHILD> childReports = new HashSet<CHILD>();
-
 	private State state;
+
+	private SortedSet<Invocation> invocations = new TreeSet<>();
 
 	private Date createdDate, startedDate, pausedDate, resumedDate, cancelledDate, completedDate,
 			failedDate;
 
 	private final List<Date> pausedDates = new ArrayList<Date>(),
 			resumedDates = new ArrayList<Date>();
-
-	private Bundle dataBundle;
 
 	private List<ReportListener> reportListeners = new ArrayList<>();
 
@@ -78,11 +74,6 @@ public class StatusReport<SUBJECT extends WorkflowBean, PARENT extends StatusRep
 	public StatusReport(SUBJECT subject) {
 		this.subject = subject;
 		setCreatedDate(new Date());
-		try {
-			dataBundle = DataBundles.createBundle();
-		} catch (IOException e) {
-			logger.log(Level.WARNING, "Error creating data bundle", e);
-		}
 	}
 
 	/**
@@ -115,27 +106,6 @@ public class StatusReport<SUBJECT extends WorkflowBean, PARENT extends StatusRep
 	 */
 	public void setParentReport(PARENT parentReport) {
 		this.parentReport = parentReport;
-	}
-
-	/**
-	 * Returns the child report.
-	 * <p>
-	 * Returns an empty set if this report has no child reports.
-	 *
-	 * @return the child report
-	 */
-	public Set<CHILD> getChildReports() {
-		return childReports;
-	}
-
-	/**
-	 * Adds a child report.
-	 *
-	 * @param the
-	 *            child report to add
-	 */
-	public void addChildReport(CHILD childReport) {
-		childReports.add(childReport);
 	}
 
 	/**
@@ -331,25 +301,20 @@ public class StatusReport<SUBJECT extends WorkflowBean, PARENT extends StatusRep
 	}
 
 	/**
-	 * Returns the <code>Bundle</code> containing the inputs for the workflow component.
-	 * <p>
-	 * If there are no inputs a <code>Bundle</code> containing no inputs is returned.
+	 * Returns the invocations.
 	 *
-	 * @return the inputs
+	 * @return the invocations
 	 */
-	public Bundle getInputs() {
-		return dataBundle;
+	public SortedSet<Invocation> getInvocations() {
+		synchronized (invocations) {
+			return new TreeSet<>(invocations);
+		}
 	}
 
-	/**
-	 * Returns the <code>Bundle</code> containing the outputs for the workflow component.
-	 * <p>
-	 * If there are no outputs a <code>Bundle</code> containing no outputs is returned.
-	 *
-	 * @return the outputs
-	 */
-	public Bundle getOutputs() {
-		return dataBundle;
+	public void addInvocation(Invocation invocation) {
+		synchronized (invocations) {
+			invocations.add(invocation);
+		}
 	}
 
 	/**

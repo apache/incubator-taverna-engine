@@ -14,8 +14,6 @@
 	<modules>
 		<module>taverna-capability-api</module>
 		<module>taverna-capability-impl</module>
-		<module>taverna-data-api</module>
-		<module>taverna-data-inmemory-impl</module>
 		<module>taverna-execution-api</module>
 		<module>taverna-execution-local</module>
 		<module>taverna-execution-remote</module>
@@ -23,8 +21,6 @@
 		<module>taverna-report-api</module>
 		<module>taverna-run-api</module>
 		<module>taverna-run-impl</module>
-		<!-- <module>taverna-integration-tests</module> -->
-		<module>taverna-data-general-impl</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>

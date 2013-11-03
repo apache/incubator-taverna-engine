@@ -51,7 +51,7 @@ public class AbstractExecutionTest {
 
 	private Profile profile;
 
-	private Bundle inputs;
+	private Bundle dataBundle;
 
 	/**
 	 * @throws java.lang.Exception
@@ -61,8 +61,8 @@ public class AbstractExecutionTest {
 		workflowBundle = new WorkflowBundle();
 		workflow = new Workflow();
 		profile = new Profile();
-		inputs = DataBundles.createBundle();
-		execution = new AbstractExecution(workflowBundle, workflow, profile, inputs) {
+		dataBundle = DataBundles.createBundle();
+		execution = new AbstractExecution(workflowBundle, workflow, profile, dataBundle) {
 			@Override
 			public void start() {}
 			@Override
@@ -119,7 +119,7 @@ public class AbstractExecutionTest {
 	 */
 	@Test
 	public void testGetInputs() {
-		assertEquals(inputs, execution.getInputs());
+		assertEquals(dataBundle, execution.getDataBundle());
 	}
 
 	/**

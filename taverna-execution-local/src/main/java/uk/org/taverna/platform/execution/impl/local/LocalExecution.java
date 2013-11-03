@@ -110,9 +110,8 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 	 *            the <code>Workflow</code> to execute
 	 * @param profile
 	 *            the <code>Profile</code> to use when executing the <code>Workflow</code>
-	 * @param inputs
-	 *            the <code>Bundle</code> containing inputs for the <code>Workflow</code>. Can
-	 *            be <code>null</code> if there are no inputs
+	 * @param dataBundle
+	 *            the <code>Bundle</code> containing the data values for the <code>Workflow</code>
 	 * @param referenceService
 	 *            the <code>ReferenceService</code> used to register inputs, outputs and
 	 *            intermediate values
@@ -120,12 +119,12 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 	 *             if the specified workflow is invalid
 	 */
 	public LocalExecution(WorkflowBundle workflowBundle, Workflow workflow, Profile profile,
-			Bundle inputs, ReferenceService referenceService, Edits edits,
+			Bundle dataBundle, ReferenceService referenceService, Edits edits,
 			ActivityService activityService, DispatchLayerService dispatchLayerService,
 			DatabaseConfiguration databaseConfiguration,
 			Set<ProvenanceConnectorFactory> provenanceConnectorFactories)
 			throws InvalidWorkflowException {
-		super(workflowBundle, workflow, profile, inputs);
+		super(workflowBundle, workflow, profile, dataBundle);
 		this.referenceService = referenceService;
 		this.databaseConfiguration = databaseConfiguration;
 		this.provenanceConnectorFactories = provenanceConnectorFactories;
@@ -137,7 +136,7 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 				inputPorts.put(dataflowInputPort.getName(), dataflowInputPort);
 			}
 			facade = edits.createWorkflowInstanceFacade(dataflow, createContext(), "");
-			executionMonitor = new LocalExecutionMonitor(getWorkflowReport(), mapping,
+			executionMonitor = new LocalExecutionMonitor(getWorkflowReport(), getDataBundle(), mapping,
 					facade.getIdentifier());
 		} catch (InvalidDataflowException e) {
 			throw new InvalidWorkflowException(e);
@@ -154,9 +153,9 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 		MonitorManager.getInstance().addObserver(executionMonitor);
 		facade.addResultListener(this);
 		facade.fire();
-		if (getInputs() != null && DataBundles.hasInputs(getInputs())) {
+		if (DataBundles.hasInputs(getDataBundle())) {
 			try {
-				Path inputs = DataBundles.getInputs(getInputs());
+				Path inputs = DataBundles.getInputs(getDataBundle());
 				for (Entry<String, DataflowInputPort> entry : inputPorts.entrySet()) {
 					String portName = entry.getKey();
 					DataflowInputPort port = entry.getValue();
@@ -179,6 +178,7 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 			}
 		}
 	}
+
 	@Override
 	public void pause() {
 		facade.pauseWorkflowRun();
@@ -275,12 +275,12 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 		if (token.getData().getReferenceType() != T2ReferenceType.IdentifiedList) {
 			WorkflowReport workflowReport = getWorkflowReport();
 			try {
-				Bundle outputBundle = workflowReport.getOutputs();
-				Path outputs = DataBundles.getOutputs(outputBundle);
+				Path outputs = DataBundles.getOutputs(getDataBundle());
 				Path port = DataBundles.getPort(outputs, portName);
 				Path path = getPath(port, 0, token.getIndex());
 				T2ReferenceConverter.convertReferenceToPath(path, token.getData(),
 						referenceService, token.getContext());
+				workflowReport.getInvocations().first().setOutputs(DataBundles.getPorts(outputs));
 				workflowReport.outputAdded(path, portName, token.getIndex());
 			} catch (IOException e) {
 				logger.log(Level.SEVERE, "Unable to convert T2Reference");
@@ -311,7 +311,7 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 					.getStrategies()) {
 				printNode("    ", iterationStrategy.getTerminalNode());
 			}
-			for (Activity activity : processor.getActivityList()) {
+			for (Activity<?> activity : processor.getActivityList()) {
 				System.out.println("    " + activity);
 				System.out.println("    " + activity.getInputPorts());
 				System.out.println("    " + activity.getInputPortMapping());

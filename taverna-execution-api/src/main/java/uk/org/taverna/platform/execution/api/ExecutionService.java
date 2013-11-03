@@ -78,14 +78,13 @@ public interface ExecutionService {
 	 *            the workflow to execute
 	 * @param profile
 	 *            the profile to use when executing the workflow
-	 * @param inputs
-	 *            the <code>Bundle</code> containing inputs for the <code>Workflow</code>. Can
-	 *            be <code>null</code> if there are no inputs
+	 * @param dataBundle
+	 *            the <code>Bundle</code> containing the data values for the <code>Workflow</code>
 	 * @return the ID of the created workflow execution
 	 * @throws InvalidWorkflowException
 	 */
 	public String createExecution(ExecutionEnvironment executionEnvironment, WorkflowBundle workflowBundle, Workflow workflow, Profile profile,
-			Bundle inputs)
+			Bundle dataBundle)
 			throws InvalidWorkflowException;
 
 	/**

@@ -20,15 +20,10 @@
  ******************************************************************************/
 package uk.org.taverna.platform.execution.api;
 
-import java.io.IOException;
-import java.nio.file.StandardCopyOption;
 import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.purl.wf4ever.robundle.Bundle;
 
-import uk.org.taverna.databundle.DataBundles;
 import uk.org.taverna.platform.report.ActivityReport;
 import uk.org.taverna.platform.report.ProcessorReport;
 import uk.org.taverna.platform.report.WorkflowReport;
@@ -47,14 +42,13 @@ import uk.org.taverna.scufl2.api.profiles.Profile;
  */
 public abstract class AbstractExecution implements Execution {
 
-	private static Logger logger = Logger.getLogger(AbstractExecution.class.getName());
-
 	private final String ID;
 	private final WorkflowBundle workflowBundle;
-	private final Bundle inputs;
+	private final Bundle dataBundle;
 	private final Workflow workflow;
 	private final Profile profile;
 	private final WorkflowReport workflowReport;
+
 	private final Scufl2Tools scufl2Tools = new Scufl2Tools();
 
 	/**
@@ -67,18 +61,17 @@ public abstract class AbstractExecution implements Execution {
 	 *            the <code>Workflow</code> to execute
 	 * @param profile
 	 *            the <code>Profile</code> to use when executing the <code>Workflow</code>
-	 * @param inputs
-	 *            the <code>Bundle</code> containing inputs for the <code>Workflow</code>. Can
-	 *            be <code>null</code> if there are no inputs
+	 * @param dataBundle
+	 *            the <code>Bundle</code> containing the data values for the <code>Workflow</code>
 	 * @throws InvalidWorkflowException
 	 *             if the specified workflow is invalid
 	 */
 	public AbstractExecution(WorkflowBundle workflowBundle, Workflow workflow, Profile profile,
-			Bundle inputs) {
+			Bundle dataBundle) {
 		this.workflowBundle = workflowBundle;
 		this.workflow = workflow;
 		this.profile = profile;
-		this.inputs = inputs;
+		this.dataBundle = dataBundle;
 		ID = UUID.randomUUID().toString();
 		workflowReport = generateWorkflowReport(workflow);
 	}
@@ -91,26 +84,21 @@ public abstract class AbstractExecution implements Execution {
 
 	public WorkflowReport generateWorkflowReport(Workflow workflow) {
 		WorkflowReport workflowReport = createWorkflowReport(workflow);
-		if (inputs != null && DataBundles.hasInputs(inputs)) {
-			try {
-				DataBundles.copyRecursively(DataBundles.getInputs(inputs), DataBundles.getInputs(workflowReport.getInputs()), StandardCopyOption.REPLACE_EXISTING);
-			} catch (IOException e) {
-				logger.log(Level.SEVERE, "Error while copying input data to workflow report", e);
-			}
-		}
 		for (Processor processor : workflow.getProcessors()) {
 			ProcessorReport processorReport = createProcessorReport(processor);
 			processorReport.setParentReport(workflowReport);
-			workflowReport.addChildReport(processorReport);
-			for (ProcessorBinding processorBinding : scufl2Tools.processorBindingsForProcessor(processor, profile)) {
+			workflowReport.addProcessorReport(processorReport);
+			for (ProcessorBinding processorBinding : scufl2Tools.processorBindingsForProcessor(
+					processor, profile)) {
 				Activity boundActivity = processorBinding.getBoundActivity();
 				ActivityReport activityReport = createActivityReport(boundActivity);
 				activityReport.setParentReport(processorReport);
 				if (scufl2Tools.containsNestedWorkflow(processor, profile)) {
-					Workflow nestedWorkflow = scufl2Tools.nestedWorkflowForProcessor(processor, profile);
-					activityReport.addChildReport(generateWorkflowReport(nestedWorkflow));
+					Workflow nestedWorkflow = scufl2Tools.nestedWorkflowForProcessor(processor,
+							profile);
+					activityReport.setNestedWorkflowReport(generateWorkflowReport(nestedWorkflow));
 				}
-				processorReport.addChildReport(activityReport);
+				processorReport.addActivityReport(activityReport);
 			}
 		}
 		return workflowReport;
@@ -127,8 +115,8 @@ public abstract class AbstractExecution implements Execution {
 	}
 
 	@Override
-	public Bundle getInputs() {
-		return inputs;
+	public Bundle getDataBundle() {
+		return dataBundle;
 	}
 
 	@Override

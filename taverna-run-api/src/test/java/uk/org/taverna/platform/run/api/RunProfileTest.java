@@ -49,7 +49,7 @@ public class RunProfileTest {
 	private LocalExecutionService executionService;
 	private Workflow workflow, mainWorkflow;
 	private Profile profile, mainProfile;
-	private Bundle inputs;
+	private Bundle dataBundle;
 
 	/**
 	 * @throws java.lang.Exception
@@ -66,18 +66,8 @@ public class RunProfileTest {
 		executionService = new LocalExecutionService();
 		executionEnvironment = new LocalExecutionEnvironment(executionService, null, null);
 
-		inputs = DataBundles.createBundle();
-		runProfile = new RunProfile(executionEnvironment, workflowBundle, workflow.getName(), profile.getName(), inputs);
-	}
-
-	/**
-	 * Test method for
-	 * {@link uk.org.taverna.platform.run.api.RunProfile#RunProfile(uk.org.taverna.scufl2.api.container.WorkflowBundle, net.sf.taverna.t2.reference.ReferenceService, uk.org.taverna.platform.execution.api.ExecutionService)}
-	 * .
-	 */
-	@Test
-	public void testRunProfileWorkflowBundleReferenceServiceExecutionService() {
-		runProfile = new RunProfile(executionEnvironment, workflowBundle);
+		dataBundle = DataBundles.createBundle();
+		runProfile = new RunProfile(executionEnvironment, workflowBundle, workflow.getName(), profile.getName(), dataBundle);
 	}
 
 	/**
@@ -87,7 +77,7 @@ public class RunProfileTest {
 	 */
 	@Test
 	public void testRunProfileWorkflowBundleMapOfStringT2ReferenceReferenceServiceExecutionService() {
-		runProfile = new RunProfile(executionEnvironment, workflowBundle, inputs);
+		runProfile = new RunProfile(executionEnvironment, workflowBundle, dataBundle);
 	}
 
 	/**
@@ -97,7 +87,7 @@ public class RunProfileTest {
 	 */
 	@Test
 	public void testRunProfileWorkflowBundleWorkflowProfileMapOfStringT2ReferenceReferenceServiceExecutionService() {
-		runProfile = new RunProfile(executionEnvironment, workflowBundle, workflow.getName(), profile.getName(), inputs);
+		runProfile = new RunProfile(executionEnvironment, workflowBundle, workflow.getName(), profile.getName(), dataBundle);
 	}
 
 	/**
@@ -192,26 +182,26 @@ public class RunProfileTest {
 
 	/**
 	 * Test method for
-	 * {@link uk.org.taverna.platform.run.api.RunProfile#getInputs()}.
+	 * {@link uk.org.taverna.platform.run.api.RunProfile#getDataBundle()}.
 	 */
 	@Test
-	public void testGetInputs() {
-		assertNotNull(runProfile.getInputs());
-		assertEquals(inputs, runProfile.getInputs());
-		assertEquals(runProfile.getInputs(), runProfile.getInputs());
+	public void testGetDataBundle() {
+		assertNotNull(runProfile.getDataBundle());
+		assertEquals(dataBundle, runProfile.getDataBundle());
+		assertEquals(runProfile.getDataBundle(), runProfile.getDataBundle());
 	}
 
 	/**
 	 * Test method for
-	 * {@link uk.org.taverna.platform.run.api.RunProfile#setInputs(org.purl.wf4ever.robundle.Bundle)}
+	 * {@link uk.org.taverna.platform.run.api.RunProfile#setDataBundle(org.purl.wf4ever.robundle.Bundle)}
 	 * .
 	 */
 	@Test
-	public void testSetInputs() {
-		runProfile.setInputs(null);
-		assertNull(runProfile.getInputs());
-		runProfile.setInputs(inputs);
-		assertEquals(inputs, runProfile.getInputs());
+	public void testSetDataBundle() {
+		runProfile.setDataBundle(null);
+		assertNull(runProfile.getDataBundle());
+		runProfile.setDataBundle(dataBundle);
+		assertEquals(dataBundle, runProfile.getDataBundle());
 	}
 
 	/**

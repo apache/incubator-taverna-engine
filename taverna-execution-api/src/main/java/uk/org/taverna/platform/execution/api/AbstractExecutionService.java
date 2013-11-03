@@ -70,9 +70,9 @@ public abstract class AbstractExecutionService implements ExecutionService {
 
 	@Override
 	public String createExecution(ExecutionEnvironment executionEnvironment, WorkflowBundle workflowBundle, Workflow workflow,
-			Profile profile, Bundle inputs)
+			Profile profile, Bundle dataBundle)
 			throws InvalidWorkflowException {
-		Execution execution = createExecutionImpl(workflowBundle, workflow, profile, inputs);
+		Execution execution = createExecutionImpl(workflowBundle, workflow, profile, dataBundle);
 		executionMap.put(execution.getID(), execution);
 		return execution.getID();
 	}
@@ -89,15 +89,14 @@ public abstract class AbstractExecutionService implements ExecutionService {
 	 *            the <code>Workflow</code> to execute
 	 * @param profile
 	 *            the <code>Profile</code> to use when executing the <code>Workflow</code>
-	 * @param inputs
-	 *            the <code>Bundle</code> containing inputs for the <code>Workflow</code>. Can
-	 *            be <code>null</code> if there are no inputs
+	 * @param dataBundle
+	 *            the <code>Bundle</code> containing the data values for the <code>Workflow</code>
 	 * @return a new Execution implementation
 	 * @throws InvalidWorkflowException
 	 *             if the specified workflow is invalid
 	 */
 	protected abstract Execution createExecutionImpl(WorkflowBundle workflowBundle,
-			Workflow workflow, Profile profile, Bundle inputs) throws InvalidWorkflowException;
+			Workflow workflow, Profile profile, Bundle dataBundle) throws InvalidWorkflowException;
 
 	@Override
 	public WorkflowReport getWorkflowReport(String executionID) throws InvalidExecutionIdException {

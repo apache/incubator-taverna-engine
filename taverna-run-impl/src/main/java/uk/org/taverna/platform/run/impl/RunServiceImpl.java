@@ -147,13 +147,8 @@ public class RunServiceImpl implements RunService {
 	}
 
 	@Override
-	public Bundle getInputs(String runID) throws InvalidRunIdException {
-		return getRun(runID).getInputs();
-	}
-
-	@Override
-	public Bundle getOutputs(String runID) throws InvalidRunIdException {
-		return getRun(runID).getOutputs();
+	public Bundle getDataBundle(String runID) throws InvalidRunIdException {
+		return getRun(runID).getDataBundle();
 	}
 
 	@Override

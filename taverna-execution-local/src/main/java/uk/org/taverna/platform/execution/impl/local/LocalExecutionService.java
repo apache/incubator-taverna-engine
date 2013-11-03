@@ -20,6 +20,7 @@
  ******************************************************************************/
 package uk.org.taverna.platform.execution.impl.local;
 
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -77,8 +78,8 @@ public class LocalExecutionService extends AbstractExecutionService {
 
 	@Override
 	protected Execution createExecutionImpl(WorkflowBundle workflowBundle, Workflow workflow,
-			Profile profile, Bundle inputs) throws InvalidWorkflowException {
-		return new LocalExecution(workflowBundle, workflow, profile, inputs,
+			Profile profile, Bundle dataBundle) throws InvalidWorkflowException {
+		return new LocalExecution(workflowBundle, workflow, profile, dataBundle,
 				referenceService, edits, activityService, dispatchLayerService, databaseConfiguration,
 				provenanceConnectorFactories);
 	}

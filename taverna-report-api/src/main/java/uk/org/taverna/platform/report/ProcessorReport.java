@@ -32,10 +32,11 @@ import uk.org.taverna.scufl2.api.core.Processor;
  *
  * @author David Withers
  */
-public abstract class ProcessorReport extends
-		StatusReport<Processor, WorkflowReport, ActivityReport> {
+public abstract class ProcessorReport extends StatusReport<Processor, WorkflowReport> {
 
-	private Map<String, Object> properties = new HashMap<String, Object>();
+	private Set<ActivityReport> activityReports = new HashSet<>();
+
+	private Map<String, Object> properties = new HashMap<>();
 
 	/**
 	 * Constructs a new <code>ProcessorReport</code>.
@@ -44,6 +45,14 @@ public abstract class ProcessorReport extends
 	 */
 	public ProcessorReport(Processor processor) {
 		super(processor);
+	}
+
+	public void addActivityReport(ActivityReport activityReport) {
+		activityReports.add(activityReport);
+	}
+
+	public Set<ActivityReport> getActivityReports() {
+		return activityReports;
 	}
 
 	/**

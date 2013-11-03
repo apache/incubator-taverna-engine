@@ -20,10 +20,18 @@
  ******************************************************************************/
 package uk.org.taverna.platform.report;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import org.purl.wf4ever.robundle.Bundle;
+
+import uk.org.taverna.databundle.DataBundles;
 import uk.org.taverna.scufl2.api.core.Workflow;
 
 /**
@@ -31,13 +39,35 @@ import uk.org.taverna.scufl2.api.core.Workflow;
  *
  * @author David Withers
  */
-public class WorkflowReport extends
-		StatusReport<Workflow, ActivityReport, ProcessorReport> {
+public class WorkflowReport extends StatusReport<Workflow, ActivityReport> {
+
+	private static final Logger logger = Logger.getLogger(WorkflowReport.class.getName());
 
 	private static final String dateFormatString = "yyyy-MM-dd HH:mm:ss";
 
+	private Set<ProcessorReport> processorReports = new HashSet<>();
+
+	private Bundle dataBundle;
+
 	public WorkflowReport(Workflow workflow) {
 		super(workflow);
+		try {
+			dataBundle = DataBundles.createBundle();
+		} catch (IOException e) {
+			logger.log(Level.WARNING, "Error creating data bundle", e);
+		}
+	}
+
+	public Set<ProcessorReport> getProcessorReports() {
+		return processorReports;
+	}
+
+	public void addProcessorReport(ProcessorReport processorReport) {
+		processorReports.add(processorReport);
+	}
+
+	public Bundle getDataBundle() {
+		return dataBundle;
 	}
 
 	public String toString() {
@@ -65,7 +95,7 @@ public class WorkflowReport extends
 		sb.append("-");
 		sb.append(spaces(9));
 		addDates(sb, getStartedDate(), getCompletedDate(), dateFormat);
-		for (ProcessorReport processorReport : getChildReports()) {
+		for (ProcessorReport processorReport : getProcessorReports()) {
 			addProcessor(sb, max, 0, processorReport, dateFormat);
 		}
 		return sb.toString();
@@ -100,9 +130,10 @@ public class WorkflowReport extends
 
 		addDates(sb, processorReport.getStartedDate(), processorReport.getCompletedDate(), dateFormat);
 
-		for (ActivityReport activityReport : processorReport.getChildReports()) {
-			for (WorkflowReport nestedWorkflowReport : activityReport.getChildReports()) {
-				for (ProcessorReport nestedProcessorReport : nestedWorkflowReport.getChildReports()) {
+		for (ActivityReport activityReport : processorReport.getActivityReports()) {
+			WorkflowReport nestedWorkflowReport = activityReport.getNestedWorkflowReport();
+			if (nestedWorkflowReport != null) {
+				for (ProcessorReport nestedProcessorReport : nestedWorkflowReport.getProcessorReports()) {
 					addProcessor(sb, max, level + 1, nestedProcessorReport, dateFormat);
 				}
 			}
@@ -127,10 +158,11 @@ public class WorkflowReport extends
 	private int getLongestName(WorkflowReport workflowReport, int level) {
 		int result = 0;
 		result = Math.max(result, getSubject().getName().length() + level);
-		for (ProcessorReport processorReport : workflowReport.getChildReports()) {
+		for (ProcessorReport processorReport : workflowReport.getProcessorReports()) {
 			result = Math.max(result, processorReport.getSubject().getName().length());
-			for (ActivityReport activityReport : processorReport.getChildReports()) {
-				for (WorkflowReport nestedWorkflowReport : activityReport.getChildReports()) {
+			for (ActivityReport activityReport : processorReport.getActivityReports()) {
+				WorkflowReport nestedWorkflowReport = activityReport.getNestedWorkflowReport();
+				if (nestedWorkflowReport != null) {
 					result = Math.max(result, getLongestName(nestedWorkflowReport, level + 1));
 				}
 			}

@@ -197,30 +197,15 @@ public interface RunService {
 	public State getState(String runID) throws InvalidRunIdException;
 
 	/**
-	 * Returns the <code>Bundle</code> containing the inputs of the run.
-	 * <p>
-	 * May be null if there are no inputs.
+	 * Returns the <code>Bundle</code> containing the data values of the run.
 	 *
 	 * @param runID
 	 *            the ID of the run
-	 * @return the <code>Databundle</code> containing the inputs of the run
+	 * @return the <code>Databundle</code> containing the data values of the run
 	 * @throws InvalidRunIdException
 	 *             if the run ID is not valid
 	 */
-	public Bundle getInputs(String runID) throws InvalidRunIdException;
-
-	/**
-	 * Returns the <code>Bundle</code> containing the outputs of the run.
-	 * <p>
-	 * May be null if there are no outputs.
-	 *
-	 * @param runID
-	 *            the ID of the run
-	 * @return the <code>Databundle</code> containing the outputs of the run
-	 * @throws InvalidRunIdException
-	 *             if the run ID is not valid
-	 */
-	public Bundle getOutputs(String runID) throws InvalidRunIdException;
+	public Bundle getDataBundle(String runID) throws InvalidRunIdException;
 
 	/**
 	 * Returns the status report for the run.
