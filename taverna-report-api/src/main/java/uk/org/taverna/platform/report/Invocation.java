@@ -74,10 +74,11 @@ public class Invocation implements Comparable<Invocation> {
 	}
 
 	/**
-	 * Returns the identifier for this invocation.
+	 * Returns the identifier for this invocation
 	 *
 	 * @return the identifier for this invocation
 	 */
+	@JsonProperty("name")
 	public String getId() {
 		return id;
 	}
@@ -88,11 +89,12 @@ public class Invocation implements Comparable<Invocation> {
 	 *
 	 * @return the context identifier for this invocation
 	 */
+	@JsonProperty("id")
 	public String getContextId() {
 		if (parent != null) {
 			String parentId = parent.getContextId();
 			if (parentId != null && !parentId.isEmpty()) {
-				return parent.getContextId() + ":" + id;
+				return parent.getContextId() + "/" + id;
 			}
 		}
 		return id;
@@ -120,7 +122,7 @@ public class Invocation implements Comparable<Invocation> {
 	    if (parent == null) {
 	        return null;
 	    }
-	    return parent.getId();
+	    return parent.getContextId();
 	}
 
 	/**
