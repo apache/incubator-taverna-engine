@@ -67,7 +67,6 @@ public class SaveTest {
     }
 
     
-    @SuppressWarnings("deprecation")
     @Before
     public void dummyReport() throws Exception {
         wfReport = new WorkflowReport(wfBundle.getMainWorkflow());
