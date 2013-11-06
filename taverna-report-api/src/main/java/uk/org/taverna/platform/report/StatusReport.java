@@ -20,6 +20,7 @@
  ******************************************************************************/
 package uk.org.taverna.platform.report;
 
+import java.net.URI;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,6 +30,10 @@ import java.util.TreeSet;
 import java.util.logging.Logger;
 
 import uk.org.taverna.scufl2.api.common.Ported;
+import uk.org.taverna.scufl2.api.common.URITools;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Report about the {@link State} of a workflow component.
@@ -81,8 +86,14 @@ public class StatusReport<SUBJECT extends Ported, PARENT extends StatusReport<?,
 	 *
 	 * @return the subject of this report
 	 */
+	@JsonIgnore
 	public SUBJECT getSubject() {
 		return subject;
+	}
+	
+	@JsonProperty("subject")
+	public URI getSubjectURI() {
+	    return new URITools().uriForBean(subject);
 	}
 
 	/**
@@ -92,6 +103,7 @@ public class StatusReport<SUBJECT extends Ported, PARENT extends StatusReport<?,
 	 *
 	 * @return the parent report
 	 */
+	@JsonIgnore
 	public PARENT getParentReport() {
 		return parentReport;
 	}

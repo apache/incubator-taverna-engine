@@ -25,6 +25,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import uk.org.taverna.scufl2.api.core.Processor;
 
 /**
@@ -83,6 +85,7 @@ public abstract class ProcessorReport extends StatusReport<Processor, WorkflowRe
 	 */
 	public abstract int getJobsCompletedWithErrors();
 
+	@JsonIgnore 
 	public Set<String> getPropertyKeys() {
 		return new HashSet<String>(properties.keySet());
 	}
