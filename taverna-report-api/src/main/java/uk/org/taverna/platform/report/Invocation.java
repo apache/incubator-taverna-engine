@@ -27,6 +27,9 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import uk.org.taverna.scufl2.api.port.Port;
 
 /**
@@ -95,6 +98,7 @@ public class Invocation implements Comparable<Invocation> {
 		return id;
 	}
 
+	@JsonIgnore
 	public StatusReport<?, ?> getReport() {
 		return report;
 	}
@@ -106,8 +110,17 @@ public class Invocation implements Comparable<Invocation> {
 	 *
 	 * @return the parent invocation
 	 */
+	@JsonIgnore
 	public Invocation getParent() {
 		return parent;
+	}
+	
+	@JsonProperty("parent")
+	public String getParentId() {
+	    if (parent == null) {
+	        return null;
+	    }
+	    return parent.getId();
 	}
 
 	/**
