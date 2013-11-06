@@ -23,13 +23,15 @@ package uk.org.taverna.platform.report;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.logging.Logger;
 
 import org.purl.wf4ever.robundle.Bundle;
 
 import uk.org.taverna.scufl2.api.core.Workflow;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Report about the {@link State} of a {@link Workflow} run.
@@ -42,7 +44,7 @@ public class WorkflowReport extends StatusReport<Workflow, ActivityReport> {
 
 	private static final String dateFormatString = "yyyy-MM-dd HH:mm:ss";
 
-	private Set<ProcessorReport> processorReports = new HashSet<>();
+	private Set<ProcessorReport> processorReports = new LinkedHashSet<>();
 
 	private Bundle dataBundle;
 
@@ -58,6 +60,7 @@ public class WorkflowReport extends StatusReport<Workflow, ActivityReport> {
 		processorReports.add(processorReport);
 	}
 
+	@JsonIgnore
 	public Bundle getDataBundle() {
 		return dataBundle;
 	}

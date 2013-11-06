@@ -20,14 +20,15 @@
  ******************************************************************************/
 package uk.org.taverna.platform.report;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
+import java.util.LinkedHashSet;
 import java.util.Set;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import uk.org.taverna.scufl2.api.core.Processor;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Report about the {@link State} of a {@link Processor} invocation.
@@ -36,9 +37,9 @@ import uk.org.taverna.scufl2.api.core.Processor;
  */
 public abstract class ProcessorReport extends StatusReport<Processor, WorkflowReport> {
 
-	private Set<ActivityReport> activityReports = new HashSet<>();
+	private Set<ActivityReport> activityReports = new LinkedHashSet<>();
 
-	private Map<String, Object> properties = new HashMap<>();
+	private SortedMap<String, Object> properties = new TreeMap<>();
 
 	/**
 	 * Constructs a new <code>ProcessorReport</code>.
