@@ -102,7 +102,7 @@ public class Invocation implements Comparable<Invocation> {
 				return parent.getId() + "/" + name;
 			}
 		}
-		return "/" + name;
+		return name;
 	}
 
 	@JsonIgnore
