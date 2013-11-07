@@ -27,10 +27,10 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import uk.org.taverna.scufl2.api.port.Port;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import uk.org.taverna.scufl2.api.port.Port;
 
 /**
  * A single invocation of a workflow, processor or activity.
@@ -39,7 +39,9 @@ import uk.org.taverna.scufl2.api.port.Port;
  */
 public class Invocation implements Comparable<Invocation> {
 
-	private final String id;
+	private final String name;
+
+	private final int[] index;
 
 	private final Invocation parent;
 
@@ -49,16 +51,19 @@ public class Invocation implements Comparable<Invocation> {
 
 	private SortedMap<String, Path> inputs, outputs;
 
-	public Invocation(String id, Invocation parent, StatusReport<?, ?> report) {
-		this.id = id;
+	public Invocation(String name, Invocation parent, StatusReport<?, ?> report) {
+		this(name, new int[0], parent, report);
+	}
+
+	public Invocation(String name, int[] index, Invocation parent, StatusReport<?, ?> report) {
+		this.name = name;
+		this.index = index;
 		this.parent = parent;
 		if (parent != null) {
 			parent.getInvocations().add(this);
 		}
 		this.report = report;
-		if (report != null) {
-			report.getInvocations().add(this);
-		}
+		report.addInvocation(this);
 
 		invocations = new TreeSet<>();
 
@@ -74,30 +79,30 @@ public class Invocation implements Comparable<Invocation> {
 	}
 
 	/**
-	 * Returns the identifier for this invocation
+	 * Returns the name for this invocation.
 	 *
-	 * @return the identifier for this invocation
+	 * @return the name for this invocation
 	 */
 	@JsonProperty("name")
-	public String getId() {
-		return id;
+	public String getName() {
+		return name;
 	}
 
 	/**
-	 * Returns the context identifier for this invocation by prepending the identifier of the parent
+	 * Returns the  identifier for this invocation by prepending the identifier of the parent
 	 * invocation.
 	 *
-	 * @return the context identifier for this invocation
+	 * @return the identifier for this invocation
 	 */
 	@JsonProperty("id")
-	public String getContextId() {
+	public String getId() {
 		if (parent != null) {
-			String parentId = parent.getContextId();
+			String parentId = parent.getId();
 			if (parentId != null && !parentId.isEmpty()) {
-				return parent.getContextId() + "/" + id;
+				return parent.getId() + "/" + name;
 			}
 		}
-		return id;
+		return "/" + name;
 	}
 
 	@JsonIgnore
@@ -116,13 +121,13 @@ public class Invocation implements Comparable<Invocation> {
 	public Invocation getParent() {
 		return parent;
 	}
-	
+
 	@JsonProperty("parent")
 	public String getParentId() {
 	    if (parent == null) {
 	        return null;
 	    }
-	    return parent.getContextId();
+	    return parent.getId();
 	}
 
 	/**
@@ -159,6 +164,16 @@ public class Invocation implements Comparable<Invocation> {
 	}
 
 	/**
+	 * Sets the value of an input port.
+	 *
+	 * @param port the port name
+	 * @param value the port value
+	 */
+	public void setInput(String port, Path value) {
+		inputs.put(port, value);
+	}
+
+	/**
 	 * Returns a map of output port names to values.
 	 * <p>
 	 * Returns an empty map if there are no output ports. If there is no value for an output port
@@ -180,21 +195,44 @@ public class Invocation implements Comparable<Invocation> {
 		this.outputs.putAll(outputs);
 	}
 
+	/**
+	 * Sets the value of an output port.
+	 *
+	 * @param port the port name
+	 * @param value the port value
+	 */
+	public void setOutput(String port, Path value) {
+		outputs.put(port, value);
+	}
+
 	@Override
 	public String toString() {
-		return "Invocation " + getContextId();
+		return "Invocation " + indexToString(index);
 	}
 
 	@Override
 	public int compareTo(Invocation o) {
-		String thisID = getContextId();
-		String otherID = o.getContextId();
-		int comparison = thisID.length() - otherID.length();
-		if (comparison == 0) {
-			return thisID.compareTo(otherID);
-		} else {
-			return comparison;
+		if (index.length == o.index.length) {
+			for (int i = 0; i < index.length; i++) {
+				int c = index[i] - o.index[i];
+				if (c != 0) {
+					return c;
+				}
+			}
+			return 0;
 		}
+		return index.length - o.index.length;
+	}
+
+	private String indexToString(int[] index) {
+		StringBuilder indexString = new StringBuilder();
+		for (int i = 0; i < index.length; i++) {
+			if (i != 0) {
+				indexString.append(":");
+			}
+			indexString.append(index[i] + 1);
+		}
+		return indexString.toString();
 	}
 
 }
