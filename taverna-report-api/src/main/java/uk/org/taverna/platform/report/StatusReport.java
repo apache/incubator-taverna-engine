@@ -27,7 +27,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.logging.Logger;
 
 import uk.org.taverna.scufl2.api.common.Ported;
 import uk.org.taverna.scufl2.api.common.URITools;
@@ -50,8 +49,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @param <PARENT>
  */
 public class StatusReport<SUBJECT extends Ported, PARENT extends StatusReport<?, ?>> {
-
-	private static final Logger logger = Logger.getLogger(StatusReport.class.getName());
 
 	private final SUBJECT subject;
 
@@ -90,7 +87,7 @@ public class StatusReport<SUBJECT extends Ported, PARENT extends StatusReport<?,
 	public SUBJECT getSubject() {
 		return subject;
 	}
-	
+
 	@JsonProperty("subject")
 	public URI getSubjectURI() {
 	    return new URITools().uriForBean(subject);

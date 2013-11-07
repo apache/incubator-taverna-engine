@@ -21,6 +21,7 @@
 package uk.org.taverna.platform.report;
 
 import java.nio.file.Path;
+import java.util.Date;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -44,6 +45,10 @@ public class Invocation implements Comparable<Invocation> {
 	private final int[] index;
 
 	private final Invocation parent;
+
+	private State state;
+
+	private Date startedDate, completedDate;
 
 	private final SortedSet<Invocation> invocations;
 
@@ -76,6 +81,8 @@ public class Invocation implements Comparable<Invocation> {
 		for (Port port : report.getSubject().getOutputPorts()) {
 			outputs.put(port.getName(), null);
 		}
+
+		setStartedDate(new Date());
 	}
 
 	/**
@@ -205,6 +212,63 @@ public class Invocation implements Comparable<Invocation> {
 		outputs.put(port, value);
 	}
 
+	/**
+	 * Returns the current {@link State} of the invocation.
+	 * <p>
+	 * An invocation state can be RUNNING or COMPLETED.
+	 *
+	 * @return the current <code>State</code>
+	 */
+	public State getState() {
+		return state;
+	}
+
+	/**
+	 * Returns the date that the status changed to RUNNING.
+	 * <p>
+	 * If the status has never been RUNNING <code>null</code> is returned.
+	 *
+	 * @return the date that the status changed to started
+	 */
+	public Date getStartedDate() {
+		return startedDate;
+	}
+
+	/**
+	 * Sets the date that the status changed to RUNNING.
+	 *
+	 * @param startedDate
+	 *            the date that the status changed to RUNNING
+	 */
+	public void setStartedDate(Date startedDate) {
+		if (this.startedDate == null) {
+			this.startedDate = startedDate;
+		}
+		state = State.RUNNING;
+	}
+
+	/**
+	 * Returns the date that the status changed to COMPLETED.
+	 * <p>
+	 * If the status never been COMPLETED <code>null</code> is returned.
+	 *
+	 * @return the date that the status changed to COMPLETED
+	 */
+	public Date getCompletedDate() {
+		return completedDate;
+	}
+
+	/**
+	 * Sets the date that the status changed to COMPLETED.
+	 *
+	 * @param completedDate
+	 *            the date that the status changed to COMPLETED
+	 */
+	public void setCompletedDate(Date completedDate) {
+		this.completedDate = completedDate;
+		state = State.COMPLETED;
+	}
+
 	@Override
 	public String toString() {
 		return "Invocation " + indexToString(index);
@@ -212,16 +276,13 @@ public class Invocation implements Comparable<Invocation> {
 
 	@Override
 	public int compareTo(Invocation o) {
-		if (index.length == o.index.length) {
-			for (int i = 0; i < index.length; i++) {
-				int c = index[i] - o.index[i];
-				if (c != 0) {
-					return c;
-				}
-			}
-			return 0;
+		String id = getId();
+		String otherId = o.getId();
+		if (id.length() == otherId.length()) {
+			return id.compareTo(otherId);
+		} else  {
+			return id.length() - otherId.length();
 		}
-		return index.length - o.index.length;
 	}
 
 	private String indexToString(int[] index) {
