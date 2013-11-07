@@ -21,7 +21,6 @@
 package uk.org.taverna.platform.execution.impl.local;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,7 +44,6 @@ import net.sf.taverna.t2.provenance.connector.ProvenanceConnector;
 import net.sf.taverna.t2.provenance.reporter.ProvenanceReporter;
 import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.T2Reference;
-import net.sf.taverna.t2.reference.T2ReferenceType;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
 import net.sf.taverna.t2.workflowmodel.DataflowInputPort;
 import net.sf.taverna.t2.workflowmodel.Edits;
@@ -151,6 +149,7 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 	@Override
 	public void start() {
 		MonitorManager.getInstance().addObserver(executionMonitor);
+		// have to add a result listener otherwise facade doesn't record when workflow is finished
 		facade.addResultListener(this);
 		facade.fire();
 		if (DataBundles.hasInputs(getDataBundle())) {
@@ -272,22 +271,6 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 
 	@Override
 	public void resultTokenProduced(WorkflowDataToken token, String portName) {
-		if (token.getData().getReferenceType() != T2ReferenceType.IdentifiedList) {
-			WorkflowReport workflowReport = getWorkflowReport();
-			try {
-				Path outputs = DataBundles.getOutputs(getDataBundle());
-				Path port = DataBundles.getPort(outputs, portName);
-				Path path = getPath(port, 0, token.getIndex());
-				T2ReferenceConverter.convertReferenceToPath(path, token.getData(),
-						referenceService, token.getContext());
-				workflowReport.getInvocations().first().setOutputs(DataBundles.getPorts(outputs));
-				workflowReport.outputAdded(path, portName, token.getIndex());
-			} catch (IOException e) {
-				logger.log(Level.SEVERE, "Unable to convert T2Reference");
-			} catch (URISyntaxException e) {
-				logger.log(Level.SEVERE, "Unable to convert T2Reference");
-			}
-		}
 	}
 
 	private Path getPath(Path path, int depth, int[] index) throws IOException {

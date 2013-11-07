@@ -21,19 +21,25 @@
 package uk.org.taverna.platform.execution.impl.local;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.NavigableMap;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import net.sf.taverna.t2.facade.ResultListener;
 import net.sf.taverna.t2.invocation.InvocationContext;
+import net.sf.taverna.t2.invocation.WorkflowDataToken;
 import net.sf.taverna.t2.lang.observer.Observable;
 import net.sf.taverna.t2.lang.observer.Observer;
 import net.sf.taverna.t2.monitor.MonitorManager.AddPropertiesMessage;
@@ -41,8 +47,20 @@ import net.sf.taverna.t2.monitor.MonitorManager.DeregisterNodeMessage;
 import net.sf.taverna.t2.monitor.MonitorManager.MonitorMessage;
 import net.sf.taverna.t2.monitor.MonitorManager.RegisterNodeMessage;
 import net.sf.taverna.t2.monitor.MonitorableProperty;
+import net.sf.taverna.t2.reference.ErrorDocument;
+import net.sf.taverna.t2.reference.ExternalReferenceSPI;
+import net.sf.taverna.t2.reference.IdentifiedList;
+import net.sf.taverna.t2.reference.ReferenceService;
+import net.sf.taverna.t2.reference.ReferenceServiceException;
+import net.sf.taverna.t2.reference.ReferenceSet;
+import net.sf.taverna.t2.reference.StackTraceElementBean;
 import net.sf.taverna.t2.reference.T2Reference;
+import net.sf.taverna.t2.reference.T2ReferenceType;
+import net.sf.taverna.t2.reference.impl.external.file.FileReference;
+import net.sf.taverna.t2.reference.impl.external.http.HttpReference;
+import net.sf.taverna.t2.results.ResultsUtils;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
+import net.sf.taverna.t2.workflowmodel.DataflowOutputPort;
 import net.sf.taverna.t2.workflowmodel.Processor;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchJobEvent;
@@ -67,7 +85,9 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 
 	private static final Logger logger = Logger.getLogger(LocalExecutionMonitor.class.getName());
 
-	private Map<String, StatusReport> reports;
+	private static final String ID_SEPARATOR = "/";
+
+	private Map<String, StatusReport<?, ?>> reports;
 
 	private Map<String, Invocation> invocations;
 
@@ -79,11 +99,8 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 
 	private final Bundle dataBundle;
 
-	private final WorkflowReport workflowReport;
-
-	public LocalExecutionMonitor(WorkflowReport workflowReport, Bundle dataBundle, WorkflowToDataflowMapper mapping,
-			String facadeId) throws InvalidWorkflowException {
-		this.workflowReport = workflowReport;
+	public LocalExecutionMonitor(WorkflowReport workflowReport, Bundle dataBundle,
+			WorkflowToDataflowMapper mapping, String facadeId) throws InvalidWorkflowException {
 		this.dataBundle = dataBundle;
 		this.facadeId = facadeId;
 		reports = new HashMap<>();
@@ -93,18 +110,23 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 		mapReports("", workflowReport, mapping);
 	}
 
-	private void mapReports(String id, WorkflowReport workflowReport, WorkflowToDataflowMapper mapping)
-			throws InvalidWorkflowException {
+	private void mapReports(String id, WorkflowReport workflowReport,
+			WorkflowToDataflowMapper mapping) throws InvalidWorkflowException {
 		Dataflow dataflow = mapping.getDataflow(workflowReport.getSubject());
-		String dataflowId = id + dataflow.getLocalName();
+		String dataflowId = null;
+		if (id.isEmpty()) {
+			dataflowId = dataflow.getLocalName();
+		} else {
+			dataflowId = id + ID_SEPARATOR + dataflow.getLocalName();
+		}
 		reports.put(dataflowId, workflowReport);
 		for (ProcessorReport processorReport : workflowReport.getProcessorReports()) {
 			Processor processor = mapping.getDataflowProcessor(processorReport.getSubject());
-			String processorId = dataflowId + processor.getLocalName();
+			String processorId = dataflowId + ID_SEPARATOR + processor.getLocalName();
 			reports.put(processorId, (LocalProcessorReport) processorReport);
 			for (ActivityReport activityReport : processorReport.getActivityReports()) {
 				Activity<?> activity = mapping.getDataflowActivity(activityReport.getSubject());
-				String activityId = processorId + String.valueOf(activity.hashCode());
+				String activityId = processorId + ID_SEPARATOR + String.valueOf(activity.hashCode());
 				reports.put(activityId, activityReport);
 				WorkflowReport nestedWorkflowReport = activityReport.getNestedWorkflowReport();
 				if (nestedWorkflowReport != null) {
@@ -135,20 +157,44 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 	public void registerNode(Object dataflowObject, String[] owningProcess,
 			Set<MonitorableProperty<?>> properties) {
 		if (dataflowObject instanceof Dataflow) {
+			Dataflow dataflow = (Dataflow) dataflowObject;
+			Invocation parentInvocation = invocations.get(getParentInvocationId(owningProcess));
 			WorkflowReport report = (WorkflowReport) reports.get(getReportId(owningProcess));
-			Invocation invocation = new Invocation("", getParentInvocation(owningProcess), report);
-			invocations.put(getInvocationId(owningProcess, new int[0]), invocation);
-			if (report.equals(workflowReport)) {
+			report.setStartedDate(new Date());
+			Invocation invocation = new Invocation(getInvocationName(owningProcess), parentInvocation, report);
+			if (parentInvocation == null) {
 				if (DataBundles.hasInputs(dataBundle)) {
 					try {
-						invocation.setInputs(DataBundles.getPorts(DataBundles.getInputs(dataBundle)));
+						invocation
+								.setInputs(DataBundles.getPorts(DataBundles.getInputs(dataBundle)));
 					} catch (IOException e) {
 						logger.log(Level.WARNING, "Error setting input ports", e);
 					}
 				}
+				try {
+					Path outputs = DataBundles.getOutputs(dataBundle);
+					DataflowResultListener dataflowResultListener = new DataflowResultListener(outputs);
+					for (DataflowOutputPort dataflowOutputPort : dataflow.getOutputPorts()) {
+						String portName = dataflowOutputPort.getName();
+						Path portPath = DataBundles.getPort(outputs, portName);
+						invocation.setOutput(portName, portPath);
+						dataflowOutputPort.addResultListener(dataflowResultListener);
+					}
+				} catch (IOException e) {
+					logger.log(Level.WARNING, "Error setting output ports", e);
+				}
+				invocations.put(getInvocationId(owningProcess), invocation);
+			} else {
+				invocation.setInputs(parentInvocation.getInputs());
+				NestedDataflowResultListener resultListener = new NestedDataflowResultListener(invocation);
+				for (DataflowOutputPort dataflowOutputPort : dataflow.getOutputPorts()) {
+					dataflowOutputPort.addResultListener(resultListener);
+				}
+				invocations.put(getInvocationId(owningProcess), invocation);
 			}
 		} else if (dataflowObject instanceof Processor) {
-			StatusReport report = reports.get(getReportId(owningProcess));
+			StatusReport<?, ?> report = reports.get(getReportId(owningProcess));
+			report.setStartedDate(new Date());
 			if (report instanceof LocalProcessorReport) {
 				LocalProcessorReport localProcessorReport = (LocalProcessorReport) report;
 				localProcessorReport.addProperties(properties);
@@ -156,105 +202,140 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 		} else if (dataflowObject instanceof Activity) {
 			Activity<?> activity = (Activity<?>) dataflowObject;
 			invocationToActivity.put(owningProcess[owningProcess.length - 1], String.valueOf(activity.hashCode()));
-			ActivityReport activityReport = (ActivityReport) reports.get(getReportId(owningProcess));
-			StatusReport parentReport = activityReport.getParentReport();
 		} else if (dataflowObject instanceof DispatchJobEvent) {
 			DispatchJobEvent jobEvent = (DispatchJobEvent) dataflowObject;
-			StatusReport report = reports.get(getReportId(owningProcess));
-			Invocation invocation = new Invocation(indexToString(jobEvent.getIndex()), getParentInvocation(owningProcess), report);
-			invocations.put(getInvocationId(owningProcess, jobEvent.getIndex()), invocation);
+			StatusReport<?, ?> report = reports.get(getReportId(owningProcess));
+			// create a new invocation
+			Invocation parentInvocation;
+			Invocation invocation;
+			if (report instanceof ActivityReport) {
+				parentInvocation = invocations.get(getParentInvocationId(owningProcess)
+						+ indexToString(jobEvent.getIndex()));
+				invocation = new Invocation(getInvocationName(owningProcess), jobEvent.getIndex(), parentInvocation,
+						report);
+				invocations.put(getInvocationId(owningProcess), invocation);
+			} else {
+				parentInvocation = invocations.get(getParentInvocationId(owningProcess));
+				invocation = new Invocation(getInvocationName(owningProcess) + indexToString(jobEvent.getIndex()), jobEvent.getIndex(), parentInvocation,
+						report);
+				invocations.put(
+						getInvocationId(owningProcess) + indexToString(jobEvent.getIndex()),
+						invocation);
+			}
+			// set the invocation inputs
 			try {
-				invocation.setInputs(convert(dataBundle, jobEvent.getData(), jobEvent.getContext()));
-				report.addInvocation(invocation);
+				for (Entry<String, T2Reference> entry : jobEvent.getData().entrySet()) {
+					invocation.setInput(entry.getKey(),
+							getIntermediate(entry.getValue(), jobEvent.getContext()));
+				}
 			} catch (IOException | URISyntaxException e) {
 				logger.log(Level.WARNING,
 						"Error saving intermediate inputs for " + jobEvent.getOwningProcess(), e);
 			}
+
 		} else if (dataflowObject instanceof DispatchResultEvent) {
 			DispatchResultEvent resultEvent = (DispatchResultEvent) dataflowObject;
-			Invocation invocation = invocations.get(getInvocationId(owningProcess, resultEvent.getIndex()));
+			StatusReport<?, ?> report = reports.get(getReportId(owningProcess));
+			// find the invocation
+			Invocation invocation;
+			if (report instanceof ActivityReport) {
+				invocation = invocations.remove(getInvocationId(owningProcess));
+			} else {
+				invocation = invocations.remove(getInvocationId(owningProcess)
+						+ indexToString(resultEvent.getIndex()));
+			}
+			// set the invocation outputs
 			try {
-				invocation.setOutputs(convert(dataBundle, resultEvent.getData(), resultEvent.getContext()));
+				for (Entry<String, T2Reference> entry : resultEvent.getData().entrySet()) {
+					invocation.setOutput(entry.getKey(),
+							getIntermediate(entry.getValue(), resultEvent.getContext()));
+				}
 			} catch (IOException | URISyntaxException e) {
-				logger.log(
-						Level.WARNING,
+				logger.log(Level.WARNING,
 						"Error saving intermediate outputs for " + resultEvent.getOwningProcess(),
 						e);
 			}
+			invocation.setCompletedDate(new Date());
 		}
 	}
 
 	public void deregisterNode(String[] owningProcess) {
-		StatusReport report = reports.get(getReportId(owningProcess));
+		StatusReport<?, ?> report = reports.get(getReportId(owningProcess));
 		if (report != null) {
 			report.setCompletedDate(new Date());
-			if (report instanceof LocalProcessorReport) {
+			if (report instanceof WorkflowReport) {
+				Invocation invocation = invocations.remove(getInvocationId(owningProcess));
+				invocation.setCompletedDate(new Date());
+			} else if (report instanceof LocalProcessorReport) {
 				LocalProcessorReport processorReport = (LocalProcessorReport) report;
 				processorReport.saveProperties();
+			} else if (report instanceof ActivityReport) {
+				// invocationToActivity.remove(owningProcess[owningProcess.length - 1]);
 			}
 		}
 	}
 
 	public void addPropertiesToNode(String[] owningProcess,
 			Set<MonitorableProperty<?>> newProperties) {
-		StatusReport report = reports.get(getReportId(owningProcess));
+		StatusReport<?, ?> report = reports.get(getReportId(owningProcess));
 		if (report instanceof LocalProcessorReport) {
 			LocalProcessorReport processorReport = (LocalProcessorReport) report;
 			processorReport.addProperties(newProperties);
 		}
 	}
 
-	/**
-	 * Converts the owning process array to a string.
-	 *
-	 * @param owningProcess
-	 *            the owning process id
-	 * @return the owning process as a string
-	 */
-	private String getOwningProcessId(String[] owningProcess) {
-		StringBuilder sb = new StringBuilder();
+	private String getParentInvocationId(String[] owningProcess) {
+		List<String> id = new ArrayList<>();
+		for (int i = 1; i < owningProcess.length - 1; i++) {
+			if (i % 4 != 0) {
+				id.add(owningProcess[i]);
+			}
+		}
+		return toPath(id);
+	}
+
+	private String getInvocationId(String[] owningProcess) {
+		List<String> id = new ArrayList<>();
 		for (int i = 1; i < owningProcess.length; i++) {
 			if (i % 4 != 0) {
-				sb.append(owningProcess[i]);
+				id.add(owningProcess[i]);
 			}
+		}
+		return toPath(id);
+	}
+
+	private String getInvocationName(String[] owningProcess) {
+		return owningProcess[owningProcess.length - 1];
+	}
+
+	private String toPath(List<String> id) {
+		StringBuilder sb = new StringBuilder();
+		boolean first = true;
+		for (String string : id) {
+			if (first) {
+				first = false;
+			} else {
+				sb.append(ID_SEPARATOR);
+			}
+			sb.append(string);
 		}
 		return sb.toString();
 	}
 
-	private Invocation getParentInvocation(String[] owningProcess) {
-		StringBuilder sb = new StringBuilder();
-		for (int i = 1; i < owningProcess.length - 1; i++) {
-			if (i % 4 != 0) {
-				sb.append(owningProcess[i]);
-			}
-		}
-		return invocations.get(sb.toString());
-	}
-
-	private String getInvocationId(String[] owningProcess, int[] index) {
-		StringBuilder sb = new StringBuilder();
-		for (int i = 1; i < owningProcess.length; i++) {
-			if (i % 4 != 0) {
-				sb.append(owningProcess[i]);
-			}
-		}
-		return sb.toString() + indexToString(index);
-	}
-
 	private String getReportId(String[] owningProcess) {
-		StringBuilder sb = new StringBuilder();
+		List<String> id = new ArrayList<>();
 		for (int i = 1, position = 0; i < owningProcess.length; i++) {
 			if (i % 4 != 0) {
 				if (position == 2) {
-					sb.append(invocationToActivity.get(owningProcess[i]));
+					id.add(invocationToActivity.get(owningProcess[i]));
 					position = 0;
 				} else {
-					sb.append(owningProcess[i]);
+					id.add(owningProcess[i]);
 					position++;
 				}
 			}
 		}
-		return sb.toString();
+		return toPath(id);
 	}
 
 	public String getProcessorId(String[] owningProcess) {
@@ -279,35 +360,153 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 		return indexString.toString();
 	}
 
-	private Map<String, Path> convert(Bundle dataBundle, Map<String, T2Reference> data,
-			InvocationContext context) throws IOException, URISyntaxException {
-		Map<String, Path> result = new HashMap<>();
-		for (Entry<String, T2Reference> entry : data.entrySet()) {
-			result.put(entry.getKey(), getIntermediate(dataBundle, entry.getValue(), context));
-		}
-		return result;
-	}
-
-	private Path getIntermediate(Bundle dataBundle, T2Reference t2Reference,
-			InvocationContext context) throws IOException, URISyntaxException {
+	private Path getIntermediate(T2Reference t2Reference, InvocationContext context)
+			throws IOException, URISyntaxException {
 		if (referenceToPath.containsKey(t2Reference)) {
 			return referenceToPath.get(t2Reference);
 		}
-		Path path = referencePath(dataBundle, t2Reference);
-		T2ReferenceConverter.convertReferenceToPath(path, t2Reference,
-				context.getReferenceService(), context);
+		Path path = referencePath(t2Reference);
+		convertReferenceToPath(path, t2Reference, context);
 		referenceToPath.put(t2Reference, path);
 		return path;
 	}
 
-	private Path referencePath(Bundle dataBundle, T2Reference t2Ref) throws IOException {
-		String local = t2Ref.getLocalPart();
+	private Path referencePath(T2Reference t2Reference) throws IOException {
+		String local = t2Reference.getLocalPart();
 		try {
 			return DataBundles.getIntermediate(dataBundle, UUID.fromString(local));
 		} catch (IllegalArgumentException ex) {
-			return DataBundles.getIntermediates(dataBundle).resolve(t2Ref.getNamespacePart())
-					.resolve(t2Ref.getLocalPart());
+			return DataBundles.getIntermediates(dataBundle).resolve(t2Reference.getNamespacePart())
+					.resolve(t2Reference.getLocalPart());
 		}
 	}
 
+	public void convertReferenceToPath(Path path, T2Reference reference, InvocationContext context)
+			throws IOException, URISyntaxException {
+		ReferenceService referenceService = context.getReferenceService();
+		if (reference.getReferenceType() == T2ReferenceType.ReferenceSet) {
+			if (DataBundles.isMissing(path)) {
+			ReferenceSet rs = referenceService.getReferenceSetService().getReferenceSet(reference);
+			if (rs == null) {
+				throw new ReferenceServiceException("Could not find ReferenceSet " + reference);
+			}
+			// Check that there are references in the set
+			if (rs.getExternalReferences().isEmpty()) {
+				throw new ReferenceServiceException("ReferenceSet " + reference + " is empty");
+			}
+
+			for (ExternalReferenceSPI ers : rs.getExternalReferences()) {
+				if (ers instanceof FileReference) {
+					URI uri = ((FileReference) ers).getFile().toURI();
+					DataBundles.setReference(path, uri);
+				} else if (ers instanceof HttpReference) {
+					URI uri = ((HttpReference) ers).getHttpUrl().toURI();
+					DataBundles.setReference(path, uri);
+				} else {
+					try (InputStream in = ers.openStream(context)) {
+						Files.copy(in, path);
+					}
+				}
+			}
+			}
+		} else if (reference.getReferenceType() == T2ReferenceType.ErrorDocument) {
+			if (DataBundles.isMissing(path)) {
+			ErrorDocument errorDocument = referenceService.getErrorDocumentService().getError(
+					reference);
+			String message = errorDocument.getMessage();
+			StringBuilder trace = new StringBuilder();
+			if (errorDocument.getExceptionMessage() != null
+					&& !errorDocument.getExceptionMessage().isEmpty()) {
+				trace.append(errorDocument.getExceptionMessage());
+				trace.append("\n");
+			}
+			List<StackTraceElementBean> stackTraceStrings = errorDocument.getStackTraceStrings();
+			for (StackTraceElementBean stackTraceElement : stackTraceStrings) {
+				trace.append(ResultsUtils.getStackTraceElementString(stackTraceElement));
+				trace.append("\n");
+			}
+			List<Path> causes = new ArrayList<>();
+			for (T2Reference errorReference : errorDocument.getErrorReferences()) {
+				causes.add(getIntermediate(errorReference, context));
+			}
+			DataBundles.setError(path, message, trace.toString(),
+					causes.toArray(new Path[causes.size()]));
+			}
+		} else { // it is an IdentifiedList<T2Reference>
+			IdentifiedList<T2Reference> identifiedList = referenceService.getListService().getList(
+					reference);
+			if (!DataBundles.isList(path)) {
+				DataBundles.createList(path);
+			}
+			for (T2Reference ref : identifiedList) {
+				convertReferenceToPath(DataBundles.newListItem(path), ref, context);
+			}
+		}
+	}
+
+	private class NestedDataflowResultListener implements ResultListener {
+
+		private final Invocation invocation;
+
+		public NestedDataflowResultListener(Invocation invocation) {
+			this.invocation = invocation;
+		}
+
+		@Override
+		public void resultTokenProduced(WorkflowDataToken token, String portName) {
+			try {
+				if (token.isFinal()) {
+					invocation.setOutput(portName, getIntermediate(token.getData(), token.getContext()));
+				}
+			} catch (IOException e) {
+				logger.log(Level.SEVERE, "Unable to convert T2Reference");
+			} catch (URISyntaxException e) {
+				logger.log(Level.SEVERE, "Unable to convert T2Reference");
+			}
+		}
+
+	}
+
+	private class DataflowResultListener implements ResultListener {
+
+		private Path outputs;
+
+		private Map<String, Integer> depthSeen = new HashMap<>();
+
+		public DataflowResultListener(Path outputs) {
+			this.outputs = outputs;
+		}
+
+		@Override
+		public void resultTokenProduced(WorkflowDataToken token, String portName) {
+			Integer depth = depthSeen.get(portName);
+			if (depth == null || depth.equals(token.getIndex().length)) {
+				if (depth == null) {
+					depthSeen.put(portName, token.getIndex().length);
+				}
+			try {
+				Path port = DataBundles.getPort(outputs, portName);
+				Path path = getPath(port, 0, token.getIndex());
+				convertReferenceToPath(path, token.getData(), token.getContext());
+			} catch (IOException e) {
+				e.printStackTrace();
+				logger.log(Level.SEVERE, "Unable to convert T2Reference");
+			} catch (URISyntaxException e) {
+				e.printStackTrace();
+				logger.log(Level.SEVERE, "Unable to convert T2Reference");
+			}
+			}
+		}
+
+		private Path getPath(Path path, int depth, int[] index) throws IOException {
+			if (depth == index.length) {
+				return path;
+			}
+			if (!DataBundles.isList(path)) {
+				DataBundles.createList(path);
+			}
+			return getPath(DataBundles.getListItem(path, index[depth]), depth + 1, index);
+		}
+
+	}
 }
