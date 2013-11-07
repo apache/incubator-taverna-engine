@@ -38,6 +38,9 @@ public class LoopHealthChecker implements HealthChecker<Processor> {
 		for (DispatchLayer<?> dl : ds.getLayers()) {
 			if (dl instanceof Loop) {
 				Activity<?> conditionActivity = ((Loop)dl).getConfiguration().getCondition();
+				if (conditionActivity == null) {
+					break;
+				}
 				for (ActivityInputPort aop : conditionActivity.getInputPorts()) {
 					String portName = aop.getName();
 					
