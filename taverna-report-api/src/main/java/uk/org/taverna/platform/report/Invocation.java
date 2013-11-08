@@ -144,7 +144,7 @@ public class Invocation implements Comparable<Invocation> {
 	 *
 	 * @return the child invocations
 	 */
-	private SortedSet<Invocation> getInvocations() {
+	public SortedSet<Invocation> getInvocations() {
 		return invocations;
 	}
 
