@@ -95,6 +95,10 @@ public class Invocation implements Comparable<Invocation> {
 		return name;
 	}
 
+	public int[] getIndex() {
+		return index;
+	}
+
 	/**
 	 * Returns the  identifier for this invocation by prepending the identifier of the parent
 	 * invocation.
