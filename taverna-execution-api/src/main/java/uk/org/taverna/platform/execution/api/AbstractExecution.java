@@ -96,7 +96,9 @@ public abstract class AbstractExecution implements Execution {
 				if (scufl2Tools.containsNestedWorkflow(processor, profile)) {
 					Workflow nestedWorkflow = scufl2Tools.nestedWorkflowForProcessor(processor,
 							profile);
-					activityReport.setNestedWorkflowReport(generateWorkflowReport(nestedWorkflow));
+					WorkflowReport nestedWorkflowReport = generateWorkflowReport(nestedWorkflow);
+					nestedWorkflowReport.setParentReport(activityReport);
+					activityReport.setNestedWorkflowReport(nestedWorkflowReport);
 				}
 				processorReport.addActivityReport(activityReport);
 			}
