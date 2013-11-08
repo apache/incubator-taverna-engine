@@ -262,15 +262,24 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 	public void deregisterNode(String[] owningProcess) {
 		StatusReport<?, ?> report = reports.get(getReportId(owningProcess));
 		if (report != null) {
-			report.setCompletedDate(new Date());
 			if (report instanceof WorkflowReport) {
 				Invocation invocation = invocations.remove(getInvocationId(owningProcess));
 				invocation.setCompletedDate(new Date());
+				report.setCompletedDate(new Date());
 			} else if (report instanceof LocalProcessorReport) {
 				LocalProcessorReport processorReport = (LocalProcessorReport) report;
 				processorReport.saveProperties();
+				report.setCompletedDate(new Date());
 			} else if (report instanceof ActivityReport) {
-				// invocationToActivity.remove(owningProcess[owningProcess.length - 1]);
+				// Invocation may still exist if the activity failed
+				Invocation invocation = invocations.remove(getInvocationId(owningProcess));
+				if (invocation != null) {
+					invocation.setCompletedDate(new Date());
+					report.setFailedDate(new Date());
+				} else {
+					report.setCompletedDate(new Date());
+				}
+				invocationToActivity.remove(owningProcess[owningProcess.length - 1]);
 			}
 		}
 	}
