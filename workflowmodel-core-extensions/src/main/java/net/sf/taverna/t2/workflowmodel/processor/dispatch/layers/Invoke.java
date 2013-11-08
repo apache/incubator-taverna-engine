@@ -125,7 +125,10 @@ public class Invoke extends AbstractDispatchLayer<JsonNode> {
 						.pushOwningProcess(getNextProcessID())
 						.getOwningProcess();
 				MonitorManager.getInstance().registerNode(activity,
-						invocationProcessIdentifier.split(":"),
+						invocationProcessIdentifier,
+						new HashSet<MonitorableProperty<?>>());
+				MonitorManager.getInstance().registerNode(jobEvent,
+						invocationProcessIdentifier,
 						new HashSet<MonitorableProperty<?>>());
 
 				// The activity is an AsynchronousActivity so we invoke it with
@@ -298,12 +301,6 @@ public class Invoke extends AbstractDispatchLayer<JsonNode> {
 
 		public void receiveResult(Map<String, T2Reference> data, int[] index) {
 
-			if (index.length == 0) {
-				// Final result, clean up monitor state
-				MonitorManager.getInstance().deregisterNode(
-						invocationProcessIdentifier);
-			}
-
 			// Construct a new result map using the activity mapping
 			// (activity output name to processor output name)
 			Map<String, T2Reference> resultMap = new HashMap<String, T2Reference>();
@@ -335,6 +332,14 @@ public class Invoke extends AbstractDispatchLayer<JsonNode> {
 			DispatchResultEvent resultEvent = new DispatchResultEvent(jobEvent
 					.getOwningProcess(), newIndex, jobEvent.getContext(),
 					resultMap, streaming);
+			if (!streaming) {
+				MonitorManager.getInstance().registerNode(resultEvent,
+						invocationProcessIdentifier,
+						new HashSet<MonitorableProperty<?>>());
+				// Final result, clean up monitor state
+				MonitorManager.getInstance().deregisterNode(
+						invocationProcessIdentifier);
+			}
 			// Push the modified data to the layer above in the
 			// dispatch stack
 			getAbove().receiveResult(resultEvent);

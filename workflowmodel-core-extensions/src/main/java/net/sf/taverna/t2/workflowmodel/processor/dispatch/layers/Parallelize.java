@@ -161,7 +161,6 @@ public class Parallelize extends AbstractDispatchLayer<JsonNode>
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public void receiveResult(DispatchResultEvent resultEvent) {
 		StateModel model;
 		String owningProcess = resultEvent.getOwningProcess();
@@ -172,9 +171,11 @@ public class Parallelize extends AbstractDispatchLayer<JsonNode>
 			logger.warn("Error received for unknown owning process: " + owningProcess);
 			return;
 		}
-		MonitorManager.getInstance().registerNode(resultEvent,
-				owningProcess.split(":"),
-				new HashSet<MonitorableProperty<?>>());
+		if (!resultEvent.isStreamingEvent()) {
+			MonitorManager.getInstance().registerNode(resultEvent,
+					owningProcess,
+					new HashSet<MonitorableProperty<?>>());
+		}
 		model.finishWith(resultEvent.getIndex());
 		getAbove().receiveResult(resultEvent);
 	}
@@ -397,7 +398,7 @@ public class Parallelize extends AbstractDispatchLayer<JsonNode>
 										.getActivities());
 						// Register with the monitor
 						MonitorManager.getInstance().registerNode(dispatchJobEvent,
-								e.getOwningProcess().split(":"),
+								e.getOwningProcess(),
 								new HashSet<MonitorableProperty<?>>());
 
 						getBelow().receiveJob(dispatchJobEvent);
