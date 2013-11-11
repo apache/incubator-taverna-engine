@@ -1,4 +1,4 @@
-package uk.org.taverna.platform.report;
+package uk.org.taverna.platform.run.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -18,6 +18,10 @@ import org.junit.Test;
 import org.purl.wf4ever.robundle.Bundle;
 
 import uk.org.taverna.databundle.DataBundles;
+import uk.org.taverna.platform.report.ActivityReport;
+import uk.org.taverna.platform.report.Invocation;
+import uk.org.taverna.platform.report.ProcessorReport;
+import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.scufl2.api.common.Scufl2Tools;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.Processor;

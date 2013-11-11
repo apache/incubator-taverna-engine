@@ -1,4 +1,4 @@
-package uk.org.taverna.platform.report;
+package uk.org.taverna.platform.run.impl;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -10,6 +10,7 @@ import java.nio.file.StandardOpenOption;
 import org.purl.wf4ever.robundle.manifest.Manifest.PathMixin;
 
 import uk.org.taverna.databundle.DataBundles;
+import uk.org.taverna.platform.report.WorkflowReport;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,7 +32,7 @@ public class WorkflowReportJSON {
             om.writeValue(w, wfReport);
         }
     }
-
+    
     protected static ObjectMapper makeObjectMapper() {
         ObjectMapper om = new ObjectMapper();
         om.enable(SerializationFeature.INDENT_OUTPUT);
