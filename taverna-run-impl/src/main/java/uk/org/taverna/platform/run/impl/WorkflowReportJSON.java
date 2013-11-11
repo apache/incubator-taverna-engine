@@ -10,11 +10,16 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.purl.wf4ever.robundle.Bundle;
 import org.purl.wf4ever.robundle.manifest.Manifest.PathMixin;
 
 import uk.org.taverna.databundle.DataBundles;
+import uk.org.taverna.platform.report.Invocation;
 import uk.org.taverna.platform.report.State;
 import uk.org.taverna.platform.report.StatusReport;
 import uk.org.taverna.platform.report.WorkflowReport;
@@ -106,10 +111,52 @@ public class WorkflowReportJSON {
         WorkflowReport workflowReport = new WorkflowReport(wf);
         parseDates(reportJson, workflowReport);
         
+        for (JsonNode invocJson : reportJson.get("invocations")) {
+            parseInvocation(invocJson, workflowReportJson, workflowReport, null);
+        }
+        
         return workflowReport;
         
     }
     
+    protected void parseInvocation(JsonNode json, Path workflowReportJson,
+            @SuppressWarnings("rawtypes") StatusReport report, Invocation parent) throws ParseException {
+       String name = json.path("name").asText();
+       Invocation invocation = new Invocation(name, parent, report);
+       Date startedDate = getDate(json, "startedDate");
+       if (startedDate != null) {
+           invocation.setStartedDate(startedDate);
+       }
+       Date completedDate = getDate(json, "completedDate");
+       if (completedDate != null) {
+           invocation.setCompletedDate(completedDate);
+       }
+
+       invocation.setInputs(parseValues(json.path("inputs"), workflowReportJson));
+       invocation.setOutputs(parseValues(json.path("outputs"), workflowReportJson));
+    }
+
+    protected Map<String, Path> parseValues(JsonNode json, Path basePath) {
+        SortedMap<String, Path> values = new TreeMap<>();
+        for (String port : iterate(json.fieldNames())) {
+            String pathStr = json.get(port).asText(); 
+            Path value = basePath.resolve(pathStr);
+            values.put(port, value);
+        }
+        return values;
+    }
+
+    private <T> Iterable<T> iterate(final Iterator<T> iterator) {
+        return new Iterable<T>() {
+
+            @Override
+            public Iterator<T> iterator() {
+                return iterator;
+            }
+
+        };
+    }
+
     StdDateFormat STD_DATE_FORMAT = new StdDateFormat();
 
     protected void parseDates(JsonNode json, 

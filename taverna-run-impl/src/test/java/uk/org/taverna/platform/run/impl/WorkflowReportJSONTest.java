@@ -38,15 +38,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class WorkflowReportJSONTest {
-
-    static {
-        try {
-            Thread.sleep(15000);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
     
     private final WorkflowReportJSON workflowReportJson = new WorkflowReportJSON();
 
@@ -194,6 +185,10 @@ public class WorkflowReportJSONTest {
         JsonNode wfInvoc = json.get("invocations").get(0);
         assertEquals("wf0", wfInvoc.get("id").asText());
         assertEquals("wf0", wfInvoc.get("name").asText());
+        
+        assertEquals("2013-01-02T14:51:00.000+0000", wfInvoc.get("startedDate").asText());
+        assertEquals("2013-12-30T23:50:00.000+0000", wfInvoc.get("completedDate").asText());
+
         String inputsName = wfInvoc.get("inputs").get("name").asText();
         assertEquals("/inputs/name", inputsName);
         String outputsGreeting = wfInvoc.get("outputs").get("greeting").asText();
@@ -329,9 +324,9 @@ public class WorkflowReportJSONTest {
             assertEquals("wf0", inv.getId());
             assertNull(inv.getParentId());
             assertNull(inv.getParent());
-            assertNull(inv.getIndex());
+            assertEquals(0, inv.getIndex().length);
             assertSame(report, inv.getReport());
-            assertEquals(State.RUNNING, inv.getState());
+            assertEquals(State.COMPLETED, inv.getState());
 
             assertEquals(date(2013,1,2,14,51), inv.getStartedDate());
             assertEquals(date(2013,12,30,23,50), inv.getCompletedDate());
@@ -340,17 +335,13 @@ public class WorkflowReportJSONTest {
             assertEquals(1, inv.getInputs().size());
             assertEquals(1, inv.getOutputs().size());
             
-            Path namePath = inv.getInputs().get("name");
-            assertEquals("/inputs/name", namePath.toString());
-            assertEquals("John", DataBundles.getStringValue(namePath));
+            Path name = inv.getInputs().get("name");
+            assertEquals("/inputs/name", name.toString());
+            assertEquals("John Doe", DataBundles.getStringValue(name));
             
-            Path greeting = inv.getInputs().get("greeting");
-            assertEquals("/outputs/greeting", namePath.toString());
-            assertEquals("Hello there, John", DataBundles.getStringValue(greeting));
-            
-            
-            
-            
+            Path greeting = inv.getOutputs().get("greeting");
+            assertEquals("/outputs/greeting", greeting.toString());
+            assertEquals("Hello, John Doe", DataBundles.getStringValue(greeting));
         }
         
     }

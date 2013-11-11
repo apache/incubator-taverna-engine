@@ -1,0 +1,111 @@
+{
+  "state" : "COMPLETED",
+  "invocations" : [ {
+    "name" : "wf0",
+    "state" : "COMPLETED",
+    "startedDate" : "2013-01-02T14:51:00.000+0000",
+    "completedDate" : "2013-12-30T23:50:00.000+0000",
+    "inputs" : {
+      "name" : "/inputs/name"
+    },
+    "outputs" : {
+      "greeting" : "/outputs/greeting"
+    },
+    "id" : "wf0"
+  } ],
+  "createdDate" : "2013-01-02T13:37:00.000+0000",
+  "startedDate" : "2013-01-02T14:50:00.000+0000",
+  "completedDate" : "2013-12-31T00:00:00.000+0000",
+  "processorReports" : [ {
+    "state" : "COMPLETED",
+    "invocations" : [ {
+      "name" : "proc-Concatenate_two_strings0",
+      "state" : "COMPLETED",
+      "startedDate" : "2013-02-02T11:00:00.000+0000",
+      "completedDate" : "2013-02-02T13:00:00.000+0000",
+      "inputs" : {
+        "string1" : "/intermediates/4c/4c984004-f1a5-43aa-8eaa-29f0f29d20e9",
+        "string2" : "/inputs/name"
+      },
+      "outputs" : {
+        "output" : "/intermediates/39/39d00be6-64da-496c-b8a7-734e48af8aa2"
+      },
+      "id" : "wf0/proc-Concatenate_two_strings0",
+      "parent" : "wf0"
+    } ],
+    "createdDate" : "2013-02-01T00:00:00.000+0000",
+    "startedDate" : "2013-02-02T00:00:00.000+0000",
+    "pausedDate" : "2013-02-05T00:00:00.000+0000",
+    "resumedDate" : "2013-02-06T00:00:00.000+0000",
+    "completedDate" : "2013-07-28T12:00:00.000+0000",
+    "pausedDates" : [ "2013-02-03T00:00:00.000+0000", "2013-02-05T00:00:00.000+0000" ],
+    "resumedDates" : [ "2013-02-04T00:00:00.000+0000", "2013-02-06T00:00:00.000+0000" ],
+    "activityReports" : [ {
+      "state" : "CANCELLED",
+      "invocations" : [ {
+        "name" : "act-Concatenate_two_strings0",
+        "state" : "RUNNING",
+        "startedDate" : "2013-02-20T11:30:00.000+0000",
+        "inputs" : {
+          "string1" : "/intermediates/4c/4c984004-f1a5-43aa-8eaa-29f0f29d20e9",
+          "string2" : "/inputs/name"
+        },
+        "outputs" : {
+          "output" : "/intermediates/39/39d00be6-64da-496c-b8a7-734e48af8aa2"
+        },
+        "id" : "wf0/proc-Concatenate_two_strings0/act-Concatenate_two_strings0",
+        "parent" : "wf0/proc-Concatenate_two_strings0"
+      } ],
+      "createdDate" : "2013-02-20T00:00:00.000+0000",
+      "cancelledDate" : "2013-02-21T11:30:00.000+0000",
+      "subject" : "http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/profile/taverna-2.4.0/activity/Concatenate_two_strings/"
+    } ],
+    "jobsQueued" : 1,
+    "jobsCompleted" : 3,
+    "jobsCompletedWithErrors" : 2,
+    "jobsStarted" : 5,
+    "subject" : "http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/processor/Concatenate_two_strings/"
+  }, {
+    "state" : "COMPLETED",
+    "invocations" : [ {
+      "name" : "proc-hello0",
+      "state" : "COMPLETED",
+      "startedDate" : "2013-02-02T11:00:00.000+0000",
+      "completedDate" : "2013-02-02T13:00:00.000+0000",
+      "outputs" : {
+        "value" : "/intermediates/4c/4c984004-f1a5-43aa-8eaa-29f0f29d20e9"
+      },
+      "id" : "wf0/proc-hello0",
+      "parent" : "wf0"
+    } ],
+    "createdDate" : "2013-02-01T00:00:00.000+0000",
+    "startedDate" : "2013-02-02T00:00:00.000+0000",
+    "pausedDate" : "2013-02-05T00:00:00.000+0000",
+    "resumedDate" : "2013-02-06T00:00:00.000+0000",
+    "completedDate" : "2013-07-28T12:00:00.000+0000",
+    "pausedDates" : [ "2013-02-03T00:00:00.000+0000", "2013-02-05T00:00:00.000+0000" ],
+    "resumedDates" : [ "2013-02-04T00:00:00.000+0000", "2013-02-06T00:00:00.000+0000" ],
+    "activityReports" : [ {
+      "state" : "CANCELLED",
+      "invocations" : [ {
+        "name" : "act-hello0",
+        "state" : "RUNNING",
+        "startedDate" : "2013-02-20T11:30:00.000+0000",
+        "outputs" : {
+          "value" : "/intermediates/4c/4c984004-f1a5-43aa-8eaa-29f0f29d20e9"
+        },
+        "id" : "wf0/proc-hello0/act-hello0",
+        "parent" : "wf0/proc-hello0"
+      } ],
+      "createdDate" : "2013-02-20T00:00:00.000+0000",
+      "cancelledDate" : "2013-02-21T11:30:00.000+0000",
+      "subject" : "http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/profile/taverna-2.4.0/activity/hello/"
+    } ],
+    "jobsQueued" : 1,
+    "jobsCompleted" : 3,
+    "jobsCompletedWithErrors" : 2,
+    "jobsStarted" : 5,
+    "subject" : "http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/processor/hello/"
+  } ],
+  "subject" : "http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/"
+}

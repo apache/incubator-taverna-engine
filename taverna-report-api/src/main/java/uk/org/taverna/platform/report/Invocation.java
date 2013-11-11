@@ -148,6 +148,7 @@ public class Invocation implements Comparable<Invocation> {
 	 *
 	 * @return the child invocations
 	 */
+	@JsonIgnore
 	public SortedSet<Invocation> getInvocations() {
 		return invocations;
 	}
@@ -245,9 +246,7 @@ public class Invocation implements Comparable<Invocation> {
 	 *            the date that the status changed to RUNNING
 	 */
 	public void setStartedDate(Date startedDate) {
-		if (this.startedDate == null) {
-			this.startedDate = startedDate;
-		}
+		this.startedDate = startedDate;
 		state = State.RUNNING;
 	}
 
