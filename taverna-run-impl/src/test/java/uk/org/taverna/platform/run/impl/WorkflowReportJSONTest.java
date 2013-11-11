@@ -32,7 +32,7 @@ import uk.org.taverna.scufl2.api.profiles.ProcessorBinding;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class SaveTest {
+public class WorkflowReportJSONTest {
 
     public class DummyProcessorReport extends ProcessorReport {
         public DummyProcessorReport(Processor processor) {
