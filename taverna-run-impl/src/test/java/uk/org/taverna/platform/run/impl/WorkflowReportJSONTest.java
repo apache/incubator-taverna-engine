@@ -1,5 +1,6 @@
 package uk.org.taverna.platform.run.impl;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -26,6 +27,7 @@ import uk.org.taverna.platform.report.ProcessorReport;
 import uk.org.taverna.platform.report.State;
 import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.scufl2.api.common.Scufl2Tools;
+import uk.org.taverna.scufl2.api.common.URITools;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.Processor;
 import uk.org.taverna.scufl2.api.io.ReaderException;
@@ -37,6 +39,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class WorkflowReportJSONTest {
 
+    static {
+        try {
+            Thread.sleep(15000);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+    
     private final WorkflowReportJSON workflowReportJson = new WorkflowReportJSON();
 
     public class DummyProcessorReport extends ProcessorReport {
@@ -84,6 +95,9 @@ public class WorkflowReportJSONTest {
         wfReport.setCreatedDate(date(2013,1,2,13,37));
         wfReport.setStartedDate(date(2013,1,2,14,50));        
         Invocation wfInvocation = new Invocation("wf0", null, wfReport);
+        wfInvocation.setStartedDate(date(2013,1,2,14,51));
+        wfInvocation.setCompletedDate(date(2013,12,30,23,50));
+
         wfReport.addInvocation(wfInvocation);
         
         Path name = DataBundles.getPort(DataBundles.getInputs(dataBundle), "name");
@@ -109,6 +123,10 @@ public class WorkflowReportJSONTest {
             processorReport.setResumedDate(date(2013,2,6,0,0));
             
             Invocation pInvocation = new Invocation("proc-" + p.getName() + "0", wfInvocation, processorReport);
+
+            pInvocation.setStartedDate(date(2013,2,2,11,0));
+            pInvocation.setCompletedDate(date(2013,2,2,13,0));
+
             if (p.getName().equals("hello")) {
                 pInvocation.getOutputs().put("value", helloValue);
                 DataBundles.setStringValue(helloValue, "Hello, ");
@@ -128,6 +146,10 @@ public class WorkflowReportJSONTest {
                 activityReport.setCreatedDate(date(2013,2,20,0,0));
                 activityReport.setCancelledDate(date(2013,2,21,11,30));
                 Invocation aInvocation = new Invocation("act-" + p.getName() + "0", pInvocation, activityReport);
+
+                aInvocation.setStartedDate(date(2013,2,20,11,30));
+//                aInvocation.setCompletedDate(date(2013,2,20,12,0));
+
                 activityReport.addInvocation(aInvocation);
                 aInvocation.getInputs().putAll(pInvocation.getInputs());
                 aInvocation.getOutputs().putAll(pInvocation.getOutputs());
@@ -282,13 +304,54 @@ public class WorkflowReportJSONTest {
     public void load() throws Exception {
         URI bundleUri = getClass().getResource("/workflowrun.bundle.zip").toURI();
         Path bundlePath = Paths.get(bundleUri);
-        Bundle bundle = DataBundles.openBundle(bundlePath);
-        
-        WorkflowReport report = workflowReportJson.load(bundle);
-        System.out.println(report);
-        assertEquals(State.COMPLETED, report.getState());
-        assertEquals(date(2013,1,2,13,37), report.getCreatedDate());
-        assertEquals(date(2013,1,2,14,50), report.getStartedDate());
+        try (Bundle bundle = DataBundles.openBundle(bundlePath)) {
+            WorkflowReport report = workflowReportJson.load(bundle);
+            assertEquals(State.COMPLETED, report.getState());
+            assertNull(report.getParentReport());
+            
+            assertEquals(wfBundle.getMainWorkflow().getName(), report.getSubject().getName());
+            URI mainWf = new URITools().uriForBean(wfBundle.getMainWorkflow());
+            assertEquals(mainWf, report.getSubjectURI());
+            
+            assertEquals(date(2013,1,2,13,37), report.getCreatedDate());
+            assertEquals(date(2013,1,2,14,50), report.getStartedDate());
+            assertEquals(date(2013,12,31,0,0), report.getCompletedDate());
+            assertNull(report.getCancelledDate());
+            assertNull(report.getResumedDate());
+            assertNull(report.getPausedDate());
+            assertTrue(report.getResumedDates().isEmpty());
+            assertTrue(report.getPausedDates().isEmpty());
+            
+            // wf invocation
+            assertEquals(1, report.getInvocations().size());
+            Invocation inv = report.getInvocations().first();
+            assertEquals("wf0", inv.getName());
+            assertEquals("wf0", inv.getId());
+            assertNull(inv.getParentId());
+            assertNull(inv.getParent());
+            assertNull(inv.getIndex());
+            assertSame(report, inv.getReport());
+            assertEquals(State.RUNNING, inv.getState());
+
+            assertEquals(date(2013,1,2,14,51), inv.getStartedDate());
+            assertEquals(date(2013,12,30,23,50), inv.getCompletedDate());
+
+            // wf invocation in/out
+            assertEquals(1, inv.getInputs().size());
+            assertEquals(1, inv.getOutputs().size());
+            
+            Path namePath = inv.getInputs().get("name");
+            assertEquals("/inputs/name", namePath.toString());
+            assertEquals("John", DataBundles.getStringValue(namePath));
+            
+            Path greeting = inv.getInputs().get("greeting");
+            assertEquals("/outputs/greeting", namePath.toString());
+            assertEquals("Hello there, John", DataBundles.getStringValue(greeting));
+            
+            
+            
+            
+        }
         
     }
     

@@ -128,7 +128,7 @@ public class StatusReport<SUBJECT extends Ported, PARENT extends StatusReport<?,
 		return state;
 	}
 
-	private void setState(State state) {
+	public void setState(State state) {
 		this.state = state;
 	}
 
@@ -358,5 +358,6 @@ public class StatusReport<SUBJECT extends Ported, PARENT extends StatusReport<?,
 			reportListeners.remove(reportListener);
 		}
 	}
+
 
 }
