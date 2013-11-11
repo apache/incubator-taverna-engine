@@ -20,12 +20,16 @@
  ******************************************************************************/
 package uk.org.taverna.platform.run.impl;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.purl.wf4ever.robundle.Bundle;
+import org.purl.wf4ever.robundle.manifest.Manifest;
 
+import uk.org.taverna.databundle.DataBundles;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
 import uk.org.taverna.platform.execution.api.InvalidExecutionIdException;
 import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
@@ -45,7 +49,9 @@ import uk.org.taverna.scufl2.api.profiles.Profile;
  */
 public class Run {
 
-	private static final Logger logger = Logger.getLogger(Run.class.getName());
+	private static final WorkflowReportJSON workflowReportJson = new WorkflowReportJSON();
+
+    private static final Logger logger = Logger.getLogger(Run.class.getName());
 
 	private final String ID, executionID;
 
@@ -111,6 +117,13 @@ public class Run {
 			throw new RunProfileException(message);
 		} else {
 			dataBundle = runProfile.getDataBundle();
+			try {
+                DataBundles.setWorkflowBundle(dataBundle, workflowBundle);
+            } catch (IOException e) {
+                String message = "Could not save workflow bundle to data bundle";
+                logger.log(Level.WARNING, message, e);
+                throw new InvalidWorkflowException(message, e);
+            }
 		}
 		if (runProfile.getExecutionEnvironment() == null) {
 			String message = "No ExecutionEnvironment specified in the RunProfile";
@@ -155,10 +168,27 @@ public class Run {
 
 	/**
 	 * Returns the <code>Bundle</code> containing the data values of the run.
-	 *	 *
+	 * <p>
+	 * 
 	 * @return the <code>Bundle</code> containing the data values for the <code>Workflow</code>
 	 */
 	public Bundle getDataBundle() {
+	    if (getWorkflowReport() != null) {
+	        // Save the workflow report
+	        try {
+                workflowReportJson.save(getWorkflowReport(), dataBundle);
+            } catch (IOException e) {
+                logger.log(Level.WARNING, "Can't save workflow report to data bundle", e);
+            }
+	    }
+	    // Update manifest
+	    try {
+            Manifest manifest = new Manifest(dataBundle);
+            manifest.populateFromBundle();
+            manifest.writeAsJsonLD();
+        } catch (IOException e) {
+            logger.log(Level.WARNING, "Can't add manifest to data bundle", e);
+        }
 		return dataBundle;
 	}
 

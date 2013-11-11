@@ -82,10 +82,11 @@ public class WorkflowReportJSON {
         objNode.with("@context").put("prov", "http://www.w3.org/ns/prov#");
     }
 
-    public void save(WorkflowReport wfReport) throws IOException {
-        Path path = DataBundles.getWorkflowRunReport(wfReport.getDataBundle());
+    public void save(WorkflowReport wfReport, Bundle dataBundle) throws IOException {
+        Path path = DataBundles.getWorkflowRunReport(dataBundle);
         save(wfReport, path);
-        DataBundles.setWorkflowBundle(wfReport.getDataBundle(), wfReport.getSubject().getParent());
+        // Already done by Run constructor
+//        DataBundles.setWorkflowBundle(wfReport.getDataBundle(), wfReport.getSubject().getParent());
     }
 
     public WorkflowReport load(Bundle bundle) throws IOException, ReaderException, ParseException {
