@@ -31,4 +31,6 @@ public interface ReportListener {
 
 	public void outputAdded(Path path, String portName, int[] index);
 
+	public void stateChanged(State oldState, State newState);
+
 }

@@ -43,11 +43,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @param <PARENT>
  *            the parent report type
  */
-/**
- * @author David Withers
- * @param <SUBJECT>
- * @param <PARENT>
- */
 public class StatusReport<SUBJECT extends Ported, PARENT extends StatusReport<?, ?>> {
 
 	private final SUBJECT subject;
@@ -90,7 +85,7 @@ public class StatusReport<SUBJECT extends Ported, PARENT extends StatusReport<?,
 
 	@JsonProperty("subject")
 	public URI getSubjectURI() {
-	    return new URITools().uriForBean(subject);
+		return new URITools().uriForBean(subject);
 	}
 
 	/**
@@ -129,7 +124,15 @@ public class StatusReport<SUBJECT extends Ported, PARENT extends StatusReport<?,
 	}
 
 	public void setState(State state) {
-		this.state = state;
+		synchronized (reportListeners) {
+			if (this.state != state) {
+				State oldState = this.state;
+				this.state = state;
+				for (ReportListener reportListener : reportListeners) {
+					reportListener.stateChanged(oldState, state);
+				}
+			}
+		}
 	}
 
 	/**
@@ -358,6 +361,5 @@ public class StatusReport<SUBJECT extends Ported, PARENT extends StatusReport<?,
 			reportListeners.remove(reportListener);
 		}
 	}
-
 
 }
