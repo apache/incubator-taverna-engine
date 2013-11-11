@@ -32,6 +32,7 @@ import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JToggleButton;
@@ -51,10 +52,16 @@ public abstract class Tab<T> extends JToggleButton {
 
 	protected final T selection;
 	private String name;
+	private Icon icon;
 	private JLabel label;
 
 	public Tab(String name, T selection) {
+		this(name, null, selection);
+	}
+
+	public Tab(String name, Icon icon, T selection) {
 		this.name = name;
+		this.icon = icon;
 		this.selection = selection;
 		initialise();
 	}
@@ -69,6 +76,7 @@ public abstract class Tab<T> extends JToggleButton {
 		GridBagConstraints c = new GridBagConstraints();
 
 		label = new JLabel(this.name);
+		label.setIcon(icon);
 		c.anchor = GridBagConstraints.WEST;
 		c.fill = GridBagConstraints.BOTH;
 		c.insets = new Insets(0, 5, 0, 5);
@@ -99,6 +107,11 @@ public abstract class Tab<T> extends JToggleButton {
 			label.setText(name);
 			repaint();
 		}
+	}
+
+	public void setIcon(Icon icon) {
+		label.setIcon(icon);
+		repaint();
 	}
 
 	@Override

@@ -63,6 +63,10 @@ public abstract class TabSelectorComponent<T> extends JPanel {
 
 	protected abstract Tab<T> createTab(T object);
 
+	public Tab<T> getTab(T object) {
+		return tabMap.get(object);
+	}
+
 	public void addObject(T object) {
 		Tab<T> button = createTab(object);
 		tabMap.put(object, button);
