@@ -25,6 +25,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.NavigableSet;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -55,7 +56,7 @@ public class StatusReport<SUBJECT extends Ported, PARENT extends StatusReport<?,
 
 	private State state;
 
-	private SortedSet<Invocation> invocations = new TreeSet<>();
+	private NavigableSet<Invocation> invocations = new TreeSet<>();
 
 	private Date createdDate, startedDate, pausedDate, resumedDate, cancelledDate, completedDate,
 			failedDate;
@@ -321,7 +322,7 @@ public class StatusReport<SUBJECT extends Ported, PARENT extends StatusReport<?,
 	 *
 	 * @return the invocations
 	 */
-	public SortedSet<Invocation> getInvocations() {
+	public NavigableSet<Invocation> getInvocations() {
 		synchronized (invocations) {
 			return new TreeSet<>(invocations);
 		}
@@ -366,15 +367,20 @@ public class StatusReport<SUBJECT extends Ported, PARENT extends StatusReport<?,
 		}
 	}
 
+	/**
+	 * Get an invocation with a given name.
+	 * @param invocationName
+	 * @return
+	 */
     public Invocation getInvocation(String invocationName) {
-        SortedSet<Invocation> invocs = getInvocations();
+        NavigableSet<Invocation> invocs = getInvocations();
         // A Comparable Invocation with the desired name
         Invocation index = new Invocation(invocationName);
-        SortedSet<Invocation> tailSet = invocs.tailSet(index);
-        if (tailSet.isEmpty()) { 
-            return null;
+        Invocation ceiling = invocs.ceiling(index);
+        if (ceiling != null && ceiling.getName().equals(invocationName)) {
+            return ceiling;            
         }
-        return tailSet.first();
+        return null;
     }
 
 }
