@@ -29,12 +29,18 @@ import java.util.TreeMap;
 import uk.org.taverna.scufl2.api.core.Processor;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * Report about the {@link State} of a {@link Processor} invocation.
  *
  * @author David Withers
  */
+@JsonPropertyOrder({ "subject", "parent", "state", "createdDate",
+        "startedDate", "pausedDate", "pausedDates", "resumedDate",
+        "resumedDates", "cancelledDate", "failedDate", "completedDate",
+        "jobsQueued", "jobsStarted", "jobsCompleted",
+        "jobsCompletedWithErrors", "invocations", "activityReports"})
 public abstract class ProcessorReport extends StatusReport<Processor, WorkflowReport> {
 
 	private Set<ActivityReport> activityReports = new LinkedHashSet<>();

@@ -33,6 +33,7 @@ import uk.org.taverna.scufl2.api.common.URITools;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * Report about the {@link State} of a workflow component.
@@ -43,6 +44,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @param <PARENT>
  *            the parent report type
  */
+
+@JsonPropertyOrder({ "subject", "parent", "state", "createdDate", "startedDate", "pausedDate", 
+    "pausedDates", "resumedDate", "resumedDates", "cancelledDate", "failedDate", "completedDate"})
 public class StatusReport<SUBJECT extends Ported, PARENT extends StatusReport<?, ?>> {
 
 	private final SUBJECT subject;

@@ -32,12 +32,14 @@ import uk.org.taverna.scufl2.api.port.Port;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * A single invocation of a workflow, processor or activity.
  *
  * @author David Withers
  */
+@JsonPropertyOrder({"id","parent", "name",  "index", "state", "startedDate", "completedDate", "inputs", "outputs"})
 public class Invocation implements Comparable<Invocation> {
 
 	private final String name;
