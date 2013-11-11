@@ -3,23 +3,27 @@ package uk.org.taverna.platform.run.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 
 import org.junit.After;
 import org.junit.Test;
 import org.purl.wf4ever.robundle.Bundle;
 
 import uk.org.taverna.databundle.DataBundles;
+import uk.org.taverna.platform.report.ActivityReport;
 import uk.org.taverna.platform.report.Invocation;
+import uk.org.taverna.platform.report.ProcessorReport;
 import uk.org.taverna.platform.report.State;
 import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.scufl2.api.common.URITools;
+import uk.org.taverna.scufl2.api.core.Processor;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,6 +39,8 @@ public class WorkflowReportJSONTest extends DummyWorkflowReport {
         Path path = wfReport.getDataBundle().getRoot().resolve("/workflowrun.json");
         assertTrue("Did not save to expected path "  + path, Files.exists(path));
 
+//        System.out.println(DataBundles.getStringValue(path));
+        
         JsonNode json;
         try (InputStream jsonIn = Files.newInputStream(path)) {
             json = new ObjectMapper().readTree(jsonIn);
@@ -166,48 +172,108 @@ public class WorkflowReportJSONTest extends DummyWorkflowReport {
         URI bundleUri = getClass().getResource("/workflowrun.bundle.zip").toURI();
         Path bundlePath = Paths.get(bundleUri);
         try (Bundle bundle = DataBundles.openBundle(bundlePath)) {
-            WorkflowReport report = workflowReportJson.load(bundle);
-            assertEquals(State.COMPLETED, report.getState());
-            assertNull(report.getParentReport());
+            WorkflowReport wfReport = workflowReportJson.load(bundle);
+            assertEquals(State.COMPLETED, wfReport.getState());
+            assertNull(wfReport.getParentReport());
             
-            assertEquals(wfBundle.getMainWorkflow().getName(), report.getSubject().getName());
+            assertEquals(wfBundle.getMainWorkflow().getName(), wfReport.getSubject().getName());
             URI mainWf = new URITools().uriForBean(wfBundle.getMainWorkflow());
-            assertEquals(mainWf, report.getSubjectURI());
+            assertEquals(mainWf, wfReport.getSubjectURI());
             
-            assertEquals(date(2013,1,2,13,37), report.getCreatedDate());
-            assertEquals(date(2013,1,2,14,50), report.getStartedDate());
-            assertEquals(date(2013,12,31,0,0), report.getCompletedDate());
-            assertNull(report.getCancelledDate());
-            assertNull(report.getResumedDate());
-            assertNull(report.getPausedDate());
-            assertTrue(report.getResumedDates().isEmpty());
-            assertTrue(report.getPausedDates().isEmpty());
+            assertEquals(date(2013,1,2,13,37), wfReport.getCreatedDate());
+            assertEquals(date(2013,1,2,14,50), wfReport.getStartedDate());
+            assertEquals(date(2013,12,31,0,0), wfReport.getCompletedDate());
+            assertNull(wfReport.getCancelledDate());
+            assertNull(wfReport.getResumedDate());
+            assertNull(wfReport.getPausedDate());
+            assertTrue(wfReport.getResumedDates().isEmpty());
+            assertTrue(wfReport.getPausedDates().isEmpty());
             
             // wf invocation
-            assertEquals(1, report.getInvocations().size());
-            Invocation inv = report.getInvocations().first();
-            assertEquals("wf0", inv.getName());
-            assertEquals("wf0", inv.getId());
-            assertNull(inv.getParentId());
-            assertNull(inv.getParent());
-            assertEquals(0, inv.getIndex().length);
-            assertSame(report, inv.getReport());
-            assertEquals(State.COMPLETED, inv.getState());
+            assertEquals(1, wfReport.getInvocations().size());
+            Invocation wfInvov = wfReport.getInvocations().first();
+            assertEquals("wf0", wfInvov.getName());
+            assertEquals("wf0", wfInvov.getId());
+            assertNull(wfInvov.getParentId());
+            assertNull(wfInvov.getParent());
+            assertEquals(0, wfInvov.getIndex().length);
+            assertSame(wfReport, wfInvov.getReport());
+            assertEquals(State.COMPLETED, wfInvov.getState());
 
-            assertEquals(date(2013,1,2,14,51), inv.getStartedDate());
-            assertEquals(date(2013,12,30,23,50), inv.getCompletedDate());
+            assertEquals(date(2013,1,2,14,51), wfInvov.getStartedDate());
+            assertEquals(date(2013,12,30,23,50), wfInvov.getCompletedDate());
 
             // wf invocation in/out
-            assertEquals(1, inv.getInputs().size());
-            assertEquals(1, inv.getOutputs().size());
+            assertEquals(1, wfInvov.getInputs().size());
+            assertEquals(1, wfInvov.getOutputs().size());
             
-            Path name = inv.getInputs().get("name");
+            Path name = wfInvov.getInputs().get("name");
             assertEquals("/inputs/name", name.toString());
             assertEquals("John Doe", DataBundles.getStringValue(name));
             
-            Path greeting = inv.getOutputs().get("greeting");
+            Path greeting = wfInvov.getOutputs().get("greeting");
             assertEquals("/outputs/greeting", greeting.toString());
             assertEquals("Hello, John Doe", DataBundles.getStringValue(greeting));
+            
+            
+            // processor reports
+            assertEquals(2, wfReport.getProcessorReports().size());
+            for (ProcessorReport procRepo : wfReport.getProcessorReports()) {
+                Processor processor = procRepo.getSubject();
+                assertTrue(wfBundle.getMainWorkflow().getProcessors().containsName(processor.getName()));
+                assertEquals(1, procRepo.getJobsQueued());
+                assertEquals(2, procRepo.getJobsCompletedWithErrors());
+                assertEquals(3, procRepo.getJobsCompleted());
+                assertEquals(5, procRepo.getJobsStarted());
+                
+
+                assertEquals(date(2013,2,1,00,00), procRepo.getCreatedDate());
+                assertEquals(date(2013,2,2,00,00), procRepo.getStartedDate());
+                assertEquals(date(2013,7,28,12,0), procRepo.getCompletedDate());
+                assertEquals(date(2013,2,5,0,0), procRepo.getPausedDate());
+                assertEquals(Arrays.asList(date(2013,2,3,0,0), date(2013,2,5,0,0)),
+                        procRepo.getPausedDates());
+                assertEquals(date(2013,2,6,0,0), procRepo.getResumedDate());
+                assertEquals(Arrays.asList(date(2013,2,4,0,0), date(2013,2,6,0,0)),
+                        procRepo.getResumedDates());
+
+                assertEquals(date(2013,7,28,12,0), procRepo.getCompletedDate());
+                
+                assertEquals(1, procRepo.getInvocations().size());
+                Invocation pInvoc = procRepo.getInvocations().first();
+                assertEquals(date(2013,2,2,11,00), pInvoc.getStartedDate());
+                assertEquals(date(2013,2,2,13,00), pInvoc.getCompletedDate());
+                assertEquals(State.COMPLETED, pInvoc.getState());
+                assertEquals(wfInvov, pInvoc.getParent());
+                assertEquals("wf0", pInvoc.getParentId());                
+                if (processor.getName().equals("hello")) {
+                    assertEquals("proc-hello0", pInvoc.getName());
+                    assertEquals("wf0/proc-hello0", pInvoc.getId());
+                    assertEquals(0, pInvoc.getInputs().size());
+                    assertEquals(1, pInvoc.getOutputs().size());
+                    assertEquals("Hello, ", DataBundles.getStringValue(pInvoc.getOutputs().get("value")));
+                } else if (processor.getName().equals("Concatenate_two_strings")) {
+                    assertEquals("proc-Concatenate_two_strings0", pInvoc.getName());
+                    assertEquals("wf0/proc-Concatenate_two_strings0", pInvoc.getId());
+                    assertEquals(2, pInvoc.getInputs().size());
+                    assertEquals("Hello, ", DataBundles.getStringValue(pInvoc.getInputs().get("string1")));
+                    assertEquals("John Doe", DataBundles.getStringValue(pInvoc.getInputs().get("string2")));
+
+                    assertEquals(1, pInvoc.getOutputs().size());
+                    assertEquals("Hello, John Doe", DataBundles.getStringValue(pInvoc.getOutputs().get("output")));                    
+                } else {
+                    fail("Unknown processor: " + processor.getName());
+                }
+                
+                assertEquals(1, procRepo.getActivityReports().size());
+                for (ActivityReport actRepo : procRepo.getActivityReports()) {
+                    assertEquals(procRepo, actRepo.getParentReport());
+                    assertEquals(State.CANCELLED, actRepo.getState());
+                    assertEquals(date(2013,2,20,00,00), actRepo.getCreatedDate());
+                    assertEquals(date(2013,2,20,11,30), actRepo.getStartedDate());
+                    assertEquals(date(2013,2,21,11,30), actRepo.getCancelledDate());                    
+                }
+            }
         }
         
     }
