@@ -22,6 +22,7 @@ package uk.org.taverna.platform.run.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +37,7 @@ import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironmentService;
 import uk.org.taverna.platform.execution.api.InvalidExecutionIdException;
 import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
+import uk.org.taverna.platform.report.ReportListener;
 import uk.org.taverna.platform.report.State;
 import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.platform.run.api.InvalidRunIdException;
@@ -90,6 +92,7 @@ public class RunServiceImpl implements RunService {
 	@Override
 	public String createRun(RunProfile runProfile) throws InvalidWorkflowException, RunProfileException {
 		Run run = new Run(runProfile);
+		run.getWorkflowReport().addReportListener(new RunReportListener(run.getID()));
 		runMap.put(run.getID(), run);
 		runs.add(run.getID());
 		return run.getID();
@@ -187,6 +190,30 @@ public class RunServiceImpl implements RunService {
 
 	public void setEventAdmin(EventAdmin eventAdmin) {
 		this.eventAdmin = eventAdmin;
+	}
+
+	private class RunReportListener implements ReportListener {
+
+		private final String runId;
+
+		public RunReportListener(String runId) {
+			this.runId = runId;
+		}
+
+		@Override
+		public void outputAdded(Path path, String portName, int[] index) {
+		}
+
+		@Override
+		public void stateChanged(State oldState, State newState) {
+			switch (newState) {
+			case COMPLETED:
+			case FAILED:
+				postEvent(RUN_STOPPED, runId);
+				break;
+			}
+		}
+
 	}
 
 }
