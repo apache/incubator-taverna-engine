@@ -85,8 +85,10 @@ public class WorkflowReportJSON {
     public void save(WorkflowReport wfReport, Bundle dataBundle) throws IOException {
         Path path = DataBundles.getWorkflowRunReport(dataBundle);
         save(wfReport, path);
-        // Already done by Run constructor
-//        DataBundles.setWorkflowBundle(wfReport.getDataBundle(), wfReport.getSubject().getParent());
+        if (! Files.exists(DataBundles.getWorkflow(dataBundle))) {
+            // Usually already done by Run constructor
+            DataBundles.setWorkflowBundle(wfReport.getDataBundle(), wfReport.getSubject().getParent());
+        }
     }
 
     public WorkflowReport load(Bundle bundle) throws IOException, ReaderException, ParseException {
