@@ -24,35 +24,9 @@ import uk.org.taverna.scufl2.api.profiles.ProcessorBinding;
 
 
 public class DummyWorkflowReport {
-
-    public class DummyProcessorReport extends ProcessorReport {
-        public DummyProcessorReport(Processor processor) {
-            super(processor);
-        }
-
-        @Override
-        public int getJobsQueued() {
-            return 1;
-        }
-
-        @Override
-        public int getJobsStarted() {
-            return 5;
-        }
-
-        @Override
-        public int getJobsCompleted() {
-            return 3;
-        }
-
-        @Override
-        public int getJobsCompletedWithErrors() {
-            return 2;
-        }
-    }
-
-
     
+    private static TimeZone UTC = TimeZone.getTimeZone("UTC");
+
     protected Bundle dataBundle;
     
     protected WorkflowReport wfReport;
@@ -66,11 +40,6 @@ public class DummyWorkflowReport {
         wfBundle = workflowBundleIO.readBundle(getClass().getResource("/hello_anyone.wfbundle"), 
                 "application/vnd.taverna.scufl2.workflow-bundle");
     }
-
-
-    
-    TimeZone UTC = TimeZone.getTimeZone("UTC");
-    
 
     protected Date date(int year, int month, int date, int hourOfDay, int minute) {
         GregorianCalendar cal = new GregorianCalendar(UTC);
@@ -104,7 +73,12 @@ public class DummyWorkflowReport {
         Path concatenateOutput = DataBundles.getIntermediate(dataBundle, UUID.randomUUID());
         
         for (Processor p : wfBundle.getMainWorkflow().getProcessors()) {
-            ProcessorReport processorReport = new DummyProcessorReport(p);
+            ProcessorReport processorReport = new ProcessorReport(p);
+            processorReport.setJobsQueued(1);
+            processorReport.setJobsStarted(5);
+            processorReport.setJobsCompleted(3);
+            processorReport.setJobsCompletedWithErrors(2);
+                        
             wfReport.addProcessorReport(processorReport);
 
             processorReport.setCreatedDate(date(2013,2,1,0,0));
@@ -136,6 +110,7 @@ public class DummyWorkflowReport {
                 ActivityReport activityReport = new ActivityReport(b.getBoundActivity());
                 processorReport.addActivityReport(activityReport);
                 activityReport.setCreatedDate(date(2013,2,20,0,0));
+                activityReport.setStartedDate(date(2013,2,20,11,00));
                 activityReport.setCancelledDate(date(2013,2,21,11,30));
                 Invocation aInvocation = new Invocation("act-" + p.getName() + "0", pInvocation, activityReport);
 

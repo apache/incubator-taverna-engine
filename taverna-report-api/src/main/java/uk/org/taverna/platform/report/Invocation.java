@@ -58,6 +58,23 @@ public class Invocation implements Comparable<Invocation> {
 
 	private SortedMap<String, Path> inputs, outputs;
 
+	/**
+     * Internal constructor for comparison use.
+     * 
+     * Only use with {@link #compareTo(Invocation)} use when looking
+     * up from {@link StatusReport#getInvocation(String)}. All fields except 
+     * {@link #getName()} are <code>null</code>.
+     * 
+     * @param name The name of the invocation to compare with
+     **/
+	Invocation(String name) {
+	    this.name = name;
+	    this.report = null;
+	    this.parent = null;
+	    this.invocations = null;
+	    this.index = null;
+	}
+	
 	public Invocation(String name, Invocation parent, StatusReport<?, ?> report) {
 		this(name, new int[0], parent, report);
 	}
@@ -85,6 +102,7 @@ public class Invocation implements Comparable<Invocation> {
 		}
 
 		setStartedDate(new Date());
+		
 	}
 
 	/**
@@ -286,6 +304,7 @@ public class Invocation implements Comparable<Invocation> {
 		if (id.length() == otherId.length()) {
 			return id.compareTo(otherId);
 		} else  {
+		    // Make "invoc5" be sorted before "invoc49"
 			return id.length() - otherId.length();
 		}
 	}

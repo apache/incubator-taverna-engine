@@ -35,33 +35,60 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * Report about the {@link State} of a {@link Processor} invocation.
  *
  * @author David Withers
+ * @author Stian Soiland-Reyes
  */
 @JsonPropertyOrder({ "subject", "parent", "state", "createdDate",
         "startedDate", "pausedDate", "pausedDates", "resumedDate",
         "resumedDates", "cancelledDate", "failedDate", "completedDate",
         "jobsQueued", "jobsStarted", "jobsCompleted",
         "jobsCompletedWithErrors", "invocations", "activityReports"})
-public abstract class ProcessorReport extends StatusReport<Processor, WorkflowReport> {
+public class ProcessorReport extends StatusReport<Processor, WorkflowReport> {
 
 	private Set<ActivityReport> activityReports = new LinkedHashSet<>();
 
-	private SortedMap<String, Object> properties = new TreeMap<>();
+	private int jobsCompleted;
 
-	/**
+    private int jobsCompletedWithErrors;
+
+    private int jobsQueued;
+
+    private int jobsStarted;
+
+    private SortedMap<String, Object> properties = new TreeMap<>();
+
+    /**
 	 * Constructs a new <code>ProcessorReport</code>.
 	 *
-	 * @param processor
+	 * @param processor The processor to report on
 	 */
 	public ProcessorReport(Processor processor) {
 		super(processor);
 	}
 
-	public void addActivityReport(ActivityReport activityReport) {
+    public void addActivityReport(ActivityReport activityReport) {
 		activityReports.add(activityReport);
 	}
 
-	public Set<ActivityReport> getActivityReports() {
+    public Set<ActivityReport> getActivityReports() {
 		return activityReports;
+	}
+
+    /**
+	 * Returns the number of jobs that the processor has completed.
+	 *
+	 * @return the number of jobs that the processor has completed
+	 */
+	public int getJobsCompleted() {
+	    return jobsCompleted;
+	}
+
+	/**
+	 * Returns the number of jobs that completed with an error.
+	 *
+	 * @return the number of jobs that completed with an error
+	 */
+	public int getJobsCompletedWithErrors() {
+	    return jobsCompletedWithErrors;
 	}
 
 	/**
@@ -69,38 +96,70 @@ public abstract class ProcessorReport extends StatusReport<Processor, WorkflowRe
 	 *
 	 * @return the number of jobs queued by the processor
 	 */
-	public abstract int getJobsQueued();
+	public int getJobsQueued() {
+        return jobsQueued;
+    }
 
 	/**
 	 * Returns the number of jobs that the processor has started processing.
 	 *
 	 * @return the number of jobs that the processor has started processing
 	 */
-	public abstract int getJobsStarted();
-
-	/**
-	 * Returns the number of jobs that the processor has completed.
-	 *
-	 * @return the number of jobs that the processor has completed
-	 */
-	public abstract int getJobsCompleted();
-
-	/**
-	 * Returns the number of jobs that completed with an error.
-	 *
-	 * @return the number of jobs that completed with an error
-	 */
-	public abstract int getJobsCompletedWithErrors();
-
-	@JsonIgnore 
-	public Set<String> getPropertyKeys() {
-		return new HashSet<String>(properties.keySet());
+	public int getJobsStarted() {
+	    return jobsStarted;
 	}
 
 	public Object getProperty(String key) {
 		return properties.get(key);
 	}
 
+	@JsonIgnore 
+	public Set<String> getPropertyKeys() {
+		return new HashSet<String>(properties.keySet());
+	}
+
+	/**
+     * Set the number of completed jobs.
+     * 
+     * @param jobsCompleted the number of jobs that the processor has completed.
+     */
+    public void setJobsCompleted(int jobsCompleted) {
+        this.jobsCompleted = jobsCompleted;
+    }
+
+	/**
+     * Set the number of jobs that have completed, but with errors.
+     * 
+     * @param jobsCompletedWithErrors the number of jobs that completed with errors
+     */
+    public void setJobsCompletedWithErrors(int jobsCompletedWithErrors) {
+        this.jobsCompletedWithErrors = jobsCompletedWithErrors;
+    }
+
+	/**
+     * Set the number of queued jobs.
+     * 
+     * @param jobsQueued the number of jobs queued by the processor
+     */
+    public void setJobsQueued(int jobsQueued) {
+        this.jobsQueued = jobsQueued;
+    }
+
+	/**
+     * Set the number of started jobs.
+     * 
+     * @param jobsStarted the number of jobs that the processor has started processing
+     */
+    public void setJobsStarted(int jobsStarted) {
+        this.jobsStarted = jobsStarted;
+    }
+
+    /**
+     * Set an additional property
+     * 
+     * @param key
+     * @param value
+     */
 	public void setProperty(String key, Object value) {
 		synchronized (properties) {
 			// if (properties.containsKey(key)) {

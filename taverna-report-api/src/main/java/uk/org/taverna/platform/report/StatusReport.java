@@ -366,4 +366,15 @@ public class StatusReport<SUBJECT extends Ported, PARENT extends StatusReport<?,
 		}
 	}
 
+    public Invocation getInvocation(String invocationName) {
+        SortedSet<Invocation> invocs = getInvocations();
+        // A Comparable Invocation with the desired name
+        Invocation index = new Invocation(invocationName);
+        SortedSet<Invocation> tailSet = invocs.tailSet(index);
+        if (tailSet.isEmpty()) { 
+            return null;
+        }
+        return tailSet.first();
+    }
+
 }

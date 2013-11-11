@@ -270,8 +270,9 @@ public class WorkflowReportJSONTest extends DummyWorkflowReport {
                     assertEquals(procRepo, actRepo.getParentReport());
                     assertEquals(State.CANCELLED, actRepo.getState());
                     assertEquals(date(2013,2,20,00,00), actRepo.getCreatedDate());
-                    assertEquals(date(2013,2,20,11,30), actRepo.getStartedDate());
-                    assertEquals(date(2013,2,21,11,30), actRepo.getCancelledDate());                    
+                    assertEquals(date(2013,2,20,11,00), actRepo.getStartedDate());
+                    assertEquals(date(2013,2,21,11,30), actRepo.getCancelledDate());                   
+                    // TODO: Test nested workflow
                 }
             }
         }

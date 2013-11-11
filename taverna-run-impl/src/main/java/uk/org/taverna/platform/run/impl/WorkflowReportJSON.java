@@ -19,14 +19,17 @@ import org.purl.wf4ever.robundle.Bundle;
 import org.purl.wf4ever.robundle.manifest.Manifest.PathMixin;
 
 import uk.org.taverna.databundle.DataBundles;
+import uk.org.taverna.platform.report.ActivityReport;
 import uk.org.taverna.platform.report.Invocation;
+import uk.org.taverna.platform.report.ProcessorReport;
 import uk.org.taverna.platform.report.State;
 import uk.org.taverna.platform.report.StatusReport;
 import uk.org.taverna.platform.report.WorkflowReport;
-import uk.org.taverna.scufl2.api.common.Scufl2Tools;
+import uk.org.taverna.scufl2.api.activity.Activity;
 import uk.org.taverna.scufl2.api.common.URITools;
 import uk.org.taverna.scufl2.api.common.WorkflowBean;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
+import uk.org.taverna.scufl2.api.core.Processor;
 import uk.org.taverna.scufl2.api.core.Workflow;
 import uk.org.taverna.scufl2.api.io.ReaderException;
 
@@ -97,7 +100,6 @@ public class WorkflowReportJSON {
         return load(path, workflow);
     }
 
-    private static Scufl2Tools scufl2Tools = new Scufl2Tools();
     private static URITools uriTools = new URITools();
     
     public WorkflowReport load(Path workflowReportJson, WorkflowBundle workflowBundle) throws IOException, ParseException {
@@ -114,17 +116,80 @@ public class WorkflowReportJSON {
         WorkflowReport workflowReport = new WorkflowReport(wf);
         parseDates(reportJson, workflowReport);
         
-        for (JsonNode invocJson : reportJson.get("invocations")) {
-            parseInvocation(invocJson, workflowReportJson, workflowReport, null);
+        for (JsonNode invocJson : reportJson.path("invocations")) {
+            // NOTE: Invocation constructor will add to parents
+            parseInvocation(invocJson, workflowReportJson, workflowReport);
         }
         
+        for (JsonNode procJson : reportJson.path("processorReports")) {
+            ProcessorReport procReport = parseProcessorReport(procJson, workflowReportJson, workflowReport, workflowBundle);
+            workflowReport.addProcessorReport(procReport);
+        }
         return workflowReport;
         
     }
     
+    protected ProcessorReport parseProcessorReport(JsonNode reportJson,
+            Path workflowReportJson, WorkflowReport workflowReport, WorkflowBundle workflowBundle) throws ParseException {
+        Processor p = (Processor) getSubject(reportJson, workflowBundle); 
+        ProcessorReport procReport = new ProcessorReport(p);
+        procReport.setParentReport(workflowReport);
+        
+        procReport.setJobsQueued(reportJson.path("jobsQueued").asInt());
+        procReport.setJobsStarted(reportJson.path("jobsStarted").asInt());
+        procReport.setJobsCompleted(reportJson.path("jobsCompleted").asInt());
+        procReport.setJobsCompletedWithErrors(reportJson.path("jobsCompletedWithErrors").asInt());
+        // TODO: procReport properties
+        
+        parseDates(reportJson, procReport);
+
+        
+        for (JsonNode invocJson : reportJson.path("invocations")) {
+            parseInvocation(invocJson, workflowReportJson, procReport);
+        }
+        
+        for (JsonNode actJson : reportJson.path("activityReports")) {
+            ActivityReport activityReport = parseActivityReport(actJson, workflowReportJson, procReport, workflowBundle);
+            procReport.addActivityReport(activityReport);
+        }
+        return procReport;
+    }
+
+    protected ActivityReport parseActivityReport(JsonNode actJson, Path workflowReportJson,
+            ProcessorReport procReport, WorkflowBundle workflowBundle) throws ParseException {
+        Activity a = (Activity) getSubject(actJson, workflowBundle); 
+        ActivityReport actReport = new ActivityReport(a);
+        actReport.setParentReport(procReport);
+        
+        parseDates(actJson, actReport);
+       
+        for (JsonNode invocJson : actJson.path("invocations")) {
+            parseInvocation(invocJson, workflowReportJson, actReport);
+        }
+        
+        JsonNode nestedWf = actJson.get("nestedWorkflowReport");
+        if (nestedWf != null) {
+            actReport.setNestedWorkflowReport(parseWorkflowReport(nestedWf, workflowReportJson, workflowBundle));
+        }        
+        return actReport;
+
+        
+    }
+
     protected void parseInvocation(JsonNode json, Path workflowReportJson,
-            @SuppressWarnings("rawtypes") StatusReport report, Invocation parent) throws ParseException {
+            @SuppressWarnings("rawtypes") StatusReport report) throws ParseException {
        String name = json.path("name").asText();
+       
+       String parentId = json.path("parent").asText();
+       Invocation parent = null;
+       if (! parentId.isEmpty()) {
+           @SuppressWarnings("rawtypes")
+           StatusReport parentReport = report.getParentReport();
+           if (parentReport != null) {
+               parent = parentReport.getInvocation(parentId);
+           }
+       }
+       
        Invocation invocation = new Invocation(name, parent, report);
        Date startedDate = getDate(json, "startedDate");
        if (startedDate != null) {
@@ -191,7 +256,7 @@ public class WorkflowReportJSON {
        
        for (JsonNode s : json.path("resumedDates")) {
            Date resumedDate = STD_DATE_FORMAT.parse(s.asText());
-           report.setPausedDate(resumedDate);
+           report.setResumedDate(resumedDate);
        }
        Date resumedDate = getDate(json, "resumedDate");
        if (report.getResumedDates().isEmpty() && resumedDate != null) {

@@ -39,17 +39,18 @@
       "startedDate" : "2013-02-02T11:00:00.000+0000",
       "completedDate" : "2013-02-02T13:00:00.000+0000",
       "inputs" : {
-        "string1" : "/intermediates/81/81f6ff7e-9899-495f-92cf-3b2f7210dd07",
+        "string1" : "/intermediates/a3/a398c7f0-b07c-41a4-9378-0ff8ca320b9f",
         "string2" : "/inputs/name"
       },
       "outputs" : {
-        "output" : "/intermediates/ce/ce5bdb58-dd88-46fe-9fc3-d18bf5fe014c"
+        "output" : "/intermediates/37/37a1e44c-1cee-4df6-9e36-abe8766ec018"
       }
     } ],
     "activityReports" : [ {
       "subject" : "http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/profile/taverna-2.4.0/activity/Concatenate_two_strings/",
       "state" : "CANCELLED",
       "createdDate" : "2013-02-20T00:00:00.000+0000",
+      "startedDate" : "2013-02-20T11:00:00.000+0000",
       "cancelledDate" : "2013-02-21T11:30:00.000+0000",
       "invocations" : [ {
         "id" : "wf0/proc-Concatenate_two_strings0/act-Concatenate_two_strings0",
@@ -58,11 +59,11 @@
         "state" : "RUNNING",
         "startedDate" : "2013-02-20T11:30:00.000+0000",
         "inputs" : {
-          "string1" : "/intermediates/81/81f6ff7e-9899-495f-92cf-3b2f7210dd07",
+          "string1" : "/intermediates/a3/a398c7f0-b07c-41a4-9378-0ff8ca320b9f",
           "string2" : "/inputs/name"
         },
         "outputs" : {
-          "output" : "/intermediates/ce/ce5bdb58-dd88-46fe-9fc3-d18bf5fe014c"
+          "output" : "/intermediates/37/37a1e44c-1cee-4df6-9e36-abe8766ec018"
         }
       } ]
     } ]
@@ -88,13 +89,14 @@
       "startedDate" : "2013-02-02T11:00:00.000+0000",
       "completedDate" : "2013-02-02T13:00:00.000+0000",
       "outputs" : {
-        "value" : "/intermediates/81/81f6ff7e-9899-495f-92cf-3b2f7210dd07"
+        "value" : "/intermediates/a3/a398c7f0-b07c-41a4-9378-0ff8ca320b9f"
       }
     } ],
     "activityReports" : [ {
       "subject" : "http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/profile/taverna-2.4.0/activity/hello/",
       "state" : "CANCELLED",
       "createdDate" : "2013-02-20T00:00:00.000+0000",
+      "startedDate" : "2013-02-20T11:00:00.000+0000",
       "cancelledDate" : "2013-02-21T11:30:00.000+0000",
       "invocations" : [ {
         "id" : "wf0/proc-hello0/act-hello0",
@@ -103,7 +105,7 @@
         "state" : "RUNNING",
         "startedDate" : "2013-02-20T11:30:00.000+0000",
         "outputs" : {
-          "value" : "/intermediates/81/81f6ff7e-9899-495f-92cf-3b2f7210dd07"
+          "value" : "/intermediates/a3/a398c7f0-b07c-41a4-9378-0ff8ca320b9f"
         }
       } ]
     } ]
