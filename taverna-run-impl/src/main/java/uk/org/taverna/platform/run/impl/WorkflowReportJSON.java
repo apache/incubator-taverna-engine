@@ -1,18 +1,21 @@
 package uk.org.taverna.platform.run.impl;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
+import org.purl.wf4ever.robundle.Bundle;
 import org.purl.wf4ever.robundle.manifest.Manifest.PathMixin;
 
 import uk.org.taverna.databundle.DataBundles;
 import uk.org.taverna.platform.report.WorkflowReport;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -24,7 +27,7 @@ public class WorkflowReportJSON {
         
 //        injectContext(objNode);
         
-        ObjectMapper om = makeObjectMapper();
+        ObjectMapper om = makeObjectMapperForSave();
 //        Files.createFile(path);
         try (Writer w = Files.newBufferedWriter(path,
                 Charset.forName("UTF-8"), StandardOpenOption.WRITE,
@@ -33,7 +36,13 @@ public class WorkflowReportJSON {
         }
     }
     
-    protected static ObjectMapper makeObjectMapper() {
+    protected static ObjectMapper makeObjectMapperForLoad() {
+        ObjectMapper om = new ObjectMapper();
+        om.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        return om;
+    }
+    
+    protected static ObjectMapper makeObjectMapperForSave() {
         ObjectMapper om = new ObjectMapper();
         om.enable(SerializationFeature.INDENT_OUTPUT);
         om.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
@@ -57,6 +66,18 @@ public class WorkflowReportJSON {
     public void save(WorkflowReport wfReport) throws IOException {
         Path path = DataBundles.getWorkflowRunReport(wfReport.getDataBundle());
         save(wfReport, path);
+    }
+
+    public WorkflowReport load(Bundle bundle) throws IOException {
+        Path path = DataBundles.getWorkflowRunReport(bundle);
+        return load(path);
+    }
+
+    public WorkflowReport load(Path path) throws IOException {
+        ObjectMapper om = makeObjectMapperForLoad();
+        try (InputStream stream = Files.newInputStream(path)) {            
+            return om.readValue(stream, WorkflowReport.class);
+        }
     }
 
 }

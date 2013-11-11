@@ -5,8 +5,10 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
@@ -21,6 +23,7 @@ import uk.org.taverna.databundle.DataBundles;
 import uk.org.taverna.platform.report.ActivityReport;
 import uk.org.taverna.platform.report.Invocation;
 import uk.org.taverna.platform.report.ProcessorReport;
+import uk.org.taverna.platform.report.State;
 import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.scufl2.api.common.Scufl2Tools;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
@@ -33,6 +36,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class WorkflowReportJSONTest {
+
+    private final WorkflowReportJSON workflowReportJson = new WorkflowReportJSON();
 
     public class DummyProcessorReport extends ProcessorReport {
         public DummyProcessorReport(Processor processor) {
@@ -147,7 +152,7 @@ public class WorkflowReportJSONTest {
 
     @Test
     public void save() throws Exception {
-        new WorkflowReportJSON().save(wfReport);
+        workflowReportJson.save(wfReport);
         Path path = wfReport.getDataBundle().getRoot().resolve("/workflowrun.json");
         assertTrue("Did not save to expected path "  + path, Files.exists(path));
 
@@ -274,7 +279,16 @@ public class WorkflowReportJSONTest {
     }
     
     @Test
-    public void testName() throws Exception {
+    public void load() throws Exception {
+        URI bundleUri = getClass().getResource("/workflowrun.bundle.zip").toURI();
+        Path bundlePath = Paths.get(bundleUri);
+        Bundle bundle = DataBundles.openBundle(bundlePath);
+        
+        WorkflowReport report = workflowReportJson.load(bundle);
+        System.out.println(report);
+        assertEquals(State.COMPLETED, report.getState());
+        assertEquals(date(2013,1,2,13,37), report.getCreatedDate());
+        assertEquals(date(2013,1,2,14,50), report.getStartedDate());
         
     }
     
