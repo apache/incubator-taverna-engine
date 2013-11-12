@@ -33,6 +33,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.purl.wf4ever.robundle.Bundle;
 
+import uk.org.taverna.databundle.DataBundles;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironmentService;
 import uk.org.taverna.platform.execution.api.InvalidExecutionIdException;
@@ -47,6 +48,7 @@ import uk.org.taverna.platform.run.api.RunService;
 import uk.org.taverna.platform.run.api.RunStateException;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.Workflow;
+import uk.org.taverna.scufl2.api.io.WorkflowBundleIO;
 import uk.org.taverna.scufl2.api.profiles.Profile;
 
 /**
@@ -190,6 +192,10 @@ public class RunServiceImpl implements RunService {
 
 	public void setEventAdmin(EventAdmin eventAdmin) {
 		this.eventAdmin = eventAdmin;
+	}
+
+	public void setWorkflowBundleIO(WorkflowBundleIO workflowBundleIO) {
+		DataBundles.setWfBundleIO(workflowBundleIO);
 	}
 
 	private class RunReportListener implements ReportListener {
