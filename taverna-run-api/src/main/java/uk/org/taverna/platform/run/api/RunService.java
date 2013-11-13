@@ -30,6 +30,8 @@ public interface RunService {
 	public static final String RUN_STOPPED = EVENT_TOPIC_ROOT + "RUN_STOPPED";
 	public static final String RUN_PAUSED = EVENT_TOPIC_ROOT + "RUN_PAUSED";
 	public static final String RUN_RESUMED = EVENT_TOPIC_ROOT + "RUN_RESUMED";
+	public static final String RUN_OPENED = EVENT_TOPIC_ROOT + "RUN_OPENED";
+	public static final String RUN_CLOSED = EVENT_TOPIC_ROOT + "RUN_CLOSED";
 
 	/**
 	 * Returns the available <code>ExecutionEnvironment</code>s.
@@ -114,7 +116,7 @@ public interface RunService {
 	 *             if the run ID is not valid
 	 * @throws InvalidExecutionIdException
 	 */
-	public void save(String runID) throws InvalidRunIdException, InvalidExecutionIdException;
+	public void save(String runID, File runFile) throws InvalidRunIdException, IOException;
 
 	/**
 	 * Deletes a run.
@@ -221,5 +223,7 @@ public interface RunService {
 	public Workflow getWorkflow(String runID) throws InvalidRunIdException;
 
 	public Profile getProfile(String runID) throws InvalidRunIdException;
+
+	public String getRunName(String runID) throws InvalidRunIdException;
 
 }

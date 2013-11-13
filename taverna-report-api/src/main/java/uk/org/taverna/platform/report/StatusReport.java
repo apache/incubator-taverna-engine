@@ -46,7 +46,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  *            the parent report type
  */
 
-@JsonPropertyOrder({ "subject", "parent", "state", "createdDate", "startedDate", "pausedDate", 
+@JsonPropertyOrder({ "subject", "parent", "state", "createdDate", "startedDate", "pausedDate",
     "pausedDates", "resumedDate", "resumedDates", "cancelledDate", "failedDate", "completedDate"})
 public class StatusReport<SUBJECT extends Ported, PARENT extends StatusReport<?, ?>> {
 
@@ -375,10 +375,9 @@ public class StatusReport<SUBJECT extends Ported, PARENT extends StatusReport<?,
     public Invocation getInvocation(String invocationName) {
         NavigableSet<Invocation> invocs = getInvocations();
         // A Comparable Invocation with the desired name
-        Invocation index = new Invocation(invocationName);
-        Invocation ceiling = invocs.ceiling(index);
-        if (ceiling != null && ceiling.getName().equals(invocationName)) {
-            return ceiling;            
+        SortedSet<Invocation> tailSet = invocs.tailSet(new Invocation(invocationName));
+        if (!tailSet.isEmpty()) {
+        	return tailSet.first();
         }
         return null;
     }

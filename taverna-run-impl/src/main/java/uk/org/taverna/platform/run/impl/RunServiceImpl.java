@@ -23,11 +23,14 @@ package uk.org.taverna.platform.run.impl;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -48,6 +51,7 @@ import uk.org.taverna.platform.run.api.RunService;
 import uk.org.taverna.platform.run.api.RunStateException;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.Workflow;
+import uk.org.taverna.scufl2.api.io.ReaderException;
 import uk.org.taverna.scufl2.api.io.WorkflowBundleIO;
 import uk.org.taverna.scufl2.api.profiles.Profile;
 
@@ -58,7 +62,7 @@ import uk.org.taverna.scufl2.api.profiles.Profile;
  */
 public class RunServiceImpl implements RunService {
 
-	private final List<String> runs;
+	private static SimpleDateFormat ISO_8601 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	private final Map<String, Run> runMap;
 
@@ -67,8 +71,7 @@ public class RunServiceImpl implements RunService {
 	private EventAdmin eventAdmin;
 
 	public RunServiceImpl() {
-		runs = new ArrayList<String>();
-		runMap = new HashMap<String, Run>();
+		runMap = new TreeMap<>();
 	}
 
 	@Override
@@ -88,7 +91,7 @@ public class RunServiceImpl implements RunService {
 
 	@Override
 	public List<String> getRuns() {
-		return runs;
+		return new ArrayList<>(runMap.keySet());
 	}
 
 	@Override
@@ -96,23 +99,39 @@ public class RunServiceImpl implements RunService {
 		Run run = new Run(runProfile);
 		run.getWorkflowReport().addReportListener(new RunReportListener(run.getID()));
 		runMap.put(run.getID(), run);
-		runs.add(run.getID());
+		postEvent(RUN_CREATED, run.getID());
 		return run.getID();
 	}
 
 	@Override
 	public String open(File runFile) throws IOException {
-		return null;
+		Bundle bundle = DataBundles.openBundle(runFile.toPath());
+		try {
+			String fileName = runFile.getName();
+			int dot = fileName.indexOf('.');
+			if (dot > 0) {
+				fileName = fileName.substring(0, dot);
+			}
+			Run run = new Run(fileName, bundle);
+			runMap.put(run.getID(), run);
+			postEvent(RUN_OPENED, run.getID());
+			return runFile.getName();
+		} catch (ReaderException | ParseException e) {
+			throw new IOException("Error opening file " + runFile, e);
+		}
 	}
 
 	@Override
 	public void close(String runID) throws InvalidRunIdException, InvalidExecutionIdException {
-
+		runMap.remove(runID);
+		postEvent(RUN_CLOSED, runID);
 	}
 
 	@Override
-	public void save(String runID) throws InvalidRunIdException, InvalidExecutionIdException {
-
+	public void save(String runID, File runFile) throws InvalidRunIdException, IOException {
+		Run run = getRun(runID);
+		Bundle dataBundle = run.getDataBundle();
+		DataBundles.closeAndSaveBundle(dataBundle, runFile.toPath());
 	}
 
 	@Override
@@ -169,6 +188,12 @@ public class RunServiceImpl implements RunService {
 	@Override
 	public Profile getProfile(String runID) throws InvalidRunIdException {
 		return getRun(runID).getProfile();
+	}
+
+	@Override
+	public String getRunName(String runID) throws InvalidRunIdException {
+		WorkflowReport workflowReport = getWorkflowReport(runID);
+		return workflowReport.getSubject().getName() + " " + ISO_8601.format(workflowReport.getCreatedDate());
 	}
 
 	private Run getRun(String runID) throws InvalidRunIdException {

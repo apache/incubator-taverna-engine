@@ -21,6 +21,7 @@
 package uk.org.taverna.platform.run.impl;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.Date;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -40,6 +41,7 @@ import uk.org.taverna.platform.run.api.RunProfileException;
 import uk.org.taverna.platform.run.api.RunStateException;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.Workflow;
+import uk.org.taverna.scufl2.api.io.ReaderException;
 import uk.org.taverna.scufl2.api.profiles.Profile;
 
 /**
@@ -146,6 +148,17 @@ public class Run {
 		}
 	}
 
+	public Run(String id, Bundle bundle) throws IOException, ReaderException, ParseException {
+		this.ID = id;
+		executionID = null;
+		executionEnvironment = null;
+		workflowReport = workflowReportJson.load(bundle);
+		workflowBundle = DataBundles.getWorkflowBundle(bundle);
+		dataBundle = bundle;
+		workflow = workflowBundle.getMainWorkflow();
+		profile = workflowBundle.getMainProfile();
+	}
+
 	/**
 	 * Returns the identifier for this <code>Run</code>.
 	 *
@@ -169,7 +182,7 @@ public class Run {
 	/**
 	 * Returns the <code>Bundle</code> containing the data values of the run.
 	 * <p>
-	 * 
+	 *
 	 * @return the <code>Bundle</code> containing the data values for the <code>Workflow</code>
 	 */
 	public Bundle getDataBundle() {
