@@ -22,6 +22,7 @@ package uk.org.taverna.platform.run.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -62,7 +63,7 @@ import uk.org.taverna.scufl2.api.profiles.Profile;
  */
 public class RunServiceImpl implements RunService {
 
-	private static SimpleDateFormat ISO_8601 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	private static SimpleDateFormat ISO_8601 = new SimpleDateFormat("yyyy-MM-dd_HHmmss");
 
 	private final Map<String, Run> runMap;
 
@@ -131,7 +132,11 @@ public class RunServiceImpl implements RunService {
 	public void save(String runID, File runFile) throws InvalidRunIdException, IOException {
 		Run run = getRun(runID);
 		Bundle dataBundle = run.getDataBundle();
-		DataBundles.closeAndSaveBundle(dataBundle, runFile.toPath());
+		try {
+			DataBundles.closeAndSaveBundle(dataBundle, runFile.toPath());
+		} catch (InvalidPathException e) {
+			throw new IOException(e);
+		}
 	}
 
 	@Override
@@ -193,7 +198,7 @@ public class RunServiceImpl implements RunService {
 	@Override
 	public String getRunName(String runID) throws InvalidRunIdException {
 		WorkflowReport workflowReport = getWorkflowReport(runID);
-		return workflowReport.getSubject().getName() + " " + ISO_8601.format(workflowReport.getCreatedDate());
+		return workflowReport.getSubject().getName() + "_" + ISO_8601.format(workflowReport.getCreatedDate());
 	}
 
 	private Run getRun(String runID) throws InvalidRunIdException {
