@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -62,6 +64,8 @@ import uk.org.taverna.scufl2.api.profiles.Profile;
  * @author David Withers
  */
 public class RunServiceImpl implements RunService {
+
+	private static final Logger logger = Logger.getLogger(RunServiceImpl.class.getName());
 
 	private static SimpleDateFormat ISO_8601 = new SimpleDateFormat("yyyy-MM-dd_HHmmss");
 
@@ -106,17 +110,19 @@ public class RunServiceImpl implements RunService {
 
 	@Override
 	public String open(File runFile) throws IOException {
-		Bundle bundle = DataBundles.openBundle(runFile.toPath());
 		try {
-			String fileName = runFile.getName();
-			int dot = fileName.indexOf('.');
+			String runID = runFile.getName();
+			int dot = runID.indexOf('.');
 			if (dot > 0) {
-				fileName = fileName.substring(0, dot);
+				runID = runID.substring(0, dot);
 			}
-			Run run = new Run(fileName, bundle);
-			runMap.put(run.getID(), run);
-			postEvent(RUN_OPENED, run.getID());
-			return runFile.getName();
+			if (!runMap.containsKey(runID)) {
+				Bundle bundle = DataBundles.openBundle(runFile.toPath());
+				Run run = new Run(runID, bundle);
+				runMap.put(run.getID(), run);
+			}
+			postEvent(RUN_OPENED, runID);
+			return runID;
 		} catch (ReaderException | ParseException e) {
 			throw new IOException("Error opening file " + runFile, e);
 		}
@@ -124,6 +130,13 @@ public class RunServiceImpl implements RunService {
 
 	@Override
 	public void close(String runID) throws InvalidRunIdException, InvalidExecutionIdException {
+		Run run = getRun(runID);
+		Bundle dataBundle = run.getDataBundle();
+		try {
+			DataBundles.closeBundle(dataBundle);
+		} catch (IOException e) {
+			logger.log(Level.WARNING, "Error closing data bundle for run " + runID, e);
+		}
 		runMap.remove(runID);
 		postEvent(RUN_CLOSED, runID);
 	}
@@ -141,7 +154,14 @@ public class RunServiceImpl implements RunService {
 
 	@Override
 	public void delete(String runID) throws InvalidRunIdException, InvalidExecutionIdException {
-		getRun(runID).delete();
+		Run run = getRun(runID);
+		run.delete();
+		Bundle dataBundle = run.getDataBundle();
+		try {
+			DataBundles.closeBundle(dataBundle);
+		} catch (IOException e) {
+			logger.log(Level.WARNING, "Error closing data bundle for run " + runID, e);
+		}
 		runMap.remove(runID);
 		postEvent(RUN_DELETED, runID);
 	}
