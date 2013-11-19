@@ -29,6 +29,7 @@ import net.sf.taverna.t2.reference.ReferenceSet;
 import net.sf.taverna.t2.reference.ReferenceSetService;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.reference.ValueCarryingExternalReference;
+import net.sf.taverna.t2.spi.SPIRegistry;
 import net.sf.taverna.t2.workbench.reference.config.DataManagementConfiguration;
 
 import org.apache.commons.beanutils.PropertyUtils;
@@ -38,6 +39,10 @@ import org.apache.log4j.Logger;
 import org.apache.tika.Tika;
 import org.apache.tika.mime.MimeTypeException;
 import org.apache.tika.mime.MimeTypes;
+import org.openrdf.rio.RDFParserFactory;
+import org.openrdf.rio.RDFParserRegistry;
+import org.openrdf.rio.RDFWriterFactory;
+import org.openrdf.rio.RDFWriterRegistry;
 import org.purl.wf4ever.robundle.Bundle;
 
 import uk.org.taverna.databundle.DataBundles;
@@ -56,10 +61,29 @@ public class Saver {
 		this.setContext(context);
 		this.setRunId(runId);
 		this.setChosenReferences(chosenReferences);
+		prepareSesame();
 	}
 
-	
-	private Map<Path, T2Reference> fileToId = new HashMap<>();
+	/**
+	 * Load 
+	 */
+	protected void prepareSesame() {
+	    RDFParserRegistry parserReg = RDFParserRegistry.getInstance();
+	    SPIRegistry<RDFParserFactory> parserSPI = new SPIRegistry<>(RDFParserFactory.class);
+	    for (RDFParserFactory service : parserSPI.getInstances()) {
+	        parserReg.add(service);
+	    }
+	    
+	    RDFWriterRegistry writerReg = RDFWriterRegistry.getInstance();
+        SPIRegistry<RDFWriterFactory> writerSPI = new SPIRegistry<>(RDFWriterFactory.class);
+        for (RDFWriterFactory service : writerSPI.getInstances()) {
+            writerReg.add(service);
+        }
+        
+    }
+
+
+    private Map<Path, T2Reference> fileToId = new HashMap<>();
 
 	private Map<Path, String> sha1sums = new HashMap<>();
 	private Map<Path, String> sha512sums = new HashMap<>();
