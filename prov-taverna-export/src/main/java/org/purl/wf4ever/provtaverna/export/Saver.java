@@ -51,85 +51,87 @@ public class Saver {
 
     private static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
 
-	private static Logger logger = Logger.getLogger(Saver.class);
-	
-	/**
-	 * @param saveProvAction
-	 */
-	public Saver(ReferenceService referenceService, InvocationContext context, String runId, Map<String, T2Reference> chosenReferences) {
-		this.setReferenceService(referenceService);
-		this.setContext(context);
-		this.setRunId(runId);
-		this.setChosenReferences(chosenReferences);
-		prepareSesame();
-	}
+    private static Logger logger = Logger.getLogger(Saver.class);
 
-	/**
-	 * Load 
-	 */
-	protected void prepareSesame() {
-	    RDFParserRegistry parserReg = RDFParserRegistry.getInstance();
-	    SPIRegistry<RDFParserFactory> parserSPI = new SPIRegistry<>(RDFParserFactory.class);
-	    for (RDFParserFactory service : parserSPI.getInstances()) {
-	        parserReg.add(service);
-	    }
-	    
-	    RDFWriterRegistry writerReg = RDFWriterRegistry.getInstance();
-        SPIRegistry<RDFWriterFactory> writerSPI = new SPIRegistry<>(RDFWriterFactory.class);
+    /**
+     * @param saveProvAction
+     */
+    public Saver(ReferenceService referenceService, InvocationContext context,
+            String runId, Map<String, T2Reference> chosenReferences) {
+        this.setReferenceService(referenceService);
+        this.setContext(context);
+        this.setRunId(runId);
+        this.setChosenReferences(chosenReferences);
+        prepareSesame();
+    }
+
+    /**
+     * Load
+     */
+    protected void prepareSesame() {
+        RDFParserRegistry parserReg = RDFParserRegistry.getInstance();
+        SPIRegistry<RDFParserFactory> parserSPI = new SPIRegistry<>(
+                RDFParserFactory.class);
+        for (RDFParserFactory service : parserSPI.getInstances()) {
+            parserReg.add(service);
+        }
+
+        RDFWriterRegistry writerReg = RDFWriterRegistry.getInstance();
+        SPIRegistry<RDFWriterFactory> writerSPI = new SPIRegistry<>(
+                RDFWriterFactory.class);
         for (RDFWriterFactory service : writerSPI.getInstances()) {
             writerReg.add(service);
         }
-        
-    }
 
+    }
 
     private Map<Path, T2Reference> fileToId = new HashMap<>();
 
-	private Map<Path, String> sha1sums = new HashMap<>();
-	private Map<Path, String> sha512sums = new HashMap<>();
-	
-	private ReferenceService referenceService;
+    private Map<Path, String> sha1sums = new HashMap<>();
+    private Map<Path, String> sha512sums = new HashMap<>();
 
-	private InvocationContext context;
+    private ReferenceService referenceService;
 
-	private String runId;
+    private InvocationContext context;
 
-	private Map<String, T2Reference> chosenReferences;
+    private String runId;
+
+    private Map<String, T2Reference> chosenReferences;
 
     private Bundle bundle;
 
     private Map<T2Reference, String> mediaTypes = new HashMap<>();
-	
-	/**
+
+    /**
      * @return the bundle
      */
     public Bundle getBundle() {
         return bundle;
     }
 
-	public void saveData(Path bundlePath) throws FileNotFoundException, IOException {
-	    Bundle bundle = DataBundles.createBundle();
-//		String folderName = bundlePath.getFileName().toString();
-//		if (folderName.endsWith(".")) {
-//            bundlePath = bundlePath.resolveSibling(folderName.substring(0,
-//                    folderName.length() - 1));
-//		}
-	    setBundle(bundle);
-		saveToFolder(bundle.getRoot(), getChosenReferences(), getReferenceService());
-		DataBundles.closeAndSaveBundle(bundle, bundlePath);
-	}
+    public void saveData(Path bundlePath) throws FileNotFoundException,
+            IOException {
+        Bundle bundle = DataBundles.createBundle();
+        // String folderName = bundlePath.getFileName().toString();
+        // if (folderName.endsWith(".")) {
+        // bundlePath = bundlePath.resolveSibling(folderName.substring(0,
+        // folderName.length() - 1));
+        // }
+        setBundle(bundle);
+        saveToFolder(bundle.getRoot(), getChosenReferences(),
+                getReferenceService());
+        DataBundles.closeAndSaveBundle(bundle, bundlePath);
+    }
 
-	private void setBundle(Bundle bundle) {
+    private void setBundle(Bundle bundle) {
         this.bundle = bundle;
     }
-	
-	
 
     protected static Tika tika = new Tika();
 
-	
-	public Path saveReference(T2Reference t2Ref, Path file) throws IOException {
-        ReferenceSetService refSet = getReferenceService().getReferenceSetService();
+    public Path saveReference(T2Reference t2Ref, Path file) throws IOException {
+        ReferenceSetService refSet = getReferenceService()
+                .getReferenceSetService();
         ReferenceSet referenceSet = refSet.getReferenceSet(t2Ref);
         List<ExternalReferenceSPI> externalReferences = new ArrayList<ExternalReferenceSPI>(
                 referenceSet.getExternalReferences());
@@ -142,7 +144,7 @@ public class Saver {
                     }
                 });
         String mimeType = findMimeType(externalReferences);
-        getMediaTypes().put(t2Ref, mimeType);        
+        getMediaTypes().put(t2Ref, mimeType);
 
         Path targetFile = writeIfLocal(externalReferences, file, mimeType);
         if (targetFile == null) {
@@ -151,15 +153,15 @@ public class Saver {
                 targetFile = DataBundles.setReference(file, uri);
             }
         }
-        
-        if (targetFile != null) {       
+
+        if (targetFile != null) {
             getFileToId().put(targetFile, t2Ref);
         } else {
             logger.warn("Could not write out reference " + t2Ref);
         }
-        
+
         return targetFile;
-        
+
     }
 
     private Path writeIfLocal(List<ExternalReferenceSPI> externalReferences,
@@ -173,16 +175,16 @@ public class Saver {
             }
         }
 
-        if (valRef == null) { 
+        if (valRef == null) {
             return null;
         }
-        
+
         String fileExtension;
         try {
-            fileExtension = MimeTypes.getDefaultMimeTypes()
-                    .forName(mimeType).getExtension();
+            fileExtension = MimeTypes.getDefaultMimeTypes().forName(mimeType)
+                    .getExtension();
         } catch (MimeTypeException e1) {
-           fileExtension = "";
+            fileExtension = "";
         }
         Path targetFile = file.resolveSibling(file.getFileName()
                 + fileExtension);
@@ -226,8 +228,8 @@ public class Saver {
                 try {
                     return url.toURI();
                 } catch (URISyntaxException e) {
-                    logger.warn("Can't convert HttpReference to URI: "+ url, e);
-                   continue;
+                    logger.warn("Can't convert HttpReference to URI: " + url, e);
+                    continue;
                 }
             } else if (className
                     .equals("net.sf.taverna.t2.reference.impl.external.file.FileReference")) {
@@ -241,7 +243,8 @@ public class Saver {
                 try {
                     return new URI("sftp", null, host, port, path, null, null);
                 } catch (URISyntaxException e) {
-                    logger.warn("Can't convert SshReference to URI: sftp://"+ host + ":" + port + path, e);
+                    logger.warn("Can't convert SshReference to URI: sftp://"
+                            + host + ":" + port + path, e);
                     continue;
                 }
             }
@@ -269,18 +272,18 @@ public class Saver {
                 mimeType = tika.detect(url);
             } else if (className
                     .equals("net.sf.taverna.t2.reference.impl.external.file.FileReference")) {
-                File file = (File) getProperty(
-                        externalReference, "file");
+                File file = (File) getProperty(externalReference, "file");
                 mimeType = tika.detect(file);
             } else if (className
                     .equals("de.uni_luebeck.inb.knowarc.usecases.invocation.ssh.SshReference")) {
-                String filename = (String) getProperty(
-                        externalReference, "fileName");
+                String filename = (String) getProperty(externalReference,
+                        "fileName");
                 try (InputStream instream = externalReference
                         .openStream(context)) {
                     mimeType = tika.detect(instream, filename);
                 }
-            } else if (className.equals("net.sf.taverna.t2.reference.impl.external.object.VMObjectReference")) {
+            } else if (className
+                    .equals("net.sf.taverna.t2.reference.impl.external.object.VMObjectReference")) {
                 mimeType = "application/x-java-serialized-object";
             } else {
                 try (InputStream instream = externalReference
@@ -297,84 +300,86 @@ public class Saver {
         }
         return mimeType;
     }
-    
-    protected void saveToFolder(Path folder, Map<String, T2Reference> chosenReferences, ReferenceService referenceService) throws IOException,
-			FileNotFoundException {
-		logger.info("Saving provenance and outputs to " + folder.toRealPath());
-		Files.createDirectories(folder);
-		String connectorType = DataManagementConfiguration.getInstance()
-				.getConnectorType();
-		ProvenanceAccess provenanceAccess = new ProvenanceAccess(connectorType,
-				getContext());
-		W3ProvenanceExport export = new W3ProvenanceExport(provenanceAccess,
-				getRunId(), this);
-		export.setFileToT2Reference(getFileToId());
-		export.setBundle(bundle);
-		
-		try {
-		    logger.debug("Saving provenance");
-			export.exportAsW3Prov();
-			logger.info("Saved provenance");
-		} catch (Exception e) {
-			logger.error("Failed to save the provenance graph", e);
- 		}
-	}
 
-	private String hexOfDigest(MessageDigest sha) {
-		return new String(Hex.encodeHex(sha.digest()));
-	}
+    protected void saveToFolder(Path folder,
+            Map<String, T2Reference> chosenReferences,
+            ReferenceService referenceService) throws IOException,
+            FileNotFoundException {
+        logger.info("Saving provenance and outputs to " + folder.toRealPath());
+        Files.createDirectories(folder);
+        String connectorType = DataManagementConfiguration.getInstance()
+                .getConnectorType();
+        ProvenanceAccess provenanceAccess = new ProvenanceAccess(connectorType,
+                getContext());
+        W3ProvenanceExport export = new W3ProvenanceExport(provenanceAccess,
+                getRunId(), this);
+        export.setFileToT2Reference(getFileToId());
+        export.setBundle(bundle);
 
-	public ReferenceService getReferenceService() {
-		return referenceService;
-	}
+        try {
+            logger.debug("Saving provenance");
+            export.exportAsW3Prov();
+            logger.info("Saved provenance");
+        } catch (Exception e) {
+            logger.error("Failed to save the provenance graph", e);
+        }
+    }
 
-	public void setReferenceService(ReferenceService referenceService) {
-		this.referenceService = referenceService;
-	}
+    private String hexOfDigest(MessageDigest sha) {
+        return new String(Hex.encodeHex(sha.digest()));
+    }
 
-	public InvocationContext getContext() {
-		return context;
-	}
+    public ReferenceService getReferenceService() {
+        return referenceService;
+    }
 
-	public void setContext(InvocationContext context) {
-		this.context = context;
-	}
+    public void setReferenceService(ReferenceService referenceService) {
+        this.referenceService = referenceService;
+    }
 
-	public String getRunId() {
-		return runId;
-	}
+    public InvocationContext getContext() {
+        return context;
+    }
 
-	public void setRunId(String runId) {
-		this.runId = runId;
-	}
+    public void setContext(InvocationContext context) {
+        this.context = context;
+    }
 
-	public Map<String, T2Reference> getChosenReferences() {
-		return chosenReferences;
-	}
+    public String getRunId() {
+        return runId;
+    }
 
-	public void setChosenReferences(Map<String, T2Reference> chosenReferences) {
-		this.chosenReferences = chosenReferences;
-	}
+    public void setRunId(String runId) {
+        this.runId = runId;
+    }
 
-	public Map<Path, T2Reference> getFileToId() {
-		return fileToId;
-	}
+    public Map<String, T2Reference> getChosenReferences() {
+        return chosenReferences;
+    }
 
-	public void setFileToId(Map<Path, T2Reference> fileToId) {
-		this.fileToId = fileToId;
-	}
+    public void setChosenReferences(Map<String, T2Reference> chosenReferences) {
+        this.chosenReferences = chosenReferences;
+    }
 
-	public Map<Path, String> getSha1sums() {
-		return sha1sums;
-	}
-	
-	public Map<T2Reference, String> getMediaTypes() {
-	    return mediaTypes;
-	}
+    public Map<Path, T2Reference> getFileToId() {
+        return fileToId;
+    }
 
-	public Map<Path, String> getSha512sums() {
-		return sha512sums;
-	}
+    public void setFileToId(Map<Path, T2Reference> fileToId) {
+        this.fileToId = fileToId;
+    }
+
+    public Map<Path, String> getSha1sums() {
+        return sha1sums;
+    }
+
+    public Map<T2Reference, String> getMediaTypes() {
+        return mediaTypes;
+    }
+
+    public Map<Path, String> getSha512sums() {
+        return sha512sums;
+    }
 
     public void setMediaTypes(Map<T2Reference, String> mediaTypes) {
         this.mediaTypes = mediaTypes;
