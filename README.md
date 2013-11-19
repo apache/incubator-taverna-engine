@@ -30,27 +30,27 @@ To install:
 
 2.  In the menu, click **Advanced** -> **Updates and plugins**
 
-3.  If Taverna does not say "An update is available" , click **Find
-    updates**
+3.  If Taverna does not say "An update is available" , click 
+    **Find updates**
 
 4.  To install the required 2.4.1 patches, click **Update** for each of:
-    * _External tool service_
-    * _Service catalogue_
-    * _Services_
-    * _Workbench_
+    * _External tool service_ (2.4.1-20120529)
+    * _Provenance_ (2.4.1-20131119)
+    * _Service catalogue_ (2.4.1-20120529)
+    * _Services_ (2.4.1-20120529)
+    * _Workbench_ (2.4.1-20120529)
 
     Note: Click **OK** in the warning message about restart; you do not need
-    to restart Taverna for each of these as we'll do that in the end
+    to restart Taverna for each of these as we'll do that in the end.
 
-5.  Click **Find new plugins**, then **Add update site** and fill in:
-    * Site name: Taverna PROV
-    * Site URL: `http://wf4ever.github.com/taverna-prov/`
+5.  Click **Find new plugins**
 
-6.  Click **OK**
+6.  Under _Prototype plugins_, tick to select **Taverna-PROV databundle**
 
-7.  Under _Taverna PROV_, tick to select _Taverna PROV plugin 1.x_
+7.  Click **Install**
 
-8.  Click **Install**
+8.  A progress bar appears while the modules of the plugin are
+    downloaded
 
 9.  Click **Close**
 
@@ -75,25 +75,24 @@ try the very simple
 from [myExperiment](http://www.myexperiment.org/workflows/2649)
 (included in the `example/` folder of this source code).
 
-Exporting PROV from Taverna is done similar to the [export of OPM and
-Janus provenance](http://dev.mygrid.org.uk/wiki/display/taverna24/Provenance+export+to+OPM+and+Janus).
-
-The difference is that you need to click **Save provenance (PROV)**, and
-in the file dialogue give the name of what will become
-a _folder_, rather than a single file.
-
-In short:
+To save a Taverna-PROV databundle containing the workflow run
+provenance:
 
 1.  Click **Results** perspective
-2.  Select a run on the left
+2.  Run a workflow, or select an existing run on the left
 3.  Click **Show workflow results** button (in case you are viewing intermediates)
 4.  Click **Save all values**
 5.  Ensure all ports are ticked
-6.  Click **Save Provenance (PROV)**
-7.  Browse and type the name of a folder for the results (which will be created)
+6.  Click **Save Provenance bundle**
+7.  Browse and type the name of the bundle
 8.  Click **OK**
-9.  The provenance and results values should have been saved to the
-    requested folder.
+9.  The provenance and results values is saved to the bundle with the
+    extension `.bundle.zip`
+10. Provide the data bundle to a service that can understand it, such
+    as http://alpha2.myexperiment.org/ or http://sandbox.wf4ever-project.org/portal
+11. You may also open the bundle in your operating system as it is 
+    a ZIP file which contains workflow inputs, outputs, provenance and a
+    copy of the workflow.
 
 
 Installation for Taverna Command line tool
@@ -139,12 +138,12 @@ command line tool has a separate home directory from the workbench)
     <plugin>
         <provider>org.purl.wf4ever</provider>
         <identifier>org.purl.wf4ever.provtaverna.prov-taverna-plugin</identifier>
-        <version>1.5</version>
-        <name>Taverna PROV plugin</name>
+        <version>2.01.05</version>
+        <name>Taverna-PROV databundle</name>
         <description/>
         <enabled>true</enabled>
         <repositories>
-            <repository>http://wf4ever.github.com/taverna-prov/</repository>
+            <repository>http://www.mygrid.org.uk/maven/repository</repository>
             <repository>http://repo.aduna-software.org/maven2/releases/</repository>
             <repository>http://uk.maven.org/maven2/</repository>
         </repositories>
@@ -152,7 +151,7 @@ command line tool has a separate home directory from the workbench)
             <dependency>
                 <groupId>org.purl.wf4ever.provtaverna</groupId>
                 <artifactId>prov-taverna-cmdline</artifactId>
-                <version>1.5</version>
+                <version>2.1.5</version>
             </dependency>
         </profile>
         <compatibility>
@@ -163,7 +162,7 @@ command line tool has a separate home directory from the workbench)
     </plugin>
     ```
 
-    You should replace `<version>1.5</version>` with whatever is the
+    You should replace `<version>2.1.5</version>` with whatever is the
     latest version [listed on the taverna-prov plugin site](http://wf4ever.github.com/taverna-prov/pluginlist.xml).
 
 4.  Start the command line tool without parameters to force downloading
@@ -246,8 +245,9 @@ tool](http://dev.mygrid.org.uk/wiki/display/taverna/Command+Line+Tool).
 
 The Taverna-PROV command line does not support all the output options of
 the regular Taverna command line, output has to be saved using
-`-outputdir`, as the PROV export refers to files in the output
-directory.
+`-outputdir`. The databundle will be saved in a filename which
+corresponds to the output directory, but with the extension
+`.bundle.zip`.
 
 To enable PROV export for the workflow run, add the parameter
 `-provenance`, which requires the parameter `-embedded` or
@@ -276,14 +276,29 @@ greeting  workflowrun.prov.ttl
 Structure of exported provenance
 --------------------------------
 
-The folder selected will contain each of the selected input and output
-ports. Ports with multiple values are stored as a folder with numbered
-outputs, starting from `0`. Values representing errors have extension `.err`.
+The `.bundle.zip` file is a [RO bundle](https://w3id.org/bundle),
+which species a structured ZIP file with a manifest. You can explore
+the bundle by unpacking it or browse it with a program like 
+[7-Zip](http://7-zip.org/).
+
+The file `workflow.wfbundle` is a copy of the executed workflow in 
+[SCUFL2 workflow
+bundle](http://dev.mygrid.org.uk/wiki/display/developer/Taverna+Workflow+Bundle)
+format. It is itself a ZIP file, but is not intended to be explored by
+users.
+
+The folders {{inputs/ and {{outputs/}} contain files and folders
+corresponding to the input and output values of the executed
+workflow.  Ports with multiple values are stored as a folder with numbered
+outputs, starting from `0`. Values representing errors have extension
+`.err`, other values have an extension guessed by inspecting the value
+structure.
 
 In you will find the file `workflowrun.prov.ttl` which contains the PROV-O export of the
 workflow run (including nested workflows) in [RDF Turtle format](http://www.w3.org/TR/turtle/).
 
-Intermediate values are stored in the `intermediates/` folder.
+Intermediate values are stored in the `intermediates/` folder and
+referenced from `workflowrun.prov.ttl`
 
 Example listing:
 
