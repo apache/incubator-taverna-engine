@@ -60,7 +60,7 @@
         <dependency>
             <groupId>org.purl.wf4ever</groupId>
             <artifactId>scufl2-wfdesc</artifactId>
-            <version>0.3.0</version>
+            <version>${scufl2.wfdesc.version}</version>
         </dependency>
 
         <dependency>

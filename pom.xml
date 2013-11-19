@@ -25,8 +25,9 @@
 		<t2.workbench.version>2.4.0</t2.workbench.version>
 		<t2.results.version>1.4</t2.results.version>
 		<t2.taverna-commandline.version>1.4</t2.taverna-commandline.version>
-        <scufl2.version>0.12.1</scufl2.version>
-        <databundle.version>0.1.1</databundle.version>
+        <scufl2.version>0.13.1</scufl2.version>
+        <scufl2.wfdesc.version>0.3.3</scufl2.wfdesc.version>
+        <databundle.version>0.2.0</databundle.version>
 	</properties>
 
 	<build>
