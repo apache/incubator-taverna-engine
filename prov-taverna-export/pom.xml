@@ -10,20 +10,9 @@
     <name>Taverna PROV export</name>
     <dependencies>
         <dependency>
-            <!--  Workaround for T2-2104 -->
-            <groupId>net.sf.taverna.t2.core</groupId>
-            <artifactId>provenance-derby</artifactId>
-            <version>1.4.1</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>prov-taverna-owl-bindings</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.sf.taverna.t2.core</groupId>
-            <artifactId>provenanceconnector</artifactId>
-            <version>${t2.core.version}</version>
+            <groupId>net.sf.taverna.t2.ui-impl</groupId>
+            <artifactId>data-management-config</artifactId>
+            <version>${t2.ui.impl.version}</version>
         </dependency>
 
         <dependency>
@@ -38,9 +27,16 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>net.sf.taverna.t2.ui-impl</groupId>
-            <artifactId>data-management-config</artifactId>
-            <version>${t2.ui.impl.version}</version>
+            <groupId>net.sf.taverna.t2.core</groupId>
+            <artifactId>provenanceconnector</artifactId>
+            <version>${t2.core.version}</version>
+        </dependency>
+        
+        <dependency>
+            <!--  Workaround for T2-2104 -->
+            <groupId>net.sf.taverna.t2.core</groupId>
+            <artifactId>provenance-derby</artifactId>
+            <version>1.4.1</version>
         </dependency>
         <dependency>
             <groupId>uk.org.taverna.scufl2</groupId>
@@ -67,6 +63,11 @@
             <groupId>uk.org.taverna.databundle</groupId>
             <artifactId>databundle</artifactId>
             <version>${databundle.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>prov-taverna-owl-bindings</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.tika</groupId>

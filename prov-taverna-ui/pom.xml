@@ -113,11 +113,6 @@
 		
 		
 		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>prov-taverna-export</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>net.sf.taverna.t2.ui-api</groupId>
 			<artifactId>menu-api</artifactId>
 			<version>${t2.ui.api.version}</version>
@@ -147,12 +142,16 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>prov-taverna-export</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>1.4</version>
-			<type>jar</type>
-			<scope>compile</scope>
 		</dependency>
 	</dependencies>
 </project>
