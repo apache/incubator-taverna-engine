@@ -22,6 +22,7 @@ package uk.org.taverna.platform.run.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.ClosedFileSystemException;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.text.ParseException;
@@ -131,10 +132,10 @@ public class RunServiceImpl implements RunService {
 	@Override
 	public void close(String runID) throws InvalidRunIdException, InvalidExecutionIdException {
 		Run run = getRun(runID);
-		Bundle dataBundle = run.getDataBundle();
 		try {
+			Bundle dataBundle = run.getDataBundle();
 			DataBundles.closeBundle(dataBundle);
-		} catch (IOException e) {
+		} catch (IOException | ClosedFileSystemException e) {
 			logger.log(Level.WARNING, "Error closing data bundle for run " + runID, e);
 		}
 		runMap.remove(runID);
