@@ -277,16 +277,22 @@ Structure of exported provenance
 --------------------------------
 
 The `.bundle.zip` file is a [RO bundle](https://w3id.org/bundle),
-which species a structured ZIP file with a manifest. You can explore
-the bundle by unpacking it or browse it with a program like
-[7-Zip](http://7-zip.org/). 
+which species a structured ZIP file with a manifest
+(`.ro/manifest.json`). You can explore the bundle by unzipping it or
+browse it with a program like [7-Zip](http://7-zip.org/). 
+
+This source includes an [example
+bundle](example/helloanyone.bundle.zip) and [unzipped
+bundle](example/helloanyone.bundle/) as a folder. This data bundle
+has been saved after running
+a simple [hello world workflow](example/helloanyone.t2flow).
 
 The remaining text of this section describes the content of the RO
 bundle, as if it was unpacked to a folder. Note that many programming
 frameworks include support for working with ZIP files, and so complete
 unpacking might not be necessary for your application. For Java, the
 [Data bundle API](https://github.com/myGrid/databundle) gives a
-programmating way to inspect and generate data bundles and their content.
+programmating way to inspect and generate data bundles.
 
 The file `workflow.wfbundle` is a copy of the executed workflow in 
 [SCUFL2 workflow
@@ -299,7 +305,9 @@ corresponding to the input and output values of the executed
 workflow.  Ports with multiple values are stored as a folder with numbered
 outputs, starting from `0`. Values representing errors have extension
 `.err`, other values have an extension guessed by inspecting the value
-structure, e.g. `.png`.
+structure, e.g. `.png`. External references have the extension `.url` -
+these files can often be opened as "Internet shortcut" or similar,
+depending on your operating system.
 
 Example listing:
 
@@ -312,26 +320,14 @@ Example listing:
     c:\Users\stain\workspace\taverna-prov\example\helloanyone.bundle>cat outputs/greeting.txt
     Hello, John Doe
 
-You will also find the file `workflowrun.prov.ttl` which contains the
+The file `workflowrun.prov.ttl` contains the
 [PROV-O](http://www.w3.org/TR/prov-o/) export of the workflow run
 (including nested workflows) in [RDF Turtle
 format](http://www.w3.org/TR/turtle/). 
 
 Example listing:
 
-    c:\Users\stain\workspace\taverna-prov\example\helloanyone.bundle>head workflowrun.prov.ttl -n 40 | tail -n 20
-    <http://ns.taverna.org.uk/2011/software/taverna-2.4.0>
-            rdfs:label  "Taverna Workbench 2.4.0"@en ;
-            rdf:type    prov:Plan .
-
-    _:b0    prov:atTime  "2013-11-22T14:00:22.804Z"^^xsd:dateTime ;
-            rdf:type     prov:End .
-
-    <http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/processor/Concatenate_two_strings/in/string2>
-            rdfs:comment  "Concatenate_two_strings input string2"@en ;
-            rdfs:label    "string2" ;
-            rdf:type      wfdesc:Input ;
-            rdf:type      prov:Role .
+    c:\Users\stain\workspace\taverna-prov\example\helloanyone.bundle>cat workflowrun.prov.ttl | head -n 40 | tail -n 8
 
     <#taverna-prov-export>
             rdf:type                     prov:Activity ;
@@ -340,6 +336,9 @@ Example listing:
             prov:endedAtTime             "2013-11-22T14:01:03.223Z"^^xsd:dateTime ;
             rdfs:label                   "taverna-prov export of workflow run provenance"@en ;
             prov:wasInformedBy           <http://ns.taverna.org.uk/2011/run/385c794c-ba11-4007-a5b5-502ba8d14263/> ;
+
+See the [provenance graph](example/helloanyone.bundle/workflowrun.prov.ttl) for a complete example. The provenance uses the vocabularies [PROV-O](http://www.w3.org/TR/prov-o/), [wfprov](http://purl.org/wf4ever/model#wfprov) and [tavernaprov](http://ns.taverna.org.uk/2012/tavernaprov/)
+
 
 Intermediate values are stored in the `intermediates/` folder and
 referenced from `workflowrun.prov.ttl`
@@ -359,7 +358,7 @@ The file `workflow.wfbundle` contains the executed workflow in [Taverna
 The file `.ro/annotations/workflow.wfdesc.ttl` contains the abstract
 structure (but not all the implementation details) of the executed
 workflow, in [RDF Turtle](http://www.w3.org/TR/turtle/)
-according to the [wfdesc ontology](http://wf4ever.github.io/ro/#wfdesc):
+according to the [wfdesc ontology](http://wf4ever.github.io/ro/#wfdesc).
 
     c:\Users\stain\workspace\taverna-prov\example\helloanyone.bundle>cat .ro/annotations/workflow.wfdesc.ttl | head -n 20
     @base <http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/> .
@@ -384,14 +383,11 @@ according to the [wfdesc ontology](http://wf4ever.github.io/ro/#wfdesc):
             wf4ever:script "output = string1 + string2;" .
 
 
-This source includes an [example
-bundle](example/helloanyone.bundle.zip), the [unzipped
-bundle](example/helloanyone.bundle/) as a folder and its [provenance
-graph](example/helloanyone.bundle/workflowrun.prov.ttl) from running
-a simple [hello world workflow](example/helloanyone.t2flow).
-
 Querying
 --------
+
+*WARNING*: This example has not been updated for Taverna-PROV 2.1; your
+output might vary.
 
 Example [SPARQL query](http://www.w3.org/TR/sparql11-query/) from [test.sparql](example/test.sparql):
 
