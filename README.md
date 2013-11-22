@@ -3,7 +3,7 @@ Taverna PROV support
 
 This is a plugin for the [Taverna](http://www.taverna.org.uk/) Workbench
 and Taverna Command Line which allows export of the provenance of a
-workflow run according to the proposed [PROV-O
+workflow run according to the [W3C PROV-O
 standard](http://www.w3.org/TR/prov-o/).
 
 
