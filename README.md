@@ -1,5 +1,4 @@
-Taverna PROV support
-====================
+# Taverna PROV support
 
 This is a plugin for the [Taverna](http://www.taverna.org.uk/) Workbench
 and Taverna Command Line which allows export of the provenance of a
@@ -7,15 +6,13 @@ workflow run according to the [W3C PROV-O
 standard](http://www.w3.org/TR/prov-o/).
 
 
-Source code and license
------------------------
+## Source code and license
 This plugin is distributed under the [GNU Lesser General Public License
 2.1](http://www.gnu.org/licenses/lgpl-2.1.html) (LGPL). The source code
 for this plugin is available at https://github.com/wf4ever/taverna-prov
 
 
-Installation for Taverna workbench
-----------------------------------
+## Installation for Taverna workbench
 Installation of an released version of this plugin does not require
 compilation, but uses Taverna's plugin mechanism.
 
@@ -57,8 +54,8 @@ To install:
 10. Exit and Restart Taverna workbench
 
 
-Usage in workbench
-------------------
+## Usage in workbench
+
 In order for PROV export to be possible from the Taverna Workbench,
 click **Preferences** from the **File** or **Taverna** menu, then go to the 
 [Preferences for Data and Provenance](http://dev.mygrid.org.uk/wiki/display24/taverna/Data+and+provenance+preferences).
@@ -95,8 +92,8 @@ provenance:
     copy of the workflow.
 
 
-Installation for Taverna Command line tool
-------------------------------------------
+## Installation for Taverna Command line tool
+
 Installation for the [Taverna command line tool](http://www.taverna.org.uk/download/command-line-tool/2-4/)
 is slightly manual as it has no GUI for installing plugins.
 
@@ -237,8 +234,8 @@ command line tool has a separate home directory from the workbench)
     need to wait for the initial download of the plugin libraries.
 
 
-Usage on command line
----------------------
+### Usage on command line
+
 The Taverna documentation has general information about [how to use the
 Taverna Command line
 tool](http://dev.mygrid.org.uk/wiki/display/taverna/Command+Line+Tool).
@@ -273,8 +270,7 @@ greeting  workflowrun.prov.ttl
 ```
 
 
-Structure of exported provenance
---------------------------------
+## Structure of exported provenance
 
 The `.bundle.zip` file is a [RO bundle](https://w3id.org/bundle),
 which species a structured ZIP file with a manifest
@@ -294,11 +290,8 @@ unpacking might not be necessary for your application. For Java, the
 [Data bundle API](https://github.com/myGrid/databundle) gives a
 programmating way to inspect and generate data bundles.
 
-The file `workflow.wfbundle` is a copy of the executed workflow in 
-[SCUFL2 workflow
-bundle](http://dev.mygrid.org.uk/wiki/display/developer/Taverna+Workflow+Bundle)
-format. It is itself a ZIP file, but is not intended to be explored by
-users.
+
+### Inputs and outputs
 
 The folders `inputs/` and `outputs/` contain files and folders
 corresponding to the input and output values of the executed
@@ -320,10 +313,15 @@ Example listing:
     c:\Users\stain\workspace\taverna-prov\example\helloanyone.bundle>cat outputs/greeting.txt
     Hello, John Doe
 
+### Workflow run provenance
+
 The file `workflowrun.prov.ttl` contains the
 [PROV-O](http://www.w3.org/TR/prov-o/) export of the workflow run
-(including nested workflows) in [RDF Turtle
+provenance (including nested workflows) in [RDF Turtle
 format](http://www.w3.org/TR/turtle/). 
+
+This log details every intermediate processor invocation in the workflow
+execution, and relates them to inputs, outputs and intermediate values.
 
 Example listing:
 
@@ -337,7 +335,9 @@ Example listing:
             rdfs:label                   "taverna-prov export of workflow run provenance"@en ;
             prov:wasInformedBy           <http://ns.taverna.org.uk/2011/run/385c794c-ba11-4007-a5b5-502ba8d14263/> ;
 
-See the [provenance graph](example/helloanyone.bundle/workflowrun.prov.ttl) for a complete example. The provenance uses the vocabularies [PROV-O](http://www.w3.org/TR/prov-o/), [wfprov](http://purl.org/wf4ever/model#wfprov) and [tavernaprov](http://ns.taverna.org.uk/2012/tavernaprov/)
+See the [provenance graph](example/helloanyone.bundle/workflowrun.prov.ttl) for a complete example. The provenance uses the vocabularies [PROV-O](http://www.w3.org/TR/prov-o/), [wfprov](http://purl.org/wf4ever/model#wfprov) and [tavernaprov](http://ns.taverna.org.uk/2012/tavernaprov/).
+
+#### Intermediate values
 
 
 Intermediate values are stored in the `intermediates/` folder and
@@ -351,9 +351,16 @@ Example listing:
     c:\Users\stain\workspace\taverna-prov\example\helloanyone.bundle>cat intermediates/d5/d58*
     Hello,
 
+### Workflow definition
 
+The file `workflow.wfbundle` is a copy of the executed workflow in 
+[SCUFL2 workflow
+bundle](http://dev.mygrid.org.uk/wiki/display/developer/Taverna+Workflow+Bundle)
+format. This is the format which will be used by 
 The file `workflow.wfbundle` contains the executed workflow in [Taverna
-3](http://www.taverna.org.uk/developers/work-in-progress/taverna-3/)'s [SCUFL2 workflow bundle](http://dev.mygrid.org.uk/wiki/display/developer/Taverna+Workflow+Bundle) format. You can use the [SCUFL2 API](http://dev.mygrid.org.uk/wiki/display/developer/SCUFL2+API) to inspect the workflow definition in detail.
+3](http://www.taverna.org.uk/developers/work-in-progress/taverna-3/). 
+
+You can use the [SCUFL2 API](http://dev.mygrid.org.uk/wiki/display/developer/SCUFL2+API) to inspect the workflow definition in detail.
 
 The file `.ro/annotations/workflow.wfdesc.ttl` contains the abstract
 structure (but not all the implementation details) of the executed
@@ -383,8 +390,7 @@ according to the [wfdesc ontology](http://wf4ever.github.io/ro/#wfdesc).
             wf4ever:script "output = string1 + string2;" .
 
 
-Querying
---------
+## Querying provenance
 
 *WARNING*: This example has not been updated for Taverna-PROV 2.1; your
 output might vary.
@@ -428,8 +434,7 @@ This shows how both name.txt and intermediates/de/def...txt are the
 origins of greeting.txt.
 
 
-Troubleshooting
----------------
+## Troubleshooting
 
 If the *Save Provenance (PROV)* button is not listed, then the plugin
 was most likely not installed correctly. 
@@ -453,8 +458,7 @@ Check that:
 
 
 
-Building
---------
+## Building
 Note - you do not normally need to build from source code, installation
 from the above plugin site is the preferred way to install this plugin.
 
