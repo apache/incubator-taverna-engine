@@ -343,6 +343,16 @@ See the [provenance graph](example/helloanyone.bundle/workflowrun.prov.ttl) for 
 Intermediate values are stored in the `intermediates/` folder and
 referenced from `workflowrun.prov.ttl`
 
+Intermediate value from the [example provenance](example/helloanyone.bundle/workflowrun.prov.ttl):
+
+    <http://ns.taverna.org.uk/2011/data/385c794c-ba11-4007-a5b5-502ba8d14263/ref/d588f6ab-122e-4788-ab12-8b6b66a67354>
+            tavernaprov:content          <intermediates/d5/d588f6ab-122e-4788-ab12-8b6b66a67354.txt> ;
+            wfprov:describedByParameter  <http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/processor/Concatenate_two_strings/in/string1> ;
+            wfprov:describedByParameter  <http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/processor/hello/out/value> ;
+            wfprov:wasOutputFrom         <http://ns.taverna.org.uk/2011/run/385c794c-ba11-4007-a5b5-502ba8d14263/process/bbaedc02-896f-491e-88bc-8dd350fcc73b/> .
+
+Here we see that the bundle file `intermediates/d5/d588f6ab-122e-4788-ab12-8b6b66a67354.txt` contains the output from the "hello" processor, which was also the input to the "Concatenate_two_strings" processor.  Details about processor, ports and parameters can be found in the [workflow definition](#Workflow-definition).
+
 Example listing:
 
     c:\Users\stain\workspace\taverna-prov\example\helloanyone.bundle>ls intermediates/d5
@@ -350,6 +360,18 @@ Example listing:
     
     c:\Users\stain\workspace\taverna-prov\example\helloanyone.bundle>cat intermediates/d5/d58*
     Hello,
+
+Note that "small" textual values are also included as `cnt:chars` in the graph, while the referenced intermediate file within the workflow bundle is always present.
+
+    <intermediates/d5/d588f6ab-122e-4788-ab12-8b6b66a67354.txt>
+            rdf:type               cnt:ContentAsText ;
+            cnt:characterEncoding  "UTF-8"^^xsd:string ;
+            cnt:chars              "Hello, "^^xsd:string ;
+            tavernaprov:byteCount  "7"^^xsd:long ;
+            tavernaprov:sha512     "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e"^^xsd:string ;
+            tavernaprov:sha1       "f52ab57fa51dfa714505294444463ae5a009ae34"^^xsd:string ;
+            rdf:type               tavernaprov:Content .
+    
 
 ### Workflow definition
 
