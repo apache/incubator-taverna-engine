@@ -294,8 +294,9 @@ outputs, starting from `0`. Values representing errors have extension
 `.err`, other values have an extension guessed by inspecting the value
 structure.
 
-In you will find the file `workflowrun.prov.ttl` which contains the PROV-O export of the
-workflow run (including nested workflows) in [RDF Turtle format](http://www.w3.org/TR/turtle/).
+In you will find the file `workflowrun.prov.ttl` which contains the
+PROV-O export of the workflow run (including nested workflows) in [RDF
+Turtle format](http://www.w3.org/TR/turtle/).
 
 Intermediate values are stored in the `intermediates/` folder and
 referenced from `workflowrun.prov.ttl`
@@ -402,12 +403,6 @@ Check that:
 * Reinstall Taverna
 * Contact myGrid for support <support@mygrid.org.uk>
 
-
-
-TODO
-----
-* Include workflow definition as t2flow and wfdesc
-* Save as RO bundle (single ZIP file)
 
 
 Building
