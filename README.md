@@ -278,8 +278,15 @@ Structure of exported provenance
 
 The `.bundle.zip` file is a [RO bundle](https://w3id.org/bundle),
 which species a structured ZIP file with a manifest. You can explore
-the bundle by unpacking it or browse it with a program like 
-[7-Zip](http://7-zip.org/).
+the bundle by unpacking it or browse it with a program like
+[7-Zip](http://7-zip.org/). 
+
+The remaining text of this section describes the content of the RO
+bundle, as if it was unpacked to a folder. Note that many programming
+frameworks include support for working with ZIP files, and so complete
+unpacking might not be necessary for your application. For Java, the
+[Data bundle API](https://github.com/myGrid/databundle) gives a
+programmating way to inspect and generate data bundles and their content.
 
 The file `workflow.wfbundle` is a copy of the executed workflow in 
 [SCUFL2 workflow
@@ -287,55 +294,100 @@ bundle](http://dev.mygrid.org.uk/wiki/display/developer/Taverna+Workflow+Bundle)
 format. It is itself a ZIP file, but is not intended to be explored by
 users.
 
-The folders {{inputs/ and {{outputs/}} contain files and folders
+The folders `inputs/` and `outputs/` contain files and folders
 corresponding to the input and output values of the executed
 workflow.  Ports with multiple values are stored as a folder with numbered
 outputs, starting from `0`. Values representing errors have extension
 `.err`, other values have an extension guessed by inspecting the value
-structure.
+structure, e.g. `.png`.
 
-In you will find the file `workflowrun.prov.ttl` which contains the
-PROV-O export of the workflow run (including nested workflows) in [RDF
-Turtle format](http://www.w3.org/TR/turtle/).
+Example listing:
+
+    c:\Users\stain\workspace\taverna-prov\example\helloanyone.bundle>ls
+    inputs  intermediates  mimetype  outputs  workflow.wfbundle  workflowrun.prov.ttl
+
+    c:\Users\stain\workspace\taverna-prov\example\helloanyone.bundle>ls outputs
+    greeting.txt
+
+    c:\Users\stain\workspace\taverna-prov\example\helloanyone.bundle>cat outputs/greeting.txt
+    Hello, John Doe
+
+You will also find the file `workflowrun.prov.ttl` which contains the
+[PROV-O](http://www.w3.org/TR/prov-o/) export of the workflow run
+(including nested workflows) in [RDF Turtle
+format](http://www.w3.org/TR/turtle/). 
+
+Example listing:
+
+    c:\Users\stain\workspace\taverna-prov\example\helloanyone.bundle>head workflowrun.prov.ttl -n 40 | tail -n 20
+    <http://ns.taverna.org.uk/2011/software/taverna-2.4.0>
+            rdfs:label  "Taverna Workbench 2.4.0"@en ;
+            rdf:type    prov:Plan .
+
+    _:b0    prov:atTime  "2013-11-22T14:00:22.804Z"^^xsd:dateTime ;
+            rdf:type     prov:End .
+
+    <http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/processor/Concatenate_two_strings/in/string2>
+            rdfs:comment  "Concatenate_two_strings input string2"@en ;
+            rdfs:label    "string2" ;
+            rdf:type      wfdesc:Input ;
+            rdf:type      prov:Role .
+
+    <#taverna-prov-export>
+            rdf:type                     prov:Activity ;
+            prov:startedAtTime           "2013-11-22T14:01:02.436Z"^^xsd:dateTime ;
+            prov:qualifiedCommunication  _:b1 ;
+            prov:endedAtTime             "2013-11-22T14:01:03.223Z"^^xsd:dateTime ;
+            rdfs:label                   "taverna-prov export of workflow run provenance"@en ;
+            prov:wasInformedBy           <http://ns.taverna.org.uk/2011/run/385c794c-ba11-4007-a5b5-502ba8d14263/> ;
 
 Intermediate values are stored in the `intermediates/` folder and
 referenced from `workflowrun.prov.ttl`
 
 Example listing:
 
-    stain@vmint ~/src/taverna-prov/example/helloanyone $ ls .
-    greeting.txt  intermediates  name.txt  workflowrun.prov.ttl
+    c:\Users\stain\workspace\taverna-prov\example\helloanyone.bundle>ls intermediates/d5
+    d588f6ab-122e-4788-ab12-8b6b66a67354.txt
+    
+    c:\Users\stain\workspace\taverna-prov\example\helloanyone.bundle>cat intermediates/d5/d58*
+    Hello,
 
-    stain@vmint ~/src/taverna-prov/example/helloanyone $ ls intermediates/*
-    def2e58b-50e2-4949-9980-fd310166621a.txt
 
-    stain@vmint:~/src/taverna-prov/example/helloanyone$ cat greeting.txt ; echo
-    Hello, World!
+The file `workflow.wfbundle` contains the executed workflow in [Taverna
+3](http://www.taverna.org.uk/developers/work-in-progress/taverna-3/)'s [SCUFL2 workflow bundle](http://dev.mygrid.org.uk/wiki/display/developer/Taverna+Workflow+Bundle) format. You can use the [SCUFL2 API](http://dev.mygrid.org.uk/wiki/display/developer/SCUFL2+API) to inspect the workflow definition in detail.
 
-    stain@vmint ~/src/taverna-prov/example/helloanyone $ cat intermediates/de/def2e58b-50e2-4949-9980-fd310166621a.txt  ; echo
-    Hello, 
+The file `.ro/annotations/workflow.wfdesc.ttl` contains the abstract
+structure (but not all the implementation details) of the executed
+workflow, in [RDF Turtle](http://www.w3.org/TR/turtle/)
+according to the [wfdesc ontology](http://wf4ever.github.io/ro/#wfdesc):
 
-    stain@vmint ~/src/taverna-prov/example/helloanyone $ head -n 17 workflowrun.prov.ttl
-    # @base <file:/C:/Users/stain/Desktop/fred/soup/workflowrun.prov.ttl> .
-    @prefix cnt: <http://www.w3.org/2011/content#> .
-    @prefix dcterms: <http://purl.org/dc/terms/> .
-    @prefix doap: <http://usefulinc.com/ns/doap#> .
+    c:\Users\stain\workspace\taverna-prov\example\helloanyone.bundle>cat .ro/annotations/workflow.wfdesc.ttl | head -n 20
+    @base <http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/> .
+    @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+    @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
     @prefix owl: <http://www.w3.org/2002/07/owl#> .
     @prefix prov: <http://www.w3.org/ns/prov#> .
-    @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-    @prefix scufl2: <http://ns.taverna.org.uk/2010/scufl2#> .
-    @prefix tavernaprov: <http://ns.taverna.org.uk/2012/tavernaprov/> .
     @prefix wfdesc: <http://purl.org/wf4ever/wfdesc#> .
-    @prefix wfprov: <http://purl.org/wf4ever/wfprov#> .
-    @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+    @prefix wf4ever: <http://purl.org/wf4ever/wf4ever#> .
+    @prefix roterms: <http://purl.org/wf4ever/roterms#> .
+    @prefix dc: <http://purl.org/dc/elements/1.1/> .
+    @prefix dcterms: <http://purl.org/dc/terms/> .
+    @prefix comp: <http://purl.org/DP/components#> .
+    @prefix dep: <http://scape.keep.pt/vocab/dependencies#> .
+    @prefix biocat: <http://biocatalogue.org/attribute/> .
     @prefix : <#> .
 
-    :taverna-prov-export rdfs:label "taverna-prov export of workflow run provenance" ;
-        prov:qualifiedAssociation _:node17rnpj0m5x1 ;
-        prov:startedAtTime "2013-05-29T10:23:43.074+01:00"^^xsd:dateTime ;
+    <processor/Concatenate_two_strings/> a wfdesc:Process , wfdesc:Description , owl:Thing , wf4ever:BeanshellScript ;
+            rdfs:label "Concatenate_two_strings" ;
+            wfdesc:hasInput <processor/Concatenate_two_strings/in/string1> , <processor/Concatenate_two_strings/in/string2> ;
+            wfdesc:hasOutput <processor/Concatenate_two_strings/out/output> ;
+            wf4ever:script "output = string1 + string2;" .
 
-This source includes an [example](example/helloanyone/) provenance folder and [example
-provenance graph](example/helloanyone/workflowrun.prov.ttl) from running
+
+This source includes an [example
+bundle](example/helloanyone.bundle.zip), the [unzipped
+bundle](example/helloanyone.bundle/) as a folder and its [provenance
+graph](example/helloanyone.bundle/workflowrun.prov.ttl) from running
 a simple [hello world workflow](example/helloanyone.t2flow).
 
 Querying
