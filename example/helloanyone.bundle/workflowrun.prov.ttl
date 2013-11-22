@@ -1,0 +1,269 @@
+@prefix dc:  <http://purl.org/dc/elements/1.1/> .
+@prefix prov:  <http://www.w3.org/ns/prov#> .
+@prefix cnt:  <http://www.w3.org/2011/content#> .
+@prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+@prefix wfprov:  <http://purl.org/wf4ever/wfprov#> .
+@prefix dcam:  <http://purl.org/dc/dcam/> .
+@prefix xml:  <http://www.w3.org/XML/1998/namespace> .
+@prefix vs:  <http://www.w3.org/2003/06/sw-vocab-status/ns#> .
+@prefix dcterms:  <http://purl.org/dc/terms/> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix wot:  <http://xmlns.com/wot/0.1/> .
+@prefix wfdesc:  <http://purl.org/wf4ever/wfdesc#> .
+@prefix dct:  <http://purl.org/dc/terms/> .
+@prefix tavernaprov:  <http://ns.taverna.org.uk/2012/tavernaprov/> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix scufl2:  <http://ns.taverna.org.uk/2010/scufl2#> .
+
+<http://ns.taverna.org.uk/2011/software/taverna-2.4.0>
+        rdfs:label  "Taverna Workbench 2.4.0"@en ;
+        rdf:type    prov:Plan .
+
+_:b0    prov:atTime  "2013-11-22T14:00:22.804Z"^^xsd:dateTime ;
+        rdf:type     prov:End .
+
+<http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/processor/Concatenate_two_strings/in/string2>
+        rdfs:comment  "Concatenate_two_strings input string2"@en ;
+        rdfs:label    "string2" ;
+        rdf:type      wfdesc:Input ;
+        rdf:type      prov:Role .
+
+<#taverna-prov-export>
+        rdf:type                     prov:Activity ;
+        prov:startedAtTime           "2013-11-22T14:01:02.436Z"^^xsd:dateTime ;
+        prov:qualifiedCommunication  _:b1 ;
+        prov:endedAtTime             "2013-11-22T14:01:03.223Z"^^xsd:dateTime ;
+        rdfs:label                   "taverna-prov export of workflow run provenance"@en ;
+        prov:wasInformedBy           <http://ns.taverna.org.uk/2011/run/385c794c-ba11-4007-a5b5-502ba8d14263/> ;
+        prov:qualifiedEnd            _:b2 ;
+        prov:qualifiedAssociation    _:b3 ;
+        prov:qualifiedStart          _:b4 ;
+        prov:wasAssociatedWith       <#taverna-engine> .
+
+_:b5    prov:hadRole  <http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/in/name> ;
+        prov:entity   <http://ns.taverna.org.uk/2011/data/385c794c-ba11-4007-a5b5-502ba8d14263/ref/999325d8-aea3-41d1-a3af-0a4a6018ce81> ;
+        rdf:type      prov:Usage .
+
+_:b6    prov:atTime  "2013-11-22T14:00:22.366Z"^^xsd:dateTime ;
+        rdf:type     prov:Start .
+
+_:b3    prov:hadPlan  <http://ns.taverna.org.uk/2011/software/taverna-2.4.0> ;
+        prov:agent    <#taverna-engine> ;
+        rdf:type      prov:Association .
+
+<http://ns.taverna.org.uk/2011/data/385c794c-ba11-4007-a5b5-502ba8d14263/ref/d588f6ab-122e-4788-ab12-8b6b66a67354>
+        tavernaprov:content          <intermediates/d5/d588f6ab-122e-4788-ab12-8b6b66a67354.txt> ;
+        wfprov:describedByParameter  <http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/processor/Concatenate_two_strings/in/string1> ;
+        wfprov:describedByParameter  <http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/processor/hello/out/value> ;
+        wfprov:wasOutputFrom         <http://ns.taverna.org.uk/2011/run/385c794c-ba11-4007-a5b5-502ba8d14263/process/bbaedc02-896f-491e-88bc-8dd350fcc73b/> ;
+        prov:qualifiedGeneration     _:b7 ;
+        prov:wasGeneratedBy          <http://ns.taverna.org.uk/2011/run/385c794c-ba11-4007-a5b5-502ba8d14263/process/bbaedc02-896f-491e-88bc-8dd350fcc73b/> ;
+        rdf:type                     wfprov:Artifact ;
+        rdf:type                     prov:Entity .
+
+_:b4    prov:atTime  "2013-11-22T14:01:02.436Z"^^xsd:dateTime ;
+        rdf:type     prov:Start .
+
+<http://ns.taverna.org.uk/2011/run/385c794c-ba11-4007-a5b5-502ba8d14263/process/c96ee795-eeb1-48b6-a6d2-478df78bd848/>
+        prov:startedAtTime           "2013-11-22T14:00:22.366Z"^^xsd:dateTime ;
+        prov:endedAtTime             "2013-11-22T14:00:22.738Z"^^xsd:dateTime ;
+        rdf:type                     wfprov:ProcessRun ;
+        prov:used                    <http://ns.taverna.org.uk/2011/data/385c794c-ba11-4007-a5b5-502ba8d14263/ref/999325d8-aea3-41d1-a3af-0a4a6018ce81> ;
+        wfprov:describedByProcess    <http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/processor/Concatenate_two_strings/> ;
+        rdfs:label                   "Processor execution Concatenate_two_strings"@en ;
+        wfprov:usedInput             <http://ns.taverna.org.uk/2011/data/385c794c-ba11-4007-a5b5-502ba8d14263/ref/999325d8-aea3-41d1-a3af-0a4a6018ce81> ;
+        prov:wasAssociatedWith       <#taverna-engine> ;
+        prov:qualifiedAssociation    _:b8 ;
+        prov:qualifiedUsage          _:b9 ;
+        prov:qualifiedStart          _:b6 ;
+        prov:used                    <http://ns.taverna.org.uk/2011/data/385c794c-ba11-4007-a5b5-502ba8d14263/ref/d588f6ab-122e-4788-ab12-8b6b66a67354> ;
+        prov:qualifiedUsage          _:b10 ;
+        wfprov:wasPartOfWorkflowRun  <http://ns.taverna.org.uk/2011/run/385c794c-ba11-4007-a5b5-502ba8d14263/> ;
+        wfprov:wasEnactedBy          <#taverna-engine> ;
+        wfprov:usedInput             <http://ns.taverna.org.uk/2011/data/385c794c-ba11-4007-a5b5-502ba8d14263/ref/d588f6ab-122e-4788-ab12-8b6b66a67354> ;
+        prov:qualifiedEnd            _:b11 .
+
+<http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/processor/Concatenate_two_strings/in/string1>
+        rdfs:comment  "Concatenate_two_strings input string1"@en ;
+        rdfs:label    "string1" ;
+        rdf:type      wfdesc:Input ;
+        rdf:type      prov:Role .
+
+<http://ns.taverna.org.uk/2011/data/385c794c-ba11-4007-a5b5-502ba8d14263/ref/587c9796-0ec2-4b84-94fe-0e8df2cd12c2>
+        tavernaprov:content          <outputs/greeting.txt> ;
+        wfprov:describedByParameter  <http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/processor/Concatenate_two_strings/out/output> ;
+        wfprov:wasOutputFrom         <http://ns.taverna.org.uk/2011/run/385c794c-ba11-4007-a5b5-502ba8d14263/process/c96ee795-eeb1-48b6-a6d2-478df78bd848/> ;
+        prov:qualifiedGeneration     _:b12 ;
+        wfprov:wasOutputFrom         <http://ns.taverna.org.uk/2011/run/385c794c-ba11-4007-a5b5-502ba8d14263/> ;
+        prov:wasGeneratedBy          <http://ns.taverna.org.uk/2011/run/385c794c-ba11-4007-a5b5-502ba8d14263/process/c96ee795-eeb1-48b6-a6d2-478df78bd848/> ;
+        wfprov:describedByParameter  <http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/out/greeting> ;
+        rdf:type                     wfprov:Artifact ;
+        rdf:type                     prov:Entity .
+
+_:b13   prov:hadRole   <http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/out/greeting> ;
+        prov:activity  <http://ns.taverna.org.uk/2011/run/385c794c-ba11-4007-a5b5-502ba8d14263/> ;
+        rdf:type       prov:Generation .
+
+_:b10   prov:hadRole  <http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/processor/Concatenate_two_strings/in/string1> ;
+        prov:entity   <http://ns.taverna.org.uk/2011/data/385c794c-ba11-4007-a5b5-502ba8d14263/ref/d588f6ab-122e-4788-ab12-8b6b66a67354> ;
+        rdf:type      prov:Usage .
+
+_:b11   prov:atTime  "2013-11-22T14:00:22.738Z"^^xsd:dateTime ;
+        rdf:type     prov:End .
+
+_:b14   prov:activity  <#taverna-prov-export> ;
+        rdf:type       prov:Generation .
+
+_:b15   prov:atTime  "2013-11-22T14:00:19.059Z"^^xsd:dateTime ;
+        rdf:type     prov:Start .
+
+_:b12   prov:hadRole   <http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/processor/Concatenate_two_strings/out/output> ;
+        prov:activity  <http://ns.taverna.org.uk/2011/run/385c794c-ba11-4007-a5b5-502ba8d14263/process/c96ee795-eeb1-48b6-a6d2-478df78bd848/> ;
+        rdf:type       prov:Generation .
+
+_:b8    prov:hadPlan  <http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/processor/Concatenate_two_strings/> ;
+        prov:agent    <#taverna-engine> ;
+        rdf:type      prov:Association .
+
+<intermediates/d5/d588f6ab-122e-4788-ab12-8b6b66a67354.txt>
+        rdf:type               cnt:ContentAsText ;
+        cnt:characterEncoding  "UTF-8"^^xsd:string ;
+        cnt:chars              "Hello, "^^xsd:string ;
+        tavernaprov:byteCount  "7"^^xsd:long ;
+        tavernaprov:sha512     "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e"^^xsd:string ;
+        tavernaprov:sha1       "f52ab57fa51dfa714505294444463ae5a009ae34"^^xsd:string ;
+        rdf:type               tavernaprov:Content .
+
+_:b1    prov:activity  <http://ns.taverna.org.uk/2011/run/385c794c-ba11-4007-a5b5-502ba8d14263/> ;
+        rdf:type       prov:Communication .
+
+<#taverna-engine>  rdf:type  tavernaprov:TavernaEngine .
+
+<http://ns.taverna.org.uk/2011/data/385c794c-ba11-4007-a5b5-502ba8d14263/ref/999325d8-aea3-41d1-a3af-0a4a6018ce81>
+        tavernaprov:content          <inputs/name.txt> ;
+        wfprov:describedByParameter  <http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/processor/Concatenate_two_strings/in/string2> ;
+        wfprov:describedByParameter  <http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/in/name> ;
+        rdf:type                     wfprov:Artifact ;
+        rdf:type                     prov:Entity .
+
+_:b16   prov:atTime  "2013-11-22T14:00:21.906Z"^^xsd:dateTime ;
+        rdf:type     prov:End .
+
+<http://ns.taverna.org.uk/2011/run/385c794c-ba11-4007-a5b5-502ba8d14263/>
+        rdf:type                    wfprov:WorkflowRun ;
+        prov:endedAtTime            "2013-11-22T14:00:22.804Z"^^xsd:dateTime ;
+        prov:qualifiedStart         _:b17 ;
+        prov:qualifiedEnd           _:b0 ;
+        dct:hasPart                 <http://ns.taverna.org.uk/2011/run/385c794c-ba11-4007-a5b5-502ba8d14263/process/c96ee795-eeb1-48b6-a6d2-478df78bd848/> ;
+        rdfs:label                  "Workflow run of Hello_Anyone"@en ;
+        wfprov:describedByWorkflow  <http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/> ;
+        dct:hasPart                 <http://ns.taverna.org.uk/2011/run/385c794c-ba11-4007-a5b5-502ba8d14263/process/bbaedc02-896f-491e-88bc-8dd350fcc73b/> ;
+        prov:wasAssociatedWith      <#taverna-engine> ;
+        prov:qualifiedUsage         _:b5 ;
+        prov:startedAtTime          "2013-11-22T14:00:18.301Z"^^xsd:dateTime ;
+        wfprov:wasEnactedBy         <#taverna-engine> ;
+        wfprov:usedInput            <http://ns.taverna.org.uk/2011/data/385c794c-ba11-4007-a5b5-502ba8d14263/ref/999325d8-aea3-41d1-a3af-0a4a6018ce81> ;
+        prov:used                   <http://ns.taverna.org.uk/2011/data/385c794c-ba11-4007-a5b5-502ba8d14263/ref/999325d8-aea3-41d1-a3af-0a4a6018ce81> ;
+        prov:qualifiedAssociation   _:b18 .
+
+_:b2    prov:atTime  "2013-11-22T14:01:03.223Z"^^xsd:dateTime ;
+        rdf:type     prov:End .
+
+<http://ns.taverna.org.uk/2011/run/385c794c-ba11-4007-a5b5-502ba8d14263/process/bbaedc02-896f-491e-88bc-8dd350fcc73b/>
+        prov:qualifiedEnd            _:b16 ;
+        prov:endedAtTime             "2013-11-22T14:00:21.906Z"^^xsd:dateTime ;
+        wfprov:describedByProcess    <http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/processor/hello/> ;
+        prov:startedAtTime           "2013-11-22T14:00:19.059Z"^^xsd:dateTime ;
+        wfprov:wasPartOfWorkflowRun  <http://ns.taverna.org.uk/2011/run/385c794c-ba11-4007-a5b5-502ba8d14263/> ;
+        prov:qualifiedAssociation    _:b19 ;
+        wfprov:wasEnactedBy          <#taverna-engine> ;
+        prov:qualifiedStart          _:b15 ;
+        rdf:type                     wfprov:ProcessRun ;
+        rdfs:label                   "Processor execution hello"@en ;
+        prov:wasAssociatedWith       <#taverna-engine> .
+
+_:b9    prov:hadRole  <http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/processor/Concatenate_two_strings/in/string2> ;
+        prov:entity   <http://ns.taverna.org.uk/2011/data/385c794c-ba11-4007-a5b5-502ba8d14263/ref/999325d8-aea3-41d1-a3af-0a4a6018ce81> ;
+        rdf:type      prov:Usage .
+
+<http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/processor/Concatenate_two_strings/out/output>
+        rdfs:comment  "Concatenate_two_strings output output"@en ;
+        rdfs:label    "output" ;
+        rdf:type      wfdesc:Output ;
+        rdf:type      prov:Role .
+
+<outputs/greeting.txt>
+        rdf:type               cnt:ContentAsText ;
+        cnt:characterEncoding  "UTF-8"^^xsd:string ;
+        cnt:chars              "Hello, John Doe"^^xsd:string ;
+        tavernaprov:byteCount  "15"^^xsd:long ;
+        tavernaprov:sha512     "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e"^^xsd:string ;
+        tavernaprov:sha1       "fbaafb56f4a609f37c33a13d7ffa9dd876815f16"^^xsd:string ;
+        rdf:type               tavernaprov:Content .
+
+<inputs/name.txt>  rdf:type    cnt:ContentAsText ;
+        cnt:characterEncoding  "UTF-8"^^xsd:string ;
+        cnt:chars              "John Doe"^^xsd:string ;
+        tavernaprov:byteCount  "8"^^xsd:long ;
+        tavernaprov:sha512     "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e"^^xsd:string ;
+        tavernaprov:sha1       "ae6e4d1209f17b460503904fad297b31e9cf6362"^^xsd:string ;
+        rdf:type               tavernaprov:Content .
+
+_:b18   prov:hadPlan  <http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/> ;
+        prov:agent    <#taverna-engine> ;
+        rdf:type      prov:Association .
+
+<http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/in/name>
+        rdfs:comment  "Workflow input name"@en ;
+        rdfs:label    "name" ;
+        rdf:type      wfdesc:Input ;
+        rdf:type      prov:Role .
+
+_:b19   prov:hadPlan  <http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/processor/hello/> ;
+        prov:agent    <#taverna-engine> ;
+        rdf:type      prov:Association .
+
+<>      foaf:primaryTopic         <http://ns.taverna.org.uk/2011/run/385c794c-ba11-4007-a5b5-502ba8d14263/> ;
+        prov:qualifiedGeneration  _:b14 ;
+        prov:wasGeneratedBy       <#taverna-prov-export> ;
+        rdf:type                  prov:Bundle .
+
+<http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/processor/hello/>
+        rdfs:label  "Processor hello"@en ;
+        rdf:type    wfdesc:Process ;
+        rdf:type    prov:Plan .
+
+<http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/>
+        dct:hasPart           <http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/processor/Concatenate_two_strings/> ;
+        wfdesc:hasSubProcess  <http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/processor/Concatenate_two_strings/> ;
+        dct:hasPart           <http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/processor/hello/> ;
+        wfdesc:hasSubProcess  <http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/processor/hello/> ;
+        rdf:type              wfdesc:Workflow ;
+        rdf:type              prov:Plan .
+
+<http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/processor/hello/out/value>
+        rdfs:comment  "hello output value"@en ;
+        rdfs:label    "value" ;
+        rdf:type      wfdesc:Output ;
+        rdf:type      prov:Role .
+
+_:b17   prov:atTime  "2013-11-22T14:00:18.301Z"^^xsd:dateTime ;
+        rdf:type     prov:Start .
+
+<http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/processor/Concatenate_two_strings/>
+        rdfs:label  "Processor Concatenate_two_strings"@en ;
+        rdf:type    wfdesc:Process ;
+        rdf:type    prov:Plan .
+
+<http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/out/greeting>
+        rdfs:comment  "Workflow output greeting"@en ;
+        rdfs:label    "greeting" ;
+        rdf:type      wfdesc:Output ;
+        rdf:type      prov:Role .
+
+_:b7    prov:hadRole   <http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/processor/hello/out/value> ;
+        prov:activity  <http://ns.taverna.org.uk/2011/run/385c794c-ba11-4007-a5b5-502ba8d14263/process/bbaedc02-896f-491e-88bc-8dd350fcc73b/> ;
+        rdf:type       prov:Generation .
