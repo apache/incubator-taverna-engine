@@ -19,8 +19,8 @@ compilation, but uses Taverna's plugin mechanism.
 You need:
 * [Taverna Workbench 2.4.0](http://www.taverna.org.uk/download/workbench/2-4/)
 * [Patch update for Taverna 2.4.1](http://markmail.org/thread/rd2zpaq27eiqiean)
-* Internet connectivity
 * [Java 1.7](http://java.com/) or later
+* Internet connectivity
 
 To install:
 
