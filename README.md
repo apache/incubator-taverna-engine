@@ -20,6 +20,7 @@ You need:
 * [Taverna Workbench 2.4.0](http://www.taverna.org.uk/download/workbench/2-4/)
 * [Patch update for Taverna 2.4.1](http://markmail.org/thread/rd2zpaq27eiqiean)
 * Internet connectivity
+* [Java 1.7](http://java.com/) or later
 
 To install:
 
@@ -485,7 +486,7 @@ Note - you do not normally need to build from source code, installation
 from the above plugin site is the preferred way to install this plugin.
 
 You need:
-* Java JDK 1.6 or newer (Tested with OpenJDK 1.7.0\_03)
+* Java JDK 1.7 or newer (Tested with OpenJDK 1.7.0\_03)
   * Note: Do not use the OpenJDK 1.6 (default in Ubuntu), as this is
    buggy with GUI and File operations, both used by Taverna workbench.
 * Maven 2.2 or newer (Tested with [Maven 3.0.4](http://maven.apache.org/download.html))
