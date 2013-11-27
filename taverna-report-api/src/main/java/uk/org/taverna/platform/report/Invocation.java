@@ -60,11 +60,11 @@ public class Invocation implements Comparable<Invocation> {
 
 	/**
      * Internal constructor for comparison use.
-     * 
+     *
      * Only use with {@link #compareTo(Invocation)} use when looking
-     * up from {@link StatusReport#getInvocation(String)}. All fields except 
+     * up from {@link StatusReport#getInvocation(String)}. All fields except
      * {@link #getName()} are <code>null</code>.
-     * 
+     *
      * @param name The name of the invocation to compare with
      **/
 	Invocation(String name) {
@@ -74,7 +74,7 @@ public class Invocation implements Comparable<Invocation> {
 	    this.invocations = null;
 	    this.index = null;
 	}
-	
+
 	public Invocation(String name, Invocation parent, StatusReport<?, ?> report) {
 		this(name, new int[0], parent, report);
 	}
@@ -83,11 +83,7 @@ public class Invocation implements Comparable<Invocation> {
 		this.name = name;
 		this.index = index;
 		this.parent = parent;
-		if (parent != null) {
-			parent.getInvocations().add(this);
-		}
 		this.report = report;
-		report.addInvocation(this);
 
 		invocations = new TreeSet<>();
 
@@ -102,7 +98,11 @@ public class Invocation implements Comparable<Invocation> {
 		}
 
 		setStartedDate(new Date());
-		
+
+		if (parent != null) {
+			parent.getInvocations().add(this);
+		}
+		report.addInvocation(this);
 	}
 
 	/**
