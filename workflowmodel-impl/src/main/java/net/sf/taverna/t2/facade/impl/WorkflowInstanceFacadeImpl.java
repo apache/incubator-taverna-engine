@@ -199,7 +199,6 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 				try {
 					edits.getAddDispatchLayerEdit(dispatchStack, provenance,
 					        provenancePosition(layers)).doEdit();
-					break;
 				} catch (EditException e) {
 					logger.warn("adding provenance layer to dispatch stack failed "
 									+ e.toString());
