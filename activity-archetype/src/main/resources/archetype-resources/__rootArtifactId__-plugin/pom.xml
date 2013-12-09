@@ -10,22 +10,7 @@
 	<artifactId>${artifactId}</artifactId>
 	<packaging>taverna-plugin</packaging>
 	<name>${classPrefix} Taverna plugin</name>
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>net.sf.taverna.t2.maven.plugins</groupId>
-				<artifactId>maven-taverna-plugin</artifactId>
-				<version>0.1.1</version>
-				<extensions>true</extensions>
-				<configuration>
-					<provider>${groupId}</provider>
-					<tavernaVersion>${t2.workbench.version}</tavernaVersion>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
-
+	<description>Description of Example Taverna plugin</description>
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>

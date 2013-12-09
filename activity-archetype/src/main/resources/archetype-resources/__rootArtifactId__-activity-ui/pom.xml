@@ -8,6 +8,7 @@
 		<version>${version}</version>
 	</parent>
 	<artifactId>${artifactId}</artifactId>
+	<packaging>bundle</packaging>
 	<name>${classPrefix} Taverna activity UI bindings</name>
 
 	<dependencies>
@@ -32,92 +33,15 @@
 			<version>${t2.ui.api.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>net.sf.taverna.t2.ui-impl</groupId>
+			<groupId>net.sf.taverna.t2.ui-api</groupId>
 			<artifactId>activity-tools</artifactId>
-			<version>${t2.ui.impl.version}</version>
+			<version>${t2.ui.api.version}</version>
 		</dependency>
 
-		<!-- Workbench runtime for testing from IDE, remove if not using TavernaWorkbenchWithExamplePlugin.main() -->
 		<dependency>
-			<groupId>net.sf.taverna.t2.taverna-workbench</groupId>
-			<artifactId>workbench-dev</artifactId>
-			<version>${t2.workbench.version}</version>
-			<scope>test</scope>
-
-			<exclusions>
-
-				<!-- Disable various activities that are not relevant to testing our 
-					example activity. If you want to re-enable for instance WSDL activity, remember 
-					to comment out the exclusion for both wsdl-activity-ui and wsdl-activity 
-					further down. -->
-				<exclusion>
-					<groupId>net.sf.taverna.t2.ui-activities</groupId>
-					<artifactId>apiconsumer-activity-ui</artifactId>
-				</exclusion>
-
-				<exclusion>
-					<groupId>net.sf.taverna.t2.ui-activities</groupId>
-					<artifactId>biomoby-activity-ui</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>net.sf.taverna.t2.ui-activities</groupId>
-					<artifactId>biomart-activity-ui</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>net.sf.taverna.t2.ui-activities</groupId>
-					<artifactId>soaplab-activity-ui</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>net.sf.taverna.t2.ui-activities</groupId>
-					<artifactId>ncbi-activity-ui</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>net.sf.taverna.t2.ui-activities</groupId>
-					<artifactId>rshell-activity-ui</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>net.sf.taverna.t2.ui-activities</groupId>
-					<artifactId>spreadsheet-import-activity-ui</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>net.sf.taverna.t2.ui-activities</groupId>
-					<artifactId>wsdl-activity-ui</artifactId>
-				</exclusion>
-
-				<!-- .. and the t2.activities counterparts -->
-				<exclusion>
-					<groupId>net.sf.taverna.t2.activities</groupId>
-					<artifactId>apiconsumer-activity</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>net.sf.taverna.t2.activities</groupId>
-					<artifactId>biomoby-activity</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>net.sf.taverna.t2.activities</groupId>
-					<artifactId>biomart-activity</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>net.sf.taverna.t2.activities</groupId>
-					<artifactId>soaplab-activity</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>net.sf.taverna.t2.activities</groupId>
-					<artifactId>ncbi-activity</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>net.sf.taverna.t2.activities</groupId>
-					<artifactId>rshell-activity</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>net.sf.taverna.t2.activities</groupId>
-					<artifactId>spreadsheet-import-activity</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>net.sf.taverna.t2.activities</groupId>
-					<artifactId>wsdl-activity</artifactId>
-				</exclusion>
-			</exclusions>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.3.0</version>
 		</dependency>
 	</dependencies>
 </project>

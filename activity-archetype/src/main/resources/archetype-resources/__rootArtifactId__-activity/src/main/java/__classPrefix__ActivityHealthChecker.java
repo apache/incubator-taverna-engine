@@ -3,8 +3,11 @@
 #set( $symbol_escape = '\' )
 package ${package};
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import net.sf.taverna.t2.visit.VisitReport;
 import net.sf.taverna.t2.visit.VisitReport.Status;
@@ -12,8 +15,7 @@ import net.sf.taverna.t2.workflowmodel.health.HealthCheck;
 import net.sf.taverna.t2.workflowmodel.health.HealthChecker;
 
 /**
- * ${classPrefix} health checker
- * 
+ * ${classPrefix} <code>HealthChecker</code>.
  */
 public class ${classPrefix}ActivityHealthChecker implements
 		HealthChecker<${classPrefix}Activity> {
@@ -35,12 +37,12 @@ public class ${classPrefix}ActivityHealthChecker implements
 	}
 
 	public VisitReport visit(${classPrefix}Activity activity, List<Object> ancestry) {
-		${classPrefix}ActivityConfigurationBean config = activity.getConfiguration();
+		JsonNode config = activity.getConfiguration();
 
 		// We'll build a list of subreports
-		List<VisitReport> subReports = new ArrayList<VisitReport>();
+		List<VisitReport> subReports = new ArrayList<>();
 
-		if (!config.getExampleUri().isAbsolute()) {
+		if (!URI.create(config.get("exampleUri").asText()).isAbsolute()) {
 			// Report Severe problems we know won't work
 			VisitReport report = new VisitReport(HealthCheck.getInstance(),
 					activity, "Example URI must be absolute", HealthCheck.INVALID_URL,
@@ -48,7 +50,7 @@ public class ${classPrefix}ActivityHealthChecker implements
 			subReports.add(report);
 		}
 
-		if (config.getExampleString().equals("")) {
+		if (config.get("exampleString").asText().equals("")) {
 			// Warning on possible problems
 			subReports.add(new VisitReport(HealthCheck.getInstance(), activity,
 					"Example string empty", HealthCheck.NO_CONFIGURATION,

@@ -11,7 +11,7 @@
 	<name>Archetypes</name>
 	<packaging>pom</packaging>
 
-	<version>1.3-SNAPSHOT</version>
+	<version>2.0-SNAPSHOT</version>
 	<scm>
 		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/dev/archetypes/trunk/</connection>
 		<developerConnection>scm:svn:https://taverna.googlecode.com/svn/taverna/dev/archetypes/trunk/</developerConnection>
@@ -49,8 +49,5 @@
 	</repositories>
 	<modules>
 		<module>activity-archetype</module>
-		<!-- 
-		 <module>activity-translator-archetype</module>
-		 -->
 	</modules>
 </project>

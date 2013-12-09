@@ -10,11 +10,9 @@
 	<name>${classPrefix} Taverna project</name>
 
 	<properties>
-		<t2.core.version>1.2</t2.core.version>
-		<t2.activities.version>1.2</t2.activities.version>
-		<t2.ui.api.version>1.2</t2.ui.api.version>
-		<t2.ui.impl.version>1.2</t2.ui.impl.version>
-		<t2.workbench.version>2.2.0</t2.workbench.version>
+		<t2.core.version>2.0.1-SNAPSHOT</t2.core.version>
+		<t2.activities.version>2.0.1-SNAPSHOT</t2.activities.version>
+		<t2.ui.api.version>2.0-SNAPSHOT</t2.ui.api.version>
 	</properties>
 
 	<build>
@@ -24,8 +22,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>2.3.2</version>
 				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
+					<source>1.7</source>
+					<target>1.7</target>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -67,8 +65,58 @@
 					</systemProperties>
 				</configuration>
 			</plugin>
-
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>net.sf.taverna.t2.maven.plugins</groupId>
+				<artifactId>taverna-maven-plugin</artifactId>
+				<version>0.3.1-SNAPSHOT</version>
+				<extensions>true</extensions>
+			</plugin>
 		</plugins>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.felix</groupId>
+					<artifactId>maven-bundle-plugin</artifactId>
+					<version>2.3.7</version>
+					<extensions>true</extensions>
+				</plugin>
+				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											net.sf.taverna.t2.maven.plugins
+										</groupId>
+										<artifactId>
+											taverna-maven-plugin
+										</artifactId>
+										<versionRange>
+											[0.3.1-SNAPSHOT,)
+										</versionRange>
+										<goals>
+											<goal>plugin-generate</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
 
 	<dependencies>
@@ -90,6 +138,16 @@
 			<id>mygrid-repository</id>
 			<name>myGrid Repository</name>
 			<url>http://www.mygrid.org.uk/maven/repository</url>
+		</repository>
+		<repository>
+			<!-- The myGrid snapshot repository for Taverna dependencies -->
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots />
+			<id>mygrid-snapshot-repository</id>
+			<name>myGrid Snapshot Repository</name>
+			<url>http://www.mygrid.org.uk/maven/snapshot-repository</url>
 		</repository>
 		<repository>
 			<!-- The repository that your jars are deployed to -->

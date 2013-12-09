@@ -12,28 +12,27 @@ import javax.swing.JTextField;
 
 import net.sf.taverna.t2.workbench.ui.views.contextualviews.activity.ActivityConfigurationPanel;
 
-import ${package}.${classPrefix}Activity;
-import ${package}.${classPrefix}ActivityConfigurationBean;
-
+import uk.org.taverna.commons.services.ServiceRegistry;
+import uk.org.taverna.scufl2.api.activity.Activity;
 
 @SuppressWarnings("serial")
-public class ${classPrefix}ConfigurationPanel
-		extends
-		ActivityConfigurationPanel<${classPrefix}Activity, 
-        ${classPrefix}ActivityConfigurationBean> {
+public class ${classPrefix}ConfigurationPanel extends ActivityConfigurationPanel {
 
-	private ${classPrefix}Activity activity;
-	private ${classPrefix}ActivityConfigurationBean configBean;
-	
+	private final ServiceRegistry serviceRegistry;
+
 	private JTextField fieldString;
 	private JTextField fieldURI;
 
-	public ${classPrefix}ConfigurationPanel(${classPrefix}Activity activity) {
-		this.activity = activity;
-		initGui();
+	public ${classPrefix}ConfigurationPanel(Activity activity, ServiceRegistry serviceRegistry) {
+		super(activity);
+		this.serviceRegistry = serviceRegistry;
+		initialise();
 	}
 
-	protected void initGui() {
+	protected void initialise() {
+		// call super.initialise() to initialise the configuration
+		super.initialise();
+
 		removeAll();
 		setLayout(new GridLayout(0, 2));
 
@@ -50,8 +49,9 @@ public class ${classPrefix}ConfigurationPanel
 		add(fieldURI);
 		labelURI.setLabelFor(fieldURI);
 
-		// Populate fields from activity configuration bean
-		refreshConfiguration();
+		// Populate fields from activity configuration
+		fieldString.setText(getProperty("exampleString"));
+		fieldURI.setText(getProperty("exampleUri"));
 	}
 
 	/**
@@ -72,50 +72,16 @@ public class ${classPrefix}ConfigurationPanel
 	}
 
 	/**
-	 * Return configuration bean generated from user interface last time
-	 * noteConfiguration() was called.
-	 */
-	@Override
-	public ${classPrefix}ActivityConfigurationBean getConfiguration() {
-		// Should already have been made by noteConfiguration()
-		return configBean;
-	}
-
-	/**
-	 * Check if the user has changed the configuration from the original
-	 */
-	@Override
-	public boolean isConfigurationChanged() {
-		String originalString = configBean.getExampleString();
-		String originalUri = configBean.getExampleUri().toASCIIString();
-		// true (changed) unless all fields match the originals
-		return ! (originalString.equals(fieldString.getText())
-				&& originalUri.equals(fieldURI.getText()));
-	}
-
-	/**
-	 * Prepare a new configuration bean from the UI, to be returned with
-	 * getConfiguration()
+	 * Set the configuration properties from the UI
 	 */
 	@Override
 	public void noteConfiguration() {
-		configBean = new ${classPrefix}ActivityConfigurationBean();
-		
 		// FIXME: Update bean fields from your UI elements
-		configBean.setExampleString(fieldString.getText());
-		configBean.setExampleUri(URI.create(fieldURI.getText()));
+		setProperty("exampleString", fieldString.getText());
+		setProperty("exampleUri", fieldURI.getText());
+
+		configureInputPorts(serviceRegistry);
+		configureOutputPorts(serviceRegistry);
 	}
 
-	/**
-	 * Update GUI from a changed configuration bean (perhaps by undo/redo).
-	 * 
-	 */
-	@Override
-	public void refreshConfiguration() {
-		configBean = activity.getConfiguration();
-		
-		// FIXME: Update UI elements from your bean fields
-		fieldString.setText(configBean.getExampleString());
-		fieldURI.setText(configBean.getExampleUri().toASCIIString());
-	}
 }

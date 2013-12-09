@@ -10,19 +10,40 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import net.sf.taverna.t2.workbench.ui.views.contextualviews.ContextualView;
+import com.fasterxml.jackson.databind.JsonNode;
 
-import ${package}.${classPrefix}Activity;
-import ${package}.${classPrefix}ActivityConfigurationBean;
+import uk.org.taverna.commons.services.ServiceRegistry;
+
+import net.sf.taverna.t2.servicedescriptions.ServiceDescriptionRegistry;
+import net.sf.taverna.t2.workbench.activityicons.ActivityIconManager;
+import net.sf.taverna.t2.workbench.edits.EditManager;
+import net.sf.taverna.t2.workbench.file.FileManager;
+import net.sf.taverna.t2.workbench.ui.actions.activity.ActivityContextualView;
+
+import uk.org.taverna.scufl2.api.activity.Activity;
+
 import ${package}.ui.config.${classPrefix}ConfigureAction;
 
 @SuppressWarnings("serial")
-public class ${classPrefix}ContextualView extends ContextualView {
-	private final ${classPrefix}Activity activity;
+public class ${classPrefix}ContextualView extends ActivityContextualView {
+
+	private final EditManager editManager;
+	private final FileManager fileManager;
+	private final ActivityIconManager activityIconManager;
+	private final ServiceDescriptionRegistry serviceDescriptionRegistry;
+	private final ServiceRegistry serviceRegistry;
+
 	private JLabel description = new JLabel("ads");
 
-	public ${classPrefix}ContextualView(${classPrefix}Activity activity) {
-		this.activity = activity;
+	public ${classPrefix}ContextualView(Activity activity, EditManager editManager,
+			FileManager fileManager, ActivityIconManager activityIconManager,
+			ServiceDescriptionRegistry serviceDescriptionRegistry, ServiceRegistry serviceRegistry) {
+		super(activity);
+		this.editManager = editManager;
+		this.fileManager = fileManager;
+		this.activityIconManager = activityIconManager;
+		this.serviceDescriptionRegistry = serviceDescriptionRegistry;
+		this.serviceRegistry = serviceRegistry;
 		initView();
 	}
 
@@ -36,9 +57,8 @@ public class ${classPrefix}ContextualView extends ContextualView {
 
 	@Override
 	public String getViewTitle() {
-		${classPrefix}ActivityConfigurationBean configuration = activity
-				.getConfiguration();
-		return "${classPrefix} service " + configuration.getExampleString();
+		JsonNode configuration = getConfigBean().getJson();
+		return "${classPrefix} service " + configuration.get("exampleString").asText();
 	}
 
 	/**
@@ -46,10 +66,9 @@ public class ${classPrefix}ContextualView extends ContextualView {
 	 */
 	@Override
 	public void refreshView() {
-		${classPrefix}ActivityConfigurationBean configuration = activity
-				.getConfiguration();
-		description.setText("${classPrefix} service " + configuration.getExampleUri()
-				+ " - " + configuration.getExampleString());
+		JsonNode configuration = getConfigBean().getJson();
+		description.setText("${classPrefix} service " + configuration.get("exampleUri").asText()
+				+ " - " + configuration.get("exampleString").asText());
 		// TODO: Might also show extra service information looked
 		// up dynamically from endpoint/registry
 	}
@@ -62,10 +81,11 @@ public class ${classPrefix}ContextualView extends ContextualView {
 		// We want to be on top
 		return 100;
 	}
-	
+
 	@Override
 	public Action getConfigureAction(final Frame owner) {
-		return new ${classPrefix}ConfigureAction(activity, owner);
+		return new ${classPrefix}ConfigureAction(getActivity(), editManager, fileManager,
+				activityIconManager, serviceDescriptionRegistry, serviceRegistry);
 	}
 
 }

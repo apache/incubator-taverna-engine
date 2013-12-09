@@ -9,35 +9,60 @@ import java.util.List;
 
 import javax.swing.Icon;
 
+import uk.org.taverna.scufl2.api.configurations.Configuration;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import net.sf.taverna.t2.servicedescriptions.ServiceDescription;
-import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 
-import ${package}.${classPrefix}Activity;
-import ${package}.${classPrefix}ActivityConfigurationBean;
+public class ${classPrefix}ServiceDesc extends ServiceDescription {
 
-public class ${classPrefix}ServiceDesc extends ServiceDescription<${classPrefix}ActivityConfigurationBean> {
+	private static final URI ACTIVITY_TYPE = URI
+			.create("http://example.com/2013/activity/${rootArtifactId}");
 
-	/**
-	 * The subclass of Activity which should be instantiated when adding a service
-	 * for this description 
-	 */
-	@Override
-	public Class<? extends Activity<${classPrefix}ActivityConfigurationBean>> getActivityClass() {
-		return ${classPrefix}Activity.class;
+	// FIXME: Replace example fields and getters/setters with any required
+	// and optional fields. (All fields are searchable in the Service palette,
+	// for instance try a search for exampleString:3)
+	private String exampleString;
+	private String exampleUri;
+
+	public String getExampleString() {
+		return exampleString;
+	}
+	public void setExampleString(String exampleString) {
+		this.exampleString = exampleString;
+	}
+
+	public String getExampleUri() {
+		return exampleUri;
+	}
+	public void setExampleUri(String exampleUri) {
+		this.exampleUri = exampleUri;
 	}
 
 	/**
-	 * The configuration bean which is to be used for configuring the instantiated activity.
-	 * Making this bean will typically require some of the fields set on this service
-	 * description, like an endpoint URL or method name. 
-	 * 
+	 * The type of Activity which should be instantiated when adding a service
+	 * for this description
 	 */
 	@Override
-	public ${classPrefix}ActivityConfigurationBean getActivityConfiguration() {
-		${classPrefix}ActivityConfigurationBean bean = new ${classPrefix}ActivityConfigurationBean();
-		bean.setExampleString(exampleString);
-		bean.setExampleUri(exampleUri);
-		return bean;
+	public URI getActivityType() {
+		return ACTIVITY_TYPE;
+	}
+
+	/**
+	 * The configuration  which is to be used for configuring the instantiated activity.
+	 * Making this configuration will typically require some of the fields set on this service
+	 * description, like an endpoint URL or method name.
+	 *
+	 */
+	@Override
+	public Configuration getActivityConfiguration() {
+		Configuration configuration = new Configuration();
+		configuration.setType(ACTIVITY_TYPE.resolve("#Config"));
+		ObjectNode json = configuration.getJsonAsObjectNode();
+		json.put("exampleString", exampleString);
+		json.put("exampleUri", exampleUri);
+		return configuration;
 	}
 
 	/**
@@ -77,25 +102,5 @@ public class ${classPrefix}ServiceDesc extends ServiceDescription<${classPrefix}
 		// FIXME: Use your fields instead of example fields
 		return Arrays.<Object>asList(exampleString, exampleUri);
 	}
-
-	
-	// FIXME: Replace example fields and getters/setters with any required
-	// and optional fields. (All fields are searchable in the Service palette,
-	// for instance try a search for exampleString:3)
-	private String exampleString;
-	private URI exampleUri;
-	public String getExampleString() {
-		return exampleString;
-	}
-	public URI getExampleUri() {
-		return exampleUri;
-	}
-	public void setExampleString(String exampleString) {
-		this.exampleString = exampleString;
-	}
-	public void setExampleUri(URI exampleUri) {
-		this.exampleUri = exampleUri;
-	}
-
 
 }
