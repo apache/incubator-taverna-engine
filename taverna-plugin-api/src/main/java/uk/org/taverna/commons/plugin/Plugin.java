@@ -48,14 +48,35 @@ public interface Plugin {
 
 	public Version getVersion();
 
+	/**
+	 * Returns the state of the plugin.
+	 *
+	 * @return the state of the plugin
+	 */
 	public State getState();
 
 	/**
-	 * Starts the plugin.
+	 * Starts the plugin and sets the state to STARTED.
+	 * <p>
+	 * If the plugin state is STARTED this method will have no effect.
+	 * <p>
+	 * All plugin bundles are not currently started will be started.
+	 *
 	 * @throws PluginException
+	 *             if the plugin state is UNINSTALLED or any of the plugin bundles cannot be started
 	 */
 	public void start() throws PluginException;
 
+	/**
+	 * Stops the plugin and sets the state to STOPPED.
+	 * <p>
+	 * If the plugin state is not STARTED this method will have no effect.
+	 * <p>
+	 * All plugin bundles not used elsewhere will be stopped.
+	 *
+	 * @throws PluginException
+	 *             if any of the plugin bundles cannot be stopped
+	 */
 	public void stop() throws PluginException;
 
 	public void uninstall() throws PluginException;
