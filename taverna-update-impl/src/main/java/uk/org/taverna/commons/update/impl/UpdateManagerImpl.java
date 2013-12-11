@@ -42,6 +42,7 @@ import uk.org.taverna.commons.download.DownloadException;
 import uk.org.taverna.commons.download.DownloadManager;
 import uk.org.taverna.commons.profile.xml.jaxb.ApplicationProfile;
 import uk.org.taverna.commons.profile.xml.jaxb.BundleInfo;
+import uk.org.taverna.commons.profile.xml.jaxb.UpdateSite;
 import uk.org.taverna.commons.profile.xml.jaxb.Updates;
 import uk.org.taverna.commons.update.UpdateException;
 import uk.org.taverna.commons.update.UpdateManager;
@@ -75,7 +76,7 @@ public class UpdateManagerImpl implements UpdateManager {
 
 	public UpdateManagerImpl() throws UpdateException {
 		try {
-			JAXBContext jaxbContext = JAXBContext.newInstance(Versions.class, ApplicationProfile.class);
+			JAXBContext jaxbContext = JAXBContext.newInstance(UpdateSite.class, ApplicationProfile.class);
 			unmarshaller = jaxbContext.createUnmarshaller();
 		} catch (JAXBException e) {
 			throw new UpdateException("Error creating JAXBContext", e);
@@ -110,8 +111,9 @@ public class UpdateManagerImpl implements UpdateManager {
 		}
 
 		try {
-			applicationVersions = (Versions) unmarshaller
+			UpdateSite updateSite = (UpdateSite) unmarshaller
 					.unmarshal(updatesFile);
+			applicationVersions = updateSite.getVersions();
 			latestVersion = applicationVersions.getLatestVersion();
 			updateAvailable = isHigherVersion(latestVersion.getVersion(), version);
 		} catch (JAXBException e) {
