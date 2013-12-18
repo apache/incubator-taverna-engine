@@ -77,7 +77,7 @@ public class W3ProvenanceExport {
 
     private static URITools uriTools = new URITools();
     
-    private static final String ARTIFACT_CLASS_LOADER = "net.sf.taverna.raven.repository.impl.LocalArtifactClassLoader";
+    private static final URI osgiURI = URI.create("http://ns.taverna.org.uk/2013/osgibundle/");
     private static final String TEXT = "text/";
     private static final String WORKFLOW_BUNDLE = "application/vnd.taverna.scufl2.workflow-bundle";
     // TODO: Avoid this Taverna 2 dependency
@@ -940,34 +940,66 @@ public class W3ProvenanceExport {
     /** Extract our own plugin version - if running within Raven */
     protected static URI getPluginIdentifier(Class<?> pluginClass) {
         ClassLoader classLoader = pluginClass.getClassLoader();
-        if (! classLoader.getClass().getCanonicalName().equals(ARTIFACT_CLASS_LOADER)) { 
-            // Unknown
-            return null;
-        }
+        String className = pluginClass.getCanonicalName();
         
-        
-        // Note: Access Raven objects as beans to avoid compile dependency on Raven        
         try {
-            Object artifact = PropertyUtils.getProperty(classLoader, "artifact");
-            if (artifact == null) { 
+//            org.osgi.framework.Bundle osgiBundle = FrameworkUtil
+//                    .getBundle(pluginClass);
+//            if (osgiBundle != null) {
+//                String symbolicName = osgiBundle.getSymbolicName();
+//                Version version = osgiBundle.getVersion();
+//            }
+
+            // equivalent as above without OSGi dependency:
+            Object bundle = PropertyUtils.getProperty(classLoader, "bundle");
+            String symbolicName = BeanUtils.getProperty(bundle, "symbolicName");
+            String version = BeanUtils.getProperty(bundle, "version")
+                    .toString();
+
+            // NOTE: The above code has not been tested within OSGi as of 2013-12-18
+            
+            return osgiURI.resolve(uriTools.validFilename(symbolicName) + "/"
+                    + uriTools.validFilename(version));
+        } catch (IllegalAccessException | InvocationTargetException
+                | NullPointerException | NoSuchMethodException e) {
+            // Assume it's not OSGi
+        }
+
+        // Not OSGi, try as Raven:
+        try {
+
+//            Artifact artifact = ((LocalArtifactClassLoader) classLoader)
+//                    .getArtifact();
+//            String groupId = artifact.getGroupId();
+//            String artifactId = artifact.getArtifactId();
+//            String version = artifact.getVersion();
+
+            // Equivalent as above, but without Raven dependency:
+
+            Object artifact = PropertyUtils
+                    .getProperty(classLoader, "artifact");
+            if (artifact == null) {
                 return null;
             }
-            // If it worked, then we assume it is a net.sf.taverna.raven.repository.Artifact
+            // If it worked, then we assume it is a
+            // net.sf.taverna.raven.repository.Artifact
             // implementation
             String groupId = BeanUtils.getProperty(artifact, "groupId");
             String artifactId = BeanUtils.getProperty(artifact, "artifactId");
             String version = BeanUtils.getProperty(artifact, "version");
-            String className = pluginClass.getCanonicalName();
+            //  mimic scufl2-t2flow
             return ravenURI.resolve(uriTools.validFilename(groupId) + "/"
-                        + uriTools.validFilename(artifactId) + "/"
-                        + uriTools.validFilename(version) + "/"
-                        + uriTools.validFilename(className));
-        } catch (IllegalAccessException | InvocationTargetException | NullPointerException
-                | NoSuchMethodException e) {
-           return null;
+                    + uriTools.validFilename(artifactId) + "/"
+                    + uriTools.validFilename(version) + "/"
+                    + uriTools.validFilename(className));
+        } catch (IllegalAccessException | InvocationTargetException
+                | NullPointerException | NoSuchMethodException e) {
+            // Assume it's not Raven
         }
         
-        
+        // Fallback based on the classname - mimic scufl2-t2flow
+        return ravenURI.resolve("undefined/" + uriTools.validFilename(className));
+
     }
 
     public void setBundle(Bundle bundle) {
