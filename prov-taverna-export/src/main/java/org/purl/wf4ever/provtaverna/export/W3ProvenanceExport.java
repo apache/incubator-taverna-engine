@@ -27,7 +27,6 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import net.sf.taverna.raven.appconfig.ApplicationConfig;
-import net.sf.taverna.raven.repository.Artifact;
 import net.sf.taverna.t2.provenance.api.ProvenanceAccess;
 import net.sf.taverna.t2.provenance.lineageservice.URIGenerator;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DataflowInvocation;
@@ -400,8 +399,6 @@ public class W3ProvenanceExport {
             provModel.resetJena();
             logger.warn("Reset Jena readers and writers");
         }
-
-        // Evil hack - convert folder to DataBundle
 
         byte[] dataflow = getDataflow(dataflowInvocation);
         try {
