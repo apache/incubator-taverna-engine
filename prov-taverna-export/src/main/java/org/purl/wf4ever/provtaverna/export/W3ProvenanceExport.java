@@ -1,8 +1,11 @@
 package org.purl.wf4ever.provtaverna.export;
 
+import static uk.org.taverna.scufl2.translator.t2flow.T2FlowParser.ravenURI;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.nio.charset.Charset;
@@ -38,6 +41,8 @@ import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.reference.T2ReferenceType;
 import net.sf.taverna.t2.spi.SPIRegistry;
 
+import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.WriterGraphRIOT;
@@ -70,6 +75,9 @@ import com.hp.hpl.jena.sparql.vocabulary.FOAF;
 
 public class W3ProvenanceExport {
 
+    private static URITools uriTools = new URITools();
+    
+    private static final String ARTIFACT_CLASS_LOADER = "net.sf.taverna.raven.repository.impl.LocalArtifactClassLoader";
     private static final String TEXT = "text/";
     private static final String WORKFLOW_BUNDLE = "application/vnd.taverna.scufl2.workflow-bundle";
     // TODO: Avoid this Taverna 2 dependency
@@ -254,11 +262,8 @@ public class W3ProvenanceExport {
         Individual tavernaAgent = provModel.createTavernaEngine(provFileUri
                 .resolve("#taverna-engine"));
 
-        String versionName = applicationConfig.getName();
         Individual plan = provModel
-                .createPlan(URI
-                        .create("http://ns.taverna.org.uk/2011/software/"
-                                + versionName));
+                .createPlan(getTavernaVersion());
         plan.setLabel(applicationConfig.getTitle(), EN);
 
         provModel.setWasAssociatedWith(storeProvenance, tavernaAgent, plan);
@@ -407,6 +412,13 @@ public class W3ProvenanceExport {
             logger.warn("Could not write bundle", e);
         }
 
+    }
+
+    private URI getTavernaVersion() {
+        String versionName = applicationConfig.getName();
+        URI tavernaVersion = URI
+                .create("http://ns.taverna.org.uk/2011/software/" + versionName);
+        return tavernaVersion;
     }
 
     private byte[] getDataflow(DataflowInvocation dataflowInvocation) {
@@ -824,15 +836,17 @@ public class W3ProvenanceExport {
 
         Agent taverna = new Agent();
         taverna.setName(applicationConfig.getTitle());
-//        String versionName = applicationConfig.getName();
-        // TODO: is this the correct uri for the software running on this
-        // machine??
-        // taverna.setUri(URI.create("http://ns.taverna.org.uk/2011/software/"
-        // + versionName));
-
+        taverna.setUri(getTavernaVersion());
+        
+        Agent provPlugin = new Agent();
+        provPlugin.setName("Taverna-PROV plugin");
+        provPlugin.setUri(getPluginIdentifier());
         manifest.getAggregation(workflowRunProvenance).setCreatedBy(
-                Arrays.asList(taverna));
+                Arrays.asList(taverna, provPlugin));        
 
+        manifest.getCreatedBy().add(provPlugin);
+
+        
         // Media types:
         for (Entry<URI, String> e : mediaTypes.entrySet()) {
             URI uri = e.getKey();
@@ -923,6 +937,35 @@ public class W3ProvenanceExport {
         // NOTE: From now dataBundle and its Path's are CLOSED
         // and can no longer be accessed
 
+    }
+
+    /** Extract our own plugin version - if running within Raven */
+    private URI getPluginIdentifier() {
+        Class<? extends W3ProvenanceExport> ourClass = getClass();
+        ClassLoader classLoader = ourClass.getClassLoader();
+        if (! classLoader.getClass().getCanonicalName().equals(ARTIFACT_CLASS_LOADER)) { 
+            // Unknown
+            return null;
+        }
+        // Note: Access Raven objects as beans to avoid compile dependency on Raven        
+        try {
+            Object artifact = PropertyUtils.getProperty(classLoader, "artifact");
+            // If it worked, then we assume it is a net.sf.taverna.raven.repository.Artifact
+            // implementation
+            String groupId = BeanUtils.getProperty(artifact, "groupId");
+            String artifactId = BeanUtils.getProperty(artifact, "artifactId");
+            String version = BeanUtils.getProperty(artifact, "version");
+            String className = ourClass.getCanonicalName();
+            return ravenURI.resolve(uriTools.validFilename(groupId) + "/"
+                        + uriTools.validFilename(artifactId) + "/"
+                        + uriTools.validFilename(version) + "/"
+                        + uriTools.validFilename(className));
+        } catch (IllegalAccessException | InvocationTargetException | NullPointerException
+                | NoSuchMethodException e) {
+           return null;
+        }
+        
+        
     }
 
     public void setBundle(Bundle bundle) {
