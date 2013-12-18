@@ -27,6 +27,7 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import net.sf.taverna.raven.appconfig.ApplicationConfig;
+import net.sf.taverna.raven.repository.Artifact;
 import net.sf.taverna.t2.provenance.api.ProvenanceAccess;
 import net.sf.taverna.t2.provenance.lineageservice.URIGenerator;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DataflowInvocation;
@@ -840,7 +841,7 @@ public class W3ProvenanceExport {
         
         Agent provPlugin = new Agent();
         provPlugin.setName("Taverna-PROV plugin");
-        provPlugin.setUri(getPluginIdentifier());
+        provPlugin.setUri(getPluginIdentifier(getClass()));
         manifest.getAggregation(workflowRunProvenance).setCreatedBy(
                 Arrays.asList(taverna, provPlugin));        
 
@@ -940,22 +941,26 @@ public class W3ProvenanceExport {
     }
 
     /** Extract our own plugin version - if running within Raven */
-    private URI getPluginIdentifier() {
-        Class<? extends W3ProvenanceExport> ourClass = getClass();
-        ClassLoader classLoader = ourClass.getClassLoader();
+    protected static URI getPluginIdentifier(Class<?> pluginClass) {
+        ClassLoader classLoader = pluginClass.getClassLoader();
         if (! classLoader.getClass().getCanonicalName().equals(ARTIFACT_CLASS_LOADER)) { 
             // Unknown
             return null;
         }
+        
+        
         // Note: Access Raven objects as beans to avoid compile dependency on Raven        
         try {
             Object artifact = PropertyUtils.getProperty(classLoader, "artifact");
+            if (artifact == null) { 
+                return null;
+            }
             // If it worked, then we assume it is a net.sf.taverna.raven.repository.Artifact
             // implementation
             String groupId = BeanUtils.getProperty(artifact, "groupId");
             String artifactId = BeanUtils.getProperty(artifact, "artifactId");
             String version = BeanUtils.getProperty(artifact, "version");
-            String className = ourClass.getCanonicalName();
+            String className = pluginClass.getCanonicalName();
             return ravenURI.resolve(uriTools.validFilename(groupId) + "/"
                         + uriTools.validFilename(artifactId) + "/"
                         + uriTools.validFilename(version) + "/"
