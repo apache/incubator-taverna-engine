@@ -24,8 +24,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.sf.taverna.t2.facade.FacadeListener;
 import net.sf.taverna.t2.facade.ResultListener;
 import net.sf.taverna.t2.facade.WorkflowInstanceFacade;
+import net.sf.taverna.t2.facade.WorkflowInstanceFacade.State;
 import net.sf.taverna.t2.invocation.TokenOrderException;
 import net.sf.taverna.t2.invocation.WorkflowDataToken;
 import net.sf.taverna.t2.reference.ExternalReferenceSPI;
@@ -80,6 +82,8 @@ public class DataflowActivity extends
 	public void executeAsynch(final Map<String, T2Reference> data,
 			final AsynchronousActivityCallback callback) {
 		callback.requestRun(new Runnable() {
+			
+			Map<String, T2Reference> outputData = new HashMap<String, T2Reference>();
 
 			public void run() {
 
@@ -94,24 +98,39 @@ public class DataflowActivity extends
 					return;
 				}
 
-				facade.addResultListener(new ResultListener() {
-					int outputPortCount = dataflow.getOutputPorts().size();
+				final ResultListener rl = new ResultListener() {
 
-					Map<String, T2Reference> outputData = new HashMap<String, T2Reference>();
 
 					public void resultTokenProduced(
 							WorkflowDataToken dataToken, String port) {
 						if (dataToken.getIndex().length == 0) {
 							outputData.put(port, dataToken.getData());
-							synchronized (this) {
-								if (--outputPortCount == 0) {
-								    facade.removeResultListener(this);
-									callback.receiveResult(outputData, dataToken.getIndex());
-								}
-							}
 						}
 					}
-				});
+				};
+				
+				final FacadeListener fl = new FacadeListener() {
+
+					@Override
+					public void workflowFailed(WorkflowInstanceFacade facade,
+							String message, Throwable t) {
+						callback.fail(message, t);
+					}
+
+					@Override
+					public void stateChange(WorkflowInstanceFacade facade,
+							State oldState, State newState) {
+						if (newState == State.completed) {
+							facade.removeResultListener(rl);
+							facade.removeFacadeListener(this);
+							callback.receiveResult(outputData, new int[]{});
+						}
+					}
+					
+				};
+				
+				facade.addResultListener(rl);
+				facade.addFacadeListener(fl);
 
 				facade.fire();
 
