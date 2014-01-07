@@ -20,12 +20,14 @@
  ******************************************************************************/
 package net.sf.taverna.t2.facade;
 
+import net.sf.taverna.t2.facade.WorkflowInstanceFacade.State;
+
 /**
  * Used to communicate a failure of the overall workflow to interested parties.
  * 
  * @author Tom Oinn
  */
-public interface FailureListener {
+public interface FacadeListener {
 
 	/**
 	 * Called if the workflow fails in a critical and fundamental way. Most
@@ -38,6 +40,8 @@ public interface FailureListener {
 	 * @param message
 	 * @param t
 	 */
-	public void workflowFailed(String message, Throwable t);
+	public void workflowFailed(WorkflowInstanceFacade facade, String message, Throwable t);
+	
+	public void stateChange(WorkflowInstanceFacade facade, State oldState, State newState);
 
 }
