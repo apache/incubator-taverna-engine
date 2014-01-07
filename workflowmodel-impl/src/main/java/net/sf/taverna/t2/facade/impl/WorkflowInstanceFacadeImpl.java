@@ -31,7 +31,7 @@ import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-import net.sf.taverna.t2.facade.FailureListener;
+import net.sf.taverna.t2.facade.FacadeListener;
 import net.sf.taverna.t2.facade.ResultListener;
 import net.sf.taverna.t2.facade.WorkflowInstanceFacade;
 import net.sf.taverna.t2.facade.WorkflowRunCancellation;
@@ -102,7 +102,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 	private String instanceOwningProcessId;
 	private String localName;
 	private MonitorManager monitorManager = MonitorManager.getInstance();
-	protected List<FailureListener> failureListeners = Collections.synchronizedList(new ArrayList<FailureListener>());
+	protected List<FacadeListener> facadeListeners = Collections.synchronizedList(new ArrayList<FacadeListener>());
 	protected List<ResultListener> resultListeners = Collections.synchronizedList(new ArrayList<ResultListener>());
 
 	private boolean provEnabled = false;
@@ -121,6 +121,9 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 	public WorkflowInstanceFacadeImpl(final Dataflow dataflow,
 			InvocationContext context, String parentProcess)
 			throws InvalidDataflowException {
+		if (dataflow == null) {
+			logger.error("Dataflow is null");
+		}
 		DataflowValidationReport report = dataflow.checkValidity();
 		if (!report.isValid()) {
 			throw new InvalidDataflowException(dataflow, report);
@@ -231,8 +234,8 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
         return position;
     }
 
-	public void addFailureListener(FailureListener listener) {
-		failureListeners.add(listener);
+	public void addFacadeListener(FacadeListener listener) {
+		facadeListeners.add(listener);
 	}
 
 	public void addResultListener(ResultListener listener) {
@@ -326,8 +329,8 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 		}
 	}
 
-	public void removeFailureListener(FailureListener listener) {
-		failureListeners.remove(listener);
+	public void removeFacadeListener(FacadeListener listener) {
+		facadeListeners.remove(listener);
 	}
 
 	public void removeResultListener(ResultListener listener) {
@@ -504,6 +507,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 	}
 	
 	public synchronized void setState(State newState) throws IllegalStateException {
+		State oldState = state;
 		if (newState.equals(state)) {
 			return;
 		}
@@ -511,18 +515,21 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 			if (state.equals(State.prepared) || state.equals(State.paused)) {
 				stateLastModified = new Date();
 				state = newState;
+				notifyFacadeListeners(oldState, newState);
 				return;
 			}
 		} else if (newState.equals(State.paused)) {			
 			if (state.equals(State.running)) {
 				stateLastModified = new Date();
 				state = newState;
+				notifyFacadeListeners(oldState, newState);
 				return;
 			}
 		} else if (newState.equals(State.completed)) {
 			if (state.equals(State.running)) {
 				stateLastModified = new Date();
 				state = newState;
+				notifyFacadeListeners(oldState, newState);
 				return;
 			} else if (state.equals(State.cancelled)) {
 				// Keep as cancelled
@@ -532,6 +539,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 			if (! state.equals(State.completed)) {
 				stateLastModified = new Date();
 				state = newState;
+				notifyFacadeListeners(oldState, newState);
 				return;
 			}
 		}		
@@ -539,6 +547,21 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 	}
 	
 	
+	private void notifyFacadeListeners(State oldState, State newState) {
+		List<FacadeListener> copyOfListeners = null;
+		synchronized (facadeListeners) {
+			copyOfListeners = new ArrayList<FacadeListener>(facadeListeners);
+		}
+		for (FacadeListener facadeListener : copyOfListeners) {
+			try {
+				facadeListener.stateChange(this, oldState, newState);
+			} catch (RuntimeException ex) {
+				logger.warn("Could not notify facade listener "
+						+ facadeListener, ex);
+			}
+		}
+	}
+
 	public synchronized boolean cancelWorkflowRun() {
 		if (getState().equals(State.completed)) {
 			return false;
@@ -548,17 +571,17 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 			setState(State.cancelled);
 			logger.info("Cancelled workflow runId=" + getWorkflowRunId()
 					+ " processId=" + instanceOwningProcessId);
-			List<FailureListener> copyOfListeners = null;
-			synchronized (failureListeners) {
-				copyOfListeners = new ArrayList<FailureListener>(failureListeners);
+			List<FacadeListener> copyOfListeners = null;
+			synchronized (facadeListeners) {
+				copyOfListeners = new ArrayList<FacadeListener>(facadeListeners);
 			}
-			for (FailureListener failureListener : copyOfListeners) {
+			for (FacadeListener facadeListener : copyOfListeners) {
 				try {
-					failureListener.workflowFailed("Workflow was cancelled",
+					facadeListener.workflowFailed(this, "Workflow was cancelled",
 							new WorkflowRunCancellation(getWorkflowRunId()));
 				} catch (RuntimeException ex) {
 					logger.warn("Could not notify failure listener "
-							+ failureListener, ex);
+							+ facadeListener, ex);
 				}
 			}
 			processorsToComplete = 0;
