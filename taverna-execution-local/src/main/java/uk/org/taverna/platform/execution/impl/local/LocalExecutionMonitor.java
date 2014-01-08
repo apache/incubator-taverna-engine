@@ -244,6 +244,11 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 				invocation = invocations.remove(getInvocationId(owningProcess)
 						+ indexToString(resultEvent.getIndex()));
 			}
+            if (invocation == null) {
+                logger.log(Level.SEVERE, "Can't find invocation for owning process " + owningProcess);
+                return;
+            }
+			
 			// set the invocation outputs
 			try {
 				for (Entry<String, T2Reference> entry : resultEvent.getData().entrySet()) {
