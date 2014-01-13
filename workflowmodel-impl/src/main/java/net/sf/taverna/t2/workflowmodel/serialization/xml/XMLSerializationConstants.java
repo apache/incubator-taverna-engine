@@ -98,6 +98,8 @@ public interface XMLSerializationConstants {
 	static final String DEPTH="depth";
 	static final String GRANULAR_DEPTH="granularDepth";
 	
+	static final String LAST_PREDICTED_DEPTH = "lastPredictedDepth";
+	
 	static final String MERGE="merge";
 	static final String MERGES="merges";
 	
