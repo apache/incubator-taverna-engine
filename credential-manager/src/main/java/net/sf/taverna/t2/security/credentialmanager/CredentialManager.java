@@ -71,6 +71,7 @@ import net.sf.taverna.t2.lang.observer.Observable;
 import net.sf.taverna.t2.lang.observer.Observer;
 import net.sf.taverna.t2.spi.SPIRegistry;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
@@ -145,7 +146,12 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	public static final String KEYSTORE = "Keystore";
 
 	public static final String TRUSTSTORE = "Truststore";
-	
+
+	// Existence of this file in the Credential Manager folder 
+	// indicates the user has set the master password so do not use the default password
+	public static final String USER_SET_MASTER_PASSWORD_INDICATOR_FILE_NAME = "user_set_master_password";
+	public static File USER_SET_MASTER_PASSWORD_INDICATOR_FILE;
+
 	// Default password for Truststore - needed as the Truststore needs to be
 	// populated before the Workbench starts up to initiate the SSLSocketFactory
 	// and to avoid popping up a dialog to ask the user for it.
@@ -170,6 +176,9 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	
 	// Credential Manager singleton
 	private static CredentialManager INSTANCE;
+
+	static SPIRegistry<CredentialProviderSPI> masterPasswordProviderSPI = new SPIRegistry<CredentialProviderSPI>(
+			CredentialProviderSPI.class);
 
 	/**
 	 * Return a CredentialManager singleton.
@@ -212,10 +221,27 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	 * from a location different from the default one (which for the Workbench is 
 	 * in <TAVERNA_HOME>/security).
 	 */
-	public static synchronized CredentialManager getInstance(String credentialManagerDirPath, 
+	public static synchronized CredentialManager getInstance(File credentialManagerDir, 
 			String masterPassword) throws CMException {
 		if (INSTANCE == null) {
-			INSTANCE = new CredentialManager(credentialManagerDirPath, masterPassword);
+			INSTANCE = new CredentialManager(credentialManagerDir, masterPassword);
+		}
+		return INSTANCE;
+	}
+	
+	/**
+	 * Return a Credential Manager singleton for a given master password and a 
+	 * path to a directory where to find the relevant Keystore/Trustore/etc. files.
+	 * This constructor is used if you want Credential Manager to read the files 
+	 * from a location different from the default one (which for the Workbench is 
+	 * in <TAVERNA_HOME>/security).
+	 * 
+	 * NOTE: This method does not create empty keystores if it does not find the files!
+	 */
+	public static synchronized CredentialManager getInstanceNoCreation(File credentialManagerDir, 
+			String masterPassword) throws CMException {
+		if (INSTANCE == null) {
+			INSTANCE = new CredentialManager(credentialManagerDir, masterPassword, false);
 		}
 		return INSTANCE;
 	}
@@ -242,18 +268,90 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	private CredentialManager() throws CMException {
 		
 		// Open the files stored in the (DEFAULT!!!) Credential Manager's directory		
-		loadDefaultConfigurationFiles();	
+		loadDefaultSecurityFiles();	
 		masterPassword = getMasterPassword();
-		init();
+		init(true);
 	}
 
-	static SPIRegistry<CredentialProviderSPI> masterPasswordProviderSPI = new SPIRegistry<CredentialProviderSPI>(
-			CredentialProviderSPI.class);
 
+	/**
+	 * Credential Manager's constructor for a given master password.
+	 */
+	private CredentialManager(String password) throws CMException {
+		
+		// Open the files stored in the (DEFAULT!!!) Credential Manager's directory		
+		loadDefaultSecurityFiles();
+		if (password != null){
+			masterPassword = password;
+		}
+		else{
+			masterPassword = getMasterPassword();
+		}
+		init(true);
+	}
+	
+	/**
+	 * Credential Manager's constructor for a given path to the security folder to load the keystores.
+	 * This constructor should try to figure out the master password itself using the master password SPIs.
+	 */
+	private CredentialManager(File credentialManagerDir) throws CMException {
+		
+		// Open the files stored in credentialManagerDir 	
+		loadSecurityFiles(credentialManagerDir);
+		masterPassword = getMasterPassword();
+		init(true);
+	}
+
+	/**
+	 * Credential Manager's constructor for a given master password and a directory where 
+	 * Credential Manager's Keystore/Truststore/etc. files are located.
+	 */
+	private CredentialManager(File credentialManagerDir, String password) throws CMException {
+		
+		// Open the files stored in the Credential Manager's directory passed in
+		loadSecurityFiles(credentialManagerDir);
+		masterPassword = password;
+		init(true);
+	}
+	
+	/**
+	 * Credential Manager's constructor for a given master password and a directory where 
+	 * Credential Manager's Keystore/Truststore/etc. files are located. 
+	 * 
+	 * It also has a flag to tell it whether or not to create empty keystores 
+	 * if they do not exist on disk already. This is needed by the 
+	 * Command Line Tool, which should not create empty keystores - just load 
+	 * existing ones. 
+	 */
+	private CredentialManager(File credentialManagerDir, String password, boolean createEmptyKeystores) throws CMException {
+		
+		if (credentialManagerDir == null){
+			loadDefaultSecurityFiles();
+		}
+		else
+		{		
+			// Open the files stored in the Credential Manager's directory passed in
+			loadSecurityFiles(credentialManagerDir);
+		}
+		
+		if (password == null){
+			masterPassword = getMasterPassword();
+		}
+		else{
+			masterPassword = password;
+		}
+		if (masterPassword == null){
+			throw new CMException("Master password for Credential Manager cannot be null.");
+		}
+		
+		init(createEmptyKeystores);	
+
+	}
+	
 	private String getMasterPassword() throws CMException {
 
 		if (keystoreFile == null){
-			loadDefaultConfigurationFiles();
+			loadDefaultSecurityFiles();
 		}
 		
 		boolean firstTime = !keystoreFile.exists();
@@ -270,11 +368,14 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 		}
 		
 		// We are in big trouble - we do not have a single master password provider.
-		String exMessage = "Failed to obtain master password from providers: "
+		String exMessage = "Failed to obtain master password for Credential Manager from providers: "
 				+ masterPasswordProviders;
+		String exMessage2 = "Failed to obtain master password for Credential Manager";
 		logger.error(exMessage);
-		throw new CMException(exMessage);
+		throw new CMException(exMessage2);
 	}
+	
+	
 
 	private static List<CredentialProviderSPI> findMasterPasswordProviders() {
 		List<CredentialProviderSPI> masterPasswordProviders = masterPasswordProviderSPI
@@ -290,35 +391,11 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 				});
 		return masterPasswordProviders;
 	}
-
-	/**
-	 * Credential Manager's constructor for a given master password.
-	 */
-	private CredentialManager(String password) throws CMException {
-		
-		// Open the files stored in the (DEFAULT!!!) Credential Manager's directory		
-		loadDefaultConfigurationFiles();	
-		masterPassword = password;
-		init();
-	}
-
-	/**
-	 * Credential Manager's constructor for a given master password and a directory where 
-	 * Credential Manager's Keystore/Truststore/etc. files are located.
-	 */
-	private CredentialManager(String credentialManagerDirPath, String password) throws CMException {
-		
-		// Open the files stored in the Credential Manager's directory passed in
-		loadSecurityFiles(credentialManagerDirPath);
-		masterPassword = password;
-		// Load the files
-		init();
-	}
 	
 	/**
 	 * Initialise Credential Manager - load the Keystore and Truststore.
 	 */
-	private void init() throws CMException {
+	private void init(boolean createEmptyKeystores) throws CMException {
 
 		this.addObserver(clearCachedServiceURIsObserver);
 		this.addObserver(keystoresChangedObserver);
@@ -328,7 +405,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 		
 		// Load the Keystore
 		try {
-			loadKeystore();
+			loadKeystore(createEmptyKeystores);
 			logger.info("Credential Manager: Loaded the Keystore.");
 		} catch (CMException cme) {
 			//logger.error(cme.getMessage(), cme);
@@ -337,7 +414,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 
 		// Load the Truststore
 		try {
-			loadTruststore();
+			loadTruststore(createEmptyKeystores);
 			logger.info("Credential Manager: Loaded the Truststore.");
 		} catch (CMException cme) {
 			//logger.error(cme.getMessage(), cme);
@@ -348,7 +425,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	/**
 	 * Load Taverna's Keystore from a file on the disk.
 	 */
-	protected static void loadKeystore()
+	protected static void loadKeystore(boolean createEmptyKeystores)
 			throws CMException {
 
 		if (keystore == null){
@@ -386,23 +463,25 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 					}
 				}
 			} else {
-				// Otherwise create a new empty Keystore
-				FileOutputStream fos = null;
-				try {
-					keystore.load(null, null);
-					// Immediately save the new (empty) Keystore to the file
-					fos = new FileOutputStream(keystoreFile);
-					keystore.store(fos, masterPassword.toCharArray());
-				} catch (Exception ex) {
-					String exMessage = "Failed to generate a new empty Keystore.";
-					//logger.error(exMessage, ex);
-					throw new CMException(exMessage, ex);
-				} finally {
-					if (fos != null) {
-						try {
-							fos.close();
-						} catch (IOException e) {
-							// ignore
+				if (createEmptyKeystores){
+					// Otherwise create a new empty Keystore if createEmptyKeystores flag is set
+					FileOutputStream fos = null;
+					try {
+						keystore.load(null, null);
+						// Immediately save the new (empty) Keystore to the file
+						fos = new FileOutputStream(keystoreFile);
+						keystore.store(fos, masterPassword.toCharArray());
+					} catch (Exception ex) {
+						String exMessage = "Failed to generate a new empty Keystore.";
+						//logger.error(exMessage, ex);
+						throw new CMException(exMessage, ex);
+					} finally {
+						if (fos != null) {
+							try {
+								fos.close();
+							} catch (IOException e) {
+								// ignore
+							}
 						}
 					}
 				}
@@ -435,6 +514,8 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 			System.clearProperty(PROPERTY_KEYSTORE_PASSWORD); // "javax.net.ssl.keyStorePassword"	
 		}
 	}
+	
+	
 
 	/**
 	 * Load Taverna's Truststore from a file on a disk. If the Truststore does
@@ -442,7 +523,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	 * truststore located in <JAVA_HOME>/lib/security/cacerts will be copied
 	 * over to the Truststore.
 	 */
-	private static void loadTruststore()
+	private static void loadTruststore(boolean createEmptyKeystores)
 			throws CMException {
 
 		if (truststore == null){
@@ -481,123 +562,125 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 					}
 				}
 			} else {
-				/*
-				 * Otherwise create a new empty Truststore and load it with
-				 * certs from Java's truststore.
-				 */
-				File javaTruststoreFile = new File(System
-						.getProperty("java.home")
-						+ "/lib/security/cacerts");
-				KeyStore javaTruststore = null;
-				// Java's truststore is of type "JKS" - try to load it
-				try {
-					javaTruststore = KeyStore.getInstance("JKS");
-				} catch (Exception ex) {
-					// The requested keystore type is not available from the
-					// provider
-					String exMessage = "Failed to instantiate a 'JKS'-type keystore for reading Java's truststore.";
-					//logger.error(exMessage, ex);
-					throw new CMException(exMessage, ex);
-				}
-
-				FileInputStream fis = null;
-				boolean loadedJavaTruststore = false;
-				/*
-				 * Load Java's truststore from the file - try with the default
-				 * Java truststore passwords.
-				 */
-				for (String password : defaultTrustStorePasswords) {
-					logger.info("Trying to load Java truststore using password: " + password);
+				if (createEmptyKeystores){
+					/*
+					 * Otherwise create a new empty Truststore and load it with
+					 * certs from Java's truststore, if createEmptyKeystores flag is set.
+					 */
+					File javaTruststoreFile = new File(System
+							.getProperty("java.home")
+							+ "/lib/security/cacerts");
+					KeyStore javaTruststore = null;
+					// Java's truststore is of type "JKS" - try to load it
 					try {
-						// Get the file
-						fis = new FileInputStream(javaTruststoreFile);
-						javaTruststore.load(fis, password.toCharArray());
-						loadedJavaTruststore = true;
-						break;
-					} catch (IOException ioex) {
-						/*
-						 * If there is an I/O or format problem with the
-						 * keystore data, or if the given password was incorrect
-						 * (Thank you Sun, now I can't know if it is the file or
-						 * the password..)
-						 */
-						String message = "Failed to load the Java "
-								+ "truststore to copy "
-								+ "over certificates using default password: "
-								+ password + " from " + javaTruststoreFile;
-						logger.info(message);
-					} catch (NoSuchAlgorithmException e) {
-						logger.error("Unknown encryption algorithm "
-								+ "while loading Java truststore from "
-								+ javaTruststoreFile, e);
-						break;
-					} catch (CertificateException e) {
-						logger.error("Certificate error while "
-								+ "loading Java truststore from "
-								+ javaTruststoreFile, e);
-						break;
-					} finally {
-						if (fis != null) {
-							try {
-								fis.close();
-							} catch (IOException e) {
-								logger.warn("Could not close input stream to "
-										+ javaTruststoreFile, e);
-							}
-						}
+						javaTruststore = KeyStore.getInstance("JKS");
+					} catch (Exception ex) {
+						// The requested keystore type is not available from the
+						// provider
+						String exMessage = "Failed to instantiate a 'JKS'-type keystore for reading Java's truststore.";
+						//logger.error(exMessage, ex);
+						throw new CMException(exMessage, ex);
 					}
-				}
 
-				if (!loadedJavaTruststore) {
-					// Try using SPIs (typically pop up GUI)
-					if (!(copyPasswordFromGUI(javaTruststore,
-							javaTruststoreFile))) {
-						String error = "Credential manager failed to load"
-								+ " certificates from Java's truststore.";
-						String help = "Try using the system property -D"
-								+ PROPERTY_TRUSTSTORE_PASSWORD
-								+ "=TheTrustStorePassword";
-						logger.error(error + " " + help);
-						System.err.println(error);
-						System.err.println(help);
-					}
-				}
-
-				FileOutputStream fos = null;
-				// Create a new empty Truststore for Taverna
-				try {
-					truststore.load(null, null);
-					if (loadedJavaTruststore) {
-						// Copy certificates into Taverna's Truststore from
-						// Java's truststore.
-						Enumeration<String> aliases = javaTruststore.aliases();
-						while (aliases.hasMoreElements()) {
-							String alias = aliases.nextElement();
-							Certificate certificate = javaTruststore
-									.getCertificate(alias);
-							if (certificate instanceof X509Certificate) {
-								String trustedCertAlias = createX509CertificateAlias((X509Certificate) certificate);
-								truststore.setCertificateEntry(
-										trustedCertAlias, certificate);
-							}
-						}
-					}
-					// Immediately save the new Truststore to the file
-					fos = new FileOutputStream(truststoreFile);
-					truststore.store(fos, masterPassword.toCharArray());
-				} catch (Exception ex) {
-					truststore = null;// make it null as it was just created but failed to save so we should retry next time
-					String exMessage = "Failed to generate new empty Taverna's Truststore.";
-					//logger.error(exMessage, ex);
-					throw new CMException(exMessage, ex);
-				} finally {
-					if (fos != null) {
+					FileInputStream fis = null;
+					boolean loadedJavaTruststore = false;
+					/*
+					 * Load Java's truststore from the file - try with the default
+					 * Java truststore passwords.
+					 */
+					for (String password : defaultTrustStorePasswords) {
+						logger.info("Trying to load Java truststore using password: " + password);
 						try {
-							fos.close();
-						} catch (IOException e) {
-							// ignore
+							// Get the file
+							fis = new FileInputStream(javaTruststoreFile);
+							javaTruststore.load(fis, password.toCharArray());
+							loadedJavaTruststore = true;
+							break;
+						} catch (IOException ioex) {
+							/*
+							 * If there is an I/O or format problem with the
+							 * keystore data, or if the given password was incorrect
+							 * (Thank you Sun, now I can't know if it is the file or
+							 * the password..)
+							 */
+							String message = "Failed to load the Java "
+									+ "truststore to copy "
+									+ "over certificates using default password: "
+									+ password + " from " + javaTruststoreFile;
+							logger.info(message);
+						} catch (NoSuchAlgorithmException e) {
+							logger.error("Unknown encryption algorithm "
+									+ "while loading Java truststore from "
+									+ javaTruststoreFile, e);
+							break;
+						} catch (CertificateException e) {
+							logger.error("Certificate error while "
+									+ "loading Java truststore from "
+									+ javaTruststoreFile, e);
+							break;
+						} finally {
+							if (fis != null) {
+								try {
+									fis.close();
+								} catch (IOException e) {
+									logger.warn("Could not close input stream to "
+											+ javaTruststoreFile, e);
+								}
+							}
 						}
 					}
+
+					if (!loadedJavaTruststore) {
+						// Try using SPIs (typically pop up GUI)
+						if (!(copyPasswordFromGUI(javaTruststore,
+								javaTruststoreFile))) {
+							String error = "Credential manager failed to load"
+									+ " certificates from Java's truststore.";
+							String help = "Try using the system property -D"
+									+ PROPERTY_TRUSTSTORE_PASSWORD
+									+ "=TheTrustStorePassword";
+							logger.error(error + " " + help);
+							System.err.println(error);
+							System.err.println(help);
+						}
+					}
+
+					FileOutputStream fos = null;
+					// Create a new empty Truststore for Taverna
+					try {
+						truststore.load(null, null);
+						if (loadedJavaTruststore) {
+							// Copy certificates into Taverna's Truststore from
+							// Java's truststore.
+							Enumeration<String> aliases = javaTruststore.aliases();
+							while (aliases.hasMoreElements()) {
+								String alias = aliases.nextElement();
+								Certificate certificate = javaTruststore
+										.getCertificate(alias);
+								if (certificate instanceof X509Certificate) {
+									String trustedCertAlias = createX509CertificateAlias((X509Certificate) certificate);
+									truststore.setCertificateEntry(
+											trustedCertAlias, certificate);
+								}
+							}
+						}
+						// Immediately save the new Truststore to the file
+						fos = new FileOutputStream(truststoreFile);
+						truststore.store(fos, masterPassword.toCharArray());
+					} catch (Exception ex) {
+						truststore = null;// make it null as it was just created but failed to save so we should retry next time
+						String exMessage = "Failed to generate new empty Taverna's Truststore.";
+						//logger.error(exMessage, ex);
+						throw new CMException(exMessage, ex);
+					} finally {
+						if (fos != null) {
+							try {
+								fos.close();
+							} catch (IOException e) {
+								// ignore
+							}
+						}
+					}					
 				}
 			}
 
@@ -1611,7 +1694,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	 * Checks if Keystore's master password is the same as the one provided.
 	 */
 	public static boolean confirmMasterPassword(String password) {
-		return ((masterPassword != null) && masterPassword.equals(password));
+		return((masterPassword != null) && masterPassword.equals(password)) ;
 	}
 
 	/**
@@ -1749,13 +1832,13 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 	 * master password in advance and use a special location for Credential Manager's files.
 	 * @throws CMException
 	 */
-	public static void initialiseSSL(String credentialManagerDirPath, String masterPassword) throws CMException {
+	public static void load_and_inialiseSSL(File credentialManagerDir, String masterPassword) throws CMException {
 		if (!sslInitialised) {
 			// We have to do this now - it will init the Keystore/Truststore and 
 			// get them ready for SSLSocketFactory (do not use lazy initialisation
-			// as usual as this is used from Command Line Tool - everything needs 
+			// as usual as this is typically used from the Command Line Tool - everything needs 
 			// to be ready and loaded)		
-			getInstance(credentialManagerDirPath, masterPassword);
+			getInstanceNoCreation(credentialManagerDir, masterPassword);
 			
 			// Create Taverna's SSLSocketFactory and set the SSL socket factory 
 			// from HttpsURLConnectionS to use it
@@ -2282,7 +2365,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 		return false;
 	}
 	
-	private static void loadDefaultConfigurationFiles() {
+	private static void loadDefaultSecurityFiles() {
 		if (credentialManagerDirectory == null){
 			credentialManagerDirectory = CMUtils.getCredentialManagerDefaultDirectory();
 		}
@@ -2294,22 +2377,15 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 		}
 	}
 
-	private void loadSecurityFiles(String credentialManagerDirPath)
+	private static void loadSecurityFiles(File credentialManagerDir)
 			throws CMException {
 		
-		// If credentialManagerDirPath is null (e.g. user did not specify -cmdir on the command line)
-		// - try with Taverna's default one
-		if (credentialManagerDirPath == null){
-			credentialManagerDirectory = CMUtils.getCredentialManagerDefaultDirectory();
-		}
-		
 		if (credentialManagerDirectory == null) {
-			try {
-				credentialManagerDirectory = new File(credentialManagerDirPath);
-			} catch (Exception e) {
-				throw new CMException(
-						"Failed to open Credential Manager's directory to load the security files: " + e.getMessage(),
-						e);
+			if (credentialManagerDir.exists()) {
+				credentialManagerDirectory = credentialManagerDir;
+			} 
+			else{
+				throw new CMException("Failed to open Credential Manager's directory to load the security files: Directory does not exist.");
 			}
 		}
 		if (keystoreFile == null){
@@ -2346,6 +2422,41 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 				KeystoreChangedEvent message) throws Exception {
 			// Create the new SSLSocketFactory and set the default SSLContext
 			HttpsURLConnection.setDefaultSSLSocketFactory(createTavernaSSLSocketFactory());
+		}
+	}
+	
+	public static boolean getUseDefaultMasterPassword(){
+		if (credentialManagerDirectory == null){
+			credentialManagerDirectory = CMUtils.getCredentialManagerDefaultDirectory();
+		}
+		if (USER_SET_MASTER_PASSWORD_INDICATOR_FILE == null){
+			USER_SET_MASTER_PASSWORD_INDICATOR_FILE = new File(credentialManagerDirectory, USER_SET_MASTER_PASSWORD_INDICATOR_FILE_NAME);
+		}
+		return !USER_SET_MASTER_PASSWORD_INDICATOR_FILE.exists();
+	}
+	
+	public static void setUseDefaultMasterPassword(boolean useDefaultMasterPassword){
+		if (credentialManagerDirectory == null){
+			credentialManagerDirectory = CMUtils.getCredentialManagerDefaultDirectory();
+		}
+		if (USER_SET_MASTER_PASSWORD_INDICATOR_FILE == null){
+			USER_SET_MASTER_PASSWORD_INDICATOR_FILE = new File(credentialManagerDirectory, USER_SET_MASTER_PASSWORD_INDICATOR_FILE_NAME);
+		}
+		if (useDefaultMasterPassword){
+			if (USER_SET_MASTER_PASSWORD_INDICATOR_FILE.exists()) {
+				// Delete the file
+				USER_SET_MASTER_PASSWORD_INDICATOR_FILE.delete();
+			}
+		} else {
+			if (!USER_SET_MASTER_PASSWORD_INDICATOR_FILE.exists()) {
+				// Touch the file
+				try {
+					FileUtils.touch(USER_SET_MASTER_PASSWORD_INDICATOR_FILE);
+				} catch (IOException ioex) {
+					// Hmmm, ignore this?
+					logger.error(ioex);
+				}
+			}
 		}
 	}
 }
