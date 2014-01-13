@@ -128,9 +128,17 @@ public class DataflowXMLSerializer extends AbstractXMLSerializer {
 			Element portElement = new Element(DATAFLOW_PORT,
 					T2_WORKFLOW_NAMESPACE);
 			Element name = new Element(NAME, T2_WORKFLOW_NAMESPACE);
+			
 			name.setText(port.getName());
-
 			portElement.addContent(name);
+			
+			int depthValue = port.getDepth();
+			if (depthValue != -1) {
+				Element depth = new Element(LAST_PREDICTED_DEPTH, T2_WORKFLOW_NAMESPACE);
+				depth.setText(String.valueOf(depthValue));
+				portElement.addContent(depth);
+			}
+			
 			// do annotations
 			portElement.addContent(annotationsToXML(port));
 			result.addContent(portElement);
