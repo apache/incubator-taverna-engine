@@ -206,7 +206,14 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 		if (INSTANCE == null) {
 			INSTANCE = new CredentialManager(masterPassword);
 		} else {
-			if (!confirmMasterPassword(masterPassword)) {
+			if (masterPassword == null){
+				// Then we'd better be using the default master password
+				if (!CredentialManager.getUseDefaultMasterPassword()){
+					String exMessage = "Incorrect master password for Credential Manager.";
+					throw new CMException(exMessage);	
+				}
+			}
+			else if (!confirmMasterPassword(masterPassword)) {
 				String exMessage = "Incorrect master password for Credential Manager.";
 				throw new CMException(exMessage);
 			}
