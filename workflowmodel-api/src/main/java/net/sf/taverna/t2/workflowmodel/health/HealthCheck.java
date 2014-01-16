@@ -43,6 +43,7 @@ public class HealthCheck extends VisitKind {
     public static final int LOOP_CONNECTION = 22;
     public static final int UNMANAGED_LOCATION = 23;
     public static final int INCOMPATIBLE_MIMETYPES = 24;
+    public static final int HIGH_PORT_DEPTH = 25;
 
 	/**
 	 * Sub-classes of HealthChecker are used to perform HealthCheck visits.
