@@ -18,7 +18,7 @@ compilation, but uses Taverna's plugin mechanism.
 
 You need:
 * [Taverna Workbench 2.5](http://www.taverna.org.uk/download/workbench/2-5/)
-* [Java 1.7](now comes included with Taverna)
+* Java 1.7 (now comes included with Taverna)
 * Internet connectivity
 
 To install:
@@ -475,9 +475,9 @@ Note - you do not normally need to build from source code, installation
 from the above plugin site is the preferred way to install this plugin.
 
 You need:
-* Java JDK 1.7 or newer (Tested with OpenJDK 1.7.0\_03)
+* Java JDK 1.7 or newer (tested with OpenJDK 1.7.0\_03)
   * Note: Do not use the OpenJDK 1.6 (default in Ubuntu), as this is
-   buggy with GUI and File operations, both used by Taverna workbench.
+   buggy with GUI and File operations, both used by the Taverna Workbench.
 * Maven 2.2 or newer (Tested with [Maven 3.0.4](http://maven.apache.org/download.html))
 
 To compile, run `mvn clean install`
