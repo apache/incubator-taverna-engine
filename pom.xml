@@ -6,7 +6,7 @@
     </prerequisites>
 	<groupId>org.purl.wf4ever.provtaverna</groupId>
 	<artifactId>prov-taverna</artifactId>
-	<version>2.1.6-SNAPSHOT</version>
+	<version>2.1.7-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Taverna PROV</name>
 
@@ -17,14 +17,14 @@
         <jena.version>2.11.0</jena.version>
 
 		<!-- Update according to latest Taverna version in www.mygrid.org.uk/dev/wiki/display/developer/Maven+module+version+numbers -->
-		<t2.core.version>1.4</t2.core.version>
-		<t2.activities.version>1.4</t2.activities.version>
-		<t2.ui.api.version>1.4</t2.ui.api.version>
-		<t2.ui.impl.version>1.4</t2.ui.impl.version>
-		<t2.ui.components.version>1.4.1</t2.ui.components.version>
-		<t2.workbench.version>2.4.0</t2.workbench.version>
-		<t2.results.version>1.4</t2.results.version>
-		<t2.taverna-commandline.version>1.4</t2.taverna-commandline.version>
+		<t2.core.version>1.5-SNAPSHOT</t2.core.version>
+		<t2.activities.version>1.5-SNAPSHOT</t2.activities.version>
+		<t2.ui.api.version>1.5-SNAPSHOT</t2.ui.api.version>
+		<t2.ui.impl.version>1.5-SNAPSHOT</t2.ui.impl.version>
+		<t2.ui.components.version>1.5-SNAPSHOT</t2.ui.components.version>
+		<t2.workbench.version>2.5-SNAPSHOT</t2.workbench.version>
+		<t2.results.version>1.5-SNAPSHOT</t2.results.version>
+		<t2.taverna-commandline.version>1.5-SNAPSHOT</t2.taverna-commandline.version>
         <scufl2.version>0.13.1</scufl2.version>
         <scufl2.wfdesc.version>0.3.3</scufl2.wfdesc.version>
         <databundle.version>0.2.0</databundle.version>
