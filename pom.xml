@@ -184,6 +184,5 @@
 		<module>prov-taverna-plugin</module>
 		<module>prov-taverna-owl-bindings</module>
 		<module>prov-taverna-export</module>
-		<module>prov-taverna-cmdline</module>
 	</modules>
 </project>
