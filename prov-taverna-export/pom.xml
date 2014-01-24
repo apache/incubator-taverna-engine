@@ -33,10 +33,9 @@
         </dependency>
         
         <dependency>
-            <!--  Workaround for T2-2104 -->
             <groupId>net.sf.taverna.t2.core</groupId>
             <artifactId>provenance-derby</artifactId>
-            <version>1.4.1</version>
+            <version>${t2.core.version}</version>
         </dependency>
         <dependency>
             <groupId>uk.org.taverna.scufl2</groupId>
