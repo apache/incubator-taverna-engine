@@ -1,0 +1,32 @@
+@prefix lm: <http://jena.hpl.hp.com/2004/08/location-mapping#> .
+
+[] lm:mapping
+   [ lm:name "http://purl.org/ao/" ; lm:altName "file:org/purl/wf4ever/provtaverna/owl/annotation-core.owl" ] ,
+   [ lm:name "http://purl.org/ao/core/" ; lm:altName "file:org/purl/wf4ever/provtaverna/owl/annotation-core.owl" ] ,
+   [ lm:name "http://www.w3.org/2011/content" ; lm:altName "file:org/purl/wf4ever/provtaverna/owl/content.owl" ] ,
+   [ lm:name "http://purl.org/NET/dc_owl2dl/dcam" ; lm:altName "file:org/purl/wf4ever/provtaverna/owl/dcam.owl" ] ,
+   [ lm:name "http://purl.org/NET/dc_owl2dl/terms_od" ; lm:altName "file:org/purl/wf4ever/provtaverna/owl/dcterms_od.owl" ] ,
+   [ lm:name "http://xmlns.com/foaf/0.1/" ; lm:altName "file:org/purl/wf4ever/provtaverna/owl/foaf.rdf" ] ,
+   [ lm:name "http://purl.org/wf4ever/ore-owl" ; lm:altName "file:org/purl/wf4ever/provtaverna/owl/ore-owl.owl" ] ,
+   [ lm:name "http://purl.org/pav/" ; lm:altName "file:org/purl/wf4ever/provtaverna/owl/pav.owl" ] ,
+   [ lm:name "http://purl.org/pav/2.0/" ; lm:altName "file:org/purl/wf4ever/provtaverna/owl/pav.owl" ] ,
+   [ lm:name "http://purl.org/pav/2.1" ; lm:altName "file:org/purl/wf4ever/provtaverna/owl/pav.owl" ] ,
+   [ lm:name "http://www.w3.org/ns/prov#" ; lm:altName "file:org/purl/wf4ever/provtaverna/owl/prov-o.rdf" ] ,
+   [ lm:name "http://www.w3.org/ns/prov-o#" ; lm:altName "file:org/purl/wf4ever/provtaverna/owl/prov-o.rdf" ] ,
+   [ lm:name "http://www.w3.org/ns/prov-aq#" ; lm:altName "file:org/purl/wf4ever/provtaverna/owl/prov-aq.rdf" ] ,
+   [ lm:name "http://www.w3.org/ns/prov-dictionary#" ; lm:altName "file:org/purl/wf4ever/provtaverna/owl/prov-dictionary.rdf" ] ,
+   [ lm:name "http://purl.org/wf4ever/ro" ; lm:altName "file:org/purl/wf4ever/provtaverna/owl/ro.owl" ] ,
+   [ lm:name "http://purl.org/wf4ever/ro#" ; lm:altName "file:org/purl/wf4ever/provtaverna/owl/ro.owl" ] ,
+   [ lm:name "http://purl.org/wf4ever/roevo" ; lm:altName "file:org/purl/wf4ever/provtaverna/owl/roevo.owl" ] ,
+   [ lm:name "http://purl.org/wf4ever/roevo#" ; lm:altName "file:org/purl/wf4ever/provtaverna/owl/roevo.owl" ] ,
+   [ lm:name "http://www.w3.org/2004/02/skos/core" ; lm:altName "file:org/purl/wf4ever/provtaverna/owl/skos-owl1-dl.rdf" ] ,
+   [ lm:name "http://www.w3.org/TR/skos-reference/skos-owl1-dl.rdf" ; lm:altName "file:org/purl/wf4ever/provtaverna/owl/skos-owl1-dl.rdf" ] ,
+   [ lm:name "http://ns.taverna.org.uk/2012/tavernaprov/" ; lm:altName "file:org/purl/wf4ever/provtaverna/owl/taverna-prov.owl" ] ,
+   [ lm:name "http://www.openarchives.org/ore/terms/" ; lm:altName "file:org/purl/wf4ever/provtaverna/owl/terms.rdf" ] ,
+   [ lm:name "http://purl.org/wf4ever/wf4ever" ; lm:altName "file:org/purl/wf4ever/provtaverna/owl/wf4ever.owl" ] ,
+   [ lm:name "http://purl.org/wf4ever/wf4ever#" ; lm:altName "file:org/purl/wf4ever/provtaverna/owl/wf4ever.owl" ] ,
+   [ lm:name "http://purl.org/wf4ever/wfdesc" ; lm:altName "file:org/purl/wf4ever/provtaverna/owl/wfdesc.owl" ] ,
+   [ lm:name "http://purl.org/wf4ever/wfdesc#" ; lm:altName "file:org/purl/wf4ever/provtaverna/owl/wfdesc.owl" ] ,
+   [ lm:name "http://purl.org/wf4ever/wfprov" ; lm:altName "file:org/purl/wf4ever/provtaverna/owl/wfprov.owl" ] ,
+   [ lm:name "http://purl.org/wf4ever/wfprov#" ; lm:altName "file:org/purl/wf4ever/provtaverna/owl/wfprov.owl" ]
+   .
