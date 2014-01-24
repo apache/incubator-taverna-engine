@@ -930,7 +930,7 @@ public class W3ProvenanceExport {
 
         // // Saving a data bundle:
         // Path bundleFile = runPath.getParent().resolve(runPath.getFileName() +
-        // ".robundle.zip");
+        // ".bundle.zip");
         // DataBundles.closeAndSaveBundle(dataBundle, bundleFile);
         // NOTE: From now dataBundle and its Path's are CLOSED
         // and can no longer be accessed

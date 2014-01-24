@@ -2,8 +2,6 @@ package org.purl.wf4ever.provtaverna.ui;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
@@ -14,10 +12,6 @@ import net.sf.taverna.t2.workbench.ui.impl.Workbench;
 import net.sf.taverna.t2.workbench.views.results.saveactions.SaveAllResultsSPI;
 
 import org.purl.wf4ever.provtaverna.export.Saver;
-
-import uk.org.taverna.databundle.DataBundles;
-
-
 
 public class SaveProvAction extends SaveAllResultsSPI {
     private static final long serialVersionUID = 1L;
