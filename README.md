@@ -9,7 +9,7 @@ standard](http://www.w3.org/TR/prov-o/).
 ## Source code and license
 This plugin is distributed under the [GNU Lesser General Public License
 2.1](http://www.gnu.org/licenses/lgpl-2.1.html) (LGPL). The source code
-for this plugin is available at https://github.com/wf4ever/taverna-prov
+for this plugin is available at https://github.com/myGrid/taverna-prov
 
 
 ## Installation for Taverna workbench
@@ -21,7 +21,9 @@ You need:
 * Java 1.7 (now comes included with Taverna)
 * Internet connectivity
 
-To install:
+Taverna-PROV is included in Taverna 2.5 and later.
+
+To install any updates to the Taverna-PROV plugin:
 
 1.  Start Taverna workbench
 
@@ -30,18 +32,11 @@ To install:
 3.  If Taverna does not say "An update is available" , click 
     **Find updates**
 
-4.  Click **Find new plugins**
+4.  For **Taverna-PROV databundle**, click **Update** if shown.
 
-5.  Under _Prototype plugins_, tick to select **Taverna-PROV databundle**
+5.  Click **Close**
 
-6.  Click **Install**
-
-7.  A progress bar appears while the modules of the plugin are
-    downloaded
-
-8.  Click **Close**
-
-9. Exit and Restart Taverna workbench
+6. Exit and Restart Taverna workbench
 
 
 ## Usage in the Taverna Workbench
@@ -377,7 +372,7 @@ You can use the [SCUFL2 API](http://dev.mygrid.org.uk/wiki/display/developer/SCU
 The file `.ro/annotations/workflow.wfdesc.ttl` contains the abstract
 structure (but not all the implementation details) of the executed
 workflow, in [RDF Turtle](http://www.w3.org/TR/turtle/)
-according to the [wfdesc ontology](http://wf4ever.github.io/ro/#wfdesc).
+according to the [wfdesc ontology](https://w3id.org/ro/#wfdesc).
 
     c:\Users\stain\workspace\taverna-prov\example\helloanyone.bundle>cat .ro/annotations/workflow.wfdesc.ttl | head -n 20
     @base <http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/> .
