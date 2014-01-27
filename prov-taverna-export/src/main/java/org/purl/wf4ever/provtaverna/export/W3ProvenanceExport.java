@@ -652,11 +652,7 @@ public class W3ProvenanceExport {
             IdentifiedList<T2Reference> list = saver.getReferenceService()
                     .getListService().getList(t2Ref);
             for (T2Reference ref : list) {
-                @SuppressWarnings("unused")
-                Path refFile = saveIntermediate(ref).toRealPath();
-                // URI relRef =
-                // uriTools.relativePath(toURI(parent.toRealPath()),
-                // toURI(refFile.toRealPath()));
+                saveIntermediate(ref);
             }
             seenReference(t2Ref, file);
             return file;
