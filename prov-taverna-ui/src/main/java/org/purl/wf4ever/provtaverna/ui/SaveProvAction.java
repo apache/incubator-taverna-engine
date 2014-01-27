@@ -45,9 +45,28 @@ public class SaveProvAction extends SaveAllResultsSPI {
 //			folder = new File(folder.getParentFile(), 
 //					folderName.substring(0, folderName.length()-1));
 //		} 
+		
+		
 		Saver saver = new Saver(getReferenceService(), getContext(), getRunId(), getChosenReferences());
-		saver.saveData(bundle.toPath());
-		final String msg = "Saved provenance data to:\n" + bundle;
+//		saver.saveData(bundle.toPath());
+		final String msg = "Saved provenance data to:\n" + bundle;		
+				
+		SaveProvSwingWorker worker = new SaveProvSwingWorker(saver, bundle);
+		SaveProvInProgressDialog dialog = new SaveProvInProgressDialog();
+		worker.addPropertyChangeListener(dialog);
+		worker.execute();
+
+		// Give a chance to the SwingWorker to finish so we do not have to display 
+		// the dialog if checking of the object is quick (so it won't flicker on the screen)
+		try {
+		    Thread.sleep(500);
+		} catch (InterruptedException ex) {
+
+		}
+		if (!worker.isDone()){
+		    dialog.setVisible(true); // this will block the GUI
+		}
+		
 		logger.info(msg);
 		SwingUtilities.invokeLater(new Runnable() {			
 			@Override
