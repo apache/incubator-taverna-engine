@@ -13,6 +13,7 @@ import com.hp.hpl.jena.ontology.DatatypeProperty;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.ObjectProperty;
 import com.hp.hpl.jena.ontology.OntClass;
+import com.hp.hpl.jena.ontology.OntDocumentManager;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.rdf.arp.JenaReader;
@@ -22,8 +23,6 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.impl.NTripleReader;
 import com.hp.hpl.jena.util.FileManager;
 import com.hp.hpl.jena.util.LocationMapper;
-import com.hp.hpl.jena.xmloutput.impl.Abbreviated;
-import com.hp.hpl.jena.xmloutput.impl.Basic;
 
 public class ProvModel {
     
@@ -132,7 +131,14 @@ public class ProvModel {
             // So that it can find our location-mapping.n3
             // and the OWLs in classpath /org/purl/wf4ever/provtaverna/owl/
             FileManager.get().addLocatorClassLoader(getClass().getClassLoader());
-            FileManager.get().setLocationMapper(new LocationMapper());
+            
+            Model mapping = ModelFactory.createDefaultModel();
+            InputStream mappingStream = getClass().getResourceAsStream("/location-mapping.n3");
+            mapping.read(mappingStream, "", "N3");
+            
+			FileManager.get().setLocationMapper(new LocationMapper(mapping));	
+			
+			OntDocumentManager.getInstance().setFileManager(FileManager.get());
         }
     }
 
