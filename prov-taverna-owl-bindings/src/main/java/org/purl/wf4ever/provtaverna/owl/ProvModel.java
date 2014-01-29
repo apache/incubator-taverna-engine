@@ -13,6 +13,7 @@ import com.hp.hpl.jena.ontology.DatatypeProperty;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.ObjectProperty;
 import com.hp.hpl.jena.ontology.OntClass;
+import com.hp.hpl.jena.ontology.OntDocumentManager;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.rdf.arp.JenaReader;
@@ -20,8 +21,8 @@ import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.impl.NTripleReader;
-import com.hp.hpl.jena.xmloutput.impl.Abbreviated;
-import com.hp.hpl.jena.xmloutput.impl.Basic;
+import com.hp.hpl.jena.util.FileManager;
+import com.hp.hpl.jena.util.LocationMapper;
 
 public class ProvModel {
     
@@ -91,6 +92,8 @@ public class ProvModel {
 
     public OntModel model;
     
+    private static boolean jenaFileManagerInitialized = false;
+    
     protected OntModel prov;
     protected OntModel provDict;
     
@@ -109,6 +112,7 @@ public class ProvModel {
         }
         setModel(ontModel);
         resetJena();
+        initializeJenaFileManager();
         loadOntologies();
         
         if (defaultPrefix != null) {
@@ -116,6 +120,25 @@ public class ProvModel {
             model.setNsPrefix(EMPTY_PREFIX, defaultPrefix);
         } else {
             model.removeNsPrefix(EMPTY_PREFIX);
+        }
+    }
+
+    private void initializeJenaFileManager() {
+        if (! jenaFileManagerInitialized) {
+            // Only initialize once to avoid adding the same locators
+            // (but no need to synchronize, the occassional extra should be ok)
+            jenaFileManagerInitialized = true;
+            // So that it can find our location-mapping.n3
+            // and the OWLs in classpath /org/purl/wf4ever/provtaverna/owl/
+            FileManager.get().addLocatorClassLoader(getClass().getClassLoader());
+            
+            Model mapping = ModelFactory.createDefaultModel();
+            InputStream mappingStream = getClass().getResourceAsStream("/location-mapping.n3");
+            mapping.read(mappingStream, "", "N3");
+            
+			FileManager.get().setLocationMapper(new LocationMapper(mapping));	
+			
+			OntDocumentManager.getInstance().setFileManager(FileManager.get());
         }
     }
 
