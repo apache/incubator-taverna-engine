@@ -2,6 +2,8 @@ package org.purl.wf4ever.provtaverna.ui;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
@@ -49,11 +51,9 @@ public class SaveProvAction extends SaveAllResultsSPI {
 		
 		Saver saver = new Saver(getReferenceService(), getContext(), getRunId(), getChosenReferences());
 //		saver.saveData(bundle.toPath());
-		final String msg = "Saved provenance data to:\n" + bundle;		
 				
 		SaveProvSwingWorker worker = new SaveProvSwingWorker(saver, bundle);
-		SaveProvInProgressDialog dialog = new SaveProvInProgressDialog();
-		worker.addPropertyChangeListener(dialog);
+		SaveProvInProgressDialog dialog = new SaveProvInProgressDialog(worker);		
 		worker.execute();
 
 		// Give a chance to the SwingWorker to finish so we do not have to display 
@@ -67,14 +67,7 @@ public class SaveProvAction extends SaveAllResultsSPI {
 		    dialog.setVisible(true); // this will block the GUI
 		}
 		
-		logger.info(msg);
-		SwingUtilities.invokeLater(new Runnable() {			
-			@Override
-			public void run() {				
-				JOptionPane.showMessageDialog(Workbench.getInstance(), 
-						msg);
-			}
-		});
+		
 	}
 
 	@Override

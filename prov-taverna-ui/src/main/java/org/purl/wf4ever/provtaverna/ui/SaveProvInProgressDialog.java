@@ -2,10 +2,12 @@ package org.purl.wf4ever.provtaverna.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.Frame;
+import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import javax.swing.AbstractAction;
+import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -27,9 +29,10 @@ public class SaveProvInProgressDialog extends JDialog implements PropertyChangeL
 
 	private static final long serialVersionUID = 3022516542431968398L;
 
-	public SaveProvInProgressDialog() {
+	public SaveProvInProgressDialog(final SaveProvSwingWorker worker) {
 		
 		super((JFrame) null, "Saving provenance bundle", true);
+		worker.addPropertyChangeListener(this);
 
 		setLocationRelativeTo(null);
 		setResizable(false);
@@ -44,7 +47,17 @@ public class SaveProvInProgressDialog extends JDialog implements PropertyChangeL
 		text.setBorder(new EmptyBorder(10,0,10,0));
 		textPanel.add(text);
 		panel.add(textPanel, BorderLayout.CENTER);
-
+		
+		JButton cancelButton = new JButton(new AbstractAction("Cancel") {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				worker.cancel(true);
+			}
+		});
+		JPanel buttons = new JPanel();
+		buttons.add(cancelButton, BorderLayout.CENTER);		
+		panel.add(buttons, BorderLayout.SOUTH);
+		
 		setContentPane(panel);
 		setPreferredSize(new Dimension(300, 100));
 
