@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
@@ -42,13 +43,16 @@ import java.security.Security;
 import java.security.KeyStore.Entry;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -480,7 +484,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 						keystore.store(fos, masterPassword.toCharArray());
 					} catch (Exception ex) {
 						String exMessage = "Failed to generate a new empty Keystore.";
-						//logger.error(exMessage, ex);
+						logger.error(exMessage, ex);
 						throw new CMException(exMessage, ex);
 					} finally {
 						if (fos != null) {
@@ -571,7 +575,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 			} else {
 				if (createEmptyKeystores){
 					/*
-					 * Otherwise create a new empty Truststore and load it with
+					 * Create a new empty Truststore and load it with
 					 * certs from Java's truststore, if createEmptyKeystores flag is set.
 					 */
 					File javaTruststoreFile = new File(System
@@ -671,13 +675,50 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 								}
 							}
 						}
+						// Insert BioCatalogue and BiodiversityCatalogue's certificates
+						InputStream[] trustedCertStreams = getSpecialTrustedCertificateStreams();
+						logger.info("Loading BioCatalogue and BiodiversityCatalogue's certificates.");	
+						for (InputStream trustedCertStream : trustedCertStreams) {
+							// Load the certificate (possibly a chain) from the stream
+							List<X509Certificate> trustedCertChain = new ArrayList<X509Certificate>();
+							try {
+								CertificateFactory cf = CertificateFactory.getInstance("X.509");
+								Collection<? extends Certificate> c = cf.generateCertificates(trustedCertStream);
+								Iterator<? extends Certificate> i = c.iterator();
+								while (i.hasNext()) {
+									trustedCertChain.add((X509Certificate) i.next());
+								}
+							} catch (Exception cex) {
+								logger.error(cex);
+							} finally {
+								try {
+									trustedCertStream.close();
+								} catch (Exception ex) {
+									// ignore
+								}
+							}
+
+							if (trustedCertChain.size() > 0) { // Managed to load certificate (chain)
+								for (X509Certificate trustedCert : trustedCertChain){
+									String alias = createX509CertificateAlias(trustedCert);
+									try {
+										truststore.setCertificateEntry(alias, trustedCert);
+									}
+									catch (Exception ex) {
+										String exMessage = "Credential Manager: Failed to insert trusted certificate entry in the Truststore.";
+										logger.error(exMessage, ex);
+									}	
+								}
+							}
+						}
+						
 						// Immediately save the new Truststore to the file
 						fos = new FileOutputStream(truststoreFile);
 						truststore.store(fos, masterPassword.toCharArray());
 					} catch (Exception ex) {
 						truststore = null;// make it null as it was just created but failed to save so we should retry next time
 						String exMessage = "Failed to generate new empty Taverna's Truststore.";
-						//logger.error(exMessage, ex);
+						logger.error(exMessage, ex);
 						throw new CMException(exMessage, ex);
 					} finally {
 						if (fos != null) {
@@ -721,6 +762,20 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 		}
 	}
 
+	// Return an array of input streams for 'special' trusted certificates contained in the
+	// resources folder that need to be loaded into Truststore, e.g. BioCatalogue's certificate.
+	public static InputStream[] getSpecialTrustedCertificateStreams(){
+		
+		InputStream biocatCert = CredentialManager.class.getResourceAsStream(
+				"/trusted-certificates/www.biocatalogue.org.pem");
+		InputStream biodivcatCert = CredentialManager.class.getResourceAsStream(
+				"/trusted-certificates/www.biodiversitycatalogue.org.pem");							
+		
+		InputStream[] trustedCertStreams = new InputStream[] {biocatCert, biodivcatCert};
+		
+		return trustedCertStreams;
+	}
+	
 	private static boolean copyPasswordFromGUI(KeyStore javaTruststore,
 			File javaTruststoreFile) {
 		List<CredentialProviderSPI> masterPasswordProviders = findMasterPasswordProviders();
