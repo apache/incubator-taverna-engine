@@ -145,7 +145,7 @@ command line tool has a separate home directory from the workbench)
     ```
 
     You should replace `<version>2.1.7-SNAPSHOT</version>` with whatever is the
-    latest version [listed on the taverna-prov plugin site](http://wf4ever.github.com/taverna-prov/pluginlist.xml).
+    latest version.
 
 4.  Start the command line tool without parameters to force downloading
     of plugins (this might take a few minutes the first time):
@@ -320,7 +320,7 @@ Example listing:
             rdfs:label                   "taverna-prov export of workflow run provenance"@en ;
             prov:wasInformedBy           <http://ns.taverna.org.uk/2011/run/385c794c-ba11-4007-a5b5-502ba8d14263/> ;
 
-See the [provenance graph](example/helloanyone.bundle/workflowrun.prov.ttl) for a complete example. The provenance uses the vocabularies [PROV-O](http://www.w3.org/TR/prov-o/), [wfprov](http://purl.org/wf4ever/model#wfprov) and [tavernaprov](http://ns.taverna.org.uk/2012/tavernaprov/).
+See the [provenance graph](example/helloanyone.bundle/workflowrun.prov.ttl) for a complete example. The provenance uses the vocabularies [PROV-O](http://www.w3.org/TR/prov-o/), [wfprov](https://w3id.org/ro#wfprov) and [tavernaprov](http://ns.taverna.org.uk/2012/tavernaprov/).
 
 #### Intermediate values
 
