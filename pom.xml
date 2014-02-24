@@ -27,7 +27,7 @@
 		<t2.taverna-commandline.version>1.4</t2.taverna-commandline.version>
         <scufl2.version>0.13.1</scufl2.version>
         <scufl2.wfdesc.version>0.3.3</scufl2.wfdesc.version>
-        <databundle.version>0.3.0-SNAPSHOT</databundle.version>
+        <databundle.version>0.3.0</databundle.version>
 	</properties>
 
 	<build>
