@@ -848,9 +848,10 @@ public class W3ProvenanceExport {
             PathMetadata aggregation = manifest.getAggregation(uri);
             if (aggregation == null) {
                 // An external reference? Add it.
-                aggregation = new PathMetadata();
-                aggregation.setUri(uri);
-                manifest.getAggregates().add(aggregation);
+		aggregation = manifest.getAggregation(uri);
+                //aggregation = new PathMetadata();
+                //aggregation.setUri(uri);
+                //manifest.getAggregates().add(aggregation);
             }
             aggregation.setMediatype(mediatype);
         }
