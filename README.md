@@ -133,7 +133,7 @@ command line tool has a separate home directory from the workbench)
             <dependency>
                 <groupId>org.purl.wf4ever.provtaverna</groupId>
                 <artifactId>prov-taverna-cmdline</artifactId>
-                <version>2.1.7-SNAPSHOT</version>
+                <version>2.2.0-SNAPSHOT</version>
             </dependency>
         </profile>
         <compatibility>
@@ -144,7 +144,7 @@ command line tool has a separate home directory from the workbench)
     </plugin>
     ```
 
-    You should replace `<version>2.1.7-SNAPSHOT</version>` with whatever is the
+    You should replace `<version>2.2.0-SNAPSHOT</version>` with whatever is the
     latest version.
 
 4.  Start the command line tool without parameters to force downloading
