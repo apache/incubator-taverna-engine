@@ -652,8 +652,7 @@ public class W3ProvenanceExport {
             IdentifiedList<T2Reference> list = saver.getReferenceService()
                     .getListService().getList(t2Ref);
             for (T2Reference ref : list) {
-                @SuppressWarnings("unused")
-                Path refFile = saveIntermediate(ref).toRealPath();
+                saveIntermediate(ref);
                 // URI relRef =
                 // uriTools.relativePath(toURI(parent.toRealPath()),
                 // toURI(refFile.toRealPath()));
@@ -852,9 +851,10 @@ public class W3ProvenanceExport {
             PathMetadata aggregation = manifest.getAggregation(uri);
             if (aggregation == null) {
                 // An external reference? Add it.
-                aggregation = new PathMetadata();
-                aggregation.setUri(uri);
-                manifest.getAggregates().add(aggregation);
+		aggregation = manifest.getAggregation(uri);
+                //aggregation = new PathMetadata();
+                //aggregation.setUri(uri);
+                //manifest.getAggregates().add(aggregation);
             }
             aggregation.setMediatype(mediatype);
         }
