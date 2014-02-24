@@ -9,7 +9,7 @@ standard](http://www.w3.org/TR/prov-o/).
 ## Source code and license
 This plugin is distributed under the [GNU Lesser General Public License
 2.1](http://www.gnu.org/licenses/lgpl-2.1.html) (LGPL). The source code
-for this plugin is available at https://github.com/wf4ever/taverna-prov
+for this plugin is available at https://github.com/myGrid/taverna-prov
 
 
 ## Installation for Taverna workbench
@@ -149,7 +149,7 @@ command line tool has a separate home directory from the workbench)
             <dependency>
                 <groupId>org.purl.wf4ever.provtaverna</groupId>
                 <artifactId>prov-taverna-cmdline</artifactId>
-                <version>2.1.5</version>
+                <version>2.1.6</version>
             </dependency>
         </profile>
         <compatibility>
@@ -160,8 +160,8 @@ command line tool has a separate home directory from the workbench)
     </plugin>
     ```
 
-    You should replace `<version>2.1.5</version>` with whatever is the
-    latest version [listed on the taverna-prov plugin site](http://wf4ever.github.com/taverna-prov/pluginlist.xml).
+    You should replace `<version>2.1.6</version>` with whatever is the
+    latest version.
 
 4.  Start the command line tool without parameters to force downloading
     of plugins (this might take a few minutes the first time):
@@ -336,7 +336,7 @@ Example listing:
             rdfs:label                   "taverna-prov export of workflow run provenance"@en ;
             prov:wasInformedBy           <http://ns.taverna.org.uk/2011/run/385c794c-ba11-4007-a5b5-502ba8d14263/> ;
 
-See the [provenance graph](example/helloanyone.bundle/workflowrun.prov.ttl) for a complete example. The provenance uses the vocabularies [PROV-O](http://www.w3.org/TR/prov-o/), [wfprov](http://purl.org/wf4ever/model#wfprov) and [tavernaprov](http://ns.taverna.org.uk/2012/tavernaprov/).
+See the [provenance graph](example/helloanyone.bundle/workflowrun.prov.ttl) for a complete example. The provenance uses the vocabularies [PROV-O](http://www.w3.org/TR/prov-o/), [wfprov](https://w3id.org/ro#wfprov) and [tavernaprov](http://ns.taverna.org.uk/2012/tavernaprov/).
 
 #### Intermediate values
 
@@ -388,7 +388,7 @@ You can use the [SCUFL2 API](http://dev.mygrid.org.uk/wiki/display/developer/SCU
 The file `.ro/annotations/workflow.wfdesc.ttl` contains the abstract
 structure (but not all the implementation details) of the executed
 workflow, in [RDF Turtle](http://www.w3.org/TR/turtle/)
-according to the [wfdesc ontology](http://wf4ever.github.io/ro/#wfdesc).
+according to the [wfdesc ontology](https://w3id.org/ro/#wfdesc).
 
     c:\Users\stain\workspace\taverna-prov\example\helloanyone.bundle>cat .ro/annotations/workflow.wfdesc.ttl | head -n 20
     @base <http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/> .
