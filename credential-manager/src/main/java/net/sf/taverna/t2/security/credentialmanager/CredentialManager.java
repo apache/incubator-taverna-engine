@@ -675,9 +675,9 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 								}
 							}
 						}
-						// Insert BioCatalogue and BiodiversityCatalogue's certificates
+						// Insert BioCatalogue, BiodiversityCatalogue and heater's certificates
 						InputStream[] trustedCertStreams = getSpecialTrustedCertificateStreams();
-						logger.info("Loading BioCatalogue and BiodiversityCatalogue's certificates.");	
+						logger.info("Loading BioCatalogue, BiodiversityCatalogue and heater's certificates.");	
 						for (InputStream trustedCertStream : trustedCertStreams) {
 							// Load the certificate (possibly a chain) from the stream
 							List<X509Certificate> trustedCertChain = new ArrayList<X509Certificate>();
@@ -769,9 +769,11 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 		InputStream biocatCert = CredentialManager.class.getResourceAsStream(
 				"/trusted-certificates/www.biocatalogue.org.pem");
 		InputStream biodivcatCert = CredentialManager.class.getResourceAsStream(
-				"/trusted-certificates/www.biodiversitycatalogue.org.pem");							
+				"/trusted-certificates/www.biodiversitycatalogue.org.pem");	
+		InputStream heaterCert = CredentialManager.class.getResourceAsStream(
+				"/trusted-certificates/heater.cs.man.ac.uk.pem");
 		
-		InputStream[] trustedCertStreams = new InputStream[] {biocatCert, biodivcatCert};
+		InputStream[] trustedCertStreams = new InputStream[] {biocatCert, biodivcatCert, heaterCert};
 		
 		return trustedCertStreams;
 	}
