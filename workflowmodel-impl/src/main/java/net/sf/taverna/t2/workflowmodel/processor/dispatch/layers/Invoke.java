@@ -323,16 +323,7 @@ public class Invoke extends AbstractDispatchLayer<Object> {
 				String processorOutputName = asyncActivity
 						.getOutputPortMapping().get(outputName);
 				if (processorOutputName != null) {
-					T2Reference ref = data.get(outputName);
-					if (ref.containsErrors()) {
-						Processor p = getProcessor();
-						String message = "Processor '" + getProcessor().getLocalName() + "' - Port '" + processorOutputName + "'";
-						resultMap.put (processorOutputName,
-								errorDocumentService
-						.registerError(message , Collections.singleton(ref), ref.getDepth(), null).getId());
-					} else {
 						resultMap.put(processorOutputName, data.get(outputName));
-					}
 				}
 			}
 			// Construct a new index array if the specified index is
