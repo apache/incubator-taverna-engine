@@ -3,12 +3,21 @@
  */
 package net.sf.taverna.t2.lang.ui;
 
+import static org.apache.log4j.Logger.getLogger;
+
 import java.awt.BorderLayout;
+import java.awt.Desktop;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JEditorPane;
 import javax.swing.JPanel;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
+
+import org.apache.log4j.Logger;
 
 /**
  * @author alanrw
@@ -16,8 +25,24 @@ import javax.swing.JPanel;
  */
 public class HtmlUtils {
 	
+	private static Logger logger = getLogger(HtmlUtils.class);
+
+
+	
 	public static JEditorPane createEditorPane(String html) {
 		JEditorPane result = new JEditorPane("text/html", html);
+		result.addHyperlinkListener(new HyperlinkListener() {
+
+			@Override
+			public void hyperlinkUpdate(HyperlinkEvent arg0) {
+				if (HyperlinkEvent.EventType.ACTIVATED == arg0.getEventType()) {
+	                try {
+	                    Desktop.getDesktop().browse(arg0.getURL().toURI());
+	                } catch (IOException | URISyntaxException e1) {
+	                    logger.error(e1);
+	                }
+	            }
+			}});
 		result.setEditable(false);
 		return result;
 	}
