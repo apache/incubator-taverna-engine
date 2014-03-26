@@ -80,4 +80,6 @@ public abstract class AbstractExternalReference implements ExternalReferenceSPI 
 	public float getResolutionCost() {
 		return 0.0f;
 	}
+	
+	public abstract ExternalReferenceSPI clone() throws CloneNotSupportedException;
 }
