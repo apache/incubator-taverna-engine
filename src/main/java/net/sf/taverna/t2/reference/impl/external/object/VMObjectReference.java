@@ -108,6 +108,12 @@ public class VMObjectReference extends AbstractExternalReference implements
 		// We do not know the object size
 		return new Long(-1);
 	}
+	
+	public VMObjectReference clone() {
+		VMObjectReference result = new VMObjectReference();
+		result.setUuid(this.getUuid());
+		return result;
+	}
 
 }
 

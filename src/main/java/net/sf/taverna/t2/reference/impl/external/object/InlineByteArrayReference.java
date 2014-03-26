@@ -93,4 +93,10 @@ public class InlineByteArrayReference extends AbstractExternalReference
 	public Long getApproximateSizeInBytes() {
 		return new Long(bytes.length);
 	}
+	
+	public InlineByteArrayReference clone() {
+		InlineByteArrayReference result = new InlineByteArrayReference();
+		result.setContents(this.getContents());
+		return result;
+	}
 }

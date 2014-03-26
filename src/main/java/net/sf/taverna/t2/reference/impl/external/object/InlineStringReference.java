@@ -117,5 +117,11 @@ public class InlineStringReference extends AbstractExternalReference implements
 	public Long getApproximateSizeInBytes() {
 		return new Long(contents.getBytes().length);
 	}
+	
+	public InlineStringReference clone() {
+		InlineStringReference result = new InlineStringReference();
+		result.setContents(this.getContents());
+		return result;
+	}
 
 }
