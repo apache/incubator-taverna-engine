@@ -193,5 +193,11 @@ public class HttpReference extends AbstractExternalReference implements
 	public void deleteData() {
 		throw new UnsupportedOperationException("Cannot delete data referenced by a URL");
 	}
+	
+	public HttpReference clone() {
+		HttpReference result = new HttpReference();
+		result.setHttpUrlString(this.getHttpUrlString());
+		return result;
+	}
 
 }
