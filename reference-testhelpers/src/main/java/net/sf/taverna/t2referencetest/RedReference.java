@@ -119,4 +119,9 @@ public class RedReference extends AbstractExternalReference implements
 		return new Long(contents.getBytes().length);
 	}
 
+	@Override
+	public ExternalReferenceSPI clone() throws CloneNotSupportedException {
+		return new RedReference(this.getContents());
+	}
+
 }

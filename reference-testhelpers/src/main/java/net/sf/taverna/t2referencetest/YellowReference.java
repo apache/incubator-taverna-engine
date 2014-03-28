@@ -120,4 +120,9 @@ public class YellowReference extends AbstractExternalReference implements
 		return new Long(contents.getBytes().length);
 	}
 
+	@Override
+	public ExternalReferenceSPI clone() throws CloneNotSupportedException {
+		return new YellowReference(this.getContents());
+	}
+
 }

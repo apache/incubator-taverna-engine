@@ -119,4 +119,9 @@ public class GreenReference extends AbstractExternalReference implements
 		return new Long(contents.getBytes().length);
 	}
 
+	@Override
+	public ExternalReferenceSPI clone() throws CloneNotSupportedException {
+		return new GreenReference(this.getContents());
+	}
+
 }
