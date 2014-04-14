@@ -117,6 +117,8 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 	private WorkflowProvenanceItem workflowItem = null;
 
 	private int portsToComplete;
+	
+	private enum WorkflowInstanceFacadeChange {CANCELLATION, PORT_DECREMENT, PROCESSOR_DECREMENT};
 
 	public WorkflowInstanceFacadeImpl(final Dataflow dataflow,
 			InvocationContext context, String parentProcess)
@@ -378,11 +380,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 						workflowDataProvenanceItem);				
 			}
 			
-			if (token.getIndex().length == 0) {
-				synchronized (WorkflowInstanceFacadeImpl.this) {
-					portsToComplete--;
-				}
-			}
+
 			ArrayList<ResultListener> copyOfListeners;
 			synchronized (resultListeners) {
 				copyOfListeners = new ArrayList<ResultListener>(resultListeners);
@@ -396,7 +394,10 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 							+ resultListener, ex);
 				}
 			}
-			checkWorkflowFinished();
+			if (token.getIndex().length == 0) {
+				checkWorkflowFinished(WorkflowInstanceFacadeChange.PORT_DECREMENT);
+			}
+
 
 		}
 	}
@@ -421,9 +422,6 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 			if (! message.getOwningProcess().equals(expectedProcessId)) {
 				return;
 			}
-			synchronized(WorkflowInstanceFacadeImpl.this) {
-				processorsToComplete--;
-			}
 			
 			// De-register the processor node from the monitor as it has finished
 			monitorManager.deregisterNode(message.getOwningProcess());
@@ -432,12 +430,22 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 			message.getProcessor().removeObserver(this);
 			
 			// All processors have finished => the workflow run has finished
-			checkWorkflowFinished();
+			checkWorkflowFinished(WorkflowInstanceFacadeChange.PROCESSOR_DECREMENT);
 		}
 	}
 
-	protected void checkWorkflowFinished() {
+	protected void checkWorkflowFinished(WorkflowInstanceFacadeChange change) {
 		synchronized (this) {
+			if (WorkflowInstanceFacadeChange.CANCELLATION.equals(change)) {
+				processorsToComplete = 0;
+				portsToComplete = 0;
+			}
+			else if (WorkflowInstanceFacadeChange.PORT_DECREMENT.equals(change)) {
+				portsToComplete--;
+			}
+			else if (WorkflowInstanceFacadeChange.PROCESSOR_DECREMENT.equals(change)) {
+				processorsToComplete--;
+			}
 			if (getState().equals(State.cancelled) && processorsToComplete < 0) {
 				logger.error("Already cancelled workflow run "
 						+ instanceOwningProcessId);
@@ -584,9 +592,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 							+ facadeListener, ex);
 				}
 			}
-			processorsToComplete = 0;
-			portsToComplete = 0;
-			checkWorkflowFinished();		
+			checkWorkflowFinished(WorkflowInstanceFacadeChange.CANCELLATION);		
 		}
 		return result;
 	}
