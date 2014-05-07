@@ -11,12 +11,12 @@
 	<name>Archetypes</name>
 	<packaging>pom</packaging>
 
-	<version>1.5</version>
+	<version>1.6-SNAPSHOT</version>
 	<scm>
 		<connection>scm:git:https://github.com/taverna/taverna-maven-archetypes.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com/taverna/taverna-maven-archetypes.git</developerConnection>
 		<url>https://github.com/taverna/taverna-maven-archetypes/</url>
-	  <tag>archetypes-1.5</tag>
+	  <tag>HEAD</tag>
   </scm>
     <build>
         <pluginManagement>
