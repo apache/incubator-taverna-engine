@@ -13,9 +13,9 @@
 
 	<version>1.4-SNAPSHOT</version>
 	<scm>
-		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/dev/archetypes/branches/maintenance/</connection>
-		<developerConnection>scm:svn:https://taverna.googlecode.com/svn/taverna/dev/archetypes/branches/maintenance/</developerConnection>
-		<url>http://code.google.com/p/taverna/source/browse/#svn/taverna/dev/archetypes/branches/maintenance/</url>
+		<connection>scm:git:https://github.com/taverna/taverna-maven-archetypes.git</connection>
+		<developerConnection>scm:git:ssh://git@github.com/taverna/taverna-maven-archetypes.git</developerConnection>
+		<url>https://github.com/taverna/taverna-maven-archetypes/</url>
 	</scm>
     <build>
         <pluginManagement>
@@ -23,7 +23,7 @@
             <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-release-plugin</artifactId>
-              <version>2.0</version>
+              <version>2.5</version>
             </plugin>
           </plugins>
         </pluginManagement>
@@ -31,7 +31,7 @@
             <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-release-plugin</artifactId>
-              <version>2.0</version>
+              <version>2.5</version>
             </plugin>
           </plugins>
     </build>
