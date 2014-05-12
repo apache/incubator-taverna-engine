@@ -5,13 +5,13 @@
 	<parent>
 		<groupId>net.sf.taverna</groupId>
 		<artifactId>taverna-parent</artifactId>
-		<version>2.5-SNAPSHOT</version>
+		<version>2.6-SNAPSHOT</version>
         <relativePath>../../taverna-parent/pom.xml</relativePath>
 	</parent>
 	<groupId>net.sf.taverna.t2.core</groupId>
 	<artifactId>reference-core-extensions</artifactId>
-	<version>1.5-SNAPSHOT</version>
-	<name>Implementation of core extension points</name>
+	<version>1.6-SNAPSHOT</version>
+	<name>Taverna engine referencetypes</name>
 	<description>
 		Implementations of certain SPIs to provide a core set of
 		functionality for the reference management framework. This
