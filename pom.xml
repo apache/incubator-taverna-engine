@@ -33,4 +33,32 @@
 			<version>${t2.reference-core-extensions.version}</version>
 		</dependency>
 	</dependencies>
+	<repositories>
+		<repository>
+			<releases />
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>mygrid-repository</id>
+			<name>myGrid Repository</name>
+			<url>http://www.mygrid.org.uk/maven/repository</url>
+		</repository>
+		<repository>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots />
+			<id>mygrid-snapshot-repository</id>
+			<name>myGrid Snapshot Repository</name>
+			<url>http://www.mygrid.org.uk/maven/snapshot-repository</url>
+		</repository>
+	</repositories>
+	<scm>
+                <connection>scm:git:https://github.com/taverna/taverna-activity-test-utils.git</connection>
+                <developerConnection>scm:git:ssh://git@github.com:taverna/taverna-activity-test-utils.git</developerConnection>
+                <url>https://github.com/taverna/taverna-activity-test-utils</url>
+                <tag>HEAD</tag>
+	</scm>
+	
+	
 </project>
