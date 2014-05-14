@@ -66,9 +66,10 @@
 		<module>ui</module>
 		<module>uibuilder</module>
 	</modules>
-	<scm>
-		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/utils/net.sf.taverna.t2.lang/trunk/</connection>
-		<developerConnection>scm:svn:https://taverna.googlecode.com/svn/taverna/utils/net.sf.taverna.t2.lang/trunk/</developerConnection>
-		<url>http://code.google.com/p/taverna/source/browse/#svn/taverna/utils/net.sf.taverna.t2.lang/trunk/</url>
-	</scm>
+        <scm>
+                <connection>scm:git:https://github.com/taverna/taverna-support-utilities.git</connection>
+                <developerConnection>scm:git:ssh://git@github.com:taverna/taverna-support-utilities.git</developerConnection>
+                <url>https://github.com/taverna/taverna-support-utilities</url>
+                <tag>HEAD</tag>
+        </scm>
 </project>
