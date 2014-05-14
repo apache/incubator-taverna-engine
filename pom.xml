@@ -43,9 +43,10 @@
 		</repository>
 	</repositories>
 	<scm>
-		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/engine/net.sf.taverna.t2.core/trunk/</connection>
-		<developerConnection>scm:svn:https://taverna.googlecode.com/svn/taverna/engine/net.sf.taverna.t2.core/trunk/</developerConnection>
-		<url>http://code.google.com/p/taverna/source/browse/#svn/taverna/engine/net.sf.taverna.t2.core/trunk</url>
+                <connection>scm:git:https://github.com/taverna/taverna-engine-core.git/connection>
+                <developerConnection>scm:git:ssh://git@github.com:taverna/taverna-engine-core.git</developerConnection>
+                <url>https://github.com/taverna/taverna-engine-core</url>
+                <tag>HEAD</tag>
 	</scm>
 	<dependencyManagement>
 		<dependencies>
