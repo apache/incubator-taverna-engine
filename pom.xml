@@ -27,11 +27,11 @@
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>${log4j.version}</version>
-        </dependency>
+	        <dependency>
+	            <groupId>log4j</groupId>
+	            <artifactId>log4j</artifactId>
+	            <version>${log4j.version}</version>
+	        </dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -39,5 +39,32 @@
 			<version>${junit.version}</version>
 		</dependency>
 	</dependencies>
+       <repositories>
+                <repository>
+                        <releases />
+                        <snapshots>
+                                <enabled>false</enabled>
+                        </snapshots>
+                        <id>mygrid-repository</id>
+                        <name>myGrid Repository</name>
+                        <url>http://www.mygrid.org.uk/maven/repository</url>
+                </repository>
+                <repository>
+                        <releases>
+                                <enabled>false</enabled>
+                        </releases>
+                        <snapshots />
+                        <id>mygrid-snapshot-repository</id>
+                        <name>myGrid Snapshot Repository</name>
+                        <url>http://www.mygrid.org.uk/maven/snapshot-repository</url>
+                </repository>
+        </repositories>
+        <scm>
+                <connection>scm:git:https://github.com/taverna/taverna-dataflow-activity.git</connection>
+                <developerConnection>scm:git:ssh://git@github.com/taverna/taverna-dataflow-activity.git</developerConnection>
+                <url>https://github.com/taverna/taverna-dataflow-activity/</url>
+                <tag>HEAD</tag>
+        </scm>
+	
 </project>
 
