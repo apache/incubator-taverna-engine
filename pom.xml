@@ -43,7 +43,7 @@
 		</repository>
 	</repositories>
 	<scm>
-                <connection>scm:git:https://github.com/taverna/taverna-engine-core.git/connection>
+                <connection>scm:git:https://github.com/taverna/taverna-engine-core.git</connection>
                 <developerConnection>scm:git:ssh://git@github.com:taverna/taverna-engine-core.git</developerConnection>
                 <url>https://github.com/taverna/taverna-engine-core</url>
                 <tag>HEAD</tag>
