@@ -38,8 +38,8 @@ import org.apache.commons.httpclient.methods.HeadMethod;
 /**
  * Implementation of ExternalReference used to refer to data held in a locally
  * accessible file. Inherits from
- * {@link net.sf.taverna.t2.reference.AbstractExternalReference AbstractExternalReference}
- * to enable hibernate based persistence.
+ * {@link net.sf.taverna.t2.reference.AbstractExternalReference
+ * AbstractExternalReference} to enable hibernate based persistence.
  * 
  * @author Tom Oinn
  * 
@@ -49,7 +49,7 @@ public class HttpReference extends AbstractExternalReference implements
 
 	private String httpUrlString = null;
 	private URL httpUrl = null;
-	
+
 	private String charsetName = null;
 	private boolean charsetFetched = false;
 
@@ -64,6 +64,7 @@ public class HttpReference extends AbstractExternalReference implements
 	/**
 	 * Return the data at the {@link URL} represented by this external reference
 	 */
+	@Override
 	public InputStream openStream(ReferenceContext context)
 			throws DereferenceException {
 		try {
@@ -82,8 +83,8 @@ public class HttpReference extends AbstractExternalReference implements
 			return charsetName;
 		}
 		charsetFetched = true;
-		if (!httpUrl.getProtocol().equals("http") &&
-				!httpUrl.getProtocol().equals("https")) {
+		if (!httpUrl.getProtocol().equals("http")
+				&& !httpUrl.getProtocol().equals("https")) {
 			charsetName = null;
 			return null;
 		}
@@ -163,10 +164,16 @@ public class HttpReference extends AbstractExternalReference implements
 		return true;
 	}
 
+	@Override
 	public Long getApproximateSizeInBytes() {
 		try {
-			String lenString = httpUrl.openConnection().getHeaderField("Content-Length");
-			if (lenString == null || lenString.equals("")){ // there is no Content-Length field so we cannot know the size
+			String lenString = httpUrl.openConnection().getHeaderField(
+					"Content-Length");
+			if (lenString == null || lenString.equals("")) { // there is no
+																// Content-Length
+																// field so we
+																// cannot know
+																// the size
 				return new Long(-1);
 			}
 			return new Long(lenString);
@@ -182,8 +189,11 @@ public class HttpReference extends AbstractExternalReference implements
 		return httpUrl;
 	}
 
-	/* (non-Javadoc)
-	 * @see net.sf.taverna.t2.reference.AbstractExternalReference#getResolutionCost()
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.sf.taverna.t2.reference.AbstractExternalReference#getResolutionCost()
 	 */
 	@Override
 	public float getResolutionCost() {
@@ -191,9 +201,11 @@ public class HttpReference extends AbstractExternalReference implements
 	}
 
 	public void deleteData() {
-		throw new UnsupportedOperationException("Cannot delete data referenced by a URL");
+		throw new UnsupportedOperationException(
+				"Cannot delete data referenced by a URL");
 	}
-	
+
+	@Override
 	public HttpReference clone() {
 		HttpReference result = new HttpReference();
 		result.setHttpUrlString(this.getHttpUrlString());

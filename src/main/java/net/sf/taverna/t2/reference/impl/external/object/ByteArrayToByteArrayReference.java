@@ -31,11 +31,13 @@ import net.sf.taverna.t2.reference.ValueToReferenceConverterSPI;
  * @author Tom Oinn
  * 
  */
-public class ByteArrayToByteArrayReference implements ValueToReferenceConverterSPI {
+public class ByteArrayToByteArrayReference implements
+		ValueToReferenceConverterSPI {
 
 	/**
 	 * Can convert if the object is an instance of byte[]
 	 */
+	@Override
 	public boolean canConvert(Object o, ReferenceContext context) {
 		return (o instanceof byte[]);
 	}
@@ -43,6 +45,7 @@ public class ByteArrayToByteArrayReference implements ValueToReferenceConverterS
 	/**
 	 * Return a new InlineByteArrayReference wrapping the supplied byte[]
 	 */
+	@Override
 	public ExternalReferenceSPI convert(Object o, ReferenceContext context)
 			throws ValueToReferenceConversionException {
 		InlineByteArrayReference result = new InlineByteArrayReference();

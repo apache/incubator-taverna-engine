@@ -48,16 +48,18 @@ public class StreamToByteArrayConverter implements
 		return bos.toByteArray();
 	}
 
+	@Override
 	public Class<byte[]> getPojoClass() {
 		return byte[].class;
 	}
 
+	@Override
 	public byte[] renderFrom(InputStream stream,
 			ReferencedDataNature dataNature, String charset) {
-			try {
-				return readFile(stream);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
+		try {
+			return readFile(stream);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }

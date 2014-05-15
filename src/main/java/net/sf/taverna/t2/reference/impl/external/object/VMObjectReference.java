@@ -28,21 +28,20 @@ import java.util.Map;
 import java.util.UUID;
 
 import net.sf.taverna.t2.reference.AbstractExternalReference;
-import net.sf.taverna.t2.reference.DereferenceException;
 import net.sf.taverna.t2.reference.ExternalReferenceSPI;
 import net.sf.taverna.t2.reference.ReferenceContext;
 
 /**
- * Implementation of ExternalReferenceSPI used to refer to objects 
- * in the local virtual machine. 
+ * Implementation of ExternalReferenceSPI used to refer to objects in the local
+ * virtual machine.
  * 
  * @author Stian Soiland-Reyes
  * @author Alex Nenadic
- *
+ * 
  */
 public class VMObjectReference extends AbstractExternalReference implements
-		ExternalReferenceSPI, Serializable{
-	
+		ExternalReferenceSPI, Serializable {
+
 	/**
 	 * 
 	 */
@@ -52,7 +51,7 @@ public class VMObjectReference extends AbstractExternalReference implements
 	 * Unique reference to the object.
 	 */
 	private String uuid;
-	
+
 	/**
 	 * Mapping from objects to their UUIDs.
 	 */
@@ -63,8 +62,8 @@ public class VMObjectReference extends AbstractExternalReference implements
 	 */
 	private static Map<UUID, Object> uuidToObject = new HashMap<UUID, Object>();
 
-	public InputStream openStream(ReferenceContext context)
-			 {
+	@Override
+	public InputStream openStream(ReferenceContext context) {
 		return new StringBufferInputStream(getObject().toString());
 
 	}
@@ -75,7 +74,7 @@ public class VMObjectReference extends AbstractExternalReference implements
 	public String getUuid() {
 		return uuid;
 	}
-	
+
 	/**
 	 * Setter used by hibernate to set the object uuid property.
 	 */
@@ -85,7 +84,7 @@ public class VMObjectReference extends AbstractExternalReference implements
 		}
 		this.uuid = id;
 	}
-	
+
 	public void setObject(Object object) {
 		if (uuid != null) {
 			throw new IllegalStateException("Can't set UUID an object twice");
@@ -104,11 +103,13 @@ public class VMObjectReference extends AbstractExternalReference implements
 		return uuidToObject.get(UUID.fromString(uuid));
 	}
 
+	@Override
 	public Long getApproximateSizeInBytes() {
 		// We do not know the object size
 		return new Long(-1);
 	}
-	
+
+	@Override
 	public VMObjectReference clone() {
 		VMObjectReference result = new VMObjectReference();
 		result.setUuid(this.getUuid());
@@ -116,4 +117,3 @@ public class VMObjectReference extends AbstractExternalReference implements
 	}
 
 }
-

@@ -56,23 +56,24 @@ public class StreamToStringConverter implements
 		return buffer.toString();
 	}
 
+	@Override
 	public Class<String> getPojoClass() {
 		return String.class;
 	}
 
+	@Override
 	public String renderFrom(InputStream stream,
 			ReferencedDataNature dataNature, String charset) {
 		BufferedReader in;
-		if ((charset == null) || !dataNature.equals(ReferencedDataNature.TEXT)){
+		if ((charset == null) || !dataNature.equals(ReferencedDataNature.TEXT)) {
 			in = new BufferedReader(new InputStreamReader(stream));
 		} else {
 			try {
 				Charset c = Charset.forName(charset);
 				in = new BufferedReader(new InputStreamReader(stream, c));
-			}
-			catch (IllegalArgumentException e1) {
+			} catch (IllegalArgumentException e1) {
 				in = new BufferedReader(new InputStreamReader(stream));
-			}					
+			}
 		}
 		try {
 			return readFile(in);

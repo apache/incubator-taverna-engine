@@ -36,21 +36,20 @@ import net.sf.taverna.t2.reference.StreamToValueConverterSPI;
 public class StreamToVMObjectReferenceConverter implements
 		StreamToValueConverterSPI<VMObjectReference> {
 
-
+	@Override
 	public Class<VMObjectReference> getPojoClass() {
 		return VMObjectReference.class;
 	}
 
+	@Override
 	public VMObjectReference renderFrom(InputStream stream,
 			ReferencedDataNature dataNature, String charset) {
-	     VMObjectReference vmRef = new VMObjectReference();
-	     try
-	     {
-	 		ObjectInputStream in = new ObjectInputStream(stream);
-	    	vmRef = (VMObjectReference) in.readObject();
-	    	return vmRef;
-	     }
-		catch (IOException e) {
+		VMObjectReference vmRef = new VMObjectReference();
+		try {
+			ObjectInputStream in = new ObjectInputStream(stream);
+			vmRef = (VMObjectReference) in.readObject();
+			return vmRef;
+		} catch (IOException e) {
 			throw new RuntimeException(e);
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException(e);
