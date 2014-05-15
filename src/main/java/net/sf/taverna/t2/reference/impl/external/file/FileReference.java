@@ -34,8 +34,8 @@ import net.sf.taverna.t2.reference.ReferencedDataNature;
 /**
  * Implementation of ExternalReference used to refer to data held in a locally
  * accessible file. Inherits from
- * {@link net.sf.taverna.t2.reference.AbstractExternalReference AbstractExternalReference}
- * to enable hibernate based persistence.
+ * {@link net.sf.taverna.t2.reference.AbstractExternalReference
+ * AbstractExternalReference} to enable hibernate based persistence.
  * 
  * @author Tom Oinn
  * 
@@ -46,7 +46,7 @@ public class FileReference extends AbstractExternalReference implements
 	private String filePathString = null;
 	private String charset = null;
 	private File file = null;
-	
+
 	private String dataNatureName = ReferencedDataNature.UNKNOWN.name();
 
 	/**
@@ -71,6 +71,7 @@ public class FileReference extends AbstractExternalReference implements
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public InputStream openStream(ReferenceContext context) {
 		try {
 			return new FileInputStream(file);
@@ -117,7 +118,7 @@ public class FileReference extends AbstractExternalReference implements
 	 */
 	@Override
 	public String toString() {
-		return "file{"+file.getAbsolutePath()+"}";
+		return "file{" + file.getAbsolutePath() + "}";
 	}
 
 	@Override
@@ -145,6 +146,7 @@ public class FileReference extends AbstractExternalReference implements
 		return true;
 	}
 
+	@Override
 	public Long getApproximateSizeInBytes() {
 		return new Long(file.length());
 	}
@@ -152,12 +154,14 @@ public class FileReference extends AbstractExternalReference implements
 	/**
 	 * @return the dataNature
 	 */
+	@Override
 	public ReferencedDataNature getDataNature() {
-		return ReferencedDataNature.valueOf(ReferencedDataNature.class, getDataNatureName());
+		return Enum.valueOf(ReferencedDataNature.class, getDataNatureName());
 	}
 
 	/**
-	 * @param dataNature the dataNature to set
+	 * @param dataNature
+	 *            the dataNature to set
 	 */
 	public void setDataNature(ReferencedDataNature dataNature) {
 		setDataNatureName(dataNature.name());
@@ -170,8 +174,11 @@ public class FileReference extends AbstractExternalReference implements
 		return file;
 	}
 
-	/* (non-Javadoc)
-	 * @see net.sf.taverna.t2.reference.AbstractExternalReference#getResolutionCost()
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.sf.taverna.t2.reference.AbstractExternalReference#getResolutionCost()
 	 */
 	@Override
 	public float getResolutionCost() {
@@ -186,7 +193,8 @@ public class FileReference extends AbstractExternalReference implements
 	}
 
 	/**
-	 * @param dataNatureName the dataNatureName to set
+	 * @param dataNatureName
+	 *            the dataNatureName to set
 	 */
 	public void setDataNatureName(String dataNatureName) {
 		this.dataNatureName = dataNatureName;

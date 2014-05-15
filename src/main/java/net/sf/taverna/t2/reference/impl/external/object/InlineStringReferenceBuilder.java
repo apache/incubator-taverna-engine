@@ -38,6 +38,7 @@ import net.sf.taverna.t2.reference.ReferenceContext;
 public class InlineStringReferenceBuilder implements
 		ExternalReferenceBuilderSPI<InlineStringReference> {
 
+	@Override
 	public InlineStringReference createReference(InputStream byteStream,
 			ReferenceContext context) {
 		try {
@@ -52,14 +53,17 @@ public class InlineStringReferenceBuilder implements
 		}
 	}
 
+	@Override
 	public float getConstructionCost() {
 		return 0.1f;
 	}
 
+	@Override
 	public Class<InlineStringReference> getReferenceType() {
 		return InlineStringReference.class;
 	}
 
+	@Override
 	public boolean isEnabled(ReferenceContext context) {
 		return true;
 	}

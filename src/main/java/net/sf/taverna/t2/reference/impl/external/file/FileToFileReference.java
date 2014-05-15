@@ -41,6 +41,7 @@ public class FileToFileReference implements ValueToReferenceConverterSPI {
 	 * file is a file or directory etc etc, for now just checks whether the
 	 * specified object is a java.io.File
 	 */
+	@Override
 	public boolean canConvert(Object o, ReferenceContext context) {
 		return (o instanceof File);
 	}
@@ -48,6 +49,7 @@ public class FileToFileReference implements ValueToReferenceConverterSPI {
 	/**
 	 * Return a FileReference
 	 */
+	@Override
 	public ExternalReferenceSPI convert(Object o, ReferenceContext context)
 			throws ValueToReferenceConversionException {
 		FileReference result = new FileReference();

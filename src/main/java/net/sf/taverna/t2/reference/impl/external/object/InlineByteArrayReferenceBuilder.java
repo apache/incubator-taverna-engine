@@ -36,6 +36,7 @@ import net.sf.taverna.t2.reference.ReferenceContext;
 public class InlineByteArrayReferenceBuilder implements
 		ExternalReferenceBuilderSPI<InlineByteArrayReference> {
 
+	@Override
 	public InlineByteArrayReference createReference(InputStream byteStream,
 			ReferenceContext context) {
 		try {
@@ -48,14 +49,17 @@ public class InlineByteArrayReferenceBuilder implements
 		}
 	}
 
+	@Override
 	public float getConstructionCost() {
 		return 0.1f;
 	}
 
+	@Override
 	public Class<InlineByteArrayReference> getReferenceType() {
 		return InlineByteArrayReference.class;
 	}
 
+	@Override
 	public boolean isEnabled(ReferenceContext context) {
 		return true;
 	}

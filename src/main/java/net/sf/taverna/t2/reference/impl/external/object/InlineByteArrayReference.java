@@ -49,7 +49,7 @@ import org.apache.log4j.Logger;
 public class InlineByteArrayReference extends AbstractExternalReference
 		implements ValueCarryingExternalReference<byte[]> {
 
-			private static Logger logger = Logger
+	private static Logger logger = Logger
 			.getLogger(InlineByteArrayReference.class);
 
 	private byte[] bytes = new byte[0];
@@ -58,14 +58,17 @@ public class InlineByteArrayReference extends AbstractExternalReference
 		this.bytes = newBytes;
 	}
 
+	@Override
 	public byte[] getValue() {
 		return bytes;
 	}
 
+	@Override
 	public Class<byte[]> getValueType() {
 		return byte[].class;
 	}
 
+	@Override
 	public InputStream openStream(ReferenceContext context)
 			throws DereferenceException {
 		return new ByteArrayInputStream(bytes);
@@ -84,12 +87,14 @@ public class InlineByteArrayReference extends AbstractExternalReference
 
 	public void setContents(String contentsAsString) {
 		try {
-			this.bytes = Base64.decodeBase64(contentsAsString.getBytes(charset.toString()));
+			this.bytes = Base64.decodeBase64(contentsAsString.getBytes(charset
+					.toString()));
 		} catch (UnsupportedEncodingException e) {
 			logger.error("Could not decode string", e);
 		}
 	}
 
+	@Override
 	public Long getApproximateSizeInBytes() {
 		return new Long(bytes.length);
 	}

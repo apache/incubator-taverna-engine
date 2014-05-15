@@ -39,6 +39,7 @@ public class UrlToHttpReference implements ValueToReferenceConverterSPI {
 	 * Can convert if the object is an instance of java.net.URL and the protocol
 	 * is HTTP
 	 */
+	@Override
 	public boolean canConvert(Object o, ReferenceContext context) {
 		if (o instanceof URL) {
 			String protocol = ((URL) o).getProtocol();
@@ -53,6 +54,7 @@ public class UrlToHttpReference implements ValueToReferenceConverterSPI {
 	 * Return a new HttpReference constructed from
 	 * <code>((URL)o).toExternalForm()</code>
 	 */
+	@Override
 	public ExternalReferenceSPI convert(Object o, ReferenceContext context)
 			throws ValueToReferenceConversionException {
 		HttpReference result = new HttpReference();

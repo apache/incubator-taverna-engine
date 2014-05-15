@@ -65,10 +65,11 @@ public class InlineStringReference extends AbstractExternalReference implements
 	 * Fakes a de-reference operation, returning a byte stream over the string
 	 * data.
 	 */
+	@Override
 	public InputStream openStream(ReferenceContext arg0) {
 		try {
-			return new ByteArrayInputStream(this.contents
-					.getBytes(getCharset()));
+			return new ByteArrayInputStream(
+					this.contents.getBytes(getCharset()));
 		} catch (UnsupportedEncodingException e) {
 			throw new DereferenceException(e);
 		}
@@ -106,14 +107,17 @@ public class InlineStringReference extends AbstractExternalReference implements
 		return "string{" + contents + "}";
 	}
 
+	@Override
 	public String getValue() {
 		return getContents();
 	}
 
+	@Override
 	public Class<String> getValueType() {
 		return String.class;
 	}
 
+	@Override
 	public Long getApproximateSizeInBytes() {
 		return new Long(contents.getBytes().length);
 	}
