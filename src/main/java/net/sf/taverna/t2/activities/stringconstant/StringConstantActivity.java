@@ -79,6 +79,7 @@ public class StringConstantActivity extends AbstractAsynchronousActivity<JsonNod
 			final AsynchronousActivityCallback callback) {
 		callback.requestRun(new Runnable() {
 
+			@Override
 			public void run() {
 				ReferenceService referenceService = callback.getContext().getReferenceService();
 				try {
