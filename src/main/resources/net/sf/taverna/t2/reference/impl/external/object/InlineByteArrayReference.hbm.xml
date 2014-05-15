@@ -10,7 +10,7 @@
 		<!-- Link to primary key from abstract superclass -->
 		<key column="bean_id" />
 		<!-- Reference specific props -->
-		<property name="contents" type="text" length="100000000" />
+		<property name="contents" type="text" length="1000000000" />
 	</joined-subclass>
 </hibernate-mapping>
 

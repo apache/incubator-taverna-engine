@@ -28,7 +28,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import net.sf.taverna.t2.reference.AbstractExternalReference;
-import net.sf.taverna.t2.reference.DereferenceException;
 import net.sf.taverna.t2.reference.ExternalReferenceSPI;
 import net.sf.taverna.t2.reference.ReferenceContext;
 
@@ -108,6 +107,13 @@ public class VMObjectReference extends AbstractExternalReference implements
 	public Long getApproximateSizeInBytes() {
 		// We do not know the object size
 		return new Long(-1);
+	}
+
+	@Override
+	public VMObjectReference clone() {
+		VMObjectReference result = new VMObjectReference();
+		result.setUuid(this.getUuid());
+		return result;
 	}
 
 }

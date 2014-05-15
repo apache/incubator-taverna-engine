@@ -11,7 +11,7 @@
 	<artifactId>reference-core-extensions</artifactId>
 	<version>2.0.1-SNAPSHOT</version>
 	<packaging>bundle</packaging>
-	<name>Implementation of core extension points</name>
+	<name>Taverna engine referencetypes</name>
 	<description>
 		Implementations of certain SPIs to provide a core set of
 		functionality for the reference management framework. This
@@ -57,11 +57,6 @@
 			<url>http://www.mygrid.org.uk/maven/snapshot-repository</url>
 		</repository>
 	</repositories>
-	<scm>
-		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/engine/net.sf.taverna.t2.core.reference-core-extensions/trunk/</connection>
-		<developerConnection>scm:svn:https://taverna.googlecode.com/svn/taverna/engine/net.sf.taverna.t2.core.reference-core-extensions/trunk/</developerConnection>
-		<url>http://code.google.com/p/taverna/source/browse/#svn/taverna/engine/net.sf.taverna.t2.core.reference-core-extensions/trunk</url>
-	</scm>
 	<dependencies>
 		<dependency>
 			<groupId>net.sf.taverna.t2.core</groupId>

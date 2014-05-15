@@ -208,4 +208,13 @@ public class FileReference extends AbstractExternalReference implements
 		}
 	}
 
+	@Override
+	public FileReference clone() {
+		FileReference result = new FileReference();
+		result.setFilePath(this.getFilePath());
+		result.setCharset(this.getCharset());
+		result.setDataNature(this.getDataNature());
+		return result;
+	}
+
 }

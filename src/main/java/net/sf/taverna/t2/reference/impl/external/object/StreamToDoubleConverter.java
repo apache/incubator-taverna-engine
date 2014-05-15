@@ -25,7 +25,7 @@ public class StreamToDoubleConverter implements
 			ReferencedDataNature dataNature, String charset) {
 		StreamToStringConverter stringConverter = new StreamToStringConverter();
 		String s = stringConverter.renderFrom(stream, dataNature, charset);
-		Double result = Double.valueOf(s);
+		Double result = Double.valueOf(s.trim());
 		return result;
 
 	}

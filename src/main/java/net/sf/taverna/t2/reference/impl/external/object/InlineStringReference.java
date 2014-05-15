@@ -122,4 +122,11 @@ public class InlineStringReference extends AbstractExternalReference implements
 		return new Long(contents.getBytes().length);
 	}
 
+	@Override
+	public InlineStringReference clone() {
+		InlineStringReference result = new InlineStringReference();
+		result.setContents(this.getContents());
+		return result;
+	}
+
 }
