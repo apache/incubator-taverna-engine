@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.List;
 
 import net.sf.taverna.t2.invocation.InvocationContext;
-import net.sf.taverna.t2.invocation.InvocationContextEntitySource;
 import net.sf.taverna.t2.provenance.reporter.ProvenanceReporter;
 import net.sf.taverna.t2.reference.ReferenceService;
 
