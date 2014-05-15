@@ -51,24 +51,11 @@ public class RemoveProcessorInputPortEditTest {
 		assertSame(p,processor);
 		assertEquals(0,processor.getInputPorts().size());
 	}
-	
-	@Test
-	public void testUndo() throws Exception {
-		assertFalse(removeProcessorInputPortEdit.isApplied());
-		removeProcessorInputPortEdit.doEdit();
-		assertTrue(removeProcessorInputPortEdit.isApplied());
-		removeProcessorInputPortEdit.undo();
-		assertFalse(removeProcessorInputPortEdit.isApplied());
-		assertEquals(1,processor.getInputPorts().size());
-		assertSame(inputPort,processor.getInputPorts().get(0));
-	}
-	
+		
 	@Test
 	public void testSubject() throws Exception {
 		assertSame(processor,removeProcessorInputPortEdit.getSubject());
 		removeProcessorInputPortEdit.doEdit();
-		assertSame(processor,removeProcessorInputPortEdit.getSubject());
-		removeProcessorInputPortEdit.undo();
-		assertSame(processor,removeProcessorInputPortEdit.getSubject());
+		assertSame(processor,removeProcessorInputPortEdit.getSubject());		
 	}
 }

@@ -49,31 +49,21 @@ public class DefaultDispatchStackEditTest {
 	@Test
 	public void testUndo() throws Exception {
 		defaultDispatchStackEdit.doEdit();
-		assertTrue(processor.getDispatchStack().getLayers().size()>0);
-		defaultDispatchStackEdit.undo();
-		assertEquals(0,processor.getDispatchStack().getLayers().size());
+		assertTrue(processor.getDispatchStack().getLayers().size()>0);		
 	}
 	
 	@Test
 	public void testSubject() throws Exception {
 		assertSame(processor,defaultDispatchStackEdit.getSubject());
 		defaultDispatchStackEdit.doEdit();
-		assertSame(processor,defaultDispatchStackEdit.getSubject());
-		defaultDispatchStackEdit.undo();
-		assertSame(processor,defaultDispatchStackEdit.getSubject());
-		defaultDispatchStackEdit.doEdit();
-		assertSame(processor,defaultDispatchStackEdit.getSubject());
+		assertSame(processor,defaultDispatchStackEdit.getSubject());		
 	}
 	
 	@Test
 	public void testApplied() throws Exception {
 		assertFalse(defaultDispatchStackEdit.isApplied());
 		defaultDispatchStackEdit.doEdit();
-		assertTrue(defaultDispatchStackEdit.isApplied());
-		defaultDispatchStackEdit.undo();
-		assertFalse(defaultDispatchStackEdit.isApplied());
-		defaultDispatchStackEdit.doEdit();
-		assertTrue(defaultDispatchStackEdit.isApplied());
+		assertTrue(defaultDispatchStackEdit.isApplied());		
 	}
 	
 }

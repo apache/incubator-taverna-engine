@@ -91,55 +91,6 @@ public class ConnectMergedDatalinkEditTest {
 		assertSame(sourcePort2,merge.getInputPorts().get(1).getIncomingLink().getSource());
 	}
 	
-	@Test
-	public void undo() throws Exception {
-		Edit<Merge> theEdit = new ConnectMergedDatalinkEdit(merge,sourcePort,sinkPort);
-		theEdit.doEdit();
-		theEdit.undo();
-		assertEquals(0,merge.getInputPorts().size());
-		assertEquals(0,merge.getOutputPort().getOutgoingLinks().size());
-		assertEquals(0,sourcePort.getOutgoingLinks().size());
-		assertNull(sinkPort.getIncomingLink());
-	}
-	
-	/**
-	 * Check that the outgoing link to the sink port is retained when undoing a second merged input.
-	 */
-	@Test
-	public void undoSecond() throws Exception {
-		Edit<Merge> theEdit = new ConnectMergedDatalinkEdit(merge,sourcePort,sinkPort);
-		theEdit.doEdit();
-		ProcessorImpl p3=new ProcessorImpl();
-		ProcessorOutputPortImpl sourcePort2=new ProcessorOutputPortImpl(p3,"source_port2",0,0);
-		Edit<Merge> theEdit2 = new ConnectMergedDatalinkEdit(merge,sourcePort2,sinkPort);
-		theEdit2.doEdit();
-		theEdit2.undo();
-		assertEquals(1,merge.getInputPorts().size());
-		assertEquals(1,merge.getOutputPort().getOutgoingLinks().size());
-	}
-	
-	@Test
-	public void redo() throws Exception {
-		Edit<Merge> theEdit = new ConnectMergedDatalinkEdit(merge,sourcePort,sinkPort);
-		theEdit.doEdit();
-		theEdit.undo();
-		theEdit.doEdit();
-		
-		assertEquals(1,merge.getInputPorts().size());
-		assertTrue(merge.getInputPorts().get(0) instanceof MergeInputPort);
-		assertSame(sourcePort,merge.getInputPorts().get(0).getIncomingLink().getSource());
-		
-		assertEquals(1,merge.getOutputPort().getOutgoingLinks().size());
-		assertSame(sinkPort,merge.getOutputPort().getOutgoingLinks().toArray(new Datalink[]{})[0].getSink());
-		
-		assertEquals(1,sourcePort.getOutgoingLinks().size());
-		assertTrue(sourcePort.getOutgoingLinks().toArray(new Datalink[]{})[0].getSink() instanceof MergeInputPort);
-		assertTrue(sinkPort.getIncomingLink().getSource() instanceof MergeOutputPort);
-		
-		assertSame(merge.getInputPorts().get(0),sourcePort.getOutgoingLinks().toArray(new Datalink[]{})[0].getSink());
-		assertSame(sinkPort.getIncomingLink().getSource(),merge.getOutputPort());
-	}
-	
 	@Test(expected=RuntimeException.class)
 	public void nullMerge() throws Exception {
 		new ConnectMergedDatalinkEdit(null,sourcePort,sinkPort);

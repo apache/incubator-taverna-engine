@@ -55,22 +55,9 @@ public class RemoveProcessorOutputPortEditTest {
 	}
 	
 	@Test
-	public void testUndo() throws Exception {
-		assertFalse(removeProcessorOutputPortEdit.isApplied());
-		removeProcessorOutputPortEdit.doEdit();
-		assertTrue(removeProcessorOutputPortEdit.isApplied());
-		removeProcessorOutputPortEdit.undo();
-		assertFalse(removeProcessorOutputPortEdit.isApplied());
-		assertEquals(1,processor.getOutputPorts().size());
-		assertSame(outputPort,processor.getOutputPorts().get(0));
-	}
-	
-	@Test
 	public void testSubject() throws Exception {
 		assertSame(processor,removeProcessorOutputPortEdit.getSubject());
 		removeProcessorOutputPortEdit.doEdit();
-		assertSame(processor,removeProcessorOutputPortEdit.getSubject());
-		removeProcessorOutputPortEdit.undo();
-		assertSame(processor,removeProcessorOutputPortEdit.getSubject());
+		assertSame(processor,removeProcessorOutputPortEdit.getSubject());		
 	}
 }

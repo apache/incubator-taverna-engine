@@ -175,28 +175,7 @@ public class AbstractDatalinkEditTest {
 		};
 		assertFalse(edit.isApplied());
 		edit.doEdit();
-		assertTrue(edit.isApplied());
-		edit.undo();
-		assertFalse(edit.isApplied());
-	}
-
-	@Test
-	public void testUndo() throws EditException {
-		AbstractDatalinkEdit edit = new AbstractDatalinkEdit(datalink) {
-			@Override
-			protected void doEditAction(DatalinkImpl datalink)
-					throws EditException {
-				editDone = true;
-			}
-		};
-		assertFalse(editDone);
-		assertFalse(edit.isApplied());
-		edit.doEdit();
-		assertTrue(editDone);
-		assertTrue(edit.isApplied());
-		edit.undo();
-		assertFalse(editDone);
-		assertFalse(edit.isApplied());
+		assertTrue(edit.isApplied());		
 	}
 
 	@Test(expected = RuntimeException.class)

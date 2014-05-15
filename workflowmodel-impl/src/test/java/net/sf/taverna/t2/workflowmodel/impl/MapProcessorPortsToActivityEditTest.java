@@ -81,9 +81,7 @@ public class MapProcessorPortsToActivityEditTest {
 	public void testIsApplied() throws Exception {
 		assertFalse(edit.isApplied());
 		edit.doEdit();
-		assertTrue(edit.isApplied());
-		edit.undo();
-		assertFalse(edit.isApplied());
+		assertTrue(edit.isApplied());		
 	}
 
 	@Test
@@ -91,14 +89,6 @@ public class MapProcessorPortsToActivityEditTest {
 		edit.doEdit();
 		assertEquals("there should now be 1 input port",1,p.getInputPorts().size());
 		assertEquals("there should now be 1 output port",1,p.getOutputPorts().size());
-	}
-
-	@Test
-	public void testUndo() throws Exception {
-		edit.doEdit();
-		edit.undo();
-		assertEquals("there should now be 2 input ports",2,p.getInputPorts().size());
-		assertEquals("there should now be 2 output ports",2,p.getOutputPorts().size());
 	}
 
 	@Test
@@ -121,14 +111,6 @@ public class MapProcessorPortsToActivityEditTest {
 		assertEquals(1,a.getOutputPortMapping().size());
 		assertEquals("outputPort1",a.getOutputPortMapping().get("outputPort1"));
 
-		edit.undo();
-
-		assertEquals(2,a.getInputPortMapping().size());
-		assertEquals("inputPort1",a.getInputPortMapping().get("inputPort1"));
-		assertEquals("inputPort2",a.getInputPortMapping().get("inputPort2"));
-		assertEquals(2,a.getOutputPortMapping().size());
-		assertEquals("outputPort1",a.getOutputPortMapping().get("outputPort1"));
-		assertEquals("outputPort2",a.getOutputPortMapping().get("outputPort2"));
 	}
 
 	@Test
