@@ -28,7 +28,6 @@ import net.sf.taverna.t2.invocation.InvocationContext;
 import net.sf.taverna.t2.invocation.InvocationContextEntitySource;
 import net.sf.taverna.t2.provenance.reporter.ProvenanceReporter;
 import net.sf.taverna.t2.reference.ReferenceService;
-import net.sf.taverna.t2.spi.SPIRegistry;
 
 public class InvocationContextImpl implements InvocationContext {
 
@@ -39,21 +38,12 @@ public class InvocationContextImpl implements InvocationContext {
 	private List<Object> entities = Collections
 			.synchronizedList(new ArrayList<Object>());
 	
-	private static SPIRegistry<InvocationContextEntitySource> icesRegistry = new SPIRegistry<InvocationContextEntitySource>(InvocationContextEntitySource.class);
-
 	public InvocationContextImpl(ReferenceService referenceService,
 			ProvenanceReporter provenanceReporter) {
 		this.referenceService = referenceService;
 		this.provenanceReporter = provenanceReporter;
-		
-		pokeEntities();
 	}
 	
-	private void pokeEntities() {
-		for (InvocationContextEntitySource ices: icesRegistry.getInstances()) {
-			this.addEntity(ices.getEntity());
-		}
-	}
 
 	public ReferenceService getReferenceService() {
 		return referenceService;
