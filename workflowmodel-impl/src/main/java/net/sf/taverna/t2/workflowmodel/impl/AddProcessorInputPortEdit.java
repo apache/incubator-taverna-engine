@@ -36,9 +36,6 @@ import org.jdom.Element;
  * 
  */
 public class AddProcessorInputPortEdit extends AbstractProcessorEdit {
-
-	Element previousIterationStrategyState = null;
-
 	private final ProcessorInputPortImpl port;
 
 	public AddProcessorInputPortEdit(Processor p, ProcessorInputPort port) {
@@ -60,7 +57,6 @@ public class AddProcessorInputPortEdit extends AbstractProcessorEdit {
 					"Attempt to create duplicate input port with name '"
 							+ port.getName() + "'");
 		}
-		previousIterationStrategyState = processor.iterationStack.asXML();
 		processor.inputPorts.add(port);
 		for (IterationStrategyImpl is : processor.iterationStack.getStrategies()) {
 			NamedInputPortNode nipn = new NamedInputPortNode(port.getName(),
@@ -70,13 +66,4 @@ public class AddProcessorInputPortEdit extends AbstractProcessorEdit {
 		}
 
 	}
-
-	@Override
-	protected void undoEditAction(ProcessorImpl processor) {
-		processor.iterationStack
-				.configureFromElement(previousIterationStrategyState);
-		processor.inputPorts
-				.remove(processor.getInputPortWithName(port.getName()));
-	}
-
 }

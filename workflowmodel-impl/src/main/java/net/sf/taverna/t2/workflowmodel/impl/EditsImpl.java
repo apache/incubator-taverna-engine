@@ -75,25 +75,30 @@ import net.sf.taverna.t2.workflowmodel.processor.iteration.impl.IterationStrateg
  */
 public class EditsImpl implements Edits {
 
+	@Override
 	public Dataflow createDataflow() {
 		return new DataflowImpl();
 	}
 
+	@Override
 	public Datalink createDatalink(EventForwardingOutputPort source,
 			EventHandlingInputPort sink) {
 		return new DatalinkImpl(source, sink);
 	}
 
+	@Override
 	public DataflowInputPort createDataflowInputPort(String name, int depth,
 			int granularDepth, Dataflow dataflow) {
 		return new DataflowInputPortImpl(name, depth, granularDepth, dataflow);
 	}
 
+	@Override
 	public DataflowOutputPort createDataflowOutputPort(String name,
 			Dataflow dataflow) {
 		return new DataflowOutputPortImpl(name, dataflow);
 	}
 
+	@Override
 	public MergeInputPort createMergeInputPort(Merge merge, String name,
 			int depth) {
 		if (merge instanceof MergeImpl) {
@@ -103,110 +108,130 @@ public class EditsImpl implements Edits {
 		}
 	}
 
+	@Override
 	public ProcessorOutputPort createProcessorOutputPort(Processor processor,
 			String name, int depth, int granularDepth) {
 		return new ProcessorOutputPortImpl((ProcessorImpl) processor, name,
 				depth, granularDepth);
 	}
 
+	@Override
 	public ProcessorInputPort createProcessorInputPort(Processor processor,
 			String name, int depth) {
 		return new ProcessorInputPortImpl((ProcessorImpl) processor, name,
 				depth);
 	}
 
+	@Override
 	public Edit<Dataflow> getAddProcessorEdit(Dataflow dataflow,
 			Processor processor) {
 		return new AddProcessorEdit(dataflow, processor);
 	}
 
+	@Override
 	public Edit<Dataflow> getAddMergeEdit(Dataflow dataflow, Merge merge) {
 		return new AddMergeEdit(dataflow, merge);
 	}
 
+	@Override
 	public Edit<DispatchStack> getAddDispatchLayerEdit(DispatchStack stack,
 			DispatchLayer<?> layer, int position) {
 		return new AddDispatchLayerEdit(stack, layer, position);
 	}
 
+	@Override
 	public Edit<Processor> getAddActivityEdit(Processor processor,
 			Activity<?> activity) {
 		return new AddActivityEdit(processor, activity);
 	}
 
+	@Override
 	public Edit<Processor> getAddProcessorInputPortEdit(Processor processor,
 			ProcessorInputPort port) {
 		return new AddProcessorInputPortEdit(processor, port);
 	}
 
+	@Override
 	public Edit<Processor> getAddProcessorOutputPortEdit(Processor processor,
 			ProcessorOutputPort port) {
 		return new AddProcessorOutputPortEdit(processor, port);
 	}
 
+	@Override
 	public Edit<Dataflow> getCreateDataflowInputPortEdit(Dataflow dataflow,
 			String portName, int portDepth, int granularDepth) {
 		return new CreateDataflowInputPortEdit(dataflow, portName, portDepth,
 				granularDepth);
 	}
 
+	@Override
 	public Edit<Dataflow> getCreateDataflowOutputPortEdit(Dataflow dataflow,
 			String portName) {
 		return new CreateDataflowOutputPortEdit(dataflow, portName);
 	}
 
+	@Override
 	public Edit<DispatchStack> getDeleteDispatchLayerEdit(DispatchStack stack,
 			DispatchLayer<?> layer) {
 		return new DeleteDispatchLayerEdit(stack, layer);
 	}
 
+	@Override
 	public Edit<Merge> getRenameMergeEdit(Merge merge,
 			String newName) {
 		return new RenameMergeEdit(merge, newName);
 	}
 
+	@Override
 	public Edit<Processor> getRenameProcessorEdit(Processor processor,
 			String newName) {
 		return new RenameProcessorEdit(processor, newName);
 	}
 
+	@Override
 	public Edit<DataflowInputPort> getRenameDataflowInputPortEdit(
 			DataflowInputPort dataflowInputPort, String newName) {
 		return new RenameDataflowInputPortEdit(dataflowInputPort, newName);
 	}
 
+	@Override
 	public Edit<DataflowOutputPort> getRenameDataflowOutputPortEdit(
 			DataflowOutputPort dataflowOutputPort, String newName) {
 		return new RenameDataflowOutputPortEdit(dataflowOutputPort, newName);
 	}
 
+	@Override
 	public Edit<DataflowInputPort> getChangeDataflowInputPortDepthEdit(
 			DataflowInputPort dataflowInputPort, int depth) {
 		return new ChangeDataflowInputPortDepthEdit(dataflowInputPort, depth);
 	}
 
+	@Override
 	public Edit<DataflowInputPort> getChangeDataflowInputPortGranularDepthEdit(
 			DataflowInputPort dataflowInputPort, int granularDepth) {
 		return new ChangeDataflowInputPortGranularDepthEdit(dataflowInputPort,
 				granularDepth);
 	}
 
+	@Override
 	public Edit<Processor> getConnectProcessorOutputEdit(Processor processor,
 			String outputPortName, EventHandlingInputPort targetPort) {
 		return new ConnectProcesorOutputEdit(processor, outputPortName,
 				targetPort);
 	}
 
+	@Override
 	public Edit<Datalink> getConnectDatalinkEdit(Datalink datalink) {
 		return new ConnectDatalinkEdit(datalink);
 	}
 
+	@Override
 	public AnnotationChain createAnnotationChain() {
 		return new AnnotationChainImpl();
 	}
 
 
-	@SuppressWarnings("unchecked")
+	@Override
 	public Edit<AnnotationChain> getAddAnnotationAssertionEdit(
 			AnnotationChain annotationChain,
 			AnnotationAssertion annotationAssertion) {
@@ -221,6 +246,7 @@ public class EditsImpl implements Edits {
 	 * merge is deleted, that is not taken into account when generating merges'
 	 * names.
 	 */
+	@Override
 	public Merge createMerge(Dataflow dataflow) {
 
 		String mergeName;
@@ -252,28 +278,33 @@ public class EditsImpl implements Edits {
 	 * @param sinkPort
 	 *            the sink port to which the link is to be created.
 	 */
+	@Override
 	public Edit<Merge> getConnectMergedDatalinkEdit(Merge merge,
 			EventForwardingOutputPort sourcePort,
 			EventHandlingInputPort sinkPort) {
 		return new ConnectMergedDatalinkEdit(merge, sourcePort, sinkPort);
 	}
 
+	@Override
 	public Edit<OrderedPair<Processor>> getCreateConditionEdit(
 			Processor control, Processor target) {
 		return new CreateConditionEdit(control, target);
 	}
 
+	@Override
 	public Edit<OrderedPair<Processor>> getRemoveConditionEdit(
 			Processor control, Processor target) {
 		return new RemoveConditionEdit(control, target);
 	}
 
+	@Override
 	public Processor createProcessor(String name) {
 		ProcessorImpl processor = new ProcessorImpl();
 		processor.setName(name);
 		return processor;
 	}
 
+	@Override
 	public IterationStrategy createIterationStrategy() {
 		return new IterationStrategyImpl();
 	}
@@ -281,6 +312,7 @@ public class EditsImpl implements Edits {
 	/**
 	 * Builds an instance of {@link ActivityInputPortImpl}
 	 */
+	@Override
 	public ActivityInputPort createActivityInputPort(
 			String portName,
 			int portDepth,
@@ -295,39 +327,42 @@ public class EditsImpl implements Edits {
 	/**
 	 * Builds an instance of {@link ActivityOutputPortImpl}
 	 */
+	@Override
 	public ActivityOutputPort createActivityOutputPort(String portName, int portDepth,
 			int portGranularDepth) {
 		return new ActivityOutputPortImpl(portName, portDepth,
 				portGranularDepth);
 	}
 
+	@Override
 	public WorkflowInstanceFacade createWorkflowInstanceFacade(
 			Dataflow dataflow, InvocationContext context, String parentProcess)
 			throws InvalidDataflowException {
 		return new WorkflowInstanceFacadeImpl(dataflow, context, parentProcess);
 	}
 
-	@SuppressWarnings("unchecked")
+	@Override
 	public Edit<AnnotationAssertion> getAddAnnotationBean(
 			AnnotationAssertion annotationAssertion,
 			AnnotationBeanSPI annotationBean) {
 		return new AddAnnotationBeanEdit(annotationAssertion, annotationBean);
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public Edit<AnnotationAssertion> getAddCurationEvent(
 			AnnotationAssertion annotationAssertion, CurationEvent curationEvent) {
 		return new AddCurationEventEdit(annotationAssertion, curationEvent);
 	}
 
-	@SuppressWarnings("unchecked")
+	@Override
 	public Edit<AnnotationAssertion> getAddAnnotationRole(
 			AnnotationAssertion annotationAssertion,
 			AnnotationRole annotationRole) {
 		return new AddAnnotationRoleEdit(annotationAssertion, annotationRole);
 	}
 
-	@SuppressWarnings("unchecked")
+	@Override
 	public Edit<AnnotationAssertion> getAddAnnotationSource(
 			AnnotationAssertion annotationAssertion,
 			AnnotationSourceSPI annotationSource) {
@@ -335,12 +370,13 @@ public class EditsImpl implements Edits {
 				annotationSource);
 	}
 
-	@SuppressWarnings("unchecked")
+	@Override
 	public Edit<AnnotationAssertion> getAddCreator(
 			AnnotationAssertion annotationAssertion, Person person) {
 		return new AddCreatorEdit(annotationAssertion, person);
 	}
 
+	@Override
 	public Edit<?> getAddAnnotationChainEdit(Annotated<?> annotated,
 			AnnotationBeanSPI annotation) {
 		List<Edit<?>> editList = new ArrayList<Edit<?>>();
@@ -357,54 +393,65 @@ public class EditsImpl implements Edits {
 		return new CompoundEdit(editList);
 	}
 
+	@Override
 	public Edit<Dataflow> getUpdateDataflowNameEdit(Dataflow dataflow,
 			String newName) {
 		return new UpdateDataflowNameEdit(dataflow, newName);
 	}
 
+	@Override
 	public Edit<Dataflow> getUpdateDataflowInternalIdentifierEdit(
 			Dataflow dataflow, String newId) {
 		return new UpdateDataflowInternalIdentifierEdit(dataflow, newId);
 	}
 
+	@Override
 	public Edit<Datalink> getDisconnectDatalinkEdit(Datalink datalink) {
 		return new DisconnectDatalinkEdit(datalink);
 	}
 
+	@Override
 	public Edit<Dataflow> getRemoveDataflowInputPortEdit(Dataflow dataflow,
 			DataflowInputPort dataflowInputPort) {
 		return new RemoveDataflowInputPortEdit(dataflow, dataflowInputPort);
 	}
 
+	@Override
 	public Edit<Dataflow> getRemoveDataflowOutputPortEdit(Dataflow dataflow,
 			DataflowOutputPort dataflowOutputPort) {
 		return new RemoveDataflowOutputPortEdit(dataflow, dataflowOutputPort);
 	}
 
+	@Override
 	public Edit<Dataflow> getRemoveProcessorEdit(Dataflow dataflow,
 			Processor processor) {
 		return new RemoveProcessorEdit(dataflow, processor);
 	}
 
+	@Override
 	public Edit<Dataflow> getRemoveMergeEdit(Dataflow dataflow, Merge merge) {
 		return new RemoveMergeEdit(dataflow, merge);
 	}
 
+	@Override
 	public Edit<Dataflow> getAddDataflowInputPortEdit(Dataflow dataflow,
 			DataflowInputPort dataflowInputPort) {
 		return new AddDataflowInputPortEdit(dataflow, dataflowInputPort);
 	}
 
+	@Override
 	public Edit<Dataflow> getAddDataflowOutputPortEdit(Dataflow dataflow,
 			DataflowOutputPort dataflowOutputPort) {
 		return new AddDataflowOutputPortEdit(dataflow, dataflowOutputPort);
 	}
 
+	@Override
 	public Edit<Activity<?>> getAddActivityInputPortEdit(Activity<?> activity,
 			ActivityInputPort activityInputPort) {
 		return new AddActivityInputPortEdit(activity, activityInputPort);
 	}
 
+	@Override
 	public Edit<Activity<?>> getAddActivityInputPortMappingEdit(
 			Activity<?> activity, String processorPortName,
 			String activityPortName) {
@@ -412,11 +459,13 @@ public class EditsImpl implements Edits {
 				activityPortName);
 	}
 
+	@Override
 	public Edit<Activity<?>> getAddActivityOutputPortEdit(Activity<?> activity,
 			ActivityOutputPort activityOutputPort) {
 		return new AddActivityOutputPortEdit(activity, activityOutputPort);
 	}
 
+	@Override
 	public Edit<Activity<?>> getAddActivityOutputPortMappingEdit(
 			Activity<?> activity, String processorPortName,
 			String activityPortName) {
@@ -424,33 +473,39 @@ public class EditsImpl implements Edits {
 				processorPortName, activityPortName);
 	}
 
+	@Override
 	public Edit<Activity<?>> getRemoveActivityInputPortEdit(
 			Activity<?> activity, ActivityInputPort activityInputPort) {
 		return new RemoveActivityInputPortEdit(activity, activityInputPort);
 	}
 
+	@Override
 	public Edit<Activity<?>> getRemoveActivityInputPortMappingEdit(
 			Activity<?> activity, String processorPortName) {
 		return new RemoveActivityInputPortMappingEdit(activity,
 				processorPortName);
 	}
 
+	@Override
 	public Edit<Activity<?>> getRemoveActivityOutputPortEdit(
 			Activity<?> activity, ActivityOutputPort activityOutputPort) {
 		return new RemoveActivityOutputPortEdit(activity, activityOutputPort);
 	}
 
+	@Override
 	public Edit<Activity<?>> getRemoveActivityOutputPortMappingEdit(
 			Activity<?> activity, String processorPortName) {
 		return new RemoveActivityOutputPortMappingEdit(activity,
 				processorPortName);
 	}
 
+	@Override
 	public Edit<Merge> getAddMergeInputPortEdit(Merge merge,
 			MergeInputPort mergeInputPort) {
 		return new AddMergeInputPortEdit(merge, mergeInputPort);
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <ConfigurationBean> Edit<Activity<?>> getConfigureActivityEdit(
 			Activity<ConfigurationBean> activity,
@@ -458,31 +513,37 @@ public class EditsImpl implements Edits {
 		return new ConfigureActivityEdit(activity, configurationBean);
 	}
 
+	@Override
 	public Edit<Processor> getRemoveProcessorInputPortEdit(Processor processor,
 			ProcessorInputPort port) {
 		return new RemoveProcessorInputPortEdit(processor, port);
 	}
 
+	@Override
 	public Edit<Processor> getRemoveProcessorOutputPortEdit(
 			Processor processor, ProcessorOutputPort port) {
 		return new RemoveProcessorOutputPortEdit(processor, port);
 	}
 
+	@Override
 	public Edit<Processor> getMapProcessorPortsForActivityEdit(
 			Processor processor) {
 		return new MapProcessorPortsForActivityEdit(processor);
 	}
 
+	@Override
 	public Edit<Processor> getDefaultDispatchStackEdit(Processor processor) {
 		return new DefaultDispatchStackEdit(processor);
 	}
 
+	@Override
 	public Edit<Processor> getSetIterationStrategyStackEdit(
 			Processor processor, IterationStrategyStack iterationStrategyStack) {
 		return new SetIterationStrategyStackEdit(processor,
 				iterationStrategyStack);
 	}
 
+	@Override
 	public <ConfigurationType> Edit<? extends Configurable<ConfigurationType>> getConfigureEdit(
 			Configurable<ConfigurationType> configurable,
 			ConfigurationType configBean) {
@@ -490,21 +551,25 @@ public class EditsImpl implements Edits {
 				Configurable.class, configurable, configBean);
 	}
 
+	@Override
 	public Edit<Merge> getReorderMergeInputPortsEdit(Merge merge,
 			List<MergeInputPort> reorderedMergeInputPortList) {
 		return new ReorderMergeInputPortsEdit(merge, reorderedMergeInputPortList);
 	}
 
+	@Override
 	public Edit<Processor> getRemoveActivityEdit(Processor processor,
 			Activity<?> activity) {
 		return new RemoveActivityEdit(processor, activity);
 	}
 
+	@Override
 	public Edit<IterationStrategyStack> getAddIterationStrategyEdit(
 			IterationStrategyStack iterationStrategyStack, IterationStrategy iterationStrategy) {
 		return new AddIterationStrategyEdit(iterationStrategyStack, iterationStrategy);
 	}
 
+	@Override
 	public Edit<IterationStrategy> getAddIterationStrategyInputNodeEdit(
 			IterationStrategy iterationStrategy, NamedInputPortNode namedInputPortNode) {
 		return new AddIterationStrategyInputPortEdit(iterationStrategy, namedInputPortNode);

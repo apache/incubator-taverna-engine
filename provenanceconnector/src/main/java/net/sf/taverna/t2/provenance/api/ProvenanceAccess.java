@@ -169,6 +169,7 @@ public class ProvenanceAccess {
 //		ApplicationContext appContext = new RavenAwareClassPathXmlApplicationContext(hibernateContext);
 		ApplicationContext appContext = null;
 
+		// FIXME Completely broken!
 		final ReferenceService referenceService = (ReferenceService) appContext
 		.getBean("t2reference.service.referenceService");
 

@@ -48,14 +48,4 @@ public class AddProcessorOutputPortEdit extends AbstractProcessorEdit {
 		
 		processor.outputPorts.add(port);
 	}
-
-	@Override
-	protected void undoEditAction(ProcessorImpl processor) {
-		BasicEventForwardingOutputPort pop = processor.getOutputPortWithName(port.getName());
-		if (pop != null) {
-			processor.outputPorts.remove(pop);
-		}
-
-	}
-
 }

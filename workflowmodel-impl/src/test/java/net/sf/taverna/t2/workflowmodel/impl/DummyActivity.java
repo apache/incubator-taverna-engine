@@ -18,30 +18,23 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package net.sf.taverna.t2.workflowmodel.serialization;
+package net.sf.taverna.t2.workflowmodel.impl;
 
-public class DummyBean {
-	private int id;
-	private String name;
-	private InnerBean innerBean;
-	public int getId() {
-		return id;
-	}
-	public void setId(int id) {
-		this.id = id;
-	}
-	public String getName() {
-		return name;
-	}
-	public void setName(String name) {
-		this.name = name;
-	}
-	public InnerBean getInnerBean() {
-		return innerBean;
-	}
-	public void setInnerBean(InnerBean innerBean) {
-		this.innerBean = innerBean;
-	}
+import net.sf.taverna.t2.workflowmodel.processor.activity.AbstractActivity;
+import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityConfigurationException;
+
+public class DummyActivity extends AbstractActivity<Integer> {
+
+	private Integer bean=null;
 	
-	
+	@Override
+	public void configure(Integer conf) throws ActivityConfigurationException {
+		bean=conf;
+	}
+
+	@Override
+	public Integer getConfiguration() {
+		return bean;
+	}
+
 }

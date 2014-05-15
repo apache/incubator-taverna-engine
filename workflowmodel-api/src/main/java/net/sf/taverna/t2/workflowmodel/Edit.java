@@ -47,6 +47,7 @@ public interface Edit<TargetType> {
 	 * Undo the edit, reverting the subject to the state it was in prior to the
 	 * edit
 	 */
+	@Deprecated
 	public void undo();
 
 	/**

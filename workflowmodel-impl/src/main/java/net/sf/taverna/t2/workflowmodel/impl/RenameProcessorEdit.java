@@ -30,10 +30,7 @@ import net.sf.taverna.t2.workflowmodel.Processor;
  * 
  */
 public class RenameProcessorEdit extends AbstractProcessorEdit {
-
-	String newName;
-
-	String oldName = null;
+	private String newName;
 
 	public RenameProcessorEdit(Processor p, String newName) {
 		super(p);
@@ -42,14 +39,6 @@ public class RenameProcessorEdit extends AbstractProcessorEdit {
 
 	@Override
 	protected void doEditAction(ProcessorImpl processor) throws EditException {
-		oldName = processor.getLocalName();
 		processor.setName(newName);
 	}
-
-	@Override
-	protected void undoEditAction(ProcessorImpl processor) {
-		processor.setName(oldName);
-
-	}
-
 }

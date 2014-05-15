@@ -21,6 +21,7 @@
 package net.sf.taverna.t2.workflowmodel.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import net.sf.taverna.t2.workflowmodel.EditException;
 import net.sf.taverna.t2.workflowmodel.EventForwardingOutputPort;
@@ -64,9 +65,8 @@ public class ConnectDatalinkEditTest {
 		assertEquals(0, datalink.getSource().getOutgoingLinks().size());
 		assertNull(datalink.getSink().getIncomingLink());
 		edit.doEditAction(datalink);
-		edit.undoEditAction(datalink);
-		assertEquals(0, datalink.getSource().getOutgoingLinks().size());
-		assertNull(datalink.getSink().getIncomingLink());
+		assertEquals(1, datalink.getSource().getOutgoingLinks().size());
+		assertNotNull(datalink.getSink().getIncomingLink());
 	}
 
 	@Test

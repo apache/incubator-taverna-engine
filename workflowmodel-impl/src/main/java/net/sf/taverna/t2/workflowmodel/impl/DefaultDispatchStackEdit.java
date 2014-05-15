@@ -37,35 +37,30 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.Retry;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.Stop;
 
 public class DefaultDispatchStackEdit extends AbstractProcessorEdit {
-	private Edit<?> compoundEdit=null;
+	private Edit<?> compoundEdit = null;
 	private static final int MAX_JOBS = 1;
-
 
 	public DefaultDispatchStackEdit(Processor processor) {
 		super(processor);
-		DispatchStackImpl stack = ((ProcessorImpl)processor).getDispatchStack();
+		DispatchStackImpl stack = ((ProcessorImpl) processor)
+				.getDispatchStack();
 		// Top level parallelise layer
 		int layer = 0;
 		List<Edit<?>> edits = new ArrayList<Edit<?>>();
-		
-		edits.add(new AddDispatchLayerEdit(stack, new Parallelize(MAX_JOBS), layer++));
+
+		edits.add(new AddDispatchLayerEdit(stack, new Parallelize(MAX_JOBS),
+				layer++));
 		edits.add(new AddDispatchLayerEdit(stack, new ErrorBounce(), layer++));
 		edits.add(new AddDispatchLayerEdit(stack, new Failover(), layer++));
 		edits.add(new AddDispatchLayerEdit(stack, new Retry(), layer++));
 		edits.add(new AddDispatchLayerEdit(stack, new Stop(), layer++));
-		
+
 		edits.add(new AddDispatchLayerEdit(stack, new Invoke(), layer++));
-		compoundEdit=new CompoundEdit(edits);
+		compoundEdit = new CompoundEdit(edits);
 	}
 
 	@Override
 	protected void doEditAction(ProcessorImpl processor) throws EditException {
 		compoundEdit.doEdit();
 	}
-
-	@Override
-	protected void undoEditAction(ProcessorImpl processor) {
-		compoundEdit.undo();
-	}
-
 }

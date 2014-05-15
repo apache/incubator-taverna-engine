@@ -40,8 +40,6 @@ public class ConnectProcesorOutputEdit extends AbstractProcessorEdit {
 
 	private String outputName;
 
-	private BasicEventForwardingOutputPort outputPort;
-	
 	private DatalinkImpl newLink = null;
 
 	public ConnectProcesorOutputEdit(Processor p, String outputName,
@@ -53,27 +51,19 @@ public class ConnectProcesorOutputEdit extends AbstractProcessorEdit {
 
 	@Override
 	protected void doEditAction(ProcessorImpl processor) throws EditException {
-		for (BasicEventForwardingOutputPort popi : processor.outputPorts) {
+		for (BasicEventForwardingOutputPort popi : processor.outputPorts)
 			if (popi.getName().equals(outputName)) {
-				newLink = new DatalinkImpl(popi, target);
-				popi.addOutgoingLink(newLink);
-				if (target instanceof AbstractEventHandlingInputPort) {
-					((AbstractEventHandlingInputPort)target).setIncomingLink(newLink);
-				}
-				outputPort = popi;
+				addOutgoingLink(popi);
 				return;
 			}
-		}
 		throw new EditException("Cannot locate output port with name '"
 				+ outputName + "'");
 	}
 
-	@Override
-	protected void undoEditAction(ProcessorImpl processor) {
-		outputPort.removeOutgoingLink(newLink);
-		if (target instanceof AbstractEventHandlingInputPort) {
-			((AbstractEventHandlingInputPort)target).setIncomingLink(null);
-		}
+	private void addOutgoingLink(BasicEventForwardingOutputPort popi) {
+		newLink = new DatalinkImpl(popi, target);
+		popi.addOutgoingLink(newLink);
+		if (target instanceof AbstractEventHandlingInputPort)
+			((AbstractEventHandlingInputPort) target).setIncomingLink(newLink);
 	}
-
 }

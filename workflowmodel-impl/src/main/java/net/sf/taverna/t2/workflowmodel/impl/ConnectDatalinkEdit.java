@@ -48,17 +48,4 @@ public class ConnectDatalinkEdit extends AbstractDatalinkEdit {
 			((AbstractEventHandlingInputPort) sink).setIncomingLink(datalink);
 		}
 	}
-
-	@Override
-	protected void undoEditAction(DatalinkImpl datalink) {
-		EventForwardingOutputPort source = datalink.getSource();
-		EventHandlingInputPort sink = datalink.getSink();
-		if (source instanceof BasicEventForwardingOutputPort) {
-			((BasicEventForwardingOutputPort) source).removeOutgoingLink(datalink);
-		}
-		if (sink instanceof AbstractEventHandlingInputPort) {
-			((AbstractEventHandlingInputPort) sink).setIncomingLink(null);
-		}
-	}
-
 }

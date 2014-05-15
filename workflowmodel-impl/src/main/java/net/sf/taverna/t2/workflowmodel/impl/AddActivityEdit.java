@@ -53,14 +53,5 @@ public class AddActivityEdit extends AbstractProcessorEdit {
 			throw new EditException(
 					"Cannot add a duplicate activity to processor");
 		}
-
 	}
-
-	@Override
-	protected void undoEditAction(ProcessorImpl processor) {
-		synchronized (processor) {
-			processor.activityList.remove(activityToAdd);
-		}
-	}
-
 }

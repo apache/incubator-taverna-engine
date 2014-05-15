@@ -43,10 +43,4 @@ public class RemoveActivityOutputPortEdit extends AbstractActivityEdit {
 	protected void doEditAction(AbstractActivity<?> activity) throws EditException {
 		activity.getOutputPorts().remove(activityOutputPort);
 	}
-
-	@Override
-	protected void undoEditAction(AbstractActivity<?> activity) {
-		activity.getOutputPorts().add(activityOutputPort);
-	}
-
 }

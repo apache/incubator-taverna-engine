@@ -49,14 +49,4 @@ public class CreateDataflowInputPortEdit extends AbstractDataflowEdit {
 	protected void doEditAction(DataflowImpl dataflow) throws EditException {
 		dataflow.createInputPort(newPortName, newPortDepth, newPortGranularDepth);
 	}
-
-	@Override
-	protected void undoEditAction(DataflowImpl dataflow) {
-		try {
-			dataflow.removeDataflowInputPort(newPortName);
-		} catch (EditException e) {
-			//shouldn't happen as port should exist
-		}
-	}
-
 }

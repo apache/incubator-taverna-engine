@@ -29,26 +29,19 @@ import net.sf.taverna.t2.workflowmodel.EditException;
  * @author David Withers
  * 
  */
-public class ChangeDataflowInputPortDepthEdit extends AbstractDataflowInputPortEdit {
-
+public class ChangeDataflowInputPortDepthEdit extends
+		AbstractDataflowInputPortEdit {
 	private int newDepth;
 
-	private int oldDepth;
-
-	public ChangeDataflowInputPortDepthEdit(DataflowInputPort dataflowInputPort, int newDepth) {
+	public ChangeDataflowInputPortDepthEdit(
+			DataflowInputPort dataflowInputPort, int newDepth) {
 		super(dataflowInputPort);
 		this.newDepth = newDepth;
 	}
 
 	@Override
-	protected void doEditAction(DataflowInputPortImpl dataflowInputPort) throws EditException {
-		oldDepth = dataflowInputPort.getDepth();
+	protected void doEditAction(DataflowInputPortImpl dataflowInputPort)
+			throws EditException {
 		dataflowInputPort.setDepth(newDepth);
 	}
-
-	@Override
-	protected void undoEditAction(DataflowInputPortImpl dataflowInputPort) {
-		dataflowInputPort.setDepth(oldDepth);
-	}
-
 }

@@ -68,8 +68,7 @@ public class CreateDataflowInputPortEditTest {
 		CreateDataflowInputPortEdit edit = new CreateDataflowInputPortEdit(dataflow, portName, portDepth, portGranularDepth);
 		assertEquals(0, dataflow.getInputPorts().size());
 		edit.doEditAction(dataflow);
-		edit.undoEditAction(dataflow);
-		assertEquals(0, dataflow.getInputPorts().size());
+		assertEquals(1, dataflow.getInputPorts().size());
 	}
 
 	@Test

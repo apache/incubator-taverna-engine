@@ -44,33 +44,16 @@ public class DisconnectDatalinkEdit extends AbstractDatalinkEdit {
 		EventForwardingOutputPort source = datalink.getSource();
 		EventHandlingInputPort sink = datalink.getSink();
 		if (source instanceof BasicEventForwardingOutputPort) {
-			((BasicEventForwardingOutputPort) source).removeOutgoingLink(datalink);
+			((BasicEventForwardingOutputPort) source)
+					.removeOutgoingLink(datalink);
 		}
 		if (sink instanceof AbstractEventHandlingInputPort) {
 			((AbstractEventHandlingInputPort) sink).setIncomingLink(null);
 			if (sink instanceof MergeInputPortImpl) {
-			    MergeInputPortImpl mip = (MergeInputPortImpl) sink;
-			    MergeImpl parent = (MergeImpl) mip.getMerge();
-			    parent.removeInputPort(mip);
+				MergeInputPortImpl mip = (MergeInputPortImpl) sink;
+				MergeImpl parent = (MergeImpl) mip.getMerge();
+				parent.removeInputPort(mip);
 			}
 		}
 	}
-
-	@Override
-	protected void undoEditAction(DatalinkImpl datalink) {
-		EventForwardingOutputPort source = datalink.getSource();
-		EventHandlingInputPort sink = datalink.getSink();
-		if (source instanceof BasicEventForwardingOutputPort) {
-			((BasicEventForwardingOutputPort) source).addOutgoingLink(datalink);
-		}
-		if (sink instanceof AbstractEventHandlingInputPort) {
-			((AbstractEventHandlingInputPort) sink).setIncomingLink(datalink);
-			if (sink instanceof MergeInputPortImpl) {
-			    MergeInputPortImpl mip = (MergeInputPortImpl) sink;
-			    MergeImpl parent = (MergeImpl) mip.getMerge();
-			    parent.addInputPort(mip);
-			}
-		}
-	}
-
 }

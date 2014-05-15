@@ -29,26 +29,20 @@ import net.sf.taverna.t2.workflowmodel.EditException;
  * @author David Withers
  * 
  */
-public class RenameDataflowOutputPortEdit extends AbstractDataflowOutputPortEdit {
+public class RenameDataflowOutputPortEdit extends
+		AbstractDataflowOutputPortEdit {
 
 	private String newName;
 
-	private String oldName = null;
-
-	public RenameDataflowOutputPortEdit(DataflowOutputPort dataflowOutputPort, String newName) {
+	public RenameDataflowOutputPortEdit(DataflowOutputPort dataflowOutputPort,
+			String newName) {
 		super(dataflowOutputPort);
 		this.newName = newName;
 	}
 
 	@Override
-	protected void doEditAction(DataflowOutputPortImpl dataflowOutputPort) throws EditException {
-		oldName = dataflowOutputPort.getName();
+	protected void doEditAction(DataflowOutputPortImpl dataflowOutputPort)
+			throws EditException {
 		dataflowOutputPort.setName(newName);
 	}
-
-	@Override
-	protected void undoEditAction(DataflowOutputPortImpl dataflowOutputPort) {
-		dataflowOutputPort.setName(oldName);
-	}
-
 }

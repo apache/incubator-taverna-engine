@@ -44,6 +44,7 @@ public abstract class AbstractBinaryProcessorEdit implements
 		this.processors = new OrderedPair<Processor>(a, b);
 	}
 
+	@Override
 	public final OrderedPair<Processor> doEdit() throws EditException {
 		if (applied) {
 			throw new EditException("Edit has already been applied!");
@@ -68,26 +69,24 @@ public abstract class AbstractBinaryProcessorEdit implements
 		}
 	}
 
+	@Override
 	public final OrderedPair<Processor> getSubject() {
 		return this.processors;
 	}
 
+	@Override
 	public final boolean isApplied() {
 		return this.applied;
 	}
 
+	@Override
 	public final void undo() {
 		if (!applied) {
 			throw new RuntimeException(
 					"Attempt to undo edit that was never applied");
 		}
-		ProcessorImpl pia = (ProcessorImpl) processors.getA();
-		ProcessorImpl pib = (ProcessorImpl) processors.getB();
-		synchronized (processors) {
-			undoEditAction(pia, pib);
-			applied = false;
-		}
-
+		throw new UnsupportedOperationException(
+				"undo not supported by this interface in Taverna 3");
 	}
 
 	/**
@@ -103,11 +102,4 @@ public abstract class AbstractBinaryProcessorEdit implements
 	 */
 	protected abstract void doEditAction(ProcessorImpl processorA,
 			ProcessorImpl processorB) throws EditException;
-
-	/**
-	 * Undo any edit effects here
-	 */
-	protected abstract void undoEditAction(ProcessorImpl processorA,
-			ProcessorImpl processorB);
-
 }

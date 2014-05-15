@@ -27,29 +27,21 @@ import net.sf.taverna.t2.workflowmodel.Merge;
 import net.sf.taverna.t2.workflowmodel.MergeInputPort;
 
 public class ReorderMergeInputPortsEdit extends AbstractMergeEdit {
-
-	private List<? extends MergeInputPort> previousInputPortList; // needed for undo
 	private List<? extends MergeInputPort> reorderedInputPortList;
 
-	public ReorderMergeInputPortsEdit(Merge merge, List<? extends MergeInputPort> reorderedInputPortList) {
+	public ReorderMergeInputPortsEdit(Merge merge,
+			List<? extends MergeInputPort> reorderedInputPortList) {
 		super(merge);
 		this.reorderedInputPortList = reorderedInputPortList;
-		this.previousInputPortList = merge.getInputPorts();
 	}
 
 	@Override
 	protected void doEditAction(MergeImpl mergeImpl) throws EditException {
 		if (mergeImpl instanceof MergeImpl) {
-			mergeImpl.reorderInputPorts(reorderedInputPortList);		
-		}
-		else {
-			throw new EditException("The Merge is of the wrong implementation, it should be of type MergeImpl");
+			mergeImpl.reorderInputPorts(reorderedInputPortList);
+		} else {
+			throw new EditException(
+					"The Merge is of the wrong implementation, it should be of type MergeImpl");
 		}
 	}
-
-	@Override
-	protected void undoEditAction(MergeImpl mergeImpl) {
-		mergeImpl.reorderInputPorts(previousInputPortList);		
-	}
-
 }

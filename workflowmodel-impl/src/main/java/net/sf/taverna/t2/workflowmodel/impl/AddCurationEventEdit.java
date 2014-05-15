@@ -21,26 +21,27 @@
 package net.sf.taverna.t2.workflowmodel.impl;
 
 import net.sf.taverna.t2.annotation.AnnotationAssertion;
+import net.sf.taverna.t2.annotation.AnnotationBeanSPI;
 import net.sf.taverna.t2.annotation.CurationEvent;
+import net.sf.taverna.t2.annotation.CurationEventBeanSPI;
 import net.sf.taverna.t2.annotation.impl.AnnotationAssertionImpl;
 import net.sf.taverna.t2.workflowmodel.Edit;
 import net.sf.taverna.t2.workflowmodel.EditException;
 
-@SuppressWarnings("unchecked")
-public class AddCurationEventEdit implements Edit<AnnotationAssertion> {
-
-	private AnnotationAssertion annotationAssertion;
-	private CurationEvent curationEvent;
+public class AddCurationEventEdit<T extends AnnotationBeanSPI, S extends CurationEventBeanSPI>
+		implements Edit<AnnotationAssertion<T>> {
+	private AnnotationAssertion<T> annotationAssertion;
+	private CurationEvent<S> curationEvent;
 	private boolean applied;
 
-	@SuppressWarnings("unchecked")
-	public AddCurationEventEdit(AnnotationAssertion annotationAssertion,
-			CurationEvent curationEvent) {
-				this.annotationAssertion = annotationAssertion;
-				this.curationEvent = curationEvent;
+	public AddCurationEventEdit(AnnotationAssertion<T> annotationAssertion,
+			CurationEvent<S> curationEvent) {
+		this.annotationAssertion = annotationAssertion;
+		this.curationEvent = curationEvent;
 	}
 
-	public AnnotationAssertion doEdit() throws EditException {
+	@Override
+	public final AnnotationAssertion<T> doEdit() throws EditException {
 		if (applied) {
 			throw new EditException("Edit has already been applied");
 		}
@@ -62,21 +63,24 @@ public class AddCurationEventEdit implements Edit<AnnotationAssertion> {
 		}
 	}
 
-	public Object getSubject() {
+	@Override
+	public final Object getSubject() {
 		return annotationAssertion;
 	}
 
-	public boolean isApplied() {
+	@Override
+	public final boolean isApplied() {
 		return applied;
 	}
 
-	public void undo() {
+	@Override
+	public final void undo() {
 		if (!applied) {
 			throw new RuntimeException(
 					"Attempt to undo edit that was never applied");
 		}
-		((AnnotationAssertionImpl)annotationAssertion).removeCurationEvent(curationEvent);
-		applied = false;
+		throw new UnsupportedOperationException(
+				"undo not supported by this interface in Taverna 3");
 	}
 
 }

@@ -44,17 +44,8 @@ public class RemoveActivityEdit extends AbstractProcessorEdit {
 	@Override
 	protected void doEditAction(ProcessorImpl processor) throws EditException {
 		List<Activity<?>> activities = processor.activityList;
-			synchronized (processor) {
-				activities.remove(activityToRemove);
-			}
-
-	}
-
-	@Override
-	protected void undoEditAction(ProcessorImpl processor) {
 		synchronized (processor) {
-			processor.activityList.add(activityToRemove);
+			activities.remove(activityToRemove);
 		}
 	}
-
 }

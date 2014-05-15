@@ -60,8 +60,7 @@ public class CreateDataflowOutputPortEditTest {
 		CreateDataflowOutputPortEdit edit = new CreateDataflowOutputPortEdit(dataflow, portName);
 		assertEquals(0, dataflow.getOutputPorts().size());
 		edit.doEditAction(dataflow);
-		edit.undoEditAction(dataflow);
-		assertEquals(0, dataflow.getOutputPorts().size());
+		assertEquals(1, dataflow.getOutputPorts().size());
 	}
 
 	@Test

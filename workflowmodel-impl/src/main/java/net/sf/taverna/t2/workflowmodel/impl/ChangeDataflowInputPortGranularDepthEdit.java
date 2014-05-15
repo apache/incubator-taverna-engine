@@ -29,26 +29,19 @@ import net.sf.taverna.t2.workflowmodel.EditException;
  * @author David Withers
  * 
  */
-public class ChangeDataflowInputPortGranularDepthEdit extends AbstractDataflowInputPortEdit {
-
+public class ChangeDataflowInputPortGranularDepthEdit extends
+		AbstractDataflowInputPortEdit {
 	private int newGranularDepth;
 
-	private int oldGranularDepth;
-
-	public ChangeDataflowInputPortGranularDepthEdit(DataflowInputPort dataflowInputPort, int newGranularDepth) {
+	public ChangeDataflowInputPortGranularDepthEdit(
+			DataflowInputPort dataflowInputPort, int newGranularDepth) {
 		super(dataflowInputPort);
 		this.newGranularDepth = newGranularDepth;
 	}
 
 	@Override
-	protected void doEditAction(DataflowInputPortImpl dataflowInputPort) throws EditException {
-		oldGranularDepth = dataflowInputPort.getGranularInputDepth();
+	protected void doEditAction(DataflowInputPortImpl dataflowInputPort)
+			throws EditException {
 		dataflowInputPort.setGranularDepth(newGranularDepth);
 	}
-
-	@Override
-	protected void undoEditAction(DataflowInputPortImpl dataflowInputPort) {
-		dataflowInputPort.setGranularDepth(oldGranularDepth);
-	}
-
 }

@@ -29,6 +29,7 @@ import net.sf.taverna.t2.annotation.AnnotationChain;
 import net.sf.taverna.t2.annotation.AnnotationRole;
 import net.sf.taverna.t2.annotation.AnnotationSourceSPI;
 import net.sf.taverna.t2.annotation.CurationEvent;
+import net.sf.taverna.t2.annotation.CurationEventBeanSPI;
 import net.sf.taverna.t2.annotation.Person;
 import net.sf.taverna.t2.facade.WorkflowInstanceFacade;
 import net.sf.taverna.t2.invocation.InvocationContext;
@@ -52,25 +53,25 @@ import net.sf.taverna.t2.workflowmodel.processor.iteration.NamedInputPortNode;
  * implementation of this interface from whatever version of the implementation
  * package you want to use, instantiate it then use the methods defined here to
  * construct and manipulate the workflow model.
- *
+ * 
  * @author Tom Oinn
  * @author Stuart Owen
  * @author David Withers
  * @author Stian Soiland-Reyes
- *
+ * 
  */
 public interface Edits {
 
 	/**
 	 * Build a new Dataflow workflow
-	 *
+	 * 
 	 * @return
 	 */
 	public Dataflow createDataflow();
 
 	/**
 	 * Builds a new DataflowInputPort.
-	 *
+	 * 
 	 * @param name
 	 * @param depth
 	 * @param granularDepth
@@ -82,7 +83,7 @@ public interface Edits {
 
 	/**
 	 * Builds a new DataflowOutputPort.
-	 *
+	 * 
 	 * @param name
 	 * @param dataflow
 	 * @return a new DataflowOutputPort
@@ -92,7 +93,7 @@ public interface Edits {
 
 	/**
 	 * Builds a new Datalink with the given source and sink ports
-	 *
+	 * 
 	 * @param source
 	 *            the source port
 	 * @param sink
@@ -105,14 +106,14 @@ public interface Edits {
 	/**
 	 * @param dataflow
 	 * @return an instance of Merge
-	 *
+	 * 
 	 * @see Merge
 	 */
 	public Merge createMerge(Dataflow dataflow);
 
 	/**
 	 * Builds a new MergeOutputPort.
-	 *
+	 * 
 	 * @param merge
 	 *            the merge that the port eill be added to
 	 * @param name
@@ -127,7 +128,7 @@ public interface Edits {
 	/**
 	 * Builds a new instance of a Processor with the given name. The processor
 	 * is setup with a default dispatch stack.
-	 *
+	 * 
 	 * @param the
 	 *            local name for the processor.
 	 */
@@ -135,20 +136,20 @@ public interface Edits {
 
 	/**
 	 * Builds a new instance of a IterationStrategy.
-	 *
+	 * 
 	 * @return a new IterationStrategy
 	 */
 	public IterationStrategy createIterationStrategy();
 
 	/**
 	 * Build a new WorkflowInstanceFacade using the supplied Dataflow
-	 *
+	 * 
 	 * @param dataflow
 	 * @param context
 	 * @return an instance of a WorkflowInstanceFacade
 	 * @throws InvalidDataflowException
 	 *             if the workflow was not valid
-	 *
+	 * 
 	 * @see WorkflowInstanceFacade
 	 */
 	public WorkflowInstanceFacade createWorkflowInstanceFacade(
@@ -158,7 +159,7 @@ public interface Edits {
 	/**
 	 * Add an Activity implementation to the set of activities within a
 	 * Processor
-	 *
+	 * 
 	 * @param processor
 	 *            Processor to add the activity to
 	 * @param activity
@@ -169,7 +170,7 @@ public interface Edits {
 
 	/**
 	 * Returns an edit to add an ActivityInputPort to an Activity.
-	 *
+	 * 
 	 * @param activity
 	 *            activity to add the port to
 	 * @param activityInputPort
@@ -182,7 +183,7 @@ public interface Edits {
 	/**
 	 * Returns an edit to add a ProcessorInputPort to ActivityInputPort mapping
 	 * to an Activity.
-	 *
+	 * 
 	 * @param activity
 	 *            activity to add the port mapping to
 	 * @param processorPortName
@@ -198,7 +199,7 @@ public interface Edits {
 
 	/**
 	 * Returns an edit to add an ActivityOutputPort to an Activity.
-	 *
+	 * 
 	 * @param activity
 	 *            activity to add the port to
 	 * @param activityOutputPort
@@ -211,7 +212,7 @@ public interface Edits {
 	/**
 	 * Returns an edit to add a ProcessorOutputPort to OutputPort mapping to an
 	 * Activity.
-	 *
+	 * 
 	 * @param activity
 	 *            activity to add the port mapping to
 	 * @param processorPortName
@@ -227,14 +228,14 @@ public interface Edits {
 
 	/**
 	 * Builds a new AnnotationChain.
-	 *
+	 * 
 	 * @return a new AnnotationChain
 	 */
 	public AnnotationChain createAnnotationChain();
 
 	/**
 	 * Add an {@link AnnotationAssertion} to an {@link AnnotationChain}
-	 *
+	 * 
 	 * @param annotationChain
 	 * @param annotationAssertion
 	 * @return an {@link Edit}able object with undo feature
@@ -245,21 +246,20 @@ public interface Edits {
 
 	/**
 	 * Add an {@link AnnotationBeanSPI} to an {@link AnnotationAssertion}
-	 *
+	 * 
 	 * @param annotationAssertion
 	 * @param annotationBean
 	 * @return the edit which has do/undo functionality
 	 */
-	@SuppressWarnings("unchecked")
-	public Edit<AnnotationAssertion> getAddAnnotationBean(
-			AnnotationAssertion annotationAssertion,
+	public <T extends AnnotationBeanSPI> Edit<AnnotationAssertion<T>> getAddAnnotationBean(
+			AnnotationAssertion<T> annotationAssertion,
 			AnnotationBeanSPI annotationBean);
 
 	/**
 	 * Returnes an edit that creates an AnnotationAssertion, adds the
 	 * AnnotationAssertion to an AnnotationChain and adds the AnnotationChain to
 	 * the Annotated.
-	 *
+	 * 
 	 * @param annotated
 	 *            the Annotated to add an AnnotationChain to
 	 * @param annotation
@@ -269,27 +269,24 @@ public interface Edits {
 	public Edit<?> getAddAnnotationChainEdit(Annotated<?> annotated,
 			AnnotationBeanSPI annotation);
 
-	@SuppressWarnings("unchecked")
-	public Edit<AnnotationAssertion> getAddAnnotationRole(
-			AnnotationAssertion annotationAssertion,
+	public <T extends AnnotationBeanSPI> Edit<AnnotationAssertion<T>> getAddAnnotationRole(
+			AnnotationAssertion<T> annotationAssertion,
 			AnnotationRole annotationRole);
 
-	@SuppressWarnings("unchecked")
-	public Edit<AnnotationAssertion> getAddAnnotationSource(
-			AnnotationAssertion annotationAssertion,
+	public <T extends AnnotationBeanSPI> Edit<AnnotationAssertion<T>> getAddAnnotationSource(
+			AnnotationAssertion<T> annotationAssertion,
 			AnnotationSourceSPI annotationSource);
 
-	@SuppressWarnings("unchecked")
-	public Edit<AnnotationAssertion> getAddCreator(
-			AnnotationAssertion annotationAssertion, Person person);
+	public <T extends AnnotationBeanSPI> Edit<AnnotationAssertion<T>> getAddCreator(
+			AnnotationAssertion<T> annotationAssertion, Person person);
 
-	@SuppressWarnings("unchecked")
-	public Edit<AnnotationAssertion> getAddCurationEvent(
-			AnnotationAssertion annotationAssertion, CurationEvent curationEvent);
+	public <T extends AnnotationBeanSPI, S extends CurationEventBeanSPI> Edit<AnnotationAssertion<T>> getAddCurationEvent(
+			AnnotationAssertion<T> annotationAssertion,
+			CurationEvent<S> curationEvent);
 
 	/**
 	 * Returns an edit to add a DataflowInputPort to a Dataflow.
-	 *
+	 * 
 	 * @param dataflow
 	 *            dataflow to add the port to
 	 * @param dataflowInputPort
@@ -301,7 +298,7 @@ public interface Edits {
 
 	/**
 	 * Returns an edit to add a DataflowOutputPort to a Dataflow.
-	 *
+	 * 
 	 * @param dataflow
 	 *            dataflow to add the port to
 	 * @param dataflowOutputPort
@@ -313,7 +310,7 @@ public interface Edits {
 
 	/**
 	 * Returns an edit to change the depth of a DataflowInputPort.
-	 *
+	 * 
 	 * @param dataflowInputPort
 	 *            the port to change the depth of
 	 * @param depth
@@ -325,7 +322,7 @@ public interface Edits {
 
 	/**
 	 * Returns an edit to change the granular depth of a DataflowInputPort.
-	 *
+	 * 
 	 * @param dataflowInputPort
 	 *            the port to change the granular depth of
 	 * @param granularDepth
@@ -337,7 +334,7 @@ public interface Edits {
 
 	/**
 	 * Add a new layer to the specified dispatch stack
-	 *
+	 * 
 	 * @param stack
 	 *            Stack to add to
 	 * @param layer
@@ -352,7 +349,7 @@ public interface Edits {
 
 	/**
 	 * Returns an edit to add a MergeInputPort to a Merge.
-	 *
+	 * 
 	 * @param merge
 	 *            merge to add the port to
 	 * @param mergeInputPort
@@ -364,7 +361,7 @@ public interface Edits {
 
 	/**
 	 * Returns an edit to reorder the list of MergeInputPortS in a Merge.
-	 *
+	 * 
 	 * @param merge
 	 *            merge to reorder the list of input ports to
 	 * @param reorderedMergeInputPortList
@@ -376,7 +373,7 @@ public interface Edits {
 
 	/**
 	 * Provides an edit object responsible for adding a Processor to a Dataflow
-	 *
+	 * 
 	 * @param dataflow
 	 *            the dataflow to add this processor to
 	 * @param processor
@@ -388,10 +385,10 @@ public interface Edits {
 	/**
 	 * Provides an Edit to add an input port a processor, creating matching
 	 * ports in the iteration strategy or strategies as a side effect.
-	 *
+	 * 
 	 * @param processor
 	 *            processor to add the port to
-	 *
+	 * 
 	 * @param port
 	 *            the input port to be added
 	 */
@@ -400,10 +397,10 @@ public interface Edits {
 
 	/**
 	 * Provides an Edit to add a new output port on a processor
-	 *
+	 * 
 	 * @param processor
 	 *            processor to add the new output port to
-	 *
+	 * 
 	 * @param port
 	 *            the port to be added
 	 */
@@ -413,7 +410,7 @@ public interface Edits {
 	/**
 	 * Returns an Edit that is responsible for configuring an Activity with a
 	 * given configuration bean.
-	 *
+	 * 
 	 * @see #getConfigureEdit(Configurable, Object)
 	 * @param activity
 	 * @param configurationBean
@@ -427,7 +424,7 @@ public interface Edits {
 	 * Return an Edit that can configure a {@link Configurable} (such as an
 	 * {@link Activity} or {@link DispatchLayer} with a given configuration
 	 * bean.
-	 *
+	 * 
 	 * @param <ConfigurationType>
 	 * @param configurable
 	 * @param configBean
@@ -437,10 +434,9 @@ public interface Edits {
 			Configurable<ConfigurationType> configurable,
 			ConfigurationType configBean);
 
-
 	/**
 	 * Connect a datalink to its source and sink.
-	 *
+	 * 
 	 * @param datalink
 	 *            the datalink to connect
 	 * @return a datalink edit
@@ -451,17 +447,17 @@ public interface Edits {
 	 * Creates and returns an instance of an Edit<Merge> that is responsible for
 	 * generating the links to an from the Merge instance to link together the
 	 * source and sink port via the merge instance.
-	 *
+	 * 
 	 * @return a new instance of Edit<Merge> constructed from the provided
 	 *         parameters.
-	 *
+	 * 
 	 * @param merge
 	 *            a Merge instance
 	 * @param sourcePort
 	 *            the source port from which a link is to be created.
 	 * @param sinkPort
 	 *            the sink port to which the link is to be created.
-	 *
+	 * 
 	 * @see Merge
 	 */
 	public Edit<Merge> getConnectMergedDatalinkEdit(Merge merge,
@@ -472,7 +468,7 @@ public interface Edits {
 	 * Connect the output port of the specified processor to a target input
 	 * port. To connect multiple inputs use this method multiple times with
 	 * different targetPort arguments.
-	 *
+	 * 
 	 * @param processor
 	 *            Processor to link from
 	 * @param outputPortName
@@ -489,7 +485,7 @@ public interface Edits {
 	 * Create a condition governing execution of the target processor. The
 	 * target will not consume jobs from any inputs until all control processors
 	 * linked through this edit have completed.
-	 *
+	 * 
 	 * @param control
 	 *            Processor controlling execution - this must complete before
 	 *            the target can start.
@@ -501,7 +497,7 @@ public interface Edits {
 
 	/**
 	 * Add an input port to a dataflow.
-	 *
+	 * 
 	 * @param dataflow
 	 *            dataflow to add the port to
 	 * @param portName
@@ -517,7 +513,7 @@ public interface Edits {
 
 	/**
 	 * Add an output port to a dataflow.
-	 *
+	 * 
 	 * @param dataflow
 	 *            dataflow to add the port to
 	 * @param portName
@@ -529,7 +525,7 @@ public interface Edits {
 	/**
 	 * Provides an edit that setup the default dispatch stack on a raw
 	 * processor.
-	 *
+	 * 
 	 * @param processor
 	 * @return
 	 */
@@ -537,7 +533,7 @@ public interface Edits {
 
 	/**
 	 * Remove a dispatch layer from its dispatch stack
-	 *
+	 * 
 	 * @param stack
 	 *            The stack from which to remove the layer
 	 * @param layer
@@ -548,7 +544,7 @@ public interface Edits {
 
 	/**
 	 * Disconnect a datalink from its source and sink.
-	 *
+	 * 
 	 * @param datalink
 	 *            the datalink to disconnect
 	 * @return a datalink edit
@@ -560,7 +556,7 @@ public interface Edits {
 	 * of its internal Activity. If there is more than 1 activity then only
 	 * first activity is used. If there are zero then an EditException will be
 	 * thrown when using the Edit.
-	 *
+	 * 
 	 * @param processor
 	 * @return
 	 */
@@ -570,11 +566,12 @@ public interface Edits {
 	/**
 	 * Returns an edit to remove an Activity from a Processor
 	 */
-	public Edit<Processor> getRemoveActivityEdit(Processor processor, Activity<?> activity);
+	public Edit<Processor> getRemoveActivityEdit(Processor processor,
+			Activity<?> activity);
 
 	/**
 	 * Returns an edit to remove an ActivityInputPort from an Activity.
-	 *
+	 * 
 	 * @param activity
 	 *            activity to remove the port from
 	 * @param activityInputPort
@@ -587,7 +584,7 @@ public interface Edits {
 	/**
 	 * Returns an edit to remove a ProcessorInputPort to ActivityInputPort
 	 * mapping from an Activity.
-	 *
+	 * 
 	 * @param activity
 	 *            activity to remove the port mapping from
 	 * @param processorPortName
@@ -600,7 +597,7 @@ public interface Edits {
 
 	/**
 	 * Returns an edit to remove an OutputPort from an Activity.
-	 *
+	 * 
 	 * @param activity
 	 *            activity to remove the port from
 	 * @param activityOutputPort
@@ -613,7 +610,7 @@ public interface Edits {
 	/**
 	 * Returns an edit to remove a ProcessorOutputPort to OutputPort mapping
 	 * from an Activity.
-	 *
+	 * 
 	 * @param activity
 	 *            activity to remove the port mapping from
 	 * @param processorPortName
@@ -627,7 +624,7 @@ public interface Edits {
 	/**
 	 * Remove a condition previously applied to the specified pair of Processor
 	 * instances
-	 *
+	 * 
 	 * @param control
 	 *            Processor controlling execution - this must complete before
 	 *            the target can start.
@@ -640,7 +637,7 @@ public interface Edits {
 
 	/**
 	 * Returns an edit to remove a DataflowInputPort from a Dataflow.
-	 *
+	 * 
 	 * @param dataflow
 	 *            the Dataflow to remove this DataflowInputPort from
 	 * @param dataflowInputPort
@@ -651,7 +648,7 @@ public interface Edits {
 
 	/**
 	 * Returns an edit to remove a DataflowOutputPort from a Dataflow.
-	 *
+	 * 
 	 * @param dataflow
 	 *            the Dataflow to remove this DataflowOutputPort from
 	 * @param dataflowOutputPort
@@ -662,7 +659,7 @@ public interface Edits {
 
 	/**
 	 * Returns an edit to remove a Processor from a Dataflow.
-	 *
+	 * 
 	 * @param dataflow
 	 *            the dataflow to remove the processor from
 	 * @param processor
@@ -673,7 +670,7 @@ public interface Edits {
 
 	/**
 	 * Removes a Processor input port.
-	 *
+	 * 
 	 * @param processor
 	 * @param port
 	 * @return
@@ -691,7 +688,7 @@ public interface Edits {
 
 	/**
 	 * Removes a merge from the dataflow.
-	 *
+	 * 
 	 * @param dataflow
 	 * @param processor
 	 * @return
@@ -700,7 +697,7 @@ public interface Edits {
 
 	/**
 	 * Rename a dataflow input port
-	 *
+	 * 
 	 * @param dataflowInputPort
 	 *            the dataflow input port to rename
 	 * @param newName
@@ -712,7 +709,7 @@ public interface Edits {
 
 	/**
 	 * Rename a dataflow output port
-	 *
+	 * 
 	 * @param dataflowOutputPort
 	 *            the dataflow output port to rename
 	 * @param newName
@@ -724,7 +721,7 @@ public interface Edits {
 
 	/**
 	 * Rename a processor
-	 *
+	 * 
 	 * @param processor
 	 *            the processor to rename
 	 * @param newName
@@ -736,20 +733,19 @@ public interface Edits {
 
 	/**
 	 * Rename a merge
-	 *
+	 * 
 	 * @param merge
 	 *            the merge to rename
 	 * @param newName
 	 *            the new name, must be unique within the workflow enclosing the
 	 *            merge instance
 	 */
-	public Edit<Merge> getRenameMergeEdit(Merge merge,
-			String newName);
+	public Edit<Merge> getRenameMergeEdit(Merge merge, String newName);
 
 	/**
 	 * Provide an edit that will configure a processors's iteration strategy
 	 * stack to the one provided.
-	 *
+	 * 
 	 * @param processor
 	 *            Processor which iteration stack is to be set
 	 * @param iterationStrategyStack
@@ -763,10 +759,12 @@ public interface Edits {
 			IterationStrategyStack iterationStrategyStack);
 
 	public Edit<IterationStrategyStack> getAddIterationStrategyEdit(
-			IterationStrategyStack iterationStrategyStack, IterationStrategy iterationStrategy);
+			IterationStrategyStack iterationStrategyStack,
+			IterationStrategy iterationStrategy);
 
 	public Edit<IterationStrategy> getAddIterationStrategyInputNodeEdit(
-			IterationStrategy iterationStrategy, NamedInputPortNode namedInputPortNode);
+			IterationStrategy iterationStrategy,
+			NamedInputPortNode namedInputPortNode);
 
 	public Edit<Dataflow> getUpdateDataflowInternalIdentifierEdit(
 			Dataflow dataflow, String newId);
@@ -776,7 +774,7 @@ public interface Edits {
 
 	/**
 	 * Builds an instance of an {@link InputPort} for an Activity.
-	 *
+	 * 
 	 * @param portName
 	 * @param portDepth
 	 * @param allowsLiteralValues
@@ -798,7 +796,7 @@ public interface Edits {
 
 	/**
 	 * Builds an instance of an {@link ActivityOutputPort} for an Activity.
-	 *
+	 * 
 	 * @param portName
 	 * @param portDepth
 	 * @param portGranularDepth
@@ -809,7 +807,7 @@ public interface Edits {
 
 	/**
 	 * Creates a new ProcessorInputPort
-	 *
+	 * 
 	 * @param processor
 	 *            the processor to with the port will be added
 	 * @param name
@@ -821,7 +819,7 @@ public interface Edits {
 
 	/**
 	 * Creates a new ProcessorOutputPort
-	 *
+	 * 
 	 * @param processor
 	 * @param name
 	 * @param depth

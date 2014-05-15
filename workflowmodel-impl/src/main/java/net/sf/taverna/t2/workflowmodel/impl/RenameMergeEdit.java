@@ -30,10 +30,7 @@ import net.sf.taverna.t2.workflowmodel.Merge;
  * 
  */
 public class RenameMergeEdit extends AbstractMergeEdit {
-
-	String newName;
-
-	String oldName = null;
+	private String newName;
 
 	public RenameMergeEdit(Merge p, String newName) {
 		super(p);
@@ -42,13 +39,6 @@ public class RenameMergeEdit extends AbstractMergeEdit {
 
 	@Override
 	protected void doEditAction(MergeImpl merge) throws EditException {
-		oldName = merge.getLocalName();
 		merge.setName(newName);
 	}
-
-	@Override
-	protected void undoEditAction(MergeImpl merge) {
-		merge.setName(oldName);
-	}
-
 }

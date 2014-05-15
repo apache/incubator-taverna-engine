@@ -45,6 +45,7 @@ public abstract class AbstractProcessorEdit implements Edit<Processor> {
 		this.processor = p;
 	}
 
+	@Override
 	public final Processor doEdit() throws EditException {
 		if (applied) {
 			throw new EditException("Edit has already been applied!");
@@ -76,30 +77,23 @@ public abstract class AbstractProcessorEdit implements Edit<Processor> {
 	protected abstract void doEditAction(ProcessorImpl processor)
 			throws EditException;
 
-	/**
-	 * Undo any edit effects here
-	 */
-	protected abstract void undoEditAction(ProcessorImpl processor);
-
+	@Override
 	public final Processor getSubject() {
 		return processor;
 	}
 
+	@Override
 	public final boolean isApplied() {
 		return this.applied;
 	}
 
+	@Override
 	public final void undo() {
 		if (!applied) {
 			throw new RuntimeException(
 					"Attempt to undo edit that was never applied");
 		}
-		ProcessorImpl pi = (ProcessorImpl) processor;
-		synchronized (pi) {
-			undoEditAction(pi);
-			applied = false;
-		}
-
+		throw new UnsupportedOperationException(
+				"undo not supported by this interface in Taverna 3");
 	}
-
 }

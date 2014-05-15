@@ -34,7 +34,8 @@ public abstract class AbstractMergeEdit implements Edit<Merge>{
 		this.merge=merge;
 	}
 
-	public Merge doEdit() throws EditException {
+	@Override
+	public final Merge doEdit() throws EditException {
 		if (applied) throw new EditException("Edit has already been applied!");
 		if (!(merge instanceof MergeImpl)) throw new EditException("Merge must be an instanceof MergeImpl");
 		MergeImpl mergeImpl = (MergeImpl)merge;
@@ -52,25 +53,27 @@ public abstract class AbstractMergeEdit implements Edit<Merge>{
 	}
 
 	protected abstract void doEditAction(MergeImpl mergeImpl) throws EditException;
-	protected abstract void undoEditAction(MergeImpl mergeImpl);
 	
-	public Object getSubject() {
+	@Override
+	public final Object getSubject() {
 		return merge;
 	}
 
-	public boolean isApplied() {
+	@Override
+	public final boolean isApplied() {
 		return applied;
 	}
 
-	public void undo() {
+	@Override
+	public final void undo() {
 		if (!applied) {
 			throw new RuntimeException(
 					"Attempt to undo edit that was never applied");
 		}
 		MergeImpl mergeImpl = (MergeImpl) merge;
 		synchronized (mergeImpl) {
-			undoEditAction(mergeImpl);
-			applied = false;
+			throw new UnsupportedOperationException(
+					"undo not supported by this interface in Taverna 3");
 		}
 	}
 

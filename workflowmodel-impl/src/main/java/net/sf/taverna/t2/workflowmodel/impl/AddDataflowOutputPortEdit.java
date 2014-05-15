@@ -33,7 +33,8 @@ public class AddDataflowOutputPortEdit extends AbstractDataflowEdit {
 
 	private DataflowOutputPort dataflowOutputPort;
 
-	public AddDataflowOutputPortEdit(Dataflow dataflow, DataflowOutputPort dataflowOutputPort) {
+	public AddDataflowOutputPortEdit(Dataflow dataflow,
+			DataflowOutputPort dataflowOutputPort) {
 		super(dataflow);
 		this.dataflowOutputPort = dataflowOutputPort;
 	}
@@ -42,25 +43,14 @@ public class AddDataflowOutputPortEdit extends AbstractDataflowEdit {
 	protected void doEditAction(DataflowImpl dataflow) throws EditException {
 		if (dataflowOutputPort instanceof DataflowOutputPortImpl) {
 			dataflow.addOutputPort((DataflowOutputPortImpl) dataflowOutputPort);
-		}
-		else {
-			throw new EditException("The DataflowOutputPort is of the wrong implmentation, it should be of type DataflowOutputPortImpl");
+		} else {
+			throw new EditException(
+					"The DataflowOutputPort is of the wrong implmentation, "
+							+ "it should be of type DataflowOutputPortImpl");
 		}
 	}
 
-	@Override
-	protected void undoEditAction(DataflowImpl dataflow) {
-		try {
-			dataflow.removeDataflowOutputPort(dataflowOutputPort);
-		} catch (EditException e1) {
-			//this port has already been added
-		}
-	}
-	
 	public DataflowOutputPort getDataflowOutputPort() {
 		return dataflowOutputPort;
 	}
-
-
-
 }

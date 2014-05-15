@@ -33,22 +33,15 @@ public class RenameDataflowInputPortEdit extends AbstractDataflowInputPortEdit {
 
 	private String newName;
 
-	private String oldName = null;
-
-	public RenameDataflowInputPortEdit(DataflowInputPort dataflowInputPort, String newName) {
+	public RenameDataflowInputPortEdit(DataflowInputPort dataflowInputPort,
+			String newName) {
 		super(dataflowInputPort);
 		this.newName = newName;
 	}
 
 	@Override
-	protected void doEditAction(DataflowInputPortImpl dataflowInputPort) throws EditException {
-		oldName = dataflowInputPort.getName();
+	protected void doEditAction(DataflowInputPortImpl dataflowInputPort)
+			throws EditException {
 		dataflowInputPort.setName(newName);
 	}
-
-	@Override
-	protected void undoEditAction(DataflowInputPortImpl dataflowInputPort) {
-		dataflowInputPort.setName(oldName);
-	}
-
 }

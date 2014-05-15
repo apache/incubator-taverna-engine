@@ -95,13 +95,4 @@ public class ConnectMergedDatalinkEdit extends AbstractMergeEdit {
 		connectInLinkEdit.doEdit();
 		if (connectOutLinkEdit!=null) connectOutLinkEdit.doEdit();
 	}
-
-	@Override
-	protected void undoEditAction(MergeImpl mergeImpl) {
-		if (connectOutLinkEdit!=null) connectOutLinkEdit.undo();
-		connectInLinkEdit.undo();
-		mergeImpl.removeInputPort(mergeInputPort);
-	}
-	
-	
 }

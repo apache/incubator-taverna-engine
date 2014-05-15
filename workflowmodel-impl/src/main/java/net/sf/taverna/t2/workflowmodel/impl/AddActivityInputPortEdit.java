@@ -43,10 +43,4 @@ public class AddActivityInputPortEdit extends AbstractActivityEdit {
 	protected void doEditAction(AbstractActivity<?> activity) throws EditException {
 		activity.getInputPorts().add(activityInputPort);
 	}
-
-	@Override
-	protected void undoEditAction(AbstractActivity<?> activity) {
-		activity.getInputPorts().remove(activityInputPort);
-	}
-
 }

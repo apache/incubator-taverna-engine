@@ -57,18 +57,6 @@ public class ChangeDataflowInputPortDepthEditTest {
 	}
 
 	@Test
-	public void testUndoEditAction() throws EditException {
-		int newDepth = 2;
-		ChangeDataflowInputPortDepthEdit edit = new ChangeDataflowInputPortDepthEdit(dataflowInputPort, newDepth);
-		assertEquals(depth, dataflowInputPort.getDepth());
-		assertEquals(granularDepth, dataflowInputPort.getGranularInputDepth());		
-		edit.doEditAction(dataflowInputPort);
-		edit.undoEditAction(dataflowInputPort);
-		assertEquals(depth, dataflowInputPort.getDepth());
-		assertEquals(granularDepth, dataflowInputPort.getGranularInputDepth());
-	}
-
-	@Test
 	public void testCreateDataflowInputPortEdit() {
 		ChangeDataflowInputPortDepthEdit edit = new ChangeDataflowInputPortDepthEdit(dataflowInputPort, 0);
 		assertEquals(dataflowInputPort, edit.getSubject());

@@ -42,10 +42,4 @@ public class AddActivityOutputPortMappingEdit extends AbstractActivityEdit {
 		// -- opposite of the outputPortMapping
 		activity.getOutputPortMapping().put(activityPortName, processorPortName);
 	}
-
-	@Override
-	protected void undoEditAction(AbstractActivity<?> activity) {
-		activity.getOutputPortMapping().remove(activityPortName);
-	}
-
 }

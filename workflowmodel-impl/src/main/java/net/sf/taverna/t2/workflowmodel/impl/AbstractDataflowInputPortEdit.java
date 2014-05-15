@@ -45,6 +45,7 @@ public abstract class AbstractDataflowInputPortEdit implements Edit<DataflowInpu
 		this.dataflowInputPort = dataflowInputPort;
 	}
 
+	@Override
 	public final DataflowInputPort doEdit() throws EditException {
 		if (applied) {
 			throw new EditException("Edit has already been applied!");
@@ -76,29 +77,23 @@ public abstract class AbstractDataflowInputPortEdit implements Edit<DataflowInpu
 	protected abstract void doEditAction(DataflowInputPortImpl dataflowInputPort)
 			throws EditException;
 
-	/**
-	 * Undo any edit effects here
-	 */
-	protected abstract void undoEditAction(DataflowInputPortImpl dataflowInputPort);
-
+	@Override
 	public final DataflowInputPort getSubject() {
 		return dataflowInputPort;
 	}
 
+	@Override
 	public final boolean isApplied() {
 		return this.applied;
 	}
 
+	@Override
 	public final void undo() {
 		if (!applied) {
 			throw new RuntimeException(
 					"Attempt to undo edit that was never applied");
 		}
-		DataflowInputPortImpl dataflowInputPortImpl = (DataflowInputPortImpl) dataflowInputPort;
-		synchronized (dataflowInputPortImpl) {
-			undoEditAction(dataflowInputPortImpl);
-			applied = false;
-		}
-
+		throw new UnsupportedOperationException(
+				"undo not supported by this interface in Taverna 3");
 	}
 }

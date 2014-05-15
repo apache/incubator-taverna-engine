@@ -58,10 +58,6 @@ public class AbstractDatalinkEditTest {
 			protected void doEditAction(DatalinkImpl datalink)
 					throws EditException {
 			}
-
-			@Override
-			protected void undoEditAction(DatalinkImpl datalink) {
-			}
 		};
 		assertEquals(datalink, edit.getSubject());
 	}
@@ -73,10 +69,6 @@ public class AbstractDatalinkEditTest {
 			protected void doEditAction(DatalinkImpl datalink)
 					throws EditException {
 			}
-
-			@Override
-			protected void undoEditAction(DatalinkImpl datalink) {
-			}
 		};
 	}
 
@@ -87,10 +79,6 @@ public class AbstractDatalinkEditTest {
 			protected void doEditAction(DatalinkImpl datalink)
 					throws EditException {
 				editDone = true;
-			}
-
-			@Override
-			protected void undoEditAction(DatalinkImpl datalink) {
 			}
 		};
 		assertFalse(editDone);
@@ -107,10 +95,6 @@ public class AbstractDatalinkEditTest {
 			protected void doEditAction(DatalinkImpl datalink)
 					throws EditException {
 			}
-
-			@Override
-			protected void undoEditAction(DatalinkImpl datalink) {
-			}
 		};
 		edit.doEdit();
 		edit.doEdit();
@@ -120,48 +104,51 @@ public class AbstractDatalinkEditTest {
 	public void testDoEditWithWrongImpl() throws EditException {
 		AbstractDatalinkEdit edit = new AbstractDatalinkEdit(new Datalink() {
 
+			@Override
 			public int getResolvedDepth() {
 				return 0;
 			}
 
+			@Override
 			public EventHandlingInputPort getSink() {
 				return null;
 			}
 
+			@Override
 			public EventForwardingOutputPort getSource() {
 				return null;
 			}
 
+			@Override
 			public Edit<? extends Datalink> getAddAnnotationEdit(
 					AnnotationChain newAnnotation) {
 				// TODO Auto-generated method stub
 				return null;
 			}
 
+			@Override
 			public Set<? extends AnnotationChain> getAnnotations() {
 				// TODO Auto-generated method stub
 				return null;
 			}
 
+			@Override
 			public Edit<? extends Datalink> getRemoveAnnotationEdit(
 					AnnotationChain annotationToRemove) {
 				// TODO Auto-generated method stub
 				return null;
 			}
 
+			@Override
 			public void setAnnotations(Set<AnnotationChain> annotations) {
 				// TODO Auto-generated method stub
-				
+
 			}
 
 		}) {
 			@Override
 			protected void doEditAction(DatalinkImpl datalink)
 					throws EditException {
-			}
-
-			@Override
-			protected void undoEditAction(DatalinkImpl datalink) {
 			}
 		};
 		edit.doEdit();
@@ -174,10 +161,6 @@ public class AbstractDatalinkEditTest {
 			protected void doEditAction(DatalinkImpl datalink)
 					throws EditException {
 			}
-
-			@Override
-			protected void undoEditAction(DatalinkImpl datalink) {
-			}
 		};
 		assertEquals(datalink, edit.getSubject());
 	}
@@ -188,10 +171,6 @@ public class AbstractDatalinkEditTest {
 			@Override
 			protected void doEditAction(DatalinkImpl datalink)
 					throws EditException {
-			}
-
-			@Override
-			protected void undoEditAction(DatalinkImpl datalink) {
 			}
 		};
 		assertFalse(edit.isApplied());
@@ -208,11 +187,6 @@ public class AbstractDatalinkEditTest {
 			protected void doEditAction(DatalinkImpl datalink)
 					throws EditException {
 				editDone = true;
-			}
-
-			@Override
-			protected void undoEditAction(DatalinkImpl datalink) {
-				editDone = false;
 			}
 		};
 		assertFalse(editDone);
@@ -231,10 +205,6 @@ public class AbstractDatalinkEditTest {
 			@Override
 			protected void doEditAction(DatalinkImpl datalink)
 					throws EditException {
-			}
-
-			@Override
-			protected void undoEditAction(DatalinkImpl datalink) {
 			}
 		};
 		edit.undo();

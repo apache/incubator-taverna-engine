@@ -45,6 +45,7 @@ public abstract class AbstractDatalinkEdit implements Edit<Datalink> {
 		this.datalink = datalink;
 	}
 
+	@Override
 	public final Datalink doEdit() throws EditException {
 		if (applied) {
 			throw new EditException("Edit has already been applied!");
@@ -76,29 +77,23 @@ public abstract class AbstractDatalinkEdit implements Edit<Datalink> {
 	protected abstract void doEditAction(DatalinkImpl datalink)
 			throws EditException;
 
-	/**
-	 * Undo any edit effects here
-	 */
-	protected abstract void undoEditAction(DatalinkImpl datalink);
-
+	@Override
 	public final Datalink getSubject() {
 		return datalink;
 	}
 
+	@Override
 	public final boolean isApplied() {
 		return this.applied;
 	}
 
+	@Override
 	public final void undo() {
 		if (!applied) {
 			throw new RuntimeException(
 					"Attempt to undo edit that was never applied");
 		}
-		DatalinkImpl datalinkImpl = (DatalinkImpl) datalink;
-		synchronized (datalinkImpl) {
-			undoEditAction(datalinkImpl);
-			applied = false;
-		}
-
+		throw new UnsupportedOperationException(
+				"undo not supported by this interface in Taverna 3");
 	}
 }

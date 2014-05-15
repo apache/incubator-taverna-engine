@@ -70,6 +70,7 @@ public abstract class AbstractEdit<SubjectInterface, SubjectType extends Subject
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public final SubjectInterface doEdit() throws EditException {
 		if (applied) {
@@ -104,16 +105,9 @@ public abstract class AbstractEdit<SubjectInterface, SubjectType extends Subject
 			throws EditException;
 
 	/**
-	 * Undo any edit effects here
-	 * 
-	 * @param subjectImpl
-	 *            The implementation instance to which the edit applies
-	 */
-	protected abstract void undoEditAction(SubjectType subjectImpl);
-
-	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public final SubjectType getSubject() {
 		return (SubjectType) subject;
@@ -122,6 +116,7 @@ public abstract class AbstractEdit<SubjectInterface, SubjectType extends Subject
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public final boolean isApplied() {
 		return applied;
 	}
@@ -129,18 +124,14 @@ public abstract class AbstractEdit<SubjectInterface, SubjectType extends Subject
 	/**
 	 * {@inheritDoc}
 	 */
-	@SuppressWarnings("unchecked")
+	@Override
 	public final void undo() {
 		if (!applied) {
 			throw new RuntimeException(
 					"Attempt to undo edit that was never applied");
 		}
-		SubjectType subjectImpl = (SubjectType) subject;
-		synchronized (subjectImpl) {
-			undoEditAction(subjectImpl);
-			applied = false;
-		}
-
+		throw new UnsupportedOperationException(
+				"undo not supported by this interface in Taverna 3");
 	}
 
 }
