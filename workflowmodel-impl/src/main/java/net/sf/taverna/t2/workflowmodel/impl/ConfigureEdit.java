@@ -27,8 +27,6 @@ import net.sf.taverna.t2.workflowmodel.ConfigurationException;
 import net.sf.taverna.t2.workflowmodel.EditException;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityAndBeanWrapper;
 import net.sf.taverna.t2.workflowmodel.processor.activity.DisabledActivity;
-import net.sf.taverna.t2.workflowmodel.serialization.xml.impl.AbstractXMLDeserializer;
-import net.sf.taverna.t2.workflowmodel.serialization.xml.impl.AbstractXMLSerializer;
 
 import org.apache.log4j.Logger;
 import org.jdom.Element;
@@ -48,10 +46,6 @@ public class ConfigureEdit<SubjectInterface extends Configurable, SubjectType ex
 	private static Logger logger = Logger
 			.getLogger(ConfigureEdit.class);
 
-	private BeanDeSerialiser beanDeSerialiser = new BeanDeSerialiser();
-
-	private BeanSerialiser beanSerialiser = new BeanSerialiser();
-
 	private final Object configurationBean;
 
 	private Element previousBean;
@@ -70,8 +64,8 @@ public class ConfigureEdit<SubjectInterface extends Configurable, SubjectType ex
 			previousBean = null;
 		} else {
 			try {
-				previousBean = beanSerialiser.beanAsElement(subject
-						.getConfiguration());
+//				previousBean = beanSerialiser.beanAsElement(subject
+//						.getConfiguration());
 			} catch (Exception e) {
 				logger.error("Error serializing configuration bean for: "
 						+ subject);
@@ -96,8 +90,9 @@ public class ConfigureEdit<SubjectInterface extends Configurable, SubjectType ex
 	}
 
 	protected Object cloneBean(Object object) throws JDOMException, IOException {
-		Element element = beanSerialiser.beanAsElement(object);
-		return beanDeSerialiser.createBean(element);
+//		Element element = beanSerialiser.beanAsElement(object);
+//		return beanDeSerialiser.createBean(element);
+		return object;
 	}
 
 	@Override
@@ -109,41 +104,12 @@ public class ConfigureEdit<SubjectInterface extends Configurable, SubjectType ex
 				// dragging of activity to  dataflow
 				// subject.configure(null);
 			} else {
-				Object bean = beanDeSerialiser.createBean(previousBean);
-				subject.configure(bean);
+//				Object bean = beanDeSerialiser.createBean(previousBean);
+//				subject.configure(bean);
 			}
-		} catch (ConfigurationException e) {
+		} catch (/*Configuration*/Exception e) {
 			logger.error("There was an error reconfiguring " + subject
 					+ " during an undo");
 		}
 	}
-
-	/**
-	 * Deserialise the bean using its classloader if it has one, otherwise use
-	 * the bean deserialisers
-	 * 
-	 */
-	protected class BeanDeSerialiser extends AbstractXMLDeserializer {
-		public Object createBean(Element configElement) {
-		    if (cl != null) {
-		    return super.createBean(configElement, cl);
-		    }
-		    ClassLoader beanClassLoader = getClass().getClassLoader();
-		    ClassLoader configurableClassLoader = getSubject()
-			.getConfiguration().getClass().getClassLoader();
-		    if (configurableClassLoader != null) {
-			return super.createBean(configElement, configurableClassLoader);
-		    } else {
-			return super.createBean(configElement, beanClassLoader);
-		    }
-		}
-	}
-
-	protected class BeanSerialiser extends AbstractXMLSerializer {
-		public Element beanAsElement(Object obj) throws JDOMException,
-				IOException {
-			return super.beanAsElement(obj);
-		}
-	}
-
 }
