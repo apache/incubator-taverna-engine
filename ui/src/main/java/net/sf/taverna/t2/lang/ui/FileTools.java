@@ -4,18 +4,15 @@
 package net.sf.taverna.t2.lang.ui;
 
 import java.awt.Component;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.prefs.Preferences;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 /**
@@ -25,6 +22,8 @@ import org.apache.log4j.Logger;
 public class FileTools {
 	
 	private static Logger logger = Logger.getLogger(FileTools.class);
+	
+	
 
 	public static boolean saveStringToFile(Component parent, String dialogTitle, String extension, String content) {
 		JFileChooser fileChooser = new JFileChooser();
@@ -72,9 +71,7 @@ public class FileTools {
 							return false;
 						}
 					}
-					BufferedWriter out = new BufferedWriter(new FileWriter(file));
-			        out.write(content);
-			        out.close();
+					FileUtils.writeStringToFile(file, content, StandardCharsets.UTF_8.name());
 					logger.info("Saved content by overwriting " + file);
 					return true;
 				} catch (IOException ex) {
@@ -105,25 +102,9 @@ public class FileTools {
 
 		if (fileChooser.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION) {
 			File selectedFile = fileChooser.getSelectedFile();
-
+			
 			try {
-				BufferedReader reader = new BufferedReader(new FileReader(
-						selectedFile));
-
-				String line;
-				StringBuffer buffer = new StringBuffer();
-				while ((line = reader.readLine()) != null) {
-					buffer.append(line);
-					buffer.append("\n");
-				}
-				reader.close();
-
-				return buffer.toString();
-
-			} catch (FileNotFoundException ffe) {
-				JOptionPane.showMessageDialog(parent, "File '"
-						+ selectedFile.getName() + "' not found",
-						"File not found", JOptionPane.ERROR_MESSAGE);
+				return FileUtils.readFileToString(selectedFile, StandardCharsets.UTF_8.name());
 			} catch (IOException ioe) {
 				JOptionPane.showMessageDialog(parent, "Can not read file '"
 						+ selectedFile.getName() + "'", "Can not read file",
