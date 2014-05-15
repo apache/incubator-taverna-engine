@@ -585,7 +585,7 @@ public class Tools {
         }
         return list;
     }
-	
+
 	/**
 	 * 
 	 * @see net.sf.taverna.t2.workflowmodel.utils.Tools#uniqueProcessorName(String, Dataflow)

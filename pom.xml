@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<artifactId>taverna-parent</artifactId>
@@ -12,7 +11,7 @@
 	<version>2.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<name>Taverna 2 Core</name>
+	<name>Taverna Engine Core</name>	
 	<modules>
 		<module>reference-api</module>
 		<module>reference-impl</module>
@@ -43,9 +42,10 @@
 		</repository>
 	</repositories>
 	<scm>
-		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/engine/net.sf.taverna.t2.core/trunk/</connection>
-		<developerConnection>scm:svn:https://taverna.googlecode.com/svn/taverna/engine/net.sf.taverna.t2.core/trunk/</developerConnection>
-		<url>http://code.google.com/p/taverna/source/browse/#svn/taverna/engine/net.sf.taverna.t2.core/trunk</url>
+                <connection>scm:git:https://github.com/taverna/taverna-engine-core.git</connection>
+                <developerConnection>scm:git:ssh://git@github.com:taverna/taverna-engine-core.git</developerConnection>
+                <url>https://github.com/taverna/taverna-engine-core</url>
+                <tag>HEAD</tag>
 	</scm>
 	<dependencyManagement>
 		<dependencies>
@@ -62,18 +62,23 @@
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
-				<artifactId>com.springsource.org.apache.commons.dbcp</artifactId>
-				<version>${commons.dbcp.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.commons</groupId>
 				<artifactId>com.springsource.org.apache.commons.io</artifactId>
 				<version>${commons.io.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
+				<artifactId>com.springsource.org.apache.commons.dbcp</artifactId>
+				<version>${commons.dbcp.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
 				<artifactId>com.springsource.org.apache.commons.lang</artifactId>
 				<version>${commons.lang.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>com.springsource.org.apache.commons.httpclient</artifactId>
+				<version>${commons.httpclient.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jdom</groupId>

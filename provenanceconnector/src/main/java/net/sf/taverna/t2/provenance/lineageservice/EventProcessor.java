@@ -161,6 +161,7 @@ public class EventProcessor {
 
 
 
+
 	/**
 	 * this is the new version that makes use of the T2 deserializer
 	 * populate static portion of the DB<br/>
@@ -270,6 +271,7 @@ public class EventProcessor {
 
 					} catch (java.io.IOException e) {
 					    logger.error("Could not serialise dataflow", e);
+					    // FIXME Bad Exception handling!
 					}
 					Blob blob = new SerialBlob(dataflowString.getBytes("UTF-8"));
 					// this is a top level dataflow description
@@ -286,6 +288,7 @@ public class EventProcessor {
 
 					} catch (java.io.IOException e) {
 					    logger.error("Could not serialise dataflow", e);
+					    // FIXME Bad Exception handling!
 					}
 
 					Blob blob = new SerialBlob(dataflowString.getBytes("UTF-8"));
@@ -700,12 +703,10 @@ public class EventProcessor {
 			// process the input and output values accumulated by WorkflowDataProcessor
 			getWfdp().processTrees(completeEvent, getWorkflowRunId());
 
-
 			reconcileLocalOutputs(provenanceItem.getWorkflowId());
 
 			if (! provenanceItem.getProcessId().contains(":")) {
 				// Top-level workflow finished
-
 				// No longer needed, done by processTrees()
 //				patchTopLevelnputs();
 
@@ -868,7 +869,6 @@ public class EventProcessor {
 		}
 
 	}
-
 
 	public void reconcileTopLevelOutputs() {
 		reconcileLocalOutputs(topLevelDataflowID);

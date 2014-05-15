@@ -154,12 +154,12 @@ public interface WorkflowInstanceFacade {
 	 * workflow has already failed will be immediately called with the failure
 	 * data.
 	 */
-	public void addFailureListener(FailureListener listener);
+	public void addFacadeListener(FacadeListener listener);
 
 	/**
 	 * Remove a previously registered failure listener
 	 */
-	public void removeFailureListener(FailureListener listener);
+	public void removeFacadeListener(FacadeListener listener);
 
 	/**
 	 * Workflow state is available through a sub-tree of the monitor tree. For

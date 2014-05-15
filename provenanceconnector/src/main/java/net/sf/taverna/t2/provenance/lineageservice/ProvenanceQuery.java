@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import net.sf.taverna.t2.invocation.InvocationContext;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.CollectionTable;
 import net.sf.taverna.t2.provenance.connector.ProvenanceConnector.DataBindingTable;
@@ -51,6 +52,10 @@ import net.sf.taverna.t2.provenance.lineageservice.utils.PortBinding;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProcessorEnactment;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Workflow;
+import net.sf.taverna.t2.provenance.lineageservice.utils.WorkflowTree;
+import net.sf.taverna.t2.reference.ReferenceService;
+import net.sf.taverna.t2.reference.T2Reference;
+import net.sf.taverna.t2.reference.impl.T2ReferenceImpl;
 import net.sf.taverna.t2.provenance.lineageservice.utils.WorkflowRun;
 import net.sf.taverna.t2.provenance.lineageservice.utils.WorkflowTree;
 
@@ -419,7 +424,6 @@ public abstract class ProvenanceQuery {
 		}
 		return null;
 	}
-
 
 	/**
 	 * @param dataflowID
@@ -1772,8 +1776,6 @@ public abstract class ProvenanceQuery {
 		return null;
 	}
 
-
-
 	/**
 	 * retrieve a tree structure starting from the top parent
 	 * @param workflowID
@@ -2834,7 +2836,6 @@ ProvenanceConnector.ProcessorEnactmentTable ProcEnact = ProvenanceConnector.Proc
 		return dataBindings;
 	}
 
-
 	public List<Port> getAllPortsInDataflow(String workflowID) {
 		Workflow w = getWorkflow(workflowID);
 
@@ -3111,8 +3112,4 @@ ProvenanceConnector.ProcessorEnactmentTable ProcEnact = ProvenanceConnector.Proc
 		}
 		return result;
 	}
-
-
 }
-
-

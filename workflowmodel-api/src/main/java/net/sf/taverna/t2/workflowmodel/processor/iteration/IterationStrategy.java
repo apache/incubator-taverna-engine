@@ -51,6 +51,6 @@ public interface IterationStrategy extends WorkflowItem {
 
 	public TerminalNode getTerminalNode();
 
-    public void normalize();
+	public void normalize();
 
 }

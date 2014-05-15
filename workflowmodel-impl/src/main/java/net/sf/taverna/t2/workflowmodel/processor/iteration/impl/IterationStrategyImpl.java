@@ -28,8 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.swing.tree.TreeNode;
-
 import net.sf.taverna.t2.invocation.Completion;
 import net.sf.taverna.t2.invocation.InvocationContext;
 import net.sf.taverna.t2.invocation.IterationInternalEvent;
@@ -46,7 +44,6 @@ import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationTypeMismatch
 import net.sf.taverna.t2.workflowmodel.processor.iteration.NamedInputPortNode;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.PrefixDotProduct;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.TerminalNode;
-import net.sf.taverna.t2.workflowmodel.serialization.xml.impl.XMLSerializationConstants;
 
 import org.jdom.Element;
 
@@ -127,51 +124,6 @@ public class IterationStrategyImpl implements IterationStrategy {
 
 	public TerminalNode getTerminalNode() {
 		return terminal;
-	}
-
-	/**
-	 * Get the XML element defining the state of this iteration strategy
-	 * 
-	 * @return
-	 */
-	protected Element asXML() {
-		Element strategyElement = new Element("strategy",
-				XMLSerializationConstants.T2_WORKFLOW_NAMESPACE);
-		if (terminal.getChildCount() > 0) {
-			AbstractIterationStrategyNode node = (AbstractIterationStrategyNode) (terminal
-					.getChildAt(0));
-			strategyElement.addContent(elementForNode(node));
-		}
-		return strategyElement;
-	}
-
-	private static Element elementForNode(AbstractIterationStrategyNode node) {
-		Element nodeElement = null;
-		if (node instanceof DotProduct) {
-			nodeElement = new Element("dot",
-					XMLSerializationConstants.T2_WORKFLOW_NAMESPACE);
-		} else if (node instanceof CrossProduct) {
-			nodeElement = new Element("cross",
-					XMLSerializationConstants.T2_WORKFLOW_NAMESPACE);
-		} else if (node instanceof PrefixDotProduct) {
-			nodeElement = new Element("prefix",
-					XMLSerializationConstants.T2_WORKFLOW_NAMESPACE);
-		} else if (node instanceof NamedInputPortNode) {
-			NamedInputPortNode nipn = (NamedInputPortNode) node;
-			nodeElement = new Element("port",
-					XMLSerializationConstants.T2_WORKFLOW_NAMESPACE);
-			nodeElement.setAttribute("name", nipn.getPortName());
-			nodeElement.setAttribute("depth", nipn.getCardinality() + "");
-		} else {
-			throw new IllegalArgumentException("Unknown node " + node);
-		}
-		Enumeration<?> children = node.children();
-		while (children.hasMoreElements()) {
-			TreeNode tn = (TreeNode) children.nextElement();
-			nodeElement
-					.addContent(elementForNode((AbstractIterationStrategyNode) tn));
-		}
-		return nodeElement;
 	}
 
 	/**

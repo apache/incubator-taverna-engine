@@ -64,7 +64,7 @@ import java.io.InputStream;
  * 
  * @author Tom Oinn
  */
-public interface ExternalReferenceSPI {
+public interface ExternalReferenceSPI extends Cloneable {
 
 	/**
 	 * Determine, if possible, whether the data this reference refers to is
@@ -129,5 +129,5 @@ public interface ExternalReferenceSPI {
 	 */
 	public float getResolutionCost();
 
-
+	public ExternalReferenceSPI clone() throws CloneNotSupportedException;
 }

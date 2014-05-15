@@ -18,25 +18,30 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package net.sf.taverna.t2.workflowmodel.serialization.xml.impl;
+package net.sf.taverna.t2.facade;
 
-import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationStrategyStack;
-import net.sf.taverna.t2.workflowmodel.processor.iteration.impl.IterationStrategyStackImpl;
+import net.sf.taverna.t2.facade.WorkflowInstanceFacade.State;
 
-import org.jdom.Element;
+/**
+ * Used to communicate a failure of the overall workflow to interested parties.
+ * 
+ * @author Tom Oinn
+ */
+public interface FacadeListener {
 
-public class IterationStrategyStackXMLDeserializer implements XMLSerializationConstants{
-	private static IterationStrategyStackXMLDeserializer instance = new IterationStrategyStackXMLDeserializer();
-
-	private IterationStrategyStackXMLDeserializer() {
-
-	}
-
-	public static IterationStrategyStackXMLDeserializer getInstance() {
-		return instance;
-	}
+	/**
+	 * Called if the workflow fails in a critical and fundamental way. Most
+	 * internal failures of individual process instances will not trigger this,
+	 * being handled either by the per processor dispatch stack through retry,
+	 * failover etc or by being converted into error tokens and injected
+	 * directly into the data stream. This therefore denotes a catastrophic and
+	 * unrecoverable problem.
+	 * 
+	 * @param message
+	 * @param t
+	 */
+	public void workflowFailed(WorkflowInstanceFacade facade, String message, Throwable t);
 	
-	public void deserializeIterationStrategyStack(Element element,IterationStrategyStack stack) {
-		((IterationStrategyStackImpl)stack).configureFromElement(element.getChild(ITERATION_STRATEGY,T2_WORKFLOW_NAMESPACE));
-	}
+	public void stateChange(WorkflowInstanceFacade facade, State oldState, State newState);
+
 }

@@ -46,6 +46,8 @@ import net.sf.taverna.t2.provenance.lineageservice.ProvenanceWriter;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Collection;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DataLink;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DataflowInvocation;
+import net.sf.taverna.t2.provenance.lineageservice.utils.PortBinding;
+import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 import net.sf.taverna.t2.provenance.lineageservice.utils.Port;
 import net.sf.taverna.t2.provenance.lineageservice.utils.PortBinding;
 import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
@@ -76,7 +78,7 @@ public class ProvenanceAccess {
 	ProvenanceAnalysis pa = null;
 	ProvenanceQuery pq;
 	ProvenanceWriter pw;
-
+	
 	private String connectorType;
 	private boolean computeOPMGraph;
 	private final List<ProvenanceConnectorFactory> provenanceConnectorFactories;
@@ -172,7 +174,6 @@ public class ProvenanceAccess {
 
 		InvocationContext context =  new InvocationContextImpl(referenceService, provenanceConnector);
 		return context;
-
 	}
 
 	/**
@@ -214,7 +215,6 @@ public class ProvenanceAccess {
 		pw.setQuery(pq);
 
 		logger.info("using writer of type: "+pw.getClass().toString());
-
 	}
 
 
@@ -315,12 +315,10 @@ public class ProvenanceAccess {
 		return pq.isTopLevelDataflow(workflowId, workflowRunId);
 	}
 
-
 	public String getLatestRunID() throws SQLException {
-		return pq.getLatestRunID();
+		return pq.getLatestRunID();		
 	}
-
-
+	
 	/**
 	 * Removes all records that pertain to a specific run (but not the static specification of the workflow run)
 	 * @param runID the internal ID of a run. This can be obtained using {@link #listRuns(String, Map)}
@@ -409,18 +407,13 @@ public class ProvenanceAccess {
 	 * not just the ID of the run)
 	 */
 	public List<WorkflowRun> getAllWorkflowIDs() {
-
 		try {
 			return pq.getRuns(null, null);
 		} catch (SQLException e) {
 			logger.error("Problem getting all workflow IDs", e);
 			return null;
 		}
-
 	}
-
-
-
 
 //	/ access static workflow structure
 
@@ -438,12 +431,12 @@ public class ProvenanceAccess {
 	public List<Collection> getCollectionsForRun(String wfInstanceID) {
 		return pq.getCollectionsForRun(wfInstanceID);
 	}
-
+	
 	public List<PortBinding> getPortBindings(Map<String, String> constraints)
 	throws SQLException {
 		return pq.getPortBindings(constraints);
 	}
-
+	
 	/**
 	 * lists all ports for a workflow
 	 * @param workflowID
@@ -475,14 +468,12 @@ public class ProvenanceAccess {
 	// PM added 5/2010
 	public String getWorkflowNameByWorkflowID(String workflowID) {
 		Workflow w = pq.getWorkflow(workflowID);
-
 		return w.getExternalName();
 	}
 
 	public WorkflowTree getWorkflowNestingStructure(String workflowID) throws SQLException {
 		return pq.getWorkflowNestingStructure(workflowID);
 	}
-
 
 //	public List<ProvenanceProcessor> getSuccessors(String workflowID, String processorName, String portName) {
 //	return null; // TODO
@@ -492,12 +483,7 @@ public class ProvenanceAccess {
 //	return null; // TODO
 //	}
 
-
-
-
 //	/ configure provenance query functionality
-
-
 
 	/**
 	 * include valus of output ports in the query result? input port values are always included<br>
@@ -507,11 +493,9 @@ public class ProvenanceAccess {
 		pa.setReturnOutputs(active);
 	}
 
-
 	public boolean isIncludeProcessorOutputs() {
 		return pa.isReturnOutputs();
 	}
-
 
 	/**
 	 * @return an instance of {@link InvocationContext} that can be used by a client to deref a Taverna data reference
@@ -519,7 +503,6 @@ public class ProvenanceAccess {
 	public InvocationContext getInvocationContext() { return getProvenanceConnector().getInvocationContext(); }
 
 //	/ OPM management
-
 
 	/**
 	 * should an OPM graph be generated in response to a query?<br>
@@ -543,16 +526,13 @@ public class ProvenanceAccess {
 		pa.setRecordArtifactValues(active);
 	}
 
-
 	/**
 	 *
 	 * @return true if the OPM graph artifacts are annotated with actual values
 	 */
 	public  boolean isAttachOPMArtifactValues() {
 		 return pa.isRecordArtifactValues();
-	 }
-
-
+	}
 
  	/**
 	 * @deprecated as workflow 'names' are not globally unique, this method should not be used!
@@ -562,7 +542,7 @@ public class ProvenanceAccess {
 	public String getWorkflowIDForExternalName(String workflowName) {
 		return pq.getWorkflowIdForExternalName(workflowName);
 	}
-
+	 
 	 public List<ProvenanceProcessor> getProcessorsForWorkflowID(String workflowID) {
 		 return pq.getProcessorsForWorkflow(workflowID);
 	 }
@@ -575,7 +555,6 @@ public class ProvenanceAccess {
 	  * for Maven module {@code net.sf.taverna.t2.core.provenanceconnector}
 	  */
 	 public ProvenanceConnector getProvenanceConnector() { return provenanceConnector; }
-
 
 	/**
 	 * @param a specific provenanceConnector used by the API
@@ -671,9 +650,4 @@ public class ProvenanceAccess {
 			return null;
 		}
 	}
-
-
-
-
-
 }

@@ -424,24 +424,24 @@ public class ProvenanceWriter {
 
 	public void addData(String dataRef, String wfInstanceId, Object data)
 	throws SQLException {
-
+		
 		Connection connection = null;
-
+		
 		try {
 			connection = getConnection();
 			PreparedStatement ps = null;
 			ps = connection.prepareStatement(
-			"INSERT INTO Data (dataReference,wfInstanceID,data) VALUES (?,?,?)");
+					"INSERT INTO Data (dataReference,wfInstanceID,data) VALUES (?,?,?)");
 			ps.setString(1, dataRef);
 			ps.setString(2, wfInstanceId);
 			ps.setString(3, (String) data);
-
+			
 			ps.executeUpdate();
-
+			
 			cnt++;
-
+			
 			logger.debug("addData executed on data value from char: "+String.valueOf(data));
-
+			
 		} catch (SQLException e) {
 			// the same ID will come in several times -- duplications are
 			// expected, don't panic
@@ -452,22 +452,20 @@ public class ProvenanceWriter {
 		}
 	}
 
-
-
 	/**
 	 * OBSOLETE<p/>
 	 * adds (dataRef, data) pairs to the Data table (only for string data)
 	 */
 	public void addData(String dataRef, String wfInstanceId, byte[] data)
-	throws SQLException {
-
+			throws SQLException {
+		
 		Connection connection = null;
-
+		
 		try {
 			connection = getConnection();
 			PreparedStatement ps = null;
 			ps = connection.prepareStatement(
-			"INSERT INTO Data (dataReference,wfInstanceID,data) VALUES (?,?,?)");
+					"INSERT INTO Data (dataReference,wfInstanceID,data) VALUES (?,?,?)");
 			ps.setString(1, dataRef);
 			ps.setString(2, wfInstanceId);
 			ps.setBytes(3, data);
@@ -509,7 +507,6 @@ public class ProvenanceWriter {
 			ps.setString(8, vb.getCollIDRef());
 			ps.setString(9, vb.getIteration());
 			ps.setInt(10, vb.getPositionInColl());
-
 
 			logger.debug("addVarBinding query: \n"+ps.toString());
 			ps.executeUpdate();
