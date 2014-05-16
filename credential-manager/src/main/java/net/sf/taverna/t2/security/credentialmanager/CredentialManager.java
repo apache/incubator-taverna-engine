@@ -40,11 +40,11 @@ import net.sf.taverna.t2.lang.observer.Observer;
  * certificates).
  * <p>
  * Keystore and Truststore are Bouncy Castle UBER-type keystores saved as files
- * called "t2keystore.ubr" and "t2truststore.ubr" respectively. In the case of
- * the Workbench, they are located in a directory called "security" inside the
- * taverna.home directory. This location can be changed, e.g. in the case of the
- * server and command line tool you may want to pass in the location of the
- * Credential Manager's files.
+ * called "taverna-keystore.ubr" and "taverna-truststore.ubr" respectively. In
+ * the case of the Workbench, they are located in a directory called "security"
+ * inside the taverna.home directory. This location can be changed, e.g. in the
+ * case of the server and command line tool you may want to pass in the location
+ * of the Credential Manager's files.
  * 
  * @author Alex Nenadic
  * @author Stian Soiland-Reyes
@@ -53,9 +53,6 @@ public interface CredentialManager {
 
 	public static final String KEYSTORE_FILE_NAME = "taverna-keystore.ubr";
 	public static final String TRUSTSTORE_FILE_NAME = "taverna-truststore.ubr";
-
-	// public static final String KEYSTORE_FILE_NAME = "t2keystore.ubr";
-	// public static final String TRUSTSTORE_FILE_NAME = "t2truststore.ubr";
 
 	public static final String UTF_8 = "UTF-8";
 
@@ -83,14 +80,6 @@ public interface CredentialManager {
 	public static enum KeystoreType {
 		KEYSTORE, TRUSTSTORE
 	};
-
-	/*
-	 * Constants denoting which of the two keystores (Keystore or Truststore) we
-	 * are currently performing an operation on.
-	 */
-	public static final String KEYSTORE = "Keystore";
-
-	public static final String TRUSTSTORE = "Truststore";
 
 	/*
 	 * Existence of this file in the Credential Manager folder indicates the
