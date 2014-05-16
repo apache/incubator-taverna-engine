@@ -34,14 +34,10 @@ import java.util.Comparator;
  * <p>
  * Another example may be to read the master password from a file or from
  * command line parameters.
- * <p>
- * It is safe to return <code>null</code> if the provider does not have an
- * opinion.
  * 
  * @see CredentialManager
  * @author Alex Nenadic
  * @author Stian Soiland-Reyes
- * 
  */
 public interface MasterPasswordProvider {
 

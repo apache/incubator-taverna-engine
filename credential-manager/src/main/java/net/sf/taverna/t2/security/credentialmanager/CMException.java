@@ -21,46 +21,41 @@
 package net.sf.taverna.t2.security.credentialmanager;
 
 /**
- * Represents a (cryptographic or any other) exception thrown by Credential Manager.
+ * Represents a (cryptographic or any other) exception thrown by Credential
+ * Manager.
  * 
  * @author Alexandra Nenadic
  */
-public class CMException
-    extends Exception
-{
-	
+public class CMException extends Exception {
+
 	private static final long serialVersionUID = 3885885604048806903L;
 
 	/**
-     * Creates a new CMException.
-     */
-    public CMException()
-    {
-        super();
-    }
+	 * Creates a new CMException.
+	 */
+	public CMException() {
+		super();
+	}
 
-    /**
-     * Creates a new CMException with the specified message.
-     */
-    public CMException(String message)
-    {
-        super(message);
-    }
+	/**
+	 * Creates a new CMException with the specified message.
+	 */
+	public CMException(String message) {
+		super(message);
+	}
 
-    /**
-     * Creates a new CMException with the specified message and cause.
-     *
-     */
-    public CMException(String message, Throwable cause)
-    {
-        super(message, cause);
-    }
+	/**
+	 * Creates a new CMException with the specified message and cause.
+	 * 
+	 */
+	public CMException(String message, Throwable cause) {
+		super(message, cause);
+	}
 
-    /**
-     * Creates a new CMException with the specified cause throwable.
-     */
-    public CMException(Throwable cause)
-    {
-        super(cause);
-    }
+	/**
+	 * Creates a new CMException with the specified cause throwable.
+	 */
+	public CMException(Throwable cause) {
+		super(cause);
+	}
 }

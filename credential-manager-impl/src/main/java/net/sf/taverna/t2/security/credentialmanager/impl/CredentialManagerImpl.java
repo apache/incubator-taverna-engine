@@ -21,9 +21,6 @@
 package net.sf.taverna.t2.security.credentialmanager.impl;
 
 import static javax.security.auth.x500.X500Principal.RFC2253;
-import static net.sf.taverna.t2.security.credentialmanager.CredentialManager.PROPERTY_TRUSTSTORE_PASSWORD;
-import static net.sf.taverna.t2.security.credentialmanager.CredentialManager.USERNAME_AND_PASSWORD_SEPARATOR_CHARACTER;
-import static net.sf.taverna.t2.security.credentialmanager.CredentialManager.UTF_8;
 import static net.sf.taverna.t2.security.credentialmanager.CredentialManager.KeystoreType.KEYSTORE;
 import static net.sf.taverna.t2.security.credentialmanager.CredentialManager.KeystoreType.TRUSTSTORE;
 
@@ -42,14 +39,12 @@ import java.net.URL;
 import java.security.Key;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
-import java.security.KeyStore.Entry;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.Security;
-import java.security.KeyStore.Entry;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -74,7 +69,6 @@ import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509ExtendedKeyManager;
 import javax.net.ssl.X509KeyManager;
 import javax.net.ssl.X509TrustManager;
-import javax.security.auth.x500.X500Principal;
 
 import net.sf.taverna.t2.lang.observer.MultiCaster;
 import net.sf.taverna.t2.lang.observer.Observable;
@@ -89,7 +83,6 @@ import net.sf.taverna.t2.security.credentialmanager.ServiceUsernameAndPasswordPr
 import net.sf.taverna.t2.security.credentialmanager.TrustConfirmationProvider;
 import net.sf.taverna.t2.security.credentialmanager.UsernamePassword;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
@@ -106,8 +99,8 @@ public class CredentialManagerImpl implements CredentialManager,
 		Observable<KeystoreChangedEvent> {
 	/** Various passwords to try for the Java's default truststore. */
 	public static List<String> defaultTrustStorePasswords = Arrays.asList(
-			System.getProperty(CredentialManager.PROPERTY_TRUSTSTORE_PASSWORD,
-					""), "changeit", "changeme", "");
+			System.getProperty(PROPERTY_TRUSTSTORE_PASSWORD, ""), "changeit",
+			"changeme", "");
 
 	// For Taverna 2.2 and older - Keystore was BC-type with user-set password
 	// and Truststore was JKS-type with the default password
@@ -215,12 +208,10 @@ public class CredentialManagerImpl implements CredentialManager,
 	 */
 	private static List<URL> getSpecialTrustedCertificates() {
 		List<URL> urls = new ArrayList<>();
-		urls.add(CredentialManager.class
-				.getResource("/trusted-certificates/www.biocatalogue.org.pem"));
-		urls.add(CredentialManager.class
-				.getResource("/trusted-certificates/www.biodiversitycatalogue.org.pem"));
-		urls.add(CredentialManager.class
-				.getResource("/trusted-certificates/heater.cs.man.ac.uk.pem"));
+		Class<?> c = CredentialManager.class;
+		urls.add(c.getResource("/trusted-certificates/www.biocatalogue.org.pem"));
+		urls.add(c.getResource("/trusted-certificates/www.biodiversitycatalogue.org.pem"));
+		urls.add(c.getResource("/trusted-certificates/heater.cs.man.ac.uk.pem"));
 		return urls;
 	}
 
@@ -1112,9 +1103,9 @@ public class CredentialManagerImpl implements CredentialManager,
 				 * HttpsURLConnectionS
 				 */
 				// HttpsURLConnection.setDefaultSSLSocketFactory(createTavernaSSLSocketFactory());
-				logger.info("Credential Manager: Updating SSLSocketFactory after inserting a key pair.");
+				logger.debug("updating SSLSocketFactory after inserting a key pair");
 			} catch (Exception ex) {
-				throw new CMException("Credential Manager: Failed to insert "
+				throw new CMException("failed to insert "
 						+ "the key pair entry in the Keystore", ex);
 			}
 		}
@@ -1156,8 +1147,7 @@ public class CredentialManagerImpl implements CredentialManager,
 			 */
 			// HttpsURLConnection.setDefaultSSLSocketFactory(createTavernaSSLSocketFactory());
 
-			logger.info("Credential Manager: Updating SSLSocketFactory "
-					+ "after deleting a keypair.");
+			logger.info("updating SSLSocketFactory after deleting a keypair");
 		}
 	}
 
@@ -1514,7 +1504,7 @@ public class CredentialManagerImpl implements CredentialManager,
 				return keystore.isKeyEntry(alias);
 			}
 		} catch (Exception ex) {
-			String exMessage = "Credential Manager: Failed to access the key entry in the Keystore.";
+			String exMessage = "failed to access the key entry in the Keystore";
 			logger.error(exMessage, ex);
 			throw new CMException(exMessage, ex);
 		}
@@ -1545,8 +1535,8 @@ public class CredentialManagerImpl implements CredentialManager,
 				}
 			}
 		} catch (Exception ex) {
-			String exMessage = "Credential Manager: Failed to delete the entry with alias "
-					+ alias + "from the " + ksType + ".";
+			String exMessage = "failed to delete the entry with alias " + alias
+					+ " from the " + ksType;
 			logger.error(exMessage, ex);
 			throw new CMException(exMessage, ex);
 		}
@@ -1576,8 +1566,8 @@ public class CredentialManagerImpl implements CredentialManager,
 				return false;
 			}
 		} catch (Exception ex) {
-			String exMessage = "Credential Manager: Failed to access the "
-					+ ksType + " to check if an alias exists.";
+			String exMessage = "failed to access the " + ksType
+					+ " to check if an alias exists";
 			logger.error(exMessage, ex);
 			throw new CMException(exMessage, ex);
 		}
@@ -1607,8 +1597,8 @@ public class CredentialManagerImpl implements CredentialManager,
 				return null;
 			}
 		} catch (Exception ex) {
-			String exMessage = "Credential Manager: Failed to access the "
-					+ ksType + " to get the aliases.";
+			String exMessage = "failed to access the " + ksType
+					+ " to get the aliases";
 			logger.error(exMessage, ex);
 			throw new CMException(exMessage, ex);
 		}
@@ -1666,7 +1656,7 @@ public class CredentialManagerImpl implements CredentialManager,
 			pkcs12.load(input, pkcs12Password.toCharArray());
 			return pkcs12;
 		} catch (Exception ex) {
-			String exMessage = "Credential Manager: Failed to open a PKCS12-type keystore.";
+			String exMessage = "failed to open a PKCS12-type keystore";
 			logger.error(exMessage, ex);
 			throw new CMException(exMessage, ex);
 		}
@@ -1763,6 +1753,7 @@ public class CredentialManagerImpl implements CredentialManager,
 		return (masterPassword != null) && masterPassword.equals(password);
 	}
 
+	private static final boolean REALLY_DISABLED = false;
 	/**
 	 * Change the Keystore and the Truststore's master password to the one
 	 * provided. The Keystore and Truststore both use the same password.
@@ -1804,24 +1795,23 @@ public class CredentialManagerImpl implements CredentialManager,
 				Enumeration<String> aliases = keystore.aliases();
 				while (aliases.hasMoreElements()) {
 					String alias = aliases.nextElement();
-					// if (alias.startsWith("password#")) { // a password entry
-					// SecretKeySpec passwordKey = (((SecretKeySpec) keystore
-					// .getKey(alias, masterPassword.toCharArray())));
-					// newKeystore.setKeyEntry(alias, passwordKey,
-					// newMasterPassword
-					// .toCharArray(), null);
-					// } else if (alias.startsWith("keypair#")) { // a private
-					// key entry
-					// // Get the private key for the alias
-					// PrivateKey privateKey = (PrivateKey) keystore.getKey(
-					// alias, masterPassword.toCharArray());
-					// // Get the related public key's certificate chain
-					// Certificate[] certChain = keystore
-					// .getCertificateChain(alias);
-					// newKeystore.setKeyEntry(alias, privateKey,
-					// newMasterPassword
-					// .toCharArray(), certChain);
-					// }
+					if (REALLY_DISABLED) {
+						if (alias.startsWith("password#")) { // a password entry
+							SecretKeySpec passwordKey = (((SecretKeySpec) keystore
+									.getKey(alias, masterPassword.toCharArray())));
+							newKeystore.setKeyEntry(alias, passwordKey,
+									newMasterPassword.toCharArray(), null);
+						} else if (alias.startsWith("keypair#")) { // a private key entry
+							// Get the private key for the alias
+							PrivateKey privateKey = (PrivateKey) keystore
+									.getKey(alias, masterPassword.toCharArray());
+							// Get the related public key's certificate chain
+							Certificate[] certChain = keystore
+									.getCertificateChain(alias);
+							newKeystore.setKeyEntry(alias, privateKey,
+									newMasterPassword.toCharArray(), certChain);
+						}
+					}
 					// Do all entries at once, not reason to separate password &
 					// key pair entries
 					newKeystore.setEntry(
@@ -1848,7 +1838,6 @@ public class CredentialManagerImpl implements CredentialManager,
 
 			// Set the new master password as well
 			masterPassword = newMasterPassword;
-
 		} catch (Exception ex) {
 			// rollback
 			keystore = oldKeystore;
@@ -1857,7 +1846,7 @@ public class CredentialManagerImpl implements CredentialManager,
 			saveKeystore(KEYSTORE);
 			saveKeystore(TRUSTSTORE);
 
-			String exMessage = "Credential Manager: Failed to change maaster password - reverting to the old.";
+			String exMessage = "Failed to change maaster password - reverting to the old one";
 			logger.error(exMessage, ex);
 			throw (new CMException(exMessage));
 		}
@@ -1924,11 +1913,17 @@ public class CredentialManagerImpl implements CredentialManager,
 			throw new CMException("Failed to initiate the SSL socet factory",
 					kmex);
 		}
-		// Set the default SSLContext to be used for subsequent SSL sockets from
-		// Java
+
+		/*
+		 * Set the default SSLContext to be used for subsequent SSL sockets from
+		 * Java
+		 */
 		SSLContext.setDefault(sc);
-		// Create SSL socket to be used for HTTPS connections from the JVM
-		// e.g. REST activity that uses Apache HTTP client library
+
+		/*
+		 * Create SSL socket to be used for HTTPS connections from the JVM e.g.
+		 * REST activity that uses Apache HTTP client library
+		 */
 		tavernaSSLSocketFactory = sc.getSocketFactory();
 
 		return tavernaSSLSocketFactory;
@@ -1967,19 +1962,18 @@ public class CredentialManagerImpl implements CredentialManager,
 			KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509",
 					"SunJSSE");
 
-			if (!isInitialized) {
-				logger.debug("Credential Manager has not been instantiated yet.");
+			if (!isInitialized)
 				// If we have not initialised the Credential Manager so far -
 				// now is the time to do it
 				try {
+					logger.debug("Credential Manager has not been instantiated yet");
 					initialize();
-					logger.debug("Credential Manager instantiated.");
+					logger.debug("Credential Manager instantiated");
 				} catch (CMException cme) {
 					throw new Exception(
 							"Could not initialize Taverna's KeyManager for SSLSocketFactory:"
 									+ " failed to initialise Credential Manager.");
 				}
-			}
 
 			// Keystore and master password should not be null as we have just
 			// initalised Credential Manager
@@ -2296,13 +2290,11 @@ public class CredentialManagerImpl implements CredentialManager,
 	 */
 	public URI normalizeServiceURI(URI serviceURI) {
 		try {
-			URI noUserInfo = CMUtils.setUserInfoForURI(serviceURI, null);
-			URI normalized = noUserInfo.normalize();
-			URI parent = normalized.resolve(".");
 			// Strip userinfo, keep fragment
-			URI withFragment = CMUtils.setFragmentForURI(parent,
+			URI normalized = CMUtils.setUserInfoForURI(serviceURI, null)
+					.normalize();
+			return CMUtils.setFragmentForURI(normalized.resolve("."),
 					serviceURI.getFragment());
-			return withFragment;
 		} catch (URISyntaxException ex) {
 			return serviceURI;
 		}

@@ -24,18 +24,16 @@ import net.sf.taverna.t2.security.credentialmanager.CredentialManager.KeystoreTy
 
 /**
  * An event given to {@link CredentialManagerOld} observers registered using
- * {@link Observable#addObserver(net.sf.taverna.t2.lang.observer.Observer)}
- * to let them know the Keystore or Truststore have been changed.
+ * {@link Observable#addObserver(net.sf.taverna.t2.lang.observer.Observer)} to
+ * let them know the Keystore or Truststore have been changed.
  * 
  * @author Alex Nenadic
  */
 public class KeystoreChangedEvent {
-	
 	// Whether the change is on the Keystore or the Truststore
-	public KeystoreType keystoreType;
-	
-	public KeystoreChangedEvent(KeystoreType keystoreType){
+	public final KeystoreType keystoreType;
+
+	public KeystoreChangedEvent(KeystoreType keystoreType) {
 		this.keystoreType = keystoreType;
 	}
-
 }

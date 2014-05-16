@@ -1,5 +1,7 @@
 package net.sf.taverna.t2.security.credentialmanager;
 
+import static java.net.Authenticator.RequestorType.PROXY;
+
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;
 import java.net.URI;
@@ -20,14 +22,12 @@ import org.apache.log4j.Logger;
  * 
  */
 public class CredentialManagerAuthenticator extends Authenticator {
-
-	private static Logger logger = Logger
-			.getLogger(CredentialManagerAuthenticator.class);
-
+	private Logger logger;
 	private CredentialManager credManager;
 
 	public CredentialManagerAuthenticator(CredentialManager credManager) {
-		this.setCredentialManager(credManager);
+		logger = Logger.getLogger(CredentialManagerAuthenticator.class);
+		setCredentialManager(credManager);
 	}
 
 	public void setCredentialManager(CredentialManager credManager) {
@@ -36,16 +36,14 @@ public class CredentialManagerAuthenticator extends Authenticator {
 
 	@Override
 	protected PasswordAuthentication getPasswordAuthentication() {
-		if (getRequestorType().equals(RequestorType.PROXY)) {
+		if (getRequestorType().equals(PROXY)) {
 			String password = System.getProperty("http.proxyPassword");
 			String username = System.getProperty("http.proxyUser");
-			if (username == null || password == null) {
+			if (username == null || password == null)
 				// No proxy authentication set
 				return null;
-			} else {
-				return new PasswordAuthentication(username, password
-						.toCharArray());
-			}
+
+			return new PasswordAuthentication(username, password.toCharArray());
 		}
 
 		URI uri;
@@ -60,10 +58,9 @@ public class CredentialManagerAuthenticator extends Authenticator {
 		} else {
 			// Construct an URI of socket://hostname:port
 			String host = getRequestingHost();
-			if (host == null) {
-				// Use IP adress
+			if (host == null)
+				// Use IP address
 				host = getRequestingSite().getHostAddress();
-			}
 			int port = getRequestingPort();
 			if (host == null || port < 0) {
 				logger.warn("Unsupported request for " + getRequestingScheme()
@@ -82,14 +79,13 @@ public class CredentialManagerAuthenticator extends Authenticator {
 		if (getRequestingScheme().equals("basic")
 				|| getRequestingScheme().equals("digest")) {
 			usePathRecursion = true;
-			if (realm != null && realm.length() > 0) {
+			if (realm != null && realm.length() > 0)
 				try {
 					uri = CMUtils.resolveUriFragment(uri, realm);
 				} catch (URISyntaxException e) {
 					logger.warn("Could not URI-encode fragment for realm: "
 							+ realm);
 				}
-			}
 		}
 
 		UsernamePassword usernameAndPassword;
@@ -110,7 +106,4 @@ public class CredentialManagerAuthenticator extends Authenticator {
 		usernameAndPassword.resetPassword();
 		return pwAuth;
 	}
-
-	
-	
 }

@@ -25,7 +25,6 @@ import java.util.Arrays;
 /**
  * 
  * @author Stian Soiland-Reyes
- *
  */
 public class UsernamePassword {
 	private char[] password;
@@ -40,10 +39,10 @@ public class UsernamePassword {
 		up.setShouldSave(isShouldSave());
 		return up;
 	}
-	
+
 	public UsernamePassword() {
 	}
-	
+
 	public UsernamePassword(String username, String password) {
 		this.username = username;
 		this.password = password.toCharArray();
@@ -52,7 +51,7 @@ public class UsernamePassword {
 	public char[] getPassword() {
 		return password;
 	}
-	
+
 	public String getPasswordAsString() {
 		return String.valueOf(password);
 	}
@@ -66,9 +65,8 @@ public class UsernamePassword {
 	}
 
 	public void resetPassword() {
-		if (this.password == null) {
+		if (this.password == null)
 			return;
-		}
 		Arrays.fill(this.password, '\u0000');
 	}
 
@@ -80,7 +78,7 @@ public class UsernamePassword {
 	public void setShouldSave(boolean shouldSave) {
 		this.shouldSave = shouldSave;
 	}
-	
+
 	public void setUsername(String username) {
 		this.username = username;
 	}
@@ -89,6 +87,4 @@ public class UsernamePassword {
 	protected void finalize() throws Throwable {
 		resetPassword();
 	}
-
-
 }
