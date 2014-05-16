@@ -12,7 +12,7 @@
 	<version>2.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<name>Taverna 2 security</name>
+	<name>Taverna engine credential manager</name>
 	<description>
 		Security infrastructure for Taverna 2 and Taverna 2 activities.
 	</description>
@@ -81,9 +81,9 @@
 
 	</repositories>
 	<scm>
-		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/engine/net.sf.taverna.t2.security/trunk/</connection>
-		<developerConnection>scm:svn:https://taverna.googlecode.com/svn/taverna/engine/net.sf.taverna.t2.security/trunk/</developerConnection>
-		<url>http://code.google.com/p/taverna/source/browse/#svn/taverna/engine/net.sf.taverna.t2.security/trunk/</url>
+		<connection>scm:svn:http://taverna.googlecode.com/svn/taverna/engine/net.sf.taverna.t2.security/branches/maintenance/</connection>
+		<developerConnection>scm:svn:https://taverna.googlecode.com/svn/taverna/engine/net.sf.taverna.t2.security/branches/maintenance/</developerConnection>
+		<url>http://code.google.com/p/taverna/source/browse/#svn/taverna/engine/net.sf.taverna.t2.security/branches/maintenance/</url>
 	</scm>
 	<dependencyManagement>
 		<dependencies>

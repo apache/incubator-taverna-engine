@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2008-2010 The University of Manchester
+ * Copyright (C) 2008-2014 The University of Manchester
  *
  *  Modifications to the initial code base are copyright of their
  *  respective authors, or their employers as appropriate.
@@ -36,15 +36,16 @@ import net.sf.taverna.t2.lang.observer.Observer;
 /**
  * Provides a wrapper for Taverna's Keystore and Truststore and implements
  * methods for managing user's credentials (passwords, private/proxy key pairs)
- * and credentials of trusted services and CAs' (i.e. their public key certificates).
- *
- * Keystore and Truststore are Bouncy Castle UBER-type keystores saved as files called
- * "t2keystore.ubr" and "t2truststore.ubr" respectively. In the case of
+ * and credentials of trusted services and CAs' (i.e. their public key
+ * certificates).
+ * <p>
+ * Keystore and Truststore are Bouncy Castle UBER-type keystores saved as files
+ * called "t2keystore.ubr" and "t2truststore.ubr" respectively. In the case of
  * the Workbench, they are located in a directory called "security" inside the
  * taverna.home directory. This location can be changed, e.g. in the case of the
  * server and command line tool you may want to pass in the location of the
  * Credential Manager's files.
- *
+ * 
  * @author Alex Nenadic
  * @author Stian Soiland-Reyes
  */
@@ -53,8 +54,8 @@ public interface CredentialManager {
 	public static final String KEYSTORE_FILE_NAME = "taverna-keystore.ubr";
 	public static final String TRUSTSTORE_FILE_NAME = "taverna-truststore.ubr";
 
-	//public static final String KEYSTORE_FILE_NAME = "t2keystore.ubr";
-	//public static final String TRUSTSTORE_FILE_NAME = "t2truststore.ubr";
+	// public static final String KEYSTORE_FILE_NAME = "t2keystore.ubr";
+	// public static final String TRUSTSTORE_FILE_NAME = "t2truststore.ubr";
 
 	public static final String UTF_8 = "UTF-8";
 
@@ -67,40 +68,67 @@ public interface CredentialManager {
 	public static final String PROPERTY_TRUSTSTORE_TYPE = "javax.net.ssl.trustStoreType";
 	public static final String PROPERTY_TRUSTSTORE_PROVIDER = "javax.net.ssl.trustStoreProvider";
 
-	// ASCII NUL character - for separating the username from the rest of the string
-	// when saving it in the Keystore. Seems like a good separator as it will highly
-	// unlikely feature in a username.
+	/*
+	 * ASCII NUL character - for separating the username from the rest of the
+	 * string when saving it in the Keystore. Seems like a good separator as it
+	 * will highly unlikely feature in a username.
+	 */
 	public static final char USERNAME_AND_PASSWORD_SEPARATOR_CHARACTER = '\u0000';
 
-	// Constants denoting which of the two Credential Manager's keystores (Keystore or Truststore)
-	// we are currently performing an operation on (in cases when the same operation can be done on both).
-	public static enum KeystoreType {KEYSTORE, TRUSTSTORE};
+	/*
+	 * Constants denoting which of the two Credential Manager's keystores
+	 * (Keystore or Truststore) we are currently performing an operation on (in
+	 * cases when the same operation can be done on both).
+	 */
+	public static enum KeystoreType {
+		KEYSTORE, TRUSTSTORE
+	};
 
+	/*
+	 * Constants denoting which of the two keystores (Keystore or Truststore) we
+	 * are currently performing an operation on.
+	 */
+	public static final String KEYSTORE = "Keystore";
+
+	public static final String TRUSTSTORE = "Truststore";
+
+	/*
+	 * Existence of this file in the Credential Manager folder indicates the
+	 * user has set the master password so do not use the default password
+	 */
+	public static final String USER_SET_MASTER_PASSWORD_INDICATOR_FILE_NAME = "user_set_master_password";
+
+	/*
+	 * Default password for Truststore - needed as the Truststore needs to be
+	 * populated before the Workbench starts up to initiate the SSLSocketFactory
+	 * and to avoid popping up a dialog to ask the user for it.
+	 */
+	// private static final String TRUSTSTORE_PASSWORD = "Tu/Ap%2_$dJt6*+Rca9v";
 
 	/**
 	 * Set the directory where Credential Manager's Keystore and Truststore
 	 * files will be read from. If this method is not used, the directory will
 	 * default to <TAVERNA_HOME>/security somewhere in user's home directory.
-	 *
-	 * If you want to use this method to change the location of Credential Manager's
-	 * configuration directory then make sure you call it before any other method on
-	 * Credential Manager.
-	 *
+	 * 
+	 * If you want to use this method to change the location of Credential
+	 * Manager's configuration directory then make sure you call it before any
+	 * other method on Credential Manager.
+	 * 
 	 * @param credentialManagerDirectory
 	 * @throws CMException
 	 */
-	public void setConfigurationDirectoryPath(File credentialManagerDirectory)
+	void setConfigurationDirectoryPath(File credentialManagerDirectory)
 			throws CMException;
 
 	/**
-	 * Checks if the Keystore contains a username and password for the given service URI.
+	 * Checks if the Keystore contains a username and password for the given
+	 * service URI.
 	 */
-	public boolean hasUsernamePasswordForService(URI serviceURI)
-			throws CMException;
+	boolean hasUsernamePasswordForService(URI serviceURI) throws CMException;
 
 	/**
-	 * Get a username and password pair for the given service's URI,
-	 * or null if it does not exit.
+	 * Get a username and password pair for the given service's URI, or null if
+	 * it does not exit.
 	 * <p>
 	 * If the username and password are not available in the Keystore, it will
 	 * invoke implementations of the {@link ServiceUsernameAndPasswordProvider}
@@ -110,26 +138,35 @@ public interface CredentialManager {
 	 * If the parameter <code>useURIPathRecursion</code> is true, then the
 	 * Credential Manager will also attempt to look for stored credentials for
 	 * each of the parent fragments of the URI.
-	 *
-	 * @param serviceURI The URI of the service for which we are providing the username and password
-	 *
-	 * @param useURIPathRecursion Whether to look for any username and passwords stored in the Keystore
-	 * for the parent fragments of the service URI (for example, we are looking for the credentials for service
-	 * http://somehost/some-fragment but we already have credentials stored for http://somehost which can be reused)
-	 *
-	 * @param requestingMessage The message to be presented to the user when asking for the username and password,
-	 * normally useful for UI providers that pop up dialogs, can be ignored otherwise
-	 *
+	 * 
+	 * @param serviceURI
+	 *            The URI of the service for which we are providing the username
+	 *            and password
+	 * 
+	 * @param useURIPathRecursion
+	 *            Whether to look for any username and passwords stored in the
+	 *            Keystore for the parent fragments of the service URI (for
+	 *            example, we are looking for the credentials for service
+	 *            http://somehost/some-fragment but we already have credentials
+	 *            stored for http://somehost which can be reused)
+	 * 
+	 * @param requestingMessage
+	 *            The message to be presented to the user when asking for the
+	 *            username and password, normally useful for UI providers that
+	 *            pop up dialogs, can be ignored otherwise
+	 * 
 	 * @return username and password pair for the given service
-	 *
-	 * @throws CMException if anything goes wrong during Keystore lookup, etc.
+	 * 
+	 * @throws CMException
+	 *             if anything goes wrong during Keystore lookup, etc.
 	 */
-	public UsernamePassword getUsernameAndPasswordForService(
-			URI serviceURI, boolean useURIPathRecursion, String requestingMessage)
+	UsernamePassword getUsernameAndPasswordForService(URI serviceURI,
+			boolean useURIPathRecursion, String requestingMessage)
 			throws CMException;
 
 	/**
-	 * Insert a username and password pair for the given service URI in the Keystore.
+	 * Insert a username and password pair for the given service URI in the
+	 * Keystore.
 	 * <p>
 	 * Effectively, this method inserts a new secret key entry in the Keystore,
 	 * where key contains <USERNAME>"\000"<PASSWORD> string, i.e. password is
@@ -144,8 +181,7 @@ public interface CredentialManager {
 	 * An alias used to identify the username and password entry is constructed
 	 * as "password#"<SERVICE_URL> using the service URL this username/password
 	 * pair is to be used for.
-	 * <p>
-	 *
+	 * 
 	 * @param usernamePassword
 	 *            The {@link UsernamePassword} to store
 	 * @param serviceURI
@@ -153,23 +189,22 @@ public interface CredentialManager {
 	 * @return TODO
 	 * @throws CMException
 	 *             If the credentials could not be stored
-	 *
-	 * @return the alias under which this username and password entry was saved in the Keystore
+	 * 
+	 * @return the alias under which this username and password entry was saved
+	 *         in the Keystore
 	 */
-	public String addUsernameAndPasswordForService(
-			UsernamePassword usernamePassword, URI serviceURI)
-			throws CMException;
+	String addUsernameAndPasswordForService(UsernamePassword usernamePassword,
+			URI serviceURI) throws CMException;
 
 	/**
 	 * Delete a username and password pair for the given service URI from the
 	 * Keystore.
 	 */
-	public void deleteUsernameAndPasswordForService(URI serviceURI)
-			throws CMException;
+	void deleteUsernameAndPasswordForService(URI serviceURI) throws CMException;
 
 	/**
-	 * Checks if the Keystore contains the given key pair entry (private key and its
-	 * corresponding public key certificate chain).
+	 * Checks if the Keystore contains the given key pair entry (private key and
+	 * its corresponding public key certificate chain).
 	 */
 	public boolean hasKeyPair(Key privateKey, Certificate[] certs)
 			throws CMException;
@@ -177,44 +212,46 @@ public interface CredentialManager {
 	/**
 	 * Insert a new key entry containing private key and the corresponding
 	 * public key certificate chain in the Keystore.
-	 *
+	 * 
 	 * An alias used to identify the keypair entry is constructed as:
 	 * "keypair#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<
 	 * CERT_SERIAL_NUMBER>
-	 *
+	 * 
 	 * @return the alias under which this key entry was saved in the Keystore
 	 */
-	public String addKeyPair(Key privateKey, Certificate[] certs)
-			throws CMException;
+	String addKeyPair(Key privateKey, Certificate[] certs) throws CMException;
 
 	/**
 	 * Delete a key pair entry from the Keystore given its alias.
 	 */
-	public void deleteKeyPair(String alias) throws CMException;
+	void deleteKeyPair(String alias) throws CMException;
 
 	/**
-	 * Delete a key pair entry from the Keystore given its private and public key parts.
+	 * Delete a key pair entry from the Keystore given its private and public
+	 * key parts.
 	 */
-	public void deleteKeyPair(Key privateKey, Certificate[] certs)
-			throws CMException;
+	void deleteKeyPair(Key privateKey, Certificate[] certs) throws CMException;
 
 	/**
-	 * Create a Keystore alias that would be used for adding the given
-	 * key pair (private and public key) entry to the Keystore. The alias is cretaed as
-	 * "keypair#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<CERT_SERIAL_NUMBER>
-	 *
-	 * @param privateKey private key
-	 * @param certs public key's certificate chain
+	 * Create a Keystore alias that would be used for adding the given key pair
+	 * (private and public key) entry to the Keystore. The alias is cretaed as
+	 * "keypair#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<
+	 * CERT_SERIAL_NUMBER>
+	 * 
+	 * @param privateKey
+	 *            private key
+	 * @param certs
+	 *            public key's certificate chain
 	 * @return
 	 */
-	public String createKeyPairAlias(Key privateKey, Certificate certs[]);
+	String createKeyPairAlias(Key privateKey, Certificate certs[]);
 
 	/**
 	 * Export a key entry containing private key and public key certificate
 	 * chain from the Keystore to a PKCS #12 file.
 	 */
-	public abstract void exportKeyPair(String alias, File exportFile,
-			String pkcs12Password) throws CMException;
+	void exportKeyPair(String alias, File exportFile, String pkcs12Password)
+			throws CMException;
 
 	/**
 	 * Get certificate entry from the Keystore or Truststore. If the given alias
@@ -223,131 +260,127 @@ public interface CredentialManager {
 	 * identifies a key pair entry, the first element of the certificate chain
 	 * of that entry is returned from the Keystore.
 	 */
-	public Certificate getCertificate(KeystoreType ksType, String alias)
+	Certificate getCertificate(KeystoreType ksType, String alias)
 			throws CMException;
 
 	/**
-	 * Get certificate chain for the key pair entry from the Keystore given its alias.
+	 * Get certificate chain for the key pair entry from the Keystore given its
+	 * alias.
 	 * <p>
-	 * This method works for the Keystore only as the Truststore does not contain key pair
-	 * entries, but trusted certificate entries only.
+	 * This method works for the Keystore only as the Truststore does not
+	 * contain key pair entries, but trusted certificate entries only.
 	 */
-	public Certificate[] getKeyPairsCertificateChain(String alias)
-			throws CMException;
+	Certificate[] getKeyPairsCertificateChain(String alias) throws CMException;
 
 	/**
-	 * Get the private key part of a key pair entry from the Keystore given its alias.
+	 * Get the private key part of a key pair entry from the Keystore given its
+	 * alias.
 	 * <p>
-	 * This method works for the Keystore only as the Truststore does not contain key pair
-	 * entries, but trusted certificate entries only.
+	 * This method works for the Keystore only as the Truststore does not
+	 * contain key pair entries, but trusted certificate entries only.
 	 */
-	public Key getKeyPairsPrivateKey(String alias)
-			throws CMException;
+	Key getKeyPairsPrivateKey(String alias) throws CMException;
 
 	/**
 	 * Checks if the Truststore contains the given public key certificate.
 	 */
-	public boolean hasTrustedCertificate(Certificate cert)
-			throws CMException;
+	boolean hasTrustedCertificate(Certificate cert) throws CMException;
 
 	/**
 	 * Insert a trusted certificate entry in the Truststore with an alias
 	 * constructed as:
-	 *
+	 * 
 	 * "trustedcert#<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#
 	 * "<CERT_SERIAL_NUMBER>
-	 *
-	 * @return the alias under which this trusted certificate entry was saved in the Keystore
+	 * 
+	 * @return the alias under which this trusted certificate entry was saved in
+	 *         the Keystore
 	 */
-	public String  addTrustedCertificate(X509Certificate cert)
-			throws CMException;
+	String addTrustedCertificate(X509Certificate cert) throws CMException;
 
 	/**
 	 * Delete a trusted certificate entry from the Truststore given its alias.
 	 */
-	public void deleteTrustedCertificate(String alias)
-			throws CMException;
+	void deleteTrustedCertificate(String alias) throws CMException;
 
 	/**
-	 * Delete a trusted certificate entry from the Truststore given the certificate.
+	 * Delete a trusted certificate entry from the Truststore given the
+	 * certificate.
 	 */
-	public void deleteTrustedCertificate(X509Certificate cert)
-			throws CMException;
+	void deleteTrustedCertificate(X509Certificate cert) throws CMException;
 
 	/**
-	 * Create a Truststore alias that would be used for adding the given
-	 * trusted X509 certificate to the Truststore. The alias is cretaed as
+	 * Create a Truststore alias that would be used for adding the given trusted
+	 * X509 certificate to the Truststore. The alias is cretaed as
 	 * "trustedcert#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<
 	 * CERT_SERIAL_NUMBER>
-	 *
-	 * @param cert certificate to generate the alias for
+	 * 
+	 * @param cert
+	 *            certificate to generate the alias for
 	 * @return the alias for the given certificate
 	 */
-	public String createTrustedCertificateAlias(X509Certificate cert);
+	String createTrustedCertificateAlias(X509Certificate cert);
 
 	/**
 	 * Check if the given alias identifies a key entry in the Keystore.
 	 */
-	public boolean isKeyEntry(String alias) throws CMException;
+	boolean isKeyEntry(String alias) throws CMException;
 
 	/**
 	 * Check if the Keystore/Truststore contains an entry with the given alias.
 	 */
-	public boolean hasEntryWithAlias(KeystoreType ksType, String alias)
+	boolean hasEntryWithAlias(KeystoreType ksType, String alias)
 			throws CMException;
 
 	/**
-	 * Get all the aliases from the Keystore/Truststore or null if there was some error
-	 * while accessing it.
+	 * Get all the aliases from the Keystore/Truststore or null if there was
+	 * some error while accessing it.
 	 */
-	public ArrayList<String> getAliases(KeystoreType ksType)
-			throws CMException;
+	ArrayList<String> getAliases(KeystoreType ksType) throws CMException;
 
 	/**
 	 * Get service URIs associated with all username/password pairs currently in
 	 * the Keystore.
-	 *
+	 * 
 	 * @see #hasUsernamePasswordForService(URI)
 	 */
-	public List<URI> getServiceURIsForAllUsernameAndPasswordPairs()
-			throws CMException;
+	List<URI> getServiceURIsForAllUsernameAndPasswordPairs() throws CMException;
 
 	/**
 	 * Load a PKCS12-type keystore from a file using the supplied password.
 	 */
-	public KeyStore loadPKCS12Keystore(File pkcs12File,
-			String pkcs12Password) throws CMException;
+	KeyStore loadPKCS12Keystore(File pkcs12File, String pkcs12Password)
+			throws CMException;
 
 	/**
 	 * Add an observer of the changes to the Keystore or Truststore.
 	 */
-	public void addObserver(Observer<KeystoreChangedEvent> observer);
+	void addObserver(Observer<KeystoreChangedEvent> observer);
 
 	/**
 	 * Get all current observers of changes to the Keystore or Truststore.
 	 */
-	public List<Observer<KeystoreChangedEvent>> getObservers();
+	List<Observer<KeystoreChangedEvent>> getObservers();
 
 	/**
 	 * Remove an observer of the changes to the Keystore or Truststore.
 	 */
-	public void removeObserver(Observer<KeystoreChangedEvent> observer);
+	void removeObserver(Observer<KeystoreChangedEvent> observer);
 
 	/**
 	 * Checks if Keystore's master password is the same as the one provided.
-	 *
+	 * 
 	 * @param password
 	 * @return
 	 * @throws CMException
 	 */
-	public boolean confirmMasterPassword(String password) throws CMException;
+	boolean confirmMasterPassword(String password) throws CMException;
 
 	/**
-	 * Change the Keystore and the Truststore's master password to the one provided.
-	 * The Keystore and Truststore both use the same password.
+	 * Change the Keystore and the Truststore's master password to the one
+	 * provided. The Keystore and Truststore both use the same password.
 	 */
-	public void changeMasterPassword(String newPassword)
-			throws CMException;
+	void changeMasterPassword(String newPassword) throws CMException;
 
 	/**
 	 * Reset the JVMs cache for authentication like HTTP Basic Auth.
@@ -356,27 +389,29 @@ public interface CredentialManager {
 	 * <code>sun.net.www.protocol.http.AuthCacheValue</code> which might not be
 	 * valid in virtual machines other than Sun Java 6. If these calls fail,
 	 * this method will log the error and return <code>false</code>.
-	 *
+	 * 
 	 * @return <code>true</code> if the VMs cache could be reset, or
 	 *         <code>false</code> otherwise.
 	 */
-	public boolean resetAuthCache();
+	boolean resetAuthCache();
 
 	/**
-	 * Set the default SSLContext to use Credential Manager's Keystore and Truststore
-	 * for managing SSL connections from Taverna and also set HttpsURLConnection's
-	 * default SSLSocketFactory to use the one from the just configured SSLContext, i.e.
-	 * backed by Credential Manager's Keystore and Truststore.
-	 *
+	 * Set the default SSLContext to use Credential Manager's Keystore and
+	 * Truststore for managing SSL connections from Taverna and also set
+	 * HttpsURLConnection's default SSLSocketFactory to use the one from the
+	 * just configured SSLContext, i.e. backed by Credential Manager's Keystore
+	 * and Truststore.
+	 * 
 	 * @throws CMException
 	 */
-	public void initializeSSL() throws CMException;
+	void initializeSSL() throws CMException;
 
 	/**
-	 * Get Taverna's SSLSocketFactory backed by Credential Manager's Keystore and Truststore.
+	 * Get Taverna's SSLSocketFactory backed by Credential Manager's Keystore
+	 * and Truststore.
+	 * 
 	 * @return
 	 * @throws CMException
 	 */
-	public SSLSocketFactory getTavernaSSLSocketFactory() throws CMException;
-
+	SSLSocketFactory getTavernaSSLSocketFactory() throws CMException;
 }

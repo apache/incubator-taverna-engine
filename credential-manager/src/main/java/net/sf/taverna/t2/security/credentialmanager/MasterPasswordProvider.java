@@ -23,16 +23,17 @@ package net.sf.taverna.t2.security.credentialmanager;
 import java.util.Comparator;
 
 /**
- * Defines an interface for providing a master password for the Credential Manager.
- * This master password is used to encrypt/decrypt the Credential Manager's Keystore/Truststore.
+ * Defines an interface for providing a master password for the Credential
+ * Manager. This master password is used to encrypt/decrypt the Credential
+ * Manager's Keystore/Truststore.
  * <p>
- * A typical implementation of this class would pop up a dialog to ask 
- * the user for the master password. Such providers should check
- * {@link GraphicsEnvironment#isHeadless()} before returning, to avoid attempts to pop up dialogues 
- * on server/headless installations.
+ * A typical implementation of this class would pop up a dialog to ask the user
+ * for the master password. Such providers should check
+ * {@link GraphicsEnvironment#isHeadless()} before returning, to avoid attempts
+ * to pop up dialogues on server/headless installations.
  * <p>
- * Another example may be to read the master password from a file or from command line
- * parameters.
+ * Another example may be to read the master password from a file or from
+ * command line parameters.
  * <p>
  * It is safe to return <code>null</code> if the provider does not have an
  * opinion.
@@ -51,7 +52,7 @@ public interface MasterPasswordProvider {
 	 * <code>true</code> from {@link #canProvideMasterPassword()}.
 	 * <p>
 	 * If the parameter <code>firstTime</code> is <code>true</code>, this is a
-	 * request for <em>setting</em> the master password, as the Keystore and 
+	 * request for <em>setting</em> the master password, as the Keystore and
 	 * Truststore have not been created yet.
 	 * 
 	 * @see #canProvideMasterPassword()
@@ -64,10 +65,12 @@ public interface MasterPasswordProvider {
 	 *         cancelled, etc.)
 	 */
 	public String getMasterPassword(boolean firstTime);
-	
+
 	/**
 	 * Set the master password.
-	 * @param password to set
+	 * 
+	 * @param password
+	 *            to set
 	 */
 	public void setMasterPassword(String password);
 
@@ -82,30 +85,32 @@ public interface MasterPasswordProvider {
 	 * It is undetermined who will be asked first if providers have the same
 	 * priority.
 	 * <p>
-	 * A typical priority for UI providers that pop up a dialog to as the user 
-	 * could be <code>100</code>, allowing server-side providers to override with priorities like
-	 * <code>500</code>, or fall-back providers (say by reading system
-	 * properties) to have a priority of <code>10</code>.
+	 * A typical priority for UI providers that pop up a dialog to as the user
+	 * could be <code>100</code>, allowing server-side providers to override
+	 * with priorities like <code>500</code>, or fall-back providers (say by
+	 * reading system properties) to have a priority of <code>10</code>.
 	 * 
 	 * @return The priority of this provider. Higher number means higher
 	 *         priority.
 	 */
 	public int getProviderPriority();
-	
+
 	/**
-	 * Set the provider's priority that determines the order in which various 
+	 * Set the provider's priority that determines the order in which various
 	 * master password providers will be invoked.
-	 *
-	 * @param priority provider's priority 
+	 * 
+	 * @param priority
+	 *            provider's priority
 	 */
-	//public void setProviderPriority(int priority);
+	// public void setProviderPriority(int priority);
 
-	public class ProviderComparator implements Comparator<MasterPasswordProvider>{
-
+	public class ProviderComparator implements
+			Comparator<MasterPasswordProvider> {
 		@Override
-		public int compare(MasterPasswordProvider provider1, MasterPasswordProvider provider2) {
-			return provider1.getProviderPriority() - provider2.getProviderPriority();
-		};
+		public int compare(MasterPasswordProvider provider1,
+				MasterPasswordProvider provider2) {
+			return provider1.getProviderPriority()
+					- provider2.getProviderPriority();
+		}
 	}
-
 }
