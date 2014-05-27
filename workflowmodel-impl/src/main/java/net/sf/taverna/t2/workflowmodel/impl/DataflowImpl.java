@@ -48,6 +48,9 @@ import net.sf.taverna.t2.workflowmodel.Processor;
 import net.sf.taverna.t2.workflowmodel.TokenProcessingEntity;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationTypeMismatchException;
 import static net.sf.taverna.t2.workflowmodel.impl.Tools.makeImmutable;
+
+import org.apache.log4j.Logger;
+
 /**
  * Implementation of Dataflow including implementation of the dataflow level
  * type checker. Other than this the implementation is fairly simple as it's
@@ -68,6 +71,8 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 	private List<DataflowOutputPortImpl> outputs;
 	protected String internalIdentifier;
     private DataflowValidationReport validationReport;
+
+    private static final Logger logger = Logger.getLogger(DataflowImpl.class);
 
 	/**
 	 * Protected constructor, assigns a default name. To build an instance of
@@ -650,11 +655,9 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 
 	/**
 	 * The active process identifiers correspond to current strands of data
-	 * running through this dataflow. The keys are process identifiers, the
-	 * values are sets of output port names for which final events have been
-	 * received.
+	 * running through this dataflow.
 	 */
-	private Map<String, Set<String>> activeProcessIdentifiers = new HashMap<String, Set<String>>();
+	private Set<String> activeProcessIdentifiers = new HashSet<String>();
     private volatile boolean immutable;
 
 	/**
@@ -673,7 +676,7 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 	protected boolean tokenReceived(String owningProcess,
 			InvocationContext context) {
 		synchronized (activeProcessIdentifiers) {
-			if (! activeProcessIdentifiers.keySet().contains(owningProcess)) {
+			if (! activeProcessIdentifiers.contains(owningProcess)) {
 				MonitorManager.getInstance().registerNode(this, owningProcess);
 				// Message each processor within the dataflow and instruct it to
 				// register any properties with the monitor including any
@@ -685,8 +688,7 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 						p.fire(owningProcess, context);
 					}
 				}
-				activeProcessIdentifiers.put(owningProcess,
-						new HashSet<String>());
+				activeProcessIdentifiers.add(owningProcess);
 				return false;
 			}
 			return true;
@@ -725,61 +727,6 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 		 * for (Processor p : getEntities(Processor.class)) { if
 		 * (p.getInputPorts().isEmpty()) { p.fire(newOwningProcess, context); } }
 		 */
-	}
-
-	/**
-	 * Called when a token with index array length zero is sent from a dataflow
-	 * output port.
-	 * 
-	 * @param portName
-	 */
-	public void sentFinalToken(String portName, String owningProcess) {
-		synchronized (activeProcessIdentifiers) {
-			Set<String> alreadyReceivedPortNames = activeProcessIdentifiers
-					.get(owningProcess);
-			if (alreadyReceivedPortNames == null) {
-				throw new RuntimeException(
-						"Workflow's broken in some way, received an output token for process '"
-								+ owningProcess + "' that shouldn't exist!");
-			}
-			if (alreadyReceivedPortNames.contains(portName)) {
-				throw new RuntimeException(
-						"Received duplicate final events on port name '"
-								+ portName + "' for process '" + owningProcess
-								+ "', this is not a good thing");
-			}
-
-			// No duplicates and the set wasn't null, add this port name to the
-			// set of ports which have sent final events.
-			alreadyReceivedPortNames.add(portName);
-
-
-			
-			// Check - if we have no duplicates and the set of output ports
-			// which have sent final events in this data thread is the same size
-			// as the number of output ports then we've finished and can
-			// deregister from the monitor
-			if (alreadyReceivedPortNames.size() == getOutputPorts().size()) {
-
-
-				// Now performed by WorkflowInstanceFacade.ProcessorFinishedObserver and FacadeResultListener
-				// to be able to handle if it is the workflow port or the processor that finishes last
-
-				/*
-				for (Processor p : getEntities(Processor.class)) {
-					MonitorManager.getInstance().deregisterNode(
-							owningProcess + ":" + p.getLocalName());
-				}
-				MonitorManager.getInstance().deregisterNode(owningProcess);
-				 */
-
-				// Remove this entry from the active process map
-				activeProcessIdentifiers.remove(owningProcess);
-
-			}
-		}
-
-
 	}
 
 	public FailureTransmitter getFailureTransmitter() {
