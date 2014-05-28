@@ -208,7 +208,7 @@ Intermediate value from the [example provenance](example/helloanyone.bundle/work
             wfprov:describedByParameter  <http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/processor/hello/out/value> ;
             wfprov:wasOutputFrom         <http://ns.taverna.org.uk/2011/run/385c794c-ba11-4007-a5b5-502ba8d14263/process/bbaedc02-896f-491e-88bc-8dd350fcc73b/> .
 
-Here we see that the bundle file `intermediates/d5/d588f6ab-122e-4788-ab12-8b6b66a67354.txt` contains the output from the "hello" processor, which was also the input to the "Concatenate_two_strings" processor.  Details about processor, ports and parameters can be found in the [workflow definition](#Workflow-definition).
+Here we see that the bundle file `intermediates/d5/d588f6ab-122e-4788-ab12-8b6b66a67354.txt` contains the output from the "hello" processor, which was also the input to the "Concatenate_two_strings" processor.  Details about processor, ports and parameters can be found in the [workflow definition](#workflow-definition).
 
 Example listing:
 
@@ -239,10 +239,14 @@ format. This is the format which will be used by
 The file `workflow.wfbundle` contains the executed workflow in [Taverna
 3](http://www.taverna.org.uk/developers/work-in-progress/taverna-3/). 
 
-You can use the [SCUFL2 API](http://dev.mygrid.org.uk/wiki/display/developer/SCUFL2+API) to inspect the workflow definition in detail.
+You can use the [SCUFL2
+API](http://dev.mygrid.org.uk/wiki/display/developer/SCUFL2+API) to inspect the
+workflow definition in detail, or unzip the workflow bundle to access the
+complete workflow definition files as RDF/XML.
 
-The file `.ro/annotations/workflow.wfdesc.ttl` contains the abstract
-structure (but not all the implementation details) of the executed
+Usually it is sufficient to inspect the simpler file
+`.ro/annotations/workflow.wfdesc.ttl`, which contains the abstract structure
+(but not all the implementation details) of the executed
 workflow, in [RDF Turtle](http://www.w3.org/TR/turtle/)
 according to the [wfdesc ontology](https://w3id.org/ro/#wfdesc).
 
@@ -270,9 +274,6 @@ according to the [wfdesc ontology](https://w3id.org/ro/#wfdesc).
 
 
 ## Querying provenance
-p
-*WARNING*: This example has not been updated for Taverna-PROV 2.1; your
-output might vary.
 
 Example [SPARQL query](http://www.w3.org/TR/sparql11-query/) from [test.sparql](example/test.sparql):
 
@@ -292,9 +293,7 @@ WHERE {
     ?greeting prov:wasGeneratedBy ?concatenate .
     ?concatenate prov:endedAtTime ?ended ;
         wfprov:wasPartOfWorkflowRun ?run ;
-        prov:qualifiedAssociation [
-            prov:hadPlan ?plan
-    ] .
+	wfprov:describedByProcess ?plan .
     ?concatenate wfprov:usedInput ?input .
     ?input tavernaprov:content ?name .
     OPTIONAL { ?name cnt:chars ?value }  .
@@ -303,18 +302,20 @@ WHERE {
     ?plan wfdesc:hasInput ?param .
     OPTIONAL { ?param rdfs:label ?paramName } .  
 }
-
 ```
 
 
 This query will be starting with the data `?greeting` which content is
-represented by the existing output file `outputs/greeting.txt`, and the 
-remaining query tries to find which input or upstream values it has
+represented by the existing output file
+[outputs/greeting.txt](example/helloanyone.bundle/outputs/greeting.txt), and
+the remaining query tries to find which input or upstream values it has
 effectively been derived from.
 
 To do this, we find the `?concatenate` process run that generated
 the greeting, and ask when it `?ended`. We also look up its `?plan`, 
-which should match an process identifier within the workflow definition.
+which should match the [process
+identifier](example/helloanyone.bundle/.ro/annotations/workflow.wfdesc.ttl#L16)
+within the workflow definition.
 
 We then look at the `?input`s used by the `?concatenate` process run (this
 should give two matches as the "Concatenate string" processor takes two
@@ -322,9 +323,12 @@ arguments). We look up their `?content` (a file witin this bundle), in addition
 to its textual `?value` (optionally, as this is only included in the graph for
 small non-binary content).
 
-Now we do a lookup of the `?script` behind the defined `?plan` - this is 
-optional because not all processors have scripts (it might be a web service).
-This information is extracted from the `.ro/annotations/workflow.wfdesc.ttl`
+Now we do a lookup of the
+[`?script`](example/helloanyone.bundle/.ro/annotations/workflow.wfdesc.ttl#L20)
+behind the defined `?plan` - this is optional because not all processors have
+scripts (it might be a web service).
+This information is extracted from the
+[.ro/annotations/workflow.wfdesc.ttl](example/helloanyone.bundle/.ro/annotations/workflow.wfdesc.)
 file which must also be parsed before querying.
 
 Lastly we look up the pararameters which describes `?input`, filtered by
