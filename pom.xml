@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-    <prerequisites>
-        <maven>3.0.5</maven>
-    </prerequisites>
+	<prerequisites>
+		<maven>3.0.5</maven>
+	</prerequisites>
 	<groupId>org.purl.wf4ever.provtaverna</groupId>
 	<artifactId>prov-taverna</artifactId>
-	<version>2.1.7-SNAPSHOT</version>
+	<version>2.2.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Taverna PROV</name>
 
@@ -14,20 +14,20 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <jena.version>2.11.0</jena.version>
+		<jena.version>2.11.0</jena.version>
 
 		<!-- Update according to latest Taverna version in www.mygrid.org.uk/dev/wiki/display/developer/Maven+module+version+numbers -->
-		<t2.core.version>1.4</t2.core.version>
-		<t2.activities.version>1.4</t2.activities.version>
-		<t2.ui.api.version>1.4</t2.ui.api.version>
-		<t2.ui.impl.version>1.4</t2.ui.impl.version>
-		<t2.ui.components.version>1.4.1</t2.ui.components.version>
-		<t2.workbench.version>2.4.0</t2.workbench.version>
-		<t2.results.version>1.4</t2.results.version>
-		<t2.taverna-commandline.version>1.4</t2.taverna-commandline.version>
-        <scufl2.version>0.13.1</scufl2.version>
-        <scufl2.wfdesc.version>0.3.3</scufl2.wfdesc.version>
-        <databundle.version>0.3.0</databundle.version>
+		<t2.core.version>1.5</t2.core.version>
+		<t2.activities.version>1.5</t2.activities.version>
+		<t2.ui.api.version>1.5</t2.ui.api.version>
+		<t2.ui.impl.version>1.5</t2.ui.impl.version>
+		<t2.ui.components.version>1.5</t2.ui.components.version>
+		<t2.workbench.version>2.5</t2.workbench.version>
+		<t2.results.version>1.5</t2.results.version>
+		<t2.taverna-commandline.version>1.5</t2.taverna-commandline.version>
+		<scufl2.version>0.13.1</scufl2.version>
+		<scufl2.wfdesc.version>0.3.5</scufl2.wfdesc.version>
+		<databundle.version>0.3.1</databundle.version>
 	</properties>
 
 	<build>
@@ -184,6 +184,5 @@
 		<module>prov-taverna-plugin</module>
 		<module>prov-taverna-owl-bindings</module>
 		<module>prov-taverna-export</module>
-		<module>prov-taverna-cmdline</module>
 	</modules>
 </project>

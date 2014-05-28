@@ -17,12 +17,13 @@ Installation of an released version of this plugin does not require
 compilation, but uses Taverna's plugin mechanism.
 
 You need:
-* [Taverna Workbench 2.4.0](http://www.taverna.org.uk/download/workbench/2-4/)
-* [Patch update for Taverna 2.4.1](http://markmail.org/thread/rd2zpaq27eiqiean)
-* [Java 1.7](http://java.com/) or later
+* [Taverna Workbench 2.5](http://www.taverna.org.uk/download/workbench/2-5/)
+* Java 1.7 (now comes included with Taverna)
 * Internet connectivity
 
-To install:
+Taverna-PROV is included in Taverna 2.5 and later.
+
+To install any updates to the Taverna-PROV plugin:
 
 1.  Start Taverna workbench
 
@@ -31,36 +32,19 @@ To install:
 3.  If Taverna does not say "An update is available" , click 
     **Find updates**
 
-4.  To install the required 2.4.1 patches, click **Update** for each of:
-    * _External tool service_ (2.4.1-20120529)
-    * _Provenance_ (2.4.1-20131119)
-    * _Service catalogue_ (2.4.1-20120529)
-    * _Services_ (2.4.1-20120529)
-    * _Workbench_ (2.4.1-20120529)
+4.  For **Taverna-PROV databundle**, click **Update** if shown.
 
-    Note: Click **OK** in the warning message about restart; you do not need
-    to restart Taverna for each of these as we'll do that in the end.
+5.  Click **Close**
 
-5.  Click **Find new plugins**
-
-6.  Under _Prototype plugins_, tick to select **Taverna-PROV databundle**
-
-7.  Click **Install**
-
-8.  A progress bar appears while the modules of the plugin are
-    downloaded
-
-9.  Click **Close**
-
-10. Exit and Restart Taverna workbench
+6. Exit and Restart Taverna workbench
 
 
-## Usage in workbench
+## Usage in the Taverna Workbench
 
 In order for PROV export to be possible from the Taverna Workbench,
 click **Preferences** from the **File** or **Taverna** menu, then go to the 
 [Preferences for Data and Provenance](http://dev.mygrid.org.uk/wiki/display24/taverna/Data+and+provenance+preferences).
-Ensure that **Provenance capture** is enabled. (This is the default in 2.4).
+Ensure that **Provenance capture** is enabled (this is the default in 2.5).
 
 If you would like Taverna to keep the provenance data between runs
 of the workbench (in order to export at a later time), then you need to
@@ -93,34 +77,34 @@ provenance:
     copy of the workflow.
 
 
-## Installation for Taverna Command line tool
+## Installation for the Taverna Command Line Tool
 
-Installation for the [Taverna command line tool](http://www.taverna.org.uk/download/command-line-tool/2-4/)
+Installation for the [Taverna Command Line Tool](http://www.taverna.org.uk/download/command-line-tool/2-5/)
 is slightly manual as it has no GUI for installing plugins.
 
 These instructions assumes a Linux environment, but the plugin should
 work also on Windows or OS X. Note that the [Taverna home
 directory](http://dev.mygrid.org.uk/wiki/display/taverna/Taverna+home+directory)
 has a different locations on those operating systems, replace
-`$HOME/.taverna-cmd-2.4.0` for the equivalent path. (Note that the
+`$HOME/.taverna-cmd-2.5.0` for the equivalent path. (Note that the
 command line tool has a separate home directory from the workbench)
 
 
-1.  To install, extract the **separate download** [Taverna command line
-    tool 2.4](http://www.taverna.org.uk/download/command-line-tool/2-4/)
+1.  To install, extract the **separate download** [Taverna Command Line
+    Tool 2.5](http://www.taverna.org.uk/download/command-line-tool/2-4/)
     to a folder of your choice. 
     
 2.  (Optionally, Linux): Make execution shortcut in $HOME/bin
 
     ```
-    stain@ralph-ubuntu:~/software/taverna-commandline-2.4.0$ chmod 755 executeworkflow.sh 
+    stain@ralph-ubuntu:~/software/taverna-commandline-2.5.0$ chmod 755 executeworkflow.sh 
 
-    stain@ralph-ubuntu:~/software/taverna-commandline-2.4.0$ mkdir ~/bin 
+    stain@ralph-ubuntu:~/software/taverna-commandline-2.5.0$ mkdir ~/bin 
     mkdir: cannot create directory `/home/stain/bin': File exists
 
-    stain@ralph-ubuntu:~/software/taverna-commandline-2.4.0$ cd ~/bin
+    stain@ralph-ubuntu:~/software/taverna-commandline-2.5.0$ cd ~/bin
 
-    stain@ralph-ubuntu:~/bin$ ln -s ~/software/taverna-commandline-2.4.0/executeworkflow.sh executeworkflow
+    stain@ralph-ubuntu:~/bin$ ln -s ~/software/taverna-commandline-2.5.0/executeworkflow.sh executeworkflow
 
     stain@ralph-ubuntu:~/bin$ . ~/.profile
 
@@ -149,25 +133,25 @@ command line tool has a separate home directory from the workbench)
             <dependency>
                 <groupId>org.purl.wf4ever.provtaverna</groupId>
                 <artifactId>prov-taverna-cmdline</artifactId>
-                <version>2.1.6</version>
+                <version>2.2.1-SNAPSHOT</version>
             </dependency>
         </profile>
         <compatibility>
             <application>
-                <version>2.4.0</version>
+                <version>2.5.0</version>
             </application>
         </compatibility>
     </plugin>
     ```
 
-    You should replace `<version>2.1.6</version>` with whatever is the
+    You should replace `<version>2.2.1-SNAPSHOT</version>` with whatever is the
     latest version.
 
 4.  Start the command line tool without parameters to force downloading
     of plugins (this might take a few minutes the first time):
 
     ```
-    stain@vmint:~/software/taverna-commandline-2.4.0$ sh executeworkflow.sh 
+    stain@vmint:~/software/taverna-commandline-2.5.0$ sh executeworkflow.sh 
     usage: executeworkflow [options] [workflow]
      -clientserver                           Connect as a client to a derby
                                              server instance.
@@ -176,9 +160,9 @@ command line tool has a separate home directory from the workbench)
     ```
 
     Note that Taverna will copy the content of this file to
-    `$HOME/.taverna-cmd-2.4.0/plugins/plugins.xml` only on first start, so
+    `$HOME/.taverna-cmd-2.5.0/plugins/plugins.xml` only on first start, so
     if you do further edits, you will need to delete the file in
-    `$HOME/.taverna-cmd-2.4.0/plugins/`.
+    `$HOME/.taverna-cmd-2.5.0/plugins/`.
 
 5.  If you get an error such as:
 
@@ -204,7 +188,7 @@ command line tool has a separate home directory from the workbench)
     working:
 
     ```
-    stain@vmint:~/software/taverna-commandline-2.4.0$ sh executeworkflow.sh 
+    stain@vmint:~/software/taverna-commandline-2.5.0$ sh executeworkflow.sh 
     usage: executeworkflow [options] [workflow]
      -clientserver                           Connect as a client to a derby
                                              server instance.
@@ -218,14 +202,14 @@ command line tool has a separate home directory from the workbench)
     java.lang.ClassNotFoundException: Could not find org.purl.wf4ever.provtaverna.cmdline.ProvCommandLineLauncher
     ```
     Then check that org.purl.wf4ever is listed in
-    `$HOME/.taverna-cmd-2.4.0/plugins/plugins.xml` - if not, then delete
+    `$HOME/.taverna-cmd-2.5.0/plugins/plugins.xml` - if not, then delete
     that file so that it is restored from the installation directory.
 
 8.  (Optional) Copy the downloaded repository content to the
     installation folder:
     
     ```
-    stain@ralph-ubuntu:~/software/taverna-commandline-2.4.0$ cp -r ~/.taverna-cmd-2.4.0/repository .
+    stain@ralph-ubuntu:~/software/taverna-commandline-2.5.0$ cp -r ~/.taverna-cmd-2.5.0/repository .
     
     ```
 
@@ -486,9 +470,9 @@ Note - you do not normally need to build from source code, installation
 from the above plugin site is the preferred way to install this plugin.
 
 You need:
-* Java JDK 1.7 or newer (Tested with OpenJDK 1.7.0\_03)
+* Java JDK 1.7 or newer (tested with OpenJDK 1.7.0\_03)
   * Note: Do not use the OpenJDK 1.6 (default in Ubuntu), as this is
-   buggy with GUI and File operations, both used by Taverna workbench.
+   buggy with GUI and File operations, both used by the Taverna Workbench.
 * Maven 2.2 or newer (Tested with [Maven 3.0.4](http://maven.apache.org/download.html))
 
 To compile, run `mvn clean install`
@@ -519,8 +503,8 @@ Example compilation:
     [INFO] Building Taverna PROV 2.0.0-SNAPSHOT
     [INFO] ------------------------------------------------------------------------
     (..)
-    Downloading: http://www.mygrid.org.uk/maven/repository/net/sf/taverna/t2/taverna-workbench/workbench-dev/2.4.0/workbench-dev-2.4.0.pom
-    Downloaded: http://www.mygrid.org.uk/maven/repository/net/sf/taverna/t2/taverna-workbench/workbench-dev/2.4.0/workbench-dev-2.4.0.pom (3 KB at 5.4 KB/sec)
+    Downloading: http://www.mygrid.org.uk/maven/repository/net/sf/taverna/t2/taverna-workbench/workbench-dev/2.5.0/workbench-dev-2.5.0.pom
+    Downloaded: http://www.mygrid.org.uk/maven/repository/net/sf/taverna/t2/taverna-workbench/workbench-dev/2.5.0/workbench-dev-2.5.0.pom (3 KB at 5.4 KB/sec)
     (..)
     [INFO] Installing /home/stain/src/taverna-prov/prov-taverna-cmdline/target/prov-taverna-cmdline-2.0.0-SNAPSHOT-tests.jar to /home/stain/.m2/repository/org/purl/wf4ever/provtaverna/prov-taverna-cmdline/2.0.0-SNAPSHOT/prov-taverna-cmdline-2.0.0-SNAPSHOT-tests.jar
     [INFO] ------------------------------------------------------------------------
@@ -619,7 +603,7 @@ in `plugins/plugins.xml`.
         </profile>
         <compatibility>
             <application>
-                <version>2.4.0</version>
+                <version>2.5.0</version>
             </application>
         </compatibility>
     </plugin>

@@ -2,6 +2,8 @@ package org.purl.wf4ever.provtaverna.ui;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
@@ -12,8 +14,6 @@ import net.sf.taverna.t2.workbench.ui.impl.Workbench;
 import net.sf.taverna.t2.workbench.views.results.saveactions.SaveAllResultsSPI;
 
 import org.purl.wf4ever.provtaverna.export.Saver;
-
-
 
 public class SaveProvAction extends SaveAllResultsSPI {
     private static final long serialVersionUID = 1L;
@@ -47,17 +47,27 @@ public class SaveProvAction extends SaveAllResultsSPI {
 //			folder = new File(folder.getParentFile(), 
 //					folderName.substring(0, folderName.length()-1));
 //		} 
+		
+		
 		Saver saver = new Saver(getReferenceService(), getContext(), getRunId(), getChosenReferences());
-		saver.saveData(bundle.toPath());
-		final String msg = "Saved provenance data to:\n" + bundle;
-		logger.info(msg);
-		SwingUtilities.invokeLater(new Runnable() {			
-			@Override
-			public void run() {				
-				JOptionPane.showMessageDialog(Workbench.getInstance(), 
-						msg);
-			}
-		});
+//		saver.saveData(bundle.toPath());
+				
+		SaveProvSwingWorker worker = new SaveProvSwingWorker(saver, bundle);
+		SaveProvInProgressDialog dialog = new SaveProvInProgressDialog(worker);		
+		worker.execute();
+
+		// Give a chance to the SwingWorker to finish so we do not have to display 
+		// the dialog if checking of the object is quick (so it won't flicker on the screen)
+		try {
+		    Thread.sleep(500);
+		} catch (InterruptedException ex) {
+
+		}
+		if (!worker.isDone()){
+		    dialog.setVisible(true); // this will block the GUI
+		}
+		
+		
 	}
 
 	@Override
