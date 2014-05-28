@@ -19,7 +19,7 @@
 				<extensions>true</extensions>
 				<configuration>
 					<provider>org.purl.wf4ever</provider>
-					<tavernaVersion>${t2.workbench.version}</tavernaVersion>
+					<tavernaVersion>${t2.taverna.workbench.version}</tavernaVersion>
 				</configuration>
 			</plugin>
 		</plugins>
