@@ -9,7 +9,7 @@ standard](http://www.w3.org/TR/prov-o/).
 ## Source code and license
 This plugin is distributed under the [GNU Lesser General Public License
 2.1](http://www.gnu.org/licenses/lgpl-2.1.html) (LGPL). The source code
-for this plugin is available at https://github.com/myGrid/taverna-prov
+for this plugin is available at https://github.com/taverna/taverna-prov
 
 
 ## Installation for Taverna workbench
@@ -144,7 +144,7 @@ The remaining text of this section describes the content of the RO
 bundle, as if it was unpacked to a folder. Note that many programming
 frameworks include support for working with ZIP files, and so complete
 unpacking might not be necessary for your application. For Java, the
-[Data bundle API](https://github.com/myGrid/databundle) gives a
+[Data bundle API](https://github.com/taverna/databundle) gives a
 programmating way to inspect and generate data bundles.
 
 
