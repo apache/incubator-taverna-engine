@@ -119,14 +119,6 @@
             <name>myGrid Snapshot Repository</name>
             <url>http://www.mygrid.org.uk/maven/snapshot-repository</url>
         </repository>
-		<repository>
-			<releases />
-			<snapshots />
-			<!-- The repository that your jars are deployed to -->
-			<id>taverna-prov</id>
-			<name>Taverna Prov Repository</name>
-			<url>http://wf4ever.github.com/taverna-prov/</url>
-		</repository>
 	</repositories>
 	<pluginRepositories>
 		<pluginRepository>
