@@ -42,7 +42,7 @@
 				<exclusion>
 					<artifactId>jena</artifactId>
 					<groupId>com.hp.hpl.jena</groupId>
-				</exclusion>				
+				</exclusion>
 			</exclusions>
 		</dependency>
         <dependency>

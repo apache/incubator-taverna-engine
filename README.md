@@ -77,147 +77,6 @@ provenance:
     copy of the workflow.
 
 
-## Installation for the Taverna Command Line Tool
-
-Installation for the [Taverna Command Line Tool](http://www.taverna.org.uk/download/command-line-tool/2-5/)
-is slightly manual as it has no GUI for installing plugins.
-
-These instructions assumes a Linux environment, but the plugin should
-work also on Windows or OS X. Note that the [Taverna home
-directory](http://dev.mygrid.org.uk/wiki/display/taverna/Taverna+home+directory)
-has a different locations on those operating systems, replace
-`$HOME/.taverna-cmd-2.5.0` for the equivalent path. (Note that the
-command line tool has a separate home directory from the workbench)
-
-
-1.  To install, extract the **separate download** [Taverna Command Line
-    Tool 2.5](http://www.taverna.org.uk/download/command-line-tool/2-4/)
-    to a folder of your choice. 
-    
-2.  (Optionally, Linux): Make execution shortcut in $HOME/bin
-
-    ```
-    stain@ralph-ubuntu:~/software/taverna-commandline-2.5.0$ chmod 755 executeworkflow.sh 
-
-    stain@ralph-ubuntu:~/software/taverna-commandline-2.5.0$ mkdir ~/bin 
-    mkdir: cannot create directory `/home/stain/bin': File exists
-
-    stain@ralph-ubuntu:~/software/taverna-commandline-2.5.0$ cd ~/bin
-
-    stain@ralph-ubuntu:~/bin$ ln -s ~/software/taverna-commandline-2.5.0/executeworkflow.sh executeworkflow
-
-    stain@ralph-ubuntu:~/bin$ . ~/.profile
-
-    stain@ralph-ubuntu:~/bin$ type executeworkflow
-    executeworkflow is hashed (/home/stain/bin/executeworkflow)
-    ```
-
-3.  Edit the file `plugins/plugin.xml` of the unpacked installation, and
-    add this section right before `</plugins:plugin>` at the end of the
-    file:
-
-    ```xml
-    <plugin>
-        <provider>org.purl.wf4ever</provider>
-        <identifier>org.purl.wf4ever.provtaverna.prov-taverna-plugin</identifier>
-        <version>2.01.05</version>
-        <name>Taverna-PROV databundle</name>
-        <description/>
-        <enabled>true</enabled>
-        <repositories>
-            <repository>http://www.mygrid.org.uk/maven/repository</repository>
-            <repository>http://repo.aduna-software.org/maven2/releases/</repository>
-            <repository>http://uk.maven.org/maven2/</repository>
-        </repositories>
-        <profile>
-            <dependency>
-                <groupId>org.purl.wf4ever.provtaverna</groupId>
-                <artifactId>prov-taverna-cmdline</artifactId>
-                <version>2.2.0-SNAPSHOT</version>
-            </dependency>
-        </profile>
-        <compatibility>
-            <application>
-                <version>2.5.0</version>
-            </application>
-        </compatibility>
-    </plugin>
-    ```
-
-    You should replace `<version>2.2.0-SNAPSHOT</version>` with whatever is the
-    latest version.
-
-4.  Start the command line tool without parameters to force downloading
-    of plugins (this might take a few minutes the first time):
-
-    ```
-    stain@vmint:~/software/taverna-commandline-2.5.0$ sh executeworkflow.sh 
-    usage: executeworkflow [options] [workflow]
-     -clientserver                           Connect as a client to a derby
-                                             server instance.
-     -cmdir <directory path>                 Absolute path to a directory
-    (..)
-    ```
-
-    Note that Taverna will copy the content of this file to
-    `$HOME/.taverna-cmd-2.5.0/plugins/plugins.xml` only on first start, so
-    if you do further edits, you will need to delete the file in
-    `$HOME/.taverna-cmd-2.5.0/plugins/`.
-
-5.  If you get an error such as:
-
-    ```
-    WARN  2012-07-18 16:44:36,323 (net.sf.taverna.raven.repository.impl.LocalRepository:85) - Could not find artifact org.purl.wf4ever.provtaverna:prov-taverna-cmdline:1.5
-    net.sf.taverna.raven.repository.ArtifactNotFoundException: Could not find artifact org.purl.wf4ever.provtaverna:prov-taverna-cmdline:1.5: Can't find artifact for: org.purl.wf4ever.provtaverna:prov-taverna-cmdline:1.5
-        at net.sf.taverna.raven.repository.impl.LocalRepository.fetch(LocalRepository.java:820)
-    ```
-
-    then check if you need to [configure Java for using proxies](http://docs.oracle.com/javase/6/docs/technotes/guides/net/proxies.html) by modifying the `java` command line in `executeworkflow.sh` or `executeworkflow.bat`.
-  
-6.  Modify the script `executeworkflow.sh` so that the line with `raven.launcher.app.main` says:
-    ```
-    -Draven.launcher.app.main=org.purl.wf4ever.provtaverna.cmdline.ProvCommandLineLauncher \
-    ```
-    or for `executeworkflow.bat`:
-    ```
-    set ARGS=%ARGS% -Draven.launcher.app.main=org.purl.wf4ever.provtaverna.cmdline.ProvCommandLineLauncher
-    
-    ```
-
-7.  Execute without parameters to ensure the modified launcher is
-    working:
-
-    ```
-    stain@vmint:~/software/taverna-commandline-2.5.0$ sh executeworkflow.sh 
-    usage: executeworkflow [options] [workflow]
-     -clientserver                           Connect as a client to a derby
-                                             server instance.
-     -cmdir <directory path>                 Absolute path to a directory
-    (..)
-    ```
-
-8.  If you get this error:
-    ```
-    Could not find class: org.purl.wf4ever.provtaverna.cmdline.ProvCommandLineLauncher
-    java.lang.ClassNotFoundException: Could not find org.purl.wf4ever.provtaverna.cmdline.ProvCommandLineLauncher
-    ```
-    Then check that org.purl.wf4ever is listed in
-    `$HOME/.taverna-cmd-2.5.0/plugins/plugins.xml` - if not, then delete
-    that file so that it is restored from the installation directory.
-
-8.  (Optional) Copy the downloaded repository content to the
-    installation folder:
-    
-    ```
-    stain@ralph-ubuntu:~/software/taverna-commandline-2.5.0$ cp -r ~/.taverna-cmd-2.5.0/repository .
-    
-    ```
-
-    This is useful if several users will run the same Taverna
-    installation (such as in a Taverna Server installation), or if you
-    are going to repackage the installation, as those users would not
-    need to wait for the initial download of the plugin libraries.
-
 
 ### Usage on command line
 
@@ -244,14 +103,27 @@ executions.
 
 Example:
 ```
-stain@ralph-ubuntu:~/src/taverna-prov/example$ executeworkflow -embedded \
-  -provenance -outputdir hello -inputvalue name fred helloanyone.t2flow 
+stain@biggie-mint ~/src/taverna-prov/example $ executeworkflow -embedded -provbundle helloanyone.bundle.zip -inputvalue name fred helloanyone.t2flow 
+Provenance bundle zip will be saved to: /home/stain/src/taverna-prov/example/helloanyone.bundle.zip
 
-Outputs will be saved to the directory: /home/stain/src/taverna-prov/example/hello
-
-stain@ralph-ubuntu:~/src/taverna-prov/example$ ls hello
-greeting  workflowrun.prov.ttl
-
+stain@biggie-mint ~/src/taverna-prov/example $ mkdir helloanyone.bundle ; cd helloanyone.bundle
+stain@biggie-mint ~/src/taverna-prov/example/helloanyone.bundle $ unzip ../helloanyone.bundle.zip 
+Archive:  ../helloanyone.bundle.zip
+ extracting: mimetype                
+   creating: inputs/
+  inflating: inputs/name.txt         
+   creating: outputs/
+  inflating: outputs/greeting.txt    
+   creating: intermediates/
+   creating: intermediates/3a/
+  inflating: intermediates/3a/3a82e39d-a537-40cf-91a0-2c89d4a2e62b.txt  
+  inflating: workflowrun.prov.ttl    
+  inflating: workflow.wfbundle       
+   creating: .ro/
+   creating: .ro/annotations/
+  inflating: .ro/annotations/workflow.wfdesc.ttl  
+  inflating: .ro/annotations/a2f03983-8836-4c36-bfb2-d713d9a1928f.ttl  
+  inflating: .ro/manifest.json   
 ```
 
 
@@ -398,76 +270,94 @@ according to the [wfdesc ontology](https://w3id.org/ro/#wfdesc).
 
 
 ## Querying provenance
-
+p
 *WARNING*: This example has not been updated for Taverna-PROV 2.1; your
 output might vary.
 
 Example [SPARQL query](http://www.w3.org/TR/sparql11-query/) from [test.sparql](example/test.sparql):
 
 ```sparql
-stain@vmint:~/src/taverna-prov/example/helloanyone$ cat ../test.sparql 
 PREFIX prov: <http://www.w3.org/ns/prov#> 
+PREFIX wfdesc: <http://purl.org/wf4ever/wfdesc#> 
 PREFIX wfprov: <http://purl.org/wf4ever/wfprov#> 
 PREFIX tavernaprov: <http://ns.taverna.org.uk/2012/tavernaprov/>
+PREFIX cnt:  <http://www.w3.org/2011/content#> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+PREFIX wf4ever: <http://purl.org/wf4ever/wf4ever#> 
 
-SELECT DISTINCT ?name ?plan ?ended
+
+SELECT DISTINCT ?paramName ?name ?value ?ended ?script
 WHERE {
-    ?greeting tavernaprov:content <greeting.txt> .
+    ?greeting tavernaprov:content <outputs/greeting.txt> .
     ?greeting prov:wasGeneratedBy ?concatenate .
     ?concatenate prov:endedAtTime ?ended ;
+        wfprov:wasPartOfWorkflowRun ?run ;
         prov:qualifiedAssociation [
             prov:hadPlan ?plan
-    ] ;
-        wfprov:wasPartOfWorkflowRun ?run .
-    ?concatenate wfprov:usedInput ?string2 .
-    ?string2 tavernaprov:content ?name .
+    ] .
+    ?concatenate wfprov:usedInput ?input .
+    ?input tavernaprov:content ?name .
+    OPTIONAL { ?name cnt:chars ?value }  .
+    OPTIONAL { ?plan wf4ever:script ?script } .
+    ?input wfprov:describedByParameter ?param .
+    ?plan wfdesc:hasInput ?param .
+    OPTIONAL { ?param rdfs:label ?paramName } .  
 }
+
 ```
+
+
+This query will be starting with the data `?greeting` which content is
+represented by the existing output file `outputs/greeting.txt`, and the 
+remaining query tries to find which input or upstream values it has
+effectively been derived from.
+
+To do this, we find the `?concatenate` process run that generated
+the greeting, and ask when it `?ended`. We also look up its `?plan`, 
+which should match an process identifier within the workflow definition.
+
+We then look at the `?input`s used by the `?concatenate` process run (this
+should give two matches as the "Concatenate string" processor takes two
+arguments). We look up their `?content` (a file witin this bundle), in addition
+to its textual `?value` (optionally, as this is only included in the graph for
+small non-binary content).
+
+Now we do a lookup of the `?script` behind the defined `?plan` - this is 
+optional because not all processors have scripts (it might be a web service).
+This information is extracted from the `.ro/annotations/workflow.wfdesc.ttl`
+file which must also be parsed before querying.
+
+Lastly we look up the pararameters which describes `?input`, filtered by
+the ones bound to the processor `?plan` (thus avoiding the workflow inputs
+"name"), and include their `?paramName` - each result should therefore show the 
+input port name and value.
 
 
 Query using [rdfproc](http://librdf.org/utils/rdfproc.html) (`apt-get install redland-utils`):
 
-    stain@vmint:~/src/taverna-prov/example/helloanyone$ rdfproc test parse workflowrun.prov.ttl turtle
-    rdfproc: Parsing URI file:///home/stain/src/taverna-prov/example/helloanyone/workflowrun.prov.ttl with turtle parser
+    stain@biggie-mint ~/src/taverna-prov/example/helloanyone.bundle $ rdfproc test parse workflowrun.prov.ttl turtle
+    rdfproc: Parsing URI file:///home/stain/src/taverna-prov/example/helloanyone.bundle/workflowrun.prov.ttl with turtle parser
 
-    stain@vmint ~/src/taverna-prov/example/helloanyone $ rdfproc test query sparql - "$(cat ../test.sparql)" 
-    rdfproc: Warning - URI file:///home/stain/src/taverna-prov/example/helloanyone/:1: Variable run was bound but is unused in the query
+    stain@biggie-mint ~/src/taverna-prov/example/helloanyone.bundle $ rdfproc test parse .ro/annotations/workflow.wfdesc.ttl turtle
+    rdfproc: Parsing URI file:///home/stain/src/taverna-prov/example/helloanyone.bundle/.ro/annotations/workflow.wfdesc.ttl with turtle parser
+    
+    stain@biggie-mint ~/src/taverna-prov/example/helloanyone.bundle $ rdfproc test2 query sparql - "$(cat ../test.sparql)"  
+    rdfproc: Warning - URI file:///home/stain/src/taverna-prov/example/helloanyone.bundle/:1: Variable run was bound but is unused in the query
     rdfproc: Query returned bindings results:
-    result: [name=<file:///home/stain/src/taverna-prov/example/helloanyone/name.txt>, plan=<http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/processor/Concatenate_two_strings/>, ended="2013-05-29T10:22:09.961+01:00"^^<http://www.w3.org/2001/XMLSchema#dateTime>]
-    result: [name=<file:///home/stain/src/taverna-prov/example/helloanyone/intermediates/de/def2e58b-50e2-4949-9980-fd310166621a.txt>, plan=<http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/processor/Concatenate_two_strings/>, ended="2013-05-29T10:22:09.961+01:00"^^<http://www.w3.org/2001/XMLSchema#dateTime>]
+    result: [, paramName="string2", name=<file:///home/stain/src/taverna-prov/example/helloanyone.bundle/inputs/name.txt>, value="fred"^^<http://www.w3.org/2001/XMLSchema#string>, ended="2014-05-28T11:49:43.711+01:00"^^<http://www.w3.org/2001/XMLSchema#dateTime>, script="output = string1 + string2;"]
+    result: [, paramName="string1", name=<file:///home/stain/src/taverna-prov/example/helloanyone.bundle/intermediates/3a/3a82e39d-a537-40cf-91a0-2c89d4a2e62b.txt>, value="Hello, "^^<http://www.w3.org/2001/XMLSchema#string>, ended="2014-05-28T11:49:43.711+01:00"^^<http://www.w3.org/2001/XMLSchema#dateTime>, script="output = string1 + string2;"]
     rdfproc: Query returned 2 results
+    
 
-This shows how both name.txt and intermediates/de/def...txt are the
-origins of greeting.txt.
-
-
-## Troubleshooting
-
-If the *Save Provenance (PROV)* button is not listed, then the plugin
-was most likely not installed correctly. 
-
-Check that:
-* You installed all the 2.4.1 updates (duplicate icons in toolbar indicates no)
-* You restarted Taverna after installation
-* Taverna can access the Internet; check [proxy settings](http://dev.mygrid.org.uk/wiki/display/taverna24/HTTP+proxy+preferences)
-* The plugin and its dependences downloaded correctly
-  * Check the `logs/` in the [Taverna home
-    directory](http://dev.mygrid.org.uk/wiki/display/taverna24/Taverna+home+directory)
-    for any error messages relating to PROV or Sesame
-  * To force a new download of plugin, delete `repository/` from the
-    above folder (*not* the installation folder) and restart Taverna
-  * To start clean and reinstall the plugin, delete everything from the
-    [Taverna home directory](http://dev.mygrid.org.uk/wiki/display/taverna24/Taverna+home+directory)
-    and restart Taverna
-* Check your Java version with `java -version`
-* Reinstall Taverna
-* Contact myGrid for support <support@mygrid.org.uk>
+This shows that the `string2` input port was bound to value `"fred"` (content of `inputs/name.txt`) in the process run that generated `outputs/greeting.txt`. Next, `string` was bound to `"Hello, "` (content of `intermediates/3a/3a82..62b.txt`). The executed script was `output = string1 + string2`.
 
 
 
 ## Building
-Note - you do not normally need to build from source code, installation
-from the above plugin site is the preferred way to install this plugin.
+Note - you do not normally need to build from source code; unless you 
+are modifying the source code, the "Taverna Prov" plugin included
+in Taverna's default plugins is the preferred way of using Taverna-PROV.
+
 
 You need:
 * Java JDK 1.7 or newer (tested with OpenJDK 1.7.0\_03)
@@ -526,46 +416,21 @@ Example compilation:
     
 
 
-WARNING:
 
-Building currently fails for unknown reasons that may indicate a bug in our dependency Alibaba or in our OWL ontologies:
-
-     [java] C:\Users\stain\AppData\Local\Temp\OWLCompiler777760187968267646\rdf\IsNil.java:5: error: cannot find symbol
-     [java] import owl.NamedIndividual;
-     [java]           ^
-     [java]   symbol:   class NamedIndividual
-     [java]   location: package owl
-     [java] C:\Users\stain\AppData\Local\Temp\OWLCompiler777760187968267646\rdf\IsNil.java:12: error: cannot find symbol
-     [java] public interface IsNil extends Resource, NamedIndividual {
-     [java]                                          ^
-     [java]   symbol: class NamedIndividual
-     ...
-     [java] 5 errors
-     [java] Exception in thread "main" org.openrdf.repository.object.exceptions.ObjectCompileException: Could not compile
-     [java]     at org.openrdf.repository.object.compiler.source.JavaCompiler.compile(JavaCompiler.java:80)
-     [java]     at org.openrdf.repository.object.compiler.OWLCompiler.compile(OWLCompiler.java:384)
-     [java]     at org.openrdf.repository.object.compiler.OWLCompiler.createJar(OWLCompiler.java:353)
-     [java]     at org.openrdf.repository.object.compiler.Compiler.main(Compiler.java:167)
-
-
-
-Note that to work with Taverna's plugin system, the build is specific
-for a particular Taverna version. To build this plugin for a different
-version of Taverna, modify the `<properties>` section of `pom.xml` to
-match the [Maven module
-versions](http://dev.mygrid.org.uk/wiki/display/developer/Maven+module+version+numbers)
-for the specific Taverna release.
+Note that to work with Taverna 2's plugin system, the build is specific
+for a particular Taverna version (but works for any edition). To build this
+plugin for a different version of Taverna, modify the `<parent>` section of
+`pom.xml` to match the Taverna release, e.g. `<version>2.4.0</version>`.
 
 In order for Taverna to find your install of the plugin rather than
 download from the official plugin site, you will need to manually edit
 `plugins/plugins.xml` of the [Taverna home
-directory](http://dev.mygrid.org.uk/wiki/display/taverna24/Taverna+home+directory)
+directory](http://dev.mygrid.org.uk/wiki/display/tav250/Taverna+home+directory)
 (run Taverna once to create the file) to include this section right
-before the final `</plugins:plugins>`.
+before the final `</plugins:plugins>`. The 
 
-NOTE: If you have already installed the official plugin, first *Remove*
-it from within Taverna. To check, look for `org.purl.wf4ever.provtaverna`
-in `plugins/plugins.xml`.
+Note that you will get two copies of the "Save provenance" button, one for the
+official version included from `workbench-plugin`, and one for the one you built.
 
 
 ```xml
@@ -632,8 +497,9 @@ You only need to do this plugin installation once - if you later
 recompile the source code without changing the version numbers, next
 start of Taverna will use the newer JARs from `mvn clean install` as 
 Taverna will prefer accessing `$HOME/.m2/repository`. You might however need to delete
-the `repository/org/purl/wf4ever` folder of the  [Taverna home directory](http://dev.mygrid.org.uk/wiki/display/taverna24/Taverna+home+directory) if 
-Taverna has downloaded the SNAPSHOT versions from the myGrid repository
+the `repository/org/purl/wf4ever` folder of the  
+[Taverna home directory](http://dev.mygrid.org.uk/wiki/display/tav250/Taverna+home+directory)
+if Taverna has downloaded the SNAPSHOT versions from the myGrid repository
 instead (for instance because you used the wrong `<repository>` path or
 did not update `<version>`).
 
