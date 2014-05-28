@@ -13,9 +13,7 @@ WHERE {
     ?greeting prov:wasGeneratedBy ?concatenate .
     ?concatenate prov:endedAtTime ?ended ;
         wfprov:wasPartOfWorkflowRun ?run ;
-        prov:qualifiedAssociation [
-            prov:hadPlan ?plan
-    ] .
+	wfprov:describedByProcess ?plan .
     ?concatenate wfprov:usedInput ?input .
     ?input tavernaprov:content ?name .
     OPTIONAL { ?name cnt:chars ?value }  .
