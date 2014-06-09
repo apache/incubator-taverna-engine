@@ -6,7 +6,11 @@
                                  http://www.springframework.org/schema/osgi
                                  http://www.springframework.org/schema/osgi/spring-osgi.xsd">
 
-	<service ref="localExecution" interface="uk.org.taverna.platform.execution.api.ExecutionService">
+	<service ref="localExecution">
+		<interfaces>
+			<beans:value>uk.org.taverna.platform.execution.api.ExecutionService</beans:value>
+			<beans:value>uk.org.taverna.platform.execution.api.WorkflowCompiler</beans:value>
+		</interfaces>
 		<service-properties>
 			<beans:entry key="executor" value="TavernaEngine" />
 		</service-properties>

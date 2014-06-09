@@ -20,12 +20,15 @@
  ******************************************************************************/
 package uk.org.taverna.platform.execution.impl.local;
 
+import java.net.URI;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 import net.sf.taverna.t2.provenance.ProvenanceConnectorFactory;
 import net.sf.taverna.t2.reference.ReferenceService;
+import net.sf.taverna.t2.workflowmodel.Dataflow;
 import net.sf.taverna.t2.workflowmodel.Edits;
 
 import org.purl.wf4ever.robundle.Bundle;
@@ -37,6 +40,7 @@ import uk.org.taverna.platform.execution.api.AbstractExecutionService;
 import uk.org.taverna.platform.execution.api.Execution;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
 import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
+import uk.org.taverna.platform.execution.api.WorkflowCompiler;
 import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 import uk.org.taverna.scufl2.api.core.Workflow;
 import uk.org.taverna.scufl2.api.profiles.Profile;
@@ -46,7 +50,7 @@ import uk.org.taverna.scufl2.api.profiles.Profile;
  *
  * @author David Withers
  */
-public class LocalExecutionService extends AbstractExecutionService {
+public class LocalExecutionService extends AbstractExecutionService implements WorkflowCompiler {
 
 	private Edits edits;
 
@@ -144,4 +148,28 @@ public class LocalExecutionService extends AbstractExecutionService {
 		this.databaseConfiguration = databaseConfiguration;
 	}
 
+	private WeakHashMap<URI, WorkflowToDataflowMapper> cache = new WeakHashMap<>();
+
+	private synchronized WorkflowToDataflowMapper getMapper(
+			WorkflowBundle bundle) {
+		WorkflowToDataflowMapper m = cache.get(bundle.getIdentifier());
+		if (m == null) {
+			m = new WorkflowToDataflowMapper(bundle, bundle.getMainProfile(),
+					edits, activityService, dispatchLayerService);
+			cache.put(bundle.getIdentifier(), m);
+		}
+		return m;
+	}
+
+	@Override
+	public Dataflow getDataflow(Workflow workflow)
+			throws InvalidWorkflowException {
+		return getMapper(workflow.getParent()).getDataflow(workflow);
+	}
+
+	@Override
+	public synchronized Dataflow getDataflow(WorkflowBundle bundle)
+			throws InvalidWorkflowException {
+		return getMapper(bundle).getDataflow(bundle.getMainWorkflow());
+	}
 }
