@@ -244,6 +244,8 @@ API](http://dev.mygrid.org.uk/wiki/display/developer/SCUFL2+API) to inspect the
 workflow definition in detail, or unzip the workflow bundle to access the
 complete workflow definition files as RDF/XML.
 
+#### Workflow structure
+
 Usually it is sufficient to inspect the simpler file
 `.ro/annotations/workflow.wfdesc.ttl`, which contains the abstract structure
 (but not all the implementation details) of the executed
@@ -271,6 +273,51 @@ according to the [wfdesc ontology](https://w3id.org/ro/#wfdesc).
             wfdesc:hasInput <processor/Concatenate_two_strings/in/string1> , <processor/Concatenate_two_strings/in/string2> ;
             wfdesc:hasOutput <processor/Concatenate_two_strings/out/output> ;
             wf4ever:script "output = string1 + string2;" .
+
+#### Original t2flow
+
+If the workflow was executed in Taverna 2 (which is the case when using this plugin), 
+then the unzipped `workflow.wfbundle` will contain a copy of the original `.t2flow` within
+its `history` folder:
+
+
+	stain@biggie-mint ~/src/taverna-prov/example/helloanyone.bundle $ mkdir workflow ; cd workflow ; unzip ../workflow.wfbundle
+	Archive:  ../workflow.wfbundle
+	 extracting: mimetype                
+	   creating: META-INF/
+	  inflating: META-INF/manifest.xml   
+	   creating: annotation/
+	  inflating: annotation/705d1f32-ea94-4a5b-b8fb-1cc1a5023427.ttl  
+	  inflating: annotation/0f1641bd-49ef-41bd-9e4b-e20cc2bf37bb.ttl  
+	  inflating: annotation/d007623d-cd94-4888-a583-e8d97953a159.ttl  
+	  inflating: annotation/e9eb11fa-fc63-4ddc-92ca-ec6921af1667.ttl  
+	  inflating: annotation/c5e91716-2f9f-4e7c-a692-8f58dba265e3.ttl  
+	   creating: history/
+	  inflating: history/01348671-5aaa-4cc2-84cc-477329b70b0d.t2flow  
+	   creating: workflow/
+	  inflating: workflow/Hello_Anyone.rdf  
+	   creating: profile/
+	   creating: profile/unspecified/
+	   creating: profile/unspecified/configuration/
+	  inflating: profile/unspecified/configuration/Concatenate_two_strings.json  
+	  inflating: profile/unspecified/configuration/Concatenate_two_strings-proc.json  
+	  inflating: profile/unspecified/configuration/hello.json  
+	  inflating: profile/unspecified/configuration/hello-proc.json  
+	  inflating: profile/unspecified.rdf  
+	  inflating: workflowBundle.rdf      
+	  inflating: META-INF/container.xml  
+
+	stain@biggie-mint ~/src/taverna-prov/example/helloanyone.bundle/workflow $ head history/01348671-5aaa-4cc2-84cc-477329b70b0d.t2flow 
+	<workflow xmlns="http://taverna.sf.net/2008/xml/t2flow" version="1" producedBy="unspecified"><dataflow id="01348671-5aaa-4cc2-84cc-477329b70b0d" role="top"><name>Hello_Anyone</name><inputPorts><port><name>name</name><depth>0</depth><granularDepth>0</granularDepth><annotations><annotation_chain encoding="xstream"><net.sf.taverna.t2.annotation.AnnotationChainImpl xmlns="">
+	  <annotationAssertions>
+	    <net.sf.taverna.t2.annotation.AnnotationAssertionImpl>
+
+The UUID in the t2flow filename (`01348671-5aaa-4cc2-84cc-477329b70b0d` above) 
+should match the executed wfbundle URI as seen in the provenance
+
+    http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/
+
+_Not yet implemented: a specific link to the `history/*.t2flow` file within the wfbundle._
 
 
 ## Querying provenance
