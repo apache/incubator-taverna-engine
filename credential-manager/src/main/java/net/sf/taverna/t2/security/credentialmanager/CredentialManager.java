@@ -792,7 +792,7 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 		return trustedCertStreams;
 	}
 	
-	public static void deleteRevokedCertificates() throws CMException{
+	public static void deleteRevokedCertificates(){
 		
 		if (truststore != null){
 			// Delete the old revoked or unnecessary BioCatalogue,
@@ -868,7 +868,6 @@ public class CredentialManager implements Observable<KeystoreChangedEvent> {
 			catch(Exception ex){
 				String exMessage = "Failed to save Truststore after deleting revoked certificate";
 				logger.error(exMessage, ex);
-				throw new CMException("Failed to save Truststore after deleting revoked certificate: " + ex.getMessage(), ex);
 			}
 		}
 	}
