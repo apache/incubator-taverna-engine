@@ -64,6 +64,11 @@ public interface CredentialManager {
 	public static final String PROPERTY_KEYSTORE_PROVIDER = "javax.net.ssl.keyStoreProvider";
 	public static final String PROPERTY_TRUSTSTORE_TYPE = "javax.net.ssl.trustStoreType";
 	public static final String PROPERTY_TRUSTSTORE_PROVIDER = "javax.net.ssl.trustStoreProvider";
+	
+	// Existence of the file with this name in the Credential Manager folder 
+	// indicates the we have deleted the revoked certificates from some of our services -
+	// BioCatalogue, BiodiversityCatalogue, heater.
+	public static final String CERTIFICATES_REVOKED_INDICATOR_FILE_NAME = "certificates_revoked";
 
 	/*
 	 * ASCII NUL character - for separating the username from the rest of the

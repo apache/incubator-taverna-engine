@@ -83,6 +83,7 @@ import net.sf.taverna.t2.security.credentialmanager.ServiceUsernameAndPasswordPr
 import net.sf.taverna.t2.security.credentialmanager.TrustConfirmationProvider;
 import net.sf.taverna.t2.security.credentialmanager.UsernamePassword;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
@@ -201,18 +202,87 @@ public class CredentialManagerImpl implements CredentialManager,
 
 	private ApplicationConfiguration applicationConfiguration;
 
+	private File certificatesRevokedIndicatorFile;
+	
 	/**
-	 * Return an array of URLs for 'special' trusted certificates contained in
-	 * the resources folder that need to be loaded into Truststore, e.g.
-	 * BioCatalogue's certificate.
-	 */
+	 * Return an array of URLs for 'special' trusted CAs' certificates contained in
+	 * the resources folder that need to be loaded into Truststore, so that we can establish trust 
+	 * into services such as BioCatalogue, BiodiversityCatalogue, heater, etc. by default.
+	 * */
 	private static List<URL> getSpecialTrustedCertificates() {
 		List<URL> urls = new ArrayList<>();
 		Class<?> c = CredentialManager.class;
-		urls.add(c.getResource("/trusted-certificates/www.biocatalogue.org.pem"));
-		urls.add(c.getResource("/trusted-certificates/www.biodiversitycatalogue.org.pem"));
-		urls.add(c.getResource("/trusted-certificates/heater.cs.man.ac.uk.pem"));
+		urls.add(c.getResource("/trusted-certificates/TERENASSLCA.crt"));
+		urls.add(c.getResource("/trusted-certificates/UTNAddTrustServer_CA.crt"));
+		urls.add(c.getResource("/trusted-certificates/AddTrustExternalCARoot.crt"));
 		return urls;
+	}
+	
+	public void deleteRevokedCertificates(){
+		
+		if (truststore != null){
+			// Delete the old revoked or unnecessary BioCatalogue,
+			// BiodiversityCatalogue and heater's certificates, if present
+			
+			if (certificatesRevokedIndicatorFile == null){
+				certificatesRevokedIndicatorFile = new File(credentialManagerDirectory, CERTIFICATES_REVOKED_INDICATOR_FILE_NAME);
+			}
+			
+			if (!certificatesRevokedIndicatorFile.exists()) {
+				
+				List<URL> certURLsToDelete = new ArrayList<>();
+				Class<?> c = CredentialManager.class;
+				certURLsToDelete.add(c.getResource("/www.biocatalogue.org-revoked.pem"));
+				certURLsToDelete.add(c.getResource("/trusted-certificates/www.biodiversitycatalogue.org-revoked.pem"));
+				certURLsToDelete.add(c.getResource("/trusted-certificates/heater.cs.man.ac.uk-not-needed.pem"));
+
+				for (URL certURLToDelete : certURLsToDelete){
+					InputStream certStreamToDelete = null;
+					try{
+						certStreamToDelete = certURLToDelete.openStream();					
+						// We know there will be only one cert in the chain
+						CertificateFactory cf = CertificateFactory
+								.getInstance("X.509");
+						Certificate certToDelete = cf.generateCertificates(certStreamToDelete).toArray(new Certificate[0])[0];
+						String aliasToDelete = truststore
+								.getCertificateAlias(certToDelete);						
+						if (aliasToDelete != null) {
+							truststore.deleteEntry(aliasToDelete);
+							logger.warn("Deleting revoked/unnecessary certificate "
+									+ aliasToDelete);
+						}
+					} catch (Exception ex) {
+						logger.error(ex.getMessage(), ex);
+					} finally {
+						try {
+							certStreamToDelete.close();
+						} catch (Exception ex) {
+							// ignore and carry on
+							logger.error(ex);
+						}
+					}
+				}
+				
+				// Touch the file
+				try {
+					FileUtils
+							.touch(certificatesRevokedIndicatorFile);
+				} catch (IOException ioex) {
+					// Hmmm, ignore this?
+					logger.error("Failed to touch " + certificatesRevokedIndicatorFile.getAbsolutePath(), ioex);
+				}
+			}
+			
+			//Save changes
+			try{
+				FileOutputStream fos = new FileOutputStream(truststoreFile);
+				truststore.store(fos, masterPassword.toCharArray());
+			}
+			catch(Exception ex){
+				String exMessage = "Failed to save Truststore after deleting revoked certificates.";
+				logger.error(exMessage, ex);
+			}
+		}
 	}
 
 	public CredentialManagerImpl() throws CMException {
@@ -412,15 +482,20 @@ public class CredentialManagerImpl implements CredentialManager,
 				try (FileInputStream fis = new FileInputStream(truststoreFile)) {
 					// Load the Truststore from the file
 					truststore.load(fis, masterPassword.toCharArray());
+					
+					// Delete the old revoked or unnecessary BioCatalogue,
+					// BiodiversityCatalogue and heater's certificates, if present
+					deleteRevokedCertificates();
+					
 				} catch (Exception ex) {
 					/* Clear out things that are useless/hindering now */
 					truststore = null;
 					masterPassword = null;
-					throw new CMException(
-							"Failed to load Taverna's Truststore from "
-									+ truststoreFile.getAbsolutePath()
-									+ ". Possible reason: incorrect password or corrupted file.",
-							ex);
+					String exMessage = "Failed to load Taverna's Truststore from "
+							+ truststoreFile.getAbsolutePath()
+							+ ". Possible reason: incorrect password or corrupted file.";
+					logger.error(exMessage, ex);
+					throw new CMException(exMessage, ex);
 				}
 			} else {
 				/*
@@ -519,9 +594,8 @@ public class CredentialManagerImpl implements CredentialManager,
 						}
 					}
 
-					// Insert BioCatalogue, BiodiversityCatalogue and heater's
-					// certificates
-					logger.info("Loading BioCatalogue, BiodiversityCatalogue and heater's certificates");
+					// Insert special trusted CA certificates
+					logger.info("Loading certificates of trusted CAs so as to establish trust into our services such as BioCatalogue, BiodiversityCatalogue, heater, etc.");	
 					CertificateFactory cf = CertificateFactory
 							.getInstance("X.509");
 					for (URL trustedCertURL : getSpecialTrustedCertificates())
