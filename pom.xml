@@ -22,7 +22,7 @@
 		<module>taverna-run-api</module>
 		<module>taverna-run-impl</module>
 	</modules>
-	<dependencyManagement>
+	<!--dependencyManagement>
 		<dependencies>
 			<dependency>
 				<groupId>org.apache.log4j</groupId>
@@ -36,7 +36,7 @@
 				<scope>test</scope>
 			</dependency>
 		</dependencies>
-	</dependencyManagement>
+	</dependencyManagement-->
 	<repositories>
 		<repository>
 			<releases />
