@@ -4,7 +4,6 @@ import static net.sf.taverna.t2.security.credentialmanager.CredentialManager.USE
 
 import java.io.File;
 
-import net.sf.taverna.t2.security.credentialmanager.CMUtils;
 import net.sf.taverna.t2.security.credentialmanager.MasterPasswordProvider;
 import uk.org.taverna.configuration.app.ApplicationConfiguration;
 
