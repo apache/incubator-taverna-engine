@@ -58,7 +58,6 @@
 			<artifactId>taverna-database-configuration-api</artifactId>
 			<version>${taverna.configuration.version}</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>org.springframework.orm</artifactId>
@@ -106,23 +105,24 @@
 		<dependency>
 			<groupId>org.apache.log4j</groupId>
 			<artifactId>com.springsource.org.apache.log4j</artifactId>
+			<version>${log4j.version}</version>
 		</dependency>
-
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
+                        <version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derby</artifactId>
-			<version>10.5.3.0_1</version>
+			<version>${derby.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>geronimo-spec</groupId>
 			<artifactId>geronimo-spec-jta</artifactId>
-			<version>1.0-M1</version>
+			<version>${geronimo.spec.jta.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
