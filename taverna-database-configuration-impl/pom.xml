@@ -46,17 +46,17 @@
 
 		<dependency>
 			<groupId>org.apache.derby</groupId>
-			<artifactId>com.springsource.org.apache.derby</artifactId>
+			<artifactId>derby</artifactId>
 			<version>${derby.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.derby</groupId>
-			<artifactId>com.springsource.org.apache.derby.client</artifactId>
+			<artifactId>derbyclient</artifactId>
 			<version>${derbyclient.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.derby</groupId>
-			<artifactId>com.springsource.org.apache.derby.drda</artifactId>
+			<artifactId>derbynet</artifactId>
 			<version>${derbynet.version}</version>
 		</dependency>
 		<dependency>
