@@ -27,7 +27,7 @@
 		<dependency>
 			<groupId>uk.org.taverna.commons</groupId>
 			<artifactId>taverna-download-api</artifactId>
-			<version>0.1.0-SNAPSHOT</version>
+			<version>${taverna.commons.version}</version>
 		</dependency>
 
 		<dependency>

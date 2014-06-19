@@ -14,7 +14,7 @@
 		<dependency>
 			<groupId>uk.org.taverna.commons</groupId>
 			<artifactId>taverna-xml-schemas</artifactId>
-			<version>0.1.0-SNAPSHOT</version>
+			<version>${taverna.commons.version}</version>
 		</dependency>
 	</dependencies>
 	<repositories>
