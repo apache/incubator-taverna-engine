@@ -13,7 +13,7 @@
 	<artifactId>lang</artifactId>
 	<version>2.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
-	<!--dependencyManagement>
+	<dependencyManagement>
 		<dependencies>
 			<dependency>
 				<groupId>junit</groupId>
@@ -27,7 +27,7 @@
 				<version>${log4j.version}</version>
 			</dependency>
 		</dependencies>
-	</dependencyManagement-->
+	</dependencyManagement>
 	<repositories>
 		<repository>
 			<releases />
