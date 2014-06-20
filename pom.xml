@@ -47,7 +47,7 @@
                 <url>https://github.com/taverna/taverna-engine-core</url>
                 <tag>HEAD</tag>
 	</scm>
-	<!--dependencyManagement>
+	<dependencyManagement>
 		<dependencies>
 			<dependency>
 				<groupId>junit</groupId>
@@ -63,6 +63,7 @@
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>com.springsource.org.apache.commons.io</artifactId>
+                                <version>${commons.io.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
@@ -72,6 +73,7 @@
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>com.springsource.org.apache.commons.lang</artifactId>
+                                <version>${commons.lang.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
@@ -84,5 +86,5 @@
 				<version>${jdom.version}</version>
 			</dependency>
 		</dependencies>
-	</dependencyManagement-->
+	</dependencyManagement>
 </project>
