@@ -61,11 +61,6 @@
 			<version>${t2.core.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>net.sf.taverna.t2</groupId>
-			<artifactId>results</artifactId>
-			<version>2.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
 			<groupId>net.sf.taverna.t2.lang</groupId>
 			<artifactId>observer</artifactId>
 			<version>${t2.lang.version}</version>

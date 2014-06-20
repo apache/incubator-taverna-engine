@@ -58,7 +58,6 @@ import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.reference.T2ReferenceType;
 import net.sf.taverna.t2.reference.impl.external.file.FileReference;
 import net.sf.taverna.t2.reference.impl.external.http.HttpReference;
-import net.sf.taverna.t2.results.ResultsUtils;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
 import net.sf.taverna.t2.workflowmodel.DataflowOutputPort;
 import net.sf.taverna.t2.workflowmodel.Processor;
@@ -394,7 +393,24 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 					.resolve(t2Reference.getLocalPart());
 		}
 	}
-
+        
+        public static String getStackTraceElementString(StackTraceElementBean stackTraceElement) {
+                StringBuilder sb = new StringBuilder();
+                sb.append(stackTraceElement.getClassName());
+                sb.append('.');
+                sb.append(stackTraceElement.getMethodName());
+                if (stackTraceElement.getFileName() == null) {
+                        sb.append("(unknown file)");
+                } else {
+                        sb.append('(');
+                        sb.append(stackTraceElement.getFileName());
+                        sb.append(':');
+                        sb.append(stackTraceElement.getLineNumber());
+                        sb.append(')');
+                }
+                return sb.toString();
+        }
+        
 	public void convertReferenceToPath(Path path, T2Reference reference, InvocationContext context)
 			throws IOException, URISyntaxException {
 		ReferenceService referenceService = context.getReferenceService();
@@ -436,7 +452,7 @@ public class LocalExecutionMonitor implements Observer<MonitorMessage> {
 			}
 			List<StackTraceElementBean> stackTraceStrings = errorDocument.getStackTraceStrings();
 			for (StackTraceElementBean stackTraceElement : stackTraceStrings) {
-				trace.append(ResultsUtils.getStackTraceElementString(stackTraceElement));
+				trace.append(getStackTraceElementString(stackTraceElement));
 				trace.append("\n");
 			}
 			List<Path> causes = new ArrayList<>();
