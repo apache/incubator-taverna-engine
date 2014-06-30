@@ -27,7 +27,6 @@
 						net.sf.taverna.t2.invocation.impl,
 						net.sf.taverna.t2.workflowmodel.impl,
 						net.sf.taverna.t2.workflowmodel.processor.iteration.impl,
-						net.sf.taverna.t2.workflowmodel.serialization.xml.impl
 						</Export-Package>
 					</instructions>
 				</configuration>

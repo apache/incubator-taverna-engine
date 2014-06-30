@@ -12,8 +12,4 @@
 
 	<service ref="editsImpl" interface="net.sf.taverna.t2.workflowmodel.Edits" />
 
-	<service ref="xmlDeserializerImpl" interface="net.sf.taverna.t2.workflowmodel.serialization.xml.XMLDeserializer" />
-
-	<service ref="xmlSerializerImpl" interface="net.sf.taverna.t2.workflowmodel.serialization.xml.XMLSerializer" />
-
 </beans:beans>

@@ -10,8 +10,4 @@
 	
 	<bean id="editsImpl" class="net.sf.taverna.t2.workflowmodel.impl.EditsImpl" />
 	
-	<bean id="xmlDeserializerImpl" class="net.sf.taverna.t2.workflowmodel.serialization.xml.impl.XMLDeserializerImpl" />
-	
-	<bean id="xmlSerializerImpl" class="net.sf.taverna.t2.workflowmodel.serialization.xml.impl.XMLSerializerImpl" />
-		
 </beans>
