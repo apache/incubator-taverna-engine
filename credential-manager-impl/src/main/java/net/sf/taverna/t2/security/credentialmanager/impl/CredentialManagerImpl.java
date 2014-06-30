@@ -32,6 +32,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
+import java.net.Authenticator;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -74,7 +75,6 @@ import net.sf.taverna.t2.lang.observer.MultiCaster;
 import net.sf.taverna.t2.lang.observer.Observable;
 import net.sf.taverna.t2.lang.observer.Observer;
 import net.sf.taverna.t2.security.credentialmanager.CMException;
-import net.sf.taverna.t2.security.credentialmanager.CMUtils;
 import net.sf.taverna.t2.security.credentialmanager.CredentialManager;
 import net.sf.taverna.t2.security.credentialmanager.JavaTruststorePasswordProvider;
 import net.sf.taverna.t2.security.credentialmanager.KeystoreChangedEvent;
@@ -217,7 +217,14 @@ public class CredentialManagerImpl implements CredentialManager,
 		urls.add(c.getResource("/trusted-certificates/AddTrustExternalCARoot.crt"));
 		return urls;
 	}
-	
+
+	/**
+	 * Connects this credential manager to the Java {@linkplain Authenticator HTTP authenticator mechanism}.
+	 */
+	public void installAuthenticator() {
+		Authenticator.setDefault(new CredentialManagerAuthenticator(this));
+	}
+
 	public void deleteRevokedCertificates(){
 		
 		if (truststore != null){
@@ -237,9 +244,7 @@ public class CredentialManagerImpl implements CredentialManager,
 				certURLsToDelete.add(c.getResource("/trusted-certificates/heater.cs.man.ac.uk-not-needed.pem"));
 
 				for (URL certURLToDelete : certURLsToDelete){
-					InputStream certStreamToDelete = null;
-					try{
-						certStreamToDelete = certURLToDelete.openStream();					
+					try (InputStream certStreamToDelete = certURLToDelete.openStream()) {					
 						// We know there will be only one cert in the chain
 						CertificateFactory cf = CertificateFactory
 								.getInstance("X.509");
@@ -253,13 +258,6 @@ public class CredentialManagerImpl implements CredentialManager,
 						}
 					} catch (Exception ex) {
 						logger.error(ex.getMessage(), ex);
-					} finally {
-						try {
-							certStreamToDelete.close();
-						} catch (Exception ex) {
-							// ignore and carry on
-							logger.error(ex);
-						}
 					}
 				}
 				

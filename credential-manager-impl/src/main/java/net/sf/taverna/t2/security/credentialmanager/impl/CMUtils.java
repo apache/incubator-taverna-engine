@@ -18,7 +18,7 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package net.sf.taverna.t2.security.credentialmanager;
+package net.sf.taverna.t2.security.credentialmanager.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -32,6 +32,8 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+
+import net.sf.taverna.t2.security.credentialmanager.CMException;
 
 import org.apache.log4j.Logger;
 

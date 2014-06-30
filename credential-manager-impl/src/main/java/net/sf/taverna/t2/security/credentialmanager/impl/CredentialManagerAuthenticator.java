@@ -1,4 +1,4 @@
-package net.sf.taverna.t2.security.credentialmanager;
+package net.sf.taverna.t2.security.credentialmanager.impl;
 
 import static java.net.Authenticator.RequestorType.PROXY;
 
@@ -6,6 +6,10 @@ import java.net.Authenticator;
 import java.net.PasswordAuthentication;
 import java.net.URI;
 import java.net.URISyntaxException;
+
+import net.sf.taverna.t2.security.credentialmanager.CMException;
+import net.sf.taverna.t2.security.credentialmanager.CredentialManager;
+import net.sf.taverna.t2.security.credentialmanager.UsernamePassword;
 
 import org.apache.log4j.Logger;
 
