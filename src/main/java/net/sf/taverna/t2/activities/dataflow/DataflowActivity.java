@@ -81,7 +81,7 @@ public class DataflowActivity extends AbstractAsynchronousActivity<JsonNode> imp
 
 				final WorkflowInstanceFacade facade;
 				try {
-					facade = edits.createWorkflowInstanceFacade(dataflow, callback.getContext(),
+					facade = getEdits().createWorkflowInstanceFacade(dataflow, callback.getContext(),
 							callback.getParentProcessIdentifier());
 				} catch (InvalidDataflowException ex) {
 					callback.fail("Invalid workflow", ex);

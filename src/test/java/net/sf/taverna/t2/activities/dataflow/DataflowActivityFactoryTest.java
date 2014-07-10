@@ -20,10 +20,10 @@
  ******************************************************************************/
 package net.sf.taverna.t2.activities.dataflow;
 
+import java.net.URI;
+import net.sf.taverna.t2.workflowmodel.impl.EditsImpl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-
-import java.net.URI;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -42,6 +42,7 @@ public class DataflowActivityFactoryTest {
 	@Before
 	public void setUp() throws Exception {
 		factory = new DataflowActivityFactory();
+                factory.setEdits(new EditsImpl());
 	}
 
 	/**
