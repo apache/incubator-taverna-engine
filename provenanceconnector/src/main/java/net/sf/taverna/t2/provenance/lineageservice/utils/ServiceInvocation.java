@@ -14,84 +14,103 @@ public class ServiceInvocation {
 	private Activity activity;
 	private String initiatingDispatchLayer;
 	private String finalDispatchLayer;
+
 	public ProcessorEnactment getProcessorEnactment() {
 		return processorEnactment;
 	}
+
 	public void setProcessorEnactment(ProcessorEnactment processorEnactment) {
 		this.processorEnactment = processorEnactment;
 	}
+
 	public String getWorkflowRunId() {
 		return workflowRunId;
 	}
+
 	public void setWorkflowRunId(String workflowRunId) {
 		this.workflowRunId = workflowRunId;
 	}
+
 	public long getInvocationNumber() {
 		return invocationNumber;
 	}
+
 	public void setInvocationNumber(long invocationNumber) {
 		this.invocationNumber = invocationNumber;
 	}
+
 	public Timestamp getInvocationStarted() {
 		return invocationStarted;
 	}
+
 	public void setInvocationStarted(Timestamp invocationStarted) {
 		this.invocationStarted = invocationStarted;
 	}
+
 	public Timestamp getInvocationEnded() {
 		return invocationEnded;
 	}
+
 	public void setInvocationEnded(Timestamp invocationEnded) {
 		this.invocationEnded = invocationEnded;
 	}
+
 	public DataBinding getInputs() {
 		return inputs;
 	}
+
 	public void setInputs(DataBinding inputs) {
 		this.inputs = inputs;
 	}
+
 	public DataBinding getOutputs() {
 		return outputs;
 	}
+
 	public void setOutputs(DataBinding outputs) {
 		this.outputs = outputs;
 	}
+
 	public String getFailureT2Reference() {
 		return failureT2Reference;
 	}
+
 	public void setFailureT2Reference(String failureT2Reference) {
 		this.failureT2Reference = failureT2Reference;
 	}
+
 	public Activity getActivity() {
 		return activity;
 	}
+
 	public void setActivity(Activity activity) {
 		this.activity = activity;
 	}
+
 	public String getInitiatingDispatchLayer() {
 		return initiatingDispatchLayer;
 	}
+
 	public void setInitiatingDispatchLayer(String initiatingDispatchLayer) {
 		this.initiatingDispatchLayer = initiatingDispatchLayer;
 	}
+
 	public String getFinalDispatchLayer() {
 		return finalDispatchLayer;
 	}
+
 	public void setFinalDispatchLayer(String finalDispatchLayer) {
 		this.finalDispatchLayer = finalDispatchLayer;
 	}
+
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result
-				+ (int) (invocationNumber ^ (invocationNumber >>> 32));
-		result = prime
-				* result
+		return 31
+				* (int) (invocationNumber ^ (invocationNumber >>> 32))
 				+ ((processorEnactment == null) ? 0 : processorEnactment
 						.hashCode());
-		return result;
 	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -110,6 +129,7 @@ public class ServiceInvocation {
 			return false;
 		return true;
 	}
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
@@ -138,5 +158,4 @@ public class ServiceInvocation {
 		builder.append("]");
 		return builder.toString();
 	}
-	
 }

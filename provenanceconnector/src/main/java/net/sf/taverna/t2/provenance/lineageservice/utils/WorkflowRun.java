@@ -3,9 +3,13 @@ package net.sf.taverna.t2.provenance.lineageservice.utils;
 import java.sql.Blob;
 
 public class WorkflowRun {
-
 	private String workflowRunId;
-	private String workflowId;  // this is the workflowId for the TOP LEVEL workflow for this run  CHECK
+	/**
+	 * this is the workflowId for the TOP LEVEL workflow for this run.
+	 * <p>
+	 * CHECK
+	 */
+	private String workflowId;
 	private String timestamp;
 	private String workflowExternalName;
 	private byte[] dataflowBlob;
@@ -65,6 +69,4 @@ public class WorkflowRun {
 	public byte[] getDataflowBlob() {
 		return dataflowBlob;
 	}
-
-
 }

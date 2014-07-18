@@ -25,25 +25,29 @@ import java.util.List;
 import java.util.ListIterator;
 
 /**
- * @author Paolo Missier<p/>
- * Java bean to hold a list of {@link LineageQueryResultRecord}, representing one record 
- * in the provenance DB at the finest possible level of granularity, i.e., 
- * a single value possibly within a collection, bound to a processor port and associated to a specific run of a specific workflow.
- * @see LineageQueryResultRecord   
+ * Java bean to hold a list of {@link LineageQueryResultRecord}, representing
+ * one record in the provenance DB at the finest possible level of granularity,
+ * i.e., a single value possibly within a collection, bound to a processor port
+ * and associated to a specific run of a specific workflow.
+ * 
+ * @author Paolo Missier
+ * @see LineageQueryResultRecord
  */
 public class Dependencies {
-
 	final public static String COLL_TYPE = "referenceSetCollection";
 	final public static String ATOM_TYPE = "referenceSet";
 	
 	boolean printResolvedValue;
 
-	private List<LineageQueryResultRecord> records = new ArrayList<LineageQueryResultRecord>();
+	private List<LineageQueryResultRecord> records = new ArrayList<>();
 
-	public ListIterator<LineageQueryResultRecord> iterator() { return getRecords().listIterator(); }
+	public ListIterator<LineageQueryResultRecord> iterator() {
+		return getRecords().listIterator();
+	}
 
 	/**
 	 * adds a single record to the list of dependencies
+	 * 
 	 * @param workflowId
 	 * @param pname
 	 * @param vname
@@ -57,17 +61,11 @@ public class Dependencies {
 	 * @param isInput
 	 * @param isCollection
 	 */
-	public void addLineageQueryResultRecord(
-			String workflowId,
-			String pname,
-			String vname,
-			String workflowRun,
-			String iteration,
-			String collIdRef,
-			String parentCollIDRef,
-			String value,
-			String resolvedValue,
-			String type, boolean isInput, boolean isCollection) {
+	public void addLineageQueryResultRecord(String workflowId, String pname,
+			String vname, String workflowRun, String iteration,
+			String collIdRef, String parentCollIDRef, String value,
+			String resolvedValue, String type, boolean isInput,
+			boolean isCollection) {
 
 		LineageQueryResultRecord record = new LineageQueryResultRecord();
 
@@ -101,12 +99,10 @@ public class Dependencies {
 		return records;
 	}
 
-
+	@Override
 	public String toString() {
-
-		StringBuffer sb = new StringBuffer();
-		for (LineageQueryResultRecord record:getRecords()) {
-			
+		StringBuilder sb = new StringBuilder();
+		for (LineageQueryResultRecord record : getRecords()) {
 			record.setPrintResolvedValue(printResolvedValue);
 			sb.append("***  record: ****\n"+record.toString());
 		}		
@@ -129,4 +125,3 @@ public class Dependencies {
 		this.printResolvedValue = printResolvedValue;
 	}
 }
-

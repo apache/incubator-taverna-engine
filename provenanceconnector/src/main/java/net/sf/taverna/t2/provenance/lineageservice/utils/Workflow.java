@@ -1,7 +1,6 @@
 package net.sf.taverna.t2.provenance.lineageservice.utils;
 
 public class Workflow {
-
 	private String workflowId;
 	private String parentWorkflowId;
 	private String externalName;
@@ -34,6 +33,5 @@ public class Workflow {
 	 */
 	public void setExternalName(String externalName) {
 		this.externalName = externalName;
-	}
-	
+	}	
 }

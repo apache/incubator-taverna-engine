@@ -23,37 +23,33 @@ package net.sf.taverna.t2.provenance.lineageservice.types;
 /**
  * 
  * @author Paolo Missier
- *
+ * 
  */
-public class LiteralType  implements ProvenanceEventType {
-    private java.lang.String id;  // attribute
+public class LiteralType implements ProvenanceEventType {
+	private String id; // attribute
 
-    public LiteralType() {
-    }
+	public LiteralType() {
+	}
 
-    public LiteralType(
-           java.lang.String id) {
-           this.id = id;
-    }
+	public LiteralType(String id) {
+		this.id = id;
+	}
 
+	/**
+	 * Gets the id value for this LiteralType.
+	 * 
+	 * @return id
+	 */
+	public String getId() {
+		return id;
+	}
 
-    /**
-     * Gets the id value for this LiteralType.
-     * 
-     * @return id
-     */
-    public java.lang.String getId() {
-        return id;
-    }
-
-
-    /**
-     * Sets the id value for this LiteralType.
-     * 
-     * @param id
-     */
-    public void setId(java.lang.String id) {
-        this.id = id;
-    }
-
+	/**
+	 * Sets the id value for this LiteralType.
+	 * 
+	 * @param id
+	 */
+	public void setId(String id) {
+		this.id = id;
+	}
 }

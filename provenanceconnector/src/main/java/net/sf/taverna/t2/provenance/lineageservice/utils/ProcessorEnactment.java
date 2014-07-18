@@ -3,7 +3,6 @@ package net.sf.taverna.t2.provenance.lineageservice.utils;
 import java.sql.Timestamp;
 
 public class ProcessorEnactment {
-
 	private Timestamp enactmentEnded;
 	private Timestamp enactmentStarted;
 	private String finalOutputsDataBindingId;
@@ -103,8 +102,7 @@ public class ProcessorEnactment {
 		this.iteration = iteration;
 	}
 
-	public void setParentProcessorEnactmentId(
-			String parentProcessorEnactmentId) {
+	public void setParentProcessorEnactmentId(String parentProcessorEnactmentId) {
 		this.parentProcessorEnactmentId = parentProcessorEnactmentId;
 	}
 

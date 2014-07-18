@@ -41,7 +41,6 @@ import net.sf.taverna.t2.provenance.lineageservice.ProvenanceWriter;
 import net.sf.taverna.t2.provenance.lineageservice.WorkflowDataProcessor;
 import net.sf.taverna.t2.provenance.reporter.ProvenanceReporter;
 import net.sf.taverna.t2.reference.ReferenceService;
-import net.sf.taverna.t2.workflowmodel.serialization.xml.XMLSerializer;
 
 import org.apache.log4j.Logger;
 
@@ -55,7 +54,7 @@ import uk.org.taverna.configuration.database.DatabaseManager;
  * @author Stuart Owen
  *
  */
-public abstract class ProvenanceConnector implements ProvenanceReporter {
+public abstract class AbstractProvenanceConnector implements ProvenanceReporter {
 
 	public static enum ActivityTable {
 		Activity, activityId, activityDefinition, workflowId;
@@ -265,7 +264,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 		}
 	}
 
-	private static Logger logger = Logger.getLogger(ProvenanceConnector.class);
+	private static Logger logger = Logger.getLogger(AbstractProvenanceConnector.class);
 	private String saveEvents;
 	private ProvenanceAnalysis provenanceAnalysis;
 	private ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -280,12 +279,9 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 	private WorkflowDataProcessor wfdp;
 	private EventProcessor eventProcessor;
 	private final DatabaseManager databaseManager;
-	private final XMLSerializer xmlSerializer;
 
-
-	public ProvenanceConnector(DatabaseManager databaseManager, XMLSerializer xmlSerializer) {
+	public AbstractProvenanceConnector(DatabaseManager databaseManager) {
 		this.databaseManager = databaseManager;
-		this.xmlSerializer = xmlSerializer;
 	}
 
 	/**
@@ -295,44 +291,38 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 	 * and after the dbURL has been set.
 	 */
 	public void init() {
-
         createDatabase();
-
 		try {
 			setWfdp(new WorkflowDataProcessor());
 			getWfdp().setPq(getQuery());
 			getWfdp().setPw(getWriter());
 
-			setEventProcessor(new EventProcessor(xmlSerializer));
+			setEventProcessor(new EventProcessor());
 			getEventProcessor().setPw(getWriter());
 			getEventProcessor().setPq(getQuery());
 			getEventProcessor().setWfdp(getWfdp());
 
 			setProvenanceAnalysis(new ProvenanceAnalysis(getQuery()));
 			setProvenance(new Provenance(getEventProcessor()));
-		} catch (InstantiationException e) {
-			logger.error("Problem with provenance initialisation: ",e);
-		} catch (IllegalAccessException e) {
-			logger.error("Problem with provenance initialisation: ",e);
-		} catch (ClassNotFoundException e) {
-			logger.error("Problem with provenance initialisation: ",e);
-		} catch (SQLException e) {
-			logger.error("Problem with provenance initialisation: ",e);
+		} catch (InstantiationException | IllegalAccessException
+				| ClassNotFoundException | SQLException e) {
+			logger.error("Problem with provenance initialisation: ", e);
 		}
 	}
-
-
 
 	/**
 	 * @return the invocationContext
 	 */
+	@Override
 	public InvocationContext getInvocationContext() {
 		return invocationContext;
 	}
 
 	/**
-	 * @param invocationContext the invocationContext to set
+	 * @param invocationContext
+	 *            the invocationContext to set
 	 */
+	@Override
 	public void setInvocationContext(InvocationContext invocationContext) {
 		this.invocationContext = invocationContext;
 	}
@@ -340,22 +330,25 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 	/**
 	 * @return the referenceService
 	 */
+	@Override
 	public ReferenceService getReferenceService() {
 		return referenceService;
 	}
 
 	/**
-	 * @param referenceService the referenceService to set
+	 * @param referenceService
+	 *            the referenceService to set
 	 */
+	@Override
 	public void setReferenceService(ReferenceService referenceService) {
 		this.referenceService = referenceService;
 	}
-
 
 	/**
 	 * Uses a {@link ScheduledThreadPoolExecutor} to process events in a Thread
 	 * safe manner
 	 */
+	@Override
 	public synchronized void addProvenanceItem(
 			final ProvenanceItem provenanceItem) {
 
@@ -399,7 +392,6 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 	 * Clear all the values in the database but keep the db there
 	 */
 	public void clearDatabase(boolean isClearDB) {
-
 		if (isClearDB) {
 			logger.info("clearing DB");
 			try {
@@ -408,10 +400,8 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 				Set<String> danglingDataRefs = getWriter().clearDBDynamic();
 
 				logger.info("references collected during removeRun:");
-				for (String s:danglingDataRefs) {
+				for (String s : danglingDataRefs)
 					logger.info(s);
-				}
-
 			} catch (SQLException e) {
 				logger.error("Problem clearing database", e);
 			}
@@ -514,6 +504,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 	 *
 	 * @param identifier
 	 */
+	@Override
 	public void setSessionID(String sessionID) {
 		this.sessionID = sessionID;
 	}
@@ -523,6 +514,7 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 	 *
 	 * @return
 	 */
+	@Override
 	public String getSessionID() {
 		return sessionID;
 	}
@@ -534,13 +526,13 @@ public abstract class ProvenanceConnector implements ProvenanceReporter {
 	}
 
 	public String getDataflowInstance(String dataflowId) {
-		String workflowRunId = null;
 		try {
-			workflowRunId = (getProvenance()).getPq().getRuns(dataflowId, null).get(0).getWorkflowRunId();
+			return (getProvenance()).getPq().getRuns(dataflowId, null).get(0)
+					.getWorkflowRunId();
 		} catch (SQLException e) {
 			logger.error("Error finding the dataflow instance", e);
+			return null;
 		}
-		return workflowRunId;
 	}
 
 	/**

@@ -20,52 +20,53 @@
  ******************************************************************************/
 package net.sf.taverna.t2.provenance.lineageservice.utils;
 
-
 /**
  * a Port that has no pName is either a WF input or output, depending on isInput
+ * 
  * @author Paolo Missier
  */
 public class ProvenanceProcessor {
-	
+
 	public static final String DATAFLOW_ACTIVITY = "net.sf.taverna.t2.activities.dataflow.DataflowActivity";
-	
+
 	private String identifier;
 	private String processorName;
 	private String workflowId;
 	private String firstActivityClassName;
 	private boolean isTopLevelProcessor;
-	
-	public ProvenanceProcessor() {		
+
+	public ProvenanceProcessor() {
 	}
 
+	@Override
 	public String toString() {
-
-		StringBuffer sb = new StringBuffer();
-		sb.append("PROCESSOR: ****").
-		append("\nworkflow: "+getWorkflowId()).
-		append("\nprocessor name: "+getProcessorName()).
-		append("\ntype: "+getFirstActivityClassName());
+		StringBuilder sb = new StringBuilder();
+		sb.append("PROCESSOR: ****").append("\nworkflow: " + getWorkflowId())
+				.append("\nprocessor name: " + getProcessorName())
+				.append("\ntype: " + getFirstActivityClassName());
 
 		return sb.toString();
 	}
 
-	
 	/**
 	 * @return the workflowId
 	 */
 	public String getWorkflowId() {
 		return workflowId;
 	}
+
 	/**
-	 * @param workflowId the workflowId to set
+	 * @param workflowId
+	 *            the workflowId to set
 	 */
 	public void setWorkflowId(String workflowId) {
 		this.workflowId = workflowId;
 	}
+
 	/**
-	 * @return    The fully qualified classname for the first activity in this
-	 *            processor, or {@link #DATAFLOW_ACTIVITY} if this is a virtual
-	 *            processor representing the workflow itself.
+	 * @return The fully qualified classname for the first activity in this
+	 *         processor, or {@link #DATAFLOW_ACTIVITY} if this is a virtual
+	 *         processor representing the workflow itself.
 	 */
 	public String getFirstActivityClassName() {
 		return firstActivityClassName;
@@ -80,22 +81,26 @@ public class ProvenanceProcessor {
 	public void setFirstActivityClassName(String firstActivityClassName) {
 		this.firstActivityClassName = firstActivityClassName;
 	}
+
 	/**
 	 * @return the processorName
 	 */
 	public String getProcessorName() {
 		return processorName;
 	}
+
 	/**
-	 * @param processorName the processorName to set
+	 * @param processorName
+	 *            the processorName to set
 	 */
 	public void setProcessorName(String processorName) {
 		this.processorName = processorName;
 	}
-	
+
 	public void setIdentifier(String identifier) {
 		this.identifier = identifier;
 	}
+
 	public String getIdentifier() {
 		return identifier;
 	}
@@ -104,10 +109,7 @@ public class ProvenanceProcessor {
 		this.isTopLevelProcessor = isTopLevelProcessor;
 	}
 
-
 	public boolean isTopLevelProcessor() {
 		return isTopLevelProcessor;
 	}
-
-
 }

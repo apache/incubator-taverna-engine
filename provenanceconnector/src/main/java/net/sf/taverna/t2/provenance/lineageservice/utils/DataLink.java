@@ -20,22 +20,19 @@
  ******************************************************************************/
 package net.sf.taverna.t2.provenance.lineageservice.utils;
 
-
 /**
  * @author paolo
  * 
  */
 
 public class DataLink {
-	private
-
-	String workflowId;
-	String sourcePortId;
-	String sourceProcessorName;
-	String sourcePortName;
-	String destinationPortId;
-	String destinationProcessorName;
-	String destinationPortName;
+	private String workflowId;
+	private String sourcePortId;
+	private String sourceProcessorName;
+	private String sourcePortName;
+	private String destinationPortId;
+	private String destinationProcessorName;
+	private String destinationPortName;
 
 	/**
 	 * @return the workflowId
@@ -51,7 +48,6 @@ public class DataLink {
 	public void setWorkflowId(String workflowRunId) {
 		this.workflowId = workflowRunId;
 	}
-
 
 	public String getSourcePortId() {
 		return sourcePortId;
@@ -90,7 +86,7 @@ public class DataLink {
 	public void setSourcePortName(String sourcePortName) {
 		this.sourcePortName = sourcePortName;
 	}
-	
+
 	public String getDestinationPortId() {
 		return destinationPortId;
 	}
@@ -128,6 +124,4 @@ public class DataLink {
 	public void setDestinationPortName(String destinationPortName) {
 		this.destinationPortName = destinationPortName;
 	}
-
-
 }

@@ -35,71 +35,52 @@ import org.jdom.input.SAXBuilder;
 
 /**
  * @author Paolo Missier
- *
+ * 
  */
 public class AnnotationsLoader {
-	
 	private static Logger logger = Logger.getLogger(AnnotationsLoader.class);
 
-
 	/**
-	 * 
-	 * @param annotationFile  by convention we use <workflow file name>+"annotations"
-	 * @return a map pname -> annotation so that the lineage query alg can use the annotation
-	 * when processing pname
+	 * @param annotationFile
+	 *            by convention we use <workflow file name>+"annotations"
+	 * @return a map pname -> annotation so that the lineage query alg can use
+	 *         the annotation when processing pname
 	 */
 	@SuppressWarnings("unchecked")
 	public Map<String,List<String>>  getAnnotations(String annotationFile)  {
-
-
-		Map<String,List<String>>  procAnnotations = new HashMap<String,List<String>>();
+		Map<String, List<String>> procAnnotations = new HashMap<>();
 
 		// load XML file as doc
 //		parse the event into DOM
-		SAXBuilder  b = new SAXBuilder();
-		Document d;
+		SAXBuilder b = new SAXBuilder();
 
 		try {
-			d = b.build (new FileReader(annotationFile));
-
-			if (d == null)  return null;
-			
-			Element root = d.getRootElement();
+			Document d = b.build(new FileReader(annotationFile));
+			if (d == null)
+				return null;
 
 			// look for all processor elements
-			List<Element> processors = root.getChildren();
-			
-			for (Element el:processors) {
-				
+			for (Element el : (List<Element>) d.getRootElement().getChildren()) {
 				String pName = el.getAttributeValue("name");
-				logger.info("processor name: "+pName);
-				
-				List<String>  annotations = new ArrayList<String>();
+				logger.info("processor name: " + pName);
+
+				List<String> annotations = new ArrayList<>();
 				// extract all annotations for this pname
 
-				List<Element> annotEl = el.getChildren();
-				
-				for (Element annotElement: annotEl) {
-					
+				for (Element annotElement : (List<Element>) el.getChildren()) {
 					String annot = annotElement.getAttributeValue("type");
-					logger.info("annotation: "+annot);
+					logger.info("annotation: " + annot);
 
 					// add this annotation
 					annotations.add(annot);
 				}
 
 				procAnnotations.put(pName, annotations);
-				
 			}
-			
-
-		} catch (JDOMException e) {
-			logger.error("Problem getting annotations from: " + annotationFile, e);
-		} catch (IOException e) {
-			logger.error("Problem getting annotations from: " + annotationFile, e);
-		} 
+		} catch (JDOMException | IOException e) {
+			logger.error("Problem getting annotations from: " + annotationFile,
+					e);
+		}
 		return procAnnotations;
-
-
 	}
 }

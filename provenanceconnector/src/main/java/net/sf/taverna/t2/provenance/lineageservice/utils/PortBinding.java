@@ -22,10 +22,9 @@ package net.sf.taverna.t2.provenance.lineageservice.utils;
 
 /**
  * @author Paolo Missier
- *
+ * 
  */
 public class PortBinding {
-
 	private String workflowId;
 	private String portName;
 	private String workflowRunId;
@@ -38,12 +37,11 @@ public class PortBinding {
 	private String iteration;
 	private String resolvedValue;
 	private String portId;
-
 	private Boolean isInputPort;
-	
-	
-	public PortBinding(){}
-	
+
+	public PortBinding() {
+	}
+
 	public PortBinding(PortBinding vb) {
 		workflowId = vb.workflowId;
 		portName = vb.portName;
@@ -60,13 +58,9 @@ public class PortBinding {
 		isInputPort = vb.isInputPort;
 	}
 
-
 	public String getPortId() {
 		return portId;
 	}
-
-	
-	
 
 	@Override
 	public String toString() {
@@ -86,109 +80,134 @@ public class PortBinding {
 	public int getPositionInColl() {
 		return positionInColl;
 	}
+
 	/**
-	 * @param positionInColl the positionInColl to set
+	 * @param positionInColl
+	 *            the positionInColl to set
 	 */
 	public void setPositionInColl(int positionInColl) {
 		this.positionInColl = positionInColl;
 	}
+
 	/**
 	 * @return the valueType
 	 */
 	public String getValueType() {
 		return valueType;
 	}
+
 	/**
-	 * @param valueType the valueType to set
+	 * @param valueType
+	 *            the valueType to set
 	 */
 	public void setValueType(String valueType) {
 		this.valueType = valueType;
 	}
+
 	/**
 	 * @return the portName
 	 */
 	public String getPortName() {
 		return portName;
 	}
+
 	/**
-	 * @param portName the portName to set
+	 * @param portName
+	 *            the portName to set
 	 */
 	public void setPortName(String portName) {
 		this.portName = portName;
 	}
+
 	/**
 	 * @return the workflowRunId
 	 */
 	public String getWorkflowRunId() {
 		return workflowRunId;
 	}
+
 	/**
-	 * @param workflowRunId the workflowRunId to set
+	 * @param workflowRunId
+	 *            the workflowRunId to set
 	 */
 	public void setWorkflowRunId(String workflowRunId) {
 		this.workflowRunId = workflowRunId;
 	}
+
 	/**
 	 * @return the processorName
 	 */
 	public String getProcessorName() {
 		return processorName;
 	}
+
 	/**
-	 * @param processorName the processorName to set
+	 * @param processorName
+	 *            the processorName to set
 	 */
 	public void setProcessorName(String processorName) {
 		this.processorName = processorName;
 	}
+
 	/**
 	 * @return the collIDRef
 	 */
 	public String getCollIDRef() {
 		return collIDRef;
 	}
+
 	/**
-	 * @param collIDRef the collIDRef to set
+	 * @param collIDRef
+	 *            the collIDRef to set
 	 */
 	public void setCollIDRef(String collIDRef) {
 		this.collIDRef = collIDRef;
 	}
+
 	/**
 	 * @return the iteration
 	 */
 	public String getIteration() {
 		return iteration;
 	}
+
 	/**
-	 * @param iterationVector the iteration to set
+	 * @param iterationVector
+	 *            the iteration to set
 	 */
 	public void setIteration(String iterationVector) {
 		this.iteration = iterationVector;
 	}
+
 	/**
 	 * @return the value
 	 */
 	public String getValue() {
 		return value;
 	}
+
 	/**
-	 * @param value the value to set
+	 * @param value
+	 *            the value to set
 	 */
 	public void setValue(String value) {
 		this.value = value;
 	}
+
 	/**
 	 * @return the ref
 	 */
 	public String getReference() {
 		return reference;
 	}
+
 	/**
-	 * @param ref the ref to set
+	 * @param ref
+	 *            the ref to set
 	 */
 	public void setReference(String ref) {
 		this.reference = ref;
 	}
-
 
 	/**
 	 * @return the resolvedValue
@@ -197,14 +216,13 @@ public class PortBinding {
 		return resolvedValue;
 	}
 
-
 	/**
-	 * @param resolvedValue the resolvedValue to set
+	 * @param resolvedValue
+	 *            the resolvedValue to set
 	 */
 	public void setResolvedValue(String resolvedValue) {
 		this.resolvedValue = resolvedValue;
 	}
-
 
 	/**
 	 * @return the workflowId
@@ -213,9 +231,9 @@ public class PortBinding {
 		return workflowId;
 	}
 
-
 	/**
-	 * @param workflowId the workflowId to set
+	 * @param workflowId
+	 *            the workflowId to set
 	 */
 	public void setWorkflowId(String workflowId) {
 		this.workflowId = workflowId;
@@ -223,7 +241,7 @@ public class PortBinding {
 
 	public void setPortId(String portId) {
 		this.portId = portId;
-		
+
 	}
 
 	public void setIsInputPort(boolean isInputPort) {
@@ -237,6 +255,4 @@ public class PortBinding {
 	public Boolean isInputPort() {
 		return isInputPort;
 	}
-	
-	
 }

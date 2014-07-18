@@ -1,21 +1,14 @@
 package net.sf.taverna.t2.provenance.lineageservice.utils;
 
-
 public class Collection {
 	private String identifier;
-	
 	private String parentIdentifier;
-	
 	private String workflowRunIdentifier;
-	
 	private String processorName;
-	
 	private String portName;
-	
 	private String iteration;
-	
 	private String collId;
-	
+
 	public String getIdentifier() {
 		return identifier;
 	}

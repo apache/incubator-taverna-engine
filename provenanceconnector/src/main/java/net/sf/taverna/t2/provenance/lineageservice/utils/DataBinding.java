@@ -5,27 +5,30 @@ public class DataBinding {
 	private Port port;
 	private String t2Reference;
 	private String workflowRunId;
+
 	public String getDataBindingId() {
 		return dataBindingId;
 	}
+
 	public void setDataBindingId(String dataBindingId) {
 		this.dataBindingId = dataBindingId;
 	}
+
 	public Port getPort() {
 		return port;
 	}
+
 	public void setPort(Port port) {
 		this.port = port;
 	}
+
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result
-				+ ((dataBindingId == null) ? 0 : dataBindingId.hashCode());
-		result = prime * result + ((port == null) ? 0 : port.hashCode());
-		return result;
+		int result = 31 + ((dataBindingId == null) ? 0 : dataBindingId
+				.hashCode());
+		return 31 * result + ((port == null) ? 0 : port.hashCode());
 	}
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
@@ -38,6 +41,7 @@ public class DataBinding {
 		builder.append("]");
 		return builder.toString();
 	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -59,15 +63,19 @@ public class DataBinding {
 			return false;
 		return true;
 	}
+
 	public String getT2Reference() {
 		return t2Reference;
 	}
+
 	public void setT2Reference(String t2Reference) {
 		this.t2Reference = t2Reference;
 	}
+
 	public String getWorkflowRunId() {
 		return workflowRunId;
 	}
+
 	public void setWorkflowRunId(String workflowRunId) {
 		this.workflowRunId = workflowRunId;
 	}

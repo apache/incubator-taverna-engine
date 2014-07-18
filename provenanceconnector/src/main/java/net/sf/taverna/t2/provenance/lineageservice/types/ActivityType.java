@@ -25,69 +25,63 @@ import net.sf.taverna.t2.provenance.lineageservice.types.ProvenanceEventType;
 /**
  * 
  * @author Paolo Missier
- *
+ * 
  */
-public class ActivityType  implements ProvenanceEventType {
-    private IterationType[] iteration;
+public class ActivityType implements ProvenanceEventType {
+	private IterationType[] iteration;
 
-    private java.lang.String id;  // attribute
+	private String id; // attribute
 
-    public ActivityType() {
-    }
+	public ActivityType() {
+	}
 
-    public ActivityType(
-           IterationType[] iteration,
-           java.lang.String id) {
-           this.iteration = iteration;
-           this.id = id;
-    }
+	public ActivityType(IterationType[] iteration, String id) {
+		this.iteration = iteration;
+		this.id = id;
+	}
 
+	/**
+	 * Gets the iteration value for this ActivityType.
+	 * 
+	 * @return iteration
+	 */
+	public IterationType[] getIteration() {
+		return iteration;
+	}
 
-    /**
-     * Gets the iteration value for this ActivityType.
-     * 
-     * @return iteration
-     */
-    public IterationType[] getIteration() {
-        return iteration;
-    }
+	/**
+	 * Sets the iteration value for this ActivityType.
+	 * 
+	 * @param iteration
+	 */
+	public void setIteration(IterationType[] iteration) {
+		this.iteration = iteration;
+	}
 
+	public IterationType getIteration(int i) {
+		return this.iteration[i];
+	}
 
-    /**
-     * Sets the iteration value for this ActivityType.
-     * 
-     * @param iteration
-     */
-    public void setIteration(IterationType[] iteration) {
-        this.iteration = iteration;
-    }
+	public void setIteration(int i, IterationType _value) {
+		this.iteration[i] = _value;
+	}
 
-    public IterationType getIteration(int i) {
-        return this.iteration[i];
-    }
+	/**
+	 * Gets the id value for this ActivityType.
+	 * 
+	 * @return id
+	 */
+	public java.lang.String getId() {
+		return id;
+	}
 
-    public void setIteration(int i, IterationType _value) {
-        this.iteration[i] = _value;
-    }
-
-
-    /**
-     * Gets the id value for this ActivityType.
-     * 
-     * @return id
-     */
-    public java.lang.String getId() {
-        return id;
-    }
-
-
-    /**
-     * Sets the id value for this ActivityType.
-     * 
-     * @param id
-     */
-    public void setId(java.lang.String id) {
-        this.id = id;
-    }
+	/**
+	 * Sets the id value for this ActivityType.
+	 * 
+	 * @param id
+	 */
+	public void setId(java.lang.String id) {
+		this.id = id;
+	}
 
 }

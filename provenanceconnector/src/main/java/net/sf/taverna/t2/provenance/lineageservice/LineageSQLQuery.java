@@ -21,19 +21,21 @@
 package net.sf.taverna.t2.provenance.lineageservice;
 
 /**
- * encapsulates an SQL query along with directives on how to interpret the results, i.e., which elements of the select clause 
- * are to be considered relevant. For instance when the query includes a join with Collection, the intent is that lineage should
- * return the collection itself as opposed to any of its elements.  
+ * encapsulates an SQL query along with directives on how to interpret the
+ * results, i.e., which elements of the select clause are to be considered
+ * relevant. For instance when the query includes a join with Collection, the
+ * intent is that lineage should return the collection itself as opposed to any
+ * of its elements.
+ * 
  * @author paolo
- *
+ * 
  */
 public class LineageSQLQuery {
+	private String vbQuery = null;
+	private String collQuery = null;
 
-	String vbQuery = null;
-	String collQuery = null;
-	
-	int depth = 0;  // =0 => use var values, >0 => use enclosing collection
-
+	/** =0 => use var values, >0 => use enclosing collection */
+	private int depth = 0;
 
 	/**
 	 * @return the depth
@@ -43,7 +45,8 @@ public class LineageSQLQuery {
 	}
 
 	/**
-	 * @param depth the depth to set
+	 * @param depth
+	 *            the depth to set
 	 */
 	public void setdepth(int depth) {
 		this.depth = depth;
@@ -75,6 +78,5 @@ public class LineageSQLQuery {
 	 */
 	public void setVbQuery(String vbQuery) {
 		this.vbQuery = vbQuery;
-	}
-	
+	}	
 }

@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.sf.taverna.t2.provenance.connector.ProvenanceConnector;
+import net.sf.taverna.t2.provenance.connector.AbstractProvenanceConnector;
 import net.sf.taverna.t2.provenance.item.ProvenanceItem;
 import net.sf.taverna.t2.provenance.item.WorkflowProvenanceItem;
 import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
@@ -37,7 +37,7 @@ import net.sf.taverna.t2.workflowmodel.Dataflow;
 import org.apache.log4j.Logger;
 
 /**
- * Implemented by the database class that a {@link ProvenanceConnector}
+ * Implemented by the database class that a {@link AbstractProvenanceConnector}
  * implementation uses for storage purposes
  * 
  * @author Paolo Missier
@@ -47,8 +47,6 @@ import org.apache.log4j.Logger;
 //FIXME is this class really needed. Can't we just push the
 //acceptRawProvanceEvent up into the ProvenanceConnector?
 public class Provenance {
-
-	@SuppressWarnings("unused")
 	private static Logger logger = Logger.getLogger(Provenance.class);
 
 	protected ProvenanceQuery pq;
@@ -137,7 +135,6 @@ public class Provenance {
 	 */
 	public void acceptRawProvenanceEvent(SharedVocabulary eventType,
 			ProvenanceItem provenanceItem) throws SQLException, IOException {
-
 		processEvent(provenanceItem, eventType);
 	}
 
@@ -151,23 +148,8 @@ public class Provenance {
 	 * @throws SQLException
 	 * @throws IOException
 	 */
-	@SuppressWarnings("unchecked")
 	protected void processEvent(ProvenanceItem provenanceItem,
 			SharedVocabulary eventType) throws SQLException, IOException {
-
-		// only attempt to save the data events, since the workflow itself may not be XMLEncode-able
-		if (!eventType.equals(SharedVocabulary.WORKFLOW_EVENT_TYPE)) {
-
-			// saveEvent for debugging / testing
-			if ("all".equals(getSaveEvents())) {
-				getEp().saveEvent(provenanceItem, eventType);
-			} else if ("iteration".equals(getSaveEvents())) {
-				if (eventType.equals("iteration"))
-					getEp().saveEvent(provenanceItem, eventType);
-
-			}
-		}
-
 		if (eventType.equals(SharedVocabulary.WORKFLOW_EVENT_TYPE)) {
 			// process the workflow structure
 			//workflowStartedMap.put()
@@ -175,58 +157,43 @@ public class Provenance {
 			
 			getEp().getWfdp().workflowStarted.put(workflowProvenanceItem.getIdentifier(), workflowProvenanceItem.getInvocationStarted());
 			if (isFirstWorkflowStructure()) {
-
 				String dataflowId = workflowProvenanceItem.getDataflow().getIdentifier();
 				String instanceId = provenanceItem.getIdentifier();
 				
 				workflowIDMap.put(instanceId, dataflowId);
-//				logger.debug("pushed workflowID "+dataflowId);
 				setFirstWorkflowStructure(false);
-//				logger.debug("processing event of type "
-//						+ SharedVocabulary.WORKFLOW_EVENT_TYPE);
 				String processWorkflowStructure = getEp().processWorkflowStructure(provenanceItem);
 				synchronized(workflowIDStack) {
 					workflowIDStack.add(0,processWorkflowStructure);
 				}
 				
-//				logger.debug("pushed workflowID "+workflowIDStack.get(0));
-
 				getEp().propagateANL(provenanceItem.getIdentifier());
 			} else {
-				
 				String dataflowId = workflowProvenanceItem.getDataflow().getIdentifier();
 				String instanceId = provenanceItem.getIdentifier();
 				
 				workflowIDMap.put(instanceId, dataflowId);
-//				logger.debug("pushed workflowID "+dataflowId);
 
 				Dataflow df = workflowProvenanceItem.getDataflow();
 				synchronized(workflowIDStack) {
 					workflowIDStack.add(0,df.getIdentifier());
 				}
 			}
-
 		} else if (provenanceItem.getEventType().equals(SharedVocabulary.END_WORKFLOW_EVENT_TYPE)) {
-
 //			String currentWorkflowID = workflowIDStack.get(0);
 //			workflowIDStack.remove(0);
 			String currentWorkflowID = provenanceItem.getParentId();
 			
-//			logger.debug("popped workflowID "+currentWorkflowID);
-			
 			getEp().processProcessEvent(provenanceItem, currentWorkflowID);
 			
 		} else {  // all other event types (iteration etc.)
-			
 			logger.debug("processEvent of type "+provenanceItem.getEventType()+" for item of type "+provenanceItem.getClass().getName());
 			String currentWorkflowID = provenanceItem.getWorkflowId();
 //			String currentWorkflowID = workflowIDMap.get(provenanceItem.getParentId());
 
-//			logger.debug("setting currentWorkflowID to "+ currentWorkflowID);
 			getEp().processProcessEvent(provenanceItem, currentWorkflowID);
 		
 //			getEp().processProcessEvent(provenanceItem, workflowIDStack.get(0));
 		}
-
 	}
 }

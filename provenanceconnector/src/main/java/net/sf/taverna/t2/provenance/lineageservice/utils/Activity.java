@@ -2,14 +2,12 @@ package net.sf.taverna.t2.provenance.lineageservice.utils;
 
 public class Activity {
 	private String activityId;
+
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result
-				+ ((activityId == null) ? 0 : activityId.hashCode());
-		return result;
+		return 31 + ((activityId == null) ? 0 : activityId.hashCode());
 	}
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
@@ -18,6 +16,7 @@ public class Activity {
 		builder.append("]");
 		return builder.toString();
 	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -34,23 +33,30 @@ public class Activity {
 			return false;
 		return true;
 	}
+
 	private String activityDefinition;
 	private Workflow workflow;
+
 	public String getActivityId() {
 		return activityId;
 	}
+
 	public void setActivityId(String activityId) {
 		this.activityId = activityId;
 	}
+
 	public String getActivityDefinition() {
 		return activityDefinition;
 	}
+
 	public void setActivityDefinition(String activityDefinition) {
 		this.activityDefinition = activityDefinition;
 	}
+
 	public Workflow getWorkflow() {
 		return workflow;
 	}
+
 	public void setWorkflow(Workflow workflow) {
 		this.workflow = workflow;
 	}

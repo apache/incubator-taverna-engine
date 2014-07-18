@@ -24,7 +24,6 @@ package net.sf.taverna.t2.provenance.lineageservice.types;
  * Used by an implementation of Provenance to identify the item type
  * 
  * @author Paolo Missier
- * 
  */
 public interface ProvenanceEventType {
 

@@ -20,11 +20,9 @@
  ******************************************************************************/
 package net.sf.taverna.t2.provenance.lineageservice.utils;
 
-
-
 /**
  * @author Paolo Missier
- *
+ * 
  */
 public class ProcessorBinding {
 	private String identifier;
@@ -34,7 +32,7 @@ public class ProcessorBinding {
 	private String workflowId;
 	private String firstActivityClassName;
 	private String iterationVector;
-	
+
 	@Override
 	public String toString() {
 		return "ProcessorBinding [firstActivityClassName="
@@ -43,50 +41,62 @@ public class ProcessorBinding {
 				+ processorName + ", workflowId=" + workflowId
 				+ ", workflowRunId=" + workflowRunId + "]";
 	}
+
 	/**
 	 * @return the processorNameRef
 	 */
 	public String getProcessorName() {
 		return processorName;
 	}
+
 	/**
-	 * @param nameRef the processorNameRef to set
+	 * @param nameRef
+	 *            the processorNameRef to set
 	 */
 	public void setProcessorName(String processorNameRef) {
 		this.processorName = processorNameRef;
 	}
+
 	/**
 	 * @return the execIDRef
 	 */
 	public String getWorkflowRunId() {
 		return workflowRunId;
 	}
+
 	/**
-	 * @param workflowRunId the workflowRunId to set
+	 * @param workflowRunId
+	 *            the workflowRunId to set
 	 */
 	public void setWorkflowRunId(String workflowRunId) {
 		this.workflowRunId = workflowRunId;
 	}
+
 	/**
 	 * @return the actName
 	 */
 	public String getFirstActivityClassName() {
 		return firstActivityClassName;
 	}
+
 	/**
-	 * @param actName the actName to set
+	 * @param actName
+	 *            the actName to set
 	 */
 	public void setFirstActivityClassName(String actName) {
 		this.firstActivityClassName = actName;
 	}
+
 	/**
 	 * @return the iteration
 	 */
 	public String getIterationVector() {
 		return iterationVector;
 	}
+
 	/**
-	 * @param iterationVector the iteration to set
+	 * @param iterationVector
+	 *            the iteration to set
 	 */
 	public void setIterationVector(String iterationVector) {
 		this.iterationVector = iterationVector;
@@ -108,11 +118,10 @@ public class ProcessorBinding {
 	}
 
 	/**
-	 * @param workflowId the workflowId to set
+	 * @param workflowId
+	 *            the workflowId to set
 	 */
 	public void setWorkflowId(String workflowId) {
 		this.workflowId = workflowId;
 	}
-	
-	
 }

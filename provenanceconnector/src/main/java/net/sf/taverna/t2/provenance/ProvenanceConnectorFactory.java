@@ -1,10 +1,8 @@
 package net.sf.taverna.t2.provenance;
 
-import net.sf.taverna.t2.provenance.connector.ProvenanceConnector;
+import net.sf.taverna.t2.provenance.connector.AbstractProvenanceConnector;
 
 public interface ProvenanceConnectorFactory {
-	
-	public ProvenanceConnector getProvenanceConnector();
+	public AbstractProvenanceConnector getProvenanceConnector();
 	public String getConnectorType();
-
 }

@@ -6,7 +6,6 @@ import java.net.URISyntaxException;
 public class URIGenerator {
 
 	public String makeT2ReferenceURI(String collId) {
-
 		// collId is of the form t2:list//<UUID>
 		// map to a proper URI
 		
@@ -32,14 +31,12 @@ public class URIGenerator {
 	}
 
 	public String escape(String part) {
-		String pathEscaped = part.replace("/", "%47");
-		String uriEscaped;
 		try {
-			uriEscaped = new URI(null, null, pathEscaped, null).getRawPath();
+			return new URI(null, null, part.replace("/", "%47"), null)
+					.getRawPath();
 		} catch (URISyntaxException e) {
 			throw new RuntimeException("Can't escape URI part " + part, e);
 		}
-		return uriEscaped;
 	}
 	
 	public String makeProcessorURI(String pName, String wfId) {
@@ -48,7 +45,6 @@ public class URIGenerator {
 
 	public String makeIteration(String workflowRunId, String workflowId,
 			String processorName, String iteration) {
-
 		String iterationUri = iteration.replace(',', '-').replace('[', ' ')
 				.replace(']', ' ').trim();
 
@@ -59,5 +55,4 @@ public class URIGenerator {
 	public URI makeRunUri(String workflowRunId) {
 		return URI.create(makeWFInstanceURI(workflowRunId));
 	}
-
 }
