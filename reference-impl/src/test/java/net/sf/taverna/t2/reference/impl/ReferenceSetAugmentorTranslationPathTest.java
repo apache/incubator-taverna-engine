@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Set;
 
 import net.sf.taverna.t2.reference.DereferenceException;
+import net.sf.taverna.t2.reference.ExternalReferenceBuilderSPI;
 import net.sf.taverna.t2.reference.ExternalReferenceSPI;
 import net.sf.taverna.t2.reference.ExternalReferenceTranslatorSPI;
 import net.sf.taverna.t2.reference.ReferenceContext;
@@ -18,6 +19,31 @@ import net.sf.taverna.t2.reference.T2Reference;
 import org.junit.Test;
 
 public class ReferenceSetAugmentorTranslationPathTest {
+
+	private final class DummyBuilder implements
+			ExternalReferenceBuilderSPI {
+		@Override
+		public ExternalReferenceSPI createReference(InputStream byteStream,
+				ReferenceContext context) {
+			return new TargetReference();
+		}
+
+		@Override
+		public Class getReferenceType() {
+			return TargetReference.class;
+		}
+
+		@Override
+		public boolean isEnabled(ReferenceContext context) {
+			return true;
+		}
+
+		@Override
+		public float getConstructionCost() {
+			return 0.5f;
+		}
+	}
+
 
 	@SuppressWarnings("rawtypes")
 	private final class DummyTranslator implements
@@ -134,7 +160,19 @@ public class ReferenceSetAugmentorTranslationPathTest {
 		Set<ExternalReferenceSPI> set = augmentor.path.doTranslation(rs, context);		
 		assertEquals(1, set.size());
 		assertTrue(set.iterator().next() instanceof TargetReference);
-		
-		
 	}
+	
+	@Test
+	public void doTranslationByReadingStream() throws Exception {
+		ReferenceContext context = new EmptyReferenceContext();
+		ReferenceSet rs = new DummyReferenceSet();
+		augmentor.path.sourceReference = new SourceReference();
+		augmentor.path.initialBuilder = new DummyBuilder();
+		//augmentor.path.translators.add(new DummyTranslator());
+		Set<ExternalReferenceSPI> set = augmentor.path.doTranslation(rs, context);		
+		assertEquals(1, set.size());
+		assertTrue(set.iterator().next() instanceof TargetReference);
+	}
+
+	
 }
