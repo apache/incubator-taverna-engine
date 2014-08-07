@@ -75,14 +75,14 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 		 * Call the updateAdjacencyList on the enclosing type when any change
 		 * occurs in the SPIs
 		 */
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings("rawtypes")
 		public void instanceRegistryUpdated(InstanceRegistry theRegistry) {
 			cacheValid = false;
 		}
 	};
 
 	private final Set<Class<ExternalReferenceSPI>> knownReferenceTypes = new HashSet<Class<ExternalReferenceSPI>>();
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	private final Map<Class<ExternalReferenceSPI>, Set<ExternalReferenceTranslatorSPI>> adjacencySets = new HashMap<Class<ExternalReferenceSPI>, Set<ExternalReferenceTranslatorSPI>>();
 
 	private final Map<Class<ExternalReferenceSPI>, ShortestPathSolver> solvers = new HashMap<Class<ExternalReferenceSPI>, ShortestPathSolver>();
@@ -164,7 +164,7 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected synchronized final void update() {
 		if (builders == null || translators == null || cacheValid) {
 			return;
@@ -195,7 +195,7 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 		cacheValid = true;
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	Set<ExternalReferenceTranslatorSPI> getNeighbours(
 			Class<ExternalReferenceSPI> node) {
 		Set<ExternalReferenceTranslatorSPI> adjacentTo = adjacencySets
@@ -213,7 +213,7 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 	/**
 	 * {@inheritDoc}
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public final Set<ExternalReferenceSPI> augmentReferenceSet(
 			ReferenceSet references,
 			Set<Class<ExternalReferenceSPI>> targetReferenceTypes,
@@ -382,7 +382,7 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 		 * Return a human readable representation of this translation path, used
 		 * by the logging methods to print trace information.
 		 */
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings("rawtypes")
 		@Override
 		public String toString() {
 			StringBuffer sb = new StringBuffer();
@@ -412,7 +412,7 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 			return sb.toString();
 		}
 
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({ "rawtypes", "unchecked" })
 		public Set<ExternalReferenceSPI> doTranslation(ReferenceSet rs,
 				ReferenceContext context) {
 			Set<ExternalReferenceSPI> results = new HashSet<ExternalReferenceSPI>();
@@ -487,7 +487,7 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 		 * @param rs
 		 * @return
 		 */
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings("rawtypes")
 		public List<TranslationPath> getDereferenceBasedPaths(ReferenceSet rs) {
 			List<TranslationPath> results = new ArrayList<TranslationPath>();
 			for (ExternalReferenceBuilderSPI erb : builders) {
@@ -634,8 +634,7 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 			}
 			Collections.sort(translationPaths);
 			if (translationPaths.isEmpty()) {
-				log
-						.debug("#   no paths discovered, type not reachable through translation");
+				log.debug("#   no paths discovered, type not reachable through translation");
 			} else {
 				log.debug("#   found " + translationPaths.size()
 						+ " distinct path(s) :");
@@ -646,7 +645,7 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 			}
 		}
 
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		private void relaxNeighbours(Class<ExternalReferenceSPI> u) {
 			log.trace("#     relaxing node " + u.getSimpleName());
 			Set<Class<ExternalReferenceSPI>> alreadySeen = new HashSet<Class<ExternalReferenceSPI>>();
