@@ -20,7 +20,7 @@ public class ReferenceSetAugmentorTranslationPathTest {
 
 	private final class ReferenceSetAugmentorWithPath extends
 			ReferenceSetAugmentorImpl {
-		protected TranslationPath path  = new TranslationPath();
+		protected TranslationPath path  = new TranslationPath(this.builders);
 	}
 
 	private ReferenceSetAugmentorWithPath augmentor = new ReferenceSetAugmentorWithPath();

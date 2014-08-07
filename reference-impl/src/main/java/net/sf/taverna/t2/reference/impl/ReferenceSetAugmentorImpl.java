@@ -59,12 +59,12 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 
 	// An instance registry of ExternalReferenceBuilderSPI instances used to
 	// construct ExternalReferenceSPI instances from byte streams
-	private InstanceRegistry<ExternalReferenceBuilderSPI<?>> builders;
+	protected InstanceRegistry<ExternalReferenceBuilderSPI<?>> builders;
 
 	// An instance registry of ExternalReferenceTranslatorSPI instances used to
 	// construct ExternalReferenceSPI instances from existing
 	// ExternalReferenceSPI instances.
-	private InstanceRegistry<ExternalReferenceTranslatorSPI<?, ?>> translators;
+	protected InstanceRegistry<ExternalReferenceTranslatorSPI<?, ?>> translators;
 
 	private boolean cacheValid = false;
 
@@ -271,7 +271,7 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 					// reference' and the builder
 					for (ExternalReferenceSPI er : references
 							.getExternalReferences()) {
-						TranslationPath newPath = new TranslationPath();
+						TranslationPath newPath = new TranslationPath(builders);
 						newPath.initialBuilder = builder;
 						newPath.sourceReference = er;
 						candidatePaths.add(newPath);
@@ -371,14 +371,17 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 	 * A path from one external reference to another along with a total
 	 * estimated path cost through one or more reference translators.
 	 */
-	protected class TranslationPath implements Comparable<TranslationPath>,
+	protected static class TranslationPath implements Comparable<TranslationPath>,
 			Iterable<ExternalReferenceTranslatorSPI<?, ?>> {
 
 		List<ExternalReferenceTranslatorSPI<?, ?>> translators = new ArrayList<ExternalReferenceTranslatorSPI<?, ?>>();
 		ExternalReferenceBuilderSPI<?> initialBuilder = null;
 		ExternalReferenceSPI sourceReference = null;
+		InstanceRegistry<ExternalReferenceBuilderSPI<?>> builders;
 
-		public TranslationPath() {
+		
+		public TranslationPath(InstanceRegistry<ExternalReferenceBuilderSPI<?>> builders) {
+			this.builders = builders;
 		}
 
 		/**
@@ -520,7 +523,7 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 							// The type wasn't found anywhere within the
 							// translation path, so we're not generating
 							// obviously stupid candidate paths.
-							TranslationPath newPath = new TranslationPath();
+							TranslationPath newPath = new TranslationPath(builders);
 							newPath.translators = this.translators;
 							newPath.initialBuilder = erb;
 							newPath.sourceReference = er;
@@ -625,7 +628,7 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 			for (Class<ExternalReferenceSPI> c : settledNodes) {
 				if (! c.equals(targetType)) {
 					// Don't calculate a path to itself!
-					TranslationPath p = new TranslationPath();
+					TranslationPath p = new TranslationPath(builders);
 					Class<ExternalReferenceSPI> node = c;
 					while (predecessors.get(node) != null) {
 						p.pathSteps().add(translators.get(node));
