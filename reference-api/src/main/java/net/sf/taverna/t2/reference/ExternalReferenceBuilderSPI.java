@@ -43,9 +43,8 @@ public interface ExternalReferenceBuilderSPI<TargetType extends ExternalReferenc
 	 * ExternalReferenceSPI implementation which would de-reference to the value
 	 * of that stream and return it.
 	 * 
-	 * @param existingReferences
-	 *            the references to be used as sources for the translation. In
-	 *            general the implementation will use one of these references.
+	 * @param byteStream
+	 *            the bytestream to read target from.
 	 * @param context
 	 *            a reference resolution context, needed potentially to
 	 *            construct the new ExternalReferenceSchemeSPI, especially in
