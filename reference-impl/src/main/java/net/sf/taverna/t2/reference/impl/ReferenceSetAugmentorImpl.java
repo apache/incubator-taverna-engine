@@ -371,12 +371,15 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 	 * A path from one external reference to another along with a total
 	 * estimated path cost through one or more reference translators.
 	 */
-	class TranslationPath implements Comparable<TranslationPath>,
+	protected class TranslationPath implements Comparable<TranslationPath>,
 			Iterable<ExternalReferenceTranslatorSPI<?, ?>> {
 
 		List<ExternalReferenceTranslatorSPI<?, ?>> translators = new ArrayList<ExternalReferenceTranslatorSPI<?, ?>>();
 		ExternalReferenceBuilderSPI<?> initialBuilder = null;
 		ExternalReferenceSPI sourceReference = null;
+
+		public TranslationPath() {
+		}
 
 		/**
 		 * Return a human readable representation of this translation path, used
