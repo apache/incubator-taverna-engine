@@ -26,8 +26,7 @@ public class TranslationPath implements Comparable<TranslationPath>,
 	private InstanceRegistry<ExternalReferenceBuilderSPI<?>> builders;
 
 	
-	public TranslationPath(InstanceRegistry<ExternalReferenceBuilderSPI<?>> builders) {
-		this.setBuilders(builders);
+	public TranslationPath() {		
 	}
 
 	/**
@@ -169,8 +168,9 @@ public class TranslationPath implements Comparable<TranslationPath>,
 						// The type wasn't found anywhere within the
 						// translation path, so we're not generating
 						// obviously stupid candidate paths.
-						TranslationPath newPath = new TranslationPath(getBuilders());
-						newPath.setTranslators(this.getTranslators());
+						TranslationPath newPath = new TranslationPath();
+						newPath.setBuilders(getBuilders());
+						newPath.setTranslators(getTranslators());
 						newPath.setInitialBuilder(erb);
 						newPath.setSourceReference(er);
 						results.add(newPath);

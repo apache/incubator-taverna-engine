@@ -270,7 +270,8 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 					// reference' and the builder
 					for (ExternalReferenceSPI er : references
 							.getExternalReferences()) {
-						TranslationPath newPath = new TranslationPath(builders);
+						TranslationPath newPath = new TranslationPath();
+						newPath.setBuilders(builders);
 						newPath.setInitialBuilder(builder);
 						newPath.setSourceReference(er);
 						candidatePaths.add(newPath);
@@ -412,7 +413,8 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 			for (Class<ExternalReferenceSPI> c : settledNodes) {
 				if (! c.equals(targetType)) {
 					// Don't calculate a path to itself!
-					TranslationPath p = new TranslationPath(builders);
+					TranslationPath p = new TranslationPath();
+					p.setBuilders(builders);
 					Class<ExternalReferenceSPI> node = c;
 					while (predecessors.get(node) != null) {
 						p.pathSteps().add(translators.get(node));

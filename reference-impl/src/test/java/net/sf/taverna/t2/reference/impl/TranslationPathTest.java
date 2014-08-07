@@ -18,7 +18,7 @@ import org.junit.Test;
 
 public class TranslationPathTest {
 
-	protected TranslationPath path  = new TranslationPath(null);
+	protected TranslationPath path  = new TranslationPath();
 	
 	@Test
 	public void doTranslationWithTranslator() throws Exception {
