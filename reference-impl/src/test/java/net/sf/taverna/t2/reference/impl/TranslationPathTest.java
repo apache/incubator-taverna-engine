@@ -16,7 +16,7 @@ import net.sf.taverna.t2referencetest.RedReference;
 
 import org.junit.Test;
 
-public class ReferenceSetAugmentorTranslationPathTest {
+public class TranslationPathTest {
 
 	private final class ReferenceSetAugmentorWithPath extends
 			ReferenceSetAugmentorImpl {
