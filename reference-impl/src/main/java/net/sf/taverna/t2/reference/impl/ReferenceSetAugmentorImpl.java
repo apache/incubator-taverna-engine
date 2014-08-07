@@ -397,7 +397,7 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 				sb.append("builder:" + builderClassName + "("
 						+ initialBuilder.getConstructionCost() + "):<"
 						+ builtType + ">");
-			} else if (translators.isEmpty() == false) {
+			} else if (! translators.isEmpty()) {
 				sb.append("<"
 						+ translators.get(0).getSourceReferenceType()
 								.getSimpleName() + ">");
@@ -426,7 +426,7 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 				results.add(builtReference);
 				currentReference = builtReference;
 			}
-			if (translators.isEmpty() == false && currentReference == null) {
+			if (!translators.isEmpty() && currentReference == null) {
 				// If there are translators in the path (there may not be if
 				// this is a pure 'dereference and build' type path) and the
 				// currentReference hasn't been set then search the existing
@@ -554,7 +554,7 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 		}
 
 		public Class<? extends ExternalReferenceSPI> getSourceType() {
-			if (translators.isEmpty() == false) {
+			if (! translators.isEmpty()) {
 				return translators.get(0).getSourceReferenceType();
 			} else if (this.sourceReference != null) {
 				return this.sourceReference.getClass();
@@ -564,7 +564,7 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 		}
 
 		public Class<? extends ExternalReferenceSPI> getTargetType() {
-			if (translators.isEmpty() == false) {
+			if (! translators.isEmpty()) {
 				return translators.get(translators.size() - 1)
 						.getTargetReferenceType();
 			} else if (this.initialBuilder != null) {
@@ -614,13 +614,13 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 			shortestDistances = new HashMap<Class<ExternalReferenceSPI>, Float>();
 			setShortestDistance(targetType, 0.0f);
 			unsettledNodes.add(targetType);
-			while (unsettledNodes.isEmpty() == false) {
+			while (! unsettledNodes.isEmpty()) {
 				Class<ExternalReferenceSPI> u = extractMin();
 				settledNodes.add(u);
 				relaxNeighbours(u);
 			}
 			for (Class<ExternalReferenceSPI> c : settledNodes) {
-				if (c.equals(targetType) == false) {
+				if (! c.equals(targetType)) {
 					// Don't calculate a path to itself!
 					TranslationPath p = new TranslationPath();
 					Class<ExternalReferenceSPI> node = c;
@@ -655,7 +655,7 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 				Class<ExternalReferenceSPI> v = ert.getSourceReferenceType();
 				log.trace("#     translator found from from '" + v + "' : "
 						+ ert.getClass().getSimpleName());
-				if (alreadySeen.contains(v) == false && isSettled(v) == false) {
+				if (! alreadySeen.contains(v) && ! isSettled(v)) {
 					// Avoid duplicate edges, always take the first one where
 					// such duplicates exist
 					alreadySeen.add(v);
