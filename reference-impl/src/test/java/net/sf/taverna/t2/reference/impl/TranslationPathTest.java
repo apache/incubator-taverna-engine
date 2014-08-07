@@ -24,7 +24,7 @@ public class TranslationPathTest {
 	public void doTranslationWithTranslator() throws Exception {
 		ReferenceContext context = new EmptyReferenceContext();
 		ReferenceSet rs = new DummyReferenceSet(new GreenReference("green"));		
-		path.translators.add(new GreenToRed());
+		path.getTranslators().add(new GreenToRed());
 		Set<ExternalReferenceSPI> set = path.doTranslation(rs, context);		
 		assertEquals(1, set.size());
 		assertTrue(set.iterator().next() instanceof RedReference);
@@ -33,9 +33,9 @@ public class TranslationPathTest {
 	@Test
 	public void doTranslationByReadingStream() throws Exception {
 		ReferenceContext context = new EmptyReferenceContext();
-		path.sourceReference = new RedReference("red");
-		ReferenceSet rs = new DummyReferenceSet(path.sourceReference);
-		path.initialBuilder = new GreenBuilder();
+		path.setSourceReference(new RedReference("red"));
+		ReferenceSet rs = new DummyReferenceSet(path.getSourceReference());
+		path.setInitialBuilder(new GreenBuilder());
 		//augmentor.path.translators.add(new DummyTranslator());
 		Set<ExternalReferenceSPI> set = path.doTranslation(rs, context);		
 		assertEquals(1, set.size());

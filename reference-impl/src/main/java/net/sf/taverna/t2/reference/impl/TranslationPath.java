@@ -20,14 +20,14 @@ import net.sf.taverna.t2.reference.ReferenceSet;
 public class TranslationPath implements Comparable<TranslationPath>,
 		Iterable<ExternalReferenceTranslatorSPI<?, ?>> {
 
-	List<ExternalReferenceTranslatorSPI<?, ?>> translators = new ArrayList<ExternalReferenceTranslatorSPI<?, ?>>();
-	ExternalReferenceBuilderSPI<?> initialBuilder = null;
-	ExternalReferenceSPI sourceReference = null;
-	InstanceRegistry<ExternalReferenceBuilderSPI<?>> builders;
+	private List<ExternalReferenceTranslatorSPI<?, ?>> translators = new ArrayList<ExternalReferenceTranslatorSPI<?, ?>>();
+	private ExternalReferenceBuilderSPI<?> initialBuilder = null;
+	private ExternalReferenceSPI sourceReference = null;
+	private InstanceRegistry<ExternalReferenceBuilderSPI<?>> builders;
 
 	
 	public TranslationPath(InstanceRegistry<ExternalReferenceBuilderSPI<?>> builders) {
-		this.builders = builders;
+		this.setBuilders(builders);
 	}
 
 	/**
@@ -39,22 +39,22 @@ public class TranslationPath implements Comparable<TranslationPath>,
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append(getPathCost() + " ");
-		if (sourceReference != null && initialBuilder != null) {
-			sb.append(sourceReference.toString() + "->bytes("
-					+ sourceReference.getResolutionCost() + ")->");
-			String builderClassName = initialBuilder.getClass()
+		if (getSourceReference() != null && getInitialBuilder() != null) {
+			sb.append(getSourceReference().toString() + "->bytes("
+					+ getSourceReference().getResolutionCost() + ")->");
+			String builderClassName = getInitialBuilder().getClass()
 					.getSimpleName();
-			String builtType = initialBuilder.getReferenceType()
+			String builtType = getInitialBuilder().getReferenceType()
 					.getSimpleName();
 			sb.append("builder:" + builderClassName + "("
-					+ initialBuilder.getConstructionCost() + "):<"
+					+ getInitialBuilder().getConstructionCost() + "):<"
 					+ builtType + ">");
-		} else if (! translators.isEmpty()) {
+		} else if (! getTranslators().isEmpty()) {
 			sb.append("<"
-					+ translators.get(0).getSourceReferenceType()
+					+ getTranslators().get(0).getSourceReferenceType()
 							.getSimpleName() + ">");
 		}
-		for (ExternalReferenceTranslatorSPI translator : translators) {
+		for (ExternalReferenceTranslatorSPI translator : getTranslators()) {
 			sb.append("-" + translator.getClass().getSimpleName() + "("
 					+ translator.getTranslationCost() + ")" + "-");
 			sb.append("<"
@@ -71,14 +71,14 @@ public class TranslationPath implements Comparable<TranslationPath>,
 		// Firstly check whether we have an initial reference and builder
 		// defined
 		ExternalReferenceSPI currentReference = null;
-		if (initialBuilder != null && sourceReference != null) {
-			ExternalReferenceSPI builtReference = initialBuilder
-					.createReference(sourceReference.openStream(context),
+		if (getInitialBuilder() != null && getSourceReference() != null) {
+			ExternalReferenceSPI builtReference = getInitialBuilder()
+					.createReference(getSourceReference().openStream(context),
 							context);
 			results.add(builtReference);
 			currentReference = builtReference;
 		}
-		if (!translators.isEmpty() && currentReference == null) {
+		if (!getTranslators().isEmpty() && currentReference == null) {
 			// If there are translators in the path (there may not be if
 			// this is a pure 'dereference and build' type path) and the
 			// currentReference hasn't been set then search the existing
@@ -86,7 +86,7 @@ public class TranslationPath implements Comparable<TranslationPath>,
 			// translation.
 			for (ExternalReferenceSPI er : rs.getExternalReferences()) {
 				if (er.getClass().equals(
-						translators.get(0).getSourceReferenceType())) {
+						getTranslators().get(0).getSourceReferenceType())) {
 					currentReference = er;
 					break;
 				}
@@ -97,7 +97,7 @@ public class TranslationPath implements Comparable<TranslationPath>,
 					"Can't locate a starting reference for the"
 							+ " translation path");
 		} else {
-			for (ExternalReferenceTranslatorSPI translator : translators) {
+			for (ExternalReferenceTranslatorSPI translator : getTranslators()) {
 				ExternalReferenceSPI translatedReference = translator
 						.createReference(currentReference, context);
 				results.add(translatedReference);
@@ -120,11 +120,11 @@ public class TranslationPath implements Comparable<TranslationPath>,
 		// stream from the specified (current) reference and using it to
 		// construct the starting point for the translation path via the
 		// specified builder.
-		if (sourceReference != null) {
-			cost += sourceReference.getResolutionCost();
+		if (getSourceReference() != null) {
+			cost += getSourceReference().getResolutionCost();
 		}
-		if (initialBuilder != null) {
-			cost += initialBuilder.getConstructionCost();
+		if (getInitialBuilder() != null) {
+			cost += getInitialBuilder().getConstructionCost();
 		}
 		return cost;
 	}
@@ -142,7 +142,7 @@ public class TranslationPath implements Comparable<TranslationPath>,
 	@SuppressWarnings("rawtypes")
 	public List<TranslationPath> getDereferenceBasedPaths(ReferenceSet rs) {
 		List<TranslationPath> results = new ArrayList<TranslationPath>();
-		for (ExternalReferenceBuilderSPI erb : builders) {
+		for (ExternalReferenceBuilderSPI erb : getBuilders()) {
 			// Check for each reference builder to see if it can build the
 			// source type for this path
 			if (erb.getReferenceType().equals(this.getSourceType())) {
@@ -169,10 +169,10 @@ public class TranslationPath implements Comparable<TranslationPath>,
 						// The type wasn't found anywhere within the
 						// translation path, so we're not generating
 						// obviously stupid candidate paths.
-						TranslationPath newPath = new TranslationPath(builders);
-						newPath.translators = this.translators;
-						newPath.initialBuilder = erb;
-						newPath.sourceReference = er;
+						TranslationPath newPath = new TranslationPath(getBuilders());
+						newPath.setTranslators(this.getTranslators());
+						newPath.setInitialBuilder(erb);
+						newPath.setSourceReference(er);
 						results.add(newPath);
 					}
 				}
@@ -182,7 +182,7 @@ public class TranslationPath implements Comparable<TranslationPath>,
 	}
 
 	public List<ExternalReferenceTranslatorSPI<?, ?>> pathSteps() {
-		return translators;
+		return getTranslators();
 	}
 
 	/**
@@ -202,28 +202,60 @@ public class TranslationPath implements Comparable<TranslationPath>,
 	 * Wrap translator list iterator for convenience
 	 */
 	public Iterator<ExternalReferenceTranslatorSPI<?, ?>> iterator() {
-		return translators.iterator();
+		return getTranslators().iterator();
 	}
 
 	public Class<? extends ExternalReferenceSPI> getSourceType() {
-		if (! translators.isEmpty()) {
-			return translators.get(0).getSourceReferenceType();
-		} else if (this.sourceReference != null) {
-			return this.sourceReference.getClass();
+		if (! getTranslators().isEmpty()) {
+			return getTranslators().get(0).getSourceReferenceType();
+		} else if (this.getSourceReference() != null) {
+			return this.getSourceReference().getClass();
 		} else {
 			return null;
 		}
 	}
 
 	public Class<? extends ExternalReferenceSPI> getTargetType() {
-		if (! translators.isEmpty()) {
-			return translators.get(translators.size() - 1)
+		if (! getTranslators().isEmpty()) {
+			return getTranslators().get(getTranslators().size() - 1)
 					.getTargetReferenceType();
-		} else if (this.initialBuilder != null) {
-			return this.initialBuilder.getReferenceType();
+		} else if (this.getInitialBuilder() != null) {
+			return this.getInitialBuilder().getReferenceType();
 		} else {
 			return null;
 		}
+	}
+
+	public List<ExternalReferenceTranslatorSPI<?, ?>> getTranslators() {
+		return translators;
+	}
+
+	public void setTranslators(List<ExternalReferenceTranslatorSPI<?, ?>> translators) {
+		this.translators = translators;
+	}
+
+	public ExternalReferenceBuilderSPI<?> getInitialBuilder() {
+		return initialBuilder;
+	}
+
+	public void setInitialBuilder(ExternalReferenceBuilderSPI<?> initialBuilder) {
+		this.initialBuilder = initialBuilder;
+	}
+
+	public ExternalReferenceSPI getSourceReference() {
+		return sourceReference;
+	}
+
+	public void setSourceReference(ExternalReferenceSPI sourceReference) {
+		this.sourceReference = sourceReference;
+	}
+
+	public InstanceRegistry<ExternalReferenceBuilderSPI<?>> getBuilders() {
+		return builders;
+	}
+
+	public void setBuilders(InstanceRegistry<ExternalReferenceBuilderSPI<?>> builders) {
+		this.builders = builders;
 	}
 
 }

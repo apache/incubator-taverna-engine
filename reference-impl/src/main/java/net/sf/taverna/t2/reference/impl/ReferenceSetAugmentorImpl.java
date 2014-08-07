@@ -271,8 +271,8 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 					for (ExternalReferenceSPI er : references
 							.getExternalReferences()) {
 						TranslationPath newPath = new TranslationPath(builders);
-						newPath.initialBuilder = builder;
-						newPath.sourceReference = er;
+						newPath.setInitialBuilder(builder);
+						newPath.setSourceReference(er);
 						candidatePaths.add(newPath);
 					}
 				}
