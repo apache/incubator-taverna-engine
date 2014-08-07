@@ -18,19 +18,14 @@ import org.junit.Test;
 
 public class TranslationPathTest {
 
-	private final class ReferenceSetAugmentorWithPath extends
-			ReferenceSetAugmentorImpl {
-		protected TranslationPath path  = new TranslationPath(this.builders);
-	}
-
-	private ReferenceSetAugmentorWithPath augmentor = new ReferenceSetAugmentorWithPath();
+	protected TranslationPath path  = new TranslationPath(null);
 	
 	@Test
 	public void doTranslationWithTranslator() throws Exception {
 		ReferenceContext context = new EmptyReferenceContext();
 		ReferenceSet rs = new DummyReferenceSet(new GreenReference("green"));		
-		augmentor.path.translators.add(new GreenToRed());
-		Set<ExternalReferenceSPI> set = augmentor.path.doTranslation(rs, context);		
+		path.translators.add(new GreenToRed());
+		Set<ExternalReferenceSPI> set = path.doTranslation(rs, context);		
 		assertEquals(1, set.size());
 		assertTrue(set.iterator().next() instanceof RedReference);
 	}
@@ -38,11 +33,11 @@ public class TranslationPathTest {
 	@Test
 	public void doTranslationByReadingStream() throws Exception {
 		ReferenceContext context = new EmptyReferenceContext();
-		augmentor.path.sourceReference = new RedReference("red");
-		ReferenceSet rs = new DummyReferenceSet(augmentor.path.sourceReference);
-		augmentor.path.initialBuilder = new GreenBuilder();
+		path.sourceReference = new RedReference("red");
+		ReferenceSet rs = new DummyReferenceSet(path.sourceReference);
+		path.initialBuilder = new GreenBuilder();
 		//augmentor.path.translators.add(new DummyTranslator());
-		Set<ExternalReferenceSPI> set = augmentor.path.doTranslation(rs, context);		
+		Set<ExternalReferenceSPI> set = path.doTranslation(rs, context);		
 		assertEquals(1, set.size());
 		assertTrue(set.iterator().next() instanceof GreenReference);
 	}
