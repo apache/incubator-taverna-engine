@@ -1,5 +1,7 @@
 package net.sf.taverna.t2.reference.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -7,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 import net.sf.taverna.raven.spi.InstanceRegistry;
+import net.sf.taverna.t2.reference.DereferenceException;
 import net.sf.taverna.t2.reference.ExternalReferenceBuilderSPI;
 import net.sf.taverna.t2.reference.ExternalReferenceSPI;
 import net.sf.taverna.t2.reference.ExternalReferenceTranslatorSPI;
@@ -71,9 +74,14 @@ public class TranslationPath implements Comparable<TranslationPath>,
 		// defined
 		ExternalReferenceSPI currentReference = null;
 		if (getInitialBuilder() != null && getSourceReference() != null) {
-			ExternalReferenceSPI builtReference = getInitialBuilder()
-					.createReference(getSourceReference().openStream(context),
-							context);
+			ExternalReferenceSPI builtReference;
+			try (InputStream stream = getSourceReference().openStream(context)) {
+				builtReference = getInitialBuilder()
+						.createReference(stream,
+								context);
+			} catch (IOException e) {
+				throw new DereferenceException("Can't create reference from stream", e);
+			}
 			results.add(builtReference);
 			currentReference = builtReference;
 		}
