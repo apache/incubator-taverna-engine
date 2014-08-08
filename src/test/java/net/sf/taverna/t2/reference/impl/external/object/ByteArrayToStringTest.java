@@ -24,26 +24,45 @@ public class ByteArrayToStringTest {
 	private final String string = "Ferronni\u00e8re \ud801\udc00";	
 	
 	
-//	@Test
-//	public void doTranslationWithTranslator() throws Exception {
-//		ReferenceContext context = new EmptyReferenceContext();
-//		InlineStringReference inlineString = new InlineStringReference();
-//		inlineString.setContents("string");
-//		//path.setSourceReference(inlineString);		
-//		ReferenceSet rs = new DummyReferenceSet(inlineString);		
-//		path.getTranslators().add(new GreenToRed());
-//		Set<ExternalReferenceSPI> set = path.doTranslation(rs, context);		
-//		assertEquals(1, set.size());
-//		assertTrue(set.iterator().next() instanceof RedReference);
-//	}
-//	
+	@Test
+	public void translateStringToByteTranslator() throws Exception {
+		ReferenceContext context = new EmptyReferenceContext();
+		InlineStringReference inlineString = new InlineStringReference();
+		inlineString.setContents(string);
+		path.setSourceReference(inlineString);
+		ReferenceSet rs = new DummyReferenceSet(inlineString);		
+		path.getTranslators().add(new InlineStringToInlineByteTranslator());
+		
+		Set<ExternalReferenceSPI> set = path.doTranslation(rs, context);		
+		assertEquals(1, set.size());
+		InlineByteArrayReference byteRef = (InlineByteArrayReference) set.iterator().next();
+		
+		assertEquals(string, new String(byteRef.getValue(), UTF8));		
+	}
+
+	@Test
+	public void translateByteToStringTranslator() throws Exception {
+		ReferenceContext context = new EmptyReferenceContext();
+		InlineByteArrayReference inlineByte = new InlineByteArrayReference();
+		inlineByte.setValue(string.getBytes(UTF8));
+		path.setSourceReference(inlineByte);
+		ReferenceSet rs = new DummyReferenceSet(inlineByte);		
+		path.getTranslators().add(new InlineByteToInlineStringTranslator());		
+		
+		Set<ExternalReferenceSPI> set = path.doTranslation(rs, context);		
+		assertEquals(1, set.size());
+		InlineStringReference inlineString = (InlineStringReference) set.iterator().next();
+		assertEquals(string,  inlineString.getContents());	
+	}
+
+	
 	@Test
 	public void translateStringToByteArrayBuilder() throws Exception {
 		ReferenceContext context = new EmptyReferenceContext();
 		InlineStringReference inlineString = new InlineStringReference();
 		inlineString.setContents(string);
 		path.setSourceReference(inlineString);
-		ReferenceSet rs = new DummyReferenceSet(path.getSourceReference());
+		ReferenceSet rs = new DummyReferenceSet(inlineString);
 		path.setInitialBuilder(new InlineByteArrayReferenceBuilder());
 		Set<ExternalReferenceSPI> set = path.doTranslation(rs, context);		
 		assertEquals(1, set.size());
@@ -58,7 +77,7 @@ public class ByteArrayToStringTest {
 		InlineByteArrayReference inlineByte = new InlineByteArrayReference();
 		inlineByte.setValue(string.getBytes(UTF8));
 		path.setSourceReference(inlineByte);
-		ReferenceSet rs = new DummyReferenceSet(path.getSourceReference());
+		ReferenceSet rs = new DummyReferenceSet(inlineByte);
 		path.setInitialBuilder(new InlineStringReferenceBuilder());
 		Set<ExternalReferenceSPI> set = path.doTranslation(rs, context);		
 		assertEquals(1, set.size());

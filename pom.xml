@@ -60,6 +60,19 @@
 			<version>${t2.core.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>net.sf.taverna.t2.core</groupId>
+			<artifactId>reference-testhelpers</artifactId>
+			<version>${t2.core.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.taverna.t2.core</groupId>
+			<artifactId>reference-impl</artifactId>
+			<version>${t2.core.version}</version>
+			<scope>test</scope>
+		</dependency>
+		
+		<dependency>
 			<groupId>commons-httpclient</groupId>
 			<artifactId>commons-httpclient</artifactId>
 			<version>${commons.httpclient.version}</version>
@@ -68,6 +81,12 @@
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 			<version>${log4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit.version}</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>
