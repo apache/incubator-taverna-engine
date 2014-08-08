@@ -45,7 +45,7 @@ public class InlineStringReferenceBuilder implements
 			ReferenceContext context) {
 		try {
 			// UTF8 is a slightly saner default than system default
-			// for most streams
+			// for most bytestreams
 			String contents = StreamToStringConverter
 					.readFile(new BufferedReader(new InputStreamReader(
 							byteStream, UTF8)));
