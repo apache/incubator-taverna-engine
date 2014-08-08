@@ -502,7 +502,7 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 				// of the cheapest reference from which to try to build the pojo
 				// from a stream
 				ExternalReferenceSPI cheapestReference = null;
-				float cheapestReferenceCost = 10.0f;
+				float cheapestReferenceCost = Float.MAX_VALUE;
 				for (ExternalReferenceSPI ers : rs.getExternalReferences()) {
 					if (ers instanceof ValueCarryingExternalReference<?>) {
 						ValueCarryingExternalReference<?> vcer = (ValueCarryingExternalReference<?>) ers;
