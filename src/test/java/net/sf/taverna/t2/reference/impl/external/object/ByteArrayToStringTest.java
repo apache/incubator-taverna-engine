@@ -19,8 +19,9 @@ public class ByteArrayToStringTest {
 
 	protected TranslationPath path  = new TranslationPath();
 	private final Charset UTF8 = Charset.forName("UTF-8");
-//	
-	private final String string = "Ferronni\u00e8re";
+	// cleverly including the supplementary character U+10400
+	// which in UTF8 should be \xf0\x90\x90\x80
+	private final String string = "Ferronni\u00e8re \ud801\udc00";	
 	
 	
 //	@Test
@@ -64,7 +65,8 @@ public class ByteArrayToStringTest {
 		assertTrue(set.iterator().next() instanceof InlineStringReference);
 		InlineStringReference inlineString = (InlineStringReference) set.iterator().next();
 		assertEquals(string,  inlineString.getContents());
-		
+		//System.out.println(string);
 	}
+	
 	
 }
