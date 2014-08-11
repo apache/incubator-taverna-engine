@@ -20,6 +20,7 @@
  ******************************************************************************/
 package net.sf.taverna.t2.reference.impl;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -501,7 +502,7 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 				// of the cheapest reference from which to try to build the pojo
 				// from a stream
 				ExternalReferenceSPI cheapestReference = null;
-				float cheapestReferenceCost = 10.0f;
+				float cheapestReferenceCost = Float.MAX_VALUE;
 				for (ExternalReferenceSPI ers : rs.getExternalReferences()) {
 					if (ers instanceof ValueCarryingExternalReference<?>) {
 						ValueCarryingExternalReference<?> vcer = (ValueCarryingExternalReference<?>) ers;
@@ -517,8 +518,9 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 					}
 				}
 				if (converter != null) {
-					return converter.renderFrom(cheapestReference
-							.openStream(context), cheapestReference.getDataNature(), cheapestReference.getCharset());
+					try (InputStream stream = cheapestReference.openStream(context)) {
+						return converter.renderFrom(stream, cheapestReference.getDataNature(), cheapestReference.getCharset());
+					}
 				}
 			} catch (Exception e) {
 				throw new ReferenceServiceException(e);
