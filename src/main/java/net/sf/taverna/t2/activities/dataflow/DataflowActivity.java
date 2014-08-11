@@ -30,7 +30,10 @@ import net.sf.taverna.t2.facade.WorkflowInstanceFacade;
 import net.sf.taverna.t2.facade.WorkflowInstanceFacade.State;
 import net.sf.taverna.t2.invocation.TokenOrderException;
 import net.sf.taverna.t2.invocation.WorkflowDataToken;
+import net.sf.taverna.t2.reference.ErrorDocument;
+import net.sf.taverna.t2.reference.ErrorDocumentService;
 import net.sf.taverna.t2.reference.ExternalReferenceSPI;
+import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
 import net.sf.taverna.t2.workflowmodel.DataflowInputPort;
@@ -145,6 +148,32 @@ public class DataflowActivity extends
 					} catch (TokenOrderException e) {
 						callback.fail("Failed to push data into facade", e);
 					}
+				}
+				
+				final ReferenceService referenceService = callback.getContext().getReferenceService();
+				ErrorDocumentService errorDocService = referenceService.getErrorDocumentService();
+				
+				for (DataflowInputPort dip : dataflow.getInputPorts()) {
+					String name = dip.getName();
+					if (data.containsKey(name)) {
+						continue;
+					}
+					int depth = dip.getDepth();
+
+					ErrorDocument doc = errorDocService.registerError("No value supplied for " + name, 
+							depth, callback.getContext());
+					T2Reference docRef = referenceService.register(doc,
+							depth, true, callback
+									.getContext());
+					try {
+						WorkflowDataToken token = new WorkflowDataToken(
+								callback.getParentProcessIdentifier(),
+								new int[] {}, docRef, callback
+										.getContext());
+						facade.pushData(token, name);
+					} catch (TokenOrderException e) {
+						callback.fail("Failed to push data into facade", e);
+					}					
 				}
 
 			}
