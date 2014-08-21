@@ -41,6 +41,7 @@ public class StreamToStringConverter implements
 
 	private static final int END_OF_FILE = -1;
 	private static final int CHUNK_SIZE = 4096;
+	private static final Charset UTF8 = Charset.forName("UTF-8");
 
 	/***************************************************************************
 	 * = readFile(): reads a text file and returns a string *
@@ -65,15 +66,16 @@ public class StreamToStringConverter implements
 	public String renderFrom(InputStream stream,
 			ReferencedDataNature dataNature, String charset) {
 		BufferedReader in;
-		if ((charset == null) || !dataNature.equals(ReferencedDataNature.TEXT)) {
-			in = new BufferedReader(new InputStreamReader(stream));
-		} else {
+		if ((charset == null) || !dataNature.equals(ReferencedDataNature.TEXT)){
+			in = new BufferedReader(new InputStreamReader(stream, UTF8));
+		} else {			
 			try {
 				Charset c = Charset.forName(charset);
 				in = new BufferedReader(new InputStreamReader(stream, c));
-			} catch (IllegalArgumentException e1) {
-				in = new BufferedReader(new InputStreamReader(stream));
 			}
+			catch (IllegalArgumentException e1) {
+				in = new BufferedReader(new InputStreamReader(stream, UTF8));
+			}					
 		}
 		try {
 			return readFile(in);

@@ -20,9 +20,10 @@
  ******************************************************************************/
 package net.sf.taverna.t2.reference.impl.external.object;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.io.StringBufferInputStream;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -62,10 +63,11 @@ public class VMObjectReference extends AbstractExternalReference implements
 	 */
 	private static Map<UUID, Object> uuidToObject = new HashMap<UUID, Object>();
 
+	private Charset UTF8 = Charset.forName("UTF-8");
+	
 	@Override
 	public InputStream openStream(ReferenceContext context) {
-		return new StringBufferInputStream(getObject().toString());
-
+		return new ByteArrayInputStream(getObject().toString().getBytes(UTF8));
 	}
 
 	/**
@@ -115,5 +117,5 @@ public class VMObjectReference extends AbstractExternalReference implements
 		result.setUuid(this.getUuid());
 		return result;
 	}
-
+	
 }

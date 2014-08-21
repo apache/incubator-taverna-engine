@@ -102,7 +102,7 @@ public class InlineByteArrayReference extends AbstractExternalReference
 	@Override
 	public InlineByteArrayReference clone() {
 		InlineByteArrayReference result = new InlineByteArrayReference();
-		result.setContents(this.getContents());
+		result.setValue(this.getValue().clone());
 		return result;
 	}
 }

@@ -24,6 +24,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 
 import net.sf.taverna.t2.reference.ExternalReferenceBuilderSPI;
 import net.sf.taverna.t2.reference.ExternalReferenceConstructionException;
@@ -38,13 +39,17 @@ import net.sf.taverna.t2.reference.ReferenceContext;
 public class InlineStringReferenceBuilder implements
 		ExternalReferenceBuilderSPI<InlineStringReference> {
 
+	private final Charset UTF8 = Charset.forName("UTF-8");
+	
 	@Override
 	public InlineStringReference createReference(InputStream byteStream,
 			ReferenceContext context) {
 		try {
+			// UTF8 is a slightly saner default than system default
+			// for most bytestreams
 			String contents = StreamToStringConverter
 					.readFile(new BufferedReader(new InputStreamReader(
-							byteStream)));
+							byteStream, UTF8)));
 			InlineStringReference ref = new InlineStringReference();
 			ref.setContents(contents);
 			return ref;
