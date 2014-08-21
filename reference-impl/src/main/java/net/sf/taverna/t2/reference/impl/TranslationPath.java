@@ -8,7 +8,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import net.sf.taverna.raven.spi.InstanceRegistry;
 import net.sf.taverna.t2.reference.DereferenceException;
 import net.sf.taverna.t2.reference.ExternalReferenceBuilderSPI;
 import net.sf.taverna.t2.reference.ExternalReferenceSPI;
@@ -26,7 +25,7 @@ public class TranslationPath implements Comparable<TranslationPath>,
 	private List<ExternalReferenceTranslatorSPI<?, ?>> translators = new ArrayList<ExternalReferenceTranslatorSPI<?, ?>>();
 	private ExternalReferenceBuilderSPI<?> initialBuilder = null;
 	private ExternalReferenceSPI sourceReference = null;
-	private InstanceRegistry<ExternalReferenceBuilderSPI<?>> builders;
+	private List<ExternalReferenceBuilderSPI<?>> builders;
 
 	
 	public TranslationPath() {		
@@ -258,11 +257,11 @@ public class TranslationPath implements Comparable<TranslationPath>,
 		this.sourceReference = sourceReference;
 	}
 
-	public InstanceRegistry<ExternalReferenceBuilderSPI<?>> getBuilders() {
+	public List<ExternalReferenceBuilderSPI<?>> getBuilders() {
 		return builders;
 	}
 
-	public void setBuilders(InstanceRegistry<ExternalReferenceBuilderSPI<?>> builders) {
+	public void setBuilders(List<ExternalReferenceBuilderSPI<?>> builders) {
 		this.builders = builders;
 	}
 
