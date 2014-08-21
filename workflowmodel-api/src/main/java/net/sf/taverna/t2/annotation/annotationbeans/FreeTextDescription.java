@@ -23,8 +23,8 @@ package net.sf.taverna.t2.annotation.annotationbeans;
 import net.sf.taverna.t2.annotation.AppliesTo;
 import net.sf.taverna.t2.workflowmodel.Condition;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
+import net.sf.taverna.t2.workflowmodel.DataflowPort;
 import net.sf.taverna.t2.workflowmodel.Datalink;
-import net.sf.taverna.t2.workflowmodel.Port;
 import net.sf.taverna.t2.workflowmodel.Processor;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 
@@ -35,7 +35,7 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
  * 
  */
 @AppliesTo(targetObjectType = { Dataflow.class, Processor.class,
-		Activity.class, Port.class, Datalink.class, Condition.class }, many = false)
+		Activity.class, DataflowPort.class, Datalink.class, Condition.class }, many = false)
 public class FreeTextDescription extends AbstractTextualValueAssertion {
 
 	/**

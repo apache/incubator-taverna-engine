@@ -110,5 +110,10 @@ public class ErrorDocumentImpl extends AbstractEntityImpl implements
 	public Set getErrorReferenceSet() {
 		return this.errorReferences;
 	}
+	
+	@Override
+	public String toString() {
+		return getMessage();
+	}
 
 }

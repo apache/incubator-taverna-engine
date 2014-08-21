@@ -89,18 +89,6 @@ public class DataflowOutputPortImpl extends BasicEventForwardingOutputPort
 		 * ResultListeners on the output port to the new token.
 		 */
 		public void receiveEvent(WorkflowDataToken token) {
-			// Pull the dataflow process identifier from the owning process
-			// and push the modified token out
-			// I'd rather avoid casting to the implementation but in this
-			// case we're in the same package - the only reason to do this
-			// is to allow dummy implementations of parts of this
-			// infrastructure during testing, in 'real' use this should
-			// always be a dataflowimpl
-			if (token.getIndex().length == 0
-					&& dataflow instanceof DataflowImpl) {
-				((DataflowImpl) dataflow).sentFinalToken(portName, token
-						.getOwningProcess());
-			}
 			WorkflowDataToken newToken = token.popOwningProcess();
 			sendEvent(newToken);
 			
