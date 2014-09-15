@@ -31,11 +31,8 @@ import net.sf.taverna.t2.monitor.NoSuchPropertyException;
  * @author David Withers
  */
 public class StaticProperty implements MonitorableProperty<Object> {
-
 	private Object value;
-	
 	private String[] name;
-	
 	private Date lastModified;
 	
 	/**
@@ -66,5 +63,4 @@ public class StaticProperty implements MonitorableProperty<Object> {
 	public Date getLastModified() {
 		return lastModified;
 	}
-
 }

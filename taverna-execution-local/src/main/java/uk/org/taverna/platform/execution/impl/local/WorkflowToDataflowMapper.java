@@ -47,7 +47,6 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayer;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchStack;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationStrategy;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.NamedInputPortNode;
-
 import uk.org.taverna.platform.capability.api.ActivityConfigurationException;
 import uk.org.taverna.platform.capability.api.ActivityNotFoundException;
 import uk.org.taverna.platform.capability.api.ActivityService;
@@ -92,38 +91,23 @@ import com.fasterxml.jackson.databind.JsonNode;
  * @author David Withers
  */
 public class WorkflowToDataflowMapper {
-
 	private static final URI NESTED_WORKFLOW_URI = URI
 			.create("http://ns.taverna.org.uk/2010/activity/nested-workflow");
 
 	private Edits edits;
-
 	private final Scufl2Tools scufl2Tools = new Scufl2Tools();
-
 	private final Map<Port, EventHandlingInputPort> inputPorts;
-
 	private final Map<Port, EventForwardingOutputPort> outputPorts;
-
 	private final Map<Port, Merge> merges;
-
 	private final Map<Workflow, Dataflow> workflowToDataflow;
-
 	private final Map<Dataflow, Workflow> dataflowToWorkflow;
-
 	private final Map<Processor, net.sf.taverna.t2.workflowmodel.Processor> workflowToDataflowProcessors;
-
 	private final Map<net.sf.taverna.t2.workflowmodel.Processor, Processor> dataflowToWorkflowProcessors;
-
 	private final Map<Activity, net.sf.taverna.t2.workflowmodel.processor.activity.Activity<?>> workflowToDataflowActivities;
-
 	private final Map<net.sf.taverna.t2.workflowmodel.processor.activity.Activity<?>, Activity> dataflowToWorkflowActivities;
-
 	private final WorkflowBundle workflowBundle;
-
 	private final Profile profile;
-
 	private final ActivityService activityService;
-
 	private final DispatchLayerService dispatchLayerService;
 
 	public WorkflowToDataflowMapper(WorkflowBundle workflowBundle, Profile profile, Edits edits,
@@ -194,13 +178,9 @@ public class WorkflowToDataflowMapper {
 		edits.getUpdateDataflowNameEdit(dataflow, new String(workflow.getName())).doEdit();
 
 		addInputPorts(workflow, dataflow);
-
 		addOutputPorts(workflow, dataflow);
-
 		addProcessors(workflow, dataflow);
-
 		addDataLinks(workflow, dataflow);
-
 		addControlLinks(workflow);
 
 		return dataflow;
@@ -219,14 +199,15 @@ public class WorkflowToDataflowMapper {
 			dataflowToWorkflowProcessors.put(dataflowProcessor, processor);
 			// add input ports
 			for (InputProcessorPort inputProcessorPort : processor.getInputPorts()) {
-				if (!scufl2Tools.datalinksTo(inputProcessorPort).isEmpty()) {
-					ProcessorInputPort processorInputPort = edits.createProcessorInputPort(
-							dataflowProcessor, inputProcessorPort.getName(),
-							inputProcessorPort.getDepth());
-					edits.getAddProcessorInputPortEdit(dataflowProcessor, processorInputPort)
-							.doEdit();
-					inputPorts.put(inputProcessorPort, processorInputPort);
-				}
+				if (scufl2Tools.datalinksTo(inputProcessorPort).isEmpty())
+					continue;
+				ProcessorInputPort processorInputPort = edits
+						.createProcessorInputPort(dataflowProcessor,
+								inputProcessorPort.getName(),
+								inputProcessorPort.getDepth());
+				edits.getAddProcessorInputPortEdit(dataflowProcessor,
+						processorInputPort).doEdit();
+				inputPorts.put(inputProcessorPort, processorInputPort);
 			}
 			// add output ports
 			for (OutputProcessorPort outputProcessorPort : processor.getOutputPorts()) {
@@ -244,11 +225,9 @@ public class WorkflowToDataflowMapper {
 			addIterationStrategy(processor, dataflowProcessor);
 
 			// add bound activities
-			List<ProcessorBinding> processorBindings = scufl2Tools.processorBindingsForProcessor(
-					processor, profile);
-			for (ProcessorBinding processorBinding : processorBindings) {
+			for (ProcessorBinding processorBinding : scufl2Tools
+					.processorBindingsForProcessor(processor, profile))
 				addActivity(processorBinding);
-			}
 		}
 	}
 
@@ -330,23 +309,20 @@ public class WorkflowToDataflowMapper {
 		if (iterationStrategyNode instanceof CrossProduct) {
 			CrossProduct crossProduct = (CrossProduct) iterationStrategyNode;
 			childDataflowIterationStrategyNode = new net.sf.taverna.t2.workflowmodel.processor.iteration.CrossProduct();
-			for (IterationStrategyNode iterationStrategyNode2 : crossProduct) {
+			for (IterationStrategyNode iterationStrategyNode2 : crossProduct)
 				addIterationStrategyNode(dataflowIterationStrategy,
 						childDataflowIterationStrategyNode, iterationStrategyNode2);
-			}
 		} else if (iterationStrategyNode instanceof DotProduct) {
 			DotProduct dotProduct = (DotProduct) iterationStrategyNode;
 			childDataflowIterationStrategyNode = new net.sf.taverna.t2.workflowmodel.processor.iteration.DotProduct();
-			for (IterationStrategyNode iterationStrategyNode2 : dotProduct) {
+			for (IterationStrategyNode iterationStrategyNode2 : dotProduct)
 				addIterationStrategyNode(dataflowIterationStrategy,
 						childDataflowIterationStrategyNode, iterationStrategyNode2);
-			}
 		} else if (iterationStrategyNode instanceof PortNode) {
 			PortNode portNode = (PortNode) iterationStrategyNode;
 			Integer desiredDepth = portNode.getDesiredDepth();
-			if (desiredDepth == null) {
+			if (desiredDepth == null)
 				desiredDepth = portNode.getInputProcessorPort().getDepth();
-			}
 			NamedInputPortNode namedInputPortNode = new NamedInputPortNode(portNode
 					.getInputProcessorPort().getName(), desiredDepth);
 			edits.getAddIterationStrategyInputNodeEdit(dataflowIterationStrategy,
@@ -365,9 +341,8 @@ public class WorkflowToDataflowMapper {
 				.get(processorBinding.getBoundProcessor());
 		Activity scufl2Activity = processorBinding.getBoundActivity();
 		URI activityType = scufl2Activity.getType();
-		if (!activityService.activityExists(activityType)) {
+		if (!activityService.activityExists(activityType))
 			throw new ActivityNotFoundException("No activity exists for " + activityType);
-		}
 		Configuration configuration = scufl2Tools.configurationFor(scufl2Activity, profile);
 
 		// create the activity
@@ -378,8 +353,8 @@ public class WorkflowToDataflowMapper {
 			if (activity instanceof NestedDataflow) {
 				Workflow nestedWorkflow = scufl2Tools.nestedWorkflowForProcessor(
 						processorBinding.getBoundProcessor(), profile);
-				Dataflow nestedDataflow = getDataflow(nestedWorkflow);
-				((NestedDataflow) activity).setNestedDataflow(nestedDataflow);
+				((NestedDataflow) activity)
+						.setNestedDataflow(getDataflow(nestedWorkflow));
 			} else {
 				throw new ActivityConfigurationException(
 						"Activity is not an instance of NestedDataflow");
@@ -439,6 +414,7 @@ public class WorkflowToDataflowMapper {
 				MergeInputPort mergeInputPort = edits.createMergeInputPort(merge, "input"
 						+ mergePosition, sink.getDepth());
 				// add it to the correct position in the merge
+				@SuppressWarnings("unchecked")
 				List<MergeInputPort> mergeInputPorts = (List<MergeInputPort>) merge.getInputPorts();
 				if (mergePosition > mergeInputPorts.size()) {
 					mergeInputPorts.add(mergeInputPort);

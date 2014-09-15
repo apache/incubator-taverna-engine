@@ -16,7 +16,6 @@ import uk.org.taverna.databundle.DataBundles;
  * @author David Withers
  */
 public class T2ReferenceConverter {
-
 	public static Object convertPathToObject(Path path) throws IOException {
 		Object object = null;
 		if (DataBundles.isValue(path)) {
@@ -39,6 +38,4 @@ public class T2ReferenceConverter {
 		}
 		return object;
 	}
-
-
 }

@@ -1,6 +1,5 @@
 package uk.org.taverna.platform.execution.impl.local;
 
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -15,17 +14,13 @@ import uk.org.taverna.scufl2.api.core.Processor;
 
 /**
  * ProcessorReport implementation based on MonitorableProperty objects.
- *
+ * 
  * @author David Withers
  */
 public class LocalProcessorReport extends ProcessorReport {
-
 	private static final String DISPATCH_ERRORBOUNCE_TOTAL_TRANSLATED = "dispatch:errorbounce:totalTranslated";
-
 	private static final String DISPATCH_PARALLELIZE_COMPLETEDJOBS = "dispatch:parallelize:completedjobs";
-
 	private static final String DISPATCH_PARALLELIZE_SENTJOBS = "dispatch:parallelize:sentjobs";
-
 	private static final String DISPATCH_PARALLELIZE_QUEUESIZE = "dispatch:parallelize:queuesize";
 
 	private Map<String, MonitorableProperty<?>> propertyMap;
@@ -42,20 +37,20 @@ public class LocalProcessorReport extends ProcessorReport {
 	}
 
 	public void saveProperties() {
-		for (Entry<String, MonitorableProperty<?>> entry : propertyMap.entrySet()) {
+		for (Entry<String, MonitorableProperty<?>> entry : propertyMap
+				.entrySet())
 			entry.setValue(new StaticProperty(entry.getValue()));
-		}
 	}
 
 	@Override
 	public int getJobsQueued() {
 		int result = -1;
-		MonitorableProperty<?> property = propertyMap.get(DISPATCH_PARALLELIZE_QUEUESIZE);
-		if (property != null) {
-			try {
+		MonitorableProperty<?> property = propertyMap
+				.get(DISPATCH_PARALLELIZE_QUEUESIZE);
+		try {
+			if (property != null)
 				result = (Integer) property.getValue();
-			} catch (NoSuchPropertyException e) {
-			}
+		} catch (NoSuchPropertyException e) {
 		}
 		return result;
 	}
@@ -63,7 +58,8 @@ public class LocalProcessorReport extends ProcessorReport {
 	@Override
 	public int getJobsStarted() {
 		int result = -1;
-		MonitorableProperty<?> property = propertyMap.get(DISPATCH_PARALLELIZE_SENTJOBS);
+		MonitorableProperty<?> property = propertyMap
+				.get(DISPATCH_PARALLELIZE_SENTJOBS);
 		if (property != null) {
 			try {
 				result = (Integer) property.getValue();
@@ -76,12 +72,12 @@ public class LocalProcessorReport extends ProcessorReport {
 	@Override
 	public int getJobsCompleted() {
 		int result = -1;
-		MonitorableProperty<?> property = propertyMap.get(DISPATCH_PARALLELIZE_COMPLETEDJOBS);
-		if (property != null) {
-			try {
-				result =  (Integer) property.getValue();
-			} catch (NoSuchPropertyException e) {
-			}
+		MonitorableProperty<?> property = propertyMap
+				.get(DISPATCH_PARALLELIZE_COMPLETEDJOBS);
+		try {
+			if (property != null)
+				result = (Integer) property.getValue();
+		} catch (NoSuchPropertyException e) {
 		}
 		return result;
 	}
@@ -89,42 +85,43 @@ public class LocalProcessorReport extends ProcessorReport {
 	@Override
 	public int getJobsCompletedWithErrors() {
 		int result = -1;
-		MonitorableProperty<?> property = propertyMap.get(DISPATCH_ERRORBOUNCE_TOTAL_TRANSLATED);
-		if (property != null) {
-			try {
-				result =  (Integer) property.getValue();
-			} catch (NoSuchPropertyException e) {
-			}
+		MonitorableProperty<?> property = propertyMap
+				.get(DISPATCH_ERRORBOUNCE_TOTAL_TRANSLATED);
+		try {
+			if (property != null)
+				result = (Integer) property.getValue();
+		} catch (NoSuchPropertyException e) {
 		}
 		return result;
 	}
 
+	@Override
 	public Set<String> getPropertyKeys() {
-		if (!propertyMap.isEmpty()) {
-			return new HashSet<String>(propertyMap.keySet());
-		}
+		if (!propertyMap.isEmpty())
+			return new HashSet<>(propertyMap.keySet());
 		return super.getPropertyKeys();
 	}
 
+	@Override
 	public Object getProperty(String key) {
 		Object result = null;
 		MonitorableProperty<?> property = propertyMap.get(key);
-		if (property != null) {
-			try {
+		try {
+			if (property != null)
 				result = property.getValue();
-			} catch (NoSuchPropertyException e) {
-			}
+		} catch (NoSuchPropertyException e) {
 		}
 		return result;
 	}
 
+	@Override
 	public void setProperty(String key, Object value) {
 		MonitorableProperty<?> monitorableProperty = propertyMap.get(key);
 		if (monitorableProperty instanceof SteerableProperty<?>) {
 			@SuppressWarnings("unchecked")
 			SteerableProperty<Object> steerableProperty = (SteerableProperty<Object>) monitorableProperty;
 			try {
-				 steerableProperty.setProperty(value);
+				steerableProperty.setProperty(value);
 			} catch (NoSuchPropertyException e) {
 			}
 		}
@@ -134,9 +131,8 @@ public class LocalProcessorReport extends ProcessorReport {
 		StringBuilder sb = new StringBuilder();
 		String[] name = property.getName();
 		for (int i = 0; i < name.length; i++) {
-			if (i > 0) {
+			if (i > 0)
 				sb.append(':');
-			}
 			sb.append(name[i]);
 		}
 		return sb.toString();

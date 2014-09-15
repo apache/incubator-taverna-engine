@@ -20,6 +20,9 @@
  ******************************************************************************/
 package uk.org.taverna.platform.execution.impl.local;
 
+import static java.util.logging.Level.SEVERE;
+import static uk.org.taverna.platform.execution.impl.local.T2ReferenceConverter.convertPathToObject;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -28,7 +31,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.sf.taverna.t2.facade.ResultListener;
@@ -60,14 +62,15 @@ import uk.org.taverna.scufl2.api.core.Workflow;
 import uk.org.taverna.scufl2.api.profiles.Profile;
 
 /**
- * An {@link uk.org.taverna.platform.execution.api.Execution Execution} for executing Taverna
- * workflows on a local Taverna Dataflow Engine.
- *
+ * An {@link uk.org.taverna.platform.execution.api.Execution Execution} for
+ * executing Taverna workflows on a local Taverna Dataflow Engine.
+ * 
  * @author David Withers
  */
 public class LocalExecution extends AbstractExecution implements ResultListener {
 
-	private static Logger logger = Logger.getLogger(LocalExecution.class.getName());
+	private static Logger logger = Logger.getLogger(LocalExecution.class
+			.getName());
 
 	private final WorkflowToDataflowMapper mapping;
 
@@ -80,39 +83,44 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 	private final Map<String, DataflowInputPort> inputPorts = new HashMap<String, DataflowInputPort>();
 
 	/**
-	 * Constructs an Execution for executing Taverna workflows on a local Taverna Dataflow Engine.
-	 *
+	 * Constructs an Execution for executing Taverna workflows on a local
+	 * Taverna Dataflow Engine.
+	 * 
 	 * @param workflowBundle
-	 *            the <code>WorkflowBundle</code> containing the <code>Workflow</code>s required for
-	 *            execution
+	 *            the <code>WorkflowBundle</code> containing the
+	 *            <code>Workflow</code>s required for execution
 	 * @param workflow
 	 *            the <code>Workflow</code> to execute
 	 * @param profile
-	 *            the <code>Profile</code> to use when executing the <code>Workflow</code>
+	 *            the <code>Profile</code> to use when executing the
+	 *            <code>Workflow</code>
 	 * @param dataBundle
-	 *            the <code>Bundle</code> containing the data values for the <code>Workflow</code>
+	 *            the <code>Bundle</code> containing the data values for the
+	 *            <code>Workflow</code>
 	 * @param referenceService
-	 *            the <code>ReferenceService</code> used to register inputs, outputs and
-	 *            intermediate values
+	 *            the <code>ReferenceService</code> used to register inputs,
+	 *            outputs and intermediate values
 	 * @throws InvalidWorkflowException
 	 *             if the specified workflow is invalid
 	 */
-	public LocalExecution(WorkflowBundle workflowBundle, Workflow workflow, Profile profile,
-			Bundle dataBundle, ReferenceService referenceService, Edits edits,
-			ActivityService activityService, DispatchLayerService dispatchLayerService)
+	public LocalExecution(WorkflowBundle workflowBundle, Workflow workflow,
+			Profile profile, Bundle dataBundle,
+			ReferenceService referenceService, Edits edits,
+			ActivityService activityService,
+			DispatchLayerService dispatchLayerService)
 			throws InvalidWorkflowException {
 		super(workflowBundle, workflow, profile, dataBundle);
 		this.referenceService = referenceService;
 		try {
-			mapping = new WorkflowToDataflowMapper(workflowBundle, profile, edits, activityService,
-					dispatchLayerService);
+			mapping = new WorkflowToDataflowMapper(workflowBundle, profile,
+					edits, activityService, dispatchLayerService);
 			Dataflow dataflow = mapping.getDataflow(workflow);
-			for (DataflowInputPort dataflowInputPort : dataflow.getInputPorts()) {
+			for (DataflowInputPort dataflowInputPort : dataflow.getInputPorts())
 				inputPorts.put(dataflowInputPort.getName(), dataflowInputPort);
-			}
-			facade = edits.createWorkflowInstanceFacade(dataflow, createContext(), "");
-			executionMonitor = new LocalExecutionMonitor(getWorkflowReport(), getDataBundle(), mapping,
-					facade.getIdentifier());
+			facade = edits.createWorkflowInstanceFacade(dataflow,
+					createContext(), "");
+			executionMonitor = new LocalExecutionMonitor(getWorkflowReport(),
+					getDataBundle(), mapping, facade.getIdentifier());
 		} catch (InvalidDataflowException e) {
 			throw new InvalidWorkflowException(e);
 		}
@@ -126,32 +134,37 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 	@Override
 	public void start() {
 		MonitorManager.getInstance().addObserver(executionMonitor);
-		// have to add a result listener otherwise facade doesn't record when workflow is finished
+		/*
+		 * have to add a result listener otherwise facade doesn't record when
+		 * workflow is finished
+		 */
 		facade.addResultListener(this);
 		facade.fire();
-		if (DataBundles.hasInputs(getDataBundle())) {
-			try {
+		try {
+			if (DataBundles.hasInputs(getDataBundle())) {
 				Path inputs = DataBundles.getInputs(getDataBundle());
-				for (Entry<String, DataflowInputPort> entry : inputPorts.entrySet()) {
-					String portName = entry.getKey();
-					DataflowInputPort port = entry.getValue();
+				for (Entry<String, DataflowInputPort> inputPort : inputPorts
+						.entrySet()) {
+					String portName = inputPort.getKey();
 					Path path = DataBundles.getPort(inputs, portName);
 					if (!DataBundles.isMissing(path)) {
-						Object object = T2ReferenceConverter.convertPathToObject(path);
-						T2Reference identifier = referenceService.register(object, port.getDepth(), true, null);
+						T2Reference identifier = referenceService.register(
+								convertPathToObject(path), inputPort.getValue()
+										.getDepth(), true, null);
 						int[] index = new int[] {};
-						WorkflowDataToken token = new WorkflowDataToken("", index, identifier,
-								facade.getContext());
+						WorkflowDataToken token = new WorkflowDataToken("",
+								index, identifier, facade.getContext());
 						try {
 							facade.pushData(token, portName);
 						} catch (TokenOrderException e) {
-							logger.log(Level.SEVERE, "Unable to push data for input " + portName, e);
+							logger.log(SEVERE, "Unable to push data for input "
+									+ portName, e);
 						}
 					}
 				}
-			} catch (IOException e) {
-				logger.log(Level.SEVERE, "Error getting input data", e);
 			}
+		} catch (IOException e) {
+			logger.log(SEVERE, "Error getting input data", e);
 		}
 	}
 
@@ -178,29 +191,29 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 	}
 
 	@Override
-	public ProcessorReport createProcessorReport(uk.org.taverna.scufl2.api.core.Processor processor) {
+	public ProcessorReport createProcessorReport(
+			uk.org.taverna.scufl2.api.core.Processor processor) {
 		return new LocalProcessorReport(processor);
 	}
 
 	@Override
-	public ActivityReport createActivityReport(uk.org.taverna.scufl2.api.activity.Activity activity) {
+	public ActivityReport createActivityReport(
+			uk.org.taverna.scufl2.api.activity.Activity activity) {
 		return new ActivityReport(activity);
 	}
 
-
 	private InvocationContext createContext() {
 		InvocationContext context = new InvocationContext() {
-			private List<Object> entities = Collections.synchronizedList(new ArrayList<Object>());
+			private List<Object> entities = Collections
+					.synchronizedList(new ArrayList<Object>());
 
 			@Override
 			public <T> List<T> getEntities(Class<T> entityType) {
-				List<T> entitiesOfType = new ArrayList<T>();
+				List<T> entitiesOfType = new ArrayList<>();
 				synchronized (entities) {
-					for (Object entity : entities) {
-						if (entityType.isInstance(entity)) {
+					for (Object entity : entities)
+						if (entityType.isInstance(entity))
 							entitiesOfType.add(entityType.cast(entity));
-						}
-					}
 				}
 				return entitiesOfType;
 			}
