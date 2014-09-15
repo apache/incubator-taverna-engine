@@ -21,19 +21,16 @@
 package uk.org.taverna.platform.execution.impl.local;
 
 import java.net.URI;
-import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-import net.sf.taverna.t2.provenance.ProvenanceConnectorFactory;
 import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
 import net.sf.taverna.t2.workflowmodel.Edits;
 
 import org.purl.wf4ever.robundle.Bundle;
 
-import uk.org.taverna.configuration.database.DatabaseConfiguration;
 import uk.org.taverna.platform.capability.api.ActivityService;
 import uk.org.taverna.platform.capability.api.DispatchLayerService;
 import uk.org.taverna.platform.execution.api.AbstractExecutionService;
@@ -60,10 +57,6 @@ public class LocalExecutionService extends AbstractExecutionService implements W
 
 	private ReferenceService referenceService;
 
-	private DatabaseConfiguration databaseConfiguration;
-
-	private Set<ProvenanceConnectorFactory> provenanceConnectorFactories;
-
 	/**
 	 * Constructs an execution service that executes workflows using the T2 dataflow engine.
 	 */
@@ -84,8 +77,7 @@ public class LocalExecutionService extends AbstractExecutionService implements W
 	protected Execution createExecutionImpl(WorkflowBundle workflowBundle, Workflow workflow,
 			Profile profile, Bundle dataBundle) throws InvalidWorkflowException {
 		return new LocalExecution(workflowBundle, workflow, profile, dataBundle,
-				referenceService, edits, activityService, dispatchLayerService, databaseConfiguration,
-				provenanceConnectorFactories);
+				referenceService, edits, activityService, dispatchLayerService);
 	}
 
 	/**
@@ -126,26 +118,6 @@ public class LocalExecutionService extends AbstractExecutionService implements W
 	 */
 	public void setReferenceService(ReferenceService referenceService) {
 		this.referenceService = referenceService;
-	}
-
-	/**
-	 * Sets the ProvenanceConnector factories.
-	 *
-	 * @param factories
-	 *            the ProvenanceConnector factories
-	 */
-	public void setProvenanceConnectorFactories(
-			Set<ProvenanceConnectorFactory> provenanceConnectorFactories) {
-		this.provenanceConnectorFactories = provenanceConnectorFactories;
-	}
-
-	/**
-	 * Sets the databaseConfiguration.
-	 *
-	 * @param databaseConfiguration the new value of databaseConfiguration
-	 */
-	public void setDatabaseConfiguration(DatabaseConfiguration databaseConfiguration) {
-		this.databaseConfiguration = databaseConfiguration;
 	}
 
 	private WeakHashMap<URI, WorkflowToDataflowMapper> cache = new WeakHashMap<>();

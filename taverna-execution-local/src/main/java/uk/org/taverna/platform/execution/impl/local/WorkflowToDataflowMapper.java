@@ -48,8 +48,6 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchStack;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationStrategy;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.NamedInputPortNode;
 
-import org.hibernate.PropertyNotFoundException;
-
 import uk.org.taverna.platform.capability.api.ActivityConfigurationException;
 import uk.org.taverna.platform.capability.api.ActivityNotFoundException;
 import uk.org.taverna.platform.capability.api.ActivityService;
@@ -156,17 +154,10 @@ public class WorkflowToDataflowMapper {
 				Dataflow dataflow = createDataflow(workflow);
 				workflowToDataflow.put(workflow, dataflow);
 				dataflowToWorkflow.put(dataflow, workflow);
-			} catch (EditException e) {
-				throw new InvalidWorkflowException(e);
-			} catch (ActivityNotFoundException e) {
-				throw new InvalidWorkflowException(e);
-			} catch (ActivityConfigurationException e) {
-				throw new InvalidWorkflowException(e);
-			} catch (PropertyNotFoundException e) {
-				throw new InvalidWorkflowException(e);
-			} catch (DispatchLayerNotFoundException e) {
-				throw new InvalidWorkflowException(e);
-			} catch (DispatchLayerConfigurationException e) {
+			} catch (EditException | ActivityConfigurationException
+					| DispatchLayerConfigurationException
+					| ActivityNotFoundException
+					| DispatchLayerNotFoundException e) {
 				throw new InvalidWorkflowException(e);
 			}
 		}
@@ -194,7 +185,7 @@ public class WorkflowToDataflowMapper {
 	}
 
 	protected Dataflow createDataflow(Workflow workflow) throws EditException,
-			ActivityNotFoundException, ActivityConfigurationException, PropertyNotFoundException,
+			ActivityNotFoundException, ActivityConfigurationException,
 			InvalidWorkflowException, DispatchLayerNotFoundException,
 			DispatchLayerConfigurationException {
 		// create the dataflow
@@ -216,7 +207,7 @@ public class WorkflowToDataflowMapper {
 	}
 
 	private void addProcessors(Workflow workflow, Dataflow dataflow) throws EditException,
-			PropertyNotFoundException, ActivityNotFoundException, ActivityConfigurationException,
+			ActivityNotFoundException, ActivityConfigurationException,
 			InvalidWorkflowException, DispatchLayerNotFoundException,
 			DispatchLayerConfigurationException {
 		for (Processor processor : workflow.getProcessors()) {

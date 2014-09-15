@@ -24,12 +24,10 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -39,8 +37,6 @@ import net.sf.taverna.t2.invocation.InvocationContext;
 import net.sf.taverna.t2.invocation.TokenOrderException;
 import net.sf.taverna.t2.invocation.WorkflowDataToken;
 import net.sf.taverna.t2.monitor.MonitorManager;
-import net.sf.taverna.t2.provenance.ProvenanceConnectorFactory;
-import net.sf.taverna.t2.provenance.connector.ProvenanceConnector;
 import net.sf.taverna.t2.provenance.reporter.ProvenanceReporter;
 import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.T2Reference;
@@ -48,18 +44,9 @@ import net.sf.taverna.t2.workflowmodel.Dataflow;
 import net.sf.taverna.t2.workflowmodel.DataflowInputPort;
 import net.sf.taverna.t2.workflowmodel.Edits;
 import net.sf.taverna.t2.workflowmodel.InvalidDataflowException;
-import net.sf.taverna.t2.workflowmodel.Processor;
-import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
-import net.sf.taverna.t2.workflowmodel.processor.iteration.CrossProduct;
-import net.sf.taverna.t2.workflowmodel.processor.iteration.DotProduct;
-import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationStrategy;
-import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationStrategyNode;
-import net.sf.taverna.t2.workflowmodel.processor.iteration.NamedInputPortNode;
-import net.sf.taverna.t2.workflowmodel.processor.iteration.TerminalNode;
 
 import org.purl.wf4ever.robundle.Bundle;
 
-import uk.org.taverna.configuration.database.DatabaseConfiguration;
 import uk.org.taverna.databundle.DataBundles;
 import uk.org.taverna.platform.capability.api.ActivityService;
 import uk.org.taverna.platform.capability.api.DispatchLayerService;
@@ -90,13 +77,7 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 
 	private final ReferenceService referenceService;
 
-	private final DatabaseConfiguration databaseConfiguration;
-
-	private final Set<ProvenanceConnectorFactory> provenanceConnectorFactories;
-
 	private final Map<String, DataflowInputPort> inputPorts = new HashMap<String, DataflowInputPort>();
-
-	private ProvenanceConnector provenanceConnector;
 
 	/**
 	 * Constructs an Execution for executing Taverna workflows on a local Taverna Dataflow Engine.
@@ -118,14 +99,10 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 	 */
 	public LocalExecution(WorkflowBundle workflowBundle, Workflow workflow, Profile profile,
 			Bundle dataBundle, ReferenceService referenceService, Edits edits,
-			ActivityService activityService, DispatchLayerService dispatchLayerService,
-			DatabaseConfiguration databaseConfiguration,
-			Set<ProvenanceConnectorFactory> provenanceConnectorFactories)
+			ActivityService activityService, DispatchLayerService dispatchLayerService)
 			throws InvalidWorkflowException {
 		super(workflowBundle, workflow, profile, dataBundle);
 		this.referenceService = referenceService;
-		this.databaseConfiguration = databaseConfiguration;
-		this.provenanceConnectorFactories = provenanceConnectorFactories;
 		try {
 			mapping = new WorkflowToDataflowMapper(workflowBundle, profile, edits, activityService,
 					dispatchLayerService);
@@ -212,25 +189,6 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 
 
 	private InvocationContext createContext() {
-		if (databaseConfiguration.isProvenanceEnabled()) {
-			String connectorType = databaseConfiguration.getConnectorType();
-
-			for (ProvenanceConnectorFactory factory : provenanceConnectorFactories) {
-				if (connectorType.equalsIgnoreCase(factory.getConnectorType())) {
-					provenanceConnector = factory.getProvenanceConnector();
-				}
-				break;
-			}
-
-			try {
-				if (provenanceConnector != null) {
-					provenanceConnector.init();
-					provenanceConnector.setReferenceService(referenceService);
-				}
-			} catch (Exception exception) {
-				logger.log(Level.SEVERE, "Error initializing provenance connector", exception);
-			}
-		}
 		InvocationContext context = new InvocationContext() {
 			private List<Object> entities = Collections.synchronizedList(new ArrayList<Object>());
 
@@ -259,77 +217,14 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 
 			@Override
 			public ProvenanceReporter getProvenanceReporter() {
-				return provenanceConnector;
+				return null;
 			}
 
 		};
-		if (provenanceConnector != null) {
-			provenanceConnector.setInvocationContext(context);
-		}
 		return context;
 	}
 
 	@Override
 	public void resultTokenProduced(WorkflowDataToken token, String portName) {
 	}
-
-	private Path getPath(Path path, int depth, int[] index) throws IOException {
-		if (depth == index.length) {
-			return path;
-		}
-		if (!DataBundles.isList(path)) {
-			DataBundles.createList(path);
-		}
-		return getPath(DataBundles.getListItem(path, index[depth]), depth+1, index);
-	}
-
-	private void printDataflow(Dataflow dataflow) {
-		System.out.println(dataflow.getInputPorts());
-		System.out.println(dataflow.getOutputPorts());
-		for (Processor processor : dataflow.getProcessors()) {
-			System.out.println("  " + processor);
-			System.out.println("    " + processor.getInputPorts());
-			System.out.println("    " + processor.getOutputPorts());
-			for (IterationStrategy iterationStrategy : processor.getIterationStrategy()
-					.getStrategies()) {
-				printNode("    ", iterationStrategy.getTerminalNode());
-			}
-			for (Activity<?> activity : processor.getActivityList()) {
-				System.out.println("    " + activity);
-				System.out.println("    " + activity.getInputPorts());
-				System.out.println("    " + activity.getInputPortMapping());
-				System.out.println("    " + activity.getOutputPorts());
-				System.out.println("    " + activity.getOutputPortMapping());
-			}
-			System.out.println("    " + processor.getActivityList().get(0));
-		}
-		System.out.println(dataflow.getLinks());
-	}
-
-	private void printNode(String indent, IterationStrategyNode node) {
-		if (node instanceof TerminalNode) {
-			System.out.println(indent + "Terminal");
-			Enumeration<IterationStrategyNode> children = node.children();
-			while (children.hasMoreElements()) {
-				printNode(indent + "  ", children.nextElement());
-			}
-		} else if (node instanceof CrossProduct) {
-			System.out.println(indent + "Cross Product");
-			Enumeration<IterationStrategyNode> children = node.children();
-			while (children.hasMoreElements()) {
-				printNode(indent + "  ", children.nextElement());
-			}
-		} else if (node instanceof DotProduct) {
-			System.out.println(indent + "Dot Product");
-			Enumeration<IterationStrategyNode> children = node.children();
-			while (children.hasMoreElements()) {
-				printNode(indent + "  ", children.nextElement());
-			}
-		} else if (node instanceof NamedInputPortNode) {
-			NamedInputPortNode inputPortNode = (NamedInputPortNode) node;
-			System.out.println(indent + inputPortNode.getPortName() + "("
-					+ inputPortNode.getCardinality() + ")");
-		}
-	}
-
 }

@@ -55,11 +55,13 @@
 			<artifactId>reference-core-extensions</artifactId>
 			<version>${t2.core.version}</version>
 		</dependency>
+		<!-- 
 		<dependency>
 			<groupId>net.sf.taverna.t2.core</groupId>
 			<artifactId>provenanceconnector</artifactId>
 			<version>${t2.core.version}</version>
 		</dependency>
+		 -->
 		<dependency>
 			<groupId>net.sf.taverna.t2</groupId>
 			<artifactId>results</artifactId>

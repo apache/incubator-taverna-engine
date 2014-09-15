@@ -17,15 +17,7 @@
 	</service>
 
 	<reference id="workflowModelEdits" interface="net.sf.taverna.t2.workflowmodel.Edits" />
-
 	<reference id="activityService" interface="uk.org.taverna.platform.capability.api.ActivityService" />
-
 	<reference id="dispatchLayerService" interface="uk.org.taverna.platform.capability.api.DispatchLayerService" />
-
 	<reference id="referenceService" interface="net.sf.taverna.t2.reference.ReferenceService" />
-
-	<reference id="databaseConfiguration" interface="uk.org.taverna.configuration.database.DatabaseConfiguration" />
-
-	<set id="provenanceConnectorFactories" interface="net.sf.taverna.t2.provenance.ProvenanceConnectorFactory" cardinality="0..N"/>
-
 </beans:beans>
