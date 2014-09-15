@@ -37,13 +37,9 @@ import uk.org.taverna.scufl2.api.profiles.Profile;
  * @author David Withers
  */
 public abstract class AbstractExecutionService implements ExecutionService {
-
 	private final String ID;
-
 	private final String name;
-
 	private final String description;
-
 	private final Map<String, Execution> executionMap;
 
 	public AbstractExecutionService(String ID, String name, String description) {
@@ -69,9 +65,9 @@ public abstract class AbstractExecutionService implements ExecutionService {
 	}
 
 	@Override
-	public String createExecution(ExecutionEnvironment executionEnvironment, WorkflowBundle workflowBundle, Workflow workflow,
-			Profile profile, Bundle dataBundle)
-			throws InvalidWorkflowException {
+	public String createExecution(ExecutionEnvironment executionEnvironment,
+			WorkflowBundle workflowBundle, Workflow workflow, Profile profile,
+			Bundle dataBundle) throws InvalidWorkflowException {
 		Execution execution = createExecutionImpl(workflowBundle, workflow, profile, dataBundle);
 		executionMap.put(execution.getID(), execution);
 		return execution.getID();
@@ -95,11 +91,13 @@ public abstract class AbstractExecutionService implements ExecutionService {
 	 * @throws InvalidWorkflowException
 	 *             if the specified workflow is invalid
 	 */
-	protected abstract Execution createExecutionImpl(WorkflowBundle workflowBundle,
-			Workflow workflow, Profile profile, Bundle dataBundle) throws InvalidWorkflowException;
+	protected abstract Execution createExecutionImpl(
+			WorkflowBundle workflowBundle, Workflow workflow, Profile profile,
+			Bundle dataBundle) throws InvalidWorkflowException;
 
 	@Override
-	public WorkflowReport getWorkflowReport(String executionID) throws InvalidExecutionIdException {
+	public WorkflowReport getWorkflowReport(String executionID)
+			throws InvalidExecutionIdException {
 		return getExecution(executionID).getWorkflowReport();
 	}
 
@@ -129,11 +127,12 @@ public abstract class AbstractExecutionService implements ExecutionService {
 		getExecution(executionID).cancel();
 	}
 
-	protected Execution getExecution(String executionID) throws InvalidExecutionIdException {
+	protected Execution getExecution(String executionID)
+			throws InvalidExecutionIdException {
 		Execution execution = executionMap.get(executionID);
-		if (execution == null) {
-			throw new InvalidExecutionIdException("Execution ID " + executionID + " is not valid");
-		}
+		if (execution == null)
+			throw new InvalidExecutionIdException("Execution ID " + executionID
+					+ " is not valid");
 		return execution;
 	}
 

@@ -59,21 +59,18 @@ public class ExecutionEnvironmentServiceImpl implements ExecutionEnvironmentServ
 
 	@Override
 	public Set<ExecutionEnvironment> getExecutionEnvironments() {
-		Set<ExecutionEnvironment> executionEnvironments = new HashSet<ExecutionEnvironment>();
-		for (ExecutionService executionService : executionServices) {
+		Set<ExecutionEnvironment> executionEnvironments = new HashSet<>();
+		for (ExecutionService executionService : executionServices)
 			executionEnvironments.addAll(executionService.getExecutionEnvivonments());
-		}
 		return executionEnvironments;
 	}
 
 	@Override
 	public Set<ExecutionEnvironment> getExecutionEnvironments(Profile profile) {
-		Set<ExecutionEnvironment> validExecutionEnvironments = new HashSet<ExecutionEnvironment>();
-		for (ExecutionEnvironment executionEnvironment : getExecutionEnvironments()) {
-			if (isValidExecutionEnvironment(executionEnvironment, profile)) {
+		Set<ExecutionEnvironment> validExecutionEnvironments = new HashSet<>();
+		for (ExecutionEnvironment executionEnvironment : getExecutionEnvironments())
+			if (isValidExecutionEnvironment(executionEnvironment, profile))
 				validExecutionEnvironments.add(executionEnvironment);
-			}
-		}
 		return validExecutionEnvironments;
 	}
 

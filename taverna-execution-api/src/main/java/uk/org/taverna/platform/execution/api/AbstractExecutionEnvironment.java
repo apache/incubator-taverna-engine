@@ -28,7 +28,6 @@ import java.net.URI;
  * @author David Withers
  */
 public abstract class AbstractExecutionEnvironment implements ExecutionEnvironment {
-
 	private final String ID;
 	private final String name;
 	private final String description;
@@ -69,13 +68,11 @@ public abstract class AbstractExecutionEnvironment implements ExecutionEnvironme
 		sb.append(name + "\n");
 		sb.append(description + "\n");
 		sb.append("Activities : \n");
-		for (URI uri : getActivityTypes()) {
+		for (URI uri : getActivityTypes())
 			sb.append("  " + uri + "\n");
-		}
 		sb.append("Dispatch Layers : \n");
-		for (URI uri : getDispatchLayerTypes()) {
+		for (URI uri : getDispatchLayerTypes())
 			sb.append("  " + uri + "\n");
-		}
 		return sb.toString();
 	}
 
