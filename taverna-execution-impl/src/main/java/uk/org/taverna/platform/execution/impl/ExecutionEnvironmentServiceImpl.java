@@ -23,7 +23,6 @@ package uk.org.taverna.platform.execution.impl;
 import java.net.URI;
 import java.text.MessageFormat;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -105,6 +104,7 @@ public class ExecutionEnvironmentServiceImpl implements ExecutionEnvironmentServ
 						executionEnvironment.getName(), activity.getType()));
 				return false;
 			}
+			@SuppressWarnings("unused")
 			Processor processor = processorBinding.getBoundProcessor();
 			// TODO check that environment has required dispatch layers for processor configuration
 //			for (DispatchStackLayer dispatchStackLayer : processor.getDispatchStack()) {
@@ -138,6 +138,7 @@ public class ExecutionEnvironmentServiceImpl implements ExecutionEnvironmentServ
 		try {
 			configuration.getJson();
 			configuration.getJsonSchema();
+			@SuppressWarnings("unused")
 			JsonNode environmentSchema = executionEnvironment.getActivityConfigurationSchema(activity.getType());
 			// TODO validate against schema
 		} catch (ActivityNotFoundException e) {
@@ -152,6 +153,7 @@ public class ExecutionEnvironmentServiceImpl implements ExecutionEnvironmentServ
 		return true;
 	}
 
+	@SuppressWarnings("unused")
 	private boolean isValidDispatchLayerConfiguration(ExecutionEnvironment executionEnvironment,
 			Configuration configuration, URI dispatchLayerType) {
 		try {
