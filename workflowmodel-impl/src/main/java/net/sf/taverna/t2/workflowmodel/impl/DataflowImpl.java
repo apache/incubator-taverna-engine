@@ -50,6 +50,8 @@ import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationTypeMismatch
 import static net.sf.taverna.t2.workflowmodel.impl.Tools.makeImmutable;
 import static net.sf.taverna.t2.workflowmodel.utils.Tools.addDataflowIdentification;
 
+import org.apache.log4j.Logger;
+
 /**
  * Implementation of Dataflow including implementation of the dataflow level
  * type checker. Other than this the implementation is fairly simple as it's
@@ -69,6 +71,8 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 	private List<DataflowOutputPortImpl> outputs;
 	protected String internalIdentifier;
 	private DataflowValidationReport validationReport;
+
+    private static final Logger logger = Logger.getLogger(DataflowImpl.class);
 
 	/**
 	 * Protected constructor, assigns a default name. To build an instance of
@@ -662,9 +666,7 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 
 	/**
 	 * The active process identifiers correspond to current strands of data
-	 * running through this dataflow. The keys are process identifiers, the
-	 * values are sets of output port names for which final events have been
-	 * received.
+	 * running through this dataflow.
 	 */
 	private Map<String, Set<String>> activeProcessIdentifiers = new HashMap<>();
 	private volatile boolean immutable;

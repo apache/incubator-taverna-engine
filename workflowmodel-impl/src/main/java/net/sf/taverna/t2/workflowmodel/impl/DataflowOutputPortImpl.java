@@ -80,13 +80,8 @@ public class DataflowOutputPortImpl extends BasicEventForwardingOutputPort
 	}
 
 	public class InternalInputPort extends AbstractEventHandlingInputPort {
-		private final Dataflow dataflow;
-		private final String portName;
-
 		private InternalInputPort(String name, Dataflow dataflow, String portName) {
 			super(name, -1);
-			this.dataflow = dataflow;
-			this.portName = portName;
 		}
 
 		/**
@@ -95,18 +90,6 @@ public class DataflowOutputPortImpl extends BasicEventForwardingOutputPort
 		 */
 		@Override
 		public void receiveEvent(WorkflowDataToken token) {
-			/*
-			 * Pull the dataflow process identifier from the owning process and
-			 * push the modified token out. I'd rather avoid casting to the
-			 * implementation but in this case we're in the same package - the
-			 * only reason to do this is to allow dummy implementations of parts
-			 * of this infrastructure during testing, in 'real' use this should
-			 * always be a dataflowimpl
-			 */
-			if (token.getIndex().length == 0
-					&& dataflow instanceof DataflowImpl)
-				((DataflowImpl) dataflow).sentFinalToken(portName, token
-						.getOwningProcess());
 			WorkflowDataToken newToken = token.popOwningProcess();
 			sendEvent(newToken);
 			
@@ -130,5 +113,4 @@ public class DataflowOutputPortImpl extends BasicEventForwardingOutputPort
 			return DataflowOutputPortImpl.this.getDepth();
 		}
 	}
-	
 }
