@@ -32,14 +32,13 @@ import net.sf.taverna.t2.workflowmodel.ProcessorOutputPort;
  * 
  * @author Tom Oinn
  * @author Stuart Owen
- * 
  */
-public class ProcessorOutputPortImpl extends BasicEventForwardingOutputPort implements ProcessorOutputPort{
+public class ProcessorOutputPortImpl extends BasicEventForwardingOutputPort
+		implements ProcessorOutputPort {
+	private ProcessorImpl parent;
 
-	private ProcessorImpl parent = null;
-	
-	protected ProcessorOutputPortImpl(ProcessorImpl parent,String portName, int portDepth,
-			int granularDepth) {
+	protected ProcessorOutputPortImpl(ProcessorImpl parent, String portName,
+			int portDepth, int granularDepth) {
 		super(portName, portDepth, granularDepth);
 		this.parent = parent;
 	}
@@ -48,14 +47,13 @@ public class ProcessorOutputPortImpl extends BasicEventForwardingOutputPort impl
 	 * Strip off the last id in the owning process stack (as this will have been
 	 * pushed onto the stack on entry to the processor) and relay the event to
 	 * the targets.
-	 * 
 	 */
 	protected void receiveEvent(WorkflowDataToken token) {
 		sendEvent(token.popOwningProcess());
 	}
-	
+
+	@Override
 	public Processor getProcessor() {
 		return this.parent;
 	}
-	
 }

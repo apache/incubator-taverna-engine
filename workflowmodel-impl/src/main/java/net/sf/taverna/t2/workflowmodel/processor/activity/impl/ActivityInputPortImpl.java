@@ -20,7 +20,8 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.processor.activity.impl;
 
-import java.util.Collections;
+import static java.util.Collections.unmodifiableList;
+
 import java.util.List;
 
 import net.sf.taverna.t2.reference.ExternalReferenceSPI;
@@ -33,11 +34,9 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityInputPort;
  * 
  * @author Tom Oinn
  * @author Stuart Owen
- * 
  */
 public class ActivityInputPortImpl extends AbstractPort implements
 		ActivityInputPort {
-
 	private Class<?> translatedElementClass;
 	private List<Class<? extends ExternalReferenceSPI>> handledReferenceSchemes;
 	boolean allowsLiteralValues;
@@ -60,7 +59,9 @@ public class ActivityInputPortImpl extends AbstractPort implements
 	 * @param portName
 	 * @param portDepth
 	 */
-	public ActivityInputPortImpl(String portName, int portDepth,
+	public ActivityInputPortImpl(
+			String portName,
+			int portDepth,
 			boolean allowsLiteralValues,
 			List<Class<? extends ExternalReferenceSPI>> handledReferenceSchemes,
 			Class<?> translatedElementClass) {
@@ -70,16 +71,18 @@ public class ActivityInputPortImpl extends AbstractPort implements
 		this.translatedElementClass = translatedElementClass;
 	}
 
+	@Override
 	public boolean allowsLiteralValues() {
 		return this.allowsLiteralValues;
 	}
 
+	@Override
 	public List<Class<? extends ExternalReferenceSPI>> getHandledReferenceSchemes() {
-		return Collections.unmodifiableList(this.handledReferenceSchemes);
+		return unmodifiableList(this.handledReferenceSchemes);
 	}
 
+	@Override
 	public Class<?> getTranslatedElementClass() {
 		return this.translatedElementClass;
 	}
-
 }

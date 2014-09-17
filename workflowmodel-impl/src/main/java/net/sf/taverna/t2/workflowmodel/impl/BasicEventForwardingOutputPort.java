@@ -37,7 +37,6 @@ import net.sf.taverna.t2.workflowmodel.EventForwardingOutputPort;
  */
 public class BasicEventForwardingOutputPort extends AbstractOutputPort
 		implements EventForwardingOutputPort {
-
 	protected Set<DatalinkImpl> outgoingLinks;
 
 	/**
@@ -50,12 +49,13 @@ public class BasicEventForwardingOutputPort extends AbstractOutputPort
 	public BasicEventForwardingOutputPort(String portName, int portDepth,
 			int granularDepth) {
 		super(portName, portDepth, granularDepth);
-		this.outgoingLinks = new HashSet<DatalinkImpl>();
+		this.outgoingLinks = new HashSet<>();
 	}
 
 	/**
 	 * Implements EventForwardingOutputPort
 	 */
+	@Override
 	public final Set<? extends Datalink> getOutgoingLinks() {
 		return Collections.unmodifiableSet(this.outgoingLinks);
 	}
@@ -66,15 +66,13 @@ public class BasicEventForwardingOutputPort extends AbstractOutputPort
 	 * @param e
 	 */
 	public void sendEvent(WorkflowDataToken e) {
-		for (Datalink link : outgoingLinks) {
+		for (Datalink link : outgoingLinks)
 			link.getSink().receiveEvent(e);
-		}
 	}
 
 	protected void addOutgoingLink(DatalinkImpl link) {
-		if (outgoingLinks.contains(link) == false) {
+		if (outgoingLinks.contains(link) == false)
 			outgoingLinks.add(link);
-		}
 	}
 
 	protected void removeOutgoingLink(Datalink link) {
@@ -92,5 +90,4 @@ public class BasicEventForwardingOutputPort extends AbstractOutputPort
 	protected void setName(String name) {
 		this.name = name;
 	}
-
 }

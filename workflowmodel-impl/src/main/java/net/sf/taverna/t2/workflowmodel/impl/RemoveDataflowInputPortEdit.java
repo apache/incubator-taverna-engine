@@ -28,10 +28,8 @@ import net.sf.taverna.t2.workflowmodel.EditException;
  * Removes a dataflow input port from a dataflow.
  * 
  * @author David Withers
- * 
  */
-public class RemoveDataflowInputPortEdit extends AbstractDataflowEdit {
-
+class RemoveDataflowInputPortEdit extends AbstractDataflowEdit {
 	private DataflowInputPort dataflowInputPort;
 
 	public RemoveDataflowInputPortEdit(Dataflow dataflow,

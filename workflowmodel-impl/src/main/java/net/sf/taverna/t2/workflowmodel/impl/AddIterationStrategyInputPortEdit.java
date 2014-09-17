@@ -20,7 +20,6 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.impl;
 
-import net.sf.taverna.t2.workflowmodel.Edit;
 import net.sf.taverna.t2.workflowmodel.EditException;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationStrategy;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.NamedInputPortNode;
@@ -31,50 +30,27 @@ import net.sf.taverna.t2.workflowmodel.processor.iteration.impl.IterationStrateg
  * 
  * @author David Withers
  */
-public class AddIterationStrategyInputPortEdit implements Edit<IterationStrategy> {
-
-	private final IterationStrategy iterationStrategy;
+class AddIterationStrategyInputPortEdit extends EditSupport<IterationStrategy> {
+	private final IterationStrategyImpl iterationStrategy;
 	private final NamedInputPortNode namedInputPortNode;
-	private boolean applied;
 
 	public AddIterationStrategyInputPortEdit(IterationStrategy iterationStrategy,
 			NamedInputPortNode namedInputPortNode) {
-		this.iterationStrategy = iterationStrategy;
+		if (!(iterationStrategy instanceof IterationStrategyImpl))
+			throw new RuntimeException(
+					"Object being edited must be instance of IterationStrategyImpl");
+		this.iterationStrategy = (IterationStrategyImpl) iterationStrategy;
 		this.namedInputPortNode = namedInputPortNode;
 	}
 
 	@Override
-	public IterationStrategy doEdit() throws EditException {
-		if (applied) {
-			throw new EditException("Edit has already been applied");
-		}
-		if (!(iterationStrategy instanceof IterationStrategyImpl)) {
-			throw new EditException(
-					"Object being edited must be instance of IterationStrategyImpl");
-		}
-		((IterationStrategyImpl) iterationStrategy).addInput(namedInputPortNode);
-		applied = true;
+	public IterationStrategy applyEdit() throws EditException {
+		iterationStrategy.addInput(namedInputPortNode);
 		return iterationStrategy;
-	}
-
-	@Override
-	public void undo() {
-		if (!applied) {
-			throw new RuntimeException(
-					"Attempt to undo edit that was never applied");
-		}
-		((IterationStrategyImpl) iterationStrategy).removeInput(namedInputPortNode);
-		applied = false;
 	}
 
 	@Override
 	public IterationStrategy getSubject() {
 		return iterationStrategy;
 	}
-
-	@Override
-	public boolean isApplied() {
-		return applied;
-	}
-
 }

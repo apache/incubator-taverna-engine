@@ -40,6 +40,7 @@ public abstract class AbstractEventHandlingInputPort extends AbstractPort
 		super(name, depth);
 	}
 
+	@Override
 	public Datalink getIncomingLink() {
 		return this.incomingLink;
 	}

@@ -21,49 +21,36 @@
 package net.sf.taverna.t2.workflowmodel.impl;
 
 import net.sf.taverna.t2.workflowmodel.DataflowOutputPort;
-import net.sf.taverna.t2.workflowmodel.Edit;
 import net.sf.taverna.t2.workflowmodel.EditException;
 
 /**
- * Abstraction of an edit acting on a DataflowOutputPort instance. Handles the check to
- * see that the DataflowOutputPort supplied is really a DataflowOutputPortImpl.
+ * Abstraction of an edit acting on a DataflowOutputPort instance. Handles the
+ * check to see that the DataflowOutputPort supplied is really a
+ * DataflowOutputPortImpl.
  * 
  * @author David Withers
- *
+ * 
  */
-public abstract class AbstractDataflowOutputPortEdit implements Edit<DataflowOutputPort> {
+public abstract class AbstractDataflowOutputPortEdit extends
+		EditSupport<DataflowOutputPort> {
+	private DataflowOutputPortImpl dataflowOutputPort;
 
-	private boolean applied = false;
-
-	private DataflowOutputPort dataflowOutputPort;
-
-	protected AbstractDataflowOutputPortEdit(DataflowOutputPort dataflowOutputPort) {
-		if (dataflowOutputPort == null) {
+	protected AbstractDataflowOutputPortEdit(
+			DataflowOutputPort dataflowOutputPort) {
+		if (dataflowOutputPort == null)
 			throw new RuntimeException(
 					"Cannot construct a DataflowOutputPort edit with null DataflowOutputPort");
-		}
-		this.dataflowOutputPort = dataflowOutputPort;
+		if (dataflowOutputPort instanceof DataflowOutputPortImpl == false)
+			throw new RuntimeException(
+					"Edit cannot be applied to a DataflowOutputPort which isn't an instance of DataflowOutputPortImpl");
+		this.dataflowOutputPort = (DataflowOutputPortImpl) dataflowOutputPort;
 	}
 
 	@Override
-	public final DataflowOutputPort doEdit() throws EditException {
-		if (applied) {
-			throw new EditException("Edit has already been applied!");
-		}
-		if (dataflowOutputPort instanceof DataflowOutputPortImpl == false) {
-			throw new EditException(
-					"Edit cannot be applied to a DataflowOutputPort which isn't an instance of DataflowOutputPortImpl");
-		}
-		DataflowOutputPortImpl dataflowOutputPortImpl = (DataflowOutputPortImpl) dataflowOutputPort;
-		try {
-			synchronized (dataflowOutputPortImpl) {
-				doEditAction(dataflowOutputPortImpl);
-				applied = true;
-				return this.dataflowOutputPort;
-			}
-		} catch (EditException ee) {
-			applied = false;
-			throw ee;
+	public final DataflowOutputPort applyEdit() throws EditException {
+		synchronized (dataflowOutputPort) {
+			doEditAction(dataflowOutputPort);
+			return this.dataflowOutputPort;
 		}
 	}
 
@@ -74,26 +61,11 @@ public abstract class AbstractDataflowOutputPortEdit implements Edit<DataflowOut
 	 *            The DataflowOutputPortImpl to which the edit applies
 	 * @throws EditException
 	 */
-	protected abstract void doEditAction(DataflowOutputPortImpl dataflowOutputPort)
-			throws EditException;
+	protected abstract void doEditAction(
+			DataflowOutputPortImpl dataflowOutputPort) throws EditException;
 
 	@Override
 	public final DataflowOutputPort getSubject() {
 		return dataflowOutputPort;
-	}
-
-	@Override
-	public final boolean isApplied() {
-		return this.applied;
-	}
-
-	@Override
-	public final void undo() {
-		if (!applied) {
-			throw new RuntimeException(
-					"Attempt to undo edit that was never applied");
-		}
-		throw new UnsupportedOperationException(
-				"undo not supported by this interface in Taverna 3");
 	}
 }

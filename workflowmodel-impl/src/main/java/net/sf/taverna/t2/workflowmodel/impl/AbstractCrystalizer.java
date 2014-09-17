@@ -66,10 +66,10 @@ public abstract class AbstractCrystalizer implements Crystalizer {
 	 * 
 	 * @param e
 	 */
-	@SuppressWarnings("unchecked")
 	// suppressed to avoid jdk1.5 compilation errors caused by the declaration
 	// IterationInternalEvent<? extends IterationInternalEvent<?>> e
-	public void receiveEvent(IterationInternalEvent e) {
+	@Override
+	public void receiveEvent(IterationInternalEvent<?> e) {
 		String owningProcess = e.getOwningProcess();
 		CompletionAwareTreeCache cache = null;
 		synchronized (cacheMap) {
@@ -77,9 +77,8 @@ public abstract class AbstractCrystalizer implements Crystalizer {
 				cache = new CompletionAwareTreeCache(owningProcess, e
 						.getContext());
 				cacheMap.put(owningProcess, cache);
-			} else {
+			} else
 				cache = cacheMap.get(owningProcess);
-			}
 		}
 		synchronized (cache) {
 			if (e instanceof Job) {
@@ -88,23 +87,19 @@ public abstract class AbstractCrystalizer implements Crystalizer {
 //				cache.insertJob(j);
 				cache.insertJob(new Job("", j.getIndex(), j.getData(), j.getContext()));
 				jobCreated(j);
-				if (j.getIndex().length == 0) {
+				if (j.getIndex().length == 0)
 					cacheMap.remove(j.getOwningProcess());
-				}
 				return;
 			} else if (e instanceof Completion) {
 				Completion c = (Completion) e;
-				int[] completionIndex = c.getIndex();
-				cache.resolveAt(owningProcess, completionIndex);
-				if (c.getIndex().length == 0) {
+				cache.resolveAt(owningProcess, c.getIndex());
+				if (c.getIndex().length == 0)
 					cacheMap.remove(c.getOwningProcess());
-				}
 			}
 		}
 	}
 
 	protected class CompletionAwareTreeCache extends TreeCache {
-
 		private String owningProcess;
 		private InvocationContext context;
 
@@ -119,58 +114,61 @@ public abstract class AbstractCrystalizer implements Crystalizer {
 			NamedNode n = nodeAt(completionIndex);
 			if (n != null) {
 				assignNamesTo(n, completionIndex);
-			} else {
-
-				// We know what the list depth should be, so we can
-				// construct appropriate depth empty lists to fill in the
-				// gaps.
-				Job j = getEmptyJob(owningProcess, completionIndex, context);
-				insertJob(j);
-				jobCreated(j);
-
+				return;
 			}
+
+			/*
+			 * We know what the list depth should be, so we can construct
+			 * appropriate depth empty lists to fill in the gaps.
+			 */
+
+			Job j = getEmptyJob(owningProcess, completionIndex, context);
+			insertJob(j);
+			jobCreated(j);
 		}
 
 		private void assignNamesTo(NamedNode n, int[] index) {
-			// Only act if contents of this node undefined
+			/* Only act if contents of this node undefined */
 			// StringBuffer iString = new StringBuffer();
 			// for (int foo : index) {
 			// iString.append(foo+" ");
 			// }
 			if (n.contents == null) {
-				Map<String, List<T2Reference>> listItems = new HashMap<String, List<T2Reference>>();
+				Map<String, List<T2Reference>> listItems = new HashMap<>();
 				int pos = 0;
-			for (NamedNode child : n.children) {
-
-					// If child doesn't have a defined name map yet then define
-					// it
+				for (NamedNode child : n.children) {
+					/*
+					 * If child doesn't have a defined name map yet then define
+					 * it.
+					 */
 					Job j;
 					if (child == null) {
-						// happens if we're completing a partially empty
-						// collection structure
+						/*
+						 * happens if we're completing a partially empty
+						 * collection structure
+						 */
 						int[] newIndex = new int[index.length + 1];
-						for (int i = 0; i < index.length; i++) {
+						for (int i = 0; i < index.length; i++)
 							newIndex[i] = index[i];
-						}
 						newIndex[index.length] = pos++;
 						j = getEmptyJob(owningProcess, newIndex, context);
 						AbstractCrystalizer.this.jobCreated(j);
+					} else if (child.contents == null) {
+						int[] newIndex = new int[index.length + 1];
+						for (int i = 0; i < index.length; i++)
+							newIndex[i] = index[i];
+						newIndex[index.length] = pos++;
+						assignNamesTo(child, newIndex);
+						j = child.contents;
 					} else {
-
-						if (child.contents == null) {
-							int[] newIndex = new int[index.length + 1];
-							for (int i = 0; i < index.length; i++) {
-								newIndex[i] = index[i];
-							}
-							newIndex[index.length] = pos++;
-							assignNamesTo(child, newIndex);
-						} else {
-							pos++;
-						}
+						pos++;
 						j = child.contents;
 					}
-					// Now pull the names out of the child job map and push them
-					// into lists to be registered
+
+					/*
+					 * Now pull the names out of the child job map and push them
+					 * into lists to be registered
+					 */
 
 					for (String outputName : j.getData().keySet()) {
 						List<T2Reference> items = listItems.get(outputName);
@@ -181,20 +179,20 @@ public abstract class AbstractCrystalizer implements Crystalizer {
 						items.add(j.getData().get(outputName));
 					}
 				}
-				Map<String, T2Reference> newDataMap = new HashMap<String, T2Reference>();
+				Map<String, T2Reference> newDataMap = new HashMap<>();
 				for (String outputName : listItems.keySet()) {
 					List<T2Reference> idlist = listItems.get(outputName);
 					newDataMap.put(outputName, context.getReferenceService()
 							.getListService().registerList(idlist, context).getId());
-
 				}
 				Job newJob = new Job(owningProcess, index, newDataMap, context);
 				n.contents = newJob;
-				// Get rid of the children as we've now named this node
+
+				/* Get rid of the children as we've now named this node */
+
 				n.children.clear();
 				AbstractCrystalizer.this.jobCreated(n.contents);
 			}
 		}
 	}
-
 }

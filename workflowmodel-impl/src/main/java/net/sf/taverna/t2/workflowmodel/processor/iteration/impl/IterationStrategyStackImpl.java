@@ -20,8 +20,9 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.processor.iteration.impl;
 
+import static java.util.Collections.unmodifiableList;
+
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -44,8 +45,7 @@ import net.sf.taverna.t2.workflowmodel.processor.iteration.MissingIterationInput
  * 
  */
 public class IterationStrategyStackImpl implements IterationStrategyStack {
-
-	private List<IterationStrategyImpl> strategies = new ArrayList<IterationStrategyImpl>();
+	private List<IterationStrategyImpl> strategies = new ArrayList<>();
 
 	/**
 	 * The iteration depth here is calculated by taking first the top iteration
@@ -58,18 +58,18 @@ public class IterationStrategyStackImpl implements IterationStrategyStack {
 	 * @return
 	 * @throws IterationTypeMismatchException
 	 */
+	@Override
 	public int getIterationDepth(Map<String, Integer> inputDepths)
 			throws IterationTypeMismatchException,
 			MissingIterationInputException {
 		// If there are no iteration strategies or no inputs then by definition
 		// there's no iteration, no wrapping and the depth of wrapping must be
 		// zero
-		if (strategies.isEmpty()) {
+		if (strategies.isEmpty())
 			return 0;
-		}
-		if (strategies.get(0).inputs.isEmpty()) {
+		if (strategies.get(0).inputs.isEmpty())
 			return 0;
-		}
+
 		IterationStrategyImpl strategy = strategies.get(0);
 		int depth = strategy.getIterationDepth(inputDepths);
 		for (int index = 1; index < strategies.size(); index++) {
@@ -85,29 +85,26 @@ public class IterationStrategyStackImpl implements IterationStrategyStack {
 	}
 
 	public void addStrategy(IterationStrategy is) {
-		if (is instanceof IterationStrategyImpl) {
-			IterationStrategyImpl isi = (IterationStrategyImpl) is;
-			strategies.add(isi);
-			isi.setIterationStrategyStack(this);
-		} else {
+		if (!(is instanceof IterationStrategyImpl))
 			throw new WorkflowStructureException(
 					"IterationStrategyStackImpl can only hold IterationStrategyImpl objects");
-		}
+		IterationStrategyImpl isi = (IterationStrategyImpl) is;
+		strategies.add(isi);
+		isi.setIterationStrategyStack(this);
 	}
 
 	public void removeStrategy(IterationStrategy is) {
-		if (is instanceof IterationStrategyImpl) {
-			IterationStrategyImpl isi = (IterationStrategyImpl) is;
-			strategies.remove(isi);
-			isi.setIterationStrategyStack(null);
-		} else {
+		if (!(is instanceof IterationStrategyImpl))
 			throw new WorkflowStructureException(
 					"IterationStrategyStackImpl can only hold IterationStrategyImpl objects");
-		}
+		IterationStrategyImpl isi = (IterationStrategyImpl) is;
+		strategies.remove(isi);
+		isi.setIterationStrategyStack(null);
 	}
 
+	@Override
 	public List<IterationStrategyImpl> getStrategies() {
-		return Collections.unmodifiableList(this.strategies);
+		return unmodifiableList(this.strategies);
 	}
 
 	public void clear() {
@@ -116,18 +113,16 @@ public class IterationStrategyStackImpl implements IterationStrategyStack {
 	
 	public void receiveData(String inputPortName, String owningProcess,
 			int[] indexArray, T2Reference dataReference, InvocationContext context) {
-		if (!strategies.isEmpty()) {
+		if (!strategies.isEmpty())
 			strategies.get(0).receiveData(inputPortName, owningProcess,
 					indexArray, dataReference, context);
-		}
 	}
 
 	public void receiveCompletion(String inputPortName, String owningProcess,
 			int[] completionArray, InvocationContext context) {
-		if (!strategies.isEmpty()) {
+		if (!strategies.isEmpty())
 			strategies.get(0).receiveCompletion(inputPortName, owningProcess,
 					completionArray, context);
-		}
 	}
 
 	/**
@@ -137,12 +132,10 @@ public class IterationStrategyStackImpl implements IterationStrategyStack {
 	 * @return
 	 */
 	protected IterationStrategyImpl layerBelow(IterationStrategyImpl that) {
-		int index = strategies.indexOf(that);
-		if (index == (strategies.size() - 1)) {
+		int index = strategies.indexOf(that) + 1;
+		if (index == strategies.size())
 			return null;
-		} else {
-			return strategies.get(index + 1);
-		}
+		return strategies.get(index);
 	}
 
 	/**
@@ -154,5 +147,4 @@ public class IterationStrategyStackImpl implements IterationStrategyStack {
 	protected void receiveEventFromStrategy(IterationInternalEvent<? extends IterationInternalEvent<?>> e) {
 		// TODO - push events onto dispatch queue
 	}
-
 }

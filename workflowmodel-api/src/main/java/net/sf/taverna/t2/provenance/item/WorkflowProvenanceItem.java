@@ -63,6 +63,7 @@ public class WorkflowProvenanceItem extends AbstractProvenanceItem {
 		this.dataflow = dataflow;
 	}
 
+	@Override
 	public SharedVocabulary getEventType() {
 		return eventType;
 	}

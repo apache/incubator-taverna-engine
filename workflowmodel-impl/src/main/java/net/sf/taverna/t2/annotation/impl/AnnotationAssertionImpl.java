@@ -54,18 +54,22 @@ public class AnnotationAssertionImpl implements AnnotationAssertion<AnnotationBe
 		this.annotationSource = annotationSource;
 	}
 
+	@Override
 	public AnnotationBeanSPI getDetail() {
 		return annotationBean;
 	}
 
+	@Override
 	public AnnotationRole getRole() {
 		return annotationRole;
 	}
 
+	@Override
 	public Date getCreationDate() {
 		return date;
 	}
 
+	@Override
 	public List<? extends Person> getCreators() {
 		return creators;
 	}
@@ -78,10 +82,12 @@ public class AnnotationAssertionImpl implements AnnotationAssertion<AnnotationBe
 		creators.remove(person);
 	}
 
+	@Override
 	public List<CurationEvent<?>> getCurationAssertions() {
 		return curationEventList;
 	}
 
+	@Override
 	public AnnotationSourceSPI getSource() {
 		return annotationSource;
 	}
@@ -118,13 +124,11 @@ public class AnnotationAssertionImpl implements AnnotationAssertion<AnnotationBe
 		annotationBean = null;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public void addCurationEvent(CurationEvent curationEvent) {
+	public void addCurationEvent(CurationEvent<?> curationEvent) {
 		curationEventList.add(curationEvent);
 	}
 
-	@SuppressWarnings("unchecked")
-	public void removeCurationEvent(CurationEvent curationEvent) {
+	public void removeCurationEvent(CurationEvent<?> curationEvent) {
 		curationEventList.remove(curationEvent);
 	}
 

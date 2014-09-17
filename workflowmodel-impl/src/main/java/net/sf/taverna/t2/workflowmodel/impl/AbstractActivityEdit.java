@@ -32,7 +32,6 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
  *
  */
 public abstract class AbstractActivityEdit extends AbstractEdit<Activity<?>, AbstractActivity<?>> {
-
 	protected AbstractActivityEdit(Activity<?> activity) {
 		super(AbstractActivity.class, activity);
 	}

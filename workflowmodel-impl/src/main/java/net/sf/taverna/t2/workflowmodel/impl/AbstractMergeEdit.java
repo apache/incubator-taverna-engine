@@ -20,35 +20,26 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.impl;
 
-import net.sf.taverna.t2.workflowmodel.Edit;
 import net.sf.taverna.t2.workflowmodel.EditException;
 import net.sf.taverna.t2.workflowmodel.Merge;
 
-public abstract class AbstractMergeEdit implements Edit<Merge>{
-	
-	Merge merge;
-	boolean applied=false;
+public abstract class AbstractMergeEdit extends EditSupport<Merge> {
+	MergeImpl merge;
 	
 	public AbstractMergeEdit(Merge merge) {
-		if (merge==null) throw new RuntimeException("Cannot construct a merge edit with a null merge");
-		this.merge=merge;
+		if (merge == null)
+			throw new RuntimeException(
+					"Cannot construct a merge edit with a null merge");
+		if (!(merge instanceof MergeImpl))
+			throw new RuntimeException("Merge must be an instanceof MergeImpl");
+		this.merge = (MergeImpl) merge;
 	}
 
 	@Override
-	public final Merge doEdit() throws EditException {
-		if (applied) throw new EditException("Edit has already been applied!");
-		if (!(merge instanceof MergeImpl)) throw new EditException("Merge must be an instanceof MergeImpl");
-		MergeImpl mergeImpl = (MergeImpl)merge;
-		try {
-			synchronized (mergeImpl) {
-				doEditAction(mergeImpl);
-				applied = true;
-			}
-		} catch (EditException ee) {
-			applied = false;
-			throw ee;
+	public final Merge applyEdit() throws EditException {
+		synchronized (merge) {
+			doEditAction(merge);
 		}
-		
 		return this.merge;
 	}
 
@@ -58,23 +49,4 @@ public abstract class AbstractMergeEdit implements Edit<Merge>{
 	public final Object getSubject() {
 		return merge;
 	}
-
-	@Override
-	public final boolean isApplied() {
-		return applied;
-	}
-
-	@Override
-	public final void undo() {
-		if (!applied) {
-			throw new RuntimeException(
-					"Attempt to undo edit that was never applied");
-		}
-		MergeImpl mergeImpl = (MergeImpl) merge;
-		synchronized (mergeImpl) {
-			throw new UnsupportedOperationException(
-					"undo not supported by this interface in Taverna 3");
-		}
-	}
-
 }

@@ -28,11 +28,9 @@ import net.sf.taverna.t2.workflowmodel.Processor;
  * An Edit class responsible for add a Processor to the dataflow.
  * 
  * @author Stuart Owen
- * 
  */
-public class AddProcessorEdit extends AbstractDataflowEdit {
-
-	private Processor processor;
+class AddProcessorEdit extends AbstractDataflowEdit {
+	private ProcessorImpl processor;
 
 	public Processor getProcessor() {
 		return processor;
@@ -40,7 +38,11 @@ public class AddProcessorEdit extends AbstractDataflowEdit {
 
 	protected AddProcessorEdit(Dataflow dataflow, Processor processor) {
 		super(dataflow);
-		this.processor = processor;
+		if (!(processor instanceof ProcessorImpl))
+			throw new RuntimeException(
+					"The Processor is of the wrong implmentation,"
+							+ " it should be of type ProcessorImpl");
+		this.processor = (ProcessorImpl) processor;
 	}
 
 	/**
@@ -52,12 +54,6 @@ public class AddProcessorEdit extends AbstractDataflowEdit {
 	 */
 	@Override
 	protected void doEditAction(DataflowImpl dataflow) throws EditException {
-		if (processor instanceof ProcessorImpl) {
-			dataflow.addProcessor((ProcessorImpl) processor);
-		} else {
-			throw new EditException(
-					"The Processor is of the wrong implmentation,"
-							+ " it should be of type ProcessorImpl");
-		}
+		dataflow.addProcessor(processor);
 	}
 }

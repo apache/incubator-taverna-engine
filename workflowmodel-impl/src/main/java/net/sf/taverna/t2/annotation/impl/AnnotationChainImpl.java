@@ -27,11 +27,11 @@ import net.sf.taverna.t2.annotation.AnnotationAssertion;
 import net.sf.taverna.t2.annotation.AnnotationChain;
 
 public class AnnotationChainImpl implements AnnotationChain{
+	private List<AnnotationAssertion<?>> annotationAssertions = new ArrayList<>();
 
-	private List<AnnotationAssertion<?>> annotationAssertions = new ArrayList<AnnotationAssertion<?>>();
-	
+	@Override
 	public List<AnnotationAssertion<?>> getAssertions() {
-		return new ArrayList<AnnotationAssertion<?>>(annotationAssertions);
+		return new ArrayList<>(annotationAssertions);
 	}
 	
 	/**
@@ -40,14 +40,11 @@ public class AnnotationChainImpl implements AnnotationChain{
 	 * 
 	 * @param annotationAssertion
 	 */
-	@SuppressWarnings("unchecked")
-	public void addAnnotationAssertion(AnnotationAssertion annotationAssertion) {
+	public void addAnnotationAssertion(AnnotationAssertion<?> annotationAssertion) {
 		annotationAssertions.add(annotationAssertion);
 	}
 	
-	@SuppressWarnings("unchecked")
-	public void removeAnnotationAssertion(AnnotationAssertion annotationAssertion) {
+	public void removeAnnotationAssertion(AnnotationAssertion<?> annotationAssertion) {
 		annotationAssertions.remove(annotationAssertion);
 	}
-
 }

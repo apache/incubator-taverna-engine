@@ -36,10 +36,8 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Job;
  * AbstractCrystalizer bound to a specific ProcessorImpl
  * 
  * @author Tom Oinn
- * 
  */
 public class ProcessorCrystalizerImpl extends AbstractCrystalizer {
-
 	private ProcessorImpl parent;
 
 	/**
@@ -51,6 +49,7 @@ public class ProcessorCrystalizerImpl extends AbstractCrystalizer {
 		this.parent = parent;
 	}
 
+	@Override
 	public void completionCreated(Completion completion) {
 		throw new WorkflowStructureException(
 				"Should never see this if everything is working,"
@@ -58,11 +57,13 @@ public class ProcessorCrystalizerImpl extends AbstractCrystalizer {
 						+ "logic is broken, talk to Tom");
 	}
 
+	@Override
 	public void jobCreated(Job outputJob) {
 		for (String outputPortName : outputJob.getData().keySet()) {
-			WorkflowDataToken token = new WorkflowDataToken(outputJob
-					.getOwningProcess(), outputJob.getIndex(), outputJob
-					.getData().get(outputPortName), outputJob.getContext());
+			WorkflowDataToken token = new WorkflowDataToken(
+					outputJob.getOwningProcess(), outputJob.getIndex(),
+					outputJob.getData().get(outputPortName),
+					outputJob.getContext());
 			parent.getOutputPortWithName(outputPortName).receiveEvent(token);
 		}
 	}
@@ -78,23 +79,24 @@ public class ProcessorCrystalizerImpl extends AbstractCrystalizer {
 			InvocationContext context) {
 		int wrappingDepth = parent.resultWrappingDepth;
 		if (wrappingDepth < 0)
-			throw new RuntimeException(
-					"Processor ["+owningProcess+"] hasn't been configured, cannot emit empty job");
-		// The wrapping depth is the length of index array that would be used if
-		// a single item of the output port type were returned. We can examine
-		// the index array for the node we're trying to create and use this to
-		// work out how much we need to add to the output port depth to create
-		// empty lists of the right type given the index array.
+			throw new RuntimeException("Processor [" + owningProcess
+					+ "] hasn't been configured, cannot emit empty job");
+		/*
+		 * The wrapping depth is the length of index array that would be used if
+		 * a single item of the output port type were returned. We can examine
+		 * the index array for the node we're trying to create and use this to
+		 * work out how much we need to add to the output port depth to create
+		 * empty lists of the right type given the index array.
+		 */
 		int depth = wrappingDepth - index.length;
 		// TODO - why was this incrementing?
 		// depth++;
 
 		ReferenceService rs = context.getReferenceService();
-		Map<String, T2Reference> emptyJobMap = new HashMap<String, T2Reference>();
-		for (OutputPort op : parent.getOutputPorts()) {
+		Map<String, T2Reference> emptyJobMap = new HashMap<>();
+		for (OutputPort op : parent.getOutputPorts())
 			emptyJobMap.put(op.getName(), rs.getListService()
 					.registerEmptyList(depth + op.getDepth(), context).getId());
-		}
 		return new Job(owningProcess, index, emptyJobMap, context);
 	}
 

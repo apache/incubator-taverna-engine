@@ -29,24 +29,22 @@ import net.sf.taverna.t2.workflowmodel.processor.iteration.impl.IterationStrateg
  * Set the iteration strategy
  * 
  * @author Stian Soiland-Reyes
- * 
  */
-public class SetIterationStrategyStackEdit extends AbstractProcessorEdit {
-	private final IterationStrategyStack iterationStrategyStack;
+class SetIterationStrategyStackEdit extends AbstractProcessorEdit {
+	private final IterationStrategyStackImpl iterationStrategyStack;
 
 	public SetIterationStrategyStackEdit(Processor processor,
 			IterationStrategyStack iterationStrategyStack) {
 		super(processor);
-		this.iterationStrategyStack = iterationStrategyStack;
+		if (!(iterationStrategyStack instanceof IterationStrategyStackImpl))
+			throw new RuntimeException(
+					"Unknown implementation of iteration strategy "
+							+ iterationStrategyStack);
+		this.iterationStrategyStack = (IterationStrategyStackImpl) iterationStrategyStack;
 	}
 
 	@Override
 	protected void doEditAction(ProcessorImpl processor) throws EditException {
-		if (!(iterationStrategyStack instanceof IterationStrategyStackImpl)) {
-			throw new EditException(
-					"Unknown implementation of iteration strategy "
-							+ iterationStrategyStack);
-		}
-		processor.iterationStack = (IterationStrategyStackImpl) iterationStrategyStack;
+		processor.iterationStack = iterationStrategyStack;
 	}
 }

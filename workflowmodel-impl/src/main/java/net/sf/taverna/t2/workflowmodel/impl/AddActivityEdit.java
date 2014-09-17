@@ -33,8 +33,7 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
  * @author Tom Oinn
  * 
  */
-public class AddActivityEdit extends AbstractProcessorEdit {
-
+class AddActivityEdit extends AbstractProcessorEdit {
 	private Activity<?> activityToAdd;
 
 	public AddActivityEdit(Processor processor, Activity<?> activity) {
@@ -45,13 +44,11 @@ public class AddActivityEdit extends AbstractProcessorEdit {
 	@Override
 	protected void doEditAction(ProcessorImpl processor) throws EditException {
 		List<Activity<?>> activities = processor.activityList;
-		if (activities.contains(activityToAdd) == false) {
-			synchronized (processor) {
-				activities.add(activityToAdd);
-			}
-		} else {
+		if (activities.contains(activityToAdd))
 			throw new EditException(
 					"Cannot add a duplicate activity to processor");
+		synchronized (processor) {
+			activities.add(activityToAdd);
 		}
 	}
 }

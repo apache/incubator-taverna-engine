@@ -25,11 +25,9 @@ import java.net.URI;
 import net.sf.taverna.t2.annotation.AnnotationSourceSPI;
 
 public class URISource implements AnnotationSourceSPI{
-	
 	private URI uri;
-	
+
 	public URISource() {
-		
 	}
 
 	public URISource(URI uri) {
@@ -37,14 +35,12 @@ public class URISource implements AnnotationSourceSPI{
 	}
 
 	public void setUri(URI uri) {
-//		if (uri != null) {
+//		if (uri != null)
 //			throw new RuntimeException("URI has already been set");
-//		}
 		this.uri = uri;
 	}
 
 	public URI getUri() {
 		return uri;
 	}
-
 }

@@ -29,23 +29,20 @@ import net.sf.taverna.t2.workflowmodel.MergeInputPort;
  * 
  * @author David Withers
  */
-public class AddMergeInputPortEdit extends AbstractMergeEdit {
-
-	private MergeInputPort mergeInputPort;
+class AddMergeInputPortEdit extends AbstractMergeEdit {
+	private MergeInputPortImpl mergeInputPort;
 
 	public AddMergeInputPortEdit(Merge merge, MergeInputPort mergeInputPort) {
 		super(merge);
-		this.mergeInputPort = mergeInputPort;
+		if (!(mergeInputPort instanceof MergeInputPortImpl))
+			throw new RuntimeException(
+					"The MergeInputPort is of the wrong implmentation,"
+							+ " it should be of type MergeInputPortImpl");
+		this.mergeInputPort = (MergeInputPortImpl) mergeInputPort;
 	}
 
 	@Override
 	protected void doEditAction(MergeImpl mergeImpl) throws EditException {
-		if (mergeInputPort instanceof MergeInputPortImpl) {
-			mergeImpl.addInputPort((MergeInputPortImpl) mergeInputPort);
-		} else {
-			throw new EditException(
-					"The MergeInputPort is of the wrong implmentation,"
-							+ " it should be of type MergeInputPortImpl");
-		}
+		mergeImpl.addInputPort(mergeInputPort);
 	}
 }

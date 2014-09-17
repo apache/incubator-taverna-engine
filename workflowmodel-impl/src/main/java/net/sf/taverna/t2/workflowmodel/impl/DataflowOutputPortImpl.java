@@ -20,8 +20,9 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.impl;
 
+import static java.util.Collections.synchronizedList;
+
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import net.sf.taverna.t2.facade.ResultListener;
@@ -37,21 +38,22 @@ public class DataflowOutputPortImpl extends BasicEventForwardingOutputPort
 	/**
 	 * Remember to synchronize access to this list
 	 */
-	protected List<ResultListener> resultListeners = Collections.synchronizedList(new ArrayList<ResultListener>());
+	protected List<ResultListener> resultListeners = synchronizedList(new ArrayList<ResultListener>());
 
 	private Dataflow dataflow;
 
-	DataflowOutputPortImpl(final String portName, final Dataflow dataflow) {
+	DataflowOutputPortImpl(String portName, Dataflow dataflow) {
 		super(portName, -1, -1);
 		this.dataflow = dataflow;
-		this.internalInput = new InternalInputPort(name,
-				dataflow, portName);
+		this.internalInput = new InternalInputPort(name, dataflow, portName);
 	}
 
+	@Override
 	public EventHandlingInputPort getInternalInputPort() {
 		return this.internalInput;
 	}
 
+	@Override
 	public Dataflow getDataflow() {
 		return this.dataflow;
 	}
@@ -61,14 +63,17 @@ public class DataflowOutputPortImpl extends BasicEventForwardingOutputPort
 		this.granularDepth = granularDepth;
 	}
 
+	@Override
 	public void addResultListener(ResultListener listener) {
 		resultListeners.add(listener);		
 	}
 
+	@Override
 	public void removeResultListener(ResultListener listener) {
 		resultListeners.remove(listener);
 	}
 	
+	@Override
 	public void setName(String newName) {
 		this.name = newName;
 		internalInput.setName(newName);
@@ -88,30 +93,33 @@ public class DataflowOutputPortImpl extends BasicEventForwardingOutputPort
 		 * Forward the event through the output port Also informs any
 		 * ResultListeners on the output port to the new token.
 		 */
+		@Override
 		public void receiveEvent(WorkflowDataToken token) {
-			// Pull the dataflow process identifier from the owning process
-			// and push the modified token out
-			// I'd rather avoid casting to the implementation but in this
-			// case we're in the same package - the only reason to do this
-			// is to allow dummy implementations of parts of this
-			// infrastructure during testing, in 'real' use this should
-			// always be a dataflowimpl
+			/*
+			 * Pull the dataflow process identifier from the owning process and
+			 * push the modified token out. I'd rather avoid casting to the
+			 * implementation but in this case we're in the same package - the
+			 * only reason to do this is to allow dummy implementations of parts
+			 * of this infrastructure during testing, in 'real' use this should
+			 * always be a dataflowimpl
+			 */
 			if (token.getIndex().length == 0
-					&& dataflow instanceof DataflowImpl) {
+					&& dataflow instanceof DataflowImpl)
 				((DataflowImpl) dataflow).sentFinalToken(portName, token
 						.getOwningProcess());
-			}
 			WorkflowDataToken newToken = token.popOwningProcess();
 			sendEvent(newToken);
 			
 			List<ResultListener> listeners;
 			synchronized (resultListeners) {
-				// thread safe copy before we push tokens (avoiding deadlock with WorkflowInstanceFacade)
-				listeners = new ArrayList<ResultListener>(resultListeners);
+				/*
+				 * thread safe copy before we push tokens (avoiding deadlock
+				 * with WorkflowInstanceFacade)
+				 */
+				listeners = new ArrayList<>(resultListeners);
 			}
-			for (ResultListener listener : listeners) {
+			for (ResultListener listener : listeners)
 				listener.resultTokenProduced(newToken, this.getName());
-			}
 		}
 
 		/**

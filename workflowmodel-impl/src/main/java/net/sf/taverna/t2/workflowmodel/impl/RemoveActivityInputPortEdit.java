@@ -30,17 +30,18 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityInputPort;
  * 
  * @author David Withers
  */
-public class RemoveActivityInputPortEdit extends AbstractActivityEdit {
-
+class RemoveActivityInputPortEdit extends AbstractActivityEdit {
 	private ActivityInputPort activityInputPort;
 
-	public RemoveActivityInputPortEdit(Activity<?> activity, ActivityInputPort activityInputPort) {
+	public RemoveActivityInputPortEdit(Activity<?> activity,
+			ActivityInputPort activityInputPort) {
 		super(activity);
 		this.activityInputPort = activityInputPort;
 	}
 
 	@Override
-	protected void doEditAction(AbstractActivity<?> activity) throws EditException {
+	protected void doEditAction(AbstractActivity<?> activity)
+			throws EditException {
 		activity.getInputPorts().remove(activityInputPort);
 	}
 }

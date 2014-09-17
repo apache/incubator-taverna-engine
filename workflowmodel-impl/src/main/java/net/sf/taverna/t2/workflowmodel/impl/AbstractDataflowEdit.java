@@ -32,7 +32,6 @@ import net.sf.taverna.t2.workflowmodel.Edit;
  */
 public abstract class AbstractDataflowEdit extends
 		AbstractEdit<Dataflow, DataflowImpl> implements Edit<Dataflow> {
-
 	protected AbstractDataflowEdit(Dataflow dataflow) {
 		super(DataflowImpl.class, dataflow);
 	}

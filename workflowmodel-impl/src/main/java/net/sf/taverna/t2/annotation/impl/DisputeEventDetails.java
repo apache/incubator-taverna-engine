@@ -23,9 +23,6 @@ package net.sf.taverna.t2.annotation.impl;
 import net.sf.taverna.t2.annotation.CurationEventBeanSPI;
 
 public class DisputeEventDetails implements CurationEventBeanSPI {
-	
 	public DisputeEventDetails() {
-		
 	}
-
 }

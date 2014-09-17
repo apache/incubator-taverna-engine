@@ -20,42 +20,42 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.impl;
 
+import static java.lang.Boolean.TRUE;
+
 import java.util.HashMap;
 import java.util.Map;
 
 import net.sf.taverna.t2.annotation.AbstractAnnotatedThing;
 import net.sf.taverna.t2.workflowmodel.Condition;
 
-public class ConditionImpl extends AbstractAnnotatedThing<Condition> implements Condition {
-
+class ConditionImpl extends AbstractAnnotatedThing<Condition> implements Condition {
 	private ProcessorImpl control, target;
-
-	private Map<String, Boolean> stateMap = new HashMap<String, Boolean>();
+	private Map<String, Boolean> stateMap = new HashMap<>();
 
 	protected ConditionImpl(ProcessorImpl control, ProcessorImpl target) {
 		this.control = control;
 		this.target = target;
 	}
 
+	@Override
 	public ProcessorImpl getControl() {
 		return this.control;
 	}
 
+	@Override
 	public ProcessorImpl getTarget() {
 		return this.target;
 	}
 
+	@Override
 	public boolean isSatisfied(String owningProcess) {
-		if (stateMap.containsKey(owningProcess)) {
-			return stateMap.get(owningProcess);
-		} else {
+		if (!stateMap.containsKey(owningProcess))
 			return false;
-		}
+		return stateMap.get(owningProcess);
 	}
 
 	protected void satisfy(String owningProcess) {
-		stateMap.put(owningProcess, Boolean.TRUE);
+		stateMap.put(owningProcess, TRUE);
 		// TODO - poke target processor here
 	}
-
 }

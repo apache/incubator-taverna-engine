@@ -28,12 +28,9 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchStack;
  * Edit implementation to remove a DispatchLayer from a DispatchStackImpl
  * 
  * @author Tom Oinn
- * 
  */
 public class DeleteDispatchLayerEdit extends AbstractDispatchLayerEdit {
-
 	private DispatchLayer<?> layer;
-
 	private int index;
 
 	public DeleteDispatchLayerEdit(DispatchStack stack,
@@ -51,5 +48,4 @@ public class DeleteDispatchLayerEdit extends AbstractDispatchLayerEdit {
 	protected void undoEditAction(DispatchStackImpl stack) {
 		stack.addLayer(layer, index);
 	}
-
 }

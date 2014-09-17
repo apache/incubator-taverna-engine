@@ -34,19 +34,18 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Job;
  * received so there is no need for an explicit cache purge operation in the
  * public API (although for termination of partially complete workflows it may
  * be sensible for subclasses to provide one)
- * <p>
  * 
  * @author Tom Oinn
  */
 public interface Crystalizer {
-
 	/**
 	 * Receive a Job or Completion, Jobs are emitted unaltered and cached,
 	 * Completion events trigger registration of a corresponding list - this may
 	 * be recursive in nature if the completion event's index implies nested
 	 * lists which have not been registered.
 	 */
-	public void receiveEvent(IterationInternalEvent<? extends IterationInternalEvent<?>> event);
+	void receiveEvent(
+			IterationInternalEvent<? extends IterationInternalEvent<?>> event);
 
 	/**
 	 * This method is called when a new Job has been handled by the
@@ -54,7 +53,7 @@ public interface Crystalizer {
 	 * registration.
 	 * 
 	 */
-	public void jobCreated(Job outputJob);
+	void jobCreated(Job outputJob);
 
 	/**
 	 * Called whenever a completion not corresponding to a node in the cache is
@@ -63,6 +62,5 @@ public interface Crystalizer {
 	 * sent to the crystalizer if there has been at least one data event with a
 	 * lower depth on the same path.
 	 */
-	public void completionCreated(Completion completion);
-
+	void completionCreated(Completion completion);
 }

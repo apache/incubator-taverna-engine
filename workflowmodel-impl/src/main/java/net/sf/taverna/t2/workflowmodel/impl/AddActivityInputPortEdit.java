@@ -30,8 +30,7 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityInputPort;
  * 
  * @author David Withers
  */
-public class AddActivityInputPortEdit extends AbstractActivityEdit {
-
+class AddActivityInputPortEdit extends AbstractActivityEdit {
 	private ActivityInputPort activityInputPort;
 
 	public AddActivityInputPortEdit(Activity<?> activity, ActivityInputPort activityInputPort) {

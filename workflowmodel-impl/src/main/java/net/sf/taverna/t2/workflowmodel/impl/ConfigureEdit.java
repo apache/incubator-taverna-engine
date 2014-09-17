@@ -33,23 +33,21 @@ import org.apache.log4j.Logger;
  * @author Stuart Owen
  * @author Stian Soiland-Reyes
  */
-@SuppressWarnings("unchecked")
-public class ConfigureEdit<SubjectInterface extends Configurable, SubjectType extends SubjectInterface>
-		extends AbstractEdit<SubjectInterface, SubjectType> {
-
-	private static Logger logger = Logger
-			.getLogger(ConfigureEdit.class);
+class ConfigureEdit<Ifc extends Configurable, Type extends Ifc> extends
+		AbstractEdit<Ifc, Type> {
+	private static Logger logger = Logger.getLogger(ConfigureEdit.class);
 
 	private final Object configurationBean;
 
-	public ConfigureEdit(Class<?> subjectType,
-			SubjectInterface configurable, Object configurationBean) {
+	public ConfigureEdit(Class<?> subjectType, Ifc configurable,
+			Object configurationBean) {
 		super(subjectType, configurable);
 		this.configurationBean = configurationBean;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	protected void doEditAction(SubjectType subject) throws EditException {
+	protected void doEditAction(Type subject) throws EditException {
 		try {
 			// FIXME: Should clone bean on configuration to prevent caller from
 			// modifying bean afterwards

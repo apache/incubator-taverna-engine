@@ -20,7 +20,6 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.impl;
 
-import net.sf.taverna.t2.workflowmodel.Edit;
 import net.sf.taverna.t2.workflowmodel.EditException;
 import net.sf.taverna.t2.workflowmodel.Processor;
 
@@ -31,39 +30,24 @@ import net.sf.taverna.t2.workflowmodel.Processor;
  * @author Tom Oinn
  * 
  */
-public abstract class AbstractProcessorEdit implements Edit<Processor> {
-
-	private boolean applied = false;
-
-	private Processor processor;
+public abstract class AbstractProcessorEdit extends EditSupport<Processor> {
+	private ProcessorImpl processor;
 
 	protected AbstractProcessorEdit(Processor p) {
-		if (p == null) {
+		if (p == null)
 			throw new RuntimeException(
 					"Cannot construct a processor edit with null processor");
-		}
-		this.processor = p;
+		if (!(processor instanceof ProcessorImpl))
+			throw new RuntimeException(
+					"Edit cannot be applied to a Processor which isn't an instance of ProcessorImpl");
+		this.processor = (ProcessorImpl) p;
 	}
 
 	@Override
-	public final Processor doEdit() throws EditException {
-		if (applied) {
-			throw new EditException("Edit has already been applied!");
-		}
-		if (!(processor instanceof ProcessorImpl)) {
-			throw new EditException(
-					"Edit cannot be applied to a Processor which isn't an instance of ProcessorImpl");
-		}
-		ProcessorImpl pi = (ProcessorImpl) processor;
-		try {
-			synchronized (pi) {
-				doEditAction(pi);
-				applied = true;
-				return this.processor;
-			}
-		} catch (EditException ee) {
-			applied = false;
-			throw ee;
+	public final Processor applyEdit() throws EditException {
+		synchronized (processor) {
+			doEditAction(processor);
+			return processor;
 		}
 	}
 
@@ -80,20 +64,5 @@ public abstract class AbstractProcessorEdit implements Edit<Processor> {
 	@Override
 	public final Processor getSubject() {
 		return processor;
-	}
-
-	@Override
-	public final boolean isApplied() {
-		return this.applied;
-	}
-
-	@Override
-	public final void undo() {
-		if (!applied) {
-			throw new RuntimeException(
-					"Attempt to undo edit that was never applied");
-		}
-		throw new UnsupportedOperationException(
-				"undo not supported by this interface in Taverna 3");
 	}
 }

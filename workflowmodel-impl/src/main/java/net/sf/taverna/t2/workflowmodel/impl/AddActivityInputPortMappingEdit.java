@@ -24,12 +24,12 @@ import net.sf.taverna.t2.workflowmodel.EditException;
 import net.sf.taverna.t2.workflowmodel.processor.activity.AbstractActivity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 
-public class AddActivityInputPortMappingEdit extends AbstractActivityEdit {
-
+class AddActivityInputPortMappingEdit extends AbstractActivityEdit {
 	private final String processorPortName;
 	private final String activityPortName;
 
-	public AddActivityInputPortMappingEdit(Activity<?> activity, String processorPortName, String activityPortName) {
+	public AddActivityInputPortMappingEdit(Activity<?> activity,
+			String processorPortName, String activityPortName) {
 		super(activity);
 		this.processorPortName = processorPortName;
 		this.activityPortName = activityPortName;
@@ -37,7 +37,9 @@ public class AddActivityInputPortMappingEdit extends AbstractActivityEdit {
 	@Override
 	protected void doEditAction(AbstractActivity<?> activity)
 			throws EditException {
-		if (activity.getInputPortMapping().containsKey(processorPortName)) throw new EditException("The output mapping for processor name:"+processorPortName+" already exists");
+		if (activity.getInputPortMapping().containsKey(processorPortName))
+			throw new EditException("The output mapping for processor name:"
+					+ processorPortName + " already exists");
 		// Note javadoc of getOutputPortMapping - the mapping is processorPort -> activityPort
 		// -- opposite of the outputPortMapping
 		activity.getInputPortMapping().put(processorPortName, activityPortName);

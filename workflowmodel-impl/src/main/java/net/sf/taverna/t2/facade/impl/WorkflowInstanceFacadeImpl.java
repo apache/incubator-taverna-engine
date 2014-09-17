@@ -20,10 +20,11 @@
  ******************************************************************************/
 package net.sf.taverna.t2.facade.impl;
 
+import static java.util.Collections.synchronizedList;
+
 import java.lang.ref.WeakReference;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -91,6 +92,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 	private State state = State.prepared;
 	public Date stateLastModified = new Date();
 
+	@Override
 	public InvocationContext getContext() {
 		return context;
 	}
@@ -102,12 +104,12 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 	private String instanceOwningProcessId;
 	private String localName;
 	private MonitorManager monitorManager = MonitorManager.getInstance();
-	protected List<FacadeListener> facadeListeners = Collections.synchronizedList(new ArrayList<FacadeListener>());
-	protected List<ResultListener> resultListeners = Collections.synchronizedList(new ArrayList<ResultListener>());
+	protected List<FacadeListener> facadeListeners = synchronizedList(new ArrayList<FacadeListener>());
+	protected List<ResultListener> resultListeners = synchronizedList(new ArrayList<ResultListener>());
 
 	private boolean provEnabled = false;
 	
-	private WeakHashMap<String, T2Reference> pushedDataMap = new WeakHashMap<String, T2Reference> ();
+	private WeakHashMap<String, T2Reference> pushedDataMap = new WeakHashMap<> ();
 
 	// Id of this run
 	private String workflowRunId;
@@ -118,18 +120,20 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 
 	private int portsToComplete;
 	
-	private enum WorkflowInstanceFacadeChange {CANCELLATION, PORT_DECREMENT, PROCESSOR_DECREMENT};
+	private enum WorkflowInstanceFacadeChange {
+		CANCELLATION, PORT_DECREMENT, PROCESSOR_DECREMENT
+	};
 
 	public WorkflowInstanceFacadeImpl(final Dataflow dataflow,
 			InvocationContext context, String parentProcess)
 			throws InvalidDataflowException {
 		if (dataflow == null) {
 			logger.error("Dataflow is null");
+			throw new IllegalArgumentException("Dataflow is null");
 		}
 		DataflowValidationReport report = dataflow.checkValidity();
-		if (!report.isValid()) {
+		if (!report.isValid())
 			throw new InvalidDataflowException(dataflow, report);
-		}
 
 		this.dataflow = dataflow;
 		this.context = context;
@@ -138,26 +142,32 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 		this.localName = "facade" + owningProcessId.getAndIncrement();
 		// Set the wf run id
 		workflowRunId = UUID.randomUUID().toString();
-		if (parentProcess.equals("")) {
+		if (parentProcess.isEmpty()) {
 			// Top-level workflow
 			
-			// add top level workflow run so that reference service can generate
-			// identifiers linked to our run
+			/*
+			 * add top level workflow run so that reference service can generate
+			 * identifiers linked to our run
+			 */
 			context.addEntity(new WorkflowRunIdEntity(workflowRunId));
 			this.instanceOwningProcessId = localName;
 			
-			// Add this WorkflowInstanceFacade to the map of all workflow run IDs 
-			// against the corresponding WorkflowInstanceFacadeS/ - to be used
-			// by DependencyActivity's such as API consumer and Beanshell
+			/*
+			 * Add this WorkflowInstanceFacade to the map of all workflow run
+			 * IDs against the corresponding WorkflowInstanceFacadeS/ - to be
+			 * used by DependencyActivity's such as API consumer and Beanshell
+			 */
 			workflowRunFacades.put(localName, new WeakReference<WorkflowInstanceFacade>(this));
-			// Note that we do not put the IDs for nested workflows, just for the main ones!
+			/*
+			 * Note that we do not put the IDs for nested workflows, just for
+			 * the main ones!
+			 */
 		} else {
 			// Nested workflow
 			this.instanceOwningProcessId = parentProcess + ":" + localName;
 		}		
 				
 		if (context.getProvenanceReporter() != null) {
-
 			provEnabled = true;
 			workflowItem = new WorkflowProvenanceItem();
 			workflowItem.setDataflow(dataflow);
@@ -166,12 +176,13 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 			workflowItem.setParentId(dataflow.getIdentifier());
 			workflowItem.setWorkflowId(dataflow.getIdentifier());
 			
-			// FIXME: workflowItem is local to each instanceOwningProcessId, but
-			// might be added to the Processor within different concurrent
-			// runs.  (T3-930)
+			/*
+			 * FIXME: workflowItem is local to each instanceOwningProcessId, but
+			 * might be added to the Processor within different concurrent runs.
+			 * (T3-930)
+			 */
 			addProvenanceLayerToProcessors(workflowItem);
 			context.getProvenanceReporter().setSessionID(workflowRunId);
-
 		}
 		facadeResultListener = new FacadeResultListener(dataflow, workflowItem);
 		
@@ -181,19 +192,19 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 			ProcessorFinishedObserver observer = new ProcessorFinishedObserver(workflowItem, expectedProcessId);
 			((ProcessorImpl) processor).addObserver(observer);
 		}
-	
 	}
 
 	private void addProvenanceLayerToProcessors(WorkflowProvenanceItem workflowItem) {
 		for (Processor processor : dataflow.getProcessors()) {
-		    // Synchronized per processor as we might be modifying its dispatch stack
-		    // (fixes T3-929)
+			/*
+			 * Synchronized per processor as we might be modifying its dispatch
+			 * stack (fixes T3-929)
+			 */
 		    synchronized (processor) {               
 		        DispatchStack dispatchStack = processor.getDispatchStack();
     			List<DispatchLayer<?>> layers = dispatchStack.getLayers();
-    			if (isProvenanceAlreadyAdded(layers)) {
+    			if (isProvenanceAlreadyAdded(layers))
     				continue;
-    			}
 				DispatchLayer<?> provenance = new IntermediateProvenance();
 				IntermediateProvenance intermediateProvenance = (IntermediateProvenance) provenance;
 				intermediateProvenance.setWorkflow(workflowItem);
@@ -214,11 +225,9 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 	}
 
     private boolean isProvenanceAlreadyAdded(List<DispatchLayer<?>> layers) {
-        for (DispatchLayer<?> layer : layers) {
-        	if (layer instanceof IntermediateProvenance) {
+        for (DispatchLayer<?> layer : layers)
+        	if (layer instanceof IntermediateProvenance)
         		return true;
-        	}
-        }
         return false;
     }
 
@@ -237,26 +246,26 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
         return position;
     }
 
+	@Override
 	public void addFacadeListener(FacadeListener listener) {
 		facadeListeners.add(listener);
 	}
 
+	@Override
 	public void addResultListener(ResultListener listener) {
 		synchronized (resultListeners) {
-			if (resultListeners.isEmpty()) {
-				for (DataflowOutputPort port : dataflow.getOutputPorts()) {
+			if (resultListeners.isEmpty())
+				for (DataflowOutputPort port : dataflow.getOutputPorts())
 					port.addResultListener(facadeResultListener);
-				}
-			}
 			resultListeners.add(listener); 
 		}		
 	}
 
+	@Override
 	public synchronized void fire() throws IllegalStateException {
-		if (getState().equals(State.running)) {
+		if (getState().equals(State.running))
 			throw new IllegalStateException(
 					"Workflow is already running!");
-		}
 		workflowStarted = new Timestamp(System.currentTimeMillis());
 		setState(State.running);
 		if (provEnabled) {
@@ -264,86 +273,99 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 			context.getProvenanceReporter().addProvenanceItem(workflowItem);
 		}
 		
-		HashSet<MonitorableProperty<?>> properties = new HashSet<MonitorableProperty<?>>();
+		HashSet<MonitorableProperty<?>> properties = new HashSet<>();
 		properties.add(new StateProperty());
 		monitorManager.registerNode(this, instanceOwningProcessId.split(":"),				
 				properties);
-		dataflow.fire(instanceOwningProcessId, context);
-		
+		dataflow.fire(instanceOwningProcessId, context);		
 	}
 
 	public final class StateProperty implements MonitorableProperty<State> {
+		@Override
 		public Date getLastModified() {
 			return stateLastModified;
 		}
 
+		@Override
 		public String[] getName() {
 			return new String[] { "facade", "state" };
 		}
 
+		@Override
 		public State getValue() throws NoSuchPropertyException {
 			return getState();
 		}
 	}
 	
+	@Override
 	public Dataflow getDataflow() {
 		return dataflow;
 	}
 
+	@Override
 	public TypedTreeModel<MonitorNode> getStateModel() {
 		// TODO WorkflowInstanceFacade.getStateModel not yet implemented
 		return null;
 	}
 
+	@Override
 	public void pushData(WorkflowDataToken token, String portName)
 			throws TokenOrderException {
 		State currentState = getState();
-		if (! currentState.equals(State.running)) {
-			throw new IllegalStateException("Can't push data, current state is not running, but " + currentState);
-		}
-		// TODO: throw TokenOrderException when token stream is violates order
-		// constraints.
+		if (! currentState.equals(State.running))
+			throw new IllegalStateException(
+					"Can't push data, current state is not running, but "
+							+ currentState);
+		/*
+		 * TODO: throw TokenOrderException when token stream is violates order
+		 * constraints.
+		 */
 		for (DataflowInputPort port : dataflow.getInputPorts()) {
-			if (portName.equals(port.getName())) {
-				if (token.getIndex().length == 0) {
-					if (pushedDataMap.containsKey(portName)) {
-						throw new IllegalStateException("Already pushed for port " + portName);
-					}
-					pushedDataMap.put(portName, token.getData());					
-				}
-				if (provEnabled) {
-					WorkflowDataProvenanceItem workflowDataProvenanceItem = new WorkflowDataProvenanceItem();
-					workflowDataProvenanceItem.setPortName(portName);
-					workflowDataProvenanceItem.setInputPort(true);
-					workflowDataProvenanceItem.setData(token.getData());
-					workflowDataProvenanceItem.setReferenceService(context.getReferenceService());
-					workflowDataProvenanceItem.setParentId(workflowItem.getIdentifier());
-					workflowDataProvenanceItem.setWorkflowId(workflowItem.getParentId());
-					workflowDataProvenanceItem.setIdentifier(UUID.randomUUID().toString());
-					workflowDataProvenanceItem.setParentId(instanceOwningProcessId);
-					workflowDataProvenanceItem.setProcessId(instanceOwningProcessId);
-					workflowDataProvenanceItem.setIndex(token.getIndex());
-					workflowDataProvenanceItem.setFinal(token.isFinal());
-					context.getProvenanceReporter().addProvenanceItem(
-							workflowDataProvenanceItem);
-				}
-				port.receiveEvent(token.pushOwningProcess(localName));
+			if (!portName.equals(port.getName()))
+				continue;
+			if (token.getIndex().length == 0) {
+				if (pushedDataMap.containsKey(portName))
+					throw new IllegalStateException("Already pushed for port " + portName);
+				pushedDataMap.put(portName, token.getData());					
 			}
+			if (provEnabled) {
+				WorkflowDataProvenanceItem workflowDataProvenanceItem = new WorkflowDataProvenanceItem();
+				workflowDataProvenanceItem.setPortName(portName);
+				workflowDataProvenanceItem.setInputPort(true);
+				workflowDataProvenanceItem.setData(token.getData());
+				workflowDataProvenanceItem.setReferenceService(context.getReferenceService());
+				workflowDataProvenanceItem.setParentId(workflowItem.getIdentifier());
+				workflowDataProvenanceItem.setWorkflowId(workflowItem.getParentId());
+				workflowDataProvenanceItem.setIdentifier(UUID.randomUUID().toString());
+				workflowDataProvenanceItem.setParentId(instanceOwningProcessId);
+				workflowDataProvenanceItem.setProcessId(instanceOwningProcessId);
+				workflowDataProvenanceItem.setIndex(token.getIndex());
+				workflowDataProvenanceItem.setFinal(token.isFinal());
+				context.getProvenanceReporter().addProvenanceItem(
+						workflowDataProvenanceItem);
+			}
+			port.receiveEvent(token.pushOwningProcess(localName));
 		}
 	}
 
+	@Override
 	public void removeFacadeListener(FacadeListener listener) {
 		facadeListeners.remove(listener);
 	}
 
+	private <T> ArrayList<T> copyList(List<T> listenerList) {
+		synchronized (listenerList) {
+			return new ArrayList<>(listenerList);
+		}
+	}
+
+	@Override
 	public void removeResultListener(ResultListener listener) {
 		synchronized (resultListeners) {
 			resultListeners.remove(listener);
-			if (resultListeners.isEmpty()) {
-				for (DataflowOutputPort port : dataflow.getOutputPorts()) {
+			if (resultListeners.isEmpty())
+				for (DataflowOutputPort port : dataflow.getOutputPorts())
 					port.removeResultListener(facadeResultListener);
-				}
-			}
 		}
 	}
 
@@ -353,17 +375,16 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 		public FacadeResultListener(Dataflow dataflow,
 				WorkflowProvenanceItem workflowItem) {
 			this.workflowItem = workflowItem;
-			
 		}
 
+		@Override
 		public void resultTokenProduced(WorkflowDataToken token, String portName) {			
-			if (!instanceOwningProcessId.equals(token.getOwningProcess())) {
+			if (!instanceOwningProcessId.equals(token.getOwningProcess()))
 				return;
-			}
-			if (getState().equals(State.cancelled)) {
+			if (getState().equals(State.cancelled))
 				// Throw the token away
 				return;
-			}
+
 			if (provEnabled) {
 				WorkflowDataProvenanceItem workflowDataProvenanceItem = new WorkflowDataProvenanceItem();
 				workflowDataProvenanceItem.setPortName(portName);
@@ -381,12 +402,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 						workflowDataProvenanceItem);				
 			}
 			
-
-			ArrayList<ResultListener> copyOfListeners;
-			synchronized (resultListeners) {
-				copyOfListeners = new ArrayList<ResultListener>(resultListeners);
-			}			
-			for (ResultListener resultListener : copyOfListeners) {
+			for (ResultListener resultListener : copyList(resultListeners))
 				try {
 					resultListener.resultTokenProduced(
 							token.popOwningProcess(), portName);
@@ -394,12 +410,8 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 					logger.warn("Could not notify result listener "
 							+ resultListener, ex);
 				}
-			}
-			if (token.getIndex().length == 0) {
+			if (token.getIndex().length == 0)
 				checkWorkflowFinished(WorkflowInstanceFacadeChange.PORT_DECREMENT);
-			}
-
-
 		}
 	}
 	
@@ -418,11 +430,11 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 			this.expectedProcessId = expectedProcessId;
 		}
 
+		@Override
 		public void notify(Observable<ProcessorFinishedEvent> sender,
 				ProcessorFinishedEvent message) throws Exception {
-			if (! message.getOwningProcess().equals(expectedProcessId)) {
+			if (! message.getOwningProcess().equals(expectedProcessId))
 				return;
-			}
 			
 			// De-register the processor node from the monitor as it has finished
 			monitorManager.deregisterNode(message.getOwningProcess());
@@ -435,18 +447,23 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 		}
 	}
 
+	private void applyChange(WorkflowInstanceFacadeChange change) {
+		switch (change) {
+		case CANCELLATION:
+			processorsToComplete = 0;
+			portsToComplete = 0;
+			break;
+		case PORT_DECREMENT:
+			portsToComplete--;
+			break;
+		case PROCESSOR_DECREMENT:
+			processorsToComplete--;
+			break;
+		}
+	}
 	protected void checkWorkflowFinished(WorkflowInstanceFacadeChange change) {
 		synchronized (this) {
-			if (WorkflowInstanceFacadeChange.CANCELLATION.equals(change)) {
-				processorsToComplete = 0;
-				portsToComplete = 0;
-			}
-			else if (WorkflowInstanceFacadeChange.PORT_DECREMENT.equals(change)) {
-				portsToComplete--;
-			}
-			else if (WorkflowInstanceFacadeChange.PROCESSOR_DECREMENT.equals(change)) {
-				processorsToComplete--;
-			}
+			applyChange(change);
 			if (getState().equals(State.cancelled) && processorsToComplete < 0) {
 				logger.error("Already cancelled workflow run "
 						+ instanceOwningProcessId);
@@ -457,29 +474,28 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 						+ instanceOwningProcessId, new IllegalStateException());
 				return;
 			}
-			if (processorsToComplete > 0 || portsToComplete > 0) {
+			if (processorsToComplete > 0 || portsToComplete > 0)
 				// Not yet finished
 				return;
-			}
 			if (processorsToComplete < 0 || portsToComplete < 0) {
 				logger.error("Already finished workflow run "
 						+ instanceOwningProcessId, new IllegalStateException());
 				return;
 			}
-			if (!getState().equals(State.cancelled)) {
+			if (!getState().equals(State.cancelled))
 				setState(State.completed);
-			}
 			processorsToComplete = -1;
 			portsToComplete = -1;
 		}	
 		// De-register the workflow node from the monitor
 		monitorManager.deregisterNode(instanceOwningProcessId + ":" + dataflow.getLocalName());
 
-		// De-register this facade node from the monitor - this will effectively
-		// tell the monitor that the workflow run has finished
+		/*
+		 * De-register this facade node from the monitor - this will effectively
+		 * tell the monitor that the workflow run has finished
+		 */
 		monitorManager.deregisterNode(instanceOwningProcessId);
-		
-		
+
 		if (provEnabled) {
 			DataflowRunComplete dataflowRunComplete = new DataflowRunComplete();
 			dataflowRunComplete.setInvocationEnded(new Timestamp(System.currentTimeMillis()));
@@ -494,11 +510,9 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 			context.getProvenanceReporter().addProvenanceItem(
 					dataflowRunComplete);
 		}
-		
-		
 	}
 
-
+	@Override
 	public WeakHashMap<String, T2Reference> getPushedDataMap() {
 		return pushedDataMap;
 	}
@@ -507,19 +521,20 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 		this.workflowRunId = workflowRunId;
 	}
 
+	@Override
 	public String getWorkflowRunId() {
 		return workflowRunId;
 	}
 	
+	@Override
 	public synchronized State getState() {
 		return state;
 	}
 	
 	public synchronized void setState(State newState) throws IllegalStateException {
 		State oldState = state;
-		if (newState.equals(state)) {
+		if (newState.equals(state))
 			return;
-		}
 		if (newState.equals(State.running)) {
 			if (state.equals(State.prepared) || state.equals(State.paused)) {
 				stateLastModified = new Date();
@@ -540,10 +555,9 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 				state = newState;
 				notifyFacadeListeners(oldState, newState);
 				return;
-			} else if (state.equals(State.cancelled)) {
+			} else if (state.equals(State.cancelled))
 				// Keep as cancelled
 				return;
-			}
 		} else if (newState.equals(State.cancelled)) {
 			if (! state.equals(State.completed)) {
 				stateLastModified = new Date();
@@ -554,37 +568,27 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 		}		
 		throw new IllegalStateException("Can't change state from " + state  + " to " + newState);		
 	}
-	
-	
+
 	private void notifyFacadeListeners(State oldState, State newState) {
-		List<FacadeListener> copyOfListeners = null;
-		synchronized (facadeListeners) {
-			copyOfListeners = new ArrayList<FacadeListener>(facadeListeners);
-		}
-		for (FacadeListener facadeListener : copyOfListeners) {
+		for (FacadeListener facadeListener : copyList(facadeListeners))
 			try {
 				facadeListener.stateChange(this, oldState, newState);
 			} catch (RuntimeException ex) {
 				logger.warn("Could not notify facade listener "
 						+ facadeListener, ex);
 			}
-		}
 	}
 
+	@Override
 	public synchronized boolean cancelWorkflowRun() {
-		if (getState().equals(State.completed)) {
+		if (getState().equals(State.completed))
 			return false;
-		}
 		boolean result = Stop.cancelWorkflow(getWorkflowRunId());
 		if (result) {
 			setState(State.cancelled);
 			logger.info("Cancelled workflow runId=" + getWorkflowRunId()
 					+ " processId=" + instanceOwningProcessId);
-			List<FacadeListener> copyOfListeners = null;
-			synchronized (facadeListeners) {
-				copyOfListeners = new ArrayList<FacadeListener>(facadeListeners);
-			}
-			for (FacadeListener facadeListener : copyOfListeners) {
+			for (FacadeListener facadeListener : copyList(facadeListeners)) {
 				try {
 					facadeListener.workflowFailed(this, "Workflow was cancelled",
 							new WorkflowRunCancellation(getWorkflowRunId()));
@@ -598,6 +602,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 		return result;
 	}
 
+	@Override
 	public boolean pauseWorkflowRun() {
 		setState(State.paused);
 		if (Stop.pauseWorkflow(getWorkflowRunId())) {
@@ -608,6 +613,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 		return false;
 	}
 
+	@Override
 	public boolean resumeWorkflowRun() {
 		setState(State.running);
 		if (Stop.resumeWorkflow(getWorkflowRunId())) {
@@ -618,6 +624,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 		return false;
 	}
 
+	@Override
 	public String getIdentifier() {
 		return localName;
 	}

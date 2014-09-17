@@ -31,8 +31,7 @@ import net.sf.taverna.t2.workflowmodel.EventHandlingInputPort;
  * @author David Withers
  * 
  */
-public class ConnectDatalinkEdit extends AbstractDatalinkEdit {
-
+class ConnectDatalinkEdit extends AbstractDatalinkEdit {
 	public ConnectDatalinkEdit(Datalink datalink) {
 		super(datalink);
 	}
@@ -41,11 +40,9 @@ public class ConnectDatalinkEdit extends AbstractDatalinkEdit {
 	protected void doEditAction(DatalinkImpl datalink) throws EditException {
 		EventForwardingOutputPort source = datalink.getSource();
 		EventHandlingInputPort sink = datalink.getSink();
-		if (source instanceof BasicEventForwardingOutputPort) {
+		if (source instanceof BasicEventForwardingOutputPort)
 			((BasicEventForwardingOutputPort) source).addOutgoingLink(datalink);
-		}
-		if (sink instanceof AbstractEventHandlingInputPort) {
+		if (sink instanceof AbstractEventHandlingInputPort)
 			((AbstractEventHandlingInputPort) sink).setIncomingLink(datalink);
-		}
 	}
 }

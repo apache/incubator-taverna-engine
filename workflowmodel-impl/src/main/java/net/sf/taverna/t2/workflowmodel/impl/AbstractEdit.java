@@ -36,9 +36,7 @@ import net.sf.taverna.t2.workflowmodel.EditException;
  *            Expected implementation type of the Subject of this edit
  */
 public abstract class AbstractEdit<SubjectInterface, SubjectType extends SubjectInterface>
-		implements Edit<SubjectInterface> {
-
-	private boolean applied = false;
+		extends EditSupport<SubjectInterface> {
 	protected SubjectInterface subject;
 	private final Class<? extends SubjectInterface> subjectType;
 
@@ -55,10 +53,9 @@ public abstract class AbstractEdit<SubjectInterface, SubjectType extends Subject
 	 */
 	@SuppressWarnings("unchecked")
 	public AbstractEdit(Class<?> subjectType, SubjectInterface subject) {
-		if (subject == null && !isNullSubjectAllowed()) {
+		if (subject == null && !isNullSubjectAllowed())
 			throw new RuntimeException(
 					"Cannot construct an edit with null subject");
-		}
 		this.subjectType = (Class<? extends SubjectInterface>) subjectType;
 		this.subject = subject;
 	}
@@ -72,25 +69,15 @@ public abstract class AbstractEdit<SubjectInterface, SubjectType extends Subject
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	public final SubjectInterface doEdit() throws EditException {
-		if (applied) {
-			throw new EditException("Edit has already been applied!");
-		}
-		if (!subjectType.isInstance(subject)) {
+	public final SubjectInterface applyEdit() throws EditException {
+		if (!subjectType.isInstance(subject))
 			throw new EditException(
 					"Edit cannot be applied to a object which isn't an instance of "
 							+ subjectType);
-		}
 		SubjectType subjectImpl = (SubjectType) subject;
-		try {
-			synchronized (subjectImpl) {
-				doEditAction(subjectImpl);
-				applied = true;
-				return this.subject;
-			}
-		} catch (EditException ee) {
-			applied = false;
-			throw ee;
+		synchronized (subjectImpl) {
+			doEditAction(subjectImpl);
+			return this.subject;
 		}
 	}
 
@@ -112,26 +99,4 @@ public abstract class AbstractEdit<SubjectInterface, SubjectType extends Subject
 	public final SubjectType getSubject() {
 		return (SubjectType) subject;
 	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public final boolean isApplied() {
-		return applied;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public final void undo() {
-		if (!applied) {
-			throw new RuntimeException(
-					"Attempt to undo edit that was never applied");
-		}
-		throw new UnsupportedOperationException(
-				"undo not supported by this interface in Taverna 3");
-	}
-
 }

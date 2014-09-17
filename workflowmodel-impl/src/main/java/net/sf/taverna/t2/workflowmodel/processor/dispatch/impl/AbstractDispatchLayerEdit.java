@@ -32,37 +32,27 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchStack;
  * 
  */
 public abstract class AbstractDispatchLayerEdit implements Edit<DispatchStack> {
-
 	private boolean applied = false;
-
-	private DispatchStack stack;
+	private DispatchStackImpl stack;
 
 	protected AbstractDispatchLayerEdit(DispatchStack s) {
-		if (s == null) {
+		if (s == null)
 			throw new RuntimeException(
 					"Cannot construct a dispatch stack edit with null dispatch stack");
-		}
-		this.stack = s;
+		if (s instanceof DispatchStackImpl == false)
+			throw new RuntimeException(
+					"Edit cannot be applied to a DispatchStack which isn't an instance of DispatchStackImpl");
+		this.stack = (DispatchStackImpl) s;
 	}
 
+	@Override
 	public final DispatchStack doEdit() throws EditException {
-		if (applied) {
+		if (applied)
 			throw new EditException("Edit has already been applied!");
-		}
-		if (stack instanceof DispatchStackImpl == false) {
-			throw new EditException(
-					"Edit cannot be applied to a DispatchStack which isn't an instance of DispatchStackImpl");
-		}
-		DispatchStackImpl dsi = (DispatchStackImpl) stack;
-		try {
-			synchronized (dsi) {
-				doEditAction(dsi);
-				applied = true;
-				return this.stack;
-			}
-		} catch (EditException ee) {
-			applied = false;
-			throw ee;
+		synchronized (stack) {
+			doEditAction(stack);
+			applied = true;
+			return stack;
 		}
 	}
 
@@ -81,25 +71,25 @@ public abstract class AbstractDispatchLayerEdit implements Edit<DispatchStack> {
 	 */
 	protected abstract void undoEditAction(DispatchStackImpl stack);
 
+	@Override
 	public final DispatchStack getSubject() {
 		return stack;
 	}
 
+	@Override
 	public final boolean isApplied() {
 		return this.applied;
 	}
 
+	@Override
 	public final void undo() {
-		if (!applied) {
+		if (!applied)
 			throw new RuntimeException(
 					"Attempt to undo edit that was never applied");
-		}
-		DispatchStackImpl dsi = (DispatchStackImpl) stack;
-		synchronized (dsi) {
-			undoEditAction(dsi);
+		synchronized (stack) {
+			undoEditAction(stack);
 			applied = false;
 		}
-
 	}
 
 }

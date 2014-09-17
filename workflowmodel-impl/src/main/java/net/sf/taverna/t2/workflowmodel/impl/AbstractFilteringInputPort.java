@@ -47,25 +47,25 @@ public abstract class AbstractFilteringInputPort extends
 		this.filterDepth = depth;
 	}
 
+	@Override
 	public int getFilterDepth() {
 		return this.filterDepth;
 	}
 
 	private int filterDepth;
 
+	@Override
 	public void receiveEvent(WorkflowDataToken token) {
 		receiveToken(token);
 	}
 
 	public void pushToken(WorkflowDataToken dt, String owningProcess,
 			int desiredDepth) {
-		if (dt.getData().getDepth() == desiredDepth) {
+		if (dt.getData().getDepth() == desiredDepth)
 			pushData(getName(), owningProcess, dt.getIndex(), dt.getData(), dt
 					.getContext());
-		} else {
-
+		else {
 			ReferenceService rs = dt.getContext().getReferenceService();
-
 			Iterator<ContextualizedT2Reference> children = rs.traverseFrom(dt
 					.getData(), dt.getData().getDepth() - 1);
 
@@ -74,12 +74,10 @@ public abstract class AbstractFilteringInputPort extends
 				int[] newIndex = new int[dt.getIndex().length
 						+ ci.getIndex().length];
 				int i = 0;
-				for (int indx : dt.getIndex()) {
+				for (int indx : dt.getIndex())
 					newIndex[i++] = indx;
-				}
-				for (int indx : ci.getIndex()) {
+				for (int indx : ci.getIndex())
 					newIndex[i++] = indx;
-				}
 				pushToken(new WorkflowDataToken(owningProcess, newIndex, ci
 						.getReference(), dt.getContext()), owningProcess,
 						desiredDepth);
@@ -91,72 +89,73 @@ public abstract class AbstractFilteringInputPort extends
 
 	public void receiveToken(WorkflowDataToken token) {
 		String newOwner = transformOwningProcess(token.getOwningProcess());
-		if (filterDepth == -1) {
+		if (filterDepth == -1)
 			throw new WorkflowStructureException(
 					"Input depth filter not configured on input port, failing");
-		} else {
-			int tokenDepth = token.getData().getDepth();
-			if (tokenDepth == filterDepth) {
-				if (filterDepth == getDepth()) {
-					// Pass event straight through, the filter depth is the same
-					// as the desired input port depth
-					pushData(getName(), newOwner, token.getIndex(), token
-							.getData(), token.getContext());
-				} else {
-					pushToken(token, newOwner, getDepth());
-					/**
-					 * // Shred the input identifier into the appropriate port //
-					 * depth and send the events through, pushing a //
-					 * completion event at the end. DataManager dManager =
-					 * ContextManager .getDataManager(newOwner); Iterator<ContextualizedIdentifier>
-					 * children = dManager .traverse(token.getData(),
-					 * getDepth()); while (children.hasNext()) {
-					 * ContextualizedIdentifier ci = children.next(); int[]
-					 * newIndex = new int[token.getIndex().length +
-					 * ci.getIndex().length]; int i = 0; for (int indx :
-					 * token.getIndex()) { newIndex[i++] = indx; } for (int indx :
-					 * ci.getIndex()) { newIndex[i++] = indx; }
-					 * pushData(getName(), newOwner, newIndex, ci.getDataRef()); }
-					 * pushCompletion(getName(), newOwner, token.getIndex());
-					 */
 
+		int tokenDepth = token.getData().getDepth();
+		if (tokenDepth == filterDepth) {
+			if (filterDepth == getDepth()) {
+				/*
+				 * Pass event straight through, the filter depth is the same as
+				 * the desired input port depth
+				 */
+				pushData(getName(), newOwner, token.getIndex(),
+						token.getData(), token.getContext());
+			} else {
+				pushToken(token, newOwner, getDepth());
+				/*
+				 * Shred the input identifier into the appropriate port depth
+				 * and send the events through, pushing a completion event at
+				 * the end.
+				 */
+				/*
+				 * DataManager dManager = ContextManager
+				 * .getDataManager(newOwner); Iterator<ContextualizedIdentifier>
+				 * children = dManager .traverse(token.getData(), getDepth());
+				 * while (children.hasNext()) { ContextualizedIdentifier ci =
+				 * children.next(); int[] newIndex = new
+				 * int[token.getIndex().length + ci.getIndex().length]; int i =
+				 * 0; for (int indx : token.getIndex()) { newIndex[i++] = indx;
+				 * } for (int indx : ci.getIndex()) { newIndex[i++] = indx; }
+				 * pushData(getName(), newOwner, newIndex, ci.getDataRef()); }
+				 * pushCompletion(getName(), newOwner, token.getIndex());
+				 */
+			}
+		} else if (tokenDepth > filterDepth) {
+			// Convert to a completion event and push into the iteration strategy
+			pushCompletion(getName(), newOwner, token.getIndex(), token
+					.getContext());
+		} else if (tokenDepth < filterDepth) {
+			/*
+			 * Normally we can ignore these, but there is a special case where
+			 * token depth is less than filter depth and there is no index
+			 * array. In this case we can't throw the token away as there will
+			 * never be an enclosing one so we have to use the data manager to
+			 * register a new single element collection and recurse.
+			 */
+			if (token.getIndex().length == 0) {
+				T2Reference ref = token.getData();
+				ReferenceService rs = token.getContext().getReferenceService();
+				int currentDepth = tokenDepth;
+				while (currentDepth < filterDepth) {
+					// Wrap in a single item list
+					List<T2Reference> newList = new ArrayList<>();
+					newList.add(ref);
+					ref = rs.getListService()
+							.registerList(newList, token.getContext()).getId();
+					currentDepth++;
 				}
-			} else if (tokenDepth > filterDepth) {
-				// Convert to a completion event and push into the iteration
-				// strategy
-				pushCompletion(getName(), newOwner, token.getIndex(), token
-						.getContext());
-			} else if (tokenDepth < filterDepth) {
-				// Normally we can ignore these, but there is a special case
-				// where token depth is less than filter depth and there is no
-				// index array. In this case we can't throw the token away as
-				// there will never be an enclosing one so we have to use the
-				// data manager to register a new single element collection and
-				// recurse.
-				if (token.getIndex().length == 0) {
-					T2Reference ref = token.getData();
-					ReferenceService rs = token.getContext()
-							.getReferenceService();
-					int currentDepth = tokenDepth;
-					while (currentDepth < filterDepth) {
-						// Wrap in a single item list
-						List<T2Reference> newList = new ArrayList<T2Reference>();
-						newList.add(ref);
-						ref = rs.getListService().registerList(newList, token.getContext()).getId();
-						currentDepth++;
-					}
-					pushData(getName(), newOwner, new int[0], ref, token
-							.getContext());
-				}
+				pushData(getName(), newOwner, new int[0], ref,
+						token.getContext());
 			}
 		}
 	}
 
 	public void setFilterDepth(int filterDepth) {
 		this.filterDepth = filterDepth;
-		if (filterDepth < getDepth()) {
+		if (filterDepth < getDepth())
 			this.filterDepth = getDepth();
-		}
 	}
 
 	/**
@@ -190,5 +189,4 @@ public abstract class AbstractFilteringInputPort extends
 	protected String transformOwningProcess(String oldOwner) {
 		return oldOwner;
 	}
-
 }

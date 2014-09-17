@@ -32,14 +32,10 @@ import net.sf.taverna.t2.workflowmodel.Processor;
  * appropriately.
  * 
  * @author Tom Oinn
- * 
  */
-public class ConnectProcesorOutputEdit extends AbstractProcessorEdit {
-
+class ConnectProcesorOutputEdit extends AbstractProcessorEdit {
 	private EventHandlingInputPort target;
-
 	private String outputName;
-
 	private DatalinkImpl newLink = null;
 
 	public ConnectProcesorOutputEdit(Processor p, String outputName,

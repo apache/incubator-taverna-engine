@@ -38,19 +38,18 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityInputPort;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityOutputPort;
 
-public class MapProcessorPortsForActivityEdit implements Edit<Processor> {
-
+class MapProcessorPortsForActivityEdit extends EditSupport<Processor> {
 	private final ProcessorImpl processor;
 	CompoundEdit compoundEdit = null;
-	
 
 	public MapProcessorPortsForActivityEdit(Processor processor) {
 		this.processor = (ProcessorImpl)processor;
 	}
 	
-	public Processor doEdit() throws EditException {
+	@Override
+	public Processor applyEdit() throws EditException {
 		EditsImpl editsImpl = new EditsImpl();
-		List<Edit<?>> edits = new ArrayList<Edit<?>>();
+		List<Edit<?>> edits = new ArrayList<>();
 		Activity<?> a = processor.getActivityList().get(0);
 		
 		List<? extends ProcessorInputPort> inputPortsForRemoval = determineInputPortsForRemoval(processor,a);
@@ -61,64 +60,61 @@ public class MapProcessorPortsForActivityEdit implements Edit<Processor> {
 //		List<OutputPort> newOutputPorts = determineNewOutputPorts(processor,a);
 		
 		for (ProcessorInputPort ip : inputPortsForRemoval) {
-			if (ip.getIncomingLink()!=null) {
-				edits.add(editsImpl.getDisconnectDatalinkEdit(ip.getIncomingLink()));
-			}
+			if (ip.getIncomingLink() != null)
+				edits.add(editsImpl.getDisconnectDatalinkEdit(ip
+						.getIncomingLink()));
 			edits.add(editsImpl.getRemoveProcessorInputPortEdit(processor, ip));
-			if (a.getInputPortMapping().containsKey(ip.getName())) {
-				edits.add(new RemoveActivityInputPortMappingEdit(a,ip.getName()));
-			}
+			if (a.getInputPortMapping().containsKey(ip.getName()))
+				edits.add(new RemoveActivityInputPortMappingEdit(a, ip
+						.getName()));
 		}
 		
 		for (ProcessorOutputPort op : outputPortsForRemoval) {
-			if (op.getOutgoingLinks().size()>0) {
+			if (!op.getOutgoingLinks().isEmpty())
 				for (Datalink link : op.getOutgoingLinks())
-				edits.add(editsImpl.getDisconnectDatalinkEdit(link));
-			}
+					edits.add(editsImpl.getDisconnectDatalinkEdit(link));
 			edits.add(editsImpl.getRemoveProcessorOutputPortEdit(processor, op));
-			if (a.getOutputPortMapping().containsKey(op.getName())) {
-				edits.add(new RemoveActivityOutputPortMappingEdit(a,op.getName()));
-			}
+			if (a.getOutputPortMapping().containsKey(op.getName()))
+				edits.add(new RemoveActivityOutputPortMappingEdit(a, op
+						.getName()));
 		}
 
 		for (ProcessorInputPort ip : changedInputPorts.keySet()) {
 			final Datalink incomingLink = ip.getIncomingLink();
-			if (incomingLink!=null) {
+			if (incomingLink != null)
 				edits.add(editsImpl.getDisconnectDatalinkEdit(incomingLink));
-			}
 			edits.add(editsImpl.getRemoveProcessorInputPortEdit(processor, ip));
 			
 			if (incomingLink != null) {
 				ActivityInputPort aip = changedInputPorts.get(ip);
-				ProcessorInputPort pip = new ProcessorInputPortImpl(processor, aip.getName(), aip.getDepth() );
-				edits.add(editsImpl.getAddProcessorInputPortEdit(processor, pip));
-				DatalinkImpl dl = new DatalinkImpl(incomingLink.getSource(), pip);
-				edits.add(editsImpl.getConnectDatalinkEdit(dl));
+				ProcessorInputPort pip = new ProcessorInputPortImpl(processor,
+						aip.getName(), aip.getDepth());
+				edits.add(editsImpl
+						.getAddProcessorInputPortEdit(processor, pip));
+				edits.add(editsImpl.getConnectDatalinkEdit(new DatalinkImpl(
+						incomingLink.getSource(), pip)));
 			}
-
 		}
 		
 		for (ProcessorOutputPort op : changedOutputPorts.keySet()) {
 			final Set<? extends Datalink> outgoingLinks = op.getOutgoingLinks();
-			if (outgoingLinks.size()>0) {
-				for (Datalink link : outgoingLinks) {
-					edits.add(editsImpl.getDisconnectDatalinkEdit(link));
-				}
-			}
+			for (Datalink link : outgoingLinks)
+				edits.add(editsImpl.getDisconnectDatalinkEdit(link));
 			edits.add(editsImpl.getRemoveProcessorOutputPortEdit(processor, op));
 			
-			if (outgoingLinks.size() > 0) {
+			if (!outgoingLinks.isEmpty()) {
 				ActivityOutputPort aop = changedOutputPorts.get(op);
-				ProcessorOutputPort pop = new ProcessorOutputPortImpl(processor, aop.getName(), aop.getDepth(), aop.getGranularDepth());
-				edits.add(editsImpl.getAddProcessorOutputPortEdit(processor, pop));
-				for (Datalink link : outgoingLinks) {
-					DatalinkImpl dl = new DatalinkImpl(pop, link.getSink());
-					edits.add(editsImpl.getConnectDatalinkEdit(dl));
-				}
+				ProcessorOutputPort pop = new ProcessorOutputPortImpl(
+						processor, aop.getName(), aop.getDepth(),
+						aop.getGranularDepth());
+				edits.add(editsImpl.getAddProcessorOutputPortEdit(processor,
+						pop));
+				for (Datalink link : outgoingLinks)
+					edits.add(editsImpl
+							.getConnectDatalinkEdit(new DatalinkImpl(pop, link
+									.getSink())));
 			}
 		}
-
-
 		
 //		for (ActivityInputPort ip : changedInputPorts) {
 //			if (ip.getIncomingLink()!=null) {
@@ -156,87 +152,62 @@ public class MapProcessorPortsForActivityEdit implements Edit<Processor> {
 		return processor;
 	}
 
+	@Override
 	public Object getSubject() {
 		return processor;
 	}
 
-	public boolean isApplied() {
-		return (compoundEdit!=null && compoundEdit.isApplied());
-	}
-
-	public void undo() {
-		compoundEdit.undo();
-	}
-
-	private List<ProcessorInputPort> determineInputPortsForRemoval(Processor p,Activity<?>a) {
-		
-		List<ProcessorInputPort> result = new ArrayList<ProcessorInputPort>();
-		for (ProcessorInputPort pPort : p.getInputPorts()) {
-			boolean found=false;
-			for (ActivityInputPort aPort : a.getInputPorts()) {
-				if (aPort.getName().equals(pPort.getName())) {
-//					if (pPort.getDepth() == aPort.getDepth()) {
-						found=true;
-//					}
-					break;
-				}
-			}
-			if (!found) {
-				result.add(pPort);
-			}
+	private List<ProcessorInputPort> determineInputPortsForRemoval(Processor p,
+			Activity<?> a) {
+		List<ProcessorInputPort> result = new ArrayList<>();
+		processorPorts: for (ProcessorInputPort pPort : p.getInputPorts()) {
+			for (ActivityInputPort aPort : a.getInputPorts())
+				if (aPort.getName().equals(pPort.getName()))
+//					if (pPort.getDepth() == aPort.getDepth())
+					continue processorPorts;
+			result.add(pPort);
 		}
 		return result;
 	}
 	
-	private List<ProcessorOutputPort> determineOutputPortsForRemoval(Processor p,Activity<?>a) {
-		List<ProcessorOutputPort> result = new ArrayList<ProcessorOutputPort>();
-		for (ProcessorOutputPort pPort : p.getOutputPorts()) {
-			boolean found=false;
-			for (OutputPort aPort : a.getOutputPorts()) {
-				if (aPort.getName().equals(pPort.getName())) {
-//					if (pPort.getDepth() == aPort.getDepth() && pPort.getGranularDepth() == aPort.getGranularDepth()) {
-						found=true;
-//					}
-					break;
-				}
-			}
-			if (!found) {
-				result.add(pPort);
-			}
+	private List<ProcessorOutputPort> determineOutputPortsForRemoval(
+			Processor p, Activity<?> a) {
+		List<ProcessorOutputPort> result = new ArrayList<>();
+		processorPorts: for (ProcessorOutputPort pPort : p.getOutputPorts()) {
+			for (OutputPort aPort : a.getOutputPorts())
+				if (aPort.getName().equals(pPort.getName()))
+//					if (pPort.getDepth() == aPort.getDepth() && pPort.getGranularDepth() == aPort.getGranularDepth())
+					continue processorPorts;
+			result.add(pPort);
 		}
 		return result;
 	}
 	
-	private Map<? extends ProcessorInputPort, ActivityInputPort> determineChangedInputPorts(Processor p,Activity<?>a) {
-		
-		Map<ProcessorInputPort, ActivityInputPort> result = new HashMap<ProcessorInputPort, ActivityInputPort>();
-		for (ProcessorInputPort pPort : p.getInputPorts()) {
-			for (ActivityInputPort aPort : a.getInputPorts()) {
+	private Map<? extends ProcessorInputPort, ActivityInputPort> determineChangedInputPorts(
+			Processor p, Activity<?> a) {
+		Map<ProcessorInputPort, ActivityInputPort> result = new HashMap<>();
+		for (ProcessorInputPort pPort : p.getInputPorts())
+			for (ActivityInputPort aPort : a.getInputPorts())
 				if (aPort.getName().equals(pPort.getName())) {
-					if (pPort.getDepth() != aPort.getDepth()) {
+					if (pPort.getDepth() != aPort.getDepth())
 						result.put(pPort, aPort);
-					}
 					break;
 				}
-			}
-		}
 		return result;
 	}
 	
-	private Map<? extends ProcessorOutputPort, ActivityOutputPort> determineChangedOutputPorts(Processor p,Activity<?>a) {
-		Map<ProcessorOutputPort, ActivityOutputPort> result = new HashMap<ProcessorOutputPort, ActivityOutputPort>();
-		for (ProcessorOutputPort pPort : p.getOutputPorts()) {
-			for (OutputPort aPort : a.getOutputPorts()) {
+	private Map<? extends ProcessorOutputPort, ActivityOutputPort> determineChangedOutputPorts(
+			Processor p, Activity<?> a) {
+		Map<ProcessorOutputPort, ActivityOutputPort> result = new HashMap<>();
+		for (ProcessorOutputPort pPort : p.getOutputPorts())
+			for (OutputPort aPort : a.getOutputPorts())
 				if (aPort.getName().equals(pPort.getName())) {
-					if ((pPort.getDepth() != aPort.getDepth()) || (pPort.getGranularDepth() != aPort.getGranularDepth())) {
+					if ((pPort.getDepth() != aPort.getDepth())
+							|| (pPort.getGranularDepth() != aPort
+									.getGranularDepth()))
 						result.put(pPort, (ActivityOutputPort) aPort);
-					}
 					break;
 				}
-			}
-		}
 		return result;
 	}
-	
-
 }

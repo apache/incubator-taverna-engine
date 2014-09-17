@@ -29,42 +29,41 @@ import net.sf.taverna.t2.workflowmodel.EventHandlingInputPort;
  * Naive bean implementation of Datalink
  * 
  * @author Tom Oinn
- * 
  */
 public class DatalinkImpl extends AbstractAnnotatedThing<Datalink> implements
 		Datalink {
-
 	private EventForwardingOutputPort source;
-
 	private EventHandlingInputPort sink;
-
 	private transient int resolvedDepth = -1;
-	
+
+	@Override
 	public int getResolvedDepth() {
 		return this.resolvedDepth;
 	}
-	
+
 	protected void setResolvedDepth(int newResolvedDepth) {
 		this.resolvedDepth = newResolvedDepth;
 	}
-	
+
 	protected DatalinkImpl(EventForwardingOutputPort source,
 			EventHandlingInputPort sink) {
 		this.source = source;
 		this.sink = sink;
 	}
 
+	@Override
 	public EventHandlingInputPort getSink() {
 		return sink;
 	}
 
+	@Override
 	public EventForwardingOutputPort getSource() {
 		return source;
 	}
-	
+
 	@Override
 	public String toString() {
-		return "link("+resolvedDepth+")"+source.getName()+":"+sink.getName();
+		return "link(" + resolvedDepth + ")" + source.getName() + ":"
+				+ sink.getName();
 	}
-
 }

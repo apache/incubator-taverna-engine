@@ -24,8 +24,7 @@ import net.sf.taverna.t2.workflowmodel.Condition;
 import net.sf.taverna.t2.workflowmodel.EditException;
 import net.sf.taverna.t2.workflowmodel.Processor;
 
-public class CreateConditionEdit extends AbstractBinaryProcessorEdit {
-
+class CreateConditionEdit extends AbstractBinaryProcessorEdit {
 	private ConditionImpl condition;
 	
 	CreateConditionEdit(Processor control, Processor target) {

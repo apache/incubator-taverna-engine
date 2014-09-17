@@ -28,11 +28,8 @@ import net.sf.taverna.t2.workflowmodel.EventForwardingOutputPort;
 
 public class DataflowInputPortImpl extends AbstractEventHandlingInputPort
 		implements DataflowInputPort {
-
 	protected BasicEventForwardingOutputPort internalOutput;
-
 	private int granularInputDepth;
-
 	private Dataflow dataflow;
 
 	DataflowInputPortImpl(String name, int depth, int granularDepth, Dataflow df) {
@@ -43,6 +40,7 @@ public class DataflowInputPortImpl extends AbstractEventHandlingInputPort
 				granularDepth);
 	}
 
+	@Override
 	public int getGranularInputDepth() {
 		return granularInputDepth;
 	}
@@ -57,6 +55,7 @@ public class DataflowInputPortImpl extends AbstractEventHandlingInputPort
 		internalOutput.setGranularDepth(granularDepth);
 	}
 	
+	@Override
 	public EventForwardingOutputPort getInternalOutputPort() {
 		return internalOutput;
 	}
@@ -65,29 +64,30 @@ public class DataflowInputPortImpl extends AbstractEventHandlingInputPort
 	 * Receive an input event, relay it through the internal output port to all
 	 * connected entities
 	 */
+	@Override
 	public void receiveEvent(WorkflowDataToken t) {
 		WorkflowDataToken transformedToken = t.pushOwningProcess(dataflow.getLocalName());
-		// I'd rather avoid casting to the implementation but in this
-		// case we're in the same package - the only reason to do this
-		// is to allow dummy implementations of parts of this
-		// infrastructure during testing, in 'real' use this should
-		// always be a dataflowimpl
-		if (dataflow instanceof DataflowImpl) {
+		/*
+		 * I'd rather avoid casting to the implementation but in this case we're
+		 * in the same package - the only reason to do this is to allow dummy
+		 * implementations of parts of this infrastructure during testing, in
+		 * 'real' use this should always be a dataflowimpl
+		 */
+		if (dataflow instanceof DataflowImpl)
 			((DataflowImpl) dataflow).tokenReceived(transformedToken
 					.getOwningProcess(), t.getContext());
-		}
-		for (Datalink dl : internalOutput.getOutgoingLinks()) {
+		for (Datalink dl : internalOutput.getOutgoingLinks())
 			dl.getSink().receiveEvent(transformedToken);
-		}
 	}
 
+	@Override
 	public Dataflow getDataflow() {
 		return dataflow;
 	}
 	
+	@Override
 	public void setName(String newName) {
 		this.name = newName;
 		internalOutput.setName(newName);
-	}
-	
+	}	
 }

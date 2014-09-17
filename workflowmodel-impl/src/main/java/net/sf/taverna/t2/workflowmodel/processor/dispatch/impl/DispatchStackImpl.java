@@ -59,12 +59,9 @@ import org.apache.log4j.Logger;
  */
 public abstract class DispatchStackImpl extends
 		AbstractAnnotatedThing<DispatchStack> implements DispatchStack {
-
 	private static Logger logger = Logger.getLogger(DispatchStackImpl.class);
-
-	private Map<String, BlockingQueue<IterationInternalEvent<? extends IterationInternalEvent<?>>>> queues = new HashMap<String, BlockingQueue<IterationInternalEvent<? extends IterationInternalEvent<?>>>>();
-
-	private List<DispatchLayer<?>> dispatchLayers = new ArrayList<DispatchLayer<?>>();
+	private Map<String, BlockingQueue<IterationInternalEvent<? extends IterationInternalEvent<?>>>> queues = new HashMap<>();
+	private List<DispatchLayer<?>> dispatchLayers = new ArrayList<>();
 
 	/**
 	 * Override to return the list of activities to be used by this dispatch
@@ -126,7 +123,7 @@ public abstract class DispatchStackImpl extends
 	 * 
 	 * @param event
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void receiveEvent(IterationInternalEvent event) {
 		BlockingQueue<IterationInternalEvent<? extends IterationInternalEvent<?>>> queue = null;
 		String owningProcess = event.getOwningProcess();
@@ -140,26 +137,24 @@ public abstract class DispatchStackImpl extends
 
 				// If all preconditions are satisfied push the queue to the
 				// dispatch layer
-				if (conditionsSatisfied(enclosingProcess)) {
+				if (conditionsSatisfied(enclosingProcess))
 					firstLayer().receiveJobQueue(
 							new DispatchJobQueueEvent(owningProcess, event
 									.getContext(), queue, getActivities()));
-				}
 			} else {
 				queue = queues.get(owningProcess);
 				queue.add(event);
 
-				// If all preconditions are satisfied then notify the queue
-				// addition to any NotifiableLayer instances. If the
-				// preconditions are not satisfied the queue isn't visible to
-				// the dispatch stack yet so do nothing.
-				if (conditionsSatisfied(enclosingProcess)) {
-					for (DispatchLayer layer : dispatchLayers) {
-						if (layer instanceof NotifiableLayer) {
+				/*
+				 * If all preconditions are satisfied then notify the queue
+				 * addition to any NotifiableLayer instances. If the
+				 * preconditions are not satisfied the queue isn't visible to
+				 * the dispatch stack yet so do nothing.
+				 */
+				if (conditionsSatisfied(enclosingProcess))
+					for (DispatchLayer layer : dispatchLayers)
+						if (layer instanceof NotifiableLayer)
 							((NotifiableLayer) layer).eventAdded(owningProcess);
-						}
-					}
-				}
 			}
 		}
 	}
@@ -209,6 +204,7 @@ public abstract class DispatchStackImpl extends
 	 * 
 	 * @see net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchStack#getLayers()
 	 */
+	@Override
 	public List<DispatchLayer<?>> getLayers() {
 		return Collections.unmodifiableList(this.dispatchLayers);
 	}
@@ -242,28 +238,26 @@ public abstract class DispatchStackImpl extends
 	 * @param layer
 	 * @return
 	 */
+	@Override
 	public DispatchLayer<?> layerAbove(DispatchLayer<?> layer) {
 		int layerIndex = dispatchLayers.indexOf(layer);
-		if (layerIndex > 0) {
+		if (layerIndex > 0)
 			return dispatchLayers.get(layerIndex - 1);
-		} else if (layerIndex == 0) {
+		if (layerIndex == 0)
 			return topLayer;
-		} else {
-			return null;
-		}
+		return null;
 	}
 
 	/**
 	 * Return the layer below (higher index) the specified layer, or null if
 	 * there are no layers below this one
 	 */
+	@Override
 	public DispatchLayer<?> layerBelow(DispatchLayer<?> layer) {
-		int layerIndex = dispatchLayers.indexOf(layer);
-		if (layerIndex < dispatchLayers.size() - 1) {
-			return dispatchLayers.get(layerIndex + 1);
-		} else {
+		int layerIndex = dispatchLayers.indexOf(layer) + 1;
+		if (layerIndex >= dispatchLayers.size())
 			return null;
-		}
+		return dispatchLayers.get(layerIndex);
 	}
 	
 	protected DispatchLayer<?> firstLayer() {
@@ -271,15 +265,13 @@ public abstract class DispatchStackImpl extends
 	}
 
 	protected class TopLayer extends AbstractDispatchLayer<Object> {
-
 		@Override
 		public void receiveResult(DispatchResultEvent resultEvent) {
 			DispatchStackImpl.this.pushEvent(new Job(resultEvent
 					.getOwningProcess(), resultEvent.getIndex(), resultEvent
 					.getData(), resultEvent.getContext()));
-			if (resultEvent.getIndex().length == 0) {
+			if (resultEvent.getIndex().length == 0)
 				sendCachePurge(resultEvent.getOwningProcess());
-			}
 		}
 
 		// TODO - implement top level error handling, if an error bubbles up to
@@ -290,9 +282,8 @@ public abstract class DispatchStackImpl extends
 			logger.error("Error received in dispatch stack on owningProcess:"
 					+ errorEvent.getOwningProcess() + ", msg:"
 					+ errorEvent.getMessage(), errorEvent.getCause());
-			if (errorEvent.getIndex().length == 0) {
+			if (errorEvent.getIndex().length == 0)
 				sendCachePurge(errorEvent.getOwningProcess());
-			}
 		}
 
 		@Override
@@ -301,28 +292,27 @@ public abstract class DispatchStackImpl extends
 			Completion c = new Completion(completionEvent.getOwningProcess(),
 					completionEvent.getIndex(), completionEvent.getContext());
 			DispatchStackImpl.this.pushEvent(c);
-			if (c.isFinal()) {
+			if (c.isFinal())
 				sendCachePurge(c.getOwningProcess());
-			}
 		}
 
 		private void sendCachePurge(String owningProcess) {
-			for (DispatchLayer<?> layer : dispatchLayers) {
+			for (DispatchLayer<?> layer : dispatchLayers)
 				layer.finishedWith(owningProcess);
-			}
 			DispatchStackImpl.this.finishedWith(owningProcess);
 			queues.remove(owningProcess);
 		}
 
+		@Override
 		public void configure(Object config) {
 			// TODO Auto-generated method stub
 
 		}
 
+		@Override
 		public Object getConfiguration() {
 			// TODO Auto-generated method stub
 			return null;
 		}
 	}
-
 }

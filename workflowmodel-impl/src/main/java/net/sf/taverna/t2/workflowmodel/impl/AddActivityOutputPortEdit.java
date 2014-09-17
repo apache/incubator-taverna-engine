@@ -30,8 +30,7 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityOutputPort;
  *
  * @author David Withers
  */
-public class AddActivityOutputPortEdit extends AbstractActivityEdit {
-
+class AddActivityOutputPortEdit extends AbstractActivityEdit {
 	private ActivityOutputPort activityOutputPort;
 
 	public AddActivityOutputPortEdit(Activity<?> activity, ActivityOutputPort activityOutputPort) {

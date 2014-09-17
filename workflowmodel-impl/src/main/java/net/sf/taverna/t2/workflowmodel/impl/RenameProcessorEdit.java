@@ -27,9 +27,8 @@ import net.sf.taverna.t2.workflowmodel.Processor;
  * Rename the specified processor
  * 
  * @author Tom Oinn
- * 
  */
-public class RenameProcessorEdit extends AbstractProcessorEdit {
+class RenameProcessorEdit extends AbstractProcessorEdit {
 	private String newName;
 
 	public RenameProcessorEdit(Processor p, String newName) {

@@ -37,9 +37,8 @@ import net.sf.taverna.t2.workflowmodel.ProcessorInputPort;
  * @author Tom Oinn
  * 
  */
-public class ProcessorInputPortImpl extends AbstractFilteringInputPort implements
-		ProcessorInputPort {
-
+public class ProcessorInputPortImpl extends AbstractFilteringInputPort
+		implements ProcessorInputPort {
 	private ProcessorImpl parent;
 
 	protected ProcessorInputPortImpl(ProcessorImpl parent, String name,
@@ -52,19 +51,23 @@ public class ProcessorInputPortImpl extends AbstractFilteringInputPort implement
 	public String transformOwningProcess(String oldOwner) {
 		return oldOwner + ":" + parent.getLocalName();
 	}
-	
+
 	@Override
-	protected void pushCompletion(String portName, String owningProcess, int[] index, InvocationContext context) {
-		parent.iterationStack.receiveCompletion(portName, owningProcess, index, context);	
+	protected void pushCompletion(String portName, String owningProcess,
+			int[] index, InvocationContext context) {
+		parent.iterationStack.receiveCompletion(portName, owningProcess, index,
+				context);
 	}
 
 	@Override
-	protected void pushData(String portName, String owningProcess, int[] index, T2Reference data, InvocationContext context) {
-		parent.iterationStack.receiveData(portName, owningProcess, index, data, context);
+	protected void pushData(String portName, String owningProcess, int[] index,
+			T2Reference data, InvocationContext context) {
+		parent.iterationStack.receiveData(portName, owningProcess, index, data,
+				context);
 	}
-	
+
+	@Override
 	public Processor getProcessor() {
 		return this.parent;
 	}
-	
 }

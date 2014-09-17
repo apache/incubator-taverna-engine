@@ -27,20 +27,21 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityOutputPort;
 
 /**
  * Removes an output port from an activity.
- *
+ * 
  * @author David Withers
  */
-public class RemoveActivityOutputPortEdit extends AbstractActivityEdit {
-
+class RemoveActivityOutputPortEdit extends AbstractActivityEdit {
 	private ActivityOutputPort activityOutputPort;
 
-	public RemoveActivityOutputPortEdit(Activity<?> activity, ActivityOutputPort activityInputPort) {
+	public RemoveActivityOutputPortEdit(Activity<?> activity,
+			ActivityOutputPort activityInputPort) {
 		super(activity);
 		this.activityOutputPort = activityInputPort;
 	}
 
 	@Override
-	protected void doEditAction(AbstractActivity<?> activity) throws EditException {
+	protected void doEditAction(AbstractActivity<?> activity)
+			throws EditException {
 		activity.getOutputPorts().remove(activityOutputPort);
 	}
 }

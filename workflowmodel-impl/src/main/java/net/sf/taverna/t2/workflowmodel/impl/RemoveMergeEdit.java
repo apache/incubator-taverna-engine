@@ -29,8 +29,7 @@ import net.sf.taverna.t2.workflowmodel.Merge;
  * 
  * @author David Withers
  */
-public class RemoveMergeEdit extends AbstractDataflowEdit {
-
+class RemoveMergeEdit extends AbstractDataflowEdit {
 	private Merge merge;
 
 	public RemoveMergeEdit(Dataflow dataflow, Merge merge) {

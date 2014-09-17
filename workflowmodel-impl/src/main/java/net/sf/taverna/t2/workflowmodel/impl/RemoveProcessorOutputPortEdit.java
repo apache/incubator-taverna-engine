@@ -24,8 +24,7 @@ import net.sf.taverna.t2.workflowmodel.EditException;
 import net.sf.taverna.t2.workflowmodel.Processor;
 import net.sf.taverna.t2.workflowmodel.ProcessorOutputPort;
 
-public class RemoveProcessorOutputPortEdit extends AbstractProcessorEdit {
-
+class RemoveProcessorOutputPortEdit extends AbstractProcessorEdit {
 	private final ProcessorOutputPort port;
 
 	public RemoveProcessorOutputPortEdit(Processor processor,

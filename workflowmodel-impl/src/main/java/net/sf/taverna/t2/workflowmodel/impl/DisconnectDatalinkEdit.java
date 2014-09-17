@@ -31,10 +31,8 @@ import net.sf.taverna.t2.workflowmodel.impl.MergeImpl;
  * Disconnect a datalink from its source and sink.
  * 
  * @author David Withers
- * 
  */
-public class DisconnectDatalinkEdit extends AbstractDatalinkEdit {
-
+class DisconnectDatalinkEdit extends AbstractDatalinkEdit {
 	public DisconnectDatalinkEdit(Datalink datalink) {
 		super(datalink);
 	}
@@ -43,16 +41,16 @@ public class DisconnectDatalinkEdit extends AbstractDatalinkEdit {
 	protected void doEditAction(DatalinkImpl datalink) throws EditException {
 		EventForwardingOutputPort source = datalink.getSource();
 		EventHandlingInputPort sink = datalink.getSink();
-		if (source instanceof BasicEventForwardingOutputPort) {
+
+		if (source instanceof BasicEventForwardingOutputPort)
 			((BasicEventForwardingOutputPort) source)
 					.removeOutgoingLink(datalink);
-		}
+
 		if (sink instanceof AbstractEventHandlingInputPort) {
 			((AbstractEventHandlingInputPort) sink).setIncomingLink(null);
 			if (sink instanceof MergeInputPortImpl) {
 				MergeInputPortImpl mip = (MergeInputPortImpl) sink;
-				MergeImpl parent = (MergeImpl) mip.getMerge();
-				parent.removeInputPort(mip);
+				((MergeImpl) mip.getMerge()).removeInputPort(mip);
 			}
 		}
 	}

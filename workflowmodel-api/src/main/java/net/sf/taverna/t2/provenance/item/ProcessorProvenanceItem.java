@@ -34,7 +34,6 @@ import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
  * 
  */
 public class ProcessorProvenanceItem extends AbstractProvenanceItem {
-
 	private ActivityProvenanceItem activityProvenanceItem;
 	private String identifier;
 	private SharedVocabulary eventType = SharedVocabulary.PROCESSOR_EVENT_TYPE;
@@ -52,8 +51,8 @@ public class ProcessorProvenanceItem extends AbstractProvenanceItem {
 		return identifier;
 	}
 
+	@Override
 	public SharedVocabulary getEventType() {
 		return eventType;
 	}
-
 }

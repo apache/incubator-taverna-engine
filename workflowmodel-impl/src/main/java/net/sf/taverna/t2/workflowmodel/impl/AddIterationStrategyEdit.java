@@ -20,7 +20,6 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.impl;
 
-import net.sf.taverna.t2.workflowmodel.Edit;
 import net.sf.taverna.t2.workflowmodel.EditException;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationStrategy;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationStrategyStack;
@@ -31,49 +30,28 @@ import net.sf.taverna.t2.workflowmodel.processor.iteration.impl.IterationStrateg
  * 
  * @author David Withers
  */
-public class AddIterationStrategyEdit implements Edit<IterationStrategyStack> {
-
-	private final IterationStrategyStack iterationStrategyStack;
+class AddIterationStrategyEdit extends EditSupport<IterationStrategyStack> {
+	private final IterationStrategyStackImpl iterationStrategyStack;
 	private final IterationStrategy iterationStrategy;
-	private boolean applied;
 
-	public AddIterationStrategyEdit(IterationStrategyStack iterationStrategyStack,
+	public AddIterationStrategyEdit(
+			IterationStrategyStack iterationStrategyStack,
 			IterationStrategy iterationStrategy) {
-		this.iterationStrategyStack = iterationStrategyStack;
+		if (!(iterationStrategyStack instanceof IterationStrategyStackImpl))
+			throw new RuntimeException(
+					"Object being edited must be instance of IterationStrategyStackImpl");
+		this.iterationStrategyStack = (IterationStrategyStackImpl) iterationStrategyStack;
 		this.iterationStrategy = iterationStrategy;
 	}
 
 	@Override
-	public IterationStrategyStack doEdit() throws EditException {
-		if (applied) {
-			throw new EditException("Edit has already been applied");
-		}
-		if (!(iterationStrategyStack instanceof IterationStrategyStackImpl)) {
-			throw new EditException(
-					"Object being edited must be instance of IterationStrategyStackImpl");
-		}
-		((IterationStrategyStackImpl) iterationStrategyStack).addStrategy(iterationStrategy);
-		applied = true;
+	public IterationStrategyStack applyEdit() throws EditException {
+		iterationStrategyStack.addStrategy(iterationStrategy);
 		return iterationStrategyStack;
-	}
-
-	@Override
-	public void undo() {
-		if (!applied) {
-			throw new RuntimeException("Attempt to undo edit that was never applied");
-		}
-		((IterationStrategyStackImpl) iterationStrategyStack).removeStrategy(iterationStrategy);
-		applied = false;
 	}
 
 	@Override
 	public IterationStrategyStack getSubject() {
 		return iterationStrategyStack;
 	}
-
-	@Override
-	public boolean isApplied() {
-		return applied;
-	}
-
 }

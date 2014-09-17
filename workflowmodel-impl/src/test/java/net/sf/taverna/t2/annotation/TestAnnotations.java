@@ -72,12 +72,9 @@ public class TestAnnotations {
 			e1.printStackTrace();
 		}
 		AnnotationAssertion annotationAssertionImpl = new AnnotationAssertionImpl();
-		Edit<AnnotationAssertion> addAnnotationBean = edits
-				.getAddAnnotationBean(annotationAssertionImpl,
-						mimeType);
+		Edit<?> addAnnotationBean = edits.getAddAnnotationBean(
+				annotationAssertionImpl, mimeType);
 
-		
-		
 		try {
 			addAnnotationBean.doEdit();
 		} catch (EditException e2) {

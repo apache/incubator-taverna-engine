@@ -56,13 +56,9 @@ import org.jdom.Element;
  * 
  */
 public class IterationStrategyImpl implements IterationStrategy {
-
 	Set<NamedInputPortNode> inputs;
-
 	private boolean wrapping = false;
-
 	protected IterationStrategyStackImpl stack = null;
-
 	private TerminalNodeImpl terminal = new TerminalNodeImpl();
 
 	/**
@@ -71,23 +67,22 @@ public class IterationStrategyImpl implements IterationStrategy {
 	 * iteration strategy itself which can then propogate them to the strategy
 	 * stack.
 	 */
+	@SuppressWarnings("serial")
 	public class TerminalNodeImpl extends TerminalNode {
-
+		@Override
 		public void receiveCompletion(int inputIndex, Completion completion) {
-			if (wrapping) {
+			if (wrapping)
 				pushEvent(completion.popIndex());
-			} else {
+			else
 				pushEvent(completion);
-			}
-
 		}
 
+		@Override
 		public void receiveJob(int inputIndex, Job newJob) {
-			if (wrapping) {
+			if (wrapping)
 				pushEvent(newJob.popIndex());
-			} else {
+			else
 				pushEvent(newJob);
-			}
 		}
 
 		public void receiveBypassCompletion(Completion completion) {
@@ -96,32 +91,30 @@ public class IterationStrategyImpl implements IterationStrategy {
 
 		private void pushEvent(
 				IterationInternalEvent<? extends IterationInternalEvent<?>> e) {
-			if (stack != null) {
-				IterationStrategyImpl below = stack
-						.layerBelow(IterationStrategyImpl.this);
-				if (below == null) {
-					stack.receiveEventFromStrategy(e);
-				} else {
-					below.receiveEvent(e);
-				}
-			}
+			if (stack == null)
+				return;
+			IterationStrategyImpl below = stack
+					.layerBelow(IterationStrategyImpl.this);
+			if (below == null)
+				stack.receiveEventFromStrategy(e);
+			else
+				below.receiveEvent(e);
 		}
 
+		@Override
 		public int getIterationDepth(Map<String, Integer> inputDepths)
 				throws IterationTypeMismatchException {
-			if (getChildCount() == 0) {
+			if (getChildCount() == 0)
 				return -1;
-			} else {
-				return getChildAt(0).getIterationDepth(inputDepths);
-			}
+			return getChildAt(0).getIterationDepth(inputDepths);
 		}
-
 	}
 
 	public IterationStrategyImpl() {
 		inputs = new HashSet<NamedInputPortNode>();
 	}
 
+	@Override
 	public TerminalNode getTerminalNode() {
 		return terminal;
 	}
@@ -135,34 +128,29 @@ public class IterationStrategyImpl implements IterationStrategy {
 	protected void configureFromXML(Element strategyElement) {
 		inputs.clear();
 		terminal.clear();
-		if (!strategyElement.getChildren().isEmpty()) {
+		if (!strategyElement.getChildren().isEmpty())
 			for (Element childElement : (List<Element>) strategyElement
-					.getChildren()) {
-				AbstractIterationStrategyNode node = nodeForElement(childElement);
-				node.setParent(terminal);
-			}
-		}
+					.getChildren())
+				nodeForElement(childElement).setParent(terminal);
 	}
 
 	private AbstractIterationStrategyNode nodeForElement(Element e) {
 		AbstractIterationStrategyNode node = null;
 		String eName = e.getName();
-		if (eName.equals("dot")) {
+		if (eName.equals("dot"))
 			node = new DotProduct();
-		} else if (eName.equals("cross")) {
+		else if (eName.equals("cross"))
 			node = new CrossProduct();
-		} else if (eName.equals("prefix")) {
+		else if (eName.equals("prefix"))
 			node = new PrefixDotProduct();
-		} else if (eName.equals("port")) {
+		else if (eName.equals("port")) {
 			String portName = e.getAttributeValue("name");
 			int portDepth = Integer.parseInt(e.getAttributeValue("depth"));
 			node = new NamedInputPortNode(portName, portDepth);
 			addInput((NamedInputPortNode) node);
 		}
-		for (Object child : e.getChildren()) {
-			Element childElement = (Element) child;
-			nodeForElement(childElement).setParent(node);
-		}
+		for (Object child : e.getChildren())
+			nodeForElement((Element) child).setParent(node);
 		return node;
 	}
 
@@ -209,13 +197,15 @@ public class IterationStrategyImpl implements IterationStrategy {
 				receiveCompletion(portName, owningProcess, new int[] {}, e
 						.getContext());
 			}
-		}
-		// Event was a completion event, push it through unmodified to the
-		// terminal node. Intermediate completion events from the split of an
-		// input Job into multiple events through data structure traversal are
-		// unwrapped but as this one is never wrapped in the first place we need
-		// a way to mark it as such, the call to the bypass method achieves this
-		else {
+		} else {
+			/*
+			 * Event was a completion event, push it through unmodified to the
+			 * terminal node. Intermediate completion events from the split of
+			 * an input Job into multiple events through data structure
+			 * traversal are unwrapped but as this one is never wrapped in the
+			 * first place we need a way to mark it as such, the call to the
+			 * bypass method achieves this
+			 */
 			terminal.receiveBypassCompletion((Completion) e);
 		}
 	}
@@ -262,11 +252,9 @@ public class IterationStrategyImpl implements IterationStrategy {
 	public void removeInputByName(String name) {
 		synchronized (inputs) {
 			NamedInputPortNode removeMe = null;
-			for (NamedInputPortNode nipn : inputs) {
-				if (nipn.getPortName().equals(name)) {
+			for (NamedInputPortNode nipn : inputs)
+				if (nipn.getPortName().equals(name))
 					removeMe = nipn;
-				}
-			}
 			if (removeMe != null) {
 				this.inputs.remove(removeMe);
 				removeMe.removeFromParent();
@@ -276,11 +264,9 @@ public class IterationStrategyImpl implements IterationStrategy {
 
 	private NamedInputPortNode nodeForName(String portName)
 			throws WorkflowStructureException {
-		for (NamedInputPortNode node : inputs) {
-			if (node.getPortName().equals(portName)) {
+		for (NamedInputPortNode node : inputs)
+			if (node.getPortName().equals(portName))
 				return node;
-			}
-		}
 		throw new WorkflowStructureException("No port found with name '"
 				+ portName + "'");
 	}
@@ -302,34 +288,35 @@ public class IterationStrategyImpl implements IterationStrategy {
 			CrossProduct cp = new CrossProduct();
 			cp.setParent(terminal);
 			nipn.setParent(cp);
-		} else {
-			AbstractIterationStrategyNode node = (AbstractIterationStrategyNode) (terminal
+		} else
+			nipn.setParent((AbstractIterationStrategyNode) terminal
 					.getChildAt(0));
-			nipn.setParent(node);
-		}
 	}
 
+	@Override
 	public int getIterationDepth(Map<String, Integer> inputDepths)
 			throws IterationTypeMismatchException {
 		return getTerminalNode().getIterationDepth(inputDepths);
 	}
 
+	@Override
 	public Map<String, Integer> getDesiredCardinalities() {
-		Map<String, Integer> result = new HashMap<String, Integer>();
-		for (NamedInputPortNode nipn : inputs) {
+		Map<String, Integer> result = new HashMap<>();
+		for (NamedInputPortNode nipn : inputs)
 			result.put(nipn.getPortName(), nipn.getCardinality());
-		}
 		return result;
 	}
 
+	@Override
 	public void normalize() {
 		boolean finished = false;
 		while (!finished) {
 			finished = true;
-			Enumeration e = getTerminalNode().breadthFirstEnumeration();
+			@SuppressWarnings("unchecked")
+			Enumeration<AbstractIterationStrategyNode> e = getTerminalNode()
+					.breadthFirstEnumeration();
 			while (e.hasMoreElements() && finished == true) {
-				AbstractIterationStrategyNode n = (AbstractIterationStrategyNode) e
-						.nextElement();
+				AbstractIterationStrategyNode n = e.nextElement();
 				AbstractIterationStrategyNode parent = (AbstractIterationStrategyNode) n
 						.getParent();
 				// Check whether anything needs doing
@@ -364,7 +351,5 @@ public class IterationStrategyImpl implements IterationStrategy {
 				 */
 			}
 		}
-
 	}
-
 }

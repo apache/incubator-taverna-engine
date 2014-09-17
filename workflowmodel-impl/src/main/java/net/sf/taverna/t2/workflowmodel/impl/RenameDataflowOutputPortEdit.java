@@ -27,11 +27,8 @@ import net.sf.taverna.t2.workflowmodel.EditException;
  * Rename the specified DataflowOutputPort
  * 
  * @author David Withers
- * 
  */
-public class RenameDataflowOutputPortEdit extends
-		AbstractDataflowOutputPortEdit {
-
+class RenameDataflowOutputPortEdit extends AbstractDataflowOutputPortEdit {
 	private String newName;
 
 	public RenameDataflowOutputPortEdit(DataflowOutputPort dataflowOutputPort,

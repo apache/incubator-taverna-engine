@@ -234,7 +234,7 @@ public class EditsImpl implements Edits {
 	@Override
 	public Edit<AnnotationChain> getAddAnnotationAssertionEdit(
 			AnnotationChain annotationChain,
-			AnnotationAssertion annotationAssertion) {
+			AnnotationAssertion<?> annotationAssertion) {
 		return new AddAnnotationAssertionEdit(annotationChain,
 				annotationAssertion);
 	}
@@ -342,28 +342,31 @@ public class EditsImpl implements Edits {
 	}
 
 	@Override
-	public Edit<AnnotationAssertion> getAddAnnotationBean(
+	@SuppressWarnings({ "rawtypes" })
+	public Edit<AnnotationAssertion<AnnotationBeanSPI>> getAddAnnotationBean(
 			AnnotationAssertion annotationAssertion,
 			AnnotationBeanSPI annotationBean) {
 		return new AddAnnotationBeanEdit(annotationAssertion, annotationBean);
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public Edit<AnnotationAssertion> getAddCurationEvent(
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public Edit<AnnotationAssertion<AnnotationBeanSPI>> getAddCurationEvent(
 			AnnotationAssertion annotationAssertion, CurationEvent curationEvent) {
 		return new AddCurationEventEdit(annotationAssertion, curationEvent);
 	}
 
 	@Override
-	public Edit<AnnotationAssertion> getAddAnnotationRole(
+	@SuppressWarnings({ "rawtypes" })
+	public Edit<AnnotationAssertion<AnnotationBeanSPI>> getAddAnnotationRole(
 			AnnotationAssertion annotationAssertion,
 			AnnotationRole annotationRole) {
 		return new AddAnnotationRoleEdit(annotationAssertion, annotationRole);
 	}
 
 	@Override
-	public Edit<AnnotationAssertion> getAddAnnotationSource(
+	@SuppressWarnings({ "rawtypes" })
+	public Edit<AnnotationAssertion<AnnotationBeanSPI>> getAddAnnotationSource(
 			AnnotationAssertion annotationAssertion,
 			AnnotationSourceSPI annotationSource) {
 		return new AddAnnotationSourceEdit(annotationAssertion,
@@ -371,7 +374,8 @@ public class EditsImpl implements Edits {
 	}
 
 	@Override
-	public Edit<AnnotationAssertion> getAddCreator(
+	@SuppressWarnings({ "rawtypes" })
+	public Edit<AnnotationAssertion<AnnotationBeanSPI>> getAddCreator(
 			AnnotationAssertion annotationAssertion, Person person) {
 		return new AddCreatorEdit(annotationAssertion, person);
 	}
@@ -506,7 +510,7 @@ public class EditsImpl implements Edits {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public <ConfigurationBean> Edit<Activity<?>> getConfigureActivityEdit(
 			Activity<ConfigurationBean> activity,
 			ConfigurationBean configurationBean) {
@@ -533,7 +537,7 @@ public class EditsImpl implements Edits {
 
 	@Override
 	public Edit<Processor> getDefaultDispatchStackEdit(Processor processor) {
-		return new DefaultDispatchStackEdit(processor);
+		return new DefaultDispatchStackEdit((ProcessorImpl) processor);
 	}
 
 	@Override

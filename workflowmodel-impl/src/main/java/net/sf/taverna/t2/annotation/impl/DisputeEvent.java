@@ -24,57 +24,51 @@ import net.sf.taverna.t2.annotation.Curateable;
 import net.sf.taverna.t2.annotation.CurationEvent;
 import net.sf.taverna.t2.annotation.CurationEventType;
 
-public class DisputeEvent implements CurationEvent<DisputeEventDetails>{
-	
+public class DisputeEvent implements CurationEvent<DisputeEventDetails> {
 	private DisputeEventDetails disputeEventDetails;
 	private CurationEventType curationEventType;
 	private Curateable targetEvent;
-	
+
 	public DisputeEvent() {
-		
 	}
-	
-	
-	public DisputeEvent(DisputeEventDetails disputeEventDetails, CurationEventType curationEventType, Curateable targetEvent) {
+
+	public DisputeEvent(DisputeEventDetails disputeEventDetails,
+			CurationEventType curationEventType, Curateable targetEvent) {
 		this.disputeEventDetails = disputeEventDetails;
 		this.curationEventType = curationEventType;
 		this.targetEvent = targetEvent;
 	}
 
+	@Override
 	public DisputeEventDetails getDetail() {
 		return disputeEventDetails;
 	}
 
+	@Override
 	public Curateable getTarget() {
 		return targetEvent;
 	}
 
+	@Override
 	public CurationEventType getType() {
 		return curationEventType;
 	}
 
-
 	public void setDisputeEventDetails(DisputeEventDetails disputeEventDetails) {
-//		if (disputeEventDetails != null) {
+//		if (disputeEventDetails != null)
 //			throw new RuntimeException("Dispute event details have already been set");
-//		}
 		this.disputeEventDetails = disputeEventDetails;
 	}
 
-
 	public void setCurationEventType(CurationEventType curationEventType) {
-//		if (curationEventType != null) {
+//		if (curationEventType != null)
 //			throw new RuntimeException("Curation event details have already been set");
-//		}
 		this.curationEventType = curationEventType;
 	}
 
-
 	public void setTargetEvent(Curateable targetEvent) {
-//		if (targetEvent!= null) {
+//		if (targetEvent!= null)
 //			throw new RuntimeException("Target event details have already been set");
-//		}
 		this.targetEvent = targetEvent;
 	}
-
 }

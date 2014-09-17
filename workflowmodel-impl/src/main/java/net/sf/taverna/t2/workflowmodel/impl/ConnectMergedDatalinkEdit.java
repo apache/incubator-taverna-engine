@@ -20,6 +20,8 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.impl;
 
+import java.util.Collection;
+
 import net.sf.taverna.t2.workflowmodel.Datalink;
 import net.sf.taverna.t2.workflowmodel.Edit;
 import net.sf.taverna.t2.workflowmodel.EditException;
@@ -30,23 +32,20 @@ import net.sf.taverna.t2.workflowmodel.Merge;
 import net.sf.taverna.t2.workflowmodel.utils.Tools;
 
 /**
+ * An edit that connects an EventForwardingOutputPort sourcePort and
+ * EventHandlingInputPort sinkPort together via an intermediary {@link Merge}
+ * instance, which is provided to the constructor. The connections are made
+ * using {@link Datalink}. Using a Merge facilitates multiple incoming Datalinks
+ * connect to a single input port.
  * <p>
- * An edit that connects an EventForwardingOutputPort sourcePort and EventHandlingInputPort sinkPort together
- * via an intermediary {@link Merge} instance, which is provided to the constructor. 
- * The connections are made using {@link Datalink}. Using a Merge facilitates multiple incoming Datalinks connect to a single
- * input port.
- * </p>
- * <p>
- * If an connection already exists between a sinkPort and a sourcePort, then then an new datalink is provided
- * for the incoming link but the outgoing link remains as is (since there can only be 1). In this case, if the
- * sink port differs from the existing one then an EditException is thrown.
- * </p>
+ * If an connection already exists between a sinkPort and a sourcePort, then
+ * then an new datalink is provided for the incoming link but the outgoing link
+ * remains as is (since there can only be 1). In this case, if the sink port
+ * differs from the existing one then an EditException is thrown.
  * 
  * @author Stuart Owen
- *
  */
-public class ConnectMergedDatalinkEdit extends AbstractMergeEdit {
-
+class ConnectMergedDatalinkEdit extends AbstractMergeEdit {
 	private EventHandlingInputPort sinkPort;
 	private EventForwardingOutputPort sourcePort;
 	private Datalink inLink;
@@ -54,45 +53,59 @@ public class ConnectMergedDatalinkEdit extends AbstractMergeEdit {
 	private Edit<Datalink> connectInLinkEdit;
 	private Edit<Datalink> connectOutLinkEdit;
 	private MergeInputPortImpl mergeInputPort;
-	
+
 	/**
-	 * Constructs the ConnectMergedDatalinkEdit with an existing Merge instance, and the source and sink ports that are to
-	 * be connected.
+	 * Constructs the ConnectMergedDatalinkEdit with an existing Merge instance,
+	 * and the source and sink ports that are to be connected.
 	 * 
 	 * @param merge
 	 * @param sourcePort
 	 * @param sinkPort
 	 */
-	public ConnectMergedDatalinkEdit(Merge merge, EventForwardingOutputPort sourcePort, EventHandlingInputPort sinkPort) {
+	public ConnectMergedDatalinkEdit(Merge merge,
+			EventForwardingOutputPort sourcePort,
+			EventHandlingInputPort sinkPort) {
 		super(merge);
-		if (sinkPort==null) throw new RuntimeException("The sinkport cannot be null");
-		this.sinkPort=sinkPort;
-		if (sourcePort==null) throw new RuntimeException("The sourceport cannot be null");
-		this.sourcePort=sourcePort;
+		if (sinkPort == null)
+			throw new RuntimeException("The sinkport cannot be null");
+		this.sinkPort = sinkPort;
+		if (sourcePort == null)
+			throw new RuntimeException("The sourceport cannot be null");
+		this.sourcePort = sourcePort;
 	}
-	
+
+	private boolean needToCreateDatalink(MergeImpl mergeImpl)
+			throws EditException {
+		Collection<? extends Datalink> outgoing = mergeImpl.getOutputPort()
+				.getOutgoingLinks();
+		if (outgoing.size() == 0) {
+			return true;
+		} else if (outgoing.size() != 1)
+			throw new EditException(
+					"The merge instance cannot have more that 1 outgoing Datalink");
+		if (outgoing.iterator().next().getSink() != sinkPort)
+			throw new EditException(
+					"Cannot add a different sinkPort to a Merge that already has one defined");
+		return false;
+	}
+
 	@Override
 	protected void doEditAction(MergeImpl mergeImpl) throws EditException {
 		Edits edits = new EditsImpl();
-		String name = Tools.getUniqueMergeInputPortName(mergeImpl, sourcePort.getName()+"To" + merge.getLocalName() + "_input", 0);
-		mergeInputPort = new MergeInputPortImpl(mergeImpl,name,sinkPort.getDepth());
+		String name = Tools.getUniqueMergeInputPortName(mergeImpl,
+				sourcePort.getName() + "To" + merge.getLocalName() + "_input",
+				0);
+		mergeInputPort = new MergeInputPortImpl(mergeImpl, name,
+				sinkPort.getDepth());
 		inLink = edits.createDatalink(sourcePort, mergeInputPort);
-		connectInLinkEdit=edits.getConnectDatalinkEdit(inLink);
-		if (mergeImpl.getOutputPort().getOutgoingLinks().size()==0) {
+		connectInLinkEdit = edits.getConnectDatalinkEdit(inLink);
+		if (needToCreateDatalink(mergeImpl)) {
 			outLink = edits.createDatalink(mergeImpl.getOutputPort(), sinkPort);
-			connectOutLinkEdit=edits.getConnectDatalinkEdit(outLink);
+			connectOutLinkEdit = edits.getConnectDatalinkEdit(outLink);
 		}
-		else if (mergeImpl.getOutputPort().getOutgoingLinks().size()==1){
-			if (mergeImpl.getOutputPort().getOutgoingLinks().toArray(new Datalink[]{})[0].getSink() != sinkPort) {
-				throw new EditException("Cannot add a different sinkPort to a Merge that already has one defined");
-			}
-		}
-		else {
-			throw new EditException("The merge instance cannot have more that 1 outgoing Datalink");
-		}
-		
 		mergeImpl.addInputPort(mergeInputPort);
 		connectInLinkEdit.doEdit();
-		if (connectOutLinkEdit!=null) connectOutLinkEdit.doEdit();
+		if (connectOutLinkEdit != null)
+			connectOutLinkEdit.doEdit();
 	}
 }

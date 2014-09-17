@@ -20,8 +20,9 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.impl;
 
+import static java.util.Collections.unmodifiableList;
+
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -67,34 +68,21 @@ import org.apache.log4j.Logger;
  */
 public final class ProcessorImpl extends AbstractAnnotatedThing<Processor>
 		implements Processor{
-
-	protected List<ConditionImpl> conditions = new ArrayList<ConditionImpl>();
-
-	protected List<ConditionImpl> controlledConditions = new ArrayList<ConditionImpl>();
-
-	protected List<ProcessorInputPortImpl> inputPorts = new ArrayList<ProcessorInputPortImpl>();
-
-	protected List<ProcessorOutputPortImpl> outputPorts = new ArrayList<ProcessorOutputPortImpl>();
-
-	protected List<Activity<?>> activityList = new ArrayList<Activity<?>>();
-
-	protected AbstractCrystalizer crystalizer;
-
-	protected DispatchStackImpl dispatchStack;
-
-	protected IterationStrategyStackImpl iterationStack;
-
 	private static int pNameCounter = 0;
-
-	protected String name;
-
-	public transient int resultWrappingDepth = -1;
-
-	protected transient Map<String, Set<MonitorableProperty<?>>> monitorables = new HashMap<String, Set<MonitorableProperty<?>>>();
-	
 	private static Logger logger = Logger.getLogger(ProcessorImpl.class);
 
-	private MultiCaster<ProcessorFinishedEvent> processorFinishedMultiCaster = new MultiCaster<ProcessorFinishedEvent>(this);
+	protected List<ConditionImpl> conditions = new ArrayList<>();
+	protected List<ConditionImpl> controlledConditions = new ArrayList<>();
+	protected List<ProcessorInputPortImpl> inputPorts = new ArrayList<>();
+	protected List<ProcessorOutputPortImpl> outputPorts = new ArrayList<>();
+	protected List<Activity<?>> activityList = new ArrayList<>();
+	protected AbstractCrystalizer crystalizer;
+	protected DispatchStackImpl dispatchStack;
+	protected IterationStrategyStackImpl iterationStack;
+	protected String name;
+	public transient int resultWrappingDepth = -1;
+	protected transient Map<String, Set<MonitorableProperty<?>>> monitorables = new HashMap<>();
+	private MultiCaster<ProcessorFinishedEvent> processorFinishedMultiCaster = new MultiCaster<>(this);
 	
 	/**
 	 * <p>
@@ -107,17 +95,17 @@ public final class ProcessorImpl extends AbstractAnnotatedThing<Processor>
 	 * </p>
 	 */
 
-	@SuppressWarnings("unchecked")
 	protected ProcessorImpl() {
-
 		// Set a default name
 		name = "UnnamedProcessor" + (pNameCounter++);
 
-		// Create iteration stack, configure it to send jobs and completion
-		// events to the dispatch stack.
+		/*
+		 * Create iteration stack, configure it to send jobs and completion
+		 * events to the dispatch stack.
+		 */
 		iterationStack = new IterationStrategyStackImpl() {
 			@Override
-			protected void receiveEventFromStrategy(IterationInternalEvent e) {
+			protected void receiveEventFromStrategy(IterationInternalEvent<?> e) {
 				dispatchStack.receiveEvent(e);
 			}
 		};
@@ -125,12 +113,12 @@ public final class ProcessorImpl extends AbstractAnnotatedThing<Processor>
 
 		// Configure dispatch stack to push output events to the crystalizer
 		dispatchStack = new DispatchStackImpl() {
-
 			@Override
 			protected String getProcessName() {
 				return ProcessorImpl.this.name;
 			}
 
+			@Override
 			public Processor getProcessor() {
 				return ProcessorImpl.this;
 			}
@@ -140,7 +128,7 @@ public final class ProcessorImpl extends AbstractAnnotatedThing<Processor>
 			 * stack. In this case we pass it into the crystalizer.
 			 */
 			@Override
-			protected void pushEvent(IterationInternalEvent e) {
+			protected void pushEvent(IterationInternalEvent<?> e) {
 				crystalizer.receiveEvent(e);
 			}
 
@@ -150,11 +138,9 @@ public final class ProcessorImpl extends AbstractAnnotatedThing<Processor>
 			 */
 			@Override
 			protected boolean conditionsSatisfied(String owningProcess) {
-				for (Condition c : conditions) {
-					if (c.isSatisfied(owningProcess) == false) {
+				for (Condition c : conditions)
+					if (c.isSatisfied(owningProcess) == false)
 						return false;
-					}
-				}
 				return true;
 			}
 
@@ -179,16 +165,18 @@ public final class ProcessorImpl extends AbstractAnnotatedThing<Processor>
 					}
 				}
 				// Tell whoever is interested that the processor has finished executing
-				processorFinishedMultiCaster.notify(new ProcessorFinishedEvent(this.getProcessor(), owningProcess));
+				processorFinishedMultiCaster.notify(new ProcessorFinishedEvent(
+						this.getProcessor(), owningProcess));
 			}
 
+			@Override
 			public void receiveMonitorableProperty(MonitorableProperty<?> prop,
 					String processID) {
 				synchronized (monitorables) {
 					Set<MonitorableProperty<?>> props = monitorables
 							.get(processID);
 					if (props == null) {
-						props = new HashSet<MonitorableProperty<?>>();
+						props = new HashSet<>();
 						monitorables.put(processID, props);
 					}
 					props.add(prop);
@@ -198,7 +186,6 @@ public final class ProcessorImpl extends AbstractAnnotatedThing<Processor>
 
 		// Configure crystalizer to send realized events to the output ports
 		crystalizer = new ProcessorCrystalizerImpl(this);
-
 	}
 
 	/**
@@ -214,57 +201,63 @@ public final class ProcessorImpl extends AbstractAnnotatedThing<Processor>
 	 * @throws InvalidDataflowException 
 	 * 			 	if the entity depended on a dataflow that was not valid
 	 */
+	@Override
 	public boolean doTypeCheck() throws IterationTypeMismatchException, InvalidDataflowException {
-		
 		// Check for any nested dataflows, they should all be valid
-		for (Activity<?> activity : getActivityList()) {
+		for (Activity<?> activity : getActivityList())
 			if (activity instanceof NestedDataflow) {
 				NestedDataflow nestedDataflowActivity = (NestedDataflow) activity;
 				Dataflow nestedDataflow = nestedDataflowActivity.getNestedDataflow();
 				DataflowValidationReport validity = nestedDataflow.checkValidity();
-				if (! validity.isValid())  {
+				if (!validity.isValid())
 					throw new InvalidDataflowException(nestedDataflow, validity);
-				}
 			}	
-		}
 		
-		// Check whether all our input ports have inbound links
-		Map<String, Integer> inputDepths = new HashMap<String, Integer>();
+		/*
+		 * Check whether all our input ports have inbound links
+		 */
+
+		Map<String, Integer> inputDepths = new HashMap<>();
 		for (ProcessorInputPortImpl input : inputPorts) {
-			if (input.getIncomingLink() == null) {
+			if (input.getIncomingLink() == null)
 				return false;
-			} else {
-				if (input.getIncomingLink().getResolvedDepth() == -1) {
-					// Incoming link hasn't been resolved yet, can't do this
-					// processor at the moment
-					return false;
-				}
-				// Get the conceptual resolved depth of the datalink
-				inputDepths.put(input.getName(), input.getIncomingLink()
-						.getResolvedDepth());
-				// Configure the filter with the finest grained item from the
-				// link source
-				input.setFilterDepth(input.getIncomingLink().getSource()
-						.getGranularDepth());
-			}
+			if (input.getIncomingLink().getResolvedDepth() == -1)
+				/*
+				 * Incoming link hasn't been resolved yet, can't do this
+				 * processor at the moment
+				 */
+				return false;
+
+			// Get the conceptual resolved depth of the datalink
+			inputDepths.put(input.getName(), input.getIncomingLink()
+					.getResolvedDepth());
+			/*
+			 * Configure the filter with the finest grained item from the link
+			 * source
+			 */
+			input.setFilterDepth(input.getIncomingLink().getSource()
+					.getGranularDepth());
 		}
-		// Got here so we have all the inputs, now test whether the iteration
-		// strategy typechecks correctly
+
+		/*
+		 * Got here so we have all the inputs, now test whether the iteration
+		 * strategy typechecks correctly
+		 */
+
 		try {
 			this.resultWrappingDepth = iterationStack
 					.getIterationDepth(inputDepths);
-			for (BasicEventForwardingOutputPort output : outputPorts) {
-				for (DatalinkImpl outgoingLink : output.outgoingLinks) {
+			for (BasicEventForwardingOutputPort output : outputPorts)
+				for (DatalinkImpl outgoingLink : output.outgoingLinks)
 					// Set the resolved depth on each output edge
 					outgoingLink.setResolvedDepth(this.resultWrappingDepth
 							+ output.getDepth());
-				}
-			}
-
 		} catch (MissingIterationInputException e) {
-			// This should never happen as we only get here if we've already
-			// checked that all the inputs have been provided. If it does happen
-			// we've got some deeper issues.
+			/*
+			 * This should never happen as we only get here if we've already
+			 * checked that all the inputs have been provided. If it does happen
+			 * we've got some deeper issues.
+			 */
 			logger.error(e);
 			return false;
 		}
@@ -278,9 +271,8 @@ public final class ProcessorImpl extends AbstractAnnotatedThing<Processor>
 	protected ProcessorInputPortImpl getInputPortWithName(String name) {
 		for (ProcessorInputPortImpl p : inputPorts) {
 			String portName = p.getName();
-			if (portName.equals(name)) {
+			if (portName.equals(name))
 				return p;
-			}
 		}
 		return null;
 	}
@@ -288,53 +280,61 @@ public final class ProcessorImpl extends AbstractAnnotatedThing<Processor>
 	protected ProcessorOutputPortImpl getOutputPortWithName(String name) {
 		for (ProcessorOutputPortImpl p : outputPorts) {
 			String portName = p.getName();
-			if (portName.equals(name)) {
+			if (portName.equals(name))
 				return p;
-			}
 		}
 		return null;
 	}
 
 	/* Implementations of Processor interface */
 
+	@Override
 	public void fire(String enclosingProcess, InvocationContext context) {
 		Job newJob = new Job(enclosingProcess + ":" + this.name, new int[0],
 				new HashMap<String, T2Reference>(), context);
 		dispatchStack.receiveEvent(newJob);
 	}
 
+	@Override
 	public List<? extends Condition> getPreconditionList() {
-		return Collections.unmodifiableList(conditions);
+		return unmodifiableList(conditions);
 	}
 
+	@Override
 	public List<? extends Condition> getControlledPreconditionList() {
-		return Collections.unmodifiableList(controlledConditions);
+		return unmodifiableList(controlledConditions);
 	}
 
+	@Override
 	public DispatchStackImpl getDispatchStack() {
 		return dispatchStack;
 	}
 
+	@Override
 	public IterationStrategyStackImpl getIterationStrategy() {
 		return iterationStack;
 	}
 
+	@Override
 	public List<? extends ProcessorInputPort> getInputPorts() {
-		return Collections.unmodifiableList(inputPorts);
+		return unmodifiableList(inputPorts);
 	}
 
+	@Override
 	public List<? extends ProcessorOutputPort> getOutputPorts() {
-		return Collections.unmodifiableList(outputPorts);
+		return unmodifiableList(outputPorts);
 	}
 
+	@Override
 	public List<? extends Activity<?>> getActivityList() {
-		return Collections.unmodifiableList(activityList);
+		return unmodifiableList(activityList);
 	}
 
 	protected void setName(String newName) {
 		this.name = newName;
 	}
 
+	@Override
 	public String getLocalName() {
 		return this.name;
 	}
@@ -355,31 +355,32 @@ public final class ProcessorImpl extends AbstractAnnotatedThing<Processor>
 
 		// The set of monitorable (and steerable) properties for this processor
 		// level monitor node
-		Set<MonitorableProperty<?>> properties = new HashSet<MonitorableProperty<?>>();
+		Set<MonitorableProperty<?>> properties = new HashSet<>();
 
-		// If any dispatch layers implement PropertyContributingDispatchLayer
-		// then message them to push their properties into the property store
-		// within the dispatch stack. In this case the anonymous inner class
-		// implements this by storing them in a protected map within
-		// ProcessoImpl from where they can be recovered after the iteration has
-		// finished.
-		for (DispatchLayer<?> layer : dispatchStack.getLayers()) {
-			if (layer instanceof PropertyContributingDispatchLayer) {
+		/*
+		 * If any dispatch layers implement PropertyContributingDispatchLayer
+		 * then message them to push their properties into the property store
+		 * within the dispatch stack. In this case the anonymous inner class
+		 * implements this by storing them in a protected map within
+		 * ProcessoImpl from where they can be recovered after the iteration has
+		 * finished.
+		 */
+		for (DispatchLayer<?> layer : dispatchStack.getLayers())
+			if (layer instanceof PropertyContributingDispatchLayer)
 				((PropertyContributingDispatchLayer<?>) layer)
 						.injectPropertiesFor(processID);
-			}
-		}
-		// All layers have now injected properties into the parent dispatch
-		// stack, which has responded by building an entry in the monitorables
-		// map in this class. We can pull everything out of it and remove the
-		// entry quite safely at this point.
+		/*
+		 * All layers have now injected properties into the parent dispatch
+		 * stack, which has responded by building an entry in the monitorables
+		 * map in this class. We can pull everything out of it and remove the
+		 * entry quite safely at this point.
+		 */
 		synchronized (monitorables) {
 			Set<MonitorableProperty<?>> layerProps = monitorables
 					.get(processID);
 			if (layerProps != null) {
-				for (MonitorableProperty<?> prop : layerProps) {
+				for (MonitorableProperty<?> prop : layerProps)
 					properties.add(prop);
-				}
 				monitorables.remove(processID);
 			}
 		}
@@ -390,14 +391,17 @@ public final class ProcessorImpl extends AbstractAnnotatedThing<Processor>
 				dataflowOwningProcess + ":" + getLocalName(), properties);
 	}
 
+	@Override
 	public void addObserver(Observer<ProcessorFinishedEvent> observer) {
 		processorFinishedMultiCaster.addObserver(observer);
 	}
 
+	@Override
 	public List<Observer<ProcessorFinishedEvent>> getObservers() {
 		return processorFinishedMultiCaster.getObservers();
 	}
 
+	@Override
 	public void removeObserver(Observer<ProcessorFinishedEvent> observer) {
 		processorFinishedMultiCaster.removeObserver(observer);
 	}

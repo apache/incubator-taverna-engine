@@ -62,6 +62,7 @@ public class ProcessProvenanceItem extends AbstractProvenanceItem {
 		return processorProvenanceItem;
 	}
 
+	@Override
 	public SharedVocabulary getEventType() {
 		return eventType;
 	}

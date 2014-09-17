@@ -29,8 +29,7 @@ import net.sf.taverna.t2.workflowmodel.Processor;
  * 
  * @author David Withers
  */
-public class RemoveProcessorEdit extends AbstractDataflowEdit {
-
+class RemoveProcessorEdit extends AbstractDataflowEdit {
 	private Processor processor;
 
 	public RemoveProcessorEdit(Dataflow dataflow, Processor processor) {

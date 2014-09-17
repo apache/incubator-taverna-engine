@@ -23,7 +23,7 @@ package net.sf.taverna.t2.workflowmodel.impl;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
 import net.sf.taverna.t2.workflowmodel.EditException;
 
-public class UpdateDataflowInternalIdentifierEdit extends AbstractDataflowEdit {
+class UpdateDataflowInternalIdentifierEdit extends AbstractDataflowEdit {
 	private String newId;
 
 	public UpdateDataflowInternalIdentifierEdit(Dataflow dataflow, String newId) {

@@ -278,14 +278,14 @@ public class EventProcessor {
 
 		try {
 			// check whether we already have this WF in the DB
-			List<String> workflowIds = null;
+			boolean alreadyInDb;
 			try {
-				workflowIds = pq.getAllworkflowIds();
+				List<String> workflowIds = pq.getAllworkflowIds();
+				alreadyInDb = workflowIds != null && workflowIds.contains(dataflowID);
 			} catch (SQLException e) {
 				logger.warn("Problem processing dataflow structure for " + dataflowID, e);
+				alreadyInDb = false;
 			}
-
-			boolean alreadyInDb = workflowIds != null && workflowIds.contains(dataflowID);
 
 			// add workflow ID -- this is NOT THE SAME AS the workflowRunId
 
@@ -293,15 +293,14 @@ public class EventProcessor {
 			 * this could be a nested workflow -- in this case, override its
 			 * workflowRunId with that of its parent
 			 */
-			if (! alreadyInDb) {
-				String parentDataflow;
-				if ((parentDataflow = wfNestingMap.get(dataflowID)) == null) {
-					Blob blob = serialize(df);
+			if (!alreadyInDb) {
+				String parentDataflow = wfNestingMap.get(dataflowID);
+				Blob blob = serialize(df);
+				if (parentDataflow == null) {
 					// this is a top level dataflow description
 					pw.addWFId(dataflowID, null, externalName, blob); // set its dataflowID with no parent
 
 				} else {
-					Blob blob = serialize(df);
 					// we are processing a nested workflow structure
 					logger.debug("dataflow "+dataflowID+" with external name "+externalName+" is nested within "+parentDataflow);
 

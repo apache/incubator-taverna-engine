@@ -28,15 +28,16 @@ import net.sf.taverna.t2.workflowmodel.Merge;
  * An Edit class responsible for adding a Merge to the dataflow.
  * 
  * @author Tom Oinn
- * 
  */
-public class AddMergeEdit extends AbstractDataflowEdit {
-
-	private Merge merge;
+class AddMergeEdit extends AbstractDataflowEdit {
+	private MergeImpl merge;
 
 	protected AddMergeEdit(Dataflow dataflow, Merge merge) {
 		super(dataflow);
-		this.merge = merge;
+		if (!(merge instanceof MergeImpl))
+			throw new RuntimeException(
+					"The Merge is of the wrong implmentation, it should be of type MergeImpl");
+		this.merge = (MergeImpl) merge;
 	}
 
 	/**
@@ -48,10 +49,6 @@ public class AddMergeEdit extends AbstractDataflowEdit {
 	 */
 	@Override
 	protected void doEditAction(DataflowImpl dataflow) throws EditException {
-		if (!(merge instanceof MergeImpl)) {
-			throw new EditException(
-					"The Merge is of the wrong implmentation, it should be of type MergeImpl");
-		}
-		dataflow.addMerge((MergeImpl) merge);
+		dataflow.addMerge(merge);
 	}
 }

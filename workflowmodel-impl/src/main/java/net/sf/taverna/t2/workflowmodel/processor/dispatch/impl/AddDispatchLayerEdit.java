@@ -31,9 +31,7 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchStack;
  * 
  */
 public class AddDispatchLayerEdit extends AbstractDispatchLayerEdit {
-
 	private DispatchLayer<?> layer;
-
 	private int index;
 
 	public AddDispatchLayerEdit(DispatchStack stack, DispatchLayer<?> newLayer,
@@ -52,5 +50,4 @@ public class AddDispatchLayerEdit extends AbstractDispatchLayerEdit {
 	protected void undoEditAction(DispatchStackImpl stack) {
 		stack.removeLayer(layer);
 	}
-
 }

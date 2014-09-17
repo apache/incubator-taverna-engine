@@ -27,6 +27,8 @@ import java.awt.event.ActionListener;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
@@ -67,9 +69,7 @@ import org.apache.log4j.Logger;
  * 
  */
 public class MonitorTreeModel implements Observer<MonitorMessage> {
-
 	private static MonitorTreeModel instance = null;
-
 	private static Logger logger = Logger.getLogger(MonitorTreeModel.class);
 	
 	/**
@@ -78,17 +78,15 @@ public class MonitorTreeModel implements Observer<MonitorMessage> {
 	 * @return The MonitorImpl singleton
 	 */
 	public synchronized static MonitorTreeModel getInstance() {
-		if (instance == null) {
+		// TODO Convert to a bean?
+		if (instance == null)
 			instance = new MonitorTreeModel();
-		}
 		return instance;
 	}
 
 	private long nodeRemovalDelay = 1000;
-
 	private DefaultTreeModel monitorTree;
-
-	private java.util.Timer nodeRemovalTimer;
+	private Timer nodeRemovalTimer;
 
 	/**
 	 * Protected constructor, use singleton access {@link #getInstance()}
@@ -98,7 +96,7 @@ public class MonitorTreeModel implements Observer<MonitorMessage> {
 	protected MonitorTreeModel() {
 		monitorTree = new DefaultTreeModel(new DefaultMutableTreeNode(this));
 		// Create the node removal timer as a daemon thread
-		nodeRemovalTimer = new java.util.Timer(true);
+		nodeRemovalTimer = new Timer(true);
 	}
 
 	/**
@@ -113,6 +111,7 @@ public class MonitorTreeModel implements Observer<MonitorMessage> {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void notify(Observable<MonitorMessage> sender, MonitorMessage message)
 			throws Exception {
 		if (message instanceof RegisterNodeMessage) {
@@ -155,6 +154,7 @@ public class MonitorTreeModel implements Observer<MonitorMessage> {
 		frame.pack();
 		frame.setVisible(true);
 		new javax.swing.Timer(500, new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent ae) {
 				jsp.repaint();
 			}
@@ -171,9 +171,8 @@ public class MonitorTreeModel implements Observer<MonitorMessage> {
 	 */
 	protected DefaultMutableTreeNode nodeAtProcessPath(String[] owningProcess,
 			int limit) throws IndexOutOfBoundsException {
-		if (limit == -1) {
+		if (limit == -1)
 			limit = owningProcess.length;
-		}
 		DefaultMutableTreeNode currentNode = (DefaultMutableTreeNode) monitorTree
 				.getRoot();
 		for (int index = 0; index < limit && index < owningProcess.length; index++) {
@@ -192,20 +191,18 @@ public class MonitorTreeModel implements Observer<MonitorMessage> {
 					// break;
 				}
 			}
-			if (!found) {
+			if (!found)
 				throw new IndexOutOfBoundsException(
 						"Cannot locate node with process ID "
 								+ printProcess(owningProcess));
-			}
 		}
 		return currentNode;
 	}
 
 	protected String printProcess(String[] process) {
 		StringBuffer sb = new StringBuffer();
-		for (String part : process) {
-			sb.append("{" + part + "}");
-		}
+		for (String part : process)
+			sb.append("{").append(part).append("}");
 		return sb.toString();
 	}
 
@@ -217,9 +214,8 @@ public class MonitorTreeModel implements Observer<MonitorMessage> {
 		try {
 			DefaultMutableTreeNode node = nodeAtProcessPath(owningProcess, -1);
 			MonitorNode mn = (MonitorNode) node.getUserObject();
-			for (MonitorableProperty<?> prop : newProperties) {
+			for (MonitorableProperty<?> prop : newProperties)
 				mn.addMonitorableProperty(prop);
-			}
 		} catch (IndexOutOfBoundsException ioobe) {
 			// Fail silently here, the node wasn't found in the state tree
 			logger.warn("Could not add properties to unknown node "
@@ -233,12 +229,11 @@ public class MonitorTreeModel implements Observer<MonitorMessage> {
 	 * some (slightly) later time as determined by the removalDelay property.
 	 */
 	protected void deregisterNode(String[] owningProcess) {
-		// logger.debug("Remove node @" +
-		// printProcess(owningProcess));
+		// logger.debug("Remove node @" + printProcess(owningProcess));
 		final DefaultMutableTreeNode nodeToRemove = nodeAtProcessPath(
 				owningProcess, -1);
 		((MonitorNodeImpl) nodeToRemove.getUserObject()).expire();
-		nodeRemovalTimer.schedule(new java.util.TimerTask() {
+		nodeRemovalTimer.schedule(new TimerTask() {
 			@Override
 			public void run() {
 				synchronized (monitorTree) {
@@ -308,12 +303,9 @@ public class MonitorTreeModel implements Observer<MonitorMessage> {
 				if (value instanceof DefaultMutableTreeNode) {
 					Object o = ((DefaultMutableTreeNode) value)
 							.getUserObject();
-					if (o instanceof MonitorNode) {
-						MonitorNode mn = (MonitorNode) o;
-						if (mn.hasExpired()) {
+					if (o instanceof MonitorNode)
+						if (((MonitorNode) o).hasExpired())
 							setEnabled(false);
-						}
-					}
 				}
 				return this;
 			}
@@ -323,6 +315,7 @@ public class MonitorTreeModel implements Observer<MonitorMessage> {
 			@Override
 			public void treeNodesInserted(final TreeModelEvent ev) {
 				SwingUtilities.invokeLater(new Runnable() {
+					@Override
 					public void run() {
 						TreePath path = ev.getTreePath();
 						setExpandedState(path, true);
@@ -333,6 +326,7 @@ public class MonitorTreeModel implements Observer<MonitorMessage> {
 			@Override
 			public void treeStructureChanged(final TreeModelEvent ev) {
 				SwingUtilities.invokeLater(new Runnable() {
+					@Override
 					public void run() {
 						TreePath path = ev.getTreePath();
 						setExpandedState(path, true);
@@ -344,12 +338,10 @@ public class MonitorTreeModel implements Observer<MonitorMessage> {
 	}
 
 	class MonitorNodeImpl implements MonitorNode {
-
 		private boolean expired = false;
 		private String[] owningProcess;
 		private Set<MonitorableProperty<?>> properties;
 		private Object workflowObject;
-
 		Date creationDate = new Date();
 
 		MonitorNodeImpl(Object workflowObject, String[] owningProcess,
@@ -359,6 +351,7 @@ public class MonitorTreeModel implements Observer<MonitorMessage> {
 			this.owningProcess = owningProcess;
 		}
 
+		@Override
 		public void addMonitorableProperty(MonitorableProperty<?> newProperty) {
 			properties.add(newProperty);
 		}
@@ -367,10 +360,12 @@ public class MonitorTreeModel implements Observer<MonitorMessage> {
 			expired = true;
 		}
 
+		@Override
 		public Date getCreationDate() {
 			return creationDate;
 		}
 
+		@Override
 		public String[] getOwningProcess() {
 			return owningProcess;
 		}
@@ -378,14 +373,17 @@ public class MonitorTreeModel implements Observer<MonitorMessage> {
 		/**
 		 * Return an unmodifiable copy of the property set
 		 */
+		@Override
 		public Set<? extends MonitorableProperty<?>> getProperties() {
 			return Collections.unmodifiableSet(properties);
 		}
 
+		@Override
 		public Object getWorkflowObject() {
 			return workflowObject;
 		}
 
+		@Override
 		public boolean hasExpired() {
 			return this.expired;
 		}
@@ -398,13 +396,10 @@ public class MonitorTreeModel implements Observer<MonitorMessage> {
 			sb.append(owningProcess[owningProcess.length - 1]);
 			sb.append(" : ");
 			for (MonitorableProperty<?> prop : getProperties()) {
-				int i = 0;
+				String separator = "";
 				for (String nameElement : prop.getName()) {
-					sb.append(nameElement);
-					i++;
-					if (i < prop.getName().length) {
-						sb.append(".");
-					}
+					sb.append(separator).append(nameElement);
+					separator = ".";
 				}
 				sb.append("=");
 				try {
@@ -417,7 +412,6 @@ public class MonitorTreeModel implements Observer<MonitorMessage> {
 			return sb.toString();
 		}
 	}
-
 
 	public long getNodeRemovalDelay() {
 		return nodeRemovalDelay;

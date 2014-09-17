@@ -80,10 +80,10 @@ import org.apache.log4j.Logger;
 public class ProvenanceAccess implements Provenance {
 	private static Logger logger = Logger.getLogger(ProvenanceAccess.class);
 
-	private AbstractProvenanceConnector provenanceConnector = null;
-	private ProvenanceAnalysis pa = null;
-	private ProvenanceQuery pq;
-	private ProvenanceWriter pw;
+	private AbstractProvenanceConnector connector = null;
+	private ProvenanceAnalysis analyser = null;
+	private ProvenanceQuery querier;
+	private ProvenanceWriter writer;
 	
 	private String connectorType;
 	private final List<ProvenanceConnectorFactory> provenanceConnectorFactories;
@@ -155,13 +155,10 @@ public class ProvenanceAccess implements Provenance {
 			ds.setUsername(username);
 		if (password != null)
 			ds.setPassword(password);
-
 		ds.setUrl(jdbcUrl);
 
-		InitialContext context;
 		try {
-			context = new InitialContext();
-			context.rebind("jdbc/taverna", ds);
+			new InitialContext().rebind("jdbc/taverna", ds);
 		} catch (NamingException ex) {
 			logger.error("Problem rebinding the jdbc context", ex);
 		}
@@ -187,7 +184,7 @@ public class ProvenanceAccess implements Provenance {
 	@Override
 	public InvocationContext initReferenceService(String hibernateContext) {
 		// FIXME
-		return new InvocationContextImpl(refService, provenanceConnector);
+		return new InvocationContextImpl(refService, connector);
 	}
 
 	private ReferenceService refService;
@@ -197,8 +194,8 @@ public class ProvenanceAccess implements Provenance {
 	 */
 	public void setReferenceService(ReferenceService refService) {
 		this.refService = refService;
-		if (provenanceConnector != null)
-			provenanceConnector.setReferenceService(refService);
+		if (connector != null)
+			connector.setReferenceService(refService);
 	}
 
 	@Override
@@ -210,24 +207,24 @@ public class ProvenanceAccess implements Provenance {
 	public void init(InvocationContext context) {
 		for (ProvenanceConnectorFactory factory : provenanceConnectorFactories)
 			if (connectorType.equalsIgnoreCase(factory.getConnectorType()))
-				provenanceConnector = factory.getProvenanceConnector();
-		logger.info("Provenance being captured using: " + provenanceConnector);
+				connector = factory.getProvenanceConnector();
+		logger.info("Provenance being captured using: " + connector);
 
 		//slight change, the init is outside but it also means that the init call has to ensure that the dbURL
 		//is set correctly
-		provenanceConnector.init();
+		connector.init();
 
-		provenanceConnector.setReferenceService(context.getReferenceService()); // CHECK context.getReferenceService());
-		provenanceConnector.setInvocationContext(context);
+		connector.setReferenceService(context.getReferenceService()); // CHECK context.getReferenceService());
+		connector.setInvocationContext(context);
 
-		pa = provenanceConnector.getProvenanceAnalysis();
-		pa.setInvocationContext(context);
+		analyser = connector.getProvenanceAnalysis();
+		analyser.setInvocationContext(context);
 
-		pq = provenanceConnector.getQuery();
-		pw = provenanceConnector.getWriter();
-		pw.setQuery(pq);
+		querier = connector.getQuery();
+		writer = connector.getWriter();
+		writer.setQuery(querier);
 
-		logger.info("using writer of type: "+pw.getClass().toString());
+		logger.info("using writer of type: " + writer.getClass());
 	}
 
 	/*
@@ -240,7 +237,7 @@ public class ProvenanceAccess implements Provenance {
 	 */
 	@Override
 	public QueryAnswer executeQuery(Query pq) throws SQLException {
-		return pa.lineageQuery(pq.getTargetPorts(), pq.getRunIDList().get(0),
+		return analyser.lineageQuery(pq.getTargetPorts(), pq.getRunIDList().get(0),
 				pq.getSelectedProcessors());
 	}
 
@@ -272,7 +269,7 @@ public class ProvenanceAccess implements Provenance {
 				+ " port " + portName + " iteration " + iteration);
 		// TODO add context workflowID to query
 		try {
-			return pa.fetchIntermediateResult(workflowRunId, workflowId,
+			return analyser.fetchIntermediateResult(workflowRunId, workflowId,
 					processorName, portName, iteration);
 		} catch (SQLException e) {
 			logger.error("Problem with fetching intermediate results", e);
@@ -286,7 +283,7 @@ public class ProvenanceAccess implements Provenance {
 	 */
 	@Override
 	public String getContainingCollection(LineageQueryResultRecord record)  {
-		return pq.getContainingCollection(record);
+		return querier.getContainingCollection(record);
 	}
 
 	/*
@@ -307,7 +304,7 @@ public class ProvenanceAccess implements Provenance {
 	public List<WorkflowRun> listRuns(String workflowId,
 			Map<String, String> conditions) {
 		try {
-			return pq.getRuns(workflowId, conditions);
+			return querier.getRuns(workflowId, conditions);
 		} catch (SQLException e) {
 			logger.error("Problem with listing runs", e);
 			return null;
@@ -316,17 +313,17 @@ public class ProvenanceAccess implements Provenance {
 
 	@Override
 	public boolean isTopLevelDataflow(String workflowId) {
-		return pq.isTopLevelDataflow(workflowId);
+		return querier.isTopLevelDataflow(workflowId);
 	}
 
 	@Override
 	public boolean isTopLevelDataflow(String workflowId, String workflowRunId) {
-		return pq.isTopLevelDataflow(workflowId, workflowRunId);
+		return querier.isTopLevelDataflow(workflowId, workflowRunId);
 	}
 
 	@Override
 	public String getLatestRunID() throws SQLException {
-		return pq.getLatestRunID();
+		return querier.getLatestRunID();
 	}
 
 	/**
@@ -342,20 +339,19 @@ public class ProvenanceAccess implements Provenance {
 	 */
 	@Override
 	public Set<String> removeRun(String runID) {
-		Set<String> danglingDataRefs = null;
-
 		// implement using clearDynamic() method or a variation. Collect references and forward
 		try {
-			danglingDataRefs = pw.clearDBDynamic(runID);
+			Set<String> danglingDataRefs = writer.clearDBDynamic(runID);
 
 			if (logger.isDebugEnabled())
 				logger.debug("references collected during removeRun: " + danglingDataRefs);
 
 			// TODO send the list of dangling refs to the Data manager for removal of the corresponding data values
+			return danglingDataRefs;
 		} catch (SQLException e) {
 			logger.error("Problem while removing run : " + runID, e);
+			return null;
 		}
-		return danglingDataRefs;
 	}
 
 	/**
@@ -368,7 +364,7 @@ public class ProvenanceAccess implements Provenance {
 	@Override
 	public void removeWorkflow(String workflowId) {
 		try {
-			pw.clearDBStatic(workflowId);
+			writer.clearDBStatic(workflowId);
 		} catch (SQLException e) {
 			logger.error("Problem with removing static workflow: " + workflowId, e);
 		}
@@ -387,11 +383,11 @@ public class ProvenanceAccess implements Provenance {
 	@Override
 	public List<String> getWorkflowID(String runID) {
 		try {
-			return pq.getWorkflowIdsForRun(runID);
+			return querier.getWorkflowIdsForRun(runID);
 		} catch (SQLException e) {
 			logger.error("Problem getting workflow ID: " + runID, e);
+			return null;
 		}
-		return null;
 	}
 
 	/**
@@ -403,17 +399,17 @@ public class ProvenanceAccess implements Provenance {
 	@Override
 	public String getTopLevelWorkflowID(String runID) {
 		try {
-			return pq.getTopLevelWorkflowIdForRun(runID);
+			return querier.getTopLevelWorkflowIdForRun(runID);
 		} catch (SQLException e) {
 			logger.error("Problem getting top level workflow: " + runID, e);
+			return null;
 		}
-		return null;
 	}
 
 	@Override
 	public List<Workflow> getWorkflowsForRun(String runID) {
 		try {
-			return pq.getWorkflowsForRun(runID);
+			return querier.getWorkflowsForRun(runID);
 		} catch (SQLException e) {
 			logger.error("Problem getting workflows for run:" + runID, e);
 			return null;
@@ -428,7 +424,7 @@ public class ProvenanceAccess implements Provenance {
 	@Override
 	public List<WorkflowRun> getAllWorkflowIDs() {
 		try {
-			return pq.getRuns(null, null);
+			return querier.getRuns(null, null);
 		} catch (SQLException e) {
 			logger.error("Problem getting all workflow IDs", e);
 			return null;
@@ -446,18 +442,18 @@ public class ProvenanceAccess implements Provenance {
 	@Override
 	public Map<String, List<ProvenanceProcessor>> getProcessorsInWorkflow(
 			String workflowID) {
-		return pq.getProcessorsDeep(null, workflowID);
+		return querier.getProcessorsDeep(null, workflowID);
 	}
 
 	@Override
 	public List<Collection> getCollectionsForRun(String wfInstanceID) {
-		return pq.getCollectionsForRun(wfInstanceID);
+		return querier.getCollectionsForRun(wfInstanceID);
 	}
 
 	@Override
 	public List<PortBinding> getPortBindings(Map<String, String> constraints)
 			throws SQLException {
-		return pq.getPortBindings(constraints);
+		return querier.getPortBindings(constraints);
 	}
 
 	/**
@@ -469,7 +465,7 @@ public class ProvenanceAccess implements Provenance {
 	 */
 	@Override
 	public List<Port> getPortsForDataflow(String workflowID) {
-		return pq.getPortsForDataflow(workflowID);
+		return querier.getPortsForDataflow(workflowID);
 	}
 
 	/**
@@ -481,7 +477,7 @@ public class ProvenanceAccess implements Provenance {
 	 */
 	@Override
 	public List<Port> getAllPortsInDataflow(String workflowID) {
-		return pq.getAllPortsInDataflow(workflowID);
+		return querier.getAllPortsInDataflow(workflowID);
 	}
 
 	/**
@@ -495,19 +491,19 @@ public class ProvenanceAccess implements Provenance {
 	@Override
 	public List<Port> getPortsForProcessor(String workflowID,
 			String processorName) {
-		return pq.getPortsForProcessor(workflowID, processorName);
+		return querier.getPortsForProcessor(workflowID, processorName);
 	}
 
 	// PM added 5/2010
 	@Override
 	public String getWorkflowNameByWorkflowID(String workflowID) {
-		return pq.getWorkflow(workflowID).getExternalName();
+		return querier.getWorkflow(workflowID).getExternalName();
 	}
 
 	@Override
 	public WorkflowTree getWorkflowNestingStructure(String workflowID)
 			throws SQLException {
-		return pq.getWorkflowNestingStructure(workflowID);
+		return querier.getWorkflowNestingStructure(workflowID);
 	}
 
 //	public List<ProvenanceProcessor> getSuccessors(String workflowID, String processorName, String portName) {
@@ -527,12 +523,12 @@ public class ProvenanceAccess implements Provenance {
 	 */
 	@Override
 	public void toggleIncludeProcessorOutputs(boolean active) {
-		pa.setReturnOutputs(active);
+		analyser.setReturnOutputs(active);
 	}
 
 	@Override
 	public boolean isIncludeProcessorOutputs() {
-		return pa.isReturnOutputs();
+		return analyser.isReturnOutputs();
 	}
 
 	/**
@@ -552,7 +548,7 @@ public class ProvenanceAccess implements Provenance {
 	 */
 	@Override
 	public void toggleOPMGeneration(boolean active) {
-		pa.setGenerateOPMGraph(active);
+		analyser.setGenerateOPMGraph(active);
 	}
 
 	/**
@@ -561,7 +557,7 @@ public class ProvenanceAccess implements Provenance {
 	 */
 	@Override
 	public boolean isOPMGenerationActive() {
-		return pa.isGenerateOPMGraph();
+		return analyser.isGenerateOPMGraph();
 	}
 
 	/**
@@ -573,7 +569,7 @@ public class ProvenanceAccess implements Provenance {
 	 */
 	@Override
 	public void toggleAttachOPMArtifactValues(boolean active) {
-		pa.setRecordArtifactValues(active);
+		analyser.setRecordArtifactValues(active);
 	}
 
 	/**
@@ -581,7 +577,7 @@ public class ProvenanceAccess implements Provenance {
 	 */
 	@Override
 	public boolean isAttachOPMArtifactValues() {
-		return pa.isRecordArtifactValues();
+		return analyser.isRecordArtifactValues();
 	}
 
 	/**
@@ -592,13 +588,13 @@ public class ProvenanceAccess implements Provenance {
 	 */
 	@Override
 	public String getWorkflowIDForExternalName(String workflowName) {
-		return pq.getWorkflowIdForExternalName(workflowName);
+		return querier.getWorkflowIdForExternalName(workflowName);
 	}
 
 	@Override
 	public List<ProvenanceProcessor> getProcessorsForWorkflowID(
 			String workflowID) {
-		return pq.getProcessorsForWorkflow(workflowID);
+		return querier.getProcessorsForWorkflow(workflowID);
 	}
 
 	/**
@@ -614,7 +610,7 @@ public class ProvenanceAccess implements Provenance {
 	 */
 	@Override
 	public AbstractProvenanceConnector getProvenanceConnector() {
-		return provenanceConnector;
+		return connector;
 	}
 
 	/**
@@ -623,7 +619,7 @@ public class ProvenanceAccess implements Provenance {
 	 */
 	public void setProvenanceConnector(
 			AbstractProvenanceConnector provenanceConnector) {
-		this.provenanceConnector = provenanceConnector;
+		this.connector = provenanceConnector;
 	}
 
 	/**
@@ -631,7 +627,7 @@ public class ProvenanceAccess implements Provenance {
 	 */
 	@Override
 	public ProvenanceAnalysis getAnalysis() {
-		return pa;
+		return analyser;
 	}
 
 	/**
@@ -639,7 +635,7 @@ public class ProvenanceAccess implements Provenance {
 	 *            the pa to set
 	 */
 	public void setPa(ProvenanceAnalysis pa) {
-		this.pa = pa;
+		this.analyser = pa;
 	}
 
 	/**
@@ -647,7 +643,7 @@ public class ProvenanceAccess implements Provenance {
 	 */
 	@Override
 	public ProvenanceQuery getQuery() {
-		return pq;
+		return querier;
 	}
 
 	/**
@@ -655,73 +651,71 @@ public class ProvenanceAccess implements Provenance {
 	 *            the pq to set
 	 */
 	public void setPq(ProvenanceQuery pq) {
-		this.pq = pq;
+		this.querier = pq;
 	}
 
 	@Override
 	public List<ProcessorEnactment> getProcessorEnactments(
 			String workflowRunId, String... processorPath) {
-		return pq.getProcessorEnactments(workflowRunId, processorPath);
+		return querier.getProcessorEnactments(workflowRunId, processorPath);
 	}
 
 	@Override
 	public ProcessorEnactment getProcessorEnactmentByProcessId(
 			String workflowRunId, String processIdentifier, String iteration) {
-		return pq.getProcessorEnactmentByProcessId(workflowRunId,
+		return querier.getProcessorEnactmentByProcessId(workflowRunId,
 				processIdentifier, iteration);
 	}
 
 	@Override
 	public ProcessorEnactment getProcessorEnactment(String processorEnactmentId) {
-		return pq.getProcessorEnactment(processorEnactmentId);
+		return querier.getProcessorEnactment(processorEnactmentId);
 	}
 
 	@Override
 	public ProvenanceProcessor getProvenanceProcessor(String workflowId,
 			String processorNameRef) {
-		return pq.getProvenanceProcessorByName(workflowId, processorNameRef);
+		return querier.getProvenanceProcessorByName(workflowId, processorNameRef);
 	}
 
 	@Override
 	public ProvenanceProcessor getProvenanceProcessor(String processorId) {
-		return pq.getProvenanceProcessorById(processorId);
+		return querier.getProvenanceProcessorById(processorId);
 	}
 
 	@Override
 	public Map<Port, T2Reference> getDataBindings(String dataBindingId) {
-		Map<Port, String> dataBindings = pq.getDataBindings(dataBindingId);
-
 		Map<Port, T2Reference> references = new HashMap<>();
-		for (Entry<Port, String> entry : dataBindings.entrySet()) {
-			T2Reference t2Ref = getProvenanceConnector().getReferenceService()
-					.referenceFromString(entry.getValue());
-			references.put(entry.getKey(), t2Ref);
-		}
+		for (Entry<Port, String> entry : querier.getDataBindings(dataBindingId)
+				.entrySet())
+			references.put(entry.getKey(), getProvenanceConnector()
+					.getReferenceService()
+					.referenceFromString(entry.getValue()));
 		return references;
 	}
 
 	@Override
 	public DataflowInvocation getDataflowInvocation(String workflowRunId) {
-		return pq.getDataflowInvocation(workflowRunId);
+		return querier.getDataflowInvocation(workflowRunId);
 	}
 
 	@Override
 	public DataflowInvocation getDataflowInvocation(
 			ProcessorEnactment processorEnactment) {
-		return pq.getDataflowInvocation(processorEnactment);
+		return querier.getDataflowInvocation(processorEnactment);
 	}
 
 	@Override
 	public List<DataflowInvocation> getDataflowInvocations(String workflowRunId) {
-		return pq.getDataflowInvocations(workflowRunId);
+		return querier.getDataflowInvocations(workflowRunId);
 	}
 
 	@Override
 	public List<DataLink> getDataLinks(String workflowId) {
-		Map<String, String> queryConstraints = new HashMap<>();
-		queryConstraints.put("workflowId", workflowId);
 		try {
-			return pq.getDataLinks(queryConstraints);
+			Map<String, String> queryConstraints = new HashMap<>();
+			queryConstraints.put("workflowId", workflowId);
+			return querier.getDataLinks(queryConstraints);
 		} catch (SQLException e) {
 			logger.error(
 					"Problem getting datalinks for workflow:" + workflowId, e);

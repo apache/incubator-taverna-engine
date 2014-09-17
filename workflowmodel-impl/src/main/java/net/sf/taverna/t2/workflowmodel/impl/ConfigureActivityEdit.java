@@ -30,18 +30,15 @@ import org.apache.log4j.Logger;
  * 
  * @author Stuart Owen
  * @author Stian Soiland-Reyes
- * 
  */
-@SuppressWarnings("unchecked")
-public class ConfigureActivityEdit extends ConfigureEdit {
-
+class ConfigureActivityEdit<SubjectInterface extends Activity<?>, SubjectType extends SubjectInterface>
+		extends ConfigureEdit<SubjectInterface, SubjectType> {
 	@SuppressWarnings("unused")
 	private static Logger logger = Logger
 			.getLogger(ConfigureActivityEdit.class);
 
-	public ConfigureActivityEdit(Activity<?> activity, Object configurationBean) {
+	public ConfigureActivityEdit(SubjectInterface activity,
+			Object configurationBean) {
 		super(Activity.class, activity, configurationBean);
 	}
-
-
 }

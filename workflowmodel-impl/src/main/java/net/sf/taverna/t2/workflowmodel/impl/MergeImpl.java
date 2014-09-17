@@ -20,8 +20,10 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.impl;
 
+import static java.lang.System.arraycopy;
+import static java.util.Collections.nCopies;
+
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,24 +50,21 @@ import org.apache.log4j.Logger;
  *
  */
 public class MergeImpl implements Merge {
-
 	@SuppressWarnings("unused")
 	private static Logger logger = Logger.getLogger(MergeImpl.class);
 	
-	private List<MergeInputPortImpl> inputs = new ArrayList<MergeInputPortImpl>();
-
+	private List<MergeInputPortImpl> inputs = new ArrayList<>();
 	private String name;
-
 	private BasicEventForwardingOutputPort output;
-	
-	private Map<String, List<T2Reference>> partialOutputsByProcess = new HashMap<String, List<T2Reference>>();
+	private Map<String, List<T2Reference>> partialOutputsByProcess = new HashMap<>();
 
 	public MergeImpl(String mergeName) {
 		super();
 		this.name = mergeName;
-		this.output = new MergeOutputPortImpl(this, name+"_output", 0, 0);
+		this.output = new MergeOutputPortImpl(this, name + "_output", 0, 0);
 	}
 
+	@Override
 	public String getLocalName() {
 		return this.name;
 	}
@@ -93,10 +92,12 @@ public class MergeImpl implements Merge {
 		inputs.remove(inputPort);
 	}
 
+	@Override
 	public List<? extends MergeInputPort> getInputPorts() {
 		return inputs;
 	}
 
+	@Override
 	public EventForwardingOutputPort getOutputPort() {
 		return this.output;
 	}
@@ -111,14 +112,12 @@ public class MergeImpl implements Merge {
 	private int inputPortNameToIndex(String portName) {
 		int i = 0;
 		for (InputPort ip : inputs) {
-			if (ip.getName().equals(portName)) {
+			if (ip.getName().equals(portName))
 				return i;
-			}
 			i++;
 		}
 		return -1; // FIXME: as the javadoc states, this is a bad thing!
 	}
-	
 
 	protected void receiveEvent(WorkflowDataToken token, String portName) {
 		List<T2Reference> outputList;
@@ -127,39 +126,35 @@ public class MergeImpl implements Merge {
 			outputList = partialOutputsByProcess.get(owningProcess);
 			if (outputList == null) {
 				int numPorts = getInputPorts().size();
-				outputList = new ArrayList<T2Reference>(Collections.nCopies(numPorts, (T2Reference)null));
+				outputList = new ArrayList<>(nCopies(numPorts, (T2Reference) null));
 				partialOutputsByProcess.put(owningProcess, outputList);
 			}
 		}
 		int portIndex = inputPortNameToIndex(portName);
-		if (portIndex == -1) {
+		if (portIndex == -1)
 			throw new WorkflowStructureException(
 					"Received event on unknown port " + portName);
-		}
 		int[] currentIndex = token.getIndex();
 		int[] newIndex = new int[currentIndex.length + 1];
 		newIndex[0] = portIndex;
-		for (int i = 0; i < currentIndex.length; i++) {
-			newIndex[i + 1] = currentIndex[i];
-		}
+		arraycopy(currentIndex, 0, newIndex, 1, currentIndex.length);
 		InvocationContext context = token.getContext();
 		output.sendEvent(new WorkflowDataToken(owningProcess,
 				newIndex, token.getData(), context));
-		if (token.getIndex().length == 0) {
+		if (token.getIndex().length == 0)
 			// Add to completion list
 			synchronized (outputList) {
-				if (outputList.size() <= portIndex) {
+				if (outputList.size() <= portIndex)
 					// Ports changed after initiating running as our list is
 					// smaller than portIndex
 					throw new WorkflowStructureException(
 							"Unexpected addition of output port " + portName
 									+ " at " + portIndex);
-				}
-				if (outputList.get(portIndex) != null) {
+				if (outputList.get(portIndex) != null)
 					throw new WorkflowStructureException(
 							"Already received completion for port " + portName
 									+ " " + outputList.get(portIndex));
-				}
+
 				outputList.set(portIndex, token.getData());
 				if (!outputList.contains(null)) {
 					// We're finished, let's register and send out the list
@@ -176,7 +171,6 @@ public class MergeImpl implements Merge {
 					output.sendEvent(workflowDataToken);
 				}
 			}
-		}
 	}
 
 	/**
@@ -184,41 +178,39 @@ public class MergeImpl implements Merge {
 	 * processing entity interface defines a list, in this case it always
 	 * contains exactly one item.
 	 */
+	@Override
 	public List<? extends EventForwardingOutputPort> getOutputPorts() {
-		List<EventForwardingOutputPort> result = new ArrayList<EventForwardingOutputPort>();
+		List<EventForwardingOutputPort> result = new ArrayList<>();
 		result.add(output);
 		return result;
 	}
 
+	@Override
 	public boolean doTypeCheck() throws IterationTypeMismatchException {
-		if (inputs.size() == 0) {
+		if (inputs.size() == 0)
 			// Arguable, but technically a merge with no inputs is valid, it may
 			// make more sense to throw an exception here though as it has no
 			// actual meaning.
 			return true;
-		}
 		// Return false if we have unbound input ports or bound ports where the
 		// resolved depth hasn't been calculated yet
-		for (MergeInputPort ip : inputs) {
+		for (MergeInputPort ip : inputs)
 			if (ip.getIncomingLink() == null
-					|| ip.getIncomingLink().getResolvedDepth() == -1) {
+					|| ip.getIncomingLink().getResolvedDepth() == -1)
 				return false;
-			}
-		}
+
 		// Got all input ports, now scan for input depths
 		int inputDepth = inputs.get(0).getIncomingLink().getResolvedDepth();
-		for (MergeInputPort ip : inputs) {
-			if (ip.getIncomingLink().getResolvedDepth() != inputDepth) {
+		for (MergeInputPort ip : inputs)
+			if (ip.getIncomingLink().getResolvedDepth() != inputDepth)
 				throw new IterationTypeMismatchException();
-			}
-		}
+
 		// Set the granular depth to be the input depth as this will be the granularity of the output
 		output.setGranularDepth(inputDepth);
 		// Got to here so all the input resolved depths match, push depth+1 to
 		// all outgoing links and return true
-		for (DatalinkImpl dli : output.outgoingLinks) {
+		for (DatalinkImpl dli : output.outgoingLinks)
 			dli.setResolvedDepth(inputDepth+1);
-		}
 		return true;
 	}
 

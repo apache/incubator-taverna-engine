@@ -29,25 +29,22 @@ import net.sf.taverna.t2.workflowmodel.EditException;
  * 
  * @author David Withers
  */
-public class AddDataflowInputPortEdit extends AbstractDataflowEdit {
-
-	private DataflowInputPort dataflowInputPort;
+class AddDataflowInputPortEdit extends AbstractDataflowEdit {
+	private DataflowInputPortImpl dataflowInputPort;
 
 	public AddDataflowInputPortEdit(Dataflow dataflow,
 			DataflowInputPort dataflowInputPort) {
 		super(dataflow);
-		this.dataflowInputPort = dataflowInputPort;
+		if (!(dataflowInputPort instanceof DataflowInputPortImpl))
+			throw new RuntimeException(
+					"The DataflowInputPort is of the wrong implmentation, "
+							+ "it should be of type DataflowInputPortImpl");
+		this.dataflowInputPort = (DataflowInputPortImpl) dataflowInputPort;
 	}
 
 	@Override
 	protected void doEditAction(DataflowImpl dataflow) throws EditException {
-		if (dataflowInputPort instanceof DataflowInputPortImpl) {
-			dataflow.addInputPort((DataflowInputPortImpl) dataflowInputPort);
-		} else {
-			throw new EditException(
-					"The DataflowInputPort is of the wrong implmentation, "
-							+ "it should be of type DataflowInputPortImpl");
-		}
+		dataflow.addInputPort(dataflowInputPort);
 	}
 
 	public DataflowInputPort getDataflowInputPort() {

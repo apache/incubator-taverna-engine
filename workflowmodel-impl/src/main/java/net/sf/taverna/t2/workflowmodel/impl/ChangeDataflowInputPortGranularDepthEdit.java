@@ -27,9 +27,8 @@ import net.sf.taverna.t2.workflowmodel.EditException;
  * Change the granular depth of the specified DataflowInputPort.
  * 
  * @author David Withers
- * 
  */
-public class ChangeDataflowInputPortGranularDepthEdit extends
+class ChangeDataflowInputPortGranularDepthEdit extends
 		AbstractDataflowInputPortEdit {
 	private int newGranularDepth;
 

@@ -25,41 +25,28 @@ import net.sf.taverna.t2.annotation.AnnotationBeanSPI;
 import net.sf.taverna.t2.annotation.CurationEvent;
 import net.sf.taverna.t2.annotation.CurationEventBeanSPI;
 import net.sf.taverna.t2.annotation.impl.AnnotationAssertionImpl;
-import net.sf.taverna.t2.workflowmodel.Edit;
 import net.sf.taverna.t2.workflowmodel.EditException;
 
-public class AddCurationEventEdit<T extends AnnotationBeanSPI, S extends CurationEventBeanSPI>
-		implements Edit<AnnotationAssertion<T>> {
-	private AnnotationAssertion<T> annotationAssertion;
+class AddCurationEventEdit<S extends CurationEventBeanSPI> extends
+		EditSupport<AnnotationAssertion<AnnotationBeanSPI>> {
+	private AnnotationAssertionImpl annotationAssertion;
 	private CurationEvent<S> curationEvent;
-	private boolean applied;
 
-	public AddCurationEventEdit(AnnotationAssertion<T> annotationAssertion,
+	public AddCurationEventEdit(AnnotationAssertion<?> annotationAssertion,
 			CurationEvent<S> curationEvent) {
-		this.annotationAssertion = annotationAssertion;
+		if (!(annotationAssertion instanceof AnnotationAssertionImpl))
+			throw new RuntimeException(
+					"Object being edited must be instance of AnnotationAssertionImpl");
+		this.annotationAssertion = (AnnotationAssertionImpl) annotationAssertion;
 		this.curationEvent = curationEvent;
 	}
 
 	@Override
-	public final AnnotationAssertion<T> doEdit() throws EditException {
-		if (applied) {
-			throw new EditException("Edit has already been applied");
-		}
-		if (!(annotationAssertion instanceof AnnotationAssertionImpl)) {
-			throw new EditException(
-					"Object being edited must be instance of AnnotationAssertionImpl");
-		}
-
-		try {
-			synchronized (annotationAssertion) {
-				((AnnotationAssertionImpl) annotationAssertion)
-						.addCurationEvent(curationEvent);
-				applied = true;
-				return this.annotationAssertion;
-			}
-		} catch (Exception e) {
-			applied = false;
-			throw new EditException("There was a problem with the edit", e);
+	public final AnnotationAssertion<AnnotationBeanSPI> applyEdit()
+			throws EditException {
+		synchronized (annotationAssertion) {
+			annotationAssertion.addCurationEvent(curationEvent);
+			return this.annotationAssertion;
 		}
 	}
 
@@ -67,20 +54,4 @@ public class AddCurationEventEdit<T extends AnnotationBeanSPI, S extends Curatio
 	public final Object getSubject() {
 		return annotationAssertion;
 	}
-
-	@Override
-	public final boolean isApplied() {
-		return applied;
-	}
-
-	@Override
-	public final void undo() {
-		if (!applied) {
-			throw new RuntimeException(
-					"Attempt to undo edit that was never applied");
-		}
-		throw new UnsupportedOperationException(
-				"undo not supported by this interface in Taverna 3");
-	}
-
 }

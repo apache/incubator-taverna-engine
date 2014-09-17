@@ -56,6 +56,7 @@ public class WorkflowDataProvenanceItem extends AbstractProvenanceItem {
 	public WorkflowDataProvenanceItem() {
 	}
 
+	@Override
 	public SharedVocabulary getEventType() {
 		return eventType;
 	}

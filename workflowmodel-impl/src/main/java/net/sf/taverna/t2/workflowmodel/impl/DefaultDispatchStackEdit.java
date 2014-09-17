@@ -26,7 +26,6 @@ import java.util.List;
 import net.sf.taverna.t2.workflowmodel.CompoundEdit;
 import net.sf.taverna.t2.workflowmodel.Edit;
 import net.sf.taverna.t2.workflowmodel.EditException;
-import net.sf.taverna.t2.workflowmodel.Processor;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.impl.AddDispatchLayerEdit;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.impl.DispatchStackImpl;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.ErrorBounce;
@@ -36,17 +35,16 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.Parallelize;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.Retry;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.Stop;
 
-public class DefaultDispatchStackEdit extends AbstractProcessorEdit {
+class DefaultDispatchStackEdit extends AbstractProcessorEdit {
 	private Edit<?> compoundEdit = null;
 	private static final int MAX_JOBS = 1;
 
-	public DefaultDispatchStackEdit(Processor processor) {
+	DefaultDispatchStackEdit(ProcessorImpl processor) {
 		super(processor);
-		DispatchStackImpl stack = ((ProcessorImpl) processor)
-				.getDispatchStack();
+		DispatchStackImpl stack = processor.getDispatchStack();
 		// Top level parallelise layer
 		int layer = 0;
-		List<Edit<?>> edits = new ArrayList<Edit<?>>();
+		List<Edit<?>> edits = new ArrayList<>();
 
 		edits.add(new AddDispatchLayerEdit(stack, new Parallelize(MAX_JOBS),
 				layer++));

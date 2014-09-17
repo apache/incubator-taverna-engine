@@ -60,12 +60,10 @@ import org.jdom.output.XMLOutputter;
  * 
  * @author Tom Oinn
  * @author Stuart Owen
- * 
  */
+@SuppressWarnings("unused")
 public class Tools {
-
-	private static Logger logger = Logger
-	.getLogger(Tools.class);
+	private static Logger logger = Logger.getLogger(Tools.class);
 
 	// XML element names
 	private static final String LAYER = "layer";
@@ -82,10 +80,7 @@ public class Tools {
 	private static final String GROUP = "group";
 	private static final String RAVEN = "raven";
 	private static final String ANNOTATIONS = "annotations";
-	@SuppressWarnings("unused")
 	private static final String ANNOTATION = "annotation";
-
-	
 
 	/**
 	 * Build a JDOM &lt;activity&gt; Element corresponding to the given
@@ -142,7 +137,6 @@ public class Tools {
 		activityElem.addContent(configElement);
 
 		return activityElem;
-
 	}
 	
 	/**
@@ -152,11 +146,10 @@ public class Tools {
 	 * @return the processor to which the activity is attached, or null if it cannot be found
 	 */
 	public Processor findProcessorForActivity(Dataflow dataflow, Activity<?> activity) {
-		for (Processor p : dataflow.getProcessors()) {
-			for (Activity<?> a : p.getActivityList()) {
-				if (a==activity) return p;
-			}
-		}
+		for (Processor p : dataflow.getProcessors())
+			for (Activity<?> a : p.getActivityList())
+				if (a == activity)
+					return p;
 		return null;
 	}
 
@@ -169,9 +162,8 @@ public class Tools {
 	 * @param annotated
 	 *            {@link MutableAnnotated} to be annotated
 	 */
-	@SuppressWarnings("unchecked")
 	@Deprecated
-	public static void annotateObject(Element annotations, Annotated annotated) {
+	public static void annotateObject(Element annotations, Annotated<?> annotated) {
 		// TODO - implement for new annotation chain framework
 		/**
 		for (Element e : (List<Element>) annotations.getChildren(ANNOTATION)) {
@@ -248,7 +240,7 @@ public class Tools {
 	 */
 	@Deprecated
 	@SuppressWarnings("unchecked")
-	public static Activity buildActivity(Element element)
+	public static Activity<?> buildActivity(Element element)
 			throws ClassNotFoundException, InstantiationException,
 			IllegalAccessException, ActivityConfigurationException {
 		Element ravenElement = element.getChild(RAVEN);
@@ -262,12 +254,12 @@ public class Tools {
 //			}
 //		}
 		String className = element.getChild(CLASS).getTextTrim();
-		Class<? extends Activity> c = (Class<? extends Activity>) cl
+		Class<? extends Activity<Object>> c = (Class<? extends Activity<Object>>) cl
 				.loadClass(className);
 		Activity<Object> activity = c.newInstance();
 
 		Element ipElement = element.getChild(INPUT_MAP);
-		for (Element mapElement : (List<Element>) (ipElement.getChildren(MAP))) {
+		for (Element mapElement : (List<Element>) ipElement.getChildren(MAP)) {
 			String processorInputName = mapElement.getAttributeValue(FROM);
 			String activityInputName = mapElement.getAttributeValue(TO);
 			activity.getInputPortMapping().put(processorInputName,
@@ -275,7 +267,7 @@ public class Tools {
 		}
 
 		Element opElement = element.getChild(OUTPUT_MAP);
-		for (Element mapElement : (List<Element>) (opElement.getChildren(MAP))) {
+		for (Element mapElement : (List<Element>) opElement.getChildren(MAP)) {
 			String activityOutputName = mapElement.getAttributeValue(FROM);
 			String processorOutputName = mapElement.getAttributeValue(TO);
 			activity.getOutputPortMapping().put(activityOutputName,
@@ -301,8 +293,8 @@ public class Tools {
 	 * @throws InstantiationException
 	 * 
 	 */
+	@SuppressWarnings("rawtypes")
 	@Deprecated
-	@SuppressWarnings("unchecked")
 	public static DispatchLayer buildDispatchLayer(Element element)
 			throws ClassNotFoundException, InstantiationException,
 			IllegalAccessException {
@@ -320,7 +312,8 @@ public class Tools {
 //			}
 //		}
 		String className = element.getChild(CLASS).getTextTrim();
-		Class<? extends DispatchLayer> c = (Class<? extends DispatchLayer>) cl
+		@SuppressWarnings("unchecked")
+		Class<? extends DispatchLayer<Object>> c = (Class<? extends DispatchLayer<Object>>) cl
 				.loadClass(className);
 		DispatchLayer<Object> layer = c.newInstance();
 
@@ -356,7 +349,7 @@ public class Tools {
 	public static ProcessorImpl buildFromActivity(Activity<?> activity)
 			throws EditException {
 		EditsImpl edits = new EditsImpl();
-		ProcessorImpl processor = (ProcessorImpl)edits.createProcessor("");
+		ProcessorImpl processor = (ProcessorImpl) edits.createProcessor("");
 		new DefaultDispatchStackEdit(processor).doEdit();
 		// Add the Activity to the processor
 		processor.activityList.add(activity);
@@ -365,13 +358,15 @@ public class Tools {
 		activity.getInputPortMapping().clear();
 		activity.getOutputPortMapping().clear();
 		for (InputPort ip : activity.getInputPorts()) {
-			ProcessorInputPort pip = edits.createProcessorInputPort(processor,ip.getName(), ip.getDepth());
+			ProcessorInputPort pip = edits.createProcessorInputPort(processor,
+					ip.getName(), ip.getDepth());
 			new AddProcessorInputPortEdit(processor, pip).doEdit();
 			activity.getInputPortMapping().put(ip.getName(), ip.getName());
 		}
 		for (OutputPort op : activity.getOutputPorts()) {
-			ProcessorOutputPort pop=edits.createProcessorOutputPort(processor,op.getName(), op
-					.getDepth(), op.getGranularDepth());
+			ProcessorOutputPort pop = edits.createProcessorOutputPort(
+					processor, op.getName(), op.getDepth(),
+					op.getGranularDepth());
 			new AddProcessorOutputPortEdit(processor, pop).doEdit();
 			activity.getOutputPortMapping().put(op.getName(), op.getName());
 		}
@@ -394,10 +389,10 @@ public class Tools {
 	public static Object createBean(Element element, ClassLoader classLoader) {
 		String beanXML = new XMLOutputter(Format.getRawFormat())
 				.outputString(element);
-		XMLDecoder decoder = new XMLDecoder(new ByteArrayInputStream(beanXML
-				.getBytes()), null, null, classLoader);
-		Object bean = decoder.readObject();
-		return bean;
+		try (XMLDecoder decoder = new XMLDecoder(new ByteArrayInputStream(
+				beanXML.getBytes()), null, null, classLoader)) {
+			return decoder.readObject();
+		}
 	}
 
 	/**
@@ -514,9 +509,8 @@ public class Tools {
 	 */
 	@Deprecated
 	public static void injectAnnotations(Element element, Annotated<?> annotated) {
-		if (!annotated.getAnnotations().isEmpty()) {
+		if (!annotated.getAnnotations().isEmpty())
 			element.addContent(getAnnotationsElement(annotated));
-		}
 	}
 
 	/**
@@ -534,9 +528,8 @@ public class Tools {
 	public static void populateAnnotationsFromParent(Element parent,
 			Annotated<?> annotated) {
 		Element annotationsElement = parent.getChild(ANNOTATIONS);
-		if (annotationsElement != null) {
+		if (annotationsElement != null)
 			annotateObject(annotationsElement, annotated);
-		}
 	}
 
 //	/**
@@ -596,12 +589,9 @@ public class Tools {
 		return net.sf.taverna.t2.workflowmodel.utils.Tools.uniqueProcessorName(preferredName, dataflow);
 	}
 		
-	
-	
 	/**
 	 * Protected constructor, use static methods only.
 	 */
 	protected Tools() {
 	}
-
 }

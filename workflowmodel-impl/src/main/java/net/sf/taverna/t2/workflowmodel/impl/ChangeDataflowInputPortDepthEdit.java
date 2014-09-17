@@ -27,10 +27,8 @@ import net.sf.taverna.t2.workflowmodel.EditException;
  * Change the depth of the specified DataflowInputPort.
  * 
  * @author David Withers
- * 
  */
-public class ChangeDataflowInputPortDepthEdit extends
-		AbstractDataflowInputPortEdit {
+class ChangeDataflowInputPortDepthEdit extends AbstractDataflowInputPortEdit {
 	private int newDepth;
 
 	public ChangeDataflowInputPortDepthEdit(

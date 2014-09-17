@@ -27,9 +27,8 @@ import net.sf.taverna.t2.workflowmodel.Merge;
  * Rename a merge
  * 
  * @author Stian Soiland-Reyes
- * 
  */
-public class RenameMergeEdit extends AbstractMergeEdit {
+class RenameMergeEdit extends AbstractMergeEdit {
 	private String newName;
 
 	public RenameMergeEdit(Merge p, String newName) {

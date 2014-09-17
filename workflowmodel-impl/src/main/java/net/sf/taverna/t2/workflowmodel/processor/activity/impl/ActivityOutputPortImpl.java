@@ -34,10 +34,8 @@ import org.apache.log4j.Logger;
  * depth and granular depth properties.
  * 
  * @author Tom Oinn
- * 
  */
 public class ActivityOutputPortImpl extends AbstractOutputPort implements ActivityOutputPort {
-
 	private static Logger logger = Logger.getLogger(ActivityOutputPortImpl.class);
 
 	/**
@@ -65,15 +63,13 @@ public class ActivityOutputPortImpl extends AbstractOutputPort implements Activi
 	public ActivityOutputPortImpl(String portName, int portDepth,
 			int granularDepth, Set<AnnotationChain> annotations) {
 		this(portName, portDepth, granularDepth);
-		for (AnnotationChain newAnnotation : annotations) {
+		for (AnnotationChain newAnnotation : annotations)
 			try {
 				getAddAnnotationEdit(newAnnotation).doEdit();
 			} catch (EditException e) {
 				// TODO Auto-generated catch block
 				logger.error(e);
 			}
-		}
-
 	}
 
 }

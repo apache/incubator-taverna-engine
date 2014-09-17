@@ -23,7 +23,7 @@ package net.sf.taverna.t2.workflowmodel.impl;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
 import net.sf.taverna.t2.workflowmodel.EditException;
 
-public class UpdateDataflowNameEdit extends AbstractDataflowEdit {
+class UpdateDataflowNameEdit extends AbstractDataflowEdit {
 	private String newName;
 
 	public UpdateDataflowNameEdit(Dataflow dataflow, String newName) {

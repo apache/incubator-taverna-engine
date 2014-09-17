@@ -25,8 +25,7 @@ import net.sf.taverna.t2.workflowmodel.Processor;
 import net.sf.taverna.t2.workflowmodel.ProcessorInputPort;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.impl.IterationStrategyImpl;
 
-public class RemoveProcessorInputPortEdit extends AbstractProcessorEdit {
-
+class RemoveProcessorInputPortEdit extends AbstractProcessorEdit {
 	private final ProcessorInputPort port;
 
 	public RemoveProcessorInputPortEdit(Processor processor,

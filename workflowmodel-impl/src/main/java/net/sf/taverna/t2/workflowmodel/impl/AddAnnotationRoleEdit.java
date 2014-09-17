@@ -21,62 +21,36 @@
 package net.sf.taverna.t2.workflowmodel.impl;
 
 import net.sf.taverna.t2.annotation.AnnotationAssertion;
+import net.sf.taverna.t2.annotation.AnnotationBeanSPI;
 import net.sf.taverna.t2.annotation.AnnotationRole;
 import net.sf.taverna.t2.annotation.impl.AnnotationAssertionImpl;
-import net.sf.taverna.t2.workflowmodel.Edit;
 import net.sf.taverna.t2.workflowmodel.EditException;
 
-@SuppressWarnings("unchecked")
-public class AddAnnotationRoleEdit implements Edit<AnnotationAssertion> {
-
-	private AnnotationAssertion annotationAssertion;
+class AddAnnotationRoleEdit extends
+		EditSupport<AnnotationAssertion<AnnotationBeanSPI>> {
+	private AnnotationAssertionImpl annotationAssertion;
 	private AnnotationRole annotationRole;
-	private boolean applied;
 
-	@SuppressWarnings("unchecked")
-	public AddAnnotationRoleEdit(AnnotationAssertion annotationAssertion,
+	public AddAnnotationRoleEdit(AnnotationAssertion<?> annotationAssertion,
 			AnnotationRole annotationRole) {
-		this.annotationAssertion = annotationAssertion;
+		if (!(annotationAssertion instanceof AnnotationAssertionImpl))
+			throw new RuntimeException(
+					"Object being edited must be instance of AnnotationAssertionImpl");
+		this.annotationAssertion = (AnnotationAssertionImpl) annotationAssertion;
 		this.annotationRole = annotationRole;
 	}
 
-	public AnnotationAssertion doEdit() throws EditException {
-		if (applied) {
-			throw new EditException("Edit has already been applied");
-		}
-		if (!(annotationAssertion instanceof AnnotationAssertionImpl)) {
-			throw new EditException(
-					"Object being edited must be instance of AnnotationAssertionImpl");
-		}
-
-		try {
-			synchronized (annotationAssertion) {
-				((AnnotationAssertionImpl) annotationAssertion)
-						.setAnnotationRole(annotationRole);
-				applied = true;
-				return this.annotationAssertion;
-			}
-		} catch (Exception e) {
-			applied = false;
-			throw new EditException("There was a problem with the edit", e);
+	@Override
+	public AnnotationAssertion<AnnotationBeanSPI> applyEdit()
+			throws EditException {
+		synchronized (annotationAssertion) {
+			annotationAssertion.setAnnotationRole(annotationRole);
+			return this.annotationAssertion;
 		}
 	}
 
+	@Override
 	public Object getSubject() {
 		return annotationAssertion;
 	}
-
-	public boolean isApplied() {
-		return applied;
-	}
-
-	public void undo() {
-		if (!applied) {
-			throw new RuntimeException(
-					"Attempt to undo edit that was never applied");
-		}
-		((AnnotationAssertionImpl) annotationAssertion).removeAnnotationRole();
-		applied = false;
-	}
-
 }

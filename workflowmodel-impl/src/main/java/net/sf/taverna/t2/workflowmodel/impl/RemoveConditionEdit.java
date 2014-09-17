@@ -28,9 +28,8 @@ import net.sf.taverna.t2.workflowmodel.Processor;
  * target processors.
  * 
  * @author Tom Oinn
- * 
  */
-public class RemoveConditionEdit extends AbstractBinaryProcessorEdit {
+class RemoveConditionEdit extends AbstractBinaryProcessorEdit {
 	public RemoveConditionEdit(Processor control, Processor target) {
 		super(control, target);
 	}
@@ -38,13 +37,12 @@ public class RemoveConditionEdit extends AbstractBinaryProcessorEdit {
 	@Override
 	protected void doEditAction(ProcessorImpl control, ProcessorImpl target)
 			throws EditException {
-		for (ConditionImpl c : control.controlledConditions) {
+		for (ConditionImpl c : control.controlledConditions)
 			if (c.getTarget() == target) {
 				control.controlledConditions.remove(c);
 				target.conditions.remove(c);
 				return;
 			}
-		}
 		throw new EditException(
 				"Can't remove a control link as it doesn't exist");
 	}

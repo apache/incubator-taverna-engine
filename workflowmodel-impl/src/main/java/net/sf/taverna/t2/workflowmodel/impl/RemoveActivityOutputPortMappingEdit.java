@@ -24,8 +24,7 @@ import net.sf.taverna.t2.workflowmodel.EditException;
 import net.sf.taverna.t2.workflowmodel.processor.activity.AbstractActivity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 
-public class RemoveActivityOutputPortMappingEdit extends AbstractActivityEdit {
-
+class RemoveActivityOutputPortMappingEdit extends AbstractActivityEdit {
 	private final String processorPortName;
 
 	public RemoveActivityOutputPortMappingEdit(Activity<?> activity,

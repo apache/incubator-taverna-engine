@@ -30,10 +30,8 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
  * Remove an Activity from a Processor.
  * 
  * @author alanrw
- * 
  */
-public class RemoveActivityEdit extends AbstractProcessorEdit {
-
+class RemoveActivityEdit extends AbstractProcessorEdit {
 	private Activity<?> activityToRemove;
 
 	public RemoveActivityEdit(Processor processor, Activity<?> activity) {
