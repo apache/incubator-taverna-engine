@@ -30,8 +30,7 @@ import net.sf.taverna.t2.workflowmodel.EventHandlingInputPort;
  * 
  * @author Tom Oinn
  */
-public class DatalinkImpl extends AbstractAnnotatedThing<Datalink> implements
-		Datalink {
+class DatalinkImpl extends AbstractAnnotatedThing<Datalink> implements Datalink {
 	private EventForwardingOutputPort source;
 	private EventHandlingInputPort sink;
 	private transient int resolvedDepth = -1;

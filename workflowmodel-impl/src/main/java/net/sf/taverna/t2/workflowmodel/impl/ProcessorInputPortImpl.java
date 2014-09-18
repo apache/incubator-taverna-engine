@@ -37,8 +37,8 @@ import net.sf.taverna.t2.workflowmodel.ProcessorInputPort;
  * @author Tom Oinn
  * 
  */
-public class ProcessorInputPortImpl extends AbstractFilteringInputPort
-		implements ProcessorInputPort {
+class ProcessorInputPortImpl extends AbstractFilteringInputPort implements
+		ProcessorInputPort {
 	private ProcessorImpl parent;
 
 	protected ProcessorInputPortImpl(ProcessorImpl parent, String name,

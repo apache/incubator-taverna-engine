@@ -31,14 +31,12 @@ import org.apache.log4j.Logger;
  * @author Stuart Owen
  * @author Stian Soiland-Reyes
  */
-class ConfigureActivityEdit<SubjectInterface extends Activity<?>, SubjectType extends SubjectInterface>
-		extends ConfigureEdit<SubjectInterface, SubjectType> {
+class ConfigureActivityEdit<T> extends ConfigureEdit<T> {
 	@SuppressWarnings("unused")
 	private static Logger logger = Logger
 			.getLogger(ConfigureActivityEdit.class);
 
-	public ConfigureActivityEdit(SubjectInterface activity,
-			Object configurationBean) {
+	public ConfigureActivityEdit(Activity<T> activity, T configurationBean) {
 		super(Activity.class, activity, configurationBean);
 	}
 }

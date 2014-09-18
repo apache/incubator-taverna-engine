@@ -33,8 +33,8 @@ import net.sf.taverna.t2.workflowmodel.ProcessorOutputPort;
  * @author Tom Oinn
  * @author Stuart Owen
  */
-public class ProcessorOutputPortImpl extends BasicEventForwardingOutputPort
-		implements ProcessorOutputPort {
+class ProcessorOutputPortImpl extends BasicEventForwardingOutputPort implements
+		ProcessorOutputPort {
 	private ProcessorImpl parent;
 
 	protected ProcessorOutputPortImpl(ProcessorImpl parent, String portName,

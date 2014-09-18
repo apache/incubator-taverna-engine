@@ -61,6 +61,17 @@ public class IterationStrategyImpl implements IterationStrategy {
 	protected IterationStrategyStackImpl stack = null;
 	private TerminalNodeImpl terminal = new TerminalNodeImpl();
 
+	private void pushEvent(IterationInternalEvent<?> e) {
+		if (stack == null)
+			return;
+		IterationStrategyImpl below = stack
+				.layerBelow(IterationStrategyImpl.this);
+		if (below == null)
+			stack.receiveEventFromStrategy(e);
+		else
+			below.receiveEvent(e);
+	}
+
 	/**
 	 * The terminal node is used internally as the root of the iteration
 	 * strategy tree, it is responsible for forwarding all events up to the
@@ -69,36 +80,22 @@ public class IterationStrategyImpl implements IterationStrategy {
 	 */
 	@SuppressWarnings("serial")
 	public class TerminalNodeImpl extends TerminalNode {
+		private IterationInternalEvent<?> unwrap(IterationInternalEvent<?> completion) {
+			return (wrapping ? completion.popIndex() : completion);
+		}
+
 		@Override
 		public void receiveCompletion(int inputIndex, Completion completion) {
-			if (wrapping)
-				pushEvent(completion.popIndex());
-			else
-				pushEvent(completion);
+			pushEvent(unwrap(completion));
 		}
 
 		@Override
 		public void receiveJob(int inputIndex, Job newJob) {
-			if (wrapping)
-				pushEvent(newJob.popIndex());
-			else
-				pushEvent(newJob);
+			pushEvent(unwrap(newJob));
 		}
 
 		public void receiveBypassCompletion(Completion completion) {
 			pushEvent(completion);
-		}
-
-		private void pushEvent(
-				IterationInternalEvent<? extends IterationInternalEvent<?>> e) {
-			if (stack == null)
-				return;
-			IterationStrategyImpl below = stack
-					.layerBelow(IterationStrategyImpl.this);
-			if (below == null)
-				stack.receiveEventFromStrategy(e);
-			else
-				below.receiveEvent(e);
 		}
 
 		@Override
@@ -111,7 +108,7 @@ public class IterationStrategyImpl implements IterationStrategy {
 	}
 
 	public IterationStrategyImpl() {
-		inputs = new HashSet<NamedInputPortNode>();
+		inputs = new HashSet<>();
 	}
 
 	@Override
@@ -144,10 +141,11 @@ public class IterationStrategyImpl implements IterationStrategy {
 		else if (eName.equals("prefix"))
 			node = new PrefixDotProduct();
 		else if (eName.equals("port")) {
-			String portName = e.getAttributeValue("name");
-			int portDepth = Integer.parseInt(e.getAttributeValue("depth"));
-			node = new NamedInputPortNode(portName, portDepth);
-			addInput((NamedInputPortNode) node);
+			NamedInputPortNode nipn = new NamedInputPortNode(
+					e.getAttributeValue("name"), Integer.parseInt(e
+							.getAttributeValue("depth")));
+			node = nipn;
+			addInput(nipn);
 		}
 		for (Object child : e.getChildren())
 			nodeForElement((Element) child).setParent(node);
@@ -162,20 +160,20 @@ public class IterationStrategyImpl implements IterationStrategy {
 	 * 
 	 * @param j
 	 */
-	@SuppressWarnings("unchecked")
-	// suppressed to avoid jdk1.5 compilation errors caused by the declaration
-	// IterationInternalEvent<? extends IterationInternalEvent<?>> e
-	protected void receiveEvent(IterationInternalEvent e) {
-		// If we ever get this method called we know we're not the top layer in
-		// the dispatch stack and that we need to perform wrap / unwrap of data
-		// as it comes in. This boolean flag informs the behaviour of the
-		// terminal
-		// node in the strategy.
+	protected void receiveEvent(IterationInternalEvent<?> e) {
+		/*
+		 * If we ever get this method called we know we're not the top layer in
+		 * the dispatch stack and that we need to perform wrap / unwrap of data
+		 * as it comes in. This boolean flag informs the behaviour of the
+		 * terminal node in the strategy.
+		 */
 		wrapping = true;
-		// If this is a Job object then we'll need to split it up and push it
-		// through the iteration system to get multiple child jobs followed by a
-		// completion event otherwise we can just push the completion event all
-		// the way through the system.
+		/*
+		 * If this is a Job object then we'll need to split it up and push it
+		 * through the iteration system to get multiple child jobs followed by a
+		 * completion event otherwise we can just push the completion event all
+		 * the way through the system.
+		 */
 		if (e instanceof Job) {
 			Job j = ((Job) e).pushIndex();
 			// Now have to split this job up into a number of distinct events!
@@ -310,7 +308,7 @@ public class IterationStrategyImpl implements IterationStrategy {
 	@Override
 	public void normalize() {
 		boolean finished = false;
-		while (!finished) {
+		do {
 			finished = true;
 			@SuppressWarnings("unchecked")
 			Enumeration<AbstractIterationStrategyNode> e = getTerminalNode()
@@ -329,9 +327,10 @@ public class IterationStrategyImpl implements IterationStrategy {
 					finished = false;
 				} else if (!(n.isLeaf()) && parent != null
 						&& n.getChildCount() == 1) {
-					// Is a collation node with a single child, and therefore
-					// pointless.
-					// Replace it with the child node
+					/*
+					 * Is a collation node with a single child, and therefore
+					 * pointless. Replace it with the child node
+					 */
 					AbstractIterationStrategyNode child = (AbstractIterationStrategyNode) n
 							.getChildAt(0);
 					// Find the index of the collation node in its parent
@@ -340,16 +339,7 @@ public class IterationStrategyImpl implements IterationStrategy {
 					parent.insert(child, oldIndex);
 					finished = false;
 				}
-				/*
-				 * else if (parent == null && n.getChildCount() == 1) { // Is
-				 * the root node but with only one child, so must // be a
-				 * collation node and have no effect on the iterator
-				 * AbstractIterationStrategyNode child =
-				 * (AbstractIterationStrategyNode) n.getChildAt(0);
-				 * n.remove(child); terminal = (TerminalNodeImpl) child;
-				 * finished = false; }
-				 */
 			}
-		}
+		} while (!finished);
 	}
 }

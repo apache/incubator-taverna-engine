@@ -31,15 +31,13 @@ import net.sf.taverna.t2.workflowmodel.Dataflow;
 import net.sf.taverna.t2.workflowmodel.DataflowOutputPort;
 import net.sf.taverna.t2.workflowmodel.EventHandlingInputPort;
 
-public class DataflowOutputPortImpl extends BasicEventForwardingOutputPort
+class DataflowOutputPortImpl extends BasicEventForwardingOutputPort
 		implements DataflowOutputPort {
-
 	protected InternalInputPort internalInput;
 	/**
 	 * Remember to synchronize access to this list
 	 */
 	protected List<ResultListener> resultListeners = synchronizedList(new ArrayList<ResultListener>());
-
 	private Dataflow dataflow;
 
 	DataflowOutputPortImpl(String portName, Dataflow dataflow) {
@@ -79,8 +77,15 @@ public class DataflowOutputPortImpl extends BasicEventForwardingOutputPort
 		internalInput.setName(newName);
 	}
 
-	public class InternalInputPort extends AbstractEventHandlingInputPort {
-		private InternalInputPort(String name, Dataflow dataflow, String portName) {
+	/** This makes a thread-safe copy. */
+	private List<ResultListener> getListeners() {
+		synchronized (resultListeners) {
+			return new ArrayList<>(resultListeners);
+		}
+	}
+
+	private class InternalInputPort extends AbstractEventHandlingInputPort {
+		InternalInputPort(String name, Dataflow dataflow, String portName) {
 			super(name, -1);
 		}
 
@@ -92,16 +97,7 @@ public class DataflowOutputPortImpl extends BasicEventForwardingOutputPort
 		public void receiveEvent(WorkflowDataToken token) {
 			WorkflowDataToken newToken = token.popOwningProcess();
 			sendEvent(newToken);
-			
-			List<ResultListener> listeners;
-			synchronized (resultListeners) {
-				/*
-				 * thread safe copy before we push tokens (avoiding deadlock
-				 * with WorkflowInstanceFacade)
-				 */
-				listeners = new ArrayList<>(resultListeners);
-			}
-			for (ResultListener listener : listeners)
+			for (ResultListener listener : getListeners())
 				listener.resultTokenProduced(newToken, this.getName());
 		}
 

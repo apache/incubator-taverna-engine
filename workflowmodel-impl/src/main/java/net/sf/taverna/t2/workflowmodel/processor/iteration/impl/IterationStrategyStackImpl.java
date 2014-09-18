@@ -62,9 +62,11 @@ public class IterationStrategyStackImpl implements IterationStrategyStack {
 	public int getIterationDepth(Map<String, Integer> inputDepths)
 			throws IterationTypeMismatchException,
 			MissingIterationInputException {
-		// If there are no iteration strategies or no inputs then by definition
-		// there's no iteration, no wrapping and the depth of wrapping must be
-		// zero
+		/*
+		 * If there are no iteration strategies or no inputs then by definition
+		 * there's no iteration, no wrapping and the depth of wrapping must be
+		 * zero
+		 */
 		if (strategies.isEmpty())
 			return 0;
 		if (strategies.get(0).inputs.isEmpty())
@@ -73,9 +75,11 @@ public class IterationStrategyStackImpl implements IterationStrategyStack {
 		IterationStrategyImpl strategy = strategies.get(0);
 		int depth = strategy.getIterationDepth(inputDepths);
 		for (int index = 1; index < strategies.size(); index++) {
-			// Construct the input depths for the staged iteration strategies
-			// after the first one by looking at the previous iteration
-			// strategy's desired cardinalities on its input ports.
+			/*
+			 * Construct the input depths for the staged iteration strategies
+			 * after the first one by looking at the previous iteration
+			 * strategy's desired cardinalities on its input ports.
+			 */
 			Map<String, Integer> stagedInputDepths = strategy
 					.getDesiredCardinalities();
 			strategy = strategies.get(index);

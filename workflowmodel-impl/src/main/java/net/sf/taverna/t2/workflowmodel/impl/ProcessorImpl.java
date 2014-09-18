@@ -67,7 +67,7 @@ import org.apache.log4j.Logger;
  * 
  */
 public final class ProcessorImpl extends AbstractAnnotatedThing<Processor>
-		implements Processor{
+		implements Processor {
 	private static int pNameCounter = 0;
 	private static Logger logger = Logger.getLogger(ProcessorImpl.class);
 
@@ -82,8 +82,9 @@ public final class ProcessorImpl extends AbstractAnnotatedThing<Processor>
 	protected String name;
 	public transient int resultWrappingDepth = -1;
 	protected transient Map<String, Set<MonitorableProperty<?>>> monitorables = new HashMap<>();
-	private MultiCaster<ProcessorFinishedEvent> processorFinishedMultiCaster = new MultiCaster<>(this);
-	
+	private MultiCaster<ProcessorFinishedEvent> processorFinishedMultiCaster = new MultiCaster<>(
+			this);
+
 	/**
 	 * <p>
 	 * Create a new processor implementation with default blank iteration
@@ -122,7 +123,7 @@ public final class ProcessorImpl extends AbstractAnnotatedThing<Processor>
 			public Processor getProcessor() {
 				return ProcessorImpl.this;
 			}
-			
+
 			/**
 			 * Called when an event bubbles out of the top of the dispatch
 			 * stack. In this case we pass it into the crystalizer.
@@ -155,16 +156,17 @@ public final class ProcessorImpl extends AbstractAnnotatedThing<Processor>
 			 */
 			@Override
 			protected void finishedWith(String owningProcess) {
-				if (! controlledConditions.isEmpty()) {
+				if (!controlledConditions.isEmpty()) {
 					String enclosingProcess = owningProcess.substring(0,
 							owningProcess.lastIndexOf(':'));
 					for (ConditionImpl ci : controlledConditions) {
 						ci.satisfy(enclosingProcess);
-						ci.getTarget().getDispatchStack().satisfyConditions(
-								enclosingProcess);
+						ci.getTarget().getDispatchStack()
+								.satisfyConditions(enclosingProcess);
 					}
 				}
-				// Tell whoever is interested that the processor has finished executing
+				// Tell whoever is interested that the processor has finished
+				// executing
 				processorFinishedMultiCaster.notify(new ProcessorFinishedEvent(
 						this.getProcessor(), owningProcess));
 			}
@@ -198,21 +200,24 @@ public final class ProcessorImpl extends AbstractAnnotatedThing<Processor>
 	 * @throws IterationTypeMismatchException
 	 *             if the typing occured but didn't match because of an
 	 *             iteration mismatch
-	 * @throws InvalidDataflowException 
-	 * 			 	if the entity depended on a dataflow that was not valid
+	 * @throws InvalidDataflowException
+	 *             if the entity depended on a dataflow that was not valid
 	 */
 	@Override
-	public boolean doTypeCheck() throws IterationTypeMismatchException, InvalidDataflowException {
+	public boolean doTypeCheck() throws IterationTypeMismatchException,
+			InvalidDataflowException {
 		// Check for any nested dataflows, they should all be valid
 		for (Activity<?> activity : getActivityList())
 			if (activity instanceof NestedDataflow) {
 				NestedDataflow nestedDataflowActivity = (NestedDataflow) activity;
-				Dataflow nestedDataflow = nestedDataflowActivity.getNestedDataflow();
-				DataflowValidationReport validity = nestedDataflow.checkValidity();
+				Dataflow nestedDataflow = nestedDataflowActivity
+						.getNestedDataflow();
+				DataflowValidationReport validity = nestedDataflow
+						.checkValidity();
 				if (!validity.isValid())
 					throw new InvalidDataflowException(nestedDataflow, validity);
-			}	
-		
+			}
+
 		/*
 		 * Check whether all our input ports have inbound links
 		 */
@@ -349,12 +354,16 @@ public final class ProcessorImpl extends AbstractAnnotatedThing<Processor>
 	 *            must register with this as the base path plus the local name
 	 */
 	void registerWithMonitor(String dataflowOwningProcess) {
-		// Given the dataflow process identifier, so append local name to get
-		// the process identifier that will be applied to incoming data tokens
+		/*
+		 * Given the dataflow process identifier, so append local name to get
+		 * the process identifier that will be applied to incoming data tokens
+		 */
 		String processID = dataflowOwningProcess + ":" + getLocalName();
 
-		// The set of monitorable (and steerable) properties for this processor
-		// level monitor node
+		/*
+		 * The set of monitorable (and steerable) properties for this processor
+		 * level monitor node
+		 */
 		Set<MonitorableProperty<?>> properties = new HashSet<>();
 
 		/*
@@ -405,7 +414,7 @@ public final class ProcessorImpl extends AbstractAnnotatedThing<Processor>
 	public void removeObserver(Observer<ProcessorFinishedEvent> observer) {
 		processorFinishedMultiCaster.removeObserver(observer);
 	}
-	
+
 	@Override
 	public String toString() {
 		return "Processor " + getLocalName();

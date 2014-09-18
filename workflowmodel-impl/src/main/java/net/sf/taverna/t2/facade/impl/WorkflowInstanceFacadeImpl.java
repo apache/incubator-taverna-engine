@@ -20,7 +20,9 @@
  ******************************************************************************/
 package net.sf.taverna.t2.facade.impl;
 
+import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.synchronizedList;
+import static java.util.UUID.randomUUID;
 
 import java.lang.ref.WeakReference;
 import java.sql.Timestamp;
@@ -78,17 +80,13 @@ import org.apache.log4j.Logger;
  * @author Stian Soiland-Reyes
  * @author Ian Dunlop
  * @author Alex Nenadic
- * 
  */
 public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
-	
 	private static Logger logger = Logger
 			.getLogger(WorkflowInstanceFacadeImpl.class);
 
 	protected static AtomicLong owningProcessId = new AtomicLong(0);
-
-	private InvocationContext context;
-	
+	private InvocationContext context;	
 	private State state = State.prepared;
 	public Date stateLastModified = new Date();
 
@@ -99,32 +97,26 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 
 	private Dataflow dataflow;
 	private FacadeResultListener facadeResultListener;
-	// How many processors have finished so far
+	/** How many processors have finished so far */
 	private int processorsToComplete;
 	private String instanceOwningProcessId;
 	private String localName;
 	private MonitorManager monitorManager = MonitorManager.getInstance();
 	protected List<FacadeListener> facadeListeners = synchronizedList(new ArrayList<FacadeListener>());
 	protected List<ResultListener> resultListeners = synchronizedList(new ArrayList<ResultListener>());
-
 	private boolean provEnabled = false;
-	
-	private WeakHashMap<String, T2Reference> pushedDataMap = new WeakHashMap<> ();
-
-	// Id of this run
+	private WeakHashMap<String, T2Reference> pushedDataMap = new WeakHashMap<>();
+	/** Id of this run */
 	private String workflowRunId;
-
 	private Timestamp workflowStarted;
-
 	private WorkflowProvenanceItem workflowItem = null;
-
 	private int portsToComplete;
 	
 	private enum WorkflowInstanceFacadeChange {
 		CANCELLATION, PORT_DECREMENT, PROCESSOR_DECREMENT
 	};
 
-	public WorkflowInstanceFacadeImpl(final Dataflow dataflow,
+	public WorkflowInstanceFacadeImpl(Dataflow dataflow,
 			InvocationContext context, String parentProcess)
 			throws InvalidDataflowException {
 		if (dataflow == null) {
@@ -187,15 +179,19 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 		facadeResultListener = new FacadeResultListener(dataflow, workflowItem);
 		
 		// Register an observer with each of the processors
-		for (Processor processor: dataflow.getProcessors()){			
-			String expectedProcessId = instanceOwningProcessId + ":" + dataflow.getLocalName() + ":" + processor.getLocalName();
-			ProcessorFinishedObserver observer = new ProcessorFinishedObserver(workflowItem, expectedProcessId);
+		for (Processor processor : dataflow.getProcessors()) {
+			String expectedProcessId = instanceOwningProcessId + ":"
+					+ dataflow.getLocalName() + ":" + processor.getLocalName();
+			ProcessorFinishedObserver observer = new ProcessorFinishedObserver(
+					workflowItem, expectedProcessId);
 			((ProcessorImpl) processor).addObserver(observer);
 		}
 	}
 
 	private void addProvenanceLayerToProcessors(WorkflowProvenanceItem workflowItem) {
-		for (Processor processor : dataflow.getProcessors()) {
+		// TODO Shouldn't we use a bean for this? 
+		Edits edits = new EditsImpl();
+		for (Processor processor : dataflow.getProcessors())
 			/*
 			 * Synchronized per processor as we might be modifying its dispatch
 			 * stack (fixes T3-929)
@@ -205,13 +201,10 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
     			List<DispatchLayer<?>> layers = dispatchStack.getLayers();
     			if (isProvenanceAlreadyAdded(layers))
     				continue;
-				DispatchLayer<?> provenance = new IntermediateProvenance();
-				IntermediateProvenance intermediateProvenance = (IntermediateProvenance) provenance;
-				intermediateProvenance.setWorkflow(workflowItem);
-				intermediateProvenance.setReporter(context
-						.getProvenanceReporter());
+    			IntermediateProvenance provenance = new IntermediateProvenance();
+				provenance.setWorkflow(workflowItem);
+				provenance.setReporter(context.getProvenanceReporter());
 
-				Edits edits = new EditsImpl();
 				try {
 					edits.getAddDispatchLayerEdit(dispatchStack, provenance,
 					        provenancePosition(layers)).doEdit();
@@ -221,7 +214,6 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 									+ e.toString());
 				}
 		    }
-		}
 	}
 
     private boolean isProvenanceAlreadyAdded(List<DispatchLayer<?>> layers) {
@@ -235,13 +227,12 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
         int position=0; // fallback - beginning of list
         for (int i = 0; i < layers.size(); i++) {
             DispatchLayer<?> layer = layers.get(i);
-        	if (layer instanceof Parallelize) {
+        	if (layer instanceof Parallelize)
         	    // Below Parallelize (should be there!)
         	    position = i+1;
-        	} else if (layer instanceof ErrorBounce) {
+        	else if (layer instanceof ErrorBounce)
         	    // and inserted just above ErrorBounce (if it's there)
         		position = i;
-        	}
         }
         return position;
     }
@@ -264,9 +255,8 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 	@Override
 	public synchronized void fire() throws IllegalStateException {
 		if (getState().equals(State.running))
-			throw new IllegalStateException(
-					"Workflow is already running!");
-		workflowStarted = new Timestamp(System.currentTimeMillis());
+			throw new IllegalStateException("Workflow is already running!");
+		workflowStarted = new Timestamp(currentTimeMillis());
 		setState(State.running);
 		if (provEnabled) {
 			workflowItem.setInvocationStarted(workflowStarted);
@@ -329,20 +319,19 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 				pushedDataMap.put(portName, token.getData());					
 			}
 			if (provEnabled) {
-				WorkflowDataProvenanceItem workflowDataProvenanceItem = new WorkflowDataProvenanceItem();
-				workflowDataProvenanceItem.setPortName(portName);
-				workflowDataProvenanceItem.setInputPort(true);
-				workflowDataProvenanceItem.setData(token.getData());
-				workflowDataProvenanceItem.setReferenceService(context.getReferenceService());
-				workflowDataProvenanceItem.setParentId(workflowItem.getIdentifier());
-				workflowDataProvenanceItem.setWorkflowId(workflowItem.getParentId());
-				workflowDataProvenanceItem.setIdentifier(UUID.randomUUID().toString());
-				workflowDataProvenanceItem.setParentId(instanceOwningProcessId);
-				workflowDataProvenanceItem.setProcessId(instanceOwningProcessId);
-				workflowDataProvenanceItem.setIndex(token.getIndex());
-				workflowDataProvenanceItem.setFinal(token.isFinal());
-				context.getProvenanceReporter().addProvenanceItem(
-						workflowDataProvenanceItem);
+				WorkflowDataProvenanceItem provItem = new WorkflowDataProvenanceItem();
+				provItem.setPortName(portName);
+				provItem.setInputPort(true);
+				provItem.setData(token.getData());
+				provItem.setReferenceService(context.getReferenceService());
+				provItem.setParentId(workflowItem.getIdentifier());
+				provItem.setWorkflowId(workflowItem.getParentId());
+				provItem.setIdentifier(randomUUID().toString());
+				provItem.setParentId(instanceOwningProcessId);
+				provItem.setProcessId(instanceOwningProcessId);
+				provItem.setIndex(token.getIndex());
+				provItem.setFinal(token.isFinal());
+				context.getProvenanceReporter().addProvenanceItem(provItem);
 			}
 			port.receiveEvent(token.pushOwningProcess(localName));
 		}
@@ -386,20 +375,19 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 				return;
 
 			if (provEnabled) {
-				WorkflowDataProvenanceItem workflowDataProvenanceItem = new WorkflowDataProvenanceItem();
-				workflowDataProvenanceItem.setPortName(portName);
-				workflowDataProvenanceItem.setInputPort(false);
-				workflowDataProvenanceItem.setData(token.getData());
-				workflowDataProvenanceItem.setReferenceService(context.getReferenceService());
-				workflowDataProvenanceItem.setParentId(workflowItem.getIdentifier());
-				workflowDataProvenanceItem.setWorkflowId(workflowItem.getParentId());
-				workflowDataProvenanceItem.setIdentifier(UUID.randomUUID().toString());
-				workflowDataProvenanceItem.setParentId(instanceOwningProcessId);
-				workflowDataProvenanceItem.setProcessId(instanceOwningProcessId);
-				workflowDataProvenanceItem.setIndex(token.getIndex());
-				workflowDataProvenanceItem.setFinal(token.isFinal());
-				context.getProvenanceReporter().addProvenanceItem(
-						workflowDataProvenanceItem);				
+				WorkflowDataProvenanceItem provItem = new WorkflowDataProvenanceItem();
+				provItem.setPortName(portName);
+				provItem.setInputPort(false);
+				provItem.setData(token.getData());
+				provItem.setReferenceService(context.getReferenceService());
+				provItem.setParentId(workflowItem.getIdentifier());
+				provItem.setWorkflowId(workflowItem.getParentId());
+				provItem.setIdentifier(randomUUID().toString());
+				provItem.setParentId(instanceOwningProcessId);
+				provItem.setProcessId(instanceOwningProcessId);
+				provItem.setIndex(token.getIndex());
+				provItem.setFinal(token.isFinal());
+				context.getProvenanceReporter().addProvenanceItem(provItem);
 			}
 			
 			for (ResultListener resultListener : copyList(resultListeners))
@@ -421,12 +409,9 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 	 *
 	 */
 	private class ProcessorFinishedObserver implements Observer<ProcessorFinishedEvent>{
-
-		private WorkflowProvenanceItem workflowItem;
 		private final String expectedProcessId;
 
 		public ProcessorFinishedObserver(WorkflowProvenanceItem workflowItem, String expectedProcessId) {
-			this.workflowItem = workflowItem;
 			this.expectedProcessId = expectedProcessId;
 		}
 
@@ -497,18 +482,14 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 		monitorManager.deregisterNode(instanceOwningProcessId);
 
 		if (provEnabled) {
-			DataflowRunComplete dataflowRunComplete = new DataflowRunComplete();
-			dataflowRunComplete.setInvocationEnded(new Timestamp(System.currentTimeMillis()));
-			dataflowRunComplete.setParentId(workflowItem
-					.getIdentifier());
-			dataflowRunComplete.setWorkflowId(workflowItem.getParentId());
-			dataflowRunComplete
-					.setProcessId(instanceOwningProcessId);
-			dataflowRunComplete.setIdentifier(UUID.randomUUID()
-					.toString());
-			dataflowRunComplete.setState(getState());
-			context.getProvenanceReporter().addProvenanceItem(
-					dataflowRunComplete);
+			DataflowRunComplete provItem = new DataflowRunComplete();
+			provItem.setInvocationEnded(new Timestamp(currentTimeMillis()));
+			provItem.setParentId(workflowItem.getIdentifier());
+			provItem.setWorkflowId(workflowItem.getParentId());
+			provItem.setProcessId(instanceOwningProcessId);
+			provItem.setIdentifier(randomUUID().toString());
+			provItem.setState(getState());
+			context.getProvenanceReporter().addProvenanceItem(provItem);
 		}
 	}
 
@@ -535,38 +516,58 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 		State oldState = state;
 		if (newState.equals(state))
 			return;
-		if (newState.equals(State.running)) {
-			if (state.equals(State.prepared) || state.equals(State.paused)) {
+		switch (newState) {
+		case running:
+			switch (state) {
+			case prepared:
+			case paused:
 				stateLastModified = new Date();
 				state = newState;
 				notifyFacadeListeners(oldState, newState);
 				return;
+			default:
+				throw new IllegalStateException("Can't change state from "
+						+ state + " to " + newState);
 			}
-		} else if (newState.equals(State.paused)) {			
-			if (state.equals(State.running)) {
+		case paused:
+			switch (state) {
+			case running:
 				stateLastModified = new Date();
 				state = newState;
 				notifyFacadeListeners(oldState, newState);
 				return;
+			default:
+				throw new IllegalStateException("Can't change state from "
+						+ state + " to " + newState);
 			}
-		} else if (newState.equals(State.completed)) {
-			if (state.equals(State.running)) {
+		case completed:
+			switch (state) {
+			case running:
 				stateLastModified = new Date();
 				state = newState;
 				notifyFacadeListeners(oldState, newState);
 				return;
-			} else if (state.equals(State.cancelled))
+			case cancelled:
 				// Keep as cancelled
 				return;
-		} else if (newState.equals(State.cancelled)) {
-			if (! state.equals(State.completed)) {
+			default:
+				throw new IllegalStateException("Can't change state from "
+						+ state + " to " + newState);
+			}
+		case cancelled:
+			switch (state) {
+			case completed:
+				throw new IllegalStateException("Can't change state from "
+						+ state + " to " + newState);
+			default:
 				stateLastModified = new Date();
 				state = newState;
 				notifyFacadeListeners(oldState, newState);
 				return;
 			}
+		default:
+			throw new IllegalStateException("Can't change state from " + state  + " to " + newState);		
 		}		
-		throw new IllegalStateException("Can't change state from " + state  + " to " + newState);		
 	}
 
 	private void notifyFacadeListeners(State oldState, State newState) {
@@ -588,7 +589,7 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 			setState(State.cancelled);
 			logger.info("Cancelled workflow runId=" + getWorkflowRunId()
 					+ " processId=" + instanceOwningProcessId);
-			for (FacadeListener facadeListener : copyList(facadeListeners)) {
+			for (FacadeListener facadeListener : copyList(facadeListeners))
 				try {
 					facadeListener.workflowFailed(this, "Workflow was cancelled",
 							new WorkflowRunCancellation(getWorkflowRunId()));
@@ -596,7 +597,6 @@ public class WorkflowInstanceFacadeImpl implements WorkflowInstanceFacade {
 					logger.warn("Could not notify failure listener "
 							+ facadeListener, ex);
 				}
-			}
 			checkWorkflowFinished(WorkflowInstanceFacadeChange.CANCELLATION);		
 		}
 		return result;

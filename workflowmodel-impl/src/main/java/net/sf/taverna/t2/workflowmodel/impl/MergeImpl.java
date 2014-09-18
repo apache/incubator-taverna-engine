@@ -49,7 +49,7 @@ import org.apache.log4j.Logger;
  * @author Stian Soiland-Reyes
  *
  */
-public class MergeImpl implements Merge {
+class MergeImpl implements Merge {
 	@SuppressWarnings("unused")
 	private static Logger logger = Logger.getLogger(MergeImpl.class);
 	

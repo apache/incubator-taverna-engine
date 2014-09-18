@@ -317,7 +317,7 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 	protected synchronized Datalink link(String sourceName, String sinkName)
 			throws EditException {
 		BasicEventForwardingOutputPort source = findSourcePort(sourceName);
-		AbstractEventHandlingInputPort sink = findSinkPort(sinkName);
+		EventHandlingInputPort sink = findSinkPort(sinkName);
 
 		// Check whether the sink is already linked
 		if (sink.getIncomingLink() != null)
@@ -333,7 +333,7 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 
 		DatalinkImpl link = new DatalinkImpl(source, sink);
 		source.addOutgoingLink(link);
-		sink.setIncomingLink(link);
+		((AbstractEventHandlingInputPort) sink).setIncomingLink(link);
 
 		return link;
 	}
@@ -371,9 +371,9 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 	}
 
 	/* @nonnull */
-	private AbstractEventHandlingInputPort findSinkPort(String sinkName)
+	private EventHandlingInputPort findSinkPort(String sinkName)
 			throws EditException {
-		AbstractEventHandlingInputPort sink = null;
+		EventHandlingInputPort sink = null;
 		String[] split;
 		split = sinkName.split(":");
 		if (split.length == 2) {
@@ -391,7 +391,7 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 			 */
 			for (DataflowOutputPortImpl dopi : outputs)
 				if (dopi.getName().equals(split[0])) {
-					sink = dopi.internalInput;
+					sink = dopi.getInternalInputPort();
 					break;
 				}
 		} else
@@ -668,7 +668,7 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 	 * The active process identifiers correspond to current strands of data
 	 * running through this dataflow.
 	 */
-	private Map<String, Set<String>> activeProcessIdentifiers = new HashMap<>();
+	private Set<String> activeProcessIdentifiers = new HashSet<>();
 	private volatile boolean immutable;
 
 	/**
@@ -687,7 +687,7 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 	protected boolean tokenReceived(String owningProcess,
 			InvocationContext context) {
 		synchronized (activeProcessIdentifiers) {
-			if (activeProcessIdentifiers.keySet().contains(owningProcess))
+			if (activeProcessIdentifiers.contains(owningProcess))
 				return true;
 			MonitorManager.getInstance().registerNode(this, owningProcess);
 
@@ -702,7 +702,7 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 				if (p.getInputPorts().isEmpty())
 					p.fire(owningProcess, context);
 			}
-			activeProcessIdentifiers.put(owningProcess, new HashSet<String>());
+			activeProcessIdentifiers.add(owningProcess);
 			return false;
 		}
 	}
@@ -745,57 +745,6 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 		 * (p.getInputPorts().isEmpty()) { p.fire(newOwningProcess, context); }
 		 * }
 		 */
-	}
-
-	/**
-	 * Called when a token with index array length zero is sent from a dataflow
-	 * output port.
-	 * 
-	 * @param portName
-	 */
-	public void sentFinalToken(String portName, String owningProcess) {
-		synchronized (activeProcessIdentifiers) {
-			Set<String> alreadyReceivedPortNames = activeProcessIdentifiers
-					.get(owningProcess);
-			if (alreadyReceivedPortNames == null)
-				throw new RuntimeException(
-						"Workflow's broken in some way, received an output token for process '"
-								+ owningProcess + "' that shouldn't exist!");
-			if (alreadyReceivedPortNames.contains(portName))
-				throw new RuntimeException(
-						"Received duplicate final events on port name '"
-								+ portName + "' for process '" + owningProcess
-								+ "', this is not a good thing");
-
-			// No duplicates and the set wasn't null, add this port name to the
-			// set of ports which have sent final events.
-			alreadyReceivedPortNames.add(portName);
-
-			/*
-			 * Check - if we have no duplicates and the set of output ports
-			 * which have sent final events in this data thread is the same size
-			 * as the number of output ports then we've finished and can
-			 * deregister from the monitor
-			 */
-			if (alreadyReceivedPortNames.size() == getOutputPorts().size()) {
-				/*
-				 * Now performed by
-				 * WorkflowInstanceFacade.ProcessorFinishedObserver and
-				 * FacadeResultListener to be able to handle if it is the
-				 * workflow port or the processor that finishes last
-				 */
-
-				/*
-				 * for (Processor p : getEntities(Processor.class)) {
-				 * MonitorManager.getInstance().deregisterNode( owningProcess +
-				 * ":" + p.getLocalName()); }
-				 * MonitorManager.getInstance().deregisterNode(owningProcess);
-				 */
-
-				// Remove this entry from the active process map
-				activeProcessIdentifiers.remove(owningProcess);
-			}
-		}
 	}
 
 	@Override

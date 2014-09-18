@@ -511,9 +511,8 @@ public class EditsImpl implements Edits {
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public <ConfigurationBean> Edit<Activity<?>> getConfigureActivityEdit(
-			Activity<ConfigurationBean> activity,
-			ConfigurationBean configurationBean) {
+	public <T> Edit<Activity<?>> getConfigureActivityEdit(Activity<T> activity,
+			T configurationBean) {
 		return new ConfigureActivityEdit(activity, configurationBean);
 	}
 
@@ -548,11 +547,10 @@ public class EditsImpl implements Edits {
 	}
 
 	@Override
-	public <ConfigurationType> Edit<? extends Configurable<ConfigurationType>> getConfigureEdit(
-			Configurable<ConfigurationType> configurable,
-			ConfigurationType configBean) {
-		return new ConfigureEdit<Configurable<ConfigurationType>, Configurable<ConfigurationType>>(
-				Configurable.class, configurable, configBean);
+	public <T> Edit<? extends Configurable<T>> getConfigureEdit(
+			Configurable<T> configurable, T configBean) {
+		return new ConfigureEdit<T>(Configurable.class, configurable,
+				configBean);
 	}
 
 	@Override
