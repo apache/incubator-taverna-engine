@@ -56,8 +56,6 @@ class MapProcessorPortsForActivityEdit extends EditSupport<Processor> {
 		List<? extends ProcessorOutputPort> outputPortsForRemoval = determineOutputPortsForRemoval(processor,a);
 		Map<? extends ProcessorInputPort, ActivityInputPort> changedInputPorts = determineChangedInputPorts(processor,a);
 		Map<? extends ProcessorOutputPort, ActivityOutputPort> changedOutputPorts = determineChangedOutputPorts(processor,a);
-//		List<ActivityInputPort> newInputPorts = determineNewInputPorts(processor,a);
-//		List<OutputPort> newOutputPorts = determineNewOutputPorts(processor,a);
 		
 		for (ProcessorInputPort ip : inputPortsForRemoval) {
 			if (ip.getIncomingLink() != null)
@@ -80,7 +78,7 @@ class MapProcessorPortsForActivityEdit extends EditSupport<Processor> {
 		}
 
 		for (ProcessorInputPort ip : changedInputPorts.keySet()) {
-			final Datalink incomingLink = ip.getIncomingLink();
+			Datalink incomingLink = ip.getIncomingLink();
 			if (incomingLink != null)
 				edits.add(editsImpl.getDisconnectDatalinkEdit(incomingLink));
 			edits.add(editsImpl.getRemoveProcessorInputPortEdit(processor, ip));
@@ -97,7 +95,7 @@ class MapProcessorPortsForActivityEdit extends EditSupport<Processor> {
 		}
 		
 		for (ProcessorOutputPort op : changedOutputPorts.keySet()) {
-			final Set<? extends Datalink> outgoingLinks = op.getOutgoingLinks();
+			Set<? extends Datalink> outgoingLinks = op.getOutgoingLinks();
 			for (Datalink link : outgoingLinks)
 				edits.add(editsImpl.getDisconnectDatalinkEdit(link));
 			edits.add(editsImpl.getRemoveProcessorOutputPortEdit(processor, op));
@@ -115,38 +113,7 @@ class MapProcessorPortsForActivityEdit extends EditSupport<Processor> {
 									.getSink())));
 			}
 		}
-		
-//		for (ActivityInputPort ip : changedInputPorts) {
-//			if (ip.getIncomingLink()!=null) {
-//				edits.add(editsImpl.getDisconnectDatalinkEdit(ip.getIncomingLink()));
-//			}
-//
-//			ProcessorInputPort pPort = processor.getInputPortWithName(ip.getName());
-//			edits.add(new ChangeProcessorInputPortDepthEdit(pPort,ip.getDepth()));
-//		}
-		
-//		for (OutputPort op : changedOutputPorts) {
-//			ProcessorOutputPort pPort = processor.getOutputPortWithName(op.getName());
-//			if (pPort.getDepth() != op.getDepth()) {
-//				edits.add(new ChangeProcessorOutputPortDepthEdit(pPort,op.getDepth()));
-//			}
-//			if (pPort.getGranularDepth() != op.getGranularDepth()) {
-//				edits.add(new ChangeProcessorOutputPortGranularDepthEdit(pPort,op.getGranularDepth()));
-//			}
-//		}
-		
-//		for (ActivityInputPort ip : newInputPorts) {
-//			ProcessorInputPort processorInputPort = editsImpl.createProcessorInputPort(processor, ip.getName(), ip.getDepth());
-//			edits.add(editsImpl.getAddProcessorInputPortEdit(processor, processorInputPort));
-//			edits.add(new AddActivityInputPortMapping(a,ip.getName(),ip.getName()));
-//		}
-//		
-//		for (OutputPort op : newOutputPorts) {
-//			ProcessorOutputPort processorOutputPort = editsImpl.createProcessorOutputPort(processor, op.getName(), op.getDepth(), op.getGranularDepth());
-//			edits.add(editsImpl.getAddProcessorOutputPortEdit(processor, processorOutputPort));
-//			edits.add(new AddActivityOutputPortMapping(a,op.getName(),op.getName()));
-//		}
-		
+
 		compoundEdit = new CompoundEdit(edits);
 		compoundEdit.doEdit();
 		return processor;
@@ -163,7 +130,6 @@ class MapProcessorPortsForActivityEdit extends EditSupport<Processor> {
 		processorPorts: for (ProcessorInputPort pPort : p.getInputPorts()) {
 			for (ActivityInputPort aPort : a.getInputPorts())
 				if (aPort.getName().equals(pPort.getName()))
-//					if (pPort.getDepth() == aPort.getDepth())
 					continue processorPorts;
 			result.add(pPort);
 		}
@@ -176,7 +142,6 @@ class MapProcessorPortsForActivityEdit extends EditSupport<Processor> {
 		processorPorts: for (ProcessorOutputPort pPort : p.getOutputPorts()) {
 			for (OutputPort aPort : a.getOutputPorts())
 				if (aPort.getName().equals(pPort.getName()))
-//					if (pPort.getDepth() == aPort.getDepth() && pPort.getGranularDepth() == aPort.getGranularDepth())
 					continue processorPorts;
 			result.add(pPort);
 		}
