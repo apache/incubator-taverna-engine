@@ -23,11 +23,15 @@ package net.sf.taverna.t2.workflowmodel.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import net.sf.taverna.t2.workflowmodel.Datalink;
+import net.sf.taverna.t2.workflowmodel.Edit;
 import net.sf.taverna.t2.workflowmodel.EditException;
+import net.sf.taverna.t2.workflowmodel.Edits;
 import net.sf.taverna.t2.workflowmodel.EventForwardingOutputPort;
 import net.sf.taverna.t2.workflowmodel.EventHandlingInputPort;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -35,6 +39,12 @@ import org.junit.Test;
  * 
  */
 public class ConnectDatalinkEditTest {
+	private static Edits edits;
+
+	@BeforeClass
+	public static void createEditsInstance() {
+		edits = new EditsImpl();
+	}
 
 	private DatalinkImpl datalink;
 	private EventForwardingOutputPort source;
@@ -49,10 +59,10 @@ public class ConnectDatalinkEditTest {
 
 	@Test
 	public void testDoEditAction() throws EditException {
-		ConnectDatalinkEdit edit = new ConnectDatalinkEdit(datalink);
+		Edit<Datalink> edit = edits.getConnectDatalinkEdit(datalink);
 		assertEquals(0, datalink.getSource().getOutgoingLinks().size());
 		assertNull(datalink.getSink().getIncomingLink());
-		edit.doEditAction(datalink);
+		edit.doEdit();
 		assertEquals(1, datalink.getSource().getOutgoingLinks().size());
 		assertEquals(datalink, datalink.getSource().getOutgoingLinks()
 				.iterator().next());
@@ -61,17 +71,17 @@ public class ConnectDatalinkEditTest {
 
 	@Test
 	public void testUndoEditAction() throws EditException {
-		ConnectDatalinkEdit edit = new ConnectDatalinkEdit(datalink);
+		Edit<Datalink> edit = edits.getConnectDatalinkEdit(datalink);
 		assertEquals(0, datalink.getSource().getOutgoingLinks().size());
 		assertNull(datalink.getSink().getIncomingLink());
-		edit.doEditAction(datalink);
+		edit.doEdit();
 		assertEquals(1, datalink.getSource().getOutgoingLinks().size());
 		assertNotNull(datalink.getSink().getIncomingLink());
 	}
 
 	@Test
 	public void testConnectDatalinkEdit() {
-		ConnectDatalinkEdit edit = new ConnectDatalinkEdit(datalink);
+		Edit<Datalink> edit = edits.getConnectDatalinkEdit(datalink);
 		assertEquals(datalink, edit.getSubject());
 	}
 

@@ -20,8 +20,12 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.impl;
 
+import static net.sf.taverna.t2.workflowmodel.utils.Tools.getUniqueMergeInputPortName;
+
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import net.sf.taverna.t2.annotation.Annotated;
 import net.sf.taverna.t2.annotation.AnnotationAssertion;
@@ -31,7 +35,6 @@ import net.sf.taverna.t2.annotation.AnnotationRole;
 import net.sf.taverna.t2.annotation.AnnotationSourceSPI;
 import net.sf.taverna.t2.annotation.CurationEvent;
 import net.sf.taverna.t2.annotation.Person;
-import net.sf.taverna.t2.annotation.impl.AddAnnotationAssertionEdit;
 import net.sf.taverna.t2.annotation.impl.AnnotationAssertionImpl;
 import net.sf.taverna.t2.annotation.impl.AnnotationChainImpl;
 import net.sf.taverna.t2.facade.WorkflowInstanceFacade;
@@ -39,12 +42,14 @@ import net.sf.taverna.t2.facade.impl.WorkflowInstanceFacadeImpl;
 import net.sf.taverna.t2.invocation.InvocationContext;
 import net.sf.taverna.t2.reference.ExternalReferenceSPI;
 import net.sf.taverna.t2.workflowmodel.CompoundEdit;
+import net.sf.taverna.t2.workflowmodel.Condition;
 import net.sf.taverna.t2.workflowmodel.Configurable;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
 import net.sf.taverna.t2.workflowmodel.DataflowInputPort;
 import net.sf.taverna.t2.workflowmodel.DataflowOutputPort;
 import net.sf.taverna.t2.workflowmodel.Datalink;
 import net.sf.taverna.t2.workflowmodel.Edit;
+import net.sf.taverna.t2.workflowmodel.EditException;
 import net.sf.taverna.t2.workflowmodel.Edits;
 import net.sf.taverna.t2.workflowmodel.EventForwardingOutputPort;
 import net.sf.taverna.t2.workflowmodel.EventHandlingInputPort;
@@ -55,6 +60,7 @@ import net.sf.taverna.t2.workflowmodel.OrderedPair;
 import net.sf.taverna.t2.workflowmodel.Processor;
 import net.sf.taverna.t2.workflowmodel.ProcessorInputPort;
 import net.sf.taverna.t2.workflowmodel.ProcessorOutputPort;
+import net.sf.taverna.t2.workflowmodel.processor.activity.AbstractActivity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityInputPort;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityOutputPort;
@@ -62,12 +68,19 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.impl.ActivityInputPort
 import net.sf.taverna.t2.workflowmodel.processor.activity.impl.ActivityOutputPortImpl;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayer;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchStack;
-import net.sf.taverna.t2.workflowmodel.processor.dispatch.impl.AddDispatchLayerEdit;
-import net.sf.taverna.t2.workflowmodel.processor.dispatch.impl.DeleteDispatchLayerEdit;
+import net.sf.taverna.t2.workflowmodel.processor.dispatch.impl.AbstractDispatchLayerEdit;
+import net.sf.taverna.t2.workflowmodel.processor.dispatch.impl.DispatchStackImpl;
+import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.ErrorBounce;
+import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.Failover;
+import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.Invoke;
+import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.Parallelize;
+import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.Retry;
+import net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.Stop;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationStrategy;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationStrategyStack;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.NamedInputPortNode;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.impl.IterationStrategyImpl;
+import net.sf.taverna.t2.workflowmodel.processor.iteration.impl.IterationStrategyStackImpl;
 
 /**
  * Implementation of {@link Edits}
@@ -101,11 +114,9 @@ public class EditsImpl implements Edits {
 	@Override
 	public MergeInputPort createMergeInputPort(Merge merge, String name,
 			int depth) {
-		if (merge instanceof MergeImpl) {
+		if (merge instanceof MergeImpl)
 			return new MergeInputPortImpl((MergeImpl) merge, name, depth);
-		} else {
-			return null;
-		}
+		return null;
 	}
 
 	@Override
@@ -125,104 +136,260 @@ public class EditsImpl implements Edits {
 	@Override
 	public Edit<Dataflow> getAddProcessorEdit(Dataflow dataflow,
 			Processor processor) {
-		return new AddProcessorEdit(dataflow, processor);
+		if (!(processor instanceof ProcessorImpl))
+			throw new RuntimeException(
+					"The Processor is of the wrong implmentation,"
+							+ " it should be of type ProcessorImpl");
+		final ProcessorImpl p = (ProcessorImpl) processor;
+		return new AbstractDataflowEdit(dataflow) {
+			@Override
+			protected void doEditAction(DataflowImpl dataflow)
+					throws EditException {
+				dataflow.addProcessor(p);
+			}
+		};
 	}
 
 	@Override
 	public Edit<Dataflow> getAddMergeEdit(Dataflow dataflow, Merge merge) {
-		return new AddMergeEdit(dataflow, merge);
+		if (!(merge instanceof MergeImpl))
+			throw new RuntimeException(
+					"The Merge is of the wrong implmentation, "
+							+ "it should be of type MergeImpl");
+		final MergeImpl m = (MergeImpl) merge;
+		return new AbstractDataflowEdit(dataflow) {
+			@Override
+			protected void doEditAction(DataflowImpl dataflow)
+					throws EditException {
+				dataflow.addMerge(m);
+			}
+		};
 	}
 
 	@Override
 	public Edit<DispatchStack> getAddDispatchLayerEdit(DispatchStack stack,
-			DispatchLayer<?> layer, int position) {
-		return new AddDispatchLayerEdit(stack, layer, position);
+			final DispatchLayer<?> layer, final int position) {
+		return new AbstractDispatchLayerEdit(stack) {
+			@Override
+			protected void doEditAction(DispatchStackImpl stack) throws EditException {
+				stack.addLayer(layer, position);
+			}
+
+			@Override
+			protected void undoEditAction(DispatchStackImpl stack) {
+				stack.removeLayer(layer);
+			}
+		};
 	}
 
 	@Override
 	public Edit<Processor> getAddActivityEdit(Processor processor,
-			Activity<?> activity) {
-		return new AddActivityEdit(processor, activity);
+			final Activity<?> activity) {
+		return new AbstractProcessorEdit(processor) {
+			@Override
+			protected void doEditAction(ProcessorImpl processor)
+					throws EditException {
+				List<Activity<?>> activities = processor.activityList;
+				if (activities.contains(activity))
+					throw new EditException(
+							"Cannot add a duplicate activity to processor");
+				synchronized (processor) {
+					activities.add(activity);
+				}
+			}
+		};
 	}
 
 	@Override
 	public Edit<Processor> getAddProcessorInputPortEdit(Processor processor,
-			ProcessorInputPort port) {
-		return new AddProcessorInputPortEdit(processor, port);
+			final ProcessorInputPort port) {
+		return new AbstractProcessorEdit(processor) {
+			@Override
+			protected void doEditAction(ProcessorImpl processor)
+					throws EditException {
+				/*
+				 * Add a new InputPort object to the processor and also create
+				 * an appropriate NamedInputPortNode in any iteration
+				 * strategies. By default set the desired drill depth on each
+				 * iteration strategy node to the same as the input port, so
+				 * this won't automatically trigger iteration staging unless the
+				 * depth is altered on the iteration strategy itself.)
+				 */
+				if (processor.getInputPortWithName(port.getName()) != null)
+					throw new EditException(
+							"Attempt to create duplicate input port with name '"
+									+ port.getName() + "'");
+				processor.inputPorts.add((ProcessorInputPortImpl) port);
+				for (IterationStrategyImpl is : processor.iterationStack
+						.getStrategies()) {
+					NamedInputPortNode nipn = new NamedInputPortNode(
+							port.getName(), port.getDepth());
+					is.addInput(nipn);
+					is.connectDefault(nipn);
+				}
+			}
+		};
 	}
 
 	@Override
 	public Edit<Processor> getAddProcessorOutputPortEdit(Processor processor,
-			ProcessorOutputPort port) {
-		return new AddProcessorOutputPortEdit(processor, port);
+			final ProcessorOutputPort port) {
+		return new AbstractProcessorEdit(processor) {
+			@Override
+			protected void doEditAction(ProcessorImpl processor)
+					throws EditException {
+				if (processor.getOutputPortWithName(port.getName()) != null)
+					throw new EditException("Duplicate output port name");
+				processor.outputPorts.add((ProcessorOutputPortImpl) port);
+			}
+		};
 	}
 
 	@Override
 	public Edit<Dataflow> getCreateDataflowInputPortEdit(Dataflow dataflow,
-			String portName, int portDepth, int granularDepth) {
-		return new CreateDataflowInputPortEdit(dataflow, portName, portDepth,
-				granularDepth);
+			final String portName, final int portDepth, final int granularDepth) {
+		return new AbstractDataflowEdit(dataflow) {
+			@Override
+			protected void doEditAction(DataflowImpl dataflow)
+					throws EditException {
+				dataflow.createInputPort(portName, portDepth, granularDepth);
+			}
+		};
 	}
 
 	@Override
 	public Edit<Dataflow> getCreateDataflowOutputPortEdit(Dataflow dataflow,
-			String portName) {
-		return new CreateDataflowOutputPortEdit(dataflow, portName);
+			final String portName) {
+		return new AbstractDataflowEdit(dataflow) {
+			@Override
+			protected void doEditAction(DataflowImpl dataflow)
+					throws EditException {
+				dataflow.createOutputPort(portName);
+			}
+		};
 	}
 
 	@Override
 	public Edit<DispatchStack> getDeleteDispatchLayerEdit(DispatchStack stack,
-			DispatchLayer<?> layer) {
-		return new DeleteDispatchLayerEdit(stack, layer);
+			final DispatchLayer<?> layer) {
+		return new AbstractDispatchLayerEdit(stack) {
+			private int index;
+
+			@Override
+			protected void doEditAction(DispatchStackImpl stack) {
+				index = stack.removeLayer(layer);
+			}
+
+			@Override
+			protected void undoEditAction(DispatchStackImpl stack) {
+				stack.addLayer(layer, index);
+			}
+		};
 	}
 
 	@Override
-	public Edit<Merge> getRenameMergeEdit(Merge merge,
-			String newName) {
-		return new RenameMergeEdit(merge, newName);
+	public Edit<Merge> getRenameMergeEdit(Merge merge, final String newName) {
+		return new AbstractMergeEdit(merge) {
+			@Override
+			protected void doEditAction(MergeImpl merge) {
+				merge.setName(newName);
+			}
+		};
 	}
 
 	@Override
 	public Edit<Processor> getRenameProcessorEdit(Processor processor,
-			String newName) {
-		return new RenameProcessorEdit(processor, newName);
+			final String newName) {
+		return new AbstractProcessorEdit(processor) {
+			@Override
+			protected void doEditAction(ProcessorImpl processor) {
+				processor.setName(newName);
+			}
+		};
 	}
 
 	@Override
 	public Edit<DataflowInputPort> getRenameDataflowInputPortEdit(
-			DataflowInputPort dataflowInputPort, String newName) {
-		return new RenameDataflowInputPortEdit(dataflowInputPort, newName);
+			DataflowInputPort dataflowInputPort, final String newName) {
+		return new AbstractDataflowInputPortEdit(dataflowInputPort) {
+			@Override
+			protected void doEditAction(DataflowInputPortImpl inputPort) {
+				inputPort.setName(newName);
+			}
+		};
 	}
 
 	@Override
 	public Edit<DataflowOutputPort> getRenameDataflowOutputPortEdit(
-			DataflowOutputPort dataflowOutputPort, String newName) {
-		return new RenameDataflowOutputPortEdit(dataflowOutputPort, newName);
+			DataflowOutputPort dataflowOutputPort, final String newName) {
+		return new AbstractDataflowOutputPortEdit(dataflowOutputPort) {
+			@Override
+			protected void doEditAction(DataflowOutputPortImpl outputPort) {
+				outputPort.setName(newName);
+			}
+		};
 	}
 
 	@Override
 	public Edit<DataflowInputPort> getChangeDataflowInputPortDepthEdit(
-			DataflowInputPort dataflowInputPort, int depth) {
-		return new ChangeDataflowInputPortDepthEdit(dataflowInputPort, depth);
+			DataflowInputPort dataflowInputPort, final int depth) {
+		return new AbstractDataflowInputPortEdit(dataflowInputPort) {
+			@Override
+			protected void doEditAction(DataflowInputPortImpl port) {
+				port.setDepth(depth);
+			}
+		};
 	}
 
 	@Override
 	public Edit<DataflowInputPort> getChangeDataflowInputPortGranularDepthEdit(
-			DataflowInputPort dataflowInputPort, int granularDepth) {
-		return new ChangeDataflowInputPortGranularDepthEdit(dataflowInputPort,
-				granularDepth);
+			DataflowInputPort dataflowInputPort, final int granularDepth) {
+		return new AbstractDataflowInputPortEdit(dataflowInputPort) {
+			@Override
+			protected void doEditAction(DataflowInputPortImpl port) {
+				port.setGranularDepth(granularDepth);
+			}
+		};
 	}
 
 	@Override
 	public Edit<Processor> getConnectProcessorOutputEdit(Processor processor,
-			String outputPortName, EventHandlingInputPort targetPort) {
-		return new ConnectProcesorOutputEdit(processor, outputPortName,
-				targetPort);
+			final String outputPortName, final EventHandlingInputPort targetPort) {
+		return new AbstractProcessorEdit(processor) {
+			@Override
+			protected void doEditAction(ProcessorImpl processor) throws EditException {
+				for (BasicEventForwardingOutputPort popi : processor.outputPorts)
+					if (popi.getName().equals(outputPortName)) {
+						addOutgoingLink(popi);
+						return;
+					}
+				throw new EditException("Cannot locate output port with name '"
+						+ outputPortName + "'");
+			}
+
+			private void addOutgoingLink(BasicEventForwardingOutputPort popi) {
+				DatalinkImpl newLink = new DatalinkImpl(popi, targetPort);
+				popi.addOutgoingLink(newLink);
+				if (targetPort instanceof AbstractEventHandlingInputPort)
+					((AbstractEventHandlingInputPort) targetPort)
+							.setIncomingLink(newLink);
+			}
+		};
 	}
 
 	@Override
 	public Edit<Datalink> getConnectDatalinkEdit(Datalink datalink) {
-		return new ConnectDatalinkEdit(datalink);
+		return new AbstractDatalinkEdit(datalink) {
+			@Override
+			protected void doEditAction(DatalinkImpl datalink) throws EditException {
+				EventForwardingOutputPort source = datalink.getSource();
+				EventHandlingInputPort sink = datalink.getSink();
+				if (source instanceof BasicEventForwardingOutputPort)
+					((BasicEventForwardingOutputPort) source).addOutgoingLink(datalink);
+				if (sink instanceof AbstractEventHandlingInputPort)
+					((AbstractEventHandlingInputPort) sink).setIncomingLink(datalink);
+			}
+		};
 	}
 
 	@Override
@@ -234,9 +401,25 @@ public class EditsImpl implements Edits {
 	@Override
 	public Edit<AnnotationChain> getAddAnnotationAssertionEdit(
 			AnnotationChain annotationChain,
-			AnnotationAssertion<?> annotationAssertion) {
-		return new AddAnnotationAssertionEdit(annotationChain,
-				annotationAssertion);
+			final AnnotationAssertion<?> annotationAssertion) {
+		if (!(annotationChain instanceof AnnotationChainImpl))
+			throw new RuntimeException(
+					"Object being edited must be instance of AnnotationChainImpl");
+		final AnnotationChainImpl chain = (AnnotationChainImpl) annotationChain;
+		return new EditSupport<AnnotationChain>() {
+			@Override
+			public AnnotationChain applyEdit() {
+				synchronized (chain) {
+					chain.addAnnotationAssertion(annotationAssertion);
+				}
+				return chain;
+			}
+
+			@Override
+			public Object getSubject() {
+				return chain;
+			}
+		};
 	}
 
 	/**
@@ -280,21 +463,84 @@ public class EditsImpl implements Edits {
 	 */
 	@Override
 	public Edit<Merge> getConnectMergedDatalinkEdit(Merge merge,
-			EventForwardingOutputPort sourcePort,
-			EventHandlingInputPort sinkPort) {
-		return new ConnectMergedDatalinkEdit(merge, sourcePort, sinkPort);
+			final EventForwardingOutputPort sourcePort,
+			final EventHandlingInputPort sinkPort) {
+		if (sourcePort == null)
+			throw new RuntimeException("The sourceport cannot be null");
+		if (sinkPort == null)
+			throw new RuntimeException("The sinkport cannot be null");
+		return new AbstractMergeEdit(merge) {
+			private boolean needToCreateDatalink(MergeImpl mergeImpl)
+					throws EditException {
+				Collection<? extends Datalink> outgoing = mergeImpl.getOutputPort()
+						.getOutgoingLinks();
+				if (outgoing.size() == 0) {
+					return true;
+				} else if (outgoing.size() != 1)
+					throw new EditException(
+							"The merge instance cannot have more that 1 outgoing Datalink");
+				if (outgoing.iterator().next().getSink() != sinkPort)
+					throw new EditException(
+							"Cannot add a different sinkPort to a Merge that already has one defined");
+				return false;
+			}
+
+			@Override
+			protected void doEditAction(MergeImpl mergeImpl)
+					throws EditException {
+				boolean linkOut = needToCreateDatalink(mergeImpl);
+				String name = getUniqueMergeInputPortName(mergeImpl,
+						sourcePort.getName() + "To" + merge.getLocalName()
+								+ "_input", 0);
+				MergeInputPortImpl mergeInputPort = new MergeInputPortImpl(
+						mergeImpl, name, sinkPort.getDepth());
+				mergeImpl.addInputPort(mergeInputPort);
+				getConnectDatalinkEdit(
+						createDatalink(sourcePort, mergeInputPort)).doEdit();
+				if (linkOut)
+					getConnectDatalinkEdit(
+							createDatalink(mergeImpl.getOutputPort(), sinkPort))
+							.doEdit();
+			}
+		};
 	}
 
 	@Override
 	public Edit<OrderedPair<Processor>> getCreateConditionEdit(
 			Processor control, Processor target) {
-		return new CreateConditionEdit(control, target);
+		return new AbstractBinaryProcessorEdit(control, target) {
+			@Override
+			protected void doEditAction(ProcessorImpl control,
+					ProcessorImpl target) throws EditException {
+				ConditionImpl condition = new ConditionImpl(control, target);
+				// Check for duplicates
+				for (Condition c : control.controlledConditions)
+					if (c.getTarget() == target)
+						throw new EditException(
+								"Attempt to create duplicate control link");
+				control.controlledConditions.add(condition);
+				target.conditions.add(condition);
+			}
+		};
 	}
 
 	@Override
 	public Edit<OrderedPair<Processor>> getRemoveConditionEdit(
 			Processor control, Processor target) {
-		return new RemoveConditionEdit(control, target);
+		return new AbstractBinaryProcessorEdit(control, target) {
+			@Override
+			protected void doEditAction(ProcessorImpl control, ProcessorImpl target)
+					throws EditException {
+				for (ConditionImpl c : control.controlledConditions)
+					if (c.getTarget() == target) {
+						control.controlledConditions.remove(c);
+						target.conditions.remove(c);
+						return;
+					}
+				throw new EditException(
+						"Can't remove a control link as it doesn't exist");
+			}
+		};
 	}
 
 	@Override
@@ -342,190 +588,395 @@ public class EditsImpl implements Edits {
 	}
 
 	@Override
-	@SuppressWarnings({ "rawtypes" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Edit<AnnotationAssertion<AnnotationBeanSPI>> getAddAnnotationBean(
 			AnnotationAssertion annotationAssertion,
-			AnnotationBeanSPI annotationBean) {
-		return new AddAnnotationBeanEdit(annotationAssertion, annotationBean);
+			final AnnotationBeanSPI bean) {
+		return new AbstractAnnotationEdit(annotationAssertion) {
+			@Override
+			protected void doEditAction(AnnotationAssertionImpl assertion)
+					throws EditException {
+				synchronized (assertion) {
+					assertion.setAnnotationBean(bean);
+				}
+			}
+		};
 	}
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Edit<AnnotationAssertion<AnnotationBeanSPI>> getAddCurationEvent(
-			AnnotationAssertion annotationAssertion, CurationEvent curationEvent) {
-		return new AddCurationEventEdit(annotationAssertion, curationEvent);
+			AnnotationAssertion annotationAssertion,
+			final CurationEvent curationEvent) {
+		return new AbstractAnnotationEdit(annotationAssertion) {
+			@Override
+			protected void doEditAction(AnnotationAssertionImpl assertion)
+					throws EditException {
+				synchronized (assertion) {
+					assertion.addCurationEvent(curationEvent);
+				}
+			}
+		};
 	}
 
 	@Override
-	@SuppressWarnings({ "rawtypes" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Edit<AnnotationAssertion<AnnotationBeanSPI>> getAddAnnotationRole(
 			AnnotationAssertion annotationAssertion,
-			AnnotationRole annotationRole) {
-		return new AddAnnotationRoleEdit(annotationAssertion, annotationRole);
+			final AnnotationRole role) {
+		return new AbstractAnnotationEdit(annotationAssertion) {
+			@Override
+			protected void doEditAction(AnnotationAssertionImpl assertion)
+					throws EditException {
+				synchronized (assertion) {
+					assertion.setAnnotationRole(role);
+				}
+			}
+		};
 	}
 
 	@Override
-	@SuppressWarnings({ "rawtypes" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Edit<AnnotationAssertion<AnnotationBeanSPI>> getAddAnnotationSource(
 			AnnotationAssertion annotationAssertion,
-			AnnotationSourceSPI annotationSource) {
-		return new AddAnnotationSourceEdit(annotationAssertion,
-				annotationSource);
+			final AnnotationSourceSPI source) {
+		return new AbstractAnnotationEdit(annotationAssertion) {
+			@Override
+			protected void doEditAction(AnnotationAssertionImpl assertion)
+					throws EditException {
+				synchronized (assertion) {
+					assertion.setAnnotationSource(source);
+				}
+			}
+		};
 	}
 
 	@Override
-	@SuppressWarnings({ "rawtypes" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Edit<AnnotationAssertion<AnnotationBeanSPI>> getAddCreator(
-			AnnotationAssertion annotationAssertion, Person person) {
-		return new AddCreatorEdit(annotationAssertion, person);
+			AnnotationAssertion annotationAssertion, final Person person) {
+		return new AbstractAnnotationEdit(annotationAssertion) {
+			@Override
+			protected void doEditAction(AnnotationAssertionImpl assertion)
+					throws EditException {
+				synchronized (assertion) {
+					assertion.addCreator(person);
+				}
+			}
+		};
 	}
 
 	@Override
 	public Edit<?> getAddAnnotationChainEdit(Annotated<?> annotated,
 			AnnotationBeanSPI annotation) {
-		List<Edit<?>> editList = new ArrayList<Edit<?>>();
+		List<Edit<?>> editList = new ArrayList<>();
 
-		AnnotationAssertion<?> annotationAssertion = new AnnotationAssertionImpl();
-		editList.add(getAddAnnotationBean(annotationAssertion, annotation));
-
-		AnnotationChain annotationChain = new AnnotationChainImpl();
-		editList.add(getAddAnnotationAssertionEdit(annotationChain,
-				annotationAssertion));
-
-		editList.add(annotated.getAddAnnotationEdit(annotationChain));
+		AnnotationAssertion<?> assertion = new AnnotationAssertionImpl();
+		AnnotationChain chain = new AnnotationChainImpl();
+		editList.add(getAddAnnotationBean(assertion, annotation));
+		editList.add(getAddAnnotationAssertionEdit(chain, assertion));
+		editList.add(annotated.getAddAnnotationEdit(chain));
 
 		return new CompoundEdit(editList);
 	}
 
 	@Override
 	public Edit<Dataflow> getUpdateDataflowNameEdit(Dataflow dataflow,
-			String newName) {
-		return new UpdateDataflowNameEdit(dataflow, newName);
+			final String newName) {
+		return new AbstractDataflowEdit(dataflow) {
+			@Override
+			protected void doEditAction(DataflowImpl dataflow) {
+				dataflow.setLocalName(newName);
+			}
+		};
 	}
 
 	@Override
 	public Edit<Dataflow> getUpdateDataflowInternalIdentifierEdit(
-			Dataflow dataflow, String newId) {
-		return new UpdateDataflowInternalIdentifierEdit(dataflow, newId);
+			Dataflow dataflow, final String newId) {
+		return new AbstractDataflowEdit(dataflow) {
+			@Override
+			protected void doEditAction(DataflowImpl dataflow) {
+				dataflow.setIdentifier(newId);
+			}
+		};
 	}
 
 	@Override
 	public Edit<Datalink> getDisconnectDatalinkEdit(Datalink datalink) {
-		return new DisconnectDatalinkEdit(datalink);
+		return new AbstractDatalinkEdit(datalink) {
+			@Override
+			protected void doEditAction(DatalinkImpl datalink) throws EditException {
+				EventForwardingOutputPort source = datalink.getSource();
+				EventHandlingInputPort sink = datalink.getSink();
+
+				if (source instanceof BasicEventForwardingOutputPort)
+					((BasicEventForwardingOutputPort) source)
+							.removeOutgoingLink(datalink);
+
+				if (sink instanceof AbstractEventHandlingInputPort) {
+					((AbstractEventHandlingInputPort) sink).setIncomingLink(null);
+					if (sink instanceof MergeInputPortImpl) {
+						MergeInputPortImpl mip = (MergeInputPortImpl) sink;
+						((MergeImpl) mip.getMerge()).removeInputPort(mip);
+					}
+				}
+			}
+		};
 	}
 
 	@Override
 	public Edit<Dataflow> getRemoveDataflowInputPortEdit(Dataflow dataflow,
-			DataflowInputPort dataflowInputPort) {
-		return new RemoveDataflowInputPortEdit(dataflow, dataflowInputPort);
+			final DataflowInputPort dataflowInputPort) {
+		return new AbstractDataflowEdit(dataflow) {
+			@Override
+			protected void doEditAction(DataflowImpl dataflow) throws EditException {
+				dataflow.removeDataflowInputPort(dataflowInputPort);
+			}
+		};
 	}
 
 	@Override
 	public Edit<Dataflow> getRemoveDataflowOutputPortEdit(Dataflow dataflow,
-			DataflowOutputPort dataflowOutputPort) {
-		return new RemoveDataflowOutputPortEdit(dataflow, dataflowOutputPort);
+			final DataflowOutputPort dataflowOutputPort) {
+		return new AbstractDataflowEdit(dataflow) {
+			@Override
+			protected void doEditAction(DataflowImpl dataflow) throws EditException {
+				dataflow.removeDataflowOutputPort(dataflowOutputPort);
+			}
+		};
 	}
 
 	@Override
 	public Edit<Dataflow> getRemoveProcessorEdit(Dataflow dataflow,
-			Processor processor) {
-		return new RemoveProcessorEdit(dataflow, processor);
+			final Processor processor) {
+		return new AbstractDataflowEdit(dataflow) {
+			@Override
+			protected void doEditAction(DataflowImpl dataflow) {
+				dataflow.removeProcessor(processor);
+			}
+		};
 	}
 
 	@Override
-	public Edit<Dataflow> getRemoveMergeEdit(Dataflow dataflow, Merge merge) {
-		return new RemoveMergeEdit(dataflow, merge);
+	public Edit<Dataflow> getRemoveMergeEdit(Dataflow dataflow, final Merge merge) {
+		return new AbstractDataflowEdit(dataflow) {
+			@Override
+			protected void doEditAction(DataflowImpl dataflow) {
+				dataflow.removeMerge(merge);
+			}
+		};
 	}
 
 	@Override
 	public Edit<Dataflow> getAddDataflowInputPortEdit(Dataflow dataflow,
 			DataflowInputPort dataflowInputPort) {
-		return new AddDataflowInputPortEdit(dataflow, dataflowInputPort);
+		if (!(dataflowInputPort instanceof DataflowInputPortImpl))
+			throw new RuntimeException(
+					"The DataflowInputPort is of the wrong implmentation, "
+							+ "it should be of type DataflowInputPortImpl");
+		final DataflowInputPortImpl port = (DataflowInputPortImpl) dataflowInputPort;
+		return new AbstractDataflowEdit(dataflow) {
+			@Override
+			protected void doEditAction(DataflowImpl dataflow)
+					throws EditException {
+				dataflow.addInputPort(port);
+			}
+		};
 	}
 
 	@Override
 	public Edit<Dataflow> getAddDataflowOutputPortEdit(Dataflow dataflow,
-			DataflowOutputPort dataflowOutputPort) {
-		return new AddDataflowOutputPortEdit(dataflow, dataflowOutputPort);
+			final DataflowOutputPort dataflowOutputPort) {
+		if (!(dataflowOutputPort instanceof DataflowOutputPortImpl))
+			throw new RuntimeException(
+					"The DataflowOutputPort is of the wrong implmentation, "
+							+ "it should be of type DataflowOutputPortImpl");
+		return new AbstractDataflowEdit(dataflow) {
+			@Override
+			protected void doEditAction(DataflowImpl dataflow)
+					throws EditException {
+				dataflow.addOutputPort((DataflowOutputPortImpl) dataflowOutputPort);
+			}
+		};
 	}
 
 	@Override
 	public Edit<Activity<?>> getAddActivityInputPortEdit(Activity<?> activity,
-			ActivityInputPort activityInputPort) {
-		return new AddActivityInputPortEdit(activity, activityInputPort);
+			final ActivityInputPort activityInputPort) {
+		return new AbstractActivityEdit(activity) {
+			@Override
+			protected void doEditAction(AbstractActivity<?> activity) {
+				activity.getInputPorts().add(activityInputPort);
+			}
+		};
 	}
 
 	@Override
 	public Edit<Activity<?>> getAddActivityInputPortMappingEdit(
-			Activity<?> activity, String processorPortName,
-			String activityPortName) {
-		return new AddActivityInputPortMappingEdit(activity, processorPortName,
-				activityPortName);
+			Activity<?> activity, final String processorPortName,
+			final String activityPortName) {
+		return new AbstractActivityEdit(activity) {
+			@Override
+			protected void doEditAction(AbstractActivity<?> activity)
+					throws EditException {
+				if (activity.getInputPortMapping().containsKey(
+						processorPortName))
+					throw new EditException(
+							"The output mapping for processor name:"
+									+ processorPortName + " already exists");
+				/*
+				 * Note javadoc of getOutputPortMapping - the mapping is
+				 * processorPort -> activityPort -- opposite of the
+				 * outputPortMapping
+				 */
+				activity.getInputPortMapping().put(processorPortName,
+						activityPortName);
+			}
+		};
 	}
 
 	@Override
 	public Edit<Activity<?>> getAddActivityOutputPortEdit(Activity<?> activity,
-			ActivityOutputPort activityOutputPort) {
-		return new AddActivityOutputPortEdit(activity, activityOutputPort);
+			final ActivityOutputPort activityOutputPort) {
+		return new AbstractActivityEdit(activity) {
+			@Override
+			protected void doEditAction(AbstractActivity<?> activity) {
+				activity.getOutputPorts().add(activityOutputPort);
+			}
+		};
 	}
 
 	@Override
 	public Edit<Activity<?>> getAddActivityOutputPortMappingEdit(
-			Activity<?> activity, String processorPortName,
-			String activityPortName) {
-		return new AddActivityOutputPortMappingEdit(activity,
-				processorPortName, activityPortName);
+			Activity<?> activity, final String processorPortName,
+			final String activityPortName) {
+		return new AbstractActivityEdit(activity) {
+			@Override
+			protected void doEditAction(AbstractActivity<?> activity)
+					throws EditException {
+				Map<String,String> opm = activity.getOutputPortMapping();
+				if (opm.containsKey(activityPortName))
+					throw new EditException("The mapping starting with:"
+							+ activityPortName + " already exists");
+				/*
+				 * Note javadoc of getOutputPortMapping - the mapping is
+				 * activityPort -> processorPort -- opposite of the
+				 * outputPortMapping
+				 */
+				opm.put(activityPortName, processorPortName);
+			}
+		};
 	}
 
 	@Override
 	public Edit<Activity<?>> getRemoveActivityInputPortEdit(
-			Activity<?> activity, ActivityInputPort activityInputPort) {
-		return new RemoveActivityInputPortEdit(activity, activityInputPort);
+			Activity<?> activity, final ActivityInputPort activityInputPort) {
+		return new AbstractActivityEdit(activity) {
+			@Override
+			protected void doEditAction(AbstractActivity<?> activity)
+					throws EditException {
+				activity.getInputPorts().remove(activityInputPort);
+			}
+		};
 	}
 
 	@Override
 	public Edit<Activity<?>> getRemoveActivityInputPortMappingEdit(
-			Activity<?> activity, String processorPortName) {
-		return new RemoveActivityInputPortMappingEdit(activity,
-				processorPortName);
+			Activity<?> activity, final String processorPortName) {
+		return new AbstractActivityEdit(activity) {
+			@Override
+			protected void doEditAction(AbstractActivity<?> activity)
+					throws EditException {
+				if (!activity.getInputPortMapping().containsKey(processorPortName))
+					throw new EditException(
+							"The input port mapping for the processor port name:"
+									+ processorPortName + " doesn't exist");
+				activity.getInputPortMapping().remove(processorPortName);
+			}
+		};
 	}
 
 	@Override
 	public Edit<Activity<?>> getRemoveActivityOutputPortEdit(
-			Activity<?> activity, ActivityOutputPort activityOutputPort) {
-		return new RemoveActivityOutputPortEdit(activity, activityOutputPort);
+			Activity<?> activity, final ActivityOutputPort activityOutputPort) {
+		return new AbstractActivityEdit(activity) {
+			@Override
+			protected void doEditAction(AbstractActivity<?> activity)
+					throws EditException {
+				activity.getOutputPorts().remove(activityOutputPort);
+			}
+		};
 	}
 
 	@Override
 	public Edit<Activity<?>> getRemoveActivityOutputPortMappingEdit(
-			Activity<?> activity, String processorPortName) {
-		return new RemoveActivityOutputPortMappingEdit(activity,
-				processorPortName);
+			Activity<?> activity, final String processorPortName) {
+		return new AbstractActivityEdit(activity) {
+			@Override
+			protected void doEditAction(AbstractActivity<?> activity)
+					throws EditException {
+				if (!activity.getOutputPortMapping().containsKey(processorPortName))
+					throw new EditException(
+							"The output port mapping for the processor port name:"
+									+ processorPortName + " doesn't exist");
+				activity.getOutputPortMapping().remove(processorPortName);
+			}
+		};
 	}
 
 	@Override
 	public Edit<Merge> getAddMergeInputPortEdit(Merge merge,
 			MergeInputPort mergeInputPort) {
-		return new AddMergeInputPortEdit(merge, mergeInputPort);
+		if (!(mergeInputPort instanceof MergeInputPortImpl))
+			throw new RuntimeException(
+					"The MergeInputPort is of the wrong implmentation,"
+							+ " it should be of type MergeInputPortImpl");
+		final MergeInputPortImpl port = (MergeInputPortImpl) mergeInputPort;
+		return new AbstractMergeEdit(merge) {
+			@Override
+			protected void doEditAction(MergeImpl mergeImpl) {
+				mergeImpl.addInputPort(port);
+			}
+		};
 	}
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public <T> Edit<Activity<?>> getConfigureActivityEdit(Activity<T> activity,
 			T configurationBean) {
-		return new ConfigureActivityEdit(activity, configurationBean);
+		return new ConfigureEdit(Activity.class, activity, configurationBean);
 	}
 
 	@Override
 	public Edit<Processor> getRemoveProcessorInputPortEdit(Processor processor,
-			ProcessorInputPort port) {
-		return new RemoveProcessorInputPortEdit(processor, port);
+			final ProcessorInputPort port) {
+		return new AbstractProcessorEdit(processor) {
+			@Override
+			protected void doEditAction(ProcessorImpl processor) throws EditException {
+				if (processor.getInputPortWithName(port.getName()) == null)
+					throw new EditException("The processor doesn't have a port named:"
+							+ port.getName());
+				for (IterationStrategyImpl is : processor.iterationStack
+						.getStrategies())
+					is.removeInputByName(port.getName());
+				processor.inputPorts.remove(port);
+			}
+		};
 	}
 
 	@Override
 	public Edit<Processor> getRemoveProcessorOutputPortEdit(
-			Processor processor, ProcessorOutputPort port) {
-		return new RemoveProcessorOutputPortEdit(processor, port);
+			Processor processor, final ProcessorOutputPort port) {
+		return new AbstractProcessorEdit(processor) {
+			@Override
+			protected void doEditAction(ProcessorImpl processor) throws EditException {
+				if (processor.getOutputPortWithName(port.getName()) == null)
+					throw new EditException("The processor doesn't have a port named:"
+							+ port.getName());
+				processor.outputPorts.remove(port);
+			}
+		};
 	}
 
 	@Override
@@ -534,16 +985,48 @@ public class EditsImpl implements Edits {
 		return new MapProcessorPortsForActivityEdit(processor);
 	}
 
+	private static final int DEFAULT_MAX_JOBS = 1;
+
 	@Override
 	public Edit<Processor> getDefaultDispatchStackEdit(Processor processor) {
-		return new DefaultDispatchStackEdit((ProcessorImpl) processor);
+		DispatchStackImpl stack = ((ProcessorImpl) processor)
+				.getDispatchStack();
+		// Top level parallelise layer
+		int layer = 0;
+		List<Edit<?>> edits = new ArrayList<>();
+		edits.add(getAddDispatchLayerEdit(stack, new Parallelize(DEFAULT_MAX_JOBS),
+				layer++));
+		edits.add(getAddDispatchLayerEdit(stack, new ErrorBounce(), layer++));
+		edits.add(getAddDispatchLayerEdit(stack, new Failover(), layer++));
+		edits.add(getAddDispatchLayerEdit(stack, new Retry(), layer++));
+		edits.add(getAddDispatchLayerEdit(stack, new Stop(), layer++));
+		edits.add(getAddDispatchLayerEdit(stack, new Invoke(), layer++));
+
+		final Edit<?> compoundEdit = new CompoundEdit(edits);
+		return new AbstractProcessorEdit(processor) {
+			@Override
+			protected void doEditAction(ProcessorImpl processor)
+					throws EditException {
+				compoundEdit.doEdit();
+			}
+		};
 	}
 
 	@Override
 	public Edit<Processor> getSetIterationStrategyStackEdit(
-			Processor processor, IterationStrategyStack iterationStrategyStack) {
-		return new SetIterationStrategyStackEdit(processor,
-				iterationStrategyStack);
+			Processor processor,
+			final IterationStrategyStack iterationStrategyStack) {
+		if (!(iterationStrategyStack instanceof IterationStrategyStackImpl))
+			throw new RuntimeException(
+					"Unknown implementation of iteration strategy "
+							+ iterationStrategyStack);
+		return new AbstractProcessorEdit(processor) {
+			@Override
+			protected void doEditAction(ProcessorImpl processor)
+					throws EditException {
+				processor.iterationStack = (IterationStrategyStackImpl) iterationStrategyStack;
+			}
+		};
 	}
 
 	@Override
@@ -555,32 +1038,89 @@ public class EditsImpl implements Edits {
 
 	@Override
 	public Edit<Merge> getReorderMergeInputPortsEdit(Merge merge,
-			List<MergeInputPort> reorderedMergeInputPortList) {
-		return new ReorderMergeInputPortsEdit(merge, reorderedMergeInputPortList);
+			final List<MergeInputPort> reorderedMergeInputPortList) {
+		return new AbstractMergeEdit(merge) {
+			@Override
+			protected void doEditAction(MergeImpl mergeImpl) {
+				mergeImpl.reorderInputPorts(reorderedMergeInputPortList);
+			}
+		};
 	}
 
 	@Override
 	public Edit<Processor> getRemoveActivityEdit(Processor processor,
-			Activity<?> activity) {
-		return new RemoveActivityEdit(processor, activity);
+			final Activity<?> activity) {
+		return new AbstractProcessorEdit(processor) {
+			@Override
+			protected void doEditAction(ProcessorImpl processor) {
+				synchronized (processor) {
+					processor.activityList.remove(activity);
+				}
+			}
+		};
 	}
 
 	@Override
 	public Edit<IterationStrategyStack> getAddIterationStrategyEdit(
-			IterationStrategyStack iterationStrategyStack, IterationStrategy iterationStrategy) {
-		return new AddIterationStrategyEdit(iterationStrategyStack, iterationStrategy);
+			IterationStrategyStack iterationStrategyStack,
+			final IterationStrategy strategy) {
+		if (!(iterationStrategyStack instanceof IterationStrategyStackImpl))
+			throw new RuntimeException(
+					"Object being edited must be instance of IterationStrategyStackImpl");
+		final IterationStrategyStackImpl stack = (IterationStrategyStackImpl) iterationStrategyStack;
+		return new EditSupport<IterationStrategyStack>() {
+			@Override
+			public IterationStrategyStack applyEdit() {
+				stack.addStrategy(strategy);
+				return stack;
+			}
+
+			@Override
+			public IterationStrategyStack getSubject() {
+				return stack;
+			}
+		};
 	}
 
 	@Override
 	public Edit<IterationStrategy> getAddIterationStrategyInputNodeEdit(
-			IterationStrategy iterationStrategy, NamedInputPortNode namedInputPortNode) {
-		return new AddIterationStrategyInputPortEdit(iterationStrategy, namedInputPortNode);
+			IterationStrategy iterationStrategy,
+			final NamedInputPortNode namedInputPortNode) {
+		if (!(iterationStrategy instanceof IterationStrategyImpl))
+			throw new RuntimeException(
+					"Object being edited must be instance of IterationStrategyImpl");
+		final IterationStrategyImpl strategy = (IterationStrategyImpl) iterationStrategy;
+		return new EditSupport<IterationStrategy>() {
+			@Override
+			public IterationStrategy applyEdit() throws EditException {
+				strategy.addInput(namedInputPortNode);
+				return strategy;
+			}
+
+			@Override
+			public IterationStrategy getSubject() {
+				return strategy;
+			}
+		};
 	}
 
 	@Override
 	public Edit<IterationStrategyStack> getClearIterationStrategyStackEdit(
-			IterationStrategyStack iterationStrategyStack) {
-		return new ClearIterationStrategyStackEdit(iterationStrategyStack);
-	}
+			final IterationStrategyStack iterationStrategyStack) {
+		if (!(iterationStrategyStack instanceof IterationStrategyStackImpl))
+			throw new RuntimeException(
+					"Object being edited must be instance of IterationStrategyStackImpl");
+		return new EditSupport<IterationStrategyStack>() {
+			@Override
+			public IterationStrategyStack applyEdit() throws EditException {
+				((IterationStrategyStackImpl) iterationStrategyStack).clear();
+				return iterationStrategyStack;
+			}
 
+			@Override
+			public IterationStrategyStack getSubject() {
+				return iterationStrategyStack;
+			}
+		};
+	}
 }

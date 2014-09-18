@@ -176,7 +176,7 @@ public abstract class DispatchStackImpl extends
 			String owningProcess = enclosingProcess + ":" + getProcessName();
 			synchronized (queues) {
 				if (queues.containsKey(owningProcess)) {
-					/**
+					/*
 					 * At least one event has been received with this process ID
 					 * and a queue exists for it.
 					 */
@@ -188,7 +188,7 @@ public abstract class DispatchStackImpl extends
 													.get(owningProcess),
 											getActivities()));
 				} else {
-					/**
+					/*
 					 * Do nothing, if the conditions are satisfied before any
 					 * jobs are received this mechanism is effectively redundant
 					 * and the normal notification system for the events will
@@ -274,9 +274,11 @@ public abstract class DispatchStackImpl extends
 				sendCachePurge(resultEvent.getOwningProcess());
 		}
 
-		// TODO - implement top level error handling, if an error bubbles up to
-		// the top layer of the dispatch stack it's trouble and probably fails
-		// this process
+		/*
+		 * TODO - implement top level error handling, if an error bubbles up to
+		 * the top layer of the dispatch stack it's trouble and probably fails
+		 * this process
+		 */
 		@Override
 		public void receiveError(DispatchErrorEvent errorEvent) {
 			logger.error("Error received in dispatch stack on owningProcess:"

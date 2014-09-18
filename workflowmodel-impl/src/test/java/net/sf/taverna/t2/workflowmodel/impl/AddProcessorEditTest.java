@@ -22,27 +22,36 @@ package net.sf.taverna.t2.workflowmodel.impl;
 
 import static org.junit.Assert.assertEquals;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
+import net.sf.taverna.t2.workflowmodel.Edit;
 import net.sf.taverna.t2.workflowmodel.EditException;
+import net.sf.taverna.t2.workflowmodel.Edits;
 import net.sf.taverna.t2.workflowmodel.NamingException;
 import net.sf.taverna.t2.workflowmodel.Processor;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class AddProcessorEditTest {
+	private static Edits edits;
+
+	@BeforeClass
+	public static void createEditsInstance() {
+		edits = new EditsImpl();
+	}
 
 	private Processor processor;
 	
 	@Before
 	public void createProcessor() {
-		processor = new EditsImpl().createProcessor("the_processor");
+		processor = edits.createProcessor("the_processor");
 	}
 	
 	@Test
 	public void testAddingOfProcessor() throws Exception {
 		Dataflow f = new DataflowImpl();
 		
-		AddProcessorEdit edit = new AddProcessorEdit(f,processor);
+		Edit<Dataflow> edit = edits.getAddProcessorEdit(f,processor);
 		edit.doEdit();
 		
 		assertEquals(1,f.getProcessors().size());
@@ -52,7 +61,7 @@ public class AddProcessorEditTest {
 	@Test(expected=EditException.class)
 	public void testCantEditTwice() throws Exception {
 		Dataflow f = new DataflowImpl();
-		AddProcessorEdit edit = new AddProcessorEdit(f,processor);
+		Edit<Dataflow> edit = edits.getAddProcessorEdit(f,processor);
 		edit.doEdit();
 		edit.doEdit();
 	}
@@ -60,12 +69,12 @@ public class AddProcessorEditTest {
 	@Test(expected=NamingException.class)
 	public void testDuplicateName() throws Exception {
 		Dataflow f = new DataflowImpl();
-		AddProcessorEdit edit = new AddProcessorEdit(f,processor);
+		Edit<Dataflow> edit = edits.getAddProcessorEdit(f,processor);
 		edit.doEdit();
 		
 		ProcessorImpl processor2=new ProcessorImpl();
 		processor2.setName(processor.getLocalName());
-		AddProcessorEdit edit2 = new AddProcessorEdit(f,processor2);
+		Edit<Dataflow> edit2 = edits.getAddProcessorEdit(f,processor);
 		edit2.doEdit();
 	}
 	

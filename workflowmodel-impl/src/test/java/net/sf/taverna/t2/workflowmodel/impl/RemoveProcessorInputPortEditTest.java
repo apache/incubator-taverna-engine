@@ -20,27 +20,35 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.impl;
 
+import net.sf.taverna.t2.workflowmodel.Edit;
+import net.sf.taverna.t2.workflowmodel.Edits;
 import net.sf.taverna.t2.workflowmodel.Processor;
 import net.sf.taverna.t2.workflowmodel.ProcessorInputPort;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
 public class RemoveProcessorInputPortEditTest {
+	private static Edits edits;
 
-	EditsImpl edits = new EditsImpl();
+	@BeforeClass
+	public static void createEditsInstance() {
+		edits = new EditsImpl();
+	}
+
 	private Processor processor;
 	private ProcessorInputPort inputPort;
-	private RemoveProcessorInputPortEdit removeProcessorInputPortEdit;
+	private Edit<Processor> removeProcessorInputPortEdit;
 	
 	@Before
 	public void setup() throws Exception {
 		processor = edits.createProcessor("test");
 		inputPort = edits.createProcessorInputPort(processor, "port", 1);
 		edits.getAddProcessorInputPortEdit(processor, inputPort).doEdit();
-		removeProcessorInputPortEdit = new RemoveProcessorInputPortEdit(processor,inputPort);
+		removeProcessorInputPortEdit = edits.getRemoveProcessorInputPortEdit(processor,inputPort);
 	}
 	
 	@Test

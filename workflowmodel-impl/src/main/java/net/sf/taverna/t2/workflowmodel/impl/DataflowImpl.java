@@ -20,6 +20,9 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.impl;
 
+import static net.sf.taverna.t2.workflowmodel.impl.Tools.makeImmutable;
+import static net.sf.taverna.t2.workflowmodel.utils.Tools.addDataflowIdentification;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -47,10 +50,6 @@ import net.sf.taverna.t2.workflowmodel.NamingException;
 import net.sf.taverna.t2.workflowmodel.Processor;
 import net.sf.taverna.t2.workflowmodel.TokenProcessingEntity;
 import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationTypeMismatchException;
-import static net.sf.taverna.t2.workflowmodel.impl.Tools.makeImmutable;
-import static net.sf.taverna.t2.workflowmodel.utils.Tools.addDataflowIdentification;
-
-import org.apache.log4j.Logger;
 
 /**
  * Implementation of Dataflow including implementation of the dataflow level
@@ -72,9 +71,7 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 	protected String internalIdentifier;
 	private DataflowValidationReport validationReport;
 
-    private static final Logger logger = Logger.getLogger(DataflowImpl.class);
-
-	/**
+    /**
 	 * Protected constructor, assigns a default name. To build an instance of
 	 * DataflowImpl you should use the appropriate Edit object from the Edits
 	 * interface

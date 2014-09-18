@@ -22,10 +22,14 @@ package net.sf.taverna.t2.workflowmodel.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
+import net.sf.taverna.t2.workflowmodel.Dataflow;
 import net.sf.taverna.t2.workflowmodel.DataflowInputPort;
+import net.sf.taverna.t2.workflowmodel.Edit;
 import net.sf.taverna.t2.workflowmodel.EditException;
+import net.sf.taverna.t2.workflowmodel.Edits;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -33,13 +37,16 @@ import org.junit.Test;
  *
  */
 public class CreateDataflowInputPortEditTest {
+	private static Edits edits;
+
+	@BeforeClass
+	public static void createEditsInstance() {
+		edits = new EditsImpl();
+	}
 
 	private DataflowImpl dataflow;
-	
 	private String portName;
-
 	private int portDepth;
-	
 	private int portGranularDepth;
 
 	@Before
@@ -52,9 +59,9 @@ public class CreateDataflowInputPortEditTest {
 
 	@Test
 	public void testDoEditAction() throws EditException {
-		CreateDataflowInputPortEdit edit = new CreateDataflowInputPortEdit(dataflow, portName, portDepth, portGranularDepth);
+		Edit<Dataflow> edit = edits.getCreateDataflowInputPortEdit(dataflow, portName, portDepth, portGranularDepth);
 		assertEquals(0, dataflow.getInputPorts().size());
-		edit.doEditAction(dataflow);
+		edit.doEdit();
 		assertEquals(1, dataflow.getInputPorts().size());
 		DataflowInputPort inputPort = dataflow.getInputPorts().get(0);
 		assertSame(dataflow, inputPort.getDataflow());
@@ -65,15 +72,15 @@ public class CreateDataflowInputPortEditTest {
 
 	@Test
 	public void testUndoEditAction() throws EditException {
-		CreateDataflowInputPortEdit edit = new CreateDataflowInputPortEdit(dataflow, portName, portDepth, portGranularDepth);
+		Edit<Dataflow> edit = edits.getCreateDataflowInputPortEdit(dataflow, portName, portDepth, portGranularDepth);
 		assertEquals(0, dataflow.getInputPorts().size());
-		edit.doEditAction(dataflow);
+		edit.doEdit();
 		assertEquals(1, dataflow.getInputPorts().size());
 	}
 
 	@Test
 	public void testCreateDataflowInputPortEdit() {
-		CreateDataflowInputPortEdit edit = new CreateDataflowInputPortEdit(dataflow, portName, portDepth, portGranularDepth);
+		Edit<Dataflow> edit = edits.getCreateDataflowInputPortEdit(dataflow, portName, portDepth, portGranularDepth);
 		assertEquals(dataflow, edit.getSubject());
 	}
 

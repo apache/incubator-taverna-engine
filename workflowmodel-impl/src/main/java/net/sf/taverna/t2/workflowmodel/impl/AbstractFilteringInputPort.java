@@ -37,11 +37,9 @@ import net.sf.taverna.t2.workflowmodel.WorkflowStructureException;
  * pushXXX methods to configure behaviour
  * 
  * @author Tom Oinn
- * 
  */
 public abstract class AbstractFilteringInputPort extends
 		AbstractEventHandlingInputPort implements FilteringInputPort {
-
 	protected AbstractFilteringInputPort(String name, int depth) {
 		super(name, depth);
 		this.filterDepth = depth;
@@ -108,18 +106,6 @@ public abstract class AbstractFilteringInputPort extends
 				 * Shred the input identifier into the appropriate port depth
 				 * and send the events through, pushing a completion event at
 				 * the end.
-				 */
-				/*
-				 * DataManager dManager = ContextManager
-				 * .getDataManager(newOwner); Iterator<ContextualizedIdentifier>
-				 * children = dManager .traverse(token.getData(), getDepth());
-				 * while (children.hasNext()) { ContextualizedIdentifier ci =
-				 * children.next(); int[] newIndex = new
-				 * int[token.getIndex().length + ci.getIndex().length]; int i =
-				 * 0; for (int indx : token.getIndex()) { newIndex[i++] = indx;
-				 * } for (int indx : ci.getIndex()) { newIndex[i++] = indx; }
-				 * pushData(getName(), newOwner, newIndex, ci.getDataRef()); }
-				 * pushCompletion(getName(), newOwner, token.getIndex());
 				 */
 			}
 		} else if (tokenDepth > filterDepth) {

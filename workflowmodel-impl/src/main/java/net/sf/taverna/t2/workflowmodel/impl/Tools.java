@@ -330,6 +330,9 @@ public class Tools {
 		return layer;
 	}
 
+	// TODO convert to a bean
+	private static EditsImpl edits = new EditsImpl();
+
 	/**
 	 * Construct a new {@link Processor} with a single {@link Activity} and
 	 * overall processor inputs and outputs mapped to the activity inputs and
@@ -348,9 +351,8 @@ public class Tools {
 	 */
 	public static ProcessorImpl buildFromActivity(Activity<?> activity)
 			throws EditException {
-		EditsImpl edits = new EditsImpl();
 		ProcessorImpl processor = (ProcessorImpl) edits.createProcessor("");
-		new DefaultDispatchStackEdit(processor).doEdit();
+		edits.getDefaultDispatchStackEdit(processor).doEdit();
 		// Add the Activity to the processor
 		processor.activityList.add(activity);
 		// Create processor inputs and outputs corresponding to activity inputs
@@ -360,14 +362,14 @@ public class Tools {
 		for (InputPort ip : activity.getInputPorts()) {
 			ProcessorInputPort pip = edits.createProcessorInputPort(processor,
 					ip.getName(), ip.getDepth());
-			new AddProcessorInputPortEdit(processor, pip).doEdit();
+			edits.getAddProcessorInputPortEdit(processor, pip).doEdit();
 			activity.getInputPortMapping().put(ip.getName(), ip.getName());
 		}
 		for (OutputPort op : activity.getOutputPorts()) {
 			ProcessorOutputPort pop = edits.createProcessorOutputPort(
 					processor, op.getName(), op.getDepth(),
 					op.getGranularDepth());
-			new AddProcessorOutputPortEdit(processor, pop).doEdit();
+			edits.getAddProcessorOutputPortEdit(processor, pop).doEdit();
 			activity.getOutputPortMapping().put(op.getName(), op.getName());
 		}
 		

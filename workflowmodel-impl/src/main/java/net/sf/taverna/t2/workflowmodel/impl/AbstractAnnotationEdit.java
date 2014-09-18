@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2007 The University of Manchester   
+ * Copyright (C) 2007-2014 The University of Manchester   
  * 
  *  Modifications to the initial code base are copyright of their
  *  respective authors, or their employers as appropriate.
@@ -20,27 +20,24 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.impl;
 
-import net.sf.taverna.t2.workflowmodel.DataflowInputPort;
-import net.sf.taverna.t2.workflowmodel.EditException;
+import net.sf.taverna.t2.annotation.AnnotationAssertion;
+import net.sf.taverna.t2.annotation.AnnotationBeanSPI;
+import net.sf.taverna.t2.annotation.impl.AnnotationAssertionImpl;
 
 /**
- * Change the granular depth of the specified DataflowInputPort.
- * 
- * @author David Withers
+ * Abstraction of an edit acting on a AnnotationAssertion instance. Handles the
+ * check to see that the AnnotationAssertion supplied is really an
+ * AnnotationAssertionImpl.
  */
-class ChangeDataflowInputPortGranularDepthEdit extends
-		AbstractDataflowInputPortEdit {
-	private int newGranularDepth;
-
-	public ChangeDataflowInputPortGranularDepthEdit(
-			DataflowInputPort dataflowInputPort, int newGranularDepth) {
-		super(dataflowInputPort);
-		this.newGranularDepth = newGranularDepth;
+abstract class AbstractAnnotationEdit
+		extends
+		AbstractEdit<AnnotationAssertion<AnnotationBeanSPI>, AnnotationAssertionImpl> {
+	protected AbstractAnnotationEdit(
+			AnnotationAssertion<AnnotationBeanSPI> annotation) {
+		super(AnnotationAssertionImpl.class, annotation);
 	}
 
-	@Override
-	protected void doEditAction(DataflowInputPortImpl dataflowInputPort)
-			throws EditException {
-		dataflowInputPort.setGranularDepth(newGranularDepth);
+	public AnnotationAssertion<AnnotationBeanSPI> getAnnotation() {
+		return getSubject();
 	}
 }

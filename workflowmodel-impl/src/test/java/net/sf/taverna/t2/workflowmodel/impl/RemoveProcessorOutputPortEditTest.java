@@ -24,25 +24,33 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import net.sf.taverna.t2.workflowmodel.Edit;
+import net.sf.taverna.t2.workflowmodel.Edits;
 import net.sf.taverna.t2.workflowmodel.Processor;
 import net.sf.taverna.t2.workflowmodel.ProcessorOutputPort;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class RemoveProcessorOutputPortEditTest {
+	private static Edits edits;
 
-	EditsImpl edits = new EditsImpl();
+	@BeforeClass
+	public static void createEditsInstance() {
+		edits = new EditsImpl();
+	}
+
 	private Processor processor;
 	private ProcessorOutputPort outputPort;
-	private RemoveProcessorOutputPortEdit removeProcessorOutputPortEdit;
+	private Edit<Processor> removeProcessorOutputPortEdit;
 	
 	@Before
 	public void setup() throws Exception {
 		processor = edits.createProcessor("test");
 		outputPort = edits.createProcessorOutputPort(processor, "port", 1,1);
 		edits.getAddProcessorOutputPortEdit(processor, outputPort).doEdit();
-		removeProcessorOutputPortEdit = new RemoveProcessorOutputPortEdit(processor,outputPort);
+		removeProcessorOutputPortEdit = edits.getRemoveProcessorOutputPortEdit(processor,outputPort);
 	}
 	
 	@Test

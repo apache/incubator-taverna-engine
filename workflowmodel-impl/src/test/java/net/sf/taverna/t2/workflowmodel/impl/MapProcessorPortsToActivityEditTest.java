@@ -28,6 +28,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 
 import net.sf.taverna.t2.reference.ExternalReferenceSPI;
+import net.sf.taverna.t2.workflowmodel.Edits;
 import net.sf.taverna.t2.workflowmodel.ProcessorInputPort;
 import net.sf.taverna.t2.workflowmodel.ProcessorOutputPort;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
@@ -35,12 +36,18 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityInputPort;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityOutputPort;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class MapProcessorPortsToActivityEditTest {
+	private static Edits edits;
+
+	@BeforeClass
+	public static void createEditsInstance() {
+		edits = new EditsImpl();
+	}
 
 	ProcessorImpl p;
-	EditsImpl edits = new EditsImpl();
 	MapProcessorPortsForActivityEdit edit;
 
 	@Before
@@ -68,10 +75,10 @@ public class MapProcessorPortsToActivityEditTest {
 
 		edits.getAddActivityEdit(p, a).doEdit();
 
-		new AddActivityInputPortMappingEdit(a,"inputPort1","inputPort1").doEdit();
-		new AddActivityInputPortMappingEdit(a,"inputPort2","inputPort2").doEdit();
-		new AddActivityOutputPortMappingEdit(a,"outputPort1","outputPort1").doEdit();
-		new AddActivityOutputPortMappingEdit(a,"outputPort2","outputPort2").doEdit();
+		edits.getAddActivityInputPortMappingEdit(a,"inputPort1","inputPort1").doEdit();
+		edits.getAddActivityInputPortMappingEdit(a,"inputPort2","inputPort2").doEdit();
+		edits.getAddActivityOutputPortMappingEdit(a,"outputPort1","outputPort1").doEdit();
+		edits.getAddActivityOutputPortMappingEdit(a,"outputPort2","outputPort2").doEdit();
 
 		edit = new MapProcessorPortsForActivityEdit(p);
 	}

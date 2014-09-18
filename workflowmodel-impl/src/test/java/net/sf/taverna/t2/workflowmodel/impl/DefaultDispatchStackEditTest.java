@@ -25,19 +25,29 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import net.sf.taverna.t2.workflowmodel.Edit;
+import net.sf.taverna.t2.workflowmodel.Edits;
+import net.sf.taverna.t2.workflowmodel.Processor;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class DefaultDispatchStackEditTest {
-	
+	private static Edits edits;
+
+	@BeforeClass
+	public static void createEditsInstance() {
+		edits = new EditsImpl();
+	}
+
 	private ProcessorImpl processor;
-	private DefaultDispatchStackEdit defaultDispatchStackEdit;
+	private Edit<Processor> defaultDispatchStackEdit;
 
 	@Before
 	public void setup() {
 		processor = new ProcessorImpl();
-		defaultDispatchStackEdit = new DefaultDispatchStackEdit(processor);
+		defaultDispatchStackEdit = edits.getDefaultDispatchStackEdit(processor);
 	}
 	@Test
 	public void testEdit() throws Exception {

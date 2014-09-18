@@ -65,7 +65,7 @@ class MapProcessorPortsForActivityEdit extends EditSupport<Processor> {
 						.getIncomingLink()));
 			edits.add(editsImpl.getRemoveProcessorInputPortEdit(processor, ip));
 			if (a.getInputPortMapping().containsKey(ip.getName()))
-				edits.add(new RemoveActivityInputPortMappingEdit(a, ip
+				edits.add(editsImpl.getRemoveActivityInputPortMappingEdit(a, ip
 						.getName()));
 		}
 		
@@ -75,7 +75,7 @@ class MapProcessorPortsForActivityEdit extends EditSupport<Processor> {
 					edits.add(editsImpl.getDisconnectDatalinkEdit(link));
 			edits.add(editsImpl.getRemoveProcessorOutputPortEdit(processor, op));
 			if (a.getOutputPortMapping().containsKey(op.getName()))
-				edits.add(new RemoveActivityOutputPortMappingEdit(a, op
+				edits.add(editsImpl.getRemoveActivityOutputPortMappingEdit(a, op
 						.getName()));
 		}
 

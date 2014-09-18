@@ -22,60 +22,69 @@ package net.sf.taverna.t2.workflowmodel.impl;
 
 import static org.junit.Assert.*;
 import net.sf.taverna.t2.workflowmodel.Edit;
+import net.sf.taverna.t2.workflowmodel.Edits;
 import net.sf.taverna.t2.workflowmodel.processor.activity.AbstractActivity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityConfigurationException;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class ConfigureActivityEditTest {
+	private static Edits edits;
+
+	@BeforeClass
+	public static void createEditsInstance() {
+		edits = new EditsImpl();
+	}
 
 	DummyActivity activity;
-	
+
 	@Before
 	public void setup() throws Exception {
-		activity=new DummyActivity();
+		activity = new DummyActivity();
 	}
-	
+
 	@Test
 	public void testDoEdit() throws Exception {
 		String bean = "bob";
-		Edit<?> edit = new ConfigureActivityEdit(activity,bean);
+		Edit<?> edit = edits.getConfigureActivityEdit(activity, bean);
 		edit.doEdit();
 		assertTrue(activity.isConfigured);
-		assertEquals("bob",activity.getConfiguration());
-	}	
-	
+		assertEquals("bob", activity.getConfiguration());
+	}
+
 	@Test
-	public void testIsApplied()  throws Exception {
+	public void testIsApplied() throws Exception {
 		String bean = "bob";
-		Edit<?> edit = new ConfigureActivityEdit(activity,bean);
+		Edit<?> edit = edits.getConfigureActivityEdit(activity, bean);
 		assertFalse(edit.isApplied());
 		edit.doEdit();
 		assertTrue(edit.isApplied());
 	}
-	
+
 	@Test
 	public void testSubject() {
 		String bean = "bob";
-		Edit<?> edit = new ConfigureActivityEdit(activity,bean);
-		assertEquals(activity,edit.getSubject());
+		Edit<?> edit = edits.getConfigureActivityEdit(activity, bean);
+		assertEquals(activity, edit.getSubject());
 	}
-	
+
 	class DummyActivity extends AbstractActivity<Object> {
-		public boolean isConfigured=false;
-		public Object configBean=null;
+		public boolean isConfigured = false;
+		public Object configBean = null;
+
 		@Override
 		public void configure(Object conf)
 				throws ActivityConfigurationException {
-			isConfigured=true;
-			configBean=conf;
+			isConfigured = true;
+			configBean = conf;
 		}
 
 		@Override
 		public Object getConfiguration() {
 			return configBean;
 		}
-		
+
 	}
 }

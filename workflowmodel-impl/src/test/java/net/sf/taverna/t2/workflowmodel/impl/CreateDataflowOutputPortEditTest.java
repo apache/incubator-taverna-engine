@@ -22,10 +22,14 @@ package net.sf.taverna.t2.workflowmodel.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
+import net.sf.taverna.t2.workflowmodel.Dataflow;
 import net.sf.taverna.t2.workflowmodel.DataflowOutputPort;
+import net.sf.taverna.t2.workflowmodel.Edit;
 import net.sf.taverna.t2.workflowmodel.EditException;
+import net.sf.taverna.t2.workflowmodel.Edits;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -33,9 +37,14 @@ import org.junit.Test;
  *
  */
 public class CreateDataflowOutputPortEditTest {
+	private static Edits edits;
+
+	@BeforeClass
+	public static void createEditsInstance() {
+		edits = new EditsImpl();
+	}
 
 	private DataflowImpl dataflow;
-	
 	private String portName;
 
 	@Before
@@ -46,9 +55,9 @@ public class CreateDataflowOutputPortEditTest {
 
 	@Test
 	public void testDoEditAction() throws EditException {
-		CreateDataflowOutputPortEdit edit = new CreateDataflowOutputPortEdit(dataflow, portName);
+		Edit<Dataflow> edit = edits.getCreateDataflowOutputPortEdit(dataflow, portName);
 		assertEquals(0, dataflow.getOutputPorts().size());
-		edit.doEditAction(dataflow);
+		edit.doEdit();
 		assertEquals(1, dataflow.getOutputPorts().size());
 		DataflowOutputPort outputPort = dataflow.getOutputPorts().get(0);
 		assertSame(dataflow, outputPort.getDataflow());
@@ -57,15 +66,15 @@ public class CreateDataflowOutputPortEditTest {
 
 	@Test
 	public void testUndoEditAction() throws EditException {
-		CreateDataflowOutputPortEdit edit = new CreateDataflowOutputPortEdit(dataflow, portName);
+		Edit<Dataflow> edit = edits.getCreateDataflowOutputPortEdit(dataflow, portName);
 		assertEquals(0, dataflow.getOutputPorts().size());
-		edit.doEditAction(dataflow);
+		edit.doEdit();
 		assertEquals(1, dataflow.getOutputPorts().size());
 	}
 
 	@Test
 	public void testCreateDataflowOutputPortEdit() {
-		CreateDataflowOutputPortEdit edit = new CreateDataflowOutputPortEdit(dataflow, portName);
+		Edit<Dataflow> edit = edits.getCreateDataflowOutputPortEdit(dataflow, portName);
 		assertEquals(dataflow, edit.getSubject());
 	}
 

@@ -21,9 +21,13 @@
 package net.sf.taverna.t2.workflowmodel.impl;
 
 import static org.junit.Assert.assertEquals;
+import net.sf.taverna.t2.workflowmodel.DataflowInputPort;
+import net.sf.taverna.t2.workflowmodel.Edit;
 import net.sf.taverna.t2.workflowmodel.EditException;
+import net.sf.taverna.t2.workflowmodel.Edits;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -31,11 +35,15 @@ import org.junit.Test;
  *
  */
 public class ChangeDataflowInputPortGranularDepthEditTest {
+	private static Edits edits;
+
+	@BeforeClass
+	public static void createEditsInstance() {
+		edits = new EditsImpl();
+	}
 
 	private DataflowInputPortImpl dataflowInputPort;
-	
 	private int depth;
-	
 	private int granularDepth;
 	
 	@Before
@@ -48,17 +56,17 @@ public class ChangeDataflowInputPortGranularDepthEditTest {
 	@Test
 	public void testDoEditAction() throws EditException {
 		int newGranularDepth = 2;
-		ChangeDataflowInputPortGranularDepthEdit edit = new ChangeDataflowInputPortGranularDepthEdit(dataflowInputPort, newGranularDepth);
+		Edit<DataflowInputPort> edit = edits.getChangeDataflowInputPortGranularDepthEdit(dataflowInputPort, newGranularDepth);
 		assertEquals(depth, dataflowInputPort.getDepth());
 		assertEquals(granularDepth, dataflowInputPort.getGranularInputDepth());		
-		edit.doEditAction(dataflowInputPort);
+		edit.doEdit();
 		assertEquals(depth, dataflowInputPort.getDepth());
 		assertEquals(newGranularDepth, dataflowInputPort.getGranularInputDepth());
 	}
 
 	@Test
 	public void testCreateDataflowInputPortEdit() {
-		ChangeDataflowInputPortDepthEdit edit = new ChangeDataflowInputPortDepthEdit(dataflowInputPort, 0);
+		Edit<DataflowInputPort> edit = edits.getChangeDataflowInputPortDepthEdit(dataflowInputPort, 0);
 		assertEquals(dataflowInputPort, edit.getSubject());
 	}
 

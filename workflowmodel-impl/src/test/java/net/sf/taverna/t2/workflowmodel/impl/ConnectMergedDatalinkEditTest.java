@@ -28,6 +28,7 @@ import static org.junit.Assert.assertTrue;
 import net.sf.taverna.t2.workflowmodel.Datalink;
 import net.sf.taverna.t2.workflowmodel.Edit;
 import net.sf.taverna.t2.workflowmodel.EditException;
+import net.sf.taverna.t2.workflowmodel.Edits;
 import net.sf.taverna.t2.workflowmodel.EventForwardingOutputPort;
 import net.sf.taverna.t2.workflowmodel.EventHandlingInputPort;
 import net.sf.taverna.t2.workflowmodel.Merge;
@@ -35,14 +36,20 @@ import net.sf.taverna.t2.workflowmodel.MergeInputPort;
 import net.sf.taverna.t2.workflowmodel.MergeOutputPort;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class ConnectMergedDatalinkEditTest {
+	private static Edits edits;
+
+	@BeforeClass
+	public static void createEditsInstance() {
+		edits = new EditsImpl();
+	}
 
 	EventForwardingOutputPort sourcePort;
 	EventHandlingInputPort sinkPort;
 	Merge merge;
-	
 	
 	@Before
 	public void setup() throws Exception {
@@ -55,7 +62,7 @@ public class ConnectMergedDatalinkEditTest {
 	
 	@Test
 	public void applyEdit() throws Exception {
-		Edit<Merge> theEdit = new ConnectMergedDatalinkEdit(merge,sourcePort,sinkPort);
+		Edit<Merge> theEdit = edits.getConnectMergedDatalinkEdit(merge,sourcePort,sinkPort);
 		assertEquals(0,merge.getInputPorts().size());
 		assertNotNull(merge.getOutputPort());
 		assertTrue(merge.getOutputPort() instanceof MergeOutputPort);
@@ -82,7 +89,7 @@ public class ConnectMergedDatalinkEditTest {
 		ProcessorImpl p3=new ProcessorImpl();
 		ProcessorOutputPortImpl sourcePort2=new ProcessorOutputPortImpl(p3,"source_port2",0,0);
 		
-		Edit<Merge> theEdit2 = new ConnectMergedDatalinkEdit(merge,sourcePort2,sinkPort);
+		Edit<Merge> theEdit2 = edits.getConnectMergedDatalinkEdit(merge,sourcePort2,sinkPort);
 		theEdit2.doEdit();
 		assertEquals(1,merge.getOutputPort().getOutgoingLinks().size());
 		assertEquals(2,merge.getInputPorts().size());
@@ -93,29 +100,29 @@ public class ConnectMergedDatalinkEditTest {
 	
 	@Test(expected=RuntimeException.class)
 	public void nullMerge() throws Exception {
-		new ConnectMergedDatalinkEdit(null,sourcePort,sinkPort);
+		edits.getConnectMergedDatalinkEdit(null,sourcePort,sinkPort);
 	}
 	
 	@Test(expected=RuntimeException.class)
 	public void nullSourcePort() throws Exception {
 		Merge merge = new MergeImpl("merge");
-		new ConnectMergedDatalinkEdit(merge,sourcePort,null);
+		edits.getConnectMergedDatalinkEdit(merge,sourcePort,null);
 	}
 	
 	@Test(expected=RuntimeException.class)
 	public void nullSinkPort() throws Exception {
 		Merge merge = new MergeImpl("merge");
-		new ConnectMergedDatalinkEdit(merge,null,sinkPort);
+		edits.getConnectMergedDatalinkEdit(merge,null,sinkPort);
 	}
 	
 	@Test(expected=EditException.class)
 	public void invalidSinkPort() throws Exception {
-		Edit<Merge> theEdit = new ConnectMergedDatalinkEdit(merge,sourcePort,sinkPort);
+		Edit<Merge> theEdit = edits.getConnectMergedDatalinkEdit(merge,sourcePort,sinkPort);
 		theEdit.doEdit();
 		
 		ProcessorImpl p2=new ProcessorImpl();
 		ProcessorInputPortImpl sinkPort2=new ProcessorInputPortImpl(p2,"sink_port2",0);
-		theEdit = new ConnectMergedDatalinkEdit(merge,sourcePort,sinkPort2);
+		theEdit = edits.getConnectMergedDatalinkEdit(merge,sourcePort,sinkPort2);
 		theEdit.doEdit();
 		
 	}
