@@ -165,8 +165,10 @@ public final class ProcessorImpl extends AbstractAnnotatedThing<Processor>
 								.satisfyConditions(enclosingProcess);
 					}
 				}
-				// Tell whoever is interested that the processor has finished
-				// executing
+				/*
+				 * Tell whoever is interested that the processor has finished
+				 * executing
+				 */
 				processorFinishedMultiCaster.notify(new ProcessorFinishedEvent(
 						this.getProcessor(), owningProcess));
 			}
@@ -394,8 +396,10 @@ public final class ProcessorImpl extends AbstractAnnotatedThing<Processor>
 			}
 		}
 
-		// Register the node with the monitor tree, including any aggregated
-		// properties from layers.
+		/*
+		 * Register the node with the monitor tree, including any aggregated
+		 * properties from layers.
+		 */
 		MonitorManager.getInstance().registerNode(this,
 				dataflowOwningProcess + ":" + getLocalName(), properties);
 	}

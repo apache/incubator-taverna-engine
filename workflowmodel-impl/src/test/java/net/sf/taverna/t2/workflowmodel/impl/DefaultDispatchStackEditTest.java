@@ -41,12 +41,12 @@ public class DefaultDispatchStackEditTest {
 		edits = new EditsImpl();
 	}
 
-	private ProcessorImpl processor;
+	private Processor processor;
 	private Edit<Processor> defaultDispatchStackEdit;
 
 	@Before
 	public void setup() {
-		processor = new ProcessorImpl();
+		processor = edits.createProcessor("");
 		defaultDispatchStackEdit = edits.getDefaultDispatchStackEdit(processor);
 	}
 	@Test

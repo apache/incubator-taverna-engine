@@ -35,7 +35,6 @@ import net.sf.taverna.t2.workflowmodel.ProcessorInputPort;
  * push at least a single list in with the empty index)
  * 
  * @author Tom Oinn
- * 
  */
 class ProcessorInputPortImpl extends AbstractFilteringInputPort implements
 		ProcessorInputPort {

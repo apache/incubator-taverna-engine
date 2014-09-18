@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2007 The University of Manchester   
+ * Copyright (C) 2007-2014 The University of Manchester   
  * 
  *  Modifications to the initial code base are copyright of their
  *  respective authors, or their employers as appropriate.
@@ -20,6 +20,7 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.impl;
 
+import static java.lang.System.identityHashCode;
 import net.sf.taverna.t2.workflowmodel.EditException;
 import net.sf.taverna.t2.workflowmodel.OrderedPair;
 import net.sf.taverna.t2.workflowmodel.Processor;
@@ -30,35 +31,52 @@ import net.sf.taverna.t2.workflowmodel.Processor;
  * modified or destroyed between two processors.
  * 
  * @author Tom Oinn
- * 
+ * @author Donal Fellows
  */
-public abstract class AbstractBinaryProcessorEdit extends
+abstract class AbstractBinaryProcessorEdit extends
 		EditSupport<OrderedPair<Processor>> {
-	private OrderedPair<Processor> processors;
+	private final OrderedPair<Processor> processors;
 
 	public AbstractBinaryProcessorEdit(Processor a, Processor b) {
-		this.processors = new OrderedPair<Processor>(a, b);
+		if (!(a instanceof ProcessorImpl) || !(b instanceof ProcessorImpl))
+			throw new RuntimeException(
+					"Edit cannot be applied to a Processor which isn't an instance of ProcessorImpl");
+		processors = new OrderedPair<>(a, b);
 	}
 
 	@Override
 	public final OrderedPair<Processor> applyEdit() throws EditException {
-		if (processors.getA() instanceof ProcessorImpl == false
-				|| processors.getB() instanceof ProcessorImpl == false)
-			throw new EditException(
-					"Edit cannot be applied to a Processor which isn't an instance of ProcessorImpl");
-
 		ProcessorImpl pia = (ProcessorImpl) processors.getA();
 		ProcessorImpl pib = (ProcessorImpl) processors.getB();
 
-		synchronized (processors) {
-			doEditAction(pia, pib);
-			return this.processors;
+		/*
+		 * Acquire both locks. Guarantee to acquire in a consistent order, based
+		 * on the system hash code (i.e., the object addresses, which we're not
+		 * supposed to know). This means that we should not deadlock, as we've
+		 * got a total order over all extant processors.
+		 * 
+		 * If someone is silly enough to use the same processor for both halves,
+		 * it doesn't matter which arm of the conditional we take.
+		 */
+		if (identityHashCode(pia) < identityHashCode(pib)) {
+			synchronized (pia) {
+				synchronized (pib) {
+					doEditAction(pia, pib);
+				}
+			}
+		} else {
+			synchronized (pib) {
+				synchronized (pia) {
+					doEditAction(pia, pib);
+				}
+			}
 		}
+		return processors;
 	}
 
 	@Override
 	public final OrderedPair<Processor> getSubject() {
-		return this.processors;
+		return processors;
 	}
 
 	/**

@@ -222,7 +222,7 @@ public class IterationStrategyImpl implements IterationStrategy {
 	public void receiveData(String inputPortName, String owningProcess,
 			int[] indexArray, T2Reference dataReference,
 			InvocationContext context) throws WorkflowStructureException {
-		Map<String, T2Reference> dataMap = new HashMap<String, T2Reference>();
+		Map<String, T2Reference> dataMap = new HashMap<>();
 		dataMap.put(inputPortName, dataReference);
 		Job newJob = new Job(owningProcess, indexArray, dataMap, context);
 		nodeForName(inputPortName).receiveJob(0, newJob);
@@ -237,13 +237,13 @@ public class IterationStrategyImpl implements IterationStrategy {
 
 	public void addInput(NamedInputPortNode nipn) {
 		synchronized (inputs) {
-			this.inputs.add(nipn);
+			inputs.add(nipn);
 		}
 	}
 
 	public void removeInput(NamedInputPortNode nipn) {
 		synchronized (inputs) {
-			this.inputs.remove(nipn);
+			inputs.remove(nipn);
 		}
 	}
 
@@ -254,7 +254,7 @@ public class IterationStrategyImpl implements IterationStrategy {
 				if (nipn.getPortName().equals(name))
 					removeMe = nipn;
 			if (removeMe != null) {
-				this.inputs.remove(removeMe);
+				inputs.remove(removeMe);
 				removeMe.removeFromParent();
 			}
 		}

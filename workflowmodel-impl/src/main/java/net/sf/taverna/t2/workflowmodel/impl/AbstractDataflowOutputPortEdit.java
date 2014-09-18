@@ -29,18 +29,17 @@ import net.sf.taverna.t2.workflowmodel.EditException;
  * DataflowOutputPortImpl.
  * 
  * @author David Withers
- * 
  */
 public abstract class AbstractDataflowOutputPortEdit extends
 		EditSupport<DataflowOutputPort> {
-	private DataflowOutputPortImpl dataflowOutputPort;
+	private final DataflowOutputPortImpl dataflowOutputPort;
 
 	protected AbstractDataflowOutputPortEdit(
 			DataflowOutputPort dataflowOutputPort) {
 		if (dataflowOutputPort == null)
 			throw new RuntimeException(
 					"Cannot construct a DataflowOutputPort edit with null DataflowOutputPort");
-		if (dataflowOutputPort instanceof DataflowOutputPortImpl == false)
+		if (!(dataflowOutputPort instanceof DataflowOutputPortImpl))
 			throw new RuntimeException(
 					"Edit cannot be applied to a DataflowOutputPort which isn't an instance of DataflowOutputPortImpl");
 		this.dataflowOutputPort = (DataflowOutputPortImpl) dataflowOutputPort;
@@ -50,8 +49,8 @@ public abstract class AbstractDataflowOutputPortEdit extends
 	public final DataflowOutputPort applyEdit() throws EditException {
 		synchronized (dataflowOutputPort) {
 			doEditAction(dataflowOutputPort);
-			return this.dataflowOutputPort;
 		}
+		return dataflowOutputPort;
 	}
 
 	/**

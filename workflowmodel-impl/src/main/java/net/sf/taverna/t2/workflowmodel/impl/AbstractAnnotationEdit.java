@@ -23,21 +23,48 @@ package net.sf.taverna.t2.workflowmodel.impl;
 import net.sf.taverna.t2.annotation.AnnotationAssertion;
 import net.sf.taverna.t2.annotation.AnnotationBeanSPI;
 import net.sf.taverna.t2.annotation.impl.AnnotationAssertionImpl;
+import net.sf.taverna.t2.workflowmodel.EditException;
 
 /**
  * Abstraction of an edit acting on a AnnotationAssertion instance. Handles the
  * check to see that the AnnotationAssertion supplied is really an
  * AnnotationAssertionImpl.
  */
-abstract class AbstractAnnotationEdit
-		extends
-		AbstractEdit<AnnotationAssertion<AnnotationBeanSPI>, AnnotationAssertionImpl> {
-	protected AbstractAnnotationEdit(
-			AnnotationAssertion<AnnotationBeanSPI> annotation) {
-		super(AnnotationAssertionImpl.class, annotation);
+abstract class AbstractAnnotationEdit extends
+		EditSupport<AnnotationAssertion<AnnotationBeanSPI>> {
+	private final AnnotationAssertionImpl annotation;
+
+	protected AbstractAnnotationEdit(AnnotationAssertion<AnnotationBeanSPI> annotation) {
+		if (annotation == null)
+			throw new RuntimeException(
+					"Cannot construct an annotation edit with null annotation");
+		if (!(annotation instanceof AnnotationAssertionImpl))
+			throw new RuntimeException(
+					"Edit cannot be applied to an AnnotationAssertion which isn't an instance of AnnotationAssertionImpl");
+		this.annotation = (AnnotationAssertionImpl) annotation;
 	}
 
-	public AnnotationAssertion<AnnotationBeanSPI> getAnnotation() {
-		return getSubject();
+	@Override
+	public final AnnotationAssertion<AnnotationBeanSPI> applyEdit()
+			throws EditException {
+		synchronized (annotation) {
+			doEditAction(annotation);
+		}
+		return annotation;
+	}
+
+	/**
+	 * Do the actual edit here
+	 * 
+	 * @param annotationAssertion
+	 *            The AnnotationAssertionImpl to which the edit applies
+	 * @throws EditException
+	 */
+	protected abstract void doEditAction(
+			AnnotationAssertionImpl annotationAssertion) throws EditException;
+
+	@Override
+	public final AnnotationAssertion<AnnotationBeanSPI> getSubject() {
+		return annotation;
 	}
 }

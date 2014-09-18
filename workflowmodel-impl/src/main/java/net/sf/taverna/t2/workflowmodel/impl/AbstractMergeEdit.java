@@ -24,7 +24,7 @@ import net.sf.taverna.t2.workflowmodel.EditException;
 import net.sf.taverna.t2.workflowmodel.Merge;
 
 public abstract class AbstractMergeEdit extends EditSupport<Merge> {
-	MergeImpl merge;
+	private final MergeImpl merge;
 	
 	public AbstractMergeEdit(Merge merge) {
 		if (merge == null)
@@ -40,7 +40,7 @@ public abstract class AbstractMergeEdit extends EditSupport<Merge> {
 		synchronized (merge) {
 			doEditAction(merge);
 		}
-		return this.merge;
+		return merge;
 	}
 
 	protected abstract void doEditAction(MergeImpl mergeImpl) throws EditException;

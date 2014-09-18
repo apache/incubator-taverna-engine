@@ -29,11 +29,9 @@ import net.sf.taverna.t2.workflowmodel.EventHandlingInputPort;
  * implementation method to set the incoming data link
  * 
  * @author Tom Oinn
- * 
  */
 public abstract class AbstractEventHandlingInputPort extends AbstractPort
 		implements EventHandlingInputPort {
-
 	private Datalink incomingLink = null;
 
 	protected AbstractEventHandlingInputPort(String name, int depth) {
@@ -52,5 +50,4 @@ public abstract class AbstractEventHandlingInputPort extends AbstractPort
 	protected void setName(String name) {
 		this.name = name;
 	}
-	
 }

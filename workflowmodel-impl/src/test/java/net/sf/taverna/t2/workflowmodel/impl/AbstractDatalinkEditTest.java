@@ -100,7 +100,7 @@ public class AbstractDatalinkEditTest {
 		edit.doEdit();
 	}
 
-	@Test(expected = EditException.class)
+	@Test(expected = RuntimeException.class)
 	public void testDoEditWithWrongImpl() throws EditException {
 		AbstractDatalinkEdit edit = new AbstractDatalinkEdit(new Datalink() {
 
@@ -122,27 +122,22 @@ public class AbstractDatalinkEditTest {
 			@Override
 			public Edit<? extends Datalink> getAddAnnotationEdit(
 					AnnotationChain newAnnotation) {
-				// TODO Auto-generated method stub
 				return null;
 			}
 
 			@Override
 			public Set<? extends AnnotationChain> getAnnotations() {
-				// TODO Auto-generated method stub
 				return null;
 			}
 
 			@Override
 			public Edit<? extends Datalink> getRemoveAnnotationEdit(
 					AnnotationChain annotationToRemove) {
-				// TODO Auto-generated method stub
 				return null;
 			}
 
 			@Override
 			public void setAnnotations(Set<AnnotationChain> annotations) {
-				// TODO Auto-generated method stub
-
 			}
 
 		}) {

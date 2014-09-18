@@ -20,6 +20,7 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.impl;
 
+import net.sf.taverna.t2.workflowmodel.EditException;
 import net.sf.taverna.t2.workflowmodel.processor.activity.AbstractActivity;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 
@@ -29,18 +30,40 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
  * 
  * @author David Withers
  * @author Stian Soiland-Reyes
- *
  */
-public abstract class AbstractActivityEdit extends AbstractEdit<Activity<?>, AbstractActivity<?>> {
-	protected AbstractActivityEdit(Activity<?> activity) {
-		super(AbstractActivity.class, activity);
+public abstract class AbstractActivityEdit<T> extends EditSupport<Activity<T>> {
+	private final AbstractActivity<T> activity;
+
+	protected AbstractActivityEdit(Activity<T> activity) {
+		if (activity == null)
+			throw new RuntimeException(
+					"Cannot construct an activity edit with null activity");
+		if (!(activity instanceof AbstractActivity))
+			throw new RuntimeException(
+					"Edit cannot be applied to an Activity which isn't an instance of AbstractActivity");
+		this.activity = (AbstractActivity<T>) activity;
 	}
 
-	public void setActivity(Activity<?> activity) {
-		this.subject = activity;
+	@Override
+	public final Activity<T> applyEdit() throws EditException {
+		synchronized (activity) {
+			doEditAction(activity);
+		}
+		return activity;
 	}
 
-	public Activity<?> getActivity() {
-		return getSubject();
+	/**
+	 * Do the actual edit here
+	 * 
+	 * @param processor
+	 *            The ProcessorImpl to which the edit applies
+	 * @throws EditException
+	 */
+	protected abstract void doEditAction(AbstractActivity<T> processor)
+			throws EditException;
+
+	@Override
+	public final Activity<T> getSubject() {
+		return activity;
 	}
 }

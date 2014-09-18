@@ -39,10 +39,11 @@ public abstract class AbstractDispatchLayerEdit implements Edit<DispatchStack> {
 		if (s == null)
 			throw new RuntimeException(
 					"Cannot construct a dispatch stack edit with null dispatch stack");
-		if (s instanceof DispatchStackImpl == false)
+		if (!(s instanceof DispatchStackImpl))
 			throw new RuntimeException(
-					"Edit cannot be applied to a DispatchStack which isn't an instance of DispatchStackImpl");
-		this.stack = (DispatchStackImpl) s;
+					"Edit cannot be applied to a DispatchStack which isn't "
+					+ "an instance of DispatchStackImpl");
+		stack = (DispatchStackImpl) s;
 	}
 
 	@Override
@@ -69,7 +70,9 @@ public abstract class AbstractDispatchLayerEdit implements Edit<DispatchStack> {
 	/**
 	 * Undo any edit effects here
 	 */
-	protected abstract void undoEditAction(DispatchStackImpl stack);
+	protected void undoEditAction(DispatchStackImpl stack) {
+		throw new RuntimeException("undo not supported in the t2 model in T3");
+	}
 
 	@Override
 	public final DispatchStack getSubject() {

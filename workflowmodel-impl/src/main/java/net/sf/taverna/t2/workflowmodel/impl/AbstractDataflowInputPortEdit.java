@@ -31,13 +31,13 @@ import net.sf.taverna.t2.workflowmodel.EditException;
  *
  */
 public abstract class AbstractDataflowInputPortEdit extends EditSupport<DataflowInputPort> {
-	private DataflowInputPortImpl dataflowInputPort;
+	private final DataflowInputPortImpl dataflowInputPort;
 
 	protected AbstractDataflowInputPortEdit(DataflowInputPort dataflowInputPort) {
 		if (dataflowInputPort == null)
 			throw new RuntimeException(
 					"Cannot construct a DataflowInputPort edit with null DataflowInputPort");
-		if (dataflowInputPort instanceof DataflowInputPortImpl == false)
+		if (!(dataflowInputPort instanceof DataflowInputPortImpl))
 			throw new RuntimeException(
 					"Edit cannot be applied to a DataflowInputPort which isn't an instance of DataflowInputPortImpl");
 		this.dataflowInputPort = (DataflowInputPortImpl) dataflowInputPort;
@@ -47,8 +47,8 @@ public abstract class AbstractDataflowInputPortEdit extends EditSupport<Dataflow
 	public final DataflowInputPort applyEdit() throws EditException {
 		synchronized (dataflowInputPort) {
 			doEditAction(dataflowInputPort);
-			return this.dataflowInputPort;
 		}
+		return dataflowInputPort;
 	}
 
 	/**

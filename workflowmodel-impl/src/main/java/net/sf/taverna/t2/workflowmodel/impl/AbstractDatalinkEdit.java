@@ -28,16 +28,15 @@ import net.sf.taverna.t2.workflowmodel.EditException;
  * see that the Datalink supplied is really a DatalinkImpl.
  * 
  * @author David Withers
- * 
  */
 public abstract class AbstractDatalinkEdit extends EditSupport<Datalink> {
-	private DatalinkImpl datalink;
+	private final DatalinkImpl datalink;
 
 	protected AbstractDatalinkEdit(Datalink datalink) {
 		if (datalink == null)
 			throw new RuntimeException(
 					"Cannot construct a datalink edit with null datalink");
-		if (datalink instanceof DatalinkImpl == false)
+		if (!(datalink instanceof DatalinkImpl))
 			throw new RuntimeException(
 					"Edit cannot be applied to a Datalink which isn't an instance of DatalinkImpl");
 		this.datalink = (DatalinkImpl) datalink;
@@ -47,8 +46,8 @@ public abstract class AbstractDatalinkEdit extends EditSupport<Datalink> {
 	public final Datalink applyEdit() throws EditException {
 		synchronized (datalink) {
 			doEditAction(datalink);
-			return this.datalink;
 		}
+		return datalink;
 	}
 
 	/**

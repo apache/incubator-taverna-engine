@@ -31,24 +31,24 @@ import net.sf.taverna.t2.workflowmodel.Processor;
  * 
  */
 public abstract class AbstractProcessorEdit extends EditSupport<Processor> {
-	private ProcessorImpl processor;
+	private final ProcessorImpl processor;
 
-	protected AbstractProcessorEdit(Processor p) {
-		if (p == null)
+	protected AbstractProcessorEdit(Processor processor) {
+		if (processor == null)
 			throw new RuntimeException(
 					"Cannot construct a processor edit with null processor");
 		if (!(processor instanceof ProcessorImpl))
 			throw new RuntimeException(
 					"Edit cannot be applied to a Processor which isn't an instance of ProcessorImpl");
-		this.processor = (ProcessorImpl) p;
+		this.processor = (ProcessorImpl) processor;
 	}
 
 	@Override
 	public final Processor applyEdit() throws EditException {
 		synchronized (processor) {
 			doEditAction(processor);
-			return processor;
 		}
+		return processor;
 	}
 
 	/**

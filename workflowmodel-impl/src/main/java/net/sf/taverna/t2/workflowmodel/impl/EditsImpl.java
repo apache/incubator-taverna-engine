@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2007 The University of Manchester
+ * Copyright (C) 2007-2014 The University of Manchester
  *
  *  Modifications to the initial code base are copyright of their
  *  respective authors, or their employers as appropriate.
@@ -20,12 +20,15 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.impl;
 
+import static java.lang.Integer.parseInt;
 import static net.sf.taverna.t2.workflowmodel.utils.Tools.getUniqueMergeInputPortName;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.sf.taverna.t2.annotation.Annotated;
 import net.sf.taverna.t2.annotation.AnnotationAssertion;
@@ -57,6 +60,7 @@ import net.sf.taverna.t2.workflowmodel.InvalidDataflowException;
 import net.sf.taverna.t2.workflowmodel.Merge;
 import net.sf.taverna.t2.workflowmodel.MergeInputPort;
 import net.sf.taverna.t2.workflowmodel.OrderedPair;
+import net.sf.taverna.t2.workflowmodel.OutputPort;
 import net.sf.taverna.t2.workflowmodel.Processor;
 import net.sf.taverna.t2.workflowmodel.ProcessorInputPort;
 import net.sf.taverna.t2.workflowmodel.ProcessorOutputPort;
@@ -84,9 +88,11 @@ import net.sf.taverna.t2.workflowmodel.processor.iteration.impl.IterationStrateg
 
 /**
  * Implementation of {@link Edits}
- *
+ * @author Donal Fellows (et al)
  */
 public class EditsImpl implements Edits {
+	// ----------------------------------------------------------------
+	// Basic factory methods
 
 	@Override
 	public Dataflow createDataflow() {
@@ -132,6 +138,81 @@ public class EditsImpl implements Edits {
 		return new ProcessorInputPortImpl((ProcessorImpl) processor, name,
 				depth);
 	}
+
+	@Override
+	public AnnotationChain createAnnotationChain() {
+		return new AnnotationChainImpl();
+	}
+
+	/**
+	 * Creates a MergeImpl instance. Merge names are generated as 'Merge0',
+	 * 'Merge1', 'Merge2', etc. The next merge to be added always gets the name
+	 * as the previous merge in the list with its index incremented by one. If a
+	 * merge is deleted, that is not taken into account when generating merges'
+	 * names.
+	 */
+	@Override
+	public Merge createMerge(Dataflow dataflow) {
+		String mergeName;
+
+		// Work out what the name of the merge should be.
+		List<? extends Merge> merges = dataflow.getMerges();
+		if (merges.isEmpty())
+			mergeName = "Merge0"; // the first merge to be added to the list
+		else
+			mergeName = "Merge"
+					+ String.valueOf(parseInt(merges.get(merges.size() - 1)
+							.getLocalName().substring(5)) + 1);
+
+		return new MergeImpl(mergeName);
+	}
+
+	@Override
+	public Processor createProcessor(String name) {
+		ProcessorImpl processor = new ProcessorImpl();
+		processor.setName(name);
+		return processor;
+	}
+
+	@Override
+	public IterationStrategy createIterationStrategy() {
+		return new IterationStrategyImpl();
+	}
+
+	/**
+	 * Builds an instance of {@link ActivityInputPortImpl}
+	 */
+	@Override
+	public ActivityInputPort createActivityInputPort(
+			String portName,
+			int portDepth,
+			boolean allowsLiteralValues,
+			List<Class<? extends ExternalReferenceSPI>> handledReferenceSchemes,
+			Class<?> translatedElementClass) {
+		return new ActivityInputPortImpl(portName, portDepth,
+				allowsLiteralValues, handledReferenceSchemes,
+				translatedElementClass);
+	}
+
+	/**
+	 * Builds an instance of {@link ActivityOutputPortImpl}
+	 */
+	@Override
+	public ActivityOutputPort createActivityOutputPort(String portName, int portDepth,
+			int portGranularDepth) {
+		return new ActivityOutputPortImpl(portName, portDepth,
+				portGranularDepth);
+	}
+
+	@Override
+	public WorkflowInstanceFacade createWorkflowInstanceFacade(
+			Dataflow dataflow, InvocationContext context, String parentProcess)
+			throws InvalidDataflowException {
+		return new WorkflowInstanceFacadeImpl(dataflow, context, parentProcess);
+	}
+
+	// ----------------------------------------------------------------
+	// Edits (structured transformation) factory methods
 
 	@Override
 	public Edit<Dataflow> getAddProcessorEdit(Dataflow dataflow,
@@ -193,9 +274,7 @@ public class EditsImpl implements Edits {
 				if (activities.contains(activity))
 					throw new EditException(
 							"Cannot add a duplicate activity to processor");
-				synchronized (processor) {
-					activities.add(activity);
-				}
+				activities.add(activity);
 			}
 		};
 	}
@@ -393,12 +472,6 @@ public class EditsImpl implements Edits {
 	}
 
 	@Override
-	public AnnotationChain createAnnotationChain() {
-		return new AnnotationChainImpl();
-	}
-
-
-	@Override
 	public Edit<AnnotationChain> getAddAnnotationAssertionEdit(
 			AnnotationChain annotationChain,
 			final AnnotationAssertion<?> annotationAssertion) {
@@ -420,34 +493,6 @@ public class EditsImpl implements Edits {
 				return chain;
 			}
 		};
-	}
-
-	/**
-	 * Creates a MergeImpl instance. Merge names are generated as 'Merge0',
-	 * 'Merge1', 'Merge2', etc. The next merge to be added always gets the name
-	 * as the previous merge in the list with its index incremented by one. If a
-	 * merge is deleted, that is not taken into account when generating merges'
-	 * names.
-	 */
-	@Override
-	public Merge createMerge(Dataflow dataflow) {
-
-		String mergeName;
-
-		// Get all merges for a workflow
-		List<? extends Merge> merges = (List<? extends Merge>) dataflow
-				.getMerges();
-
-		if (merges.isEmpty()) {
-			mergeName = "Merge0"; // the first merge to be added to the list
-		} else {
-			String lastMergeName = merges.get(merges.size() - 1).getLocalName();
-			// Get the index of the last Merge
-			int lastMergeIndex = Integer.parseInt(lastMergeName.substring(5));
-			mergeName = "Merge" + String.valueOf((lastMergeIndex + 1));
-		}
-
-		return new MergeImpl(mergeName);
 	}
 
 	/**
@@ -486,20 +531,19 @@ public class EditsImpl implements Edits {
 			}
 
 			@Override
-			protected void doEditAction(MergeImpl mergeImpl)
-					throws EditException {
-				boolean linkOut = needToCreateDatalink(mergeImpl);
-				String name = getUniqueMergeInputPortName(mergeImpl,
+			protected void doEditAction(MergeImpl merge) throws EditException {
+				boolean linkOut = needToCreateDatalink(merge);
+				String name = getUniqueMergeInputPortName(merge,
 						sourcePort.getName() + "To" + merge.getLocalName()
 								+ "_input", 0);
 				MergeInputPortImpl mergeInputPort = new MergeInputPortImpl(
-						mergeImpl, name, sinkPort.getDepth());
-				mergeImpl.addInputPort(mergeInputPort);
+						merge, name, sinkPort.getDepth());
+				merge.addInputPort(mergeInputPort);
 				getConnectDatalinkEdit(
 						createDatalink(sourcePort, mergeInputPort)).doEdit();
 				if (linkOut)
 					getConnectDatalinkEdit(
-							createDatalink(mergeImpl.getOutputPort(), sinkPort))
+							createDatalink(merge.getOutputPort(), sinkPort))
 							.doEdit();
 			}
 		};
@@ -544,50 +588,6 @@ public class EditsImpl implements Edits {
 	}
 
 	@Override
-	public Processor createProcessor(String name) {
-		ProcessorImpl processor = new ProcessorImpl();
-		processor.setName(name);
-		return processor;
-	}
-
-	@Override
-	public IterationStrategy createIterationStrategy() {
-		return new IterationStrategyImpl();
-	}
-
-	/**
-	 * Builds an instance of {@link ActivityInputPortImpl}
-	 */
-	@Override
-	public ActivityInputPort createActivityInputPort(
-			String portName,
-			int portDepth,
-			boolean allowsLiteralValues,
-			List<Class<? extends ExternalReferenceSPI>> handledReferenceSchemes,
-			Class<?> translatedElementClass) {
-		return new ActivityInputPortImpl(portName, portDepth,
-				allowsLiteralValues, handledReferenceSchemes,
-				translatedElementClass);
-	}
-
-	/**
-	 * Builds an instance of {@link ActivityOutputPortImpl}
-	 */
-	@Override
-	public ActivityOutputPort createActivityOutputPort(String portName, int portDepth,
-			int portGranularDepth) {
-		return new ActivityOutputPortImpl(portName, portDepth,
-				portGranularDepth);
-	}
-
-	@Override
-	public WorkflowInstanceFacade createWorkflowInstanceFacade(
-			Dataflow dataflow, InvocationContext context, String parentProcess)
-			throws InvalidDataflowException {
-		return new WorkflowInstanceFacadeImpl(dataflow, context, parentProcess);
-	}
-
-	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Edit<AnnotationAssertion<AnnotationBeanSPI>> getAddAnnotationBean(
 			AnnotationAssertion annotationAssertion,
@@ -596,9 +596,7 @@ public class EditsImpl implements Edits {
 			@Override
 			protected void doEditAction(AnnotationAssertionImpl assertion)
 					throws EditException {
-				synchronized (assertion) {
-					assertion.setAnnotationBean(bean);
-				}
+				assertion.setAnnotationBean(bean);
 			}
 		};
 	}
@@ -612,9 +610,7 @@ public class EditsImpl implements Edits {
 			@Override
 			protected void doEditAction(AnnotationAssertionImpl assertion)
 					throws EditException {
-				synchronized (assertion) {
-					assertion.addCurationEvent(curationEvent);
-				}
+				assertion.addCurationEvent(curationEvent);
 			}
 		};
 	}
@@ -628,9 +624,7 @@ public class EditsImpl implements Edits {
 			@Override
 			protected void doEditAction(AnnotationAssertionImpl assertion)
 					throws EditException {
-				synchronized (assertion) {
-					assertion.setAnnotationRole(role);
-				}
+				assertion.setAnnotationRole(role);
 			}
 		};
 	}
@@ -644,9 +638,7 @@ public class EditsImpl implements Edits {
 			@Override
 			protected void doEditAction(AnnotationAssertionImpl assertion)
 					throws EditException {
-				synchronized (assertion) {
-					assertion.setAnnotationSource(source);
-				}
+				assertion.setAnnotationSource(source);
 			}
 		};
 	}
@@ -659,9 +651,7 @@ public class EditsImpl implements Edits {
 			@Override
 			protected void doEditAction(AnnotationAssertionImpl assertion)
 					throws EditException {
-				synchronized (assertion) {
-					assertion.addCreator(person);
-				}
+				assertion.addCreator(person);
 			}
 		};
 	}
@@ -714,12 +704,11 @@ public class EditsImpl implements Edits {
 					((BasicEventForwardingOutputPort) source)
 							.removeOutgoingLink(datalink);
 
-				if (sink instanceof AbstractEventHandlingInputPort) {
+				if (sink instanceof AbstractEventHandlingInputPort)
 					((AbstractEventHandlingInputPort) sink).setIncomingLink(null);
-					if (sink instanceof MergeInputPortImpl) {
-						MergeInputPortImpl mip = (MergeInputPortImpl) sink;
-						((MergeImpl) mip.getMerge()).removeInputPort(mip);
-					}
+				if (sink instanceof MergeInputPortImpl) {
+					MergeInputPortImpl mip = (MergeInputPortImpl) sink;
+					((MergeImpl) mip.getMerge()).removeInputPort(mip);
 				}
 			}
 		};
@@ -802,23 +791,25 @@ public class EditsImpl implements Edits {
 	}
 
 	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Edit<Activity<?>> getAddActivityInputPortEdit(Activity<?> activity,
 			final ActivityInputPort activityInputPort) {
 		return new AbstractActivityEdit(activity) {
 			@Override
-			protected void doEditAction(AbstractActivity<?> activity) {
+			protected void doEditAction(AbstractActivity activity) {
 				activity.getInputPorts().add(activityInputPort);
 			}
 		};
 	}
 
 	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Edit<Activity<?>> getAddActivityInputPortMappingEdit(
 			Activity<?> activity, final String processorPortName,
 			final String activityPortName) {
 		return new AbstractActivityEdit(activity) {
 			@Override
-			protected void doEditAction(AbstractActivity<?> activity)
+			protected void doEditAction(AbstractActivity activity)
 					throws EditException {
 				if (activity.getInputPortMapping().containsKey(
 						processorPortName))
@@ -837,25 +828,27 @@ public class EditsImpl implements Edits {
 	}
 
 	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Edit<Activity<?>> getAddActivityOutputPortEdit(Activity<?> activity,
 			final ActivityOutputPort activityOutputPort) {
 		return new AbstractActivityEdit(activity) {
 			@Override
-			protected void doEditAction(AbstractActivity<?> activity) {
+			protected void doEditAction(AbstractActivity activity) {
 				activity.getOutputPorts().add(activityOutputPort);
 			}
 		};
 	}
 
 	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Edit<Activity<?>> getAddActivityOutputPortMappingEdit(
 			Activity<?> activity, final String processorPortName,
 			final String activityPortName) {
 		return new AbstractActivityEdit(activity) {
 			@Override
-			protected void doEditAction(AbstractActivity<?> activity)
+			protected void doEditAction(AbstractActivity activity)
 					throws EditException {
-				Map<String,String> opm = activity.getOutputPortMapping();
+				Map<String, String> opm = activity.getOutputPortMapping();
 				if (opm.containsKey(activityPortName))
 					throw new EditException("The mapping starting with:"
 							+ activityPortName + " already exists");
@@ -870,11 +863,12 @@ public class EditsImpl implements Edits {
 	}
 
 	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Edit<Activity<?>> getRemoveActivityInputPortEdit(
 			Activity<?> activity, final ActivityInputPort activityInputPort) {
 		return new AbstractActivityEdit(activity) {
 			@Override
-			protected void doEditAction(AbstractActivity<?> activity)
+			protected void doEditAction(AbstractActivity activity)
 					throws EditException {
 				activity.getInputPorts().remove(activityInputPort);
 			}
@@ -882,11 +876,12 @@ public class EditsImpl implements Edits {
 	}
 
 	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Edit<Activity<?>> getRemoveActivityInputPortMappingEdit(
 			Activity<?> activity, final String processorPortName) {
 		return new AbstractActivityEdit(activity) {
 			@Override
-			protected void doEditAction(AbstractActivity<?> activity)
+			protected void doEditAction(AbstractActivity activity)
 					throws EditException {
 				if (!activity.getInputPortMapping().containsKey(processorPortName))
 					throw new EditException(
@@ -898,11 +893,12 @@ public class EditsImpl implements Edits {
 	}
 
 	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Edit<Activity<?>> getRemoveActivityOutputPortEdit(
 			Activity<?> activity, final ActivityOutputPort activityOutputPort) {
 		return new AbstractActivityEdit(activity) {
 			@Override
-			protected void doEditAction(AbstractActivity<?> activity)
+			protected void doEditAction(AbstractActivity activity)
 					throws EditException {
 				activity.getOutputPorts().remove(activityOutputPort);
 			}
@@ -910,11 +906,12 @@ public class EditsImpl implements Edits {
 	}
 
 	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Edit<Activity<?>> getRemoveActivityOutputPortMappingEdit(
 			Activity<?> activity, final String processorPortName) {
 		return new AbstractActivityEdit(activity) {
 			@Override
-			protected void doEditAction(AbstractActivity<?> activity)
+			protected void doEditAction(AbstractActivity activity)
 					throws EditException {
 				if (!activity.getOutputPortMapping().containsKey(processorPortName))
 					throw new EditException(
@@ -981,8 +978,138 @@ public class EditsImpl implements Edits {
 
 	@Override
 	public Edit<Processor> getMapProcessorPortsForActivityEdit(
-			Processor processor) {
-		return new MapProcessorPortsForActivityEdit(processor);
+			final Processor processor) {
+		return new EditSupport<Processor>() {
+			@Override
+			public Processor applyEdit() throws EditException {
+				List<Edit<?>> edits = new ArrayList<>();
+				Activity<?> a = processor.getActivityList().get(0);
+
+				List<ProcessorInputPort> inputPortsForRemoval = determineInputPortsForRemoval(
+						processor, a);
+				List<ProcessorOutputPort> outputPortsForRemoval = determineOutputPortsForRemoval(
+						processor, a);
+				Map<ProcessorInputPort, ActivityInputPort> changedInputPorts = determineChangedInputPorts(
+						processor, a);
+				Map<ProcessorOutputPort, ActivityOutputPort> changedOutputPorts = determineChangedOutputPorts(
+						processor, a);
+
+				for (ProcessorInputPort ip : inputPortsForRemoval) {
+					if (ip.getIncomingLink() != null)
+						edits.add(getDisconnectDatalinkEdit(ip
+								.getIncomingLink()));
+					edits.add(getRemoveProcessorInputPortEdit(processor, ip));
+					if (a.getInputPortMapping().containsKey(ip.getName()))
+						edits.add(getRemoveActivityInputPortMappingEdit(a, ip
+								.getName()));
+				}
+				
+				for (ProcessorOutputPort op : outputPortsForRemoval) {
+					if (!op.getOutgoingLinks().isEmpty())
+						for (Datalink link : op.getOutgoingLinks())
+							edits.add(getDisconnectDatalinkEdit(link));
+					edits.add(getRemoveProcessorOutputPortEdit(processor, op));
+					if (a.getOutputPortMapping().containsKey(op.getName()))
+						edits.add(getRemoveActivityOutputPortMappingEdit(a, op
+								.getName()));
+				}
+
+				for (ProcessorInputPort ip : changedInputPorts.keySet()) {
+					Datalink incomingLink = ip.getIncomingLink();
+					if (incomingLink != null)
+						edits.add(getDisconnectDatalinkEdit(incomingLink));
+					edits.add(getRemoveProcessorInputPortEdit(processor, ip));
+					
+					if (incomingLink != null) {
+						ActivityInputPort aip = changedInputPorts.get(ip);
+						ProcessorInputPort pip = createProcessorInputPort(processor,
+								aip.getName(), aip.getDepth());
+						edits.add(getAddProcessorInputPortEdit(processor, pip));
+						edits.add(getConnectDatalinkEdit(new DatalinkImpl(
+								incomingLink.getSource(), pip)));
+					}
+				}
+				
+				for (ProcessorOutputPort op : changedOutputPorts.keySet()) {
+					Set<? extends Datalink> outgoingLinks = op.getOutgoingLinks();
+					for (Datalink link : outgoingLinks)
+						edits.add(getDisconnectDatalinkEdit(link));
+					edits.add(getRemoveProcessorOutputPortEdit(processor, op));
+					
+					if (!outgoingLinks.isEmpty()) {
+						ActivityOutputPort aop = changedOutputPorts.get(op);
+						ProcessorOutputPort pop = createProcessorOutputPort(
+								processor, aop.getName(), aop.getDepth(),
+								aop.getGranularDepth());
+						edits.add(getAddProcessorOutputPortEdit(processor,
+								pop));
+						for (Datalink link : outgoingLinks)
+							edits.add(getConnectDatalinkEdit(createDatalink(
+									pop, link.getSink())));
+					}
+				}
+
+				new CompoundEdit(edits).doEdit();
+				return processor;
+			}
+
+			@Override
+			public Object getSubject() {
+				return processor;
+			}
+
+			private List<ProcessorInputPort> determineInputPortsForRemoval(Processor p,
+					Activity<?> a) {
+				List<ProcessorInputPort> result = new ArrayList<>();
+				processorPorts: for (ProcessorInputPort pPort : p.getInputPorts()) {
+					for (ActivityInputPort aPort : a.getInputPorts())
+						if (aPort.getName().equals(pPort.getName()))
+							continue processorPorts;
+					result.add(pPort);
+				}
+				return result;
+			}
+			
+			private List<ProcessorOutputPort> determineOutputPortsForRemoval(
+					Processor p, Activity<?> a) {
+				List<ProcessorOutputPort> result = new ArrayList<>();
+				processorPorts: for (ProcessorOutputPort pPort : p.getOutputPorts()) {
+					for (OutputPort aPort : a.getOutputPorts())
+						if (aPort.getName().equals(pPort.getName()))
+							continue processorPorts;
+					result.add(pPort);
+				}
+				return result;
+			}
+			
+			private Map<ProcessorInputPort, ActivityInputPort> determineChangedInputPorts(
+					Processor p, Activity<?> a) {
+				Map<ProcessorInputPort, ActivityInputPort> result = new HashMap<>();
+				for (ProcessorInputPort pPort : p.getInputPorts())
+					for (ActivityInputPort aPort : a.getInputPorts())
+						if (aPort.getName().equals(pPort.getName())) {
+							if (pPort.getDepth() != aPort.getDepth())
+								result.put(pPort, aPort);
+							break;
+						}
+				return result;
+			}
+			
+			private Map<ProcessorOutputPort, ActivityOutputPort> determineChangedOutputPorts(
+					Processor p, Activity<?> a) {
+				Map<ProcessorOutputPort, ActivityOutputPort> result = new HashMap<>();
+				for (ProcessorOutputPort pPort : p.getOutputPorts())
+					for (OutputPort aPort : a.getOutputPorts())
+						if (aPort.getName().equals(pPort.getName())) {
+							if ((pPort.getDepth() != aPort.getDepth())
+									|| (pPort.getGranularDepth() != aPort
+											.getGranularDepth()))
+								result.put(pPort, (ActivityOutputPort) aPort);
+							break;
+						}
+				return result;
+			}
+		};
 	}
 
 	private static final int DEFAULT_MAX_JOBS = 1;
@@ -1030,10 +1157,10 @@ public class EditsImpl implements Edits {
 	}
 
 	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <T> Edit<? extends Configurable<T>> getConfigureEdit(
 			Configurable<T> configurable, T configBean) {
-		return new ConfigureEdit<T>(Configurable.class, configurable,
-				configBean);
+		return new ConfigureEdit(Configurable.class, configurable, configBean);
 	}
 
 	@Override
@@ -1053,9 +1180,7 @@ public class EditsImpl implements Edits {
 		return new AbstractProcessorEdit(processor) {
 			@Override
 			protected void doEditAction(ProcessorImpl processor) {
-				synchronized (processor) {
-					processor.activityList.remove(activity);
-				}
+				processor.activityList.remove(activity);
 			}
 		};
 	}

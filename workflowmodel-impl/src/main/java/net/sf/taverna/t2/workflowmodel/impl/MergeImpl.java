@@ -188,12 +188,16 @@ class MergeImpl implements Merge {
 	@Override
 	public boolean doTypeCheck() throws IterationTypeMismatchException {
 		if (inputs.size() == 0)
-			// Arguable, but technically a merge with no inputs is valid, it may
-			// make more sense to throw an exception here though as it has no
-			// actual meaning.
+			/*
+			 * Arguable, but technically a merge with no inputs is valid, it may
+			 * make more sense to throw an exception here though as it has no
+			 * actual meaning.
+			 */
 			return true;
-		// Return false if we have unbound input ports or bound ports where the
-		// resolved depth hasn't been calculated yet
+		/*
+		 * Return false if we have unbound input ports or bound ports where the
+		 * resolved depth hasn't been calculated yet
+		 */
 		for (MergeInputPort ip : inputs)
 			if (ip.getIncomingLink() == null
 					|| ip.getIncomingLink().getResolvedDepth() == -1)
@@ -207,8 +211,10 @@ class MergeImpl implements Merge {
 
 		// Set the granular depth to be the input depth as this will be the granularity of the output
 		output.setGranularDepth(inputDepth);
-		// Got to here so all the input resolved depths match, push depth+1 to
-		// all outgoing links and return true
+		/*
+		 * Got to here so all the input resolved depths match, push depth+1 to
+		 * all outgoing links and return true
+		 */
 		for (DatalinkImpl dli : output.outgoingLinks)
 			dli.setResolvedDepth(inputDepth+1);
 		return true;

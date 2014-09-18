@@ -20,8 +20,9 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.processor.dispatch.impl;
 
+import static java.util.Collections.unmodifiableList;
+
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -127,22 +128,24 @@ public abstract class DispatchStackImpl extends
 	public void receiveEvent(IterationInternalEvent event) {
 		BlockingQueue<IterationInternalEvent<? extends IterationInternalEvent<?>>> queue = null;
 		String owningProcess = event.getOwningProcess();
+		String enclosingProcess = owningProcess.substring(0, owningProcess
+				.lastIndexOf(':'));
 		synchronized (queues) {
-			String enclosingProcess = owningProcess.substring(0, owningProcess
-					.lastIndexOf(':'));
-			if (!queues.containsKey(owningProcess)) {
-				queue = new LinkedBlockingQueue<IterationInternalEvent<? extends IterationInternalEvent<?>>>();
+			queue = queues.get(owningProcess);
+			if (queue == null) {
+				queue = new LinkedBlockingQueue<>();
 				queues.put(owningProcess, queue);
 				queue.add(event);
 
-				// If all preconditions are satisfied push the queue to the
-				// dispatch layer
+				/*
+				 * If all preconditions are satisfied push the queue to the
+				 * dispatch layer
+				 */
 				if (conditionsSatisfied(enclosingProcess))
 					firstLayer().receiveJobQueue(
 							new DispatchJobQueueEvent(owningProcess, event
 									.getContext(), queue, getActivities()));
 			} else {
-				queue = queues.get(owningProcess);
 				queue.add(event);
 
 				/*
@@ -199,14 +202,9 @@ public abstract class DispatchStackImpl extends
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchStack#getLayers()
-	 */
 	@Override
 	public List<DispatchLayer<?>> getLayers() {
-		return Collections.unmodifiableList(this.dispatchLayers);
+		return unmodifiableList(this.dispatchLayers);
 	}
 
 	public void addLayer(DispatchLayer<?> newLayer) {
@@ -308,7 +306,6 @@ public abstract class DispatchStackImpl extends
 		@Override
 		public void configure(Object config) {
 			// TODO Auto-generated method stub
-
 		}
 
 		@Override

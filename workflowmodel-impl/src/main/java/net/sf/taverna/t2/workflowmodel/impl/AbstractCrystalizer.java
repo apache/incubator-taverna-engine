@@ -48,8 +48,7 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Job;
  * @author David Withers
  */
 public abstract class AbstractCrystalizer implements Crystalizer {
-
-	private Map<String, CompletionAwareTreeCache> cacheMap = new HashMap<String, CompletionAwareTreeCache>();
+	private Map<String, CompletionAwareTreeCache> cacheMap = new HashMap<>();
 
 	public abstract Job getEmptyJob(String owningProcess, int[] index,
 			InvocationContext context);
@@ -64,10 +63,8 @@ public abstract class AbstractCrystalizer implements Crystalizer {
 	 * which don't already exist create empty jobs instead and emit those, if
 	 * undefined the completion event is emited intact.
 	 * 
-	 * @param e
+	 * @param e The event (a {@link Job} or a {@link Completion})
 	 */
-	// suppressed to avoid jdk1.5 compilation errors caused by the declaration
-	// IterationInternalEvent<? extends IterationInternalEvent<?>> e
 	@Override
 	public void receiveEvent(IterationInternalEvent<?> e) {
 		String owningProcess = e.getOwningProcess();
@@ -80,18 +77,19 @@ public abstract class AbstractCrystalizer implements Crystalizer {
 			} else
 				cache = cacheMap.get(owningProcess);
 		}
-		synchronized (cache) {
-			if (e instanceof Job) {
-				// Pass through Job after storing it in the cache
-				Job j = (Job) e;
-//				cache.insertJob(j);
-				cache.insertJob(new Job("", j.getIndex(), j.getData(), j.getContext()));
+		if (e instanceof Job) {
+			// Pass through Job after storing it in the cache
+			Job j = (Job) e;
+			synchronized (cache) {
+				cache.insertJob(new Job("", j.getIndex(), j.getData(), j
+						.getContext()));
 				jobCreated(j);
 				if (j.getIndex().length == 0)
 					cacheMap.remove(j.getOwningProcess());
-				return;
-			} else if (e instanceof Completion) {
-				Completion c = (Completion) e;
+			}
+		} else if (e instanceof Completion) {
+			Completion c = (Completion) e;
+			synchronized (cache) {
 				cache.resolveAt(owningProcess, c.getIndex());
 				if (c.getIndex().length == 0)
 					cacheMap.remove(c.getOwningProcess());
@@ -129,70 +127,68 @@ public abstract class AbstractCrystalizer implements Crystalizer {
 
 		private void assignNamesTo(NamedNode n, int[] index) {
 			/* Only act if contents of this node undefined */
-			// StringBuffer iString = new StringBuffer();
-			// for (int foo : index) {
-			// iString.append(foo+" ");
-			// }
-			if (n.contents == null) {
-				Map<String, List<T2Reference>> listItems = new HashMap<>();
-				int pos = 0;
-				for (NamedNode child : n.children) {
+			if (n.contents != null)
+				return;
+
+			Map<String, List<T2Reference>> listItems = new HashMap<>();
+			int pos = 0;
+			for (NamedNode child : n.children) {
+				/*
+				 * If child doesn't have a defined name map yet then define it.
+				 */
+				Job j;
+				if (child == null) {
 					/*
-					 * If child doesn't have a defined name map yet then define
-					 * it.
+					 * happens if we're completing a partially empty collection
+					 * structure
 					 */
-					Job j;
-					if (child == null) {
-						/*
-						 * happens if we're completing a partially empty
-						 * collection structure
-						 */
-						int[] newIndex = new int[index.length + 1];
-						for (int i = 0; i < index.length; i++)
-							newIndex[i] = index[i];
-						newIndex[index.length] = pos++;
-						j = getEmptyJob(owningProcess, newIndex, context);
-						AbstractCrystalizer.this.jobCreated(j);
-					} else if (child.contents == null) {
-						int[] newIndex = new int[index.length + 1];
-						for (int i = 0; i < index.length; i++)
-							newIndex[i] = index[i];
-						newIndex[index.length] = pos++;
-						assignNamesTo(child, newIndex);
-						j = child.contents;
-					} else {
-						pos++;
-						j = child.contents;
-					}
-
-					/*
-					 * Now pull the names out of the child job map and push them
-					 * into lists to be registered
-					 */
-
-					for (String outputName : j.getData().keySet()) {
-						List<T2Reference> items = listItems.get(outputName);
-						if (items == null) {
-							items = new ArrayList<T2Reference>();
-							listItems.put(outputName, items);
-						}
-						items.add(j.getData().get(outputName));
-					}
+					int[] newIndex = new int[index.length + 1];
+					for (int i = 0; i < index.length; i++)
+						newIndex[i] = index[i];
+					newIndex[index.length] = pos++;
+					j = getEmptyJob(owningProcess, newIndex, context);
+					jobCreated(j);
+				} else if (child.contents == null) {
+					int[] newIndex = new int[index.length + 1];
+					for (int i = 0; i < index.length; i++)
+						newIndex[i] = index[i];
+					newIndex[index.length] = pos++;
+					assignNamesTo(child, newIndex);
+					j = child.contents;
+				} else {
+					pos++;
+					j = child.contents;
 				}
-				Map<String, T2Reference> newDataMap = new HashMap<>();
-				for (String outputName : listItems.keySet()) {
-					List<T2Reference> idlist = listItems.get(outputName);
-					newDataMap.put(outputName, context.getReferenceService()
-							.getListService().registerList(idlist, context).getId());
+
+				/*
+				 * Now pull the names out of the child job map and push them
+				 * into lists to be registered
+				 */
+
+				for (String outputName : j.getData().keySet()) {
+					List<T2Reference> items = listItems.get(outputName);
+					if (items == null) {
+						items = new ArrayList<>();
+						listItems.put(outputName, items);
+					}
+					items.add(j.getData().get(outputName));
 				}
-				Job newJob = new Job(owningProcess, index, newDataMap, context);
-				n.contents = newJob;
-
-				/* Get rid of the children as we've now named this node */
-
-				n.children.clear();
-				AbstractCrystalizer.this.jobCreated(n.contents);
 			}
+			Map<String, T2Reference> newDataMap = new HashMap<>();
+			for (String outputName : listItems.keySet())
+				newDataMap.put(
+						outputName,
+						context.getReferenceService()
+								.getListService()
+								.registerList(listItems.get(outputName),
+										context).getId());
+			Job newJob = new Job(owningProcess, index, newDataMap, context);
+			n.contents = newJob;
+
+			/* Get rid of the children as we've now named this node */
+
+			n.children.clear();
+			jobCreated(n.contents);
 		}
 	}
 }

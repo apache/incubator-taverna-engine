@@ -28,7 +28,9 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 
 import net.sf.taverna.t2.reference.ExternalReferenceSPI;
+import net.sf.taverna.t2.workflowmodel.Edit;
 import net.sf.taverna.t2.workflowmodel.Edits;
+import net.sf.taverna.t2.workflowmodel.Processor;
 import net.sf.taverna.t2.workflowmodel.ProcessorInputPort;
 import net.sf.taverna.t2.workflowmodel.ProcessorOutputPort;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
@@ -48,7 +50,7 @@ public class MapProcessorPortsToActivityEditTest {
 	}
 
 	ProcessorImpl p;
-	MapProcessorPortsForActivityEdit edit;
+	Edit<Processor> edit;
 
 	@Before
 	public void setupProcessorAndEdit() throws Exception {
@@ -80,7 +82,7 @@ public class MapProcessorPortsToActivityEditTest {
 		edits.getAddActivityOutputPortMappingEdit(a,"outputPort1","outputPort1").doEdit();
 		edits.getAddActivityOutputPortMappingEdit(a,"outputPort2","outputPort2").doEdit();
 
-		edit = new MapProcessorPortsForActivityEdit(p);
+		edit = edits.getMapProcessorPortsForActivityEdit(p);
 	}
 
 

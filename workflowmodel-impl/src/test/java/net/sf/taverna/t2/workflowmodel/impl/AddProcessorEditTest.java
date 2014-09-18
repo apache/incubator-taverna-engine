@@ -49,7 +49,7 @@ public class AddProcessorEditTest {
 	
 	@Test
 	public void testAddingOfProcessor() throws Exception {
-		Dataflow f = new DataflowImpl();
+		Dataflow f = edits.createDataflow();
 		
 		Edit<Dataflow> edit = edits.getAddProcessorEdit(f,processor);
 		edit.doEdit();

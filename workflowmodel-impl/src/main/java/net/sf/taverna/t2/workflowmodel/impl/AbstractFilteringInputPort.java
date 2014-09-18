@@ -93,14 +93,14 @@ public abstract class AbstractFilteringInputPort extends
 
 		int tokenDepth = token.getData().getDepth();
 		if (tokenDepth == filterDepth) {
-			if (filterDepth == getDepth()) {
+			if (filterDepth == getDepth())
 				/*
 				 * Pass event straight through, the filter depth is the same as
 				 * the desired input port depth
 				 */
 				pushData(getName(), newOwner, token.getIndex(),
 						token.getData(), token.getContext());
-			} else {
+			else {
 				pushToken(token, newOwner, getDepth());
 				/*
 				 * Shred the input identifier into the appropriate port depth

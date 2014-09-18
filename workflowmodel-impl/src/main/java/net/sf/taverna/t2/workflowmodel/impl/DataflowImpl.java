@@ -20,11 +20,10 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.impl;
 
-import static net.sf.taverna.t2.workflowmodel.impl.Tools.makeImmutable;
+import static java.util.Collections.unmodifiableList;
 import static net.sf.taverna.t2.workflowmodel.utils.Tools.addDataflowIdentification;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -405,7 +404,7 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 	 */
 	@Override
 	public synchronized List<? extends DataflowInputPort> getInputPorts() {
-		return Collections.unmodifiableList(inputs);
+		return unmodifiableList(inputs);
 	}
 
 	/**
@@ -459,7 +458,7 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 	 */
 	@Override
 	public synchronized List<? extends DataflowOutputPort> getOutputPorts() {
-		return Collections.unmodifiableList(outputs);
+		return unmodifiableList(outputs);
 	}
 
 	/**
@@ -651,7 +650,7 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 		List<T> result = new ArrayList<T>();
 		filterAndAdd(processors, result, entityType);
 		filterAndAdd(merges, result, entityType);
-		return Collections.unmodifiableList(result);
+		return unmodifiableList(result);
 	}
 
 	private <T extends NamedWorkflowEntity> void filterAndAdd(
@@ -789,10 +788,10 @@ public class DataflowImpl extends AbstractAnnotatedThing<Dataflow> implements
 	public synchronized void setImmutable() {
 		if (immutable)
 			return;
-		processors = makeImmutable(processors);
-		merges = makeImmutable(merges);
-		outputs = makeImmutable(outputs);
-		inputs = makeImmutable(inputs);
+		processors = unmodifiableList(processors);
+		merges = unmodifiableList(merges);
+		outputs = unmodifiableList(outputs);
+		inputs = unmodifiableList(inputs);
 		immutable = true;
 	}
 }

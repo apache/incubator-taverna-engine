@@ -32,28 +32,47 @@ import org.apache.log4j.Logger;
  * 
  * @author Stuart Owen
  * @author Stian Soiland-Reyes
+ * @author Donal Fellows
  */
-class ConfigureEdit<T> extends AbstractEdit<Configurable<T>, Configurable<T>> {
+class ConfigureEdit<T> extends EditSupport<Configurable<T>> {
 	private static Logger logger = Logger.getLogger(ConfigureEdit.class);
 
+	private final Configurable<T> configurable;
+	private final Class<? extends Configurable<T>> configurableType;
 	private final T configurationBean;
 
-	ConfigureEdit(Class<?> subjectType, Configurable<T> configurable,
-			T configurationBean) {
-		super(subjectType, configurable);
+	ConfigureEdit(Class<? extends Configurable<T>> subjectType,
+			Configurable<T> configurable, T configurationBean) {
+		if (configurable == null)
+			throw new RuntimeException(
+					"Cannot construct an edit with null subject");
+		this.configurableType = subjectType;
+		this.configurable = configurable;
 		this.configurationBean = configurationBean;
+		if (!configurableType.isInstance(configurable))
+			throw new RuntimeException(
+					"Edit cannot be applied to an object which isn't an instance of "
+							+ configurableType);
 	}
 
 	@Override
-	protected void doEditAction(Configurable<T> subject) throws EditException {
+	public final Configurable<T> applyEdit() throws EditException {
 		try {
 			// FIXME: Should clone bean on configuration to prevent caller from
 			// modifying bean afterwards
-			subject.configure(configurationBean);
+			synchronized (configurable) {
+				configurable.configure(configurationBean);
+			}
+			return configurable;
 		} catch (ConfigurationException e) {
 			logger.error("Error configuring :"
-					+ subject.getClass().getSimpleName(), e);
+					+ configurable.getClass().getSimpleName(), e);
 			throw new EditException(e);
 		}
+	}
+
+	@Override
+	public final Configurable<T> getSubject() {
+		return configurable;
 	}
 }
