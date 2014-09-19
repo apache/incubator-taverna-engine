@@ -33,7 +33,6 @@ import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
  * @author Ian Dunlop
  * @author Paolo Missier
  * @author Stuart Owen
- * 
  */
 public class IterationProvenanceItem extends AbstractProvenanceItem {
 	private Timestamp enactmentEnded;
@@ -61,10 +60,10 @@ public class IterationProvenanceItem extends AbstractProvenanceItem {
 		return errorItem;
 	}
 
+	@Override
 	public SharedVocabulary getEventType() {
 		return eventType;
 	}
-
 
 	public InputDataProvenanceItem getInputDataItem() {
 		return inputDataItem;
@@ -93,7 +92,7 @@ public class IterationProvenanceItem extends AbstractProvenanceItem {
 	public void setInputDataItem(InputDataProvenanceItem inputDataItem) {
 		this.inputDataItem = inputDataItem;
 	}
-	
+
 	public void setIteration(int[] iteration) {
 		this.iteration = iteration;
 	}
@@ -105,6 +104,5 @@ public class IterationProvenanceItem extends AbstractProvenanceItem {
 	public void setParentIterationItem(
 			IterationProvenanceItem parentIterationItem) {
 		this.parentIterationItem = parentIterationItem;
-	}	
-
+	}
 }

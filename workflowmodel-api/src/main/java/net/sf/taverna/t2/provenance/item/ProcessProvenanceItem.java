@@ -33,7 +33,6 @@ import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
  * @author Stuart owen
  * @author Paolo Missier
  * @author Ian Dunlop
- * 
  */
 public class ProcessProvenanceItem extends AbstractProvenanceItem {
 	private String owningProcess;
@@ -45,7 +44,8 @@ public class ProcessProvenanceItem extends AbstractProvenanceItem {
 	/**
 	 * As {@link WorkflowInstanceFacade}s are created for a Processor the
 	 * details are appended to the owning process identifier. This is in the
-	 * form facadeX:dataflowY:ProcessorZ etc.  This method returns the facadeX part.
+	 * form facadeX:dataflowY:ProcessorZ etc. This method returns the facadeX
+	 * part.
 	 * 
 	 * @return
 	 */
@@ -82,9 +82,8 @@ public class ProcessProvenanceItem extends AbstractProvenanceItem {
 	public void setDataflowID(String dataflowID) {
 		this.dataflowID = dataflowID;
 	}
-	
+
 	public String getDataflowID() {
 		return dataflowID;
 	}
-
 }

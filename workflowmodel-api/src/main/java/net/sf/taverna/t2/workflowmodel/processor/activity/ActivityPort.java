@@ -28,7 +28,6 @@ import net.sf.taverna.t2.workflowmodel.Port;
  * @see ActivityInputPort
  * @see ActivityOutputPort
  * @author Stian Soiland-Reyes
- *
  */
 public interface ActivityPort extends Port {
 

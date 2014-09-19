@@ -30,18 +30,15 @@ import java.lang.annotation.Target;
  * Describes how a dispatch layer reacts to a Job message
  * 
  * @author Tom Oinn
- * 
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
 @ReactionTo(messageType = DispatchMessageType.JOB)
 public @interface DispatchLayerJobReaction {
-
 	public DispatchLayerStateEffect[] stateEffects();
 
 	public DispatchMessageType[] emits();
 	
 	public boolean relaysUnmodified();
-
 }

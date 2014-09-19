@@ -8,14 +8,13 @@ import net.sf.taverna.t2.provenance.item.WorkflowProvenanceItem;
 import net.sf.taverna.t2.reference.ReferenceService;
 
 public interface ProvenanceReporter {
-
 	/**
 	 * Add a {@link ProvenanceItem} to the connector
 	 * 
 	 * @param provenanceItem
 	 * @param invocationContext
 	 */
-	public void addProvenanceItem(ProvenanceItem provenanceItem);
+	void addProvenanceItem(ProvenanceItem provenanceItem);
 
 	// FIXME is this reference service really needed since we have the context?
 	/**
@@ -24,14 +23,14 @@ public interface ProvenanceReporter {
 	 * 
 	 * @param referenceService
 	 */
-	public void setReferenceService(ReferenceService referenceService);
+	void setReferenceService(ReferenceService referenceService);
 
 	/**
 	 * Get the {@link ReferenceService} in use by this connector
 	 * 
 	 * @return
 	 */
-	public ReferenceService getReferenceService();
+	ReferenceService getReferenceService();
 
 	/**
 	 * Get all the {@link ProvenanceItem}s that the connector currently knows
@@ -39,14 +38,14 @@ public interface ProvenanceReporter {
 	 * 
 	 * @return
 	 */
-	public List<ProvenanceItem> getProvenanceCollection();
+	List<ProvenanceItem> getProvenanceCollection();
 
 	/**
 	 * Set the {@link InvocationContext} that this reporter should be using
 	 * 
 	 * @param invocationContext
 	 */
-	public void setInvocationContext(InvocationContext invocationContext);
+	void setInvocationContext(InvocationContext invocationContext);
 
 	/**
 	 * Get the {@link InvocationContext} that this reporter should be using if
@@ -54,21 +53,20 @@ public interface ProvenanceReporter {
 	 * 
 	 * @return
 	 */
-	public InvocationContext getInvocationContext();
-	
+	InvocationContext getInvocationContext();
+
 	/**
 	 * A unique identifier for this run of provenance, should correspond to the
 	 * initial {@link WorkflowProvenanceItem} idenifier that gets sent through
 	 * 
 	 * @param identifier
 	 */
-	public void setSessionID(String sessionID);
+	void setSessionID(String sessionID);
 
 	/**
 	 * What is the unique identifier used by this connector
 	 * 
 	 * @return
 	 */
-	public String getSessionID();
-
+	String getSessionID();
 }

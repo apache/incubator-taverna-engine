@@ -31,7 +31,6 @@ package net.sf.taverna.t2.workflowmodel;
  *            Type of the pair of contained objects
  */
 public class OrderedPair<T> {
-
 	private T a, b;
 
 	/**
@@ -43,10 +42,9 @@ public class OrderedPair<T> {
 	 * @param b
 	 */
 	public OrderedPair(T a, T b) {
-		if (a == null || b == null) {
+		if (a == null || b == null)
 			throw new RuntimeException(
 					"Cannot construct ordered pair with null arguments");
-		}
 		this.a = a;
 		this.b = b;
 	}
@@ -72,12 +70,16 @@ public class OrderedPair<T> {
 	 */
 	@Override
 	public boolean equals(Object other) {
-		if (other instanceof OrderedPair) {
-			OrderedPair<?> op = (OrderedPair<?>) other;
-			return (a.equals(op.getA()) && b.equals(op.getB()));
-		} else {
+		if (!(other instanceof OrderedPair))
 			return false;
-		}
+		OrderedPair<?> op = (OrderedPair<?>) other;
+		return (a.equals(op.getA()) && b.equals(op.getB()));
 	}
 
+	@Override
+	public int hashCode() {
+		int aHash = a.hashCode();
+		int bHash = b.hashCode();
+		return (aHash << 16) | (aHash >> 16) | bHash;
+	}
 }

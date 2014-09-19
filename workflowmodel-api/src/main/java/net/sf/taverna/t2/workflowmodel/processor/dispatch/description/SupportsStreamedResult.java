@@ -33,11 +33,9 @@ import java.lang.annotation.Target;
  * type. By default dispatch layers are assumed to not handle this message type.
  * 
  * @author Tom Oinn
- * 
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
 public @interface SupportsStreamedResult {
-
 }

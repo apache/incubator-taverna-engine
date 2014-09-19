@@ -4,13 +4,13 @@
 package net.sf.taverna.t2.facade;
 
 /**
+ * A WorkflowRunCancellation is passed to listeners when a workflow run is
+ * cancelled.
  * 
- * A WorkflowRunCancellation is passed to listeners when a workflow run is cancelled.
  * @author alanrw
- *
  */
+@SuppressWarnings("serial")
 public class WorkflowRunCancellation extends Throwable {
-	
 	/**
 	 * The id of the workflow run that was cancelled
 	 */
@@ -26,6 +26,4 @@ public class WorkflowRunCancellation extends Throwable {
 	public String getCancelledWorkflowRunId() {
 		return cancelledWorkflowRunId;
 	}
-	
-
 }

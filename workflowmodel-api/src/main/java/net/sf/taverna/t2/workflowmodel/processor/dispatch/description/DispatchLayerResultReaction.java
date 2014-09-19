@@ -30,18 +30,15 @@ import java.lang.annotation.Target;
  * Describes how a dispatch layer responds to a result message
  * 
  * @author Tom Oinn
- * 
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
 @ReactionTo(messageType = DispatchMessageType.RESULT)
 public @interface DispatchLayerResultReaction {
-
 	public DispatchLayerStateEffect[] stateEffects();
 
 	public DispatchMessageType[] emits();
 
 	public boolean relaysUnmodified();
-	
 }

@@ -37,10 +37,8 @@ import net.sf.taverna.t2.reference.T2Reference;
  * within the workflow itself.
  * 
  * @author Tom Oinn
- * 
  */
 public class Job extends IterationInternalEvent<Job> {
-
 	private Map<String, T2Reference> dataMap;
 
 	/**
@@ -90,7 +88,6 @@ public class Job extends IterationInternalEvent<Job> {
 			InvocationContext context) {
 		super(owner, index, context);
 		this.dataMap = data;
-
 	}
 
 	/**
@@ -103,22 +100,18 @@ public class Job extends IterationInternalEvent<Job> {
 	 */
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
-		sb.append("Job(" + owner + ")[");
-		for (int i = 0; i < index.length; i++) {
-			if (i > 0) {
-				sb.append(",");
-			}
-			sb.append(index[i] + "");
+		StringBuilder sb = new StringBuilder();
+		sb.append("Job(").append(owner).append(")[");
+		String sep = "";
+		for (int i : index) {
+			sb.append(sep).append(i);
+			sep = ",";
 		}
 		sb.append("]{");
-		boolean first = true;
+		sep = "";
 		for (String key : dataMap.keySet()) {
-			if (!first) {
-				sb.append(",");
-			}
-			sb.append(key + "=" + dataMap.get(key));
-			first = false;
+			sb.append(sep).append(key).append("=").append(dataMap.get(key));
+			sep = ",";
 		}
 		sb.append("}");
 		return sb.toString();
@@ -134,5 +127,4 @@ public class Job extends IterationInternalEvent<Job> {
 			throws ProcessIdentifierException {
 		return new Job(pushOwner(localProcessName), index, dataMap, context);
 	}
-
 }

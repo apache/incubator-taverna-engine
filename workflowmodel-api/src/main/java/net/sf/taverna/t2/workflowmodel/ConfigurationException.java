@@ -28,10 +28,8 @@ package net.sf.taverna.t2.workflowmodel;
  * 
  * @author Stian Soiland-Reyes
  * @author Tom Oinn
- * 
  */
 public class ConfigurationException extends Exception {
-
 	private static final long serialVersionUID = -2841928064598107156L;
 
 	/**
@@ -61,5 +59,4 @@ public class ConfigurationException extends Exception {
 	public ConfigurationException(Throwable cause) {
 		super(cause);
 	}
-
 }

@@ -27,34 +27,36 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Factory for creating {@link DispatchLayer} instances.
- *
+ * 
  * @author David Withers
  */
 public interface DispatchLayerFactory {
-
 	/**
-	 * Creates a new <code>DispatchLayer</code> instance.
-	 *
+	 * Creates a new {@link DispatchLayer} instance.
+	 * 
 	 * @param dispatchLayerType
-	 *            the type of the <code>DispatchLayer</code>
+	 *            the type of the {@link DispatchLayer}
 	 * @return a new <code>DispatchLayer</code> instance
 	 */
-	public DispatchLayer<?> createDispatchLayer(URI dispatchLayerType);
+	DispatchLayer<?> createDispatchLayer(URI dispatchLayerType);
 
 	/**
-	 * Returns the types of the <code>DispatchLayer</code>s that this factory can create.
-	 *
-	 * @return the types of the <code>DispatchLayer</code>s that this factory can create
+	 * Returns the types of the {@link DispatchLayer}s that this factory
+	 * can create.
+	 * 
+	 * @return the types of the {@link DispatchLayer}s that this factory
+	 *         can create
 	 */
-	public Set<URI> getDispatchLayerTypes();
+	Set<URI> getDispatchLayerTypes();
 
 	/**
-	 * Returns the JSON Schema for the configuration required by the <code>DispatchLayer</code>.
-	 *
+	 * Returns the JSON Schema for the configuration required by the
+	 * {@link DispatchLayer}.
+	 * 
 	 * @param dispatchLayerType
-	 *            the type of the <code>DispatchLayer</code>
-	 * @return the JSON Schema for the configuration required by the <code>DispatchLayer</code>
+	 *            the type of the {@link DispatchLayer}
+	 * @return the JSON Schema for the configuration required by the
+	 *         {@link DispatchLayer}
 	 */
-	public JsonNode getDispatchLayerConfigurationSchema(URI dispatchLayerType);
-
+	JsonNode getDispatchLayerConfigurationSchema(URI dispatchLayerType);
 }

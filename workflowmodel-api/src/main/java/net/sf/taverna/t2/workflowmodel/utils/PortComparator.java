@@ -28,12 +28,10 @@ import net.sf.taverna.t2.workflowmodel.Port;
  * Compare two workflow ports by their name.
  * 
  * @author Stian Soiland-Reyes
- * 
  */
 public class PortComparator implements Comparator<Port> {
-
+	@Override
 	public int compare(Port o1, Port o2) {
 		return o1.getName().compareToIgnoreCase(o2.getName());
 	}
-
 }

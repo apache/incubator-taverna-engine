@@ -26,22 +26,23 @@ import net.sf.taverna.t2.annotation.AbstractAnnotatedThing;
  * Port definition with depth and name
  * 
  * @author Tom Oinn
- *
  */
-public abstract class AbstractPort extends AbstractAnnotatedThing<Port> implements Port {
-
+public abstract class AbstractPort extends AbstractAnnotatedThing<Port>
+		implements Port {
 	protected String name;
 	protected int depth;
-	
+
 	protected AbstractPort(String name, int depth) {
 		this.name = name;
 		this.depth = depth;
 	}
-	
+
+	@Override
 	public int getDepth() {
 		return this.depth;
 	}
 
+	@Override
 	public final String getName() {
 		return this.name;
 	}
@@ -50,5 +51,4 @@ public abstract class AbstractPort extends AbstractAnnotatedThing<Port> implemen
 	public String toString() {
 		return getClass().getSimpleName() + " " + getName() + " (" + getDepth() + ")";
 	}
-	
 }

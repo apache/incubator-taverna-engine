@@ -54,42 +54,44 @@ import net.sf.taverna.t2.workflowmodel.Dataflow;
  * @author Alex Nenadic
  * @author Stian Soiland-Reyes
  * @author Alan R Williams
- * 
  */
 @ControlBoundary
 public interface WorkflowInstanceFacade {
-
 	public static enum State {
 		/**
-		 * Workflow has not yet been started using {@link WorkflowInstanceFacade#fire()}
+		 * Workflow has not yet been started using
+		 * {@link WorkflowInstanceFacade#fire()}
 		 */
 		prepared,
 		/**
-		 * Workflow is running (or have been resumed using {@link WorkflowInstanceFacade#fire()})
+		 * Workflow is running (or have been resumed using
+		 * {@link WorkflowInstanceFacade#fire()})
 		 */
 		running,
 		/**
-		 * Workflow has been paused using {@link WorkflowInstanceFacade#pauseWorkflowRun()}
+		 * Workflow has been paused using
+		 * {@link WorkflowInstanceFacade#pauseWorkflowRun()}
 		 */
 		paused,
 		/**
-		 * Workflow has completed, all processors are finished and all data delivered to all output ports. 
+		 * Workflow has completed, all processors are finished and all data
+		 * delivered to all output ports.
 		 */
 		completed,
 		/**
-		 * Workflow has been cancelled using {@link WorkflowInstanceFacade#cancelWorkflowRun()}
+		 * Workflow has been cancelled using
+		 * {@link WorkflowInstanceFacade#cancelWorkflowRun()}
 		 */
 		cancelled;
 	}
-	
-	
+
 	/**
 	 * A weak hash map of all workflow run IDs mapped against the corresponding
 	 * WorkflowInstanceFacadeS. This is needed for activities with dependencies
 	 * (such as beanshell and API consumer) to gain access to the current
 	 * workflow via the WorkflowInstanceFacade.
 	 */
-	public static final WeakHashMap<String, WeakReference<WorkflowInstanceFacade>> workflowRunFacades = new WeakHashMap<String, WeakReference<WorkflowInstanceFacade>>();
+	static final WeakHashMap<String, WeakReference<WorkflowInstanceFacade>> workflowRunFacades = new WeakHashMap<>();
 
 	/**
 	 * Push a data token into the specified port. If the token is part of a
@@ -106,7 +108,7 @@ public interface WorkflowInstanceFacade {
 	 *             if ordering constraints on the token stream to each input
 	 *             port are violated
 	 */
-	public void pushData(WorkflowDataToken token, String portName)
+	void pushData(WorkflowDataToken token, String portName)
 			throws TokenOrderException;
 
 	/**
@@ -117,7 +119,7 @@ public interface WorkflowInstanceFacade {
 	 *             if the workflow has already been fired or has had data pushed
 	 *             to it.
 	 */
-	public void fire() throws IllegalStateException;
+	void fire() throws IllegalStateException;
 
 	/**
 	 * The result listener is used to handle data tokens produced by the
@@ -133,14 +135,14 @@ public interface WorkflowInstanceFacade {
 	 * 
 	 * @param listener
 	 */
-	public void addResultListener(ResultListener listener);
+	void addResultListener(ResultListener listener);
 
 	/**
 	 * Remove a previously registered result listener
 	 * 
 	 * @param listener
 	 */
-	public void removeResultListener(ResultListener listener);
+	void removeResultListener(ResultListener listener);
 
 	/**
 	 * A failure listener reports on overall workflow failure. It is not
@@ -154,12 +156,12 @@ public interface WorkflowInstanceFacade {
 	 * workflow has already failed will be immediately called with the failure
 	 * data.
 	 */
-	public void addFacadeListener(FacadeListener listener);
+	void addFacadeListener(FacadeListener listener);
 
 	/**
 	 * Remove a previously registered failure listener
 	 */
-	public void removeFacadeListener(FacadeListener listener);
+	void removeFacadeListener(FacadeListener listener);
 
 	/**
 	 * Workflow state is available through a sub-tree of the monitor tree. For
@@ -174,27 +176,27 @@ public interface WorkflowInstanceFacade {
 	 * @return Typed version of TreeModel representing the state of this
 	 *         workflow. Nodes in the tree are instances of MonitorNode
 	 */
-	public TypedTreeModel<MonitorNode> getStateModel();
+	TypedTreeModel<MonitorNode> getStateModel();
 
 	/**
 	 * Return the dataflow this facade facades
 	 */
-	public Dataflow getDataflow();
+	Dataflow getDataflow();
 
 	/**
 	 * Return the invocation context used by this facade
 	 */
-	public InvocationContext getContext();
+	InvocationContext getContext();
 
 	/**
 	 * Return a map of the data pushed on the named port
 	 */
-	public WeakHashMap<String, T2Reference> getPushedDataMap();
+	WeakHashMap<String, T2Reference> getPushedDataMap();
 
 	/**
 	 * Get the unique id of the wf run inside the facede.
 	 */
-	public String getWorkflowRunId();
+	String getWorkflowRunId();
 
 	/**
 	 * Cancel the workflow run corresponding to this facade
@@ -203,34 +205,33 @@ public interface WorkflowInstanceFacade {
 	 *         this does not mean that all of the invocations associated with
 	 *         the run have finished.
 	 */
-	public boolean cancelWorkflowRun() throws IllegalStateException;
+	boolean cancelWorkflowRun() throws IllegalStateException;
 
 	/**
 	 * Pause the workflow run corresponding to this facade
 	 * 
 	 * @return true if the workflow run was successfully paused.
 	 */
-	public boolean pauseWorkflowRun() throws IllegalStateException;
+	boolean pauseWorkflowRun() throws IllegalStateException;
 
 	/**
 	 * Resume the workflow run corresponding to this facade
 	 * 
 	 * @return true if the workflow run was successfully resumed
 	 */
-	public boolean resumeWorkflowRun() throws IllegalStateException;
+	boolean resumeWorkflowRun() throws IllegalStateException;
 
 	/**
 	 * Return the current workflow {@link State}.
-
+	 * 
 	 * @return The workflow state.
 	 */
-	public State getState();
-	
+	State getState();
+
 	/**
 	 * An identifier that is unique to this facade.
 	 * 
 	 * @return a String representing a unique internal identifier.
 	 */
-	public String getIdentifier();
-
+	String getIdentifier();
 }

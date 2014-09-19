@@ -20,6 +20,8 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.processor.dispatch.events;
 
+import static net.sf.taverna.t2.workflowmodel.processor.dispatch.description.DispatchMessageType.RESULT;
+
 import java.util.Map;
 
 import net.sf.taverna.t2.invocation.InvocationContext;
@@ -36,11 +38,9 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.description.DispatchMe
  * such cases before they occur but for now it's something to watch for.
  * 
  * @author Tom Oinn
- * 
  */
 public class DispatchResultEvent extends
 		AbstractDispatchEvent<DispatchResultEvent> {
-
 	private Map<String, T2Reference> dataMap;
 	private boolean streaming;
 
@@ -98,11 +98,11 @@ public class DispatchResultEvent extends
 	}
 
 	/**
-	 * DispatchMessageType.RESULT
+	 * @return Always a {@link DispatchMessageType#RESULT}.
 	 */
 	@Override
 	public DispatchMessageType getMessageType() {
-		return DispatchMessageType.RESULT;
+		return RESULT;
 	}
 
 }

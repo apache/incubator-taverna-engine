@@ -27,23 +27,21 @@ import net.sf.taverna.t2.annotation.Annotated;
  * EventForwardingOutputPort to an instance of EventHandlingInputPort
  * 
  * @author Tom Oinn
- * 
  */
 public interface Datalink extends Annotated<Datalink>, WorkflowItem {
-
 	/**
 	 * Get the sink for events flowing through this link
 	 * 
 	 * @return input port receiving events
 	 */
-	public EventHandlingInputPort getSink();
+	EventHandlingInputPort getSink();
 
 	/**
 	 * Get the source for events flowing through this link
 	 * 
 	 * @return output port generating events
 	 */
-	public EventForwardingOutputPort getSource();
+	EventForwardingOutputPort getSource();
 
 	/**
 	 * Each datalink has a resolved depth, this being the constant sum of index
@@ -54,6 +52,5 @@ public interface Datalink extends Annotated<Datalink>, WorkflowItem {
 	 * 
 	 * @return
 	 */
-	public int getResolvedDepth();
-
+	int getResolvedDepth();
 }

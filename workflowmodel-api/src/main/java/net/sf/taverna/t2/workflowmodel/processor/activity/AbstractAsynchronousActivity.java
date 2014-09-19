@@ -74,6 +74,7 @@ public abstract class AbstractAsynchronousActivity<ConfigType> extends
 	 * heavy lifting in the body of this method without creating a new thread
 	 * specifically for it.
 	 */
+	@Override
 	public abstract void executeAsynch(Map<String, T2Reference> data,
 			AsynchronousActivityCallback callback);
 

@@ -191,16 +191,20 @@ public class TestIterationStrategyNodes {
 		dotProduct2 = new DotProduct();
 	}
 
+	@SuppressWarnings("serial")
 	protected final class DummyTerminalNode extends TerminalNode {
 
+		@Override
 		public int getIterationDepth(Map<String, Integer> inputDepths)
 				throws IterationTypeMismatchException {
 			return 0;
 		}
 
+		@Override
 		public void receiveCompletion(int inputIndex, Completion completion) {
 		}
 
+		@Override
 		public void receiveJob(int inputIndex, Job newJob) {
 		}
 	}

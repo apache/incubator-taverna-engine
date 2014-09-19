@@ -11,12 +11,8 @@ import net.sf.taverna.t2.visit.Visitor;
  *
  */
 public class DummyVisitKind extends VisitKind {
-
-	/* (non-Javadoc)
-	 * @see net.sf.taverna.t2.visit.VisitKind#getVisitorClass()
-	 */
 	@Override
-	public Class<? extends Visitor> getVisitorClass() {
+	public Class<? extends Visitor<?>> getVisitorClass() {
 		return null;
 	}
 

@@ -30,12 +30,9 @@ import java.util.List;
  * exception.
  * 
  * @author Tom Oinn
- * 
  */
 public class CompoundEdit implements Edit<Object> {
-
 	private final transient List<Edit<?>> childEdits;
-
 	private transient boolean applied = false;
 
 	/**
@@ -43,7 +40,7 @@ public class CompoundEdit implements Edit<Object> {
 	 * 
 	 */
 	public CompoundEdit() {
-		this.childEdits = new ArrayList<Edit<?>>();
+		this.childEdits = new ArrayList<>();
 	}
 
 	/**
@@ -63,34 +60,38 @@ public class CompoundEdit implements Edit<Object> {
 	 * the exception is rethrown as the cause of a new EditException from the
 	 * CompoundEdit
 	 */
+	@Override
+	@SuppressWarnings("deprecation")
 	public synchronized Object doEdit() throws EditException {
-		if (isApplied()) {
+		if (isApplied())
 			throw new EditException("Cannot apply an edit more than once!");
-		}
-		List<Edit<?>> doneEdits = new ArrayList<Edit<?>>();
+		List<Edit<?>> doneEdits = new ArrayList<>();
 		try {
 			for (Edit<?> edit : childEdits) {
 				edit.doEdit();
-				// Insert the done edit at position 0 in the list so we can
-				// iterate over the list in the normal order if we need to
-				// rollback, this ensures that the most recent edit is first.
+				/*
+				 * Insert the done edit at position 0 in the list so we can
+				 * iterate over the list in the normal order if we need to
+				 * rollback, this ensures that the most recent edit is first.
+				 */
 				doneEdits.add(0, edit);
 			}
 			applied = true;
+			return null;
 		} catch (EditException ee) {
-			for (Edit<?> undoMe : doneEdits) {
+			// TODO Remove undo; we can't do that any more
+			for (Edit<?> undoMe : doneEdits)
 				undoMe.undo();
-			}
 			applied = false;
 			throw new EditException("Failed child of compound edit", ee);
 		}
-		return null;
 	}
 
 	/**
 	 * There is no explicit subject for a compound edit, so this method always
 	 * returns null.
 	 */
+	@Override
 	public Object getSubject() {
 		return null;
 	}
@@ -98,16 +99,17 @@ public class CompoundEdit implements Edit<Object> {
 	/**
 	 * Rolls back all child edits in reverse order
 	 */
+	@Override
+	@SuppressWarnings("deprecation")
 	public synchronized void undo() {
-		for (int i = (childEdits.size() - 1); i >= 0; i--) {
+		for (int i = (childEdits.size() - 1); i >= 0; i--)
 			// Undo child edits in reverse order
 			childEdits.get(i).undo();
-		}
 		applied = false;
 	}
 
+	@Override
 	public boolean isApplied() {
 		return applied;
 	}
-
 }

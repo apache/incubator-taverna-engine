@@ -6,13 +6,10 @@ import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 
 public class InvocationStartedProvenanceItem extends AbstractProvenanceItem {
-
 	private Activity<?> activity;
-	
 	private String invocationProcessId;
-
 	private Date invocationStarted;
-	
+
 	public final Date getInvocationStarted() {
 		return invocationStarted;
 	}
@@ -40,7 +37,5 @@ public class InvocationStartedProvenanceItem extends AbstractProvenanceItem {
 
 	public void setInvocationStarted(Date invocationStarted) {
 		this.invocationStarted = invocationStarted;
-		
 	}
-
 }

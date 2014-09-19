@@ -30,12 +30,9 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Job;
  * system
  * 
  * @author Tom Oinn
- * 
  */
 public class TreeCache {
-
 	private NamedNode root = null;
-
 	private int indexDepth = -1;
 
 	/**
@@ -43,34 +40,26 @@ public class TreeCache {
 	 */
 	@Override
 	public synchronized String toString() {
-		StringBuffer sb = new StringBuffer();
-		if (root != null) {
-			printNode(root, sb, "");
-		}
-		else {
-			sb.append("No root node defined.");
-		}
+		if (root == null)
+			return "No root node defined.";
+		StringBuilder sb = new StringBuilder();
+		printNode(root, sb, "");
 		return sb.toString();
 	}
 	
-	private synchronized void printNode(NamedNode node, StringBuffer sb, String indent) {
-		sb.append(indent+"Node ("+node.contents+")\n");
+	private synchronized void printNode(NamedNode node, StringBuilder sb, String indent) {
+		sb.append(indent).append("Node (").append(node.contents).append(")\n");
 		String newIndent = indent + "  ";
-		for (NamedNode child : node.children) {
-			if (child == null) {
-				sb.append(newIndent+"null\n");
-			}
-			else {
+		for (NamedNode child : node.children)
+			if (child == null)
+				sb.append(newIndent).append("null\n");
+			else
 				printNode(child, sb, newIndent);
-			}
-		}
 	}
 	
 	public class NamedNode {
-
 		public Job contents = null;
-
-		public List<NamedNode> children = new ArrayList<NamedNode>();
+		public List<NamedNode> children = new ArrayList<>();
 
 		public void insertJob(Job j) {
 			insertJobAt(j, j.getIndex());
@@ -82,12 +71,10 @@ public class TreeCache {
 				return;
 			}
 			int firstIndex = position[0];
-			if (firstIndex >= children.size()) {
+			if (firstIndex >= children.size())
 				// Pad with blank NamedNode objects
-				for (int i = children.size(); i <= firstIndex; i++) {
+				for (int i = children.size(); i <= firstIndex; i++)
 					children.add(null);
-				}
-			}
 			NamedNode child = children.get(firstIndex);
 			if (child == null) {
 				child = new NamedNode();
@@ -95,20 +82,16 @@ public class TreeCache {
 			}
 
 			int[] newTarget = new int[position.length - 1];
-			for (int i = 1; i < position.length; i++) {
+			for (int i = 1; i < position.length; i++)
 				newTarget[i - 1] = position[i];
-			}
 			child.insertJobAt(j, newTarget);
 		}
 
 		public NamedNode childAt(int i) {
-			if (i >= children.size()) {
+			if (i >= children.size())
 				return null;
-			} else {
-				return children.get(i);
-			}
+			return children.get(i);
 		}
-
 	}
 
 	/**
@@ -130,22 +113,19 @@ public class TreeCache {
 	 * @param j
 	 */
 	public synchronized void insertJob(Job j) {
-		if (root == null) {
+		if (root == null)
 			root = new NamedNode();
-		}
 		indexDepth = j.getIndex().length;
 		root.insertJob(j);
 	}
 
 	protected synchronized NamedNode nodeAt(int[] position) {
-		if (root == null) {
+		if (root == null)
 			return null;
-		}
 		NamedNode result = root;
 		int index = 0;
-		while (index < position.length && result != null) {
+		while (index < position.length && result != null)
 			result = result.childAt(position[index++]);
-		}
 		return result;
 	}
 
@@ -158,11 +138,9 @@ public class TreeCache {
 		if (indexArray.length > 0) {
 			int[] newIndex = tail(indexArray);
 			NamedNode node = nodeAt(newIndex);
-			if (node != null) {
-				if (node.children.size() >= indexArray[indexArray.length - 1]) {
-					node.children.set(indexArray[indexArray.length - 1], null);
-				}
-			}
+			if (node != null
+					&& node.children.size() >= indexArray[indexArray.length - 1])
+				node.children.set(indexArray[indexArray.length - 1], null);
 		}
 	}
 
@@ -171,22 +149,19 @@ public class TreeCache {
 	 * used by the prefix matching iteration strategy
 	 */
 	public synchronized List<Job> jobsWithPrefix(int[] prefix) {
-		List<Job> jobs = new ArrayList<Job>();
+		List<Job> jobs = new ArrayList<>();
 		NamedNode prefixNode = nodeAt(prefix);
-		if (prefixNode != null) {
+		if (prefixNode != null)
 			getJobsUnder(prefixNode, jobs);
-		}
 		return jobs;
 	}
 
 	private synchronized void getJobsUnder(NamedNode node, List<Job> jobs) {
-		if (node.contents != null) {
+		if (node.contents != null)
 			jobs.add(node.contents);
-		} else {
-			for (NamedNode child : node.children) {
+		else
+			for (NamedNode child : node.children)
 				getJobsUnder(child, jobs);
-			}
-		}
 	}
 
 	/**
@@ -207,10 +182,7 @@ public class TreeCache {
 	 */
 	public synchronized Job get(int[] location) {
 		NamedNode n = nodeAt(location);
-		if (n == null) {
-			return null;
-		}
-		return n.contents;
+		return (n == null ? null : n.contents);
 	}
 
 	/**
@@ -221,10 +193,8 @@ public class TreeCache {
 	 */
 	private static int[] tail(int[] arg) {
 		int result[] = new int[arg.length - 1];
-		for (int i = 0; i < arg.length - 1; i++) {
+		for (int i = 0; i < arg.length - 1; i++)
 			result[i] = arg[i];
-		}
 		return result;
 	}
-
 }

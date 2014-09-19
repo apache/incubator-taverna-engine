@@ -20,6 +20,7 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.processor.dispatch.events;
 
+import static net.sf.taverna.t2.workflowmodel.processor.dispatch.description.DispatchMessageType.ERROR;
 import net.sf.taverna.t2.invocation.InvocationContext;
 import net.sf.taverna.t2.invocation.ProcessIdentifierException;
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
@@ -33,11 +34,9 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.description.DispatchMe
  * unhandleable problem.
  * 
  * @author Tom Oinn
- * 
  */
 public class DispatchErrorEvent extends
 		AbstractDispatchEvent<DispatchErrorEvent> {
-
 	private Throwable cause;
 	private String message;
 	private DispatchErrorType failureType;
@@ -111,11 +110,10 @@ public class DispatchErrorEvent extends
 	}
 
 	/**
-	 * DispatchMessageType.ERROR
+	 * @return Always a {@link DispatchMessageType#ERROR}
 	 */
 	@Override
 	public DispatchMessageType getMessageType() {
-		return DispatchMessageType.ERROR;
+		return ERROR;
 	}
-
 }

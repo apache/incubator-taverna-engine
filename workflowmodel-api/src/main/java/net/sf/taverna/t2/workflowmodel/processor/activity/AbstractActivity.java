@@ -63,46 +63,43 @@ import org.apache.log4j.Logger;
  */
 public abstract class AbstractActivity<ConfigType> extends
 		AbstractAnnotatedThing<Activity<?>> implements Activity<ConfigType> {
-
-	private static Logger logger = Logger
-	.getLogger(AbstractActivity.class);
+	private static Logger logger = Logger.getLogger(AbstractActivity.class);
 
 	private Edits edits;
 
-	protected Map<String, String> inputPortMapping = new HashMap<String, String>();
+	protected Map<String, String> inputPortMapping = new HashMap<>();
+	protected Map<String, String> outputPortMapping = new HashMap<>();
+	protected Set<ActivityOutputPort> outputPorts = new HashSet<>();
+	protected Set<ActivityInputPort> inputPorts = new HashSet<>();
 
-	protected Map<String, String> outputPortMapping = new HashMap<String, String>();
-
-	protected Set<ActivityOutputPort> outputPorts = new HashSet<ActivityOutputPort>();
-
-	protected Set<ActivityInputPort> inputPorts = new HashSet<ActivityInputPort>();
-
+	@Override
 	public void setEdits(Edits edits) {
-                if (edits == null){
-                    throw new IllegalArgumentException ("Edits can not be null.");
-                }
+		if (edits == null)
+			throw new IllegalArgumentException("Edits can not be null.");
 		this.edits = edits;
 	}
 
-        /**
-          * @return the edits
-          */
-        public Edits getEdits() {
-            if (edits == null){
-                throw new IllegalStateException("Unable to run this meathod until setEdits has been called");
-            }
-                return edits;
-        }
+	/**
+	 * @return the edits
+	 */
+	public Edits getEdits() {
+		if (edits == null)
+			throw new IllegalStateException(
+					"Unable to run this meathod until setEdits has been called");
+		return edits;
+	}
 
 	/**
 	 * @see net.sf.taverna.t2.workflowmodel.processor.activity.Activity#configure(java.lang.Object)
 	 */
+	@Override
 	public abstract void configure(ConfigType conf)
 			throws ActivityConfigurationException;
 
 	/**
 	 * @see net.sf.taverna.t2.workflowmodel.processor.activity.Activity#getConfiguration()
 	 */
+	@Override
 	public abstract ConfigType getConfiguration();
 
 	/*
@@ -110,6 +107,7 @@ public abstract class AbstractActivity<ConfigType> extends
 	 *
 	 * @see net.sf.taverna.t2.workflowmodel.processor.activity.Activity#getInputPortMapping()
 	 */
+	@Override
 	public final Map<String, String> getInputPortMapping() {
 		return this.inputPortMapping;
 	}
@@ -119,6 +117,7 @@ public abstract class AbstractActivity<ConfigType> extends
 	 *
 	 * @see net.sf.taverna.t2.workflowmodel.processor.activity.Activity#getInputPorts()
 	 */
+	@Override
 	public final Set<ActivityInputPort> getInputPorts() {
 		return inputPorts;
 	}
@@ -128,6 +127,7 @@ public abstract class AbstractActivity<ConfigType> extends
 	 *
 	 * @see net.sf.taverna.t2.workflowmodel.processor.activity.Activity#getOutputPortMapping()
 	 */
+	@Override
 	public final Map<String, String> getOutputPortMapping() {
 		return this.outputPortMapping;
 	}
@@ -137,6 +137,7 @@ public abstract class AbstractActivity<ConfigType> extends
 	 *
 	 * @see net.sf.taverna.t2.workflowmodel.processor.activity.Activity#getOutputPorts()
 	 */
+	@Override
 	public final Set<ActivityOutputPort> getOutputPorts() {
 		return outputPorts;
 	}
@@ -156,12 +157,11 @@ public abstract class AbstractActivity<ConfigType> extends
 			boolean allowsLiteralValues,
 			List<Class<? extends ExternalReferenceSPI>> handledReferenceSchemes,
 			Class<?> translatedElementClass) {
-		if (handledReferenceSchemes == null) {
+		if (handledReferenceSchemes == null)
 			handledReferenceSchemes = Collections.emptyList();
-		}
-		inputPorts.add(getEdits().createActivityInputPort(
-				portName, portDepth, allowsLiteralValues,
-				handledReferenceSchemes, translatedElementClass));
+		inputPorts.add(getEdits().createActivityInputPort(portName, portDepth,
+				allowsLiteralValues, handledReferenceSchemes,
+				translatedElementClass));
 	}
 
 	/**
@@ -223,28 +223,32 @@ public abstract class AbstractActivity<ConfigType> extends
 
 		for (ActivityOutputPortDefinitionBean outputDef : configBean
 				.getOutputPortDefinitions()) {
-			ActivityOutputPort createActivityOutputPort = getEdits().createActivityOutputPort(
-					outputDef.getName(), outputDef.getDepth(), outputDef
-					.getGranularDepth());
+			ActivityOutputPort createActivityOutputPort = getEdits()
+					.createActivityOutputPort(outputDef.getName(),
+							outputDef.getDepth(), outputDef.getGranularDepth());
 //			addOutput(outputDef.getName(), outputDef.getDepth(), outputDef
 //					.getGranularDepth());
-			this.outputPorts.add(createActivityOutputPort);
-			//add the mime types as annotations
-			for (String mimeType:outputDef.getMimeTypes()) {
-				MimeType mimeTypeAnnotation = new MimeType();
-				mimeTypeAnnotation.setText(mimeType);
-				try {
-					getEdits().getAddAnnotationChainEdit(createActivityOutputPort, mimeTypeAnnotation).doEdit();
-				} catch (EditException e) {
-					logger.error(e);
-				}
-			}
+			outputPorts.add(createActivityOutputPort);
+			// add the mime types as annotations
+			for (String mimeType : outputDef.getMimeTypes())
+				setMimeType(createActivityOutputPort, mimeType);
+		}
+	}
+
+	private void setMimeType(ActivityOutputPort outputPort, String mimeType) {
+		MimeType mimeTypeAnnotation = new MimeType();
+		mimeTypeAnnotation.setText(mimeType);
+		try {
+			getEdits()
+					.getAddAnnotationChainEdit(outputPort, mimeTypeAnnotation)
+					.doEdit();
+		} catch (EditException e) {
+			logger.error(e);
 		}
 	}
 
 	/**
 	 * Remove existing output ports.
-	 *
 	 */
 	protected void removeOutputs() {
 		outputPorts.clear();
@@ -257,5 +261,4 @@ public abstract class AbstractActivity<ConfigType> extends
 	protected void removeInputs() {
 		inputPorts.clear();
 	}
-
 }

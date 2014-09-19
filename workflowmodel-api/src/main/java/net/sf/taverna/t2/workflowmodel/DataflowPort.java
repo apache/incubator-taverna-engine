@@ -25,13 +25,10 @@ package net.sf.taverna.t2.workflowmodel;
  * 
  * @author Tom Oinn
  * @author Stian Soiland-Reyes
- * 
  */
 public interface DataflowPort extends Port {
-
 	/**
 	 * Get the parent DataFlow to which this port belongs
 	 */
 	public Dataflow getDataflow();
-
 }

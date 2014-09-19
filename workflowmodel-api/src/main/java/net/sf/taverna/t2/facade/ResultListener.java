@@ -27,10 +27,8 @@ import net.sf.taverna.t2.invocation.WorkflowDataToken;
  * production events from the underlying workflow instance
  * 
  * @author Tom Oinn
- * 
  */
 public interface ResultListener {
-
 	/**
 	 * Called when a new result token is produced by the workflow instance.
 	 * 
@@ -41,6 +39,5 @@ public interface ResultListener {
 	 *            token is produced, this now folds in the owning process which
 	 *            was part of the signature for this method
 	 */
-	public void resultTokenProduced(WorkflowDataToken token, String portName);
-
+	void resultTokenProduced(WorkflowDataToken token, String portName);
 }

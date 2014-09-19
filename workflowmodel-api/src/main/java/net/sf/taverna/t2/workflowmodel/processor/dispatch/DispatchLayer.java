@@ -21,7 +21,6 @@
 package net.sf.taverna.t2.workflowmodel.processor.dispatch;
 
 import net.sf.taverna.t2.workflowmodel.Configurable;
-import net.sf.taverna.t2.workflowmodel.WorkflowItem;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchCompletionEvent;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchErrorEvent;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchJobEvent;
@@ -46,32 +45,31 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchResultE
  * of instigating the creation of each class of message.
  * 
  * @author Tom Oinn
- * 
  */
-public interface DispatchLayer<ConfigurationType> extends Configurable<ConfigurationType> {
-
+public interface DispatchLayer<ConfigurationType> extends
+		Configurable<ConfigurationType> {
 	/**
 	 * Receive a pointer to the job queue along with a set of activities, this
 	 * is received from the layer above in the dispatch stack or from the
-	 * DispatchStackImpl object itself if this is the top layer
+	 * DispatchStackImpl object itself if this is the top layer.
 	 */
-	public void receiveJobQueue(DispatchJobQueueEvent queueEvent);
+	void receiveJobQueue(DispatchJobQueueEvent queueEvent);
 
 	/**
 	 * Receive a single job and associated set of activities from the layer
 	 * above
 	 */
-	public void receiveJob(DispatchJobEvent jobEvent);
+	void receiveJob(DispatchJobEvent jobEvent);
 
 	/**
 	 * Receive a single error reference from the layer below
 	 */
-	public void receiveError(DispatchErrorEvent errorEvent);
+	void receiveError(DispatchErrorEvent errorEvent);
 
 	/**
 	 * Receive a result from the layer below
 	 */
-	public void receiveResult(DispatchResultEvent resultEvent);
+	void receiveResult(DispatchResultEvent resultEvent);
 
 	/**
 	 * Receive a (possibly partial) completion event from the layer below. This
@@ -80,22 +78,20 @@ public interface DispatchLayer<ConfigurationType> extends Configurable<Configura
 	 * activities has completed. Not all dispatch stack layers are compatible
 	 * with this mode of operation, for example retry and recursion do not play
 	 * well here!
-	 * 
 	 */
-	public void receiveResultCompletion(DispatchCompletionEvent completionEvent);
+	void receiveResultCompletion(DispatchCompletionEvent completionEvent);
 
 	/**
 	 * Called when there will be no more events with the specified process
 	 * identifier, can be used to purge cached state from layers within the
 	 * stack
 	 */
-	public void finishedWith(String owningProcess);
+	void finishedWith(String owningProcess);
 
 	/**
 	 * Set the parent dispatch stack of this layer, this is called when a layer
 	 * is added to the dispatch stack and can be safely ignored by end users of
 	 * this API
 	 */
-	public void setDispatchStack(DispatchStack stack);
-	
+	void setDispatchStack(DispatchStack stack);
 }

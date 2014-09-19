@@ -35,16 +35,14 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityConfigurationE
  * @author Tom Oinn
  * @author Stian Soiland-Reyes
  * @see ActivityConfigurationException
- * 
  */
 public interface Configurable<ConfigurationType> extends WorkflowItem {
-
 	/**
 	 * Each item stores configuration within a bean of type ConfigurationType,
 	 * this method returns the configuration. This is used by the automatic
 	 * serialisation framework to store the item definition in the workflow XML.
 	 */
-	public abstract ConfigurationType getConfiguration();
+	ConfigurationType getConfiguration();
 
 	/**
 	 * When the item is built from the workflow definition XML the object is
@@ -54,7 +52,5 @@ public interface Configurable<ConfigurationType> extends WorkflowItem {
 	 * @throws ConfigurationException
 	 *             if a problem occurs when configuring the item
 	 */
-	public abstract void configure(ConfigurationType conf)
-			throws ConfigurationException;
-
+	void configure(ConfigurationType conf) throws ConfigurationException;
 }

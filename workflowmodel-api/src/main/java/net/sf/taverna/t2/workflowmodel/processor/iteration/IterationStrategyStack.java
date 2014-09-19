@@ -35,10 +35,8 @@ import net.sf.taverna.t2.workflowmodel.WorkflowItem;
  * workflow to a particular cardinality.
  * 
  * @author Tom Oinn
- * 
  */
 public interface IterationStrategyStack extends WorkflowItem {
-
 	/**
 	 * The iteration strategy stack consists of an ordered list of iteration
 	 * strategies.
@@ -47,7 +45,7 @@ public interface IterationStrategyStack extends WorkflowItem {
 	 *         strategy objects in order, with the strategy at position 0 in the
 	 *         list being the one to which data is fed first.
 	 */
-	public List<? extends IterationStrategy> getStrategies();
+	List<? extends IterationStrategy> getStrategies();
 
 	/**
 	 * Calculate the depth of the iteration strategy stack as a whole given a
@@ -61,9 +59,7 @@ public interface IterationStrategyStack extends WorkflowItem {
 	 * @throws IterationTypeMismatchException
 	 * @throws MissingIterationInputException
 	 */
-	public int getIterationDepth(Map<String, Integer> inputDepths)
+	int getIterationDepth(Map<String, Integer> inputDepths)
 			throws IterationTypeMismatchException,
 			MissingIterationInputException;
-	
-
 }

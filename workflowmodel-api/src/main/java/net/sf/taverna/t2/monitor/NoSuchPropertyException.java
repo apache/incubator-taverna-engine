@@ -28,10 +28,8 @@ package net.sf.taverna.t2.monitor;
  * exception where it is thrown.
  * 
  * @author Tom Oinn
- * 
  */
 public class NoSuchPropertyException extends Exception {
-
 	private static final long serialVersionUID = 6320919057517500603L;
 
 	public NoSuchPropertyException() {
@@ -49,5 +47,4 @@ public class NoSuchPropertyException extends Exception {
 	public NoSuchPropertyException(Throwable arg0) {
 		super(arg0);
 	}
-
 }

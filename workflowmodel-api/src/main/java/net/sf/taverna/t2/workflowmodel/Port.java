@@ -27,12 +27,9 @@ import net.sf.taverna.t2.annotation.Annotated;
  * appropriately.
  * 
  * @author Tom Oinn
- * 
  */
 public interface Port extends Annotated<Port>, WorkflowItem {
+	String getName();
 
-	public String getName();
-
-	public int getDepth();
-
+	int getDepth();
 }

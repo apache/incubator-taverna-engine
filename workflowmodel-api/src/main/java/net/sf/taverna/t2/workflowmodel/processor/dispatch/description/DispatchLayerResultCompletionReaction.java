@@ -30,18 +30,15 @@ import java.lang.annotation.Target;
  * Describes how a dispatch layer reacts to a result completion message
  * 
  * @author Tom Oinn
- * 
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
 @ReactionTo(messageType = DispatchMessageType.RESULT_COMPLETION)
 public @interface DispatchLayerResultCompletionReaction {
-
 	public DispatchLayerStateEffect[] stateEffects();
 
 	public DispatchMessageType[] emits();
 
 	public boolean relaysUnmodified();
-	
 }

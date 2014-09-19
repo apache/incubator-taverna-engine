@@ -23,7 +23,6 @@ package net.sf.taverna.t2.workflowmodel.processor.dispatch;
 import static net.sf.taverna.t2.annotation.HierarchyRole.CHILD;
 import static net.sf.taverna.t2.annotation.HierarchyRole.PARENT;
 
-
 import java.util.List;
 
 import net.sf.taverna.t2.annotation.Annotated;
@@ -42,10 +41,8 @@ import net.sf.taverna.t2.workflowmodel.WorkflowItem;
  * ordered list with index 0 being the top of the stack.
  * 
  * @author Tom Oinn
- * 
  */
 public interface DispatchStack extends Annotated<DispatchStack>, WorkflowItem {
-
 	/**
 	 * The DispatchStack consists of an ordered list of DispatchLayer instances
 	 * where the DispatchLayer at index zero is at the bottom of the stack and
@@ -54,7 +51,7 @@ public interface DispatchStack extends Annotated<DispatchStack>, WorkflowItem {
 	 * 
 	 */
 	@HierarchyTraversal(hierarchies = { "workflowStructure" }, role = { CHILD })
-	public List<DispatchLayer<?>> getLayers();
+	List<DispatchLayer<?>> getLayers();
 
 	/**
 	 * The dispatch stack is contained within a processor, this can be null if
@@ -63,7 +60,7 @@ public interface DispatchStack extends Annotated<DispatchStack>, WorkflowItem {
 	 * annotations for various reasons.
 	 */
 	@HierarchyTraversal(hierarchies = { "workflowStructure" }, role = { PARENT })
-	public Processor getProcessor();
+	Processor getProcessor();
 
 	/**
 	 * Return the layer above (lower index!) the specified layer, or a reference
@@ -78,7 +75,7 @@ public interface DispatchStack extends Annotated<DispatchStack>, WorkflowItem {
 	 * @param layer
 	 * @return
 	 */
-	public DispatchLayer<?> layerAbove(DispatchLayer<?> layer);
+	DispatchLayer<?> layerAbove(DispatchLayer<?> layer);
 
 	/**
 	 * Return the layer below (higher index) the specified layer, or null if
@@ -87,7 +84,7 @@ public interface DispatchStack extends Annotated<DispatchStack>, WorkflowItem {
 	 * @param layer
 	 * @return
 	 */
-	public DispatchLayer<?> layerBelow(DispatchLayer<?> layer);
+	DispatchLayer<?> layerBelow(DispatchLayer<?> layer);
 
 	/**
 	 * The dispatch stack acts as an aggregator for monitorable properties
@@ -98,7 +95,6 @@ public interface DispatchStack extends Annotated<DispatchStack>, WorkflowItem {
 	 * @param prop
 	 * @param processID
 	 */
-	public void receiveMonitorableProperty(MonitorableProperty<?> prop,
+	void receiveMonitorableProperty(MonitorableProperty<?> prop,
 			String processID);
-
 }

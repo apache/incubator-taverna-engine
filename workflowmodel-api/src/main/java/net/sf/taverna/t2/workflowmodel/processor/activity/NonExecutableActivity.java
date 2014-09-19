@@ -7,16 +7,14 @@ import java.util.Map;
 
 import net.sf.taverna.t2.reference.T2Reference;
 
-
 /**
- * A non-executable activity is a wrapper for an Activity that cannot be executed, for example because it is offline or unrecognized.
- *
+ * A non-executable activity is a wrapper for an Activity that cannot be
+ * executed, for example because it is offline or unrecognized.
+ * 
  * @author alanrw
- *
  */
-
-public abstract class NonExecutableActivity<T> extends AbstractAsynchronousActivity<T> {
-
+public abstract class NonExecutableActivity<T> extends
+		AbstractAsynchronousActivity<T> {
 	public static final String URI = "http://ns.taverna.org.uk/2010/activity/nonExecutable";
 
 	/**
@@ -28,6 +26,7 @@ public abstract class NonExecutableActivity<T> extends AbstractAsynchronousActiv
 
 	/**
 	 * Add an input to the NonExecutableActivity with the specified name.
+	 * 
 	 * @param portName
 	 */
 	public void addProxyInput(String portName) {
@@ -35,7 +34,9 @@ public abstract class NonExecutableActivity<T> extends AbstractAsynchronousActiv
 	}
 
 	/**
-	 * Add an input to the NonExecutableActivity with the specified name and depth.
+	 * Add an input to the NonExecutableActivity with the specified name and
+	 * depth.
+	 * 
 	 * @param portName
 	 * @param depth
 	 */
@@ -45,7 +46,7 @@ public abstract class NonExecutableActivity<T> extends AbstractAsynchronousActiv
 
 	/**
 	 * Add an output to the NonExecutableActivity with the specified name
-	 *
+	 * 
 	 * @param portName
 	 */
 	public void addProxyOutput(String portName) {
@@ -53,8 +54,9 @@ public abstract class NonExecutableActivity<T> extends AbstractAsynchronousActiv
 	}
 
 	/**
-	 * Add an output to the NonExecutableActivity with the specified name and depth
-	 *
+	 * Add an output to the NonExecutableActivity with the specified name and
+	 * depth
+	 * 
 	 * @param portName
 	 * @param depth
 	 */
@@ -62,21 +64,17 @@ public abstract class NonExecutableActivity<T> extends AbstractAsynchronousActiv
 		super.addOutput(portName, depth);
 	}
 
-	/*
+	/**
 	 * Attempting to run a NonExecutableActivity will always fail.
-	 *
-	 * (non-Javadoc)
-	 * @see net.sf.taverna.t2.workflowmodel.processor.activity.AbstractAsynchronousActivity#executeAsynch(java.util.Map, net.sf.taverna.t2.workflowmodel.processor.activity.AsynchronousActivityCallback)
 	 */
 	@Override
 	public void executeAsynch(Map<String, T2Reference> data,
 			final AsynchronousActivityCallback callback) {
 		callback.requestRun(new Runnable() {
-
+			@Override
 			public void run() {
 				callback.fail("The service is not executable");
 			}
 		});
 	}
-
 }

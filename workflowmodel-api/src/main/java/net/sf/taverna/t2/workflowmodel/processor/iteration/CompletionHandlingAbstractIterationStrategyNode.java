@@ -20,7 +20,8 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.processor.iteration;
 
-import java.util.Collections;
+import static java.util.Collections.synchronizedMap;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,22 +49,20 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Job;
  * @author Tom Oinn
  * @author David Withers
  */
+@SuppressWarnings("serial")
 public abstract class CompletionHandlingAbstractIterationStrategyNode extends
 		AbstractIterationStrategyNode {
-
 	/**
 	 * Container class for the state of completion for a given process
 	 * identifier
 	 * 
 	 * @author Tom Oinn
-	 * 
 	 */
 	protected final class CompletionState {
 		protected CompletionState(int indexLength) {
 			inputComplete = new boolean[indexLength];
-			for (int i = 0; i < indexLength; i++) {
+			for (int i = 0; i < indexLength; i++)
 				inputComplete[i] = false;
-			}
 		}
 
 		protected boolean[] inputComplete;
@@ -73,31 +72,29 @@ public abstract class CompletionHandlingAbstractIterationStrategyNode extends
 		 * Return true iff all inputs have completed
 		 */
 		protected boolean isComplete() {
-			for (boolean inputCompletion : inputComplete) {
-				if (!inputCompletion) {
+			for (boolean inputCompletion : inputComplete)
+				if (!inputCompletion)
 					return false;
-				}
-			}
 			return true;
 		}
 	}
 
-	private Map<String, CompletionState> ownerToCompletion = Collections.synchronizedMap(new HashMap<String, CompletionState>());
+	private Map<String, CompletionState> ownerToCompletion = synchronizedMap(new HashMap<String, CompletionState>());
 
+	@Override
 	public final void receiveCompletion(int inputIndex, Completion completion) {
 		innerReceiveCompletion(inputIndex, completion);
-		if (completion.getIndex().length == 0) {
+		if (completion.getIndex().length == 0)
 			pingCompletionState(inputIndex, completion.getOwningProcess(),
 					true, completion.getContext());
-		}
 	}
 
+	@Override
 	public final void receiveJob(int inputIndex, Job newJob) {
 		innerReceiveJob(inputIndex, newJob);
-		if (newJob.getIndex().length == 0) {
+		if (newJob.getIndex().length == 0)
 			pingCompletionState(inputIndex, newJob.getOwningProcess(), false,
 					newJob.getContext());
-		}
 	}
 
 	/**
@@ -113,32 +110,27 @@ public abstract class CompletionHandlingAbstractIterationStrategyNode extends
 			boolean isCompletion, InvocationContext context) {
 		CompletionState cs = getCompletionState(owningProcess);
 		cs.inputComplete[inputIndex] = true;
-		if (isCompletion) {
+		if (isCompletion)
 			cs.receivedCompletion = true;
-		}
 		if (cs.isComplete()) {
 			cleanUp(owningProcess);
 			ownerToCompletion.remove(owningProcess);
-			if (cs.receivedCompletion) {
+			if (cs.receivedCompletion)
 				pushCompletion(new Completion(owningProcess, new int[0],
 						context));
-			}
 		}
 	}
 
 	protected CompletionState getCompletionState(String owningProcess) {
-		if (ownerToCompletion.containsKey(owningProcess)) {
+		if (ownerToCompletion.containsKey(owningProcess))
 			return ownerToCompletion.get(owningProcess);
-		} else {
-			CompletionState cs = new CompletionState(getChildCount());
-			ownerToCompletion.put(owningProcess, cs);
-			return cs;
-		}
+		CompletionState cs = new CompletionState(getChildCount());
+		ownerToCompletion.put(owningProcess, cs);
+		return cs;
 	}
 
 	protected abstract void innerReceiveCompletion(int inputIndex,
 			Completion completion);
 
 	protected abstract void innerReceiveJob(int inputIndex, Job newJob);
-
 }

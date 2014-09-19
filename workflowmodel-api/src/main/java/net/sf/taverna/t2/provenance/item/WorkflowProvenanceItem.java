@@ -36,23 +36,20 @@ import net.sf.taverna.t2.workflowmodel.Dataflow;
  * @author Ian Dunlop
  * @author Paolo Missier
  * @author Stuart Owen
- * 
  */
 public class WorkflowProvenanceItem extends AbstractProvenanceItem {
-
 	private Dataflow dataflow;
-	private SharedVocabulary eventType  = SharedVocabulary.WORKFLOW_EVENT_TYPE;
+	private SharedVocabulary eventType = SharedVocabulary.WORKFLOW_EVENT_TYPE;
 	private int[] index;
 	private boolean isFinal;
 
 	private Timestamp invocationStarted;
-	
+
 	public Timestamp getInvocationStarted() {
 		return invocationStarted;
 	}
 
 	public WorkflowProvenanceItem() {
-		
 	}
 
 	public Dataflow getDataflow() {
@@ -67,7 +64,7 @@ public class WorkflowProvenanceItem extends AbstractProvenanceItem {
 	public SharedVocabulary getEventType() {
 		return eventType;
 	}
-	
+
 	/**
 	 * @return the index
 	 */
@@ -76,7 +73,8 @@ public class WorkflowProvenanceItem extends AbstractProvenanceItem {
 	}
 
 	/**
-	 * @param index the index to set
+	 * @param index
+	 *            the index to set
 	 */
 	public void setIndex(int[] index) {
 		this.index = index;
@@ -90,7 +88,8 @@ public class WorkflowProvenanceItem extends AbstractProvenanceItem {
 	}
 
 	/**
-	 * @param isFinal the isFinal to set
+	 * @param isFinal
+	 *            the isFinal to set
 	 */
 	public void setFinal(boolean isFinal) {
 		this.isFinal = isFinal;

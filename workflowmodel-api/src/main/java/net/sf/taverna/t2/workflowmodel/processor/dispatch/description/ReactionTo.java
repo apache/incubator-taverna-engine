@@ -31,13 +31,10 @@ import java.lang.annotation.Target;
  * classes are referring
  * 
  * @author Tom Oinn
- * 
  */
 @Documented
 @Target(ElementType.ANNOTATION_TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ReactionTo {
-
 	public DispatchMessageType messageType();
-
 }

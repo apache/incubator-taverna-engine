@@ -29,24 +29,21 @@ import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
  * @author Paolo Missier
  * @author Stuart Owen
  * @author Ian Dunlop
- * 
  */
 public class InputDataProvenanceItem extends DataProvenanceItem {
-
 	private SharedVocabulary eventType = SharedVocabulary.INPUTDATA_EVENT_TYPE;
 
 	/**
 	 * Used when generating the xml version by the {@link DataProvenanceItem}.
 	 * Identifies this {@link DataProvenanceItem} as containing input
 	 */
+	@Override
 	protected boolean isInput() {
 		return true;
 	}
 
+	@Override
 	public SharedVocabulary getEventType() {
 		return eventType;
 	}
-
-
-
 }

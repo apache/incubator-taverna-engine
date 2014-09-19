@@ -20,7 +20,8 @@
  ******************************************************************************/
 package net.sf.taverna.t2.annotation;
 
-import java.util.Collections;
+import static java.util.Collections.unmodifiableSet;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -35,11 +36,9 @@ import net.sf.taverna.t2.workflowmodel.EditException;
  * 
  * @author Tom Oinn
  * @author Alan R Williams
- * 
  */
 public abstract class AbstractAnnotatedThing<T> implements Annotated<T> {
-
-	private Set<AnnotationChain> annotations = new HashSet<AnnotationChain>();
+	private Set<AnnotationChain> annotations = new HashSet<>();
 
 	/**
 	 * Return the set of annotations bound to this annotated object, the set
@@ -49,8 +48,9 @@ public abstract class AbstractAnnotatedThing<T> implements Annotated<T> {
 	 * 
 	 * @see net.sf.taverna.t2.annotation.Annotated#getAnnotations()
 	 */
+	@Override
 	public final Set<AnnotationChain> getAnnotations() {
-		return Collections.unmodifiableSet(annotations);
+		return unmodifiableSet(annotations);
 	}
 
 	/**
@@ -60,6 +60,7 @@ public abstract class AbstractAnnotatedThing<T> implements Annotated<T> {
 	 * 
 	 * @param annotations
 	 */
+	@Override
 	public final void setAnnotations(Set<AnnotationChain> annotations) {
 		this.annotations = annotations;
 	}
@@ -69,14 +70,11 @@ public abstract class AbstractAnnotatedThing<T> implements Annotated<T> {
 	 * of the enclosing AbstractAnnotatedThing class
 	 * 
 	 * @author Tom
-	 * 
 	 * @param <TargetType>
 	 */
 	private static abstract class AbstractAnnotationEdit<TargetType> implements
 			Edit<TargetType> {
-
 		private AbstractAnnotatedThing<TargetType> subject;
-
 		private boolean applied = false;
 
 		protected AbstractAnnotationEdit(
@@ -84,12 +82,12 @@ public abstract class AbstractAnnotatedThing<T> implements Annotated<T> {
 			this.subject = subject;
 		}
 
+		@Override
 		@SuppressWarnings("unchecked")
 		public final TargetType doEdit() throws EditException {
 			synchronized (subject) {
-				if (applied) {
+				if (applied)
 					throw new EditException("Edit already applied!");
-				}
 				doEditAction(subject);
 				this.applied = true;
 				return (TargetType) subject;
@@ -101,31 +99,33 @@ public abstract class AbstractAnnotatedThing<T> implements Annotated<T> {
 
 		protected abstract void undoEditAction(AbstractAnnotatedThing<?> subject);
 
+		@Override
 		@SuppressWarnings("unchecked")
 		public final TargetType getSubject() {
 			return (TargetType) subject;
 		}
 
+		@Override
 		public final boolean isApplied() {
 			return this.applied;
 		}
 
+		@Override
 		public final void undo() {
 			synchronized (subject) {
-				if (!applied) {
+				if (!applied)
 					throw new RuntimeException(
 							"Attempt to undo edit that was never applied");
-				}
 				undoEditAction(subject);
 				applied = false;
 			}
 		}
-
 	}
 
 	/**
 	 * @see net.sf.taverna.t2.annotation.Annotated#getAddAnnotationEdit(net.sf.taverna.t2.annotation.WorkflowAnnotation)
 	 */
+	@Override
 	public final Edit<T> getAddAnnotationEdit(
 			final AnnotationChain newAnnotation) {
 		return new AbstractAnnotationEdit<T>(this) {
@@ -145,6 +145,7 @@ public abstract class AbstractAnnotatedThing<T> implements Annotated<T> {
 	/**
 	 * @see net.sf.taverna.t2.annotation.Annotated#getRemoveAnnotationEdit(net.sf.taverna.t2.annotation.WorkflowAnnotation)
 	 */
+	@Override
 	public final Edit<T> getRemoveAnnotationEdit(
 			final AnnotationChain annotationToRemove) {
 		return new AbstractAnnotationEdit<T>(this) {
@@ -160,5 +161,4 @@ public abstract class AbstractAnnotatedThing<T> implements Annotated<T> {
 			}
 		};
 	}
-
 }

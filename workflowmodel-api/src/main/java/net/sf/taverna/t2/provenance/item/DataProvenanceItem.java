@@ -32,7 +32,6 @@ import net.sf.taverna.t2.reference.T2Reference;
  * @author Ian Dunlop
  * @auhor Stuart Owen
  * @author Paolo Missier
- * 
  */
 public abstract class DataProvenanceItem extends AbstractProvenanceItem {
 	/** A map of port name to data reference */
@@ -46,16 +45,10 @@ public abstract class DataProvenanceItem extends AbstractProvenanceItem {
 	 */
 	protected abstract boolean isInput();
 
-	/* (non-Javadoc)
-	 * @see net.sf.taverna.t2.provenance.item.DataProvenanceItemInterface#getDataMap()
-	 */
 	public Map<String, T2Reference> getDataMap() {
 		return dataMap;
 	}
 
-	/* (non-Javadoc)
-	 * @see net.sf.taverna.t2.provenance.item.DataProvenanceItemInterface#setDataMap(java.util.Map)
-	 */
 	public void setDataMap(Map<String, T2Reference> dataMap) {
 		this.dataMap = dataMap;
 	}
@@ -67,5 +60,4 @@ public abstract class DataProvenanceItem extends AbstractProvenanceItem {
 	public ReferenceService getReferenceService() {
 		return referenceService;
 	}
-	
 }

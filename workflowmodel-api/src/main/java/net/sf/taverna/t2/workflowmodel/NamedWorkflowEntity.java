@@ -34,15 +34,12 @@ package net.sf.taverna.t2.workflowmodel;
  * All named workflow entities support the sticky note annotation type
  * 
  * @author Tom Oinn
- * 
  */
 public interface NamedWorkflowEntity extends WorkflowItem {
-
 	/**
 	 * Every workflow level entity has a name which is unique within the
 	 * workflow in which it exists. This only applies to the immediate parent
 	 * workflow, names may be duplicated in child workflows etc.
 	 */
-	public String getLocalName();
-
+	String getLocalName();
 }

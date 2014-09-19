@@ -31,10 +31,8 @@ import net.sf.taverna.t2.reference.T2Reference;
  * but it can happen)
  * 
  * @author Ian Dunlop
- * 
  */
 public class WorkflowDataProvenanceItem extends AbstractProvenanceItem {
-
 	private ReferenceService referenceService;
 	/** The port name that the data is for */
 	private String portName;
@@ -87,9 +85,8 @@ public class WorkflowDataProvenanceItem extends AbstractProvenanceItem {
 
 	public void setIndex(int[] index) {
 		this.index = index;
-	
 	}
-	
+
 	public int[] getIndex() {
 		return index;
 	}
@@ -97,9 +94,8 @@ public class WorkflowDataProvenanceItem extends AbstractProvenanceItem {
 	public void setFinal(boolean isFinal) {
 		this.isFinal = isFinal;
 	}
-	
+
 	public boolean isFinal() {
 		return isFinal;
-	}	
-
+	}
 }

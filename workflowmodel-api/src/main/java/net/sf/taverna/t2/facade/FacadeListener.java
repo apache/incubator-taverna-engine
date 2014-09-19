@@ -28,7 +28,6 @@ import net.sf.taverna.t2.facade.WorkflowInstanceFacade.State;
  * @author Tom Oinn
  */
 public interface FacadeListener {
-
 	/**
 	 * Called if the workflow fails in a critical and fundamental way. Most
 	 * internal failures of individual process instances will not trigger this,
@@ -38,10 +37,13 @@ public interface FacadeListener {
 	 * unrecoverable problem.
 	 * 
 	 * @param message
+	 *            Description of what happened
 	 * @param t
+	 *            The cause of the failure
 	 */
-	public void workflowFailed(WorkflowInstanceFacade facade, String message, Throwable t);
-	
-	public void stateChange(WorkflowInstanceFacade facade, State oldState, State newState);
+	void workflowFailed(WorkflowInstanceFacade facade, String message,
+			Throwable t);
 
+	void stateChange(WorkflowInstanceFacade facade, State oldState,
+			State newState);
 }

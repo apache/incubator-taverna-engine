@@ -33,15 +33,14 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchResultE
  * Convenience abstract implementation of DispatchLayer
  * 
  * @author Tom Oinn
- * 
  */
 public abstract class AbstractDispatchLayer<ConfigurationType> implements
 		DispatchLayer<ConfigurationType> {
-
-	protected static Timer cleanupTimer = new Timer("Dispatch stack state cleanup", true);
-	
+	protected static Timer cleanupTimer = new Timer(
+			"Dispatch stack state cleanup", true);
 	protected static final int CLEANUP_DELAY_MS = 1000;
-	
+
+	@Override
 	public void setDispatchStack(DispatchStack parentStack) {
 		this.dispatchStack = parentStack;
 	}
@@ -49,60 +48,56 @@ public abstract class AbstractDispatchLayer<ConfigurationType> implements
 	protected DispatchStack dispatchStack;
 
 	protected final DispatchLayer<?> getAbove() {
-		return this.dispatchStack.layerAbove(this);
+		return dispatchStack.layerAbove(this);
 	}
 
 	protected final DispatchLayer<?> getBelow() {
-		return this.dispatchStack.layerBelow(this);
+		return dispatchStack.layerBelow(this);
 	}
 
+	@Override
 	public void receiveError(DispatchErrorEvent errorEvent) {
 		DispatchLayer<?> above = dispatchStack.layerAbove(this);
-		if (above != null) {
+		if (above != null)
 			above.receiveError(errorEvent);
-		}
 	}
 
+	@Override
 	public void receiveJob(DispatchJobEvent jobEvent) {
 		DispatchLayer<?> below = dispatchStack.layerBelow(this);
-		if (below != null) {
+		if (below != null)
 			below.receiveJob(jobEvent);
-		}
 	}
 
-	@SuppressWarnings("unchecked")
+	@Override
 	public void receiveJobQueue(DispatchJobQueueEvent jobQueueEvent) {
-		DispatchLayer below = dispatchStack.layerBelow(this);
-		if (below != null) {
+		DispatchLayer<?> below = dispatchStack.layerBelow(this);
+		if (below != null)
 			below.receiveJobQueue(jobQueueEvent);
-		}
-
 	}
 
+	@Override
 	public void receiveResult(DispatchResultEvent resultEvent) {
 		DispatchLayer<?> above = dispatchStack.layerAbove(this);
-		if (above != null) {
+		if (above != null)
 			above.receiveResult(resultEvent);
-		}
 	}
 
+	@Override
 	public void receiveResultCompletion(DispatchCompletionEvent completionEvent) {
 		DispatchLayer<?> above = dispatchStack.layerAbove(this);
-		if (above != null) {
+		if (above != null)
 			above.receiveResultCompletion(completionEvent);
-		}
-
 	}
 
+	@Override
 	public void finishedWith(String owningProcess) {
 		// Do nothing by default
 	}
-	
+
 	public Processor getProcessor() {
-		if (dispatchStack == null) {
+		if (dispatchStack == null)
 			return null;
-		}
 		return dispatchStack.getProcessor();
 	}
-
 }

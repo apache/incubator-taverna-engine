@@ -28,12 +28,10 @@ import net.sf.taverna.t2.reference.T2Reference;
  * the Job holds a map of arbitrarily many named data references in a bundle.
  * 
  * @author Tom Oinn
- * 
  */
 public class WorkflowDataToken extends Event<WorkflowDataToken> {
-
 	private T2Reference dataRef;
-	
+
 	/**
 	 * Construct a new data token with the specified owning process, conceptual
 	 * index array and data reference
@@ -42,7 +40,8 @@ public class WorkflowDataToken extends Event<WorkflowDataToken> {
 	 * @param index
 	 * @param dataRef
 	 */
-	public WorkflowDataToken(String owningProcess, int[] index, T2Reference dataRef, InvocationContext context) {
+	public WorkflowDataToken(String owningProcess, int[] index,
+			T2Reference dataRef, InvocationContext context) {
 		super(owningProcess, index, context);
 		this.dataRef = dataRef;
 	}
@@ -56,10 +55,10 @@ public class WorkflowDataToken extends Event<WorkflowDataToken> {
 	@Override
 	public WorkflowDataToken pushOwningProcess(String localProcessName)
 			throws ProcessIdentifierException {
-		return new WorkflowDataToken(pushOwner(localProcessName), index, dataRef, context);
+		return new WorkflowDataToken(pushOwner(localProcessName), index,
+				dataRef, context);
 	}
 
-	
 	/**
 	 * Return the ID of the data this event represents
 	 * 
@@ -68,7 +67,7 @@ public class WorkflowDataToken extends Event<WorkflowDataToken> {
 	public T2Reference getData() {
 		return this.dataRef;
 	}
-	
+
 	/**
 	 * Show the owner, index array and data map in textual form for debugging
 	 * and any other purpose. Jobs appear in the form :
@@ -79,19 +78,14 @@ public class WorkflowDataToken extends Event<WorkflowDataToken> {
 	 */
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
-		sb.append("Token(" + owner + ")[");
-		for (int i = 0; i < index.length; i++) {
-			if (i > 0) {
-				sb.append(",");
-			}
-			sb.append(index[i] + "");
+		StringBuilder sb = new StringBuilder();
+		sb.append("Token(").append(owner).append(")[");
+		String sep = "";
+		for (int idx : index) {
+			sb.append(sep).append(idx);
+			sep = ",";
 		}
-		sb.append("]{");
-		sb.append(dataRef.toString());
-		sb.append("}");
+		sb.append("]{").append(dataRef).append("}");
 		return sb.toString();
 	}
-
-	
 }

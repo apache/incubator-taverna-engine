@@ -31,25 +31,22 @@ import net.sf.taverna.t2.annotation.Annotated;
  * identifier.
  * 
  * @author Tom Oinn
- * 
  */
 public interface Condition extends Annotated<Condition>, WorkflowItem {
-
 	/**
 	 * @return the Processor constrained by this condition
 	 */
-	public Processor getControl();
+	Processor getControl();
 
 	/**
 	 * @return the Processor acting as the controller for this condition
 	 */
-	public Processor getTarget();
+	Processor getTarget();
 
 	/**
 	 * @param owningProcess
 	 *            the context in which the condition is to be evaluated
 	 * @return whether the condition is satisfied
 	 */
-	public boolean isSatisfied(String owningProcess);
-
+	boolean isSatisfied(String owningProcess);
 }

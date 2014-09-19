@@ -21,6 +21,7 @@
 package net.sf.taverna.t2.provenance.item;
 
 import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
+
 /**
  * Contains details of port names and the output data they receive. Parent is an
  * {@link IterationProvenanceItem}
@@ -28,21 +29,21 @@ import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
  * @author Paolo Missier
  * @author Stuart Owen
  * @author Ian Dunlop
- * 
  */
 public class OutputDataProvenanceItem extends DataProvenanceItem {
-
 	private SharedVocabulary eventType = SharedVocabulary.OUTPUTDATA_EVENT_TYPE;
+
 	/**
 	 * Used when generating the xml version by the {@link DataProvenanceItem}.
 	 * Identifies this {@link DataProvenanceItem} as containing output
 	 */
+	@Override
 	protected boolean isInput() {
 		return false;
 	}
 
+	@Override
 	public SharedVocabulary getEventType() {
 		return eventType;
 	}
-
 }

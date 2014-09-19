@@ -26,33 +26,30 @@ import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
  * Used to store some enactment information during a workflow run
  * 
  * @see AbstractProvenanceItem
- * 
  * @author Ian Dunlop
- * 
  */
 public interface ProvenanceItem {
-
 	/**
 	 * What type of information does the item contain. The
 	 * {@link SharedVocabulary} can be used to identify it
 	 * 
 	 * @return
 	 */
-	public SharedVocabulary getEventType();
+	SharedVocabulary getEventType();
 
 	/**
 	 * The unique identifier for this item
 	 * 
 	 * @return
 	 */
-	public String getIdentifier();
+	String getIdentifier();
 
 	/**
 	 * A unique id for this event. Any children would use this as their parentId
 	 * 
 	 * @param identifier
 	 */
-	public void setIdentifier(String identifier);
+	void setIdentifier(String identifier);
 
 	/**
 	 * The workflow model id that is supplied during enactment eg
@@ -60,14 +57,14 @@ public interface ProvenanceItem {
 	 * 
 	 * @param processId
 	 */
-	public void setProcessId(String processId);
+	void setProcessId(String processId);
 
 	/**
 	 * Get the enactor supplie identifier
 	 * 
 	 * @return
 	 */
-	public String getProcessId();
+	String getProcessId();
 
 	/**
 	 * The parent of this provenance Item. The model is
@@ -81,25 +78,26 @@ public interface ProvenanceItem {
 	 * 
 	 * @param parentId
 	 */
-	public void setParentId(String parentId);
+	void setParentId(String parentId);
 
 	/**
 	 * Who is the parent of this item?
 	 * 
 	 * @return
 	 */
-	public String getParentId();
-	
+	String getParentId();
+
 	/**
 	 * The uuid that belongs to the actual dataflow
+	 * 
 	 * @param workflowId
 	 */
-	public void setWorkflowId(String workflowId);
-	
+	void setWorkflowId(String workflowId);
+
 	/**
 	 * The uuid that belongs to the actual dataflow
+	 * 
 	 * @return a string representation of a uuid
 	 */
-	public String getWorkflowId();
-
+	String getWorkflowId();
 }

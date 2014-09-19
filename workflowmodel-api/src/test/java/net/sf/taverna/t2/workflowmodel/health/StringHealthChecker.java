@@ -27,14 +27,17 @@ import net.sf.taverna.t2.workflowmodel.health.HealthChecker;
 
 public class StringHealthChecker implements HealthChecker<String> {
 
+	@Override
 	public boolean canVisit(Object subject) {
 		return subject!=null && subject instanceof String;
 	}
 
+	@Override
 	public VisitReport visit(String o, List<Object> ancestry) {
 		return null;
 	}
 
+	@Override
 	public boolean isTimeConsuming() {
 		return false;
 	}

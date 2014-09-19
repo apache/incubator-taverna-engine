@@ -20,19 +20,16 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel;
 
-
 /**
- * Thrown if attempting to use a workflow that
- * is not {@link Dataflow#checkValidity() valid}.
+ * Thrown if attempting to use a workflow that is not
+ * {@link Dataflow#checkValidity() valid}.
  * <p>
  * The {@link DataflowValidationReport} can be retrieved using
  * {@link #getDataflowValidationReport()} and will provide details on how the
  * dataflow is invalid. The {@link #getDataflow()} will provide the invalid
  * dataflow.
- * </p>
  * 
  * @author Stian Soiland-Reyes
- * 
  */
 public class InvalidDataflowException extends Exception {
 	private static final long serialVersionUID = -8470683930687738369L;
@@ -63,5 +60,4 @@ public class InvalidDataflowException extends Exception {
 	public Dataflow getDataflow() {
 		return dataflow;
 	}
-
 }

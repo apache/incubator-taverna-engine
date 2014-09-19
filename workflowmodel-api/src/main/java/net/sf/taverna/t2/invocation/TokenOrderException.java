@@ -27,10 +27,8 @@ package net.sf.taverna.t2.invocation;
  * populated.
  * 
  * @author Tom Oinn
- * 
  */
 public class TokenOrderException extends Exception {
-
 	public TokenOrderException() {
 		super();
 	}
@@ -47,9 +45,5 @@ public class TokenOrderException extends Exception {
 		super(arg0);
 	}
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -7870614853928171878L;
-
 }

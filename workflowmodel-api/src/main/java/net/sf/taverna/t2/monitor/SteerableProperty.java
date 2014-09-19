@@ -25,16 +25,13 @@ package net.sf.taverna.t2.monitor;
  * agents or other clients.
  * 
  * @author Tom Oinn
- * 
  */
 public interface SteerableProperty<T> extends MonitorableProperty<T> {
-
 	/**
 	 * Set the property value
 	 * 
 	 * @param newValue
 	 * @throws NoSuchPropertyException
 	 */
-	public void setProperty(T newValue) throws NoSuchPropertyException;
-
+	void setProperty(T newValue) throws NoSuchPropertyException;
 }

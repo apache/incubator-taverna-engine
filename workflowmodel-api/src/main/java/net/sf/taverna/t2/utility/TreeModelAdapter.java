@@ -33,26 +33,21 @@ import javax.swing.tree.TreePath;
  * friends.
  * 
  * @author Tom Oinn
- * 
  */
 public final class TreeModelAdapter {
+	private static class TypedListenerPair<TT> {
+		TypedTreeModelListener<TT> typedListener;
 
-	private class TypedListenerPair {
-		@SuppressWarnings("unchecked")
-		TypedTreeModelListener typedListener;
-		
 		TreeModelListener untypedListener;
-		
-		@SuppressWarnings("unchecked")
-		TypedListenerPair(TypedTreeModelListener typedListener,
+
+		TypedListenerPair(TypedTreeModelListener<TT> typedListener,
 				TreeModelListener untypedListener) {
 			this.typedListener = typedListener;
 			this.untypedListener = untypedListener;
 		}
-
 	}
 
-	private static Set<TypedListenerPair> mapping = new HashSet<TypedListenerPair>();
+	private static Set<TypedListenerPair<Object>> mapping = new HashSet<>();
 
 	private static TreeModelAdapter instance = null;
 
@@ -61,9 +56,8 @@ public final class TreeModelAdapter {
 	}
 
 	private synchronized static TreeModelAdapter getInstance() {
-		if (instance == null) {
+		if (instance == null)
 			instance = new TreeModelAdapter();
-		}
 		return instance;
 	}
 
@@ -83,96 +77,98 @@ public final class TreeModelAdapter {
 
 	private <NodeType extends Object> TreeModel removeType(
 			final TypedTreeModel<NodeType> typedModel) {
-
 		return new TreeModel() {
-
-			@SuppressWarnings("unchecked")
-			public void addTreeModelListener(final TreeModelListener arg0) {
-				TypedTreeModelListener typedListener = new TypedTreeModelListener<NodeType>() {
-
+			@SuppressWarnings({ "rawtypes", "unchecked" })
+			@Override
+			public void addTreeModelListener(final TreeModelListener listener) {
+				TypedTreeModelListener<NodeType> typedListener = new TypedTreeModelListener<NodeType>() {
+					@Override
 					public void treeNodesChanged(TypedTreeModelEvent<NodeType> e) {
-						arg0.treeNodesChanged(unwrapType(e));
+						listener.treeNodesChanged(unwrapType(e));
 					}
 
+					@Override
 					public void treeNodesInserted(
 							TypedTreeModelEvent<NodeType> e) {
-						arg0.treeNodesInserted(unwrapType(e));
+						listener.treeNodesInserted(unwrapType(e));
 					}
 
+					@Override
 					public void treeNodesRemoved(TypedTreeModelEvent<NodeType> e) {
-						arg0.treeNodesRemoved(unwrapType(e));
+						listener.treeNodesRemoved(unwrapType(e));
 					}
 
+					@Override
 					public void treeStructureChanged(
 							TypedTreeModelEvent<NodeType> e) {
-						arg0.treeStructureChanged(unwrapType(e));
+						listener.treeStructureChanged(unwrapType(e));
 					}
 
 					private TreeModelEvent unwrapType(
 							final TypedTreeModelEvent<NodeType> e) {
-						return new TreeModelEvent(e.getSource(), e
-								.getTreePath(), e.getChildIndices(), e
-								.getChildren());
+						return new TreeModelEvent(e.getSource(),
+								e.getTreePath(), e.getChildIndices(),
+								e.getChildren());
 					}
-
 				};
 				synchronized (mapping) {
 					typedModel.addTreeModelListener(typedListener);
-					mapping.add(new TypedListenerPair(typedListener, arg0));
+					mapping.add(new TypedListenerPair(typedListener, listener));
 				}
-
 			}
 
+			@Override
 			@SuppressWarnings("unchecked")
 			public Object getChild(Object arg0, int arg1) {
 				return typedModel.getChild((NodeType) arg0, arg1);
 			}
 
+			@Override
 			@SuppressWarnings("unchecked")
 			public int getChildCount(Object arg0) {
 				return typedModel.getChildCount((NodeType) arg0);
 			}
 
+			@Override
 			@SuppressWarnings("unchecked")
 			public int getIndexOfChild(Object arg0, Object arg1) {
 				return typedModel.getIndexOfChild((NodeType) arg0,
 						(NodeType) arg1);
 			}
 
+			@Override
 			public Object getRoot() {
 				return typedModel.getRoot();
 			}
 
+			@Override
 			@SuppressWarnings("unchecked")
 			public boolean isLeaf(Object arg0) {
 				return typedModel.isLeaf((NodeType) arg0);
 			}
 
+			@Override
 			@SuppressWarnings("unchecked")
 			public void removeTreeModelListener(TreeModelListener arg0) {
 				synchronized (mapping) {
-					TypedListenerPair toRemove = null;
-					for (TypedListenerPair tpl : mapping) {
+					TypedListenerPair<NodeType> toRemove = null;
+					for (TypedListenerPair<Object> tpl : mapping)
 						if (tpl.untypedListener == arg0) {
-							toRemove = tpl;
+							toRemove = (TypedListenerPair<NodeType>) tpl;
 							typedModel
-									.removeTreeModelListener(tpl.typedListener);
+									.removeTreeModelListener((TypedTreeModelListener<NodeType>) tpl.typedListener);
 							break;
 						}
-					}
-					if (toRemove == null) {
+					if (toRemove == null)
 						return;
-					}
 					mapping.remove(toRemove);
 				}
-
 			}
 
+			@Override
 			public void valueForPathChanged(TreePath arg0, Object arg1) {
 				typedModel.valueForPathChanged(arg0, arg1);
 			}
-
 		};
 	}
-
 }

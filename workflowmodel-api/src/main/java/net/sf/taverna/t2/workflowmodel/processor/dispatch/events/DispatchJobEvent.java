@@ -20,6 +20,8 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.processor.dispatch.events;
 
+import static net.sf.taverna.t2.workflowmodel.processor.dispatch.description.DispatchMessageType.JOB;
+
 import java.util.List;
 import java.util.Map;
 
@@ -34,12 +36,9 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.description.DispatchMe
  * along with an ordered list of Activity instances.
  * 
  * @author Tom Oinn
- * 
  */
 public class DispatchJobEvent extends AbstractDispatchEvent<DispatchJobEvent> {
-
 	private Map<String, T2Reference> dataMap;
-
 	private List<? extends Activity<?>> activities;
 
 	/**
@@ -86,21 +85,22 @@ public class DispatchJobEvent extends AbstractDispatchEvent<DispatchJobEvent> {
 	@Override
 	public DispatchJobEvent popOwningProcess()
 			throws ProcessIdentifierException {
-		return new DispatchJobEvent(popOwner(), index, context, dataMap, activities);
+		return new DispatchJobEvent(popOwner(), index, context, dataMap,
+				activities);
 	}
 
 	@Override
 	public DispatchJobEvent pushOwningProcess(String localProcessName)
 			throws ProcessIdentifierException {
-		return new DispatchJobEvent(pushOwner(localProcessName), index, context, dataMap, activities);
+		return new DispatchJobEvent(pushOwner(localProcessName), index,
+				context, dataMap, activities);
 	}
 
 	/**
-	 * DispatchMessageType.JOB
+	 * @return Always a {@link DispatchMessageType#JOB}.
 	 */
 	@Override
 	public DispatchMessageType getMessageType() {
-		return DispatchMessageType.JOB;
+		return JOB;
 	}
-
 }

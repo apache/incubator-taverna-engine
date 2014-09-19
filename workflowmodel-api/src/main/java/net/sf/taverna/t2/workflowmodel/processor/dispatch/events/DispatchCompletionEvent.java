@@ -20,6 +20,7 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.processor.dispatch.events;
 
+import static net.sf.taverna.t2.workflowmodel.processor.dispatch.description.DispatchMessageType.RESULT_COMPLETION;
 import net.sf.taverna.t2.invocation.InvocationContext;
 import net.sf.taverna.t2.invocation.ProcessIdentifierException;
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.description.DispatchMessageType;
@@ -31,11 +32,9 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.description.DispatchMe
  * prevent them from ever seeing it.
  * 
  * @author Tom Oinn
- * 
  */
 public class DispatchCompletionEvent extends
 		AbstractDispatchEvent<DispatchCompletionEvent> {
-
 	/**
 	 * Construct a new dispatch result completion event
 	 * 
@@ -66,7 +65,6 @@ public class DispatchCompletionEvent extends
 	 */
 	@Override
 	public DispatchMessageType getMessageType() {
-		return DispatchMessageType.RESULT_COMPLETION;
+		return RESULT_COMPLETION;
 	}
-
 }

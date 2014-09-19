@@ -1,20 +1,17 @@
 package net.sf.taverna.t2.visit;
 
 import java.util.List;
-import java.util.Map;
 
 /**
- * 
  * A Visitor can perform a visit of a VisitKind on a object. It can return a
  * VisitReport giving details of the result of the visit, A Visitor may be time
  * consuming, in which case it is only performed upon user request.
  * 
  * @author alanrw
  * 
- * @param <T>
+ * @param <T> The type of the objects being visited.
  */
 public interface Visitor<T> {
-
 	/**
 	 * Returns true if the visitor can visit the specified object.
 	 * 
@@ -44,5 +41,4 @@ public interface Visitor<T> {
 	 * @return
 	 */
 	boolean isTimeConsuming();
-
 }

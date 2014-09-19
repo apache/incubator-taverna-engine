@@ -26,10 +26,8 @@ package net.sf.taverna.t2.invocation;
  * local name including a colon ':' character.
  * 
  * @author Tom Oinn
- * 
  */
 public class ProcessIdentifierException extends RuntimeException {
-
 	private static final long serialVersionUID = -221443591753067425L;
 
 	public ProcessIdentifierException() {
@@ -47,5 +45,4 @@ public class ProcessIdentifierException extends RuntimeException {
 	public ProcessIdentifierException(Throwable cause) {
 		super(cause);
 	}
-
 }

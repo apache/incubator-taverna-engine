@@ -29,10 +29,8 @@ package net.sf.taverna.t2.workflowmodel;
  * input.
  * 
  * @author Tom Oinn
- * 
  */
 public interface DataflowInputPort extends EventHandlingInputPort, DataflowPort {
-
 	/**
 	 * Return the internal output port. Output ports have a granular depth
 	 * property denoting the finest grained output token they can possibly
@@ -42,15 +40,13 @@ public interface DataflowInputPort extends EventHandlingInputPort, DataflowPort 
 	 * 
 	 * @return the internal output port
 	 */
-	public EventForwardingOutputPort getInternalOutputPort();
-	
+	EventForwardingOutputPort getInternalOutputPort();
+
 	/**
 	 * Define the finest grained item that will be sent to this input port. As
 	 * all data are relayed through to the internal output port this is used to
 	 * denote output port granularity as well as to configure any downstream
 	 * connected filtering input ports.
 	 */
-	public int getGranularInputDepth();
-	
-	
+	int getGranularInputDepth();
 }

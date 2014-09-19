@@ -40,11 +40,9 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchResultE
  * 
  * @author Tom Oinn
  * @author Stian Soiland-Reyes
- * 
  */
 public abstract class AbstractErrorHandlerLayer<ConfigurationType> extends
 		AbstractDispatchLayer<ConfigurationType> {
-
 	private static Logger logger = Logger
 			.getLogger(AbstractErrorHandlerLayer.class);
 
@@ -57,14 +55,11 @@ public abstract class AbstractErrorHandlerLayer<ConfigurationType> extends
 	 * @return
 	 */
 	private static boolean identicalIndex(int[] a, int[] b) {
-		if (a.length != b.length) {
+		if (a.length != b.length)
 			return false;
-		}
-		for (int i = 0; i < a.length; i++) {
-			if (a[i] != b[i]) {
+		for (int i = 0; i < a.length; i++)
+			if (a[i] != b[i])
 				return false;
-			}
-		}
 		return true;
 	}
 
@@ -78,7 +73,7 @@ public abstract class AbstractErrorHandlerLayer<ConfigurationType> extends
 	 * @see #getJobsDefault(String)
 	 * @see #getJobsCopy(String)
 	 */
-	private Map<String, List<JobState>> stateMap = new HashMap<String, List<JobState>>();
+	private Map<String, List<JobState>> stateMap = new HashMap<>();
 
 	protected AbstractErrorHandlerLayer() {
 		super();
@@ -102,9 +97,7 @@ public abstract class AbstractErrorHandlerLayer<ConfigurationType> extends
 	@Override
 	public void receiveError(DispatchErrorEvent errorEvent) {
 		String owningProcess = errorEvent.getOwningProcess();
-		List<JobState> activeJobs = getJobsCopy(owningProcess);
-
-		for (JobState rs : activeJobs) {
+		for (JobState rs : getJobsCopy(owningProcess))
 			if (identicalIndex(rs.jobEvent.getIndex(), errorEvent.getIndex())) {
 				boolean handled = rs.handleError();
 				if (!handled) {
@@ -113,7 +106,6 @@ public abstract class AbstractErrorHandlerLayer<ConfigurationType> extends
 					return;
 				}
 			}
-		}
 	}
 
 	/**
@@ -157,12 +149,11 @@ public abstract class AbstractErrorHandlerLayer<ConfigurationType> extends
 	 *            {@link DispatchJobEvent#getIndex()}
 	 */
 	protected void forget(String owningProcess, int[] index) {
-		for (JobState jobState : getJobsCopy(owningProcess)) {
+		for (JobState jobState : getJobsCopy(owningProcess))
 			if (identicalIndex(jobState.jobEvent.getIndex(), index)) {
 				removeJob(owningProcess, jobState);
 				return;
 			}
-		}
 		// It could be due to pipelining activities like BioMart 
 		logger.debug("Could not forget " + owningProcess + " " + Arrays.toString(index));
 	}
@@ -197,13 +188,13 @@ public abstract class AbstractErrorHandlerLayer<ConfigurationType> extends
 			activeJobs = stateMap.get(owningProcess);
 		}
 		if (activeJobs == null) {
-			logger.error("Could not find any active jobs for " + owningProcess);
+			logger.warn("Could not find any active jobs for " + owningProcess);
 			return Collections.emptyList();
 		}
 		// Take a copy of the list so we don't modify it while iterating over it
 		List<JobState> activeJobsCopy;
 		synchronized (activeJobs) {
-			activeJobsCopy = new ArrayList<JobState>(activeJobs);
+			activeJobsCopy = new ArrayList<>(activeJobs);
 		}
 		return activeJobsCopy;
 	}
@@ -230,7 +221,7 @@ public abstract class AbstractErrorHandlerLayer<ConfigurationType> extends
 		synchronized (stateMap) {
 			stateList = stateMap.get(owningProcess);
 			if (stateList == null) {
-				stateList = new ArrayList<JobState>();
+				stateList = new ArrayList<>();
 				stateMap.put(owningProcess, stateList);
 			}
 		}
@@ -266,7 +257,6 @@ public abstract class AbstractErrorHandlerLayer<ConfigurationType> extends
 	 * per job basis.
 	 * 
 	 * @author Tom Oinn
-	 * 
 	 */
 	protected abstract class JobState {
 		protected DispatchJobEvent jobEvent;
@@ -289,7 +279,5 @@ public abstract class AbstractErrorHandlerLayer<ConfigurationType> extends
 		 * @return true if the error was handled.
 		 */
 		public abstract boolean handleError();
-
 	}
-
 }

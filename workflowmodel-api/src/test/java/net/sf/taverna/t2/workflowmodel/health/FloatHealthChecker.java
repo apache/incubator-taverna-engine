@@ -27,14 +27,17 @@ import net.sf.taverna.t2.workflowmodel.health.HealthChecker;
 
 public class FloatHealthChecker implements HealthChecker<Float> {
 
+	@Override
 	public boolean canVisit(Object subject) {
 		return subject!=null && subject instanceof Float;
 	}
 
+	@Override
 	public VisitReport visit(Float o, List<Object> ancestry) {
 		return null;
 	}
 
+	@Override
 	public boolean isTimeConsuming() {
 		return false;
 	}

@@ -46,7 +46,6 @@ import org.junit.Test;
  *
  */
 public class TestMonitorManager {
-
 	private MonitorManager monitorManager;
 
 	@Test
@@ -57,7 +56,7 @@ public class TestMonitorManager {
 		// Make a fake registration
 		Object workflowObject = "The workflow object as a string";
 		String[] owningProcess = { "dataflow0", "process4", "42424" };
-		Set<MonitorableProperty<?>> properties = new HashSet<MonitorableProperty<?>>();
+		Set<MonitorableProperty<?>> properties = new HashSet<>();
 		properties.add(new ExampleProperty());
 		monitorManager.registerNode(workflowObject, owningProcess, properties);
 
@@ -84,7 +83,7 @@ public class TestMonitorManager {
 		assertEquals(0, testMonitor.getCounts());
 		// Make a fake add properties
 		String[] owningProcess = { "dataflow0", "process4", "42424" };
-		Set<MonitorableProperty<?>> newProperties = new HashSet<MonitorableProperty<?>>();
+		Set<MonitorableProperty<?>> newProperties = new HashSet<>();
 		newProperties.add(new ExampleProperty());
 		monitorManager.addPropertiesToNode(owningProcess, newProperties);
 
@@ -145,6 +144,7 @@ public class TestMonitorManager {
 			return lastSender;
 		}
 
+		@Override
 		public synchronized void notify(Observable<MonitorMessage> sender,
 				MonitorMessage message) throws Exception {
 			this.lastSender = sender;
@@ -154,14 +154,17 @@ public class TestMonitorManager {
 	}
 
 	private final class ExampleProperty implements MonitorableProperty<String> {
+		@Override
 		public Date getLastModified() {
 			return new Date();
 		}
 
+		@Override
 		public String[] getName() {
 			return new String[] { "monitor", "test", "example" };
 		}
 
+		@Override
 		public String getValue() throws NoSuchPropertyException {
 			return "Example property value";
 		}

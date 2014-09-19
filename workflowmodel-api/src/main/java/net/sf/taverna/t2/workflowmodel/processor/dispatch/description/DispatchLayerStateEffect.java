@@ -26,10 +26,8 @@ package net.sf.taverna.t2.workflowmodel.processor.dispatch.description;
  * can be described as state free.
  * 
  * @author Tom Oinn
- * 
  */
 public enum DispatchLayerStateEffect {
-
 	/**
 	 * The message causes a state object within the dispatch layer to be created
 	 * keyed on the process identifier and index
@@ -83,5 +81,4 @@ public enum DispatchLayerStateEffect {
 	 * will occur
 	 */
 	NO_EFFECT;
-
 }

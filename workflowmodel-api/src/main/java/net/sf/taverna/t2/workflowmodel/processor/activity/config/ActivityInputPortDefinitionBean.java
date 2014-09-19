@@ -31,22 +31,16 @@ import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationBean;
  * 
  * @author Stuart Owen
  * @author Stian Soiland-Reyes
- * 
  */
 @ConfigurationBean(uri = "http://ns.taverna.org.uk/2010/scufl2#InputPortDefinition")
 public class ActivityInputPortDefinitionBean extends ActivityPortDefinitionBean {
-
 	private List<Class<? extends ExternalReferenceSPI>> handledReferenceSchemes;
-
 	private Class<?> translatedElementType;
-
 	private boolean allowsLiteralValues;
 
 	public List<Class<? extends ExternalReferenceSPI>> getHandledReferenceSchemes() {
-		if (handledReferenceSchemes == null) {
-			return Collections
-					.<Class<? extends ExternalReferenceSPI>> emptyList();
-		}
+		if (handledReferenceSchemes == null)
+			return Collections.emptyList();
 		return handledReferenceSchemes;
 	}
 
@@ -70,5 +64,4 @@ public class ActivityInputPortDefinitionBean extends ActivityPortDefinitionBean 
 	public void setAllowsLiteralValues(boolean allowsLiteralValues) {
 		this.allowsLiteralValues = allowsLiteralValues;
 	}
-
 }

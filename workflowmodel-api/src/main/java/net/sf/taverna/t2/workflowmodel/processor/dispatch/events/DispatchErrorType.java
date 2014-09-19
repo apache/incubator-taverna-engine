@@ -26,10 +26,8 @@ package net.sf.taverna.t2.workflowmodel.processor.dispatch.events;
  * message.
  * 
  * @author Tom Oinn
- * 
  */
 public enum DispatchErrorType {
-
 	/**
 	 * Indicates that the failure to invoke the activity was due to invalid
 	 * input data, in this case there is no point in trying to invoke the
@@ -53,5 +51,4 @@ public enum DispatchErrorType {
 	 * the credential set is pointless.
 	 */
 	AUTHENTICATION;
-
 }

@@ -30,10 +30,8 @@ import java.util.Set;
  * this class are not aware of the surrounding tree structure.
  * 
  * @author Tom Oinn
- * 
  */
 public interface MonitorNode {
-
 	/**
 	 * Each monitor node can reference zero or one workflow object. This is the
 	 * object which is providing any properties the node exposes, so is likely
@@ -44,36 +42,35 @@ public interface MonitorNode {
 	 *         this workflow object can be anything, and may not be a top level
 	 *         workflow object at all.
 	 */
-	public Object getWorkflowObject();
+	Object getWorkflowObject();
 
 	/**
 	 * Each monitor node has an identity corresponding to the identifier stack
 	 * of the data flowing through the workflow object that created it. This
 	 * string array also defines its position in the monitor tree.
 	 */
-	public String[] getOwningProcess();
+	String[] getOwningProcess();
 
 	/**
 	 * Each monitor node exposes a set of properties, which may or may not be
 	 * mutable
 	 */
-	public Set<? extends MonitorableProperty<?>> getProperties();
+	Set<? extends MonitorableProperty<?>> getProperties();
 
 	/**
 	 * Each node has a creation date
 	 */
-	public Date getCreationDate();
+	Date getCreationDate();
 
 	/**
 	 * Properties can be added to the monitor node after creation if required,
 	 * although this should be used only when necessary to avoid race conditions
 	 */
-	public void addMonitorableProperty(MonitorableProperty<?> newProperty);
+	void addMonitorableProperty(MonitorableProperty<?> newProperty);
 
 	/**
 	 * Nodes can persist in the tree after they have expired, in which case this
 	 * will return true.
 	 */
-	public boolean hasExpired();
-
+	boolean hasExpired();
 }

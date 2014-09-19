@@ -35,25 +35,24 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Job;
  * 
  * @author Tom Oinn
  * @author Stian Soiland-Reyes
- * 
  */
 public interface IterationStrategyNode extends MutableTreeNode, WorkflowItem {
-
 	/**
 	 * Specialised return type of {@link TreeNode#children()}
 	 */
-
-	public Enumeration<IterationStrategyNode> children();
+	@Override
+	Enumeration<IterationStrategyNode> children();
 
 	/**
 	 * Remove all children nodes and set the parent to <code>null</code>.
 	 */
-	public void clear();
+	void clear();
 
 	/**
 	 * Specialised return type of {@link TreeNode#getChildAt(int)}
 	 */
-	public IterationStrategyNode getChildAt(int childIndex);
+	@Override
+	IterationStrategyNode getChildAt(int childIndex);
 
 	/**
 	 * Return a copy of the list of children nodes, or an empty list if
@@ -61,7 +60,7 @@ public interface IterationStrategyNode extends MutableTreeNode, WorkflowItem {
 	 * 
 	 * @return List of children nodes.
 	 */
-	public List<IterationStrategyNode> getChildren();
+	List<IterationStrategyNode> getChildren();
 
 	/**
 	 * In the context of an enclosing iteration strategy each node should be
@@ -81,13 +80,14 @@ public interface IterationStrategyNode extends MutableTreeNode, WorkflowItem {
 	 * @return
 	 * @throws IterationTypeMismatchException
 	 */
-	public int getIterationDepth(Map<String, Integer> inputDepths)
+	int getIterationDepth(Map<String, Integer> inputDepths)
 			throws IterationTypeMismatchException;
 
 	/**
 	 * Specialised return type of {@link TreeNode#getParent()}
 	 */
-	public IterationStrategyNode getParent();
+	@Override
+	IterationStrategyNode getParent();
 
 	/**
 	 * Insert a new child node. The new child will be added in the end of the
@@ -96,7 +96,7 @@ public interface IterationStrategyNode extends MutableTreeNode, WorkflowItem {
 	 * @param child
 	 *            Child node to add
 	 */
-	public void insert(MutableTreeNode child);
+	void insert(MutableTreeNode child);
 
 	/**
 	 * Nodes can also receive completion events, the simplest being one
@@ -105,7 +105,7 @@ public interface IterationStrategyNode extends MutableTreeNode, WorkflowItem {
 	 * index array prefixed by the specified completion index array will be
 	 * received on the specified index'
 	 */
-	public void receiveCompletion(int inputIndex, Completion completion);
+	void receiveCompletion(int inputIndex, Completion completion);
 
 	/**
 	 * The nodes within the iteration strategy, a tree structure, are event
@@ -117,6 +117,5 @@ public interface IterationStrategyNode extends MutableTreeNode, WorkflowItem {
 	 * @param inputIndex
 	 * @param newJob
 	 */
-	public void receiveJob(int inputIndex, Job newJob);
-
+	void receiveJob(int inputIndex, Job newJob);
 }

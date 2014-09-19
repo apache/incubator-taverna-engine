@@ -1,18 +1,12 @@
-/**
- * 
- */
 package net.sf.taverna.t2.visit;
 
 /**
- * 
  * This visit kind is a dummy for collecting together the information associated
  * with a nested workflow.
  * 
  * @author alanrw
- * 
  */
 public class DataflowCollation extends VisitKind {
-
 	public static final int NESTED_ISSUES = 1;
 
 	/*
@@ -24,7 +18,7 @@ public class DataflowCollation extends VisitKind {
 	 * @see net.sf.taverna.t2.visit.VisitKind#getVisitorClass()
 	 */
 	@Override
-	public Class<? extends Visitor> getVisitorClass() {
+	public Class<? extends Visitor<?>> getVisitorClass() {
 		return null;
 	}
 
@@ -35,5 +29,4 @@ public class DataflowCollation extends VisitKind {
 	public static DataflowCollation getInstance() {
 		return Singleton.instance;
 	}
-
 }

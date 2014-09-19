@@ -32,15 +32,13 @@ import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationTypeMismatch
  * emit workflow data tokens.
  * 
  * @author Tom Oinn
- * 
  */
 public interface TokenProcessingEntity extends NamedWorkflowEntity {
+	@HierarchyTraversal(hierarchies = { "workflowStructure" }, role = { CHILD })
+	List<? extends EventHandlingInputPort> getInputPorts();
 
 	@HierarchyTraversal(hierarchies = { "workflowStructure" }, role = { CHILD })
-	public List<? extends EventHandlingInputPort> getInputPorts();
-
-	@HierarchyTraversal(hierarchies = { "workflowStructure" }, role = { CHILD })
-	public List<? extends EventForwardingOutputPort> getOutputPorts();
+	List<? extends EventForwardingOutputPort> getOutputPorts();
 
 	/**
 	 * Run a collection level based type check on the token processing entity
@@ -51,9 +49,9 @@ public interface TokenProcessingEntity extends NamedWorkflowEntity {
 	 * @throws IterationTypeMismatchException
 	 *             if the typing occurred but didn't match because of an
 	 *             iteration mismatch
-	 * @throws InvalidDataflowException 
-	 * 			 	if the entity depended on a dataflow that was not valid
+	 * @throws InvalidDataflowException
+	 *             if the entity depended on a dataflow that was not valid
 	 */
-	public boolean doTypeCheck() throws IterationTypeMismatchException, InvalidDataflowException;
-	
+	boolean doTypeCheck() throws IterationTypeMismatchException,
+			InvalidDataflowException;
 }

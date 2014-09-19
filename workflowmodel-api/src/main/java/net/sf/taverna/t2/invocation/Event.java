@@ -29,29 +29,22 @@ package net.sf.taverna.t2.invocation;
  * the API)
  * 
  * @author Tom Oinn
- * 
  */
 public abstract class Event<EventType extends Event<?>> {
-
 	protected String owner;
-
 	protected InvocationContext context;
-
 	protected int[] index;
 
 	protected Event(String owner, int[] index, InvocationContext context) {
 		this.owner = owner;
 		this.index = index;
 		this.context = context;
-		if (index == null) {
+		if (index == null)
 			throw new RuntimeException("Job index cannot be null");
-		}
-		if (owner == null) {
+		if (owner == null)
 			throw new RuntimeException("Owning process cannot be null");
-		}
-		if (context == null) {
+		if (context == null)
 			throw new RuntimeException("Invocation context cannot be null");
-		}
 	}
 
 	/**
@@ -126,14 +119,12 @@ public abstract class Event<EventType extends Event<?>> {
 	 */
 	protected final String popOwner() throws ProcessIdentifierException {
 		// Empty string already, can't pop from here, throw exception
-		if (owner.equals("")) {
+		if (owner.isEmpty())
 			throw new ProcessIdentifierException(
 					"Attempt to pop a null owning process (empty string)");
-		}
 		// A single ID with no colon in, return the empty string
-		if (owner.lastIndexOf(':') < 0) {
+		if (owner.lastIndexOf(':') < 0)
 			return "";
-		}
 		return owner.substring(0, owner.lastIndexOf(':'));
 	}
 
@@ -150,20 +141,17 @@ public abstract class Event<EventType extends Event<?>> {
 	 */
 	protected final String pushOwner(String newLocalProcess)
 			throws ProcessIdentifierException {
-		if (newLocalProcess.contains(":")) {
+		if (newLocalProcess.contains(":"))
 			throw new ProcessIdentifierException("Can't push '"
 					+ newLocalProcess + "' as it contains a ':' character");
-		}
-		if (owner.equals("")) {
+		if (owner.isEmpty())
 			// If the owner was the empty string we don't need to append the
 			// colon
 			return newLocalProcess;
-		} else {
-			return owner + ":" + newLocalProcess;
-		}
+		return owner + ":" + newLocalProcess;
 	}
-	
 
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(getClass().getSimpleName());
@@ -176,6 +164,5 @@ public abstract class Event<EventType extends Event<?>> {
 		}
 		sb.append(']');
 		return sb.toString();
-	};
-
+	}
 }

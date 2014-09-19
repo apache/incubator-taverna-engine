@@ -27,13 +27,13 @@ import javax.swing.tree.MutableTreeNode;
  * responsible for forwarding all events up to the iteration strategy itself
  * which can then propogate them to the strategy stack.
  */
+@SuppressWarnings("serial")
 public abstract class TerminalNode extends AbstractIterationStrategyNode {
 	@Override
 	public synchronized void insert(MutableTreeNode child, int index) {
-		if (getChildCount() > 0 && getChildAt(0) != child) {
+		if (getChildCount() > 0 && getChildAt(0) != child)
 			throw new IllegalStateException(
 					"The terminal node can have maximum one child");
-		}
 		super.insert(child, index);
 	}
 }

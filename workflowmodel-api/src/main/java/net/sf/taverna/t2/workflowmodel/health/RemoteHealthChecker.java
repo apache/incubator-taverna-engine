@@ -3,6 +3,20 @@
  */
 package net.sf.taverna.t2.workflowmodel.health;
 
+import static java.lang.System.currentTimeMillis;
+import static java.net.HttpURLConnection.HTTP_GONE;
+import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
+import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
+import static java.net.HttpURLConnection.HTTP_OK;
+import static net.sf.taverna.t2.visit.VisitReport.Status.SEVERE;
+import static net.sf.taverna.t2.visit.VisitReport.Status.WARNING;
+import static net.sf.taverna.t2.workflowmodel.health.HealthCheck.CONNECTION_PROBLEM;
+import static net.sf.taverna.t2.workflowmodel.health.HealthCheck.INVALID_URL;
+import static net.sf.taverna.t2.workflowmodel.health.HealthCheck.IO_PROBLEM;
+import static net.sf.taverna.t2.workflowmodel.health.HealthCheck.NOT_HTTP;
+import static net.sf.taverna.t2.workflowmodel.health.HealthCheck.NO_PROBLEM;
+import static net.sf.taverna.t2.workflowmodel.health.HealthCheck.TIME_OUT;
+
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
@@ -26,18 +40,13 @@ import org.apache.log4j.Logger;
  * specific endpoint
  * 
  * @author alanrw
- * 
  */
 public abstract class RemoteHealthChecker implements HealthChecker<Object> {
-		
 	public static final long ENDPOINT_EXPIRY_MILLIS = 30 * 1000; // 30 seconds
-
-	private static Logger logger = Logger.getLogger(RemoteHealthChecker.class);
-	
-	private static int timeout = 10000;
-
+	private static final Logger logger = Logger.getLogger(RemoteHealthChecker.class);
+	private static int timeout = 10000; // TODO Manage via bean?
 	private static long endpointExpiryMillis = ENDPOINT_EXPIRY_MILLIS;
-	
+
 	public static int getTimeoutInSeconds() {
 		return timeout / 1000;
 	}
@@ -45,10 +54,11 @@ public abstract class RemoteHealthChecker implements HealthChecker<Object> {
 	public static void setTimeoutInSeconds(int timeout) {
 		RemoteHealthChecker.timeout = timeout * 1000;
 	}
-	
+
 	public static long getEndpointExpiryInMilliseconds() {
 		return endpointExpiryMillis;
 	}
+
 	public static void setEndpointExpiryInMilliseconds(int endpointExpiry) {
 		endpointExpiryMillis = endpointExpiry;
 	}
@@ -63,26 +73,28 @@ public abstract class RemoteHealthChecker implements HealthChecker<Object> {
 		visitReportsByEndpoint.clear();
 	}
 
-	private static Map<String, WeakReference<VisitReport>> visitReportsByEndpoint = new ConcurrentHashMap<String, WeakReference<VisitReport>>();
+	private static Map<String, WeakReference<VisitReport>> visitReportsByEndpoint = new ConcurrentHashMap<>();
 
-	
 	/**
-	 * Try to contact the specified endpoint as part of the health-checking of the Activity.
+	 * Try to contact the specified endpoint as part of the health-checking of
+	 * the Activity.
 	 * 
-	 * @param activity The activity that is being checked
-	 * @param endpoint The String corresponding to the URL of the endpoint
+	 * @param activity
+	 *            The activity that is being checked
+	 * @param endpoint
+	 *            The String corresponding to the URL of the endpoint
 	 * 
 	 * @return
 	 */
-	public static VisitReport contactEndpoint(Activity activity, String endpoint) {
-
-		WeakReference<VisitReport> cachedReportRef = visitReportsByEndpoint.get(endpoint);
+	public static VisitReport contactEndpoint(Activity<?> activity,
+			String endpoint) {
+		WeakReference<VisitReport> cachedReportRef = visitReportsByEndpoint
+				.get(endpoint);
 		VisitReport cachedReport = null;
-		if (cachedReportRef != null) {
+		if (cachedReportRef != null)
 			cachedReport = cachedReportRef.get();
-		}
 		if (cachedReport != null) {
-			long now = System.currentTimeMillis();
+			long now = currentTimeMillis();
 			long age = now - cachedReport.getCheckTime();
 			if (age < getEndpointExpiryInMilliseconds()) {
 				VisitReport newReport;
@@ -91,19 +103,21 @@ public abstract class RemoteHealthChecker implements HealthChecker<Object> {
 					newReport = cachedReport.clone();
 					// But changed the subject
 					newReport.setSubject(activity);
-					logger.info("Returning cached report for endpoint " + endpoint + ": " + newReport);
+					logger.info("Returning cached report for endpoint "
+							+ endpoint + ": " + newReport);
 					return newReport;
 				} catch (CloneNotSupportedException e) {
-					logger.warn("Could not clone VisitReport " + cachedReport, e);
-				}				
+					logger.warn("Could not clone VisitReport " + cachedReport,
+							e);
+				}
 			}
 		}
 		
 		Status status = Status.OK;
 		String message = "Responded OK";
-		int resultId = HealthCheck.NO_PROBLEM;
+		int resultId = NO_PROBLEM;
 		URLConnection connection = null;
-		int responseCode = HttpURLConnection.HTTP_OK;
+		int responseCode = HTTP_OK;
 		Exception ex = null;
 		try {
 			URL url = new URL(endpoint);
@@ -115,13 +129,14 @@ public abstract class RemoteHealthChecker implements HealthChecker<Object> {
 				httpConnection.setRequestMethod("HEAD");
 				httpConnection.connect();
 				responseCode = httpConnection.getResponseCode();
-				if (responseCode != HttpURLConnection.HTTP_OK) {
+				if (responseCode != HTTP_OK) {
 					try {
-						if ((connection != null) && (connection.getInputStream() != null)) {
+						if ((connection != null)
+								&& (connection.getInputStream() != null))
 							connection.getInputStream().close();
-						}
 					} catch (IOException e) {
-						logger.info("Unable to close connection to " + endpoint, e);
+						logger.info(
+								"Unable to close connection to " + endpoint, e);
 					}
 					connection = url.openConnection();
 					connection.setReadTimeout(timeout);
@@ -131,52 +146,50 @@ public abstract class RemoteHealthChecker implements HealthChecker<Object> {
 					httpConnection.connect();
 					responseCode = httpConnection.getResponseCode();
 				}
- 				if (responseCode != HttpURLConnection.HTTP_OK) {
-					if ((responseCode > HttpURLConnection.HTTP_INTERNAL_ERROR)) {
-						status = Status.WARNING;
+				if (responseCode != HTTP_OK) {
+					if ((responseCode > HTTP_INTERNAL_ERROR)) {
+						status = WARNING;
 						message = "Unexpected response";
-						resultId = HealthCheck.CONNECTION_PROBLEM;
-					}
-					else if ((responseCode == HttpURLConnection.HTTP_NOT_FOUND)
-							|| (responseCode == HttpURLConnection.HTTP_GONE)) {
-						status = Status.WARNING;
+						resultId = CONNECTION_PROBLEM;
+					} else if ((responseCode == HTTP_NOT_FOUND)
+							|| (responseCode == HTTP_GONE)) {
+						status = WARNING;
 						message = "Bad response";
-						resultId = HealthCheck.CONNECTION_PROBLEM;
+						resultId = CONNECTION_PROBLEM;
 					}
 				}
 			} else {
 			    connection.connect();
-				status = Status.WARNING;
+				status = WARNING;
 				message = "Not HTTP";
-				resultId = HealthCheck.NOT_HTTP;
+				resultId = NOT_HTTP;
 			}
-
 		} catch (MalformedURLException e) {
-			status = Status.SEVERE;
+			status = SEVERE;
 			message = "Invalid URL";
-			resultId = HealthCheck.INVALID_URL;
+			resultId = INVALID_URL;
 			ex = e;
 		} catch (SocketTimeoutException e) {
-			status = Status.SEVERE;
+			status = SEVERE;
 			message = "Timed out";
-			resultId = HealthCheck.TIME_OUT;
+			resultId = TIME_OUT;
 			ex = e;
-		}  catch (SSLException e){
-				// Some kind of error when trying to establish an HTTPS connection to the endpoint
-				status = Status.SEVERE;
-				message = "HTTPS connection problem";
-				resultId = HealthCheck.IO_PROBLEM; // SSLException is an IOException
-				ex = e;
+		} catch (SSLException e){
+			// Some kind of error when trying to establish an HTTPS connection to the endpoint
+			status = SEVERE;
+			message = "HTTPS connection problem";
+			resultId = IO_PROBLEM; // SSLException is an IOException
+			ex = e;
 		} catch (IOException e) {
-			status = Status.SEVERE;
+			status = SEVERE;
 			message = "Read problem";
-			resultId = HealthCheck.IO_PROBLEM;
+			resultId = IO_PROBLEM;
 			ex = e;
 		} finally {
 			try {
-				if ((connection != null) && (connection.getInputStream() != null)) {
+				if ((connection != null)
+						&& (connection.getInputStream() != null))
 					connection.getInputStream().close();
-				}
 			} catch (IOException e) {
 				logger.info("Unable to close connection to " + endpoint, e);
 			}
@@ -185,25 +198,21 @@ public abstract class RemoteHealthChecker implements HealthChecker<Object> {
 		VisitReport vr = new VisitReport(HealthCheck.getInstance(), activity, message,
 				resultId, status);
 		vr.setProperty("endpoint", endpoint);
-		if (ex != null) {
+		if (ex != null)
 		    vr.setProperty("exception", ex);
-		}
-		if (responseCode != HttpURLConnection.HTTP_OK) {
+		if (responseCode != HTTP_OK)
 			vr.setProperty("responseCode", Integer.toString(responseCode));
-		}
-		if (resultId == HealthCheck.TIME_OUT) {
+		if (resultId == TIME_OUT)
 			vr.setProperty("timeOut", Integer.toString(timeout));
-		}
-		visitReportsByEndpoint.put(endpoint, new WeakReference<VisitReport>(vr));
+		visitReportsByEndpoint.put(endpoint, new WeakReference<>(vr));
 		return vr;
 	}
 
 	/**
-	 * A remote health-check is time consuming as it tries to contact an external resource.
-	 * 
-	 * (non-Javadoc)
-	 * @see net.sf.taverna.t2.visit.Visitor#isTimeConsuming()
+	 * A remote health-check is time consuming as it tries to contact an
+	 * external resource.
 	 */
+	@Override
 	public boolean isTimeConsuming() {
 		return true;
 	}

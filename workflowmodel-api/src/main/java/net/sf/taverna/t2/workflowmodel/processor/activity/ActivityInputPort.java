@@ -30,10 +30,8 @@ import net.sf.taverna.t2.workflowmodel.InputPort;
  * Activity instances.
  * 
  * @author Tom Oinn
- * 
  */
 public interface ActivityInputPort extends InputPort, ActivityPort {
-
 	/**
 	 * Declares that the DataDocument instances fed as input data (either
 	 * directly or as elements of a collection) to this input port must contain
@@ -43,7 +41,7 @@ public interface ActivityInputPort extends InputPort, ActivityPort {
 	 * @return Class objects representing the reference scheme types which this
 	 *         input can handle
 	 */
-	public List<Class<? extends ExternalReferenceSPI>> getHandledReferenceSchemes();
+	List<Class<? extends ExternalReferenceSPI>> getHandledReferenceSchemes();
 
 	/**
 	 * Literal values are a special case as they are not represented by
@@ -57,7 +55,7 @@ public interface ActivityInputPort extends InputPort, ActivityPort {
 	 *         requires them to be converted to an instance of a reference
 	 *         scheme class (as defined by getHandledReferenceSchemes)
 	 */
-	public boolean allowsLiteralValues();
+	boolean allowsLiteralValues();
 
 	/**
 	 * The Java object type desired when the input data reference is converted
@@ -76,6 +74,5 @@ public interface ActivityInputPort extends InputPort, ActivityPort {
 	 *         almost always be String.class or byte[].class but other cases may
 	 *         exist.
 	 */
-	public Class<?> getTranslatedElementClass();
-
+	Class<?> getTranslatedElementClass();
 }

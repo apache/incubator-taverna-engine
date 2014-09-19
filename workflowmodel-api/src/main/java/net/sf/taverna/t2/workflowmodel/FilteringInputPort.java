@@ -39,10 +39,8 @@ package net.sf.taverna.t2.workflowmodel;
  * if this is not the case the filtering may not function correctly.
  * 
  * @author Tom Oinn
- * 
  */
 public interface FilteringInputPort extends EventHandlingInputPort {
-
 	/**
 	 * Set the depth at which to filter events. Events at a lower depth than
 	 * this are ignored completely, those at exactly this depth are passed
@@ -50,6 +48,5 @@ public interface FilteringInputPort extends EventHandlingInputPort {
 	 * 
 	 * @param filterDepth
 	 */
-	public int getFilterDepth();
-
+	int getFilterDepth();
 }

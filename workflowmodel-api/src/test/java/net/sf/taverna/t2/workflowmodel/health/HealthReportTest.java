@@ -39,7 +39,7 @@ public class HealthReportTest {
 	
 	@Before
 	public void setUp() throws Exception {
-		List<VisitReport> subreports = new ArrayList<VisitReport>();
+		List<VisitReport> subreports = new ArrayList<>();
 		subreports.add(new VisitReport(DummyVisitKind.getInstance(), "sub subject","this is a subreport",0,Status.OK));
 		report = new VisitReport(DummyVisitKind.getInstance(), "a subject","a message",0, Status.WARNING,subreports);
 	}

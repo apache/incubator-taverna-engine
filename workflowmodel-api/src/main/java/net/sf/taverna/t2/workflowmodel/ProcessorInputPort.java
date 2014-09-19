@@ -25,8 +25,6 @@ package net.sf.taverna.t2.workflowmodel;
  * port
  * 
  * @author Tom Oinn
- * 
  */
 public interface ProcessorInputPort extends FilteringInputPort, ProcessorPort {
-
 }

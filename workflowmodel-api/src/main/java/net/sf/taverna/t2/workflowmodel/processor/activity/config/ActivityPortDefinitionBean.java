@@ -30,71 +30,75 @@ import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationBean;
 import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationProperty;
 
 /**
- * A generic bean that describes the shared properties of input and output ports.
+ * A generic bean that describes the shared properties of input and output
+ * ports.
  * 
  * @author Stuart Owen
- *
+ * 
  */
 @ConfigurationBean(uri = "http://ns.taverna.org.uk/2010/scufl2#PortDefinition")
 public abstract class ActivityPortDefinitionBean {
 	private String name;
 	private int depth;
 	private List<String> mimeTypes;
-	
+
 	/**
 	 * @return the port name
 	 */
 	public String getName() {
 		return name;
 	}
-	
+
 	/**
-	 * @param name the port name
+	 * @param name
+	 *            the port name
 	 */
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+
 	/**
 	 * @return the depth of the port
 	 */
 	public int getDepth() {
 		return depth;
 	}
-	
+
 	/**
-	 * @param depth the depth of the port
+	 * @param depth
+	 *            the depth of the port
 	 */
 	public void setDepth(int depth) {
 		this.depth = depth;
 	}
-	
+
 	/**
 	 * @return a list a MIME types that describe the port
 	 */
 	public List<String> getMimeTypes() {
-		if (mimeTypes == null) {
+		if (mimeTypes == null)
 			return Collections.emptyList();
-		}
 		return mimeTypes;
 	}
-	
+
 	/**
-	 * @param mimeTypes the list of MIME-types that describe the port
+	 * @param mimeTypes
+	 *            the list of MIME-types that describe the port
 	 */
 	public void setMimeTypes(List<String> mimeTypes) {
 		this.mimeTypes = mimeTypes;
 	}
-	
+
 	/**
-	 * @param mimeTypes the list of MIME-types that describe the port
+	 * @param mimeTypes
+	 *            the list of MIME-types that describe the port
 	 */
 	@ConfigurationProperty(name = "expectedMimeType", label = "Mime Types", description = "The MIME-types that describe the port", required = false)
 	public void setMimeTypes(Set<URI> mimeTypes) {
-		this.mimeTypes = new ArrayList<String>();
-		for (URI uri : mimeTypes) {
-			this.mimeTypes.add("'" + URI.create("http://purl.org/NET/mediatypes/").relativize(uri) + "'");
-		}
+		this.mimeTypes = new ArrayList<>();
+		for (URI uri : mimeTypes)
+			this.mimeTypes.add("'"
+					+ URI.create("http://purl.org/NET/mediatypes/").relativize(
+							uri) + "'");
 	}
-	
 }

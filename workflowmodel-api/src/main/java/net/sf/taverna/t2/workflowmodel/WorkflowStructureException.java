@@ -28,14 +28,9 @@ package net.sf.taverna.t2.workflowmodel;
  * @author Tom OInn
  */
 public class WorkflowStructureException extends RuntimeException {
-
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	public WorkflowStructureException(String string) {
 		super(string);
 	}
-
 }

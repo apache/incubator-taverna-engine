@@ -29,20 +29,18 @@ import java.util.Set;
  * relaying events.
  * 
  * @author Tom Oinn
- * 
  */
 public interface EventForwardingOutputPort extends OutputPort {
-
 	/**
 	 * The set of EventHandlingInputPort objects which act as targets for events
 	 * produced from this OutputPort
 	 * 
 	
 	public Set<EventHandlingInputPort> getTargets();
-*/
+*/ //FIXME What is happening here???
 
 	/**
 	 * The set of datalinks for which this output port is the source of events
 	 */
-	public Set<? extends Datalink> getOutgoingLinks();
+	Set<? extends Datalink> getOutgoingLinks();
 }

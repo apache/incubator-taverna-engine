@@ -25,10 +25,9 @@ package net.sf.taverna.t2.workflowmodel;
  * granular depth bean getter.
  * 
  * @author Tom Oinn
- * 
  */
-public abstract class AbstractOutputPort extends AbstractPort implements OutputPort {
-
+public abstract class AbstractOutputPort extends AbstractPort implements
+		OutputPort {
 	protected int granularDepth;
 
 	protected AbstractOutputPort(String portName, int portDepth,
@@ -37,8 +36,8 @@ public abstract class AbstractOutputPort extends AbstractPort implements OutputP
 		this.granularDepth = granularDepth;
 	}
 
+	@Override
 	public int getGranularDepth() {
 		return granularDepth;
 	}
-
 }

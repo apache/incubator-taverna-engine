@@ -6,10 +6,8 @@ package net.sf.taverna.t2.workflowmodel;
  * (that includes the whole dispatch stack - iterations of the processor and all).
  * 
  * @author Alex Nenadic
- *
  */
 public class ProcessorFinishedEvent {
-
 	private Processor processor;
 	private String owningProcess;
 	
@@ -33,5 +31,4 @@ public class ProcessorFinishedEvent {
 	public Processor getProcessor() {
 		return processor;
 	}
-
 }

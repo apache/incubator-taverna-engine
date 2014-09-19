@@ -23,16 +23,15 @@ package net.sf.taverna.t2.workflowmodel.health;
 import net.sf.taverna.t2.visit.Visitor;
 
 /**
- * An SPI interface whose implementation performs a health check on an arbitrary instance.
- * <br>
+ * An SPI interface whose implementation performs a health check on an arbitrary
+ * instance.
  * 
  * @author Stuart Owen
  * @author David Withers
- *
- * @param <Type> the type of the item being checked
+ * 
+ * @param <Type>
+ *            the type of the item being checked
  */
 public interface HealthChecker<T> extends Visitor<T> {
-
-
 
 }

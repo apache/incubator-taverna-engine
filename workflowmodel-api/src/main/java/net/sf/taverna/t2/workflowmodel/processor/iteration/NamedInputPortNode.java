@@ -32,12 +32,10 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Job;
  * Processor object to which the iteration strategy belongs.
  * 
  * @author Tom Oinn
- * 
  */
+@SuppressWarnings("serial")
 public class NamedInputPortNode extends AbstractIterationStrategyNode {
-
 	private String portName;
-
 	private int desiredCardinality;
 
 	public NamedInputPortNode(String name, int cardinality) {
@@ -50,6 +48,7 @@ public class NamedInputPortNode extends AbstractIterationStrategyNode {
 	 * If this node receives a job it will always be pushed without modification
 	 * up to the parent
 	 */
+	@Override
 	public void receiveJob(int inputIndex, Job newJob) {
 		pushJob(newJob);
 	}
@@ -57,6 +56,7 @@ public class NamedInputPortNode extends AbstractIterationStrategyNode {
 	/**
 	 * Completion events are passed straight through the same as jobs
 	 */
+	@Override
 	public void receiveCompletion(int inputIndex, Completion completion) {
 		pushCompletion(completion);
 	}
@@ -101,6 +101,7 @@ public class NamedInputPortNode extends AbstractIterationStrategyNode {
 	 * the desired one. If the desired depth is greater then wrapping will
 	 * happen and the iteration depth will be zero (rather than a negative!)
 	 */
+	@Override
 	public int getIterationDepth(Map<String, Integer> inputDepths) {
 		int myInputDepth = inputDepths.get(portName);
 		int depthMismatch = myInputDepth - desiredCardinality;
@@ -112,5 +113,4 @@ public class NamedInputPortNode extends AbstractIterationStrategyNode {
 		return getClass().getSimpleName() + " " + getPortName() + "("
 				+ getCardinality() + ")";
 	}
-
 }

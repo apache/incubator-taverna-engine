@@ -32,24 +32,22 @@ import net.sf.taverna.t2.monitor.MonitorManager.MonitorMessage;
 /**
  * Manages a list of monitors implementations that get notified to register and
  * deregister nodes (ie. {@link{net.sf.taverna.t2.monitor.MonitorNode}s), in
- * addition to the addition of
- * {@link MonitorableProperty monitorable properties} of such nodes.
+ * addition to the addition of {@link MonitorableProperty monitorable
+ * properties} of such nodes.
  * <p>
  * Nodes are identified by their owning process, which is an array of strings,
  * for instance ["dataflow2", "processor5", "fish"]
  * <p>
  * To notify the (by default 0) monitors, use any of the
  * {@link #addPropertiesToNode(String[], Set)},
- * {@link #registerNode(Object, String[], Set)},
- * {@link #deregisterNode(String)} methods and variants.
+ * {@link #registerNode(Object, String[], Set)}, {@link #deregisterNode(String)}
+ * methods and variants.
  * <p>
  * To register a monitor, use {@link #addObserver(Observer)}.
  * 
  * @author Stian Soiland-Reyes
- * 
  */
 public class MonitorManager implements Observable<MonitorMessage> {
-
 	private static MonitorManager instance;
 
 	/**
@@ -58,9 +56,8 @@ public class MonitorManager implements Observable<MonitorMessage> {
 	 * @return The MonitorManager singleton
 	 */
 	public synchronized static MonitorManager getInstance() {
-		if (instance == null) {
+		if (instance == null)
 			setInstance(new MonitorManager());
-		}
 		return instance;
 	}
 
@@ -76,8 +73,7 @@ public class MonitorManager implements Observable<MonitorMessage> {
 		MonitorManager.instance = instance;
 	}
 
-	protected MultiCaster<MonitorMessage> multiCaster = new MultiCaster<MonitorMessage>(
-			this);
+	protected MultiCaster<MonitorMessage> multiCaster = new MultiCaster<>(this);
 
 	/**
 	 * Protected constructor, use singleton access
@@ -90,6 +86,7 @@ public class MonitorManager implements Observable<MonitorMessage> {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void addObserver(Observer<MonitorMessage> observer) {
 		multiCaster.addObserver(observer);
 	}
@@ -154,6 +151,7 @@ public class MonitorManager implements Observable<MonitorMessage> {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public List<Observer<MonitorMessage>> getObservers() {
 		return multiCaster.getObservers();
 	}
@@ -290,9 +288,8 @@ public class MonitorManager implements Observable<MonitorMessage> {
 	 */
 	public void registerNode(Object workflowObject, String[] owningProcess,
 			Set<MonitorableProperty<?>> properties) {
-		if (properties == null) {
-			properties = new HashSet<MonitorableProperty<?>>();
-		}
+		if (properties == null)
+			properties = new HashSet<>();
 		multiCaster.notify(new RegisterNodeMessage(workflowObject,
 				owningProcess, properties));
 	}
@@ -300,14 +297,15 @@ public class MonitorManager implements Observable<MonitorMessage> {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void removeObserver(Observer<MonitorMessage> observer) {
 		multiCaster.removeObserver(observer);
 	}
 
 	/**
 	 * Message indicating that {@link #getNewProperties() new properties} have
-	 * been added to a node identified by given
-	 * {@link #getOwningProcess() owning process}.
+	 * been added to a node identified by given {@link #getOwningProcess()
+	 * owning process}.
 	 * 
 	 */
 	public class AddPropertiesMessage extends MonitorMessage {
@@ -325,8 +323,8 @@ public class MonitorManager implements Observable<MonitorMessage> {
 	}
 
 	/**
-	 * Message indicating that the node of the given
-	 * {@link #getOwningProcess() owning process} is to be deregistered.
+	 * Message indicating that the node of the given {@link #getOwningProcess()
+	 * owning process} is to be deregistered.
 	 * 
 	 */
 	public class DeregisterNodeMessage extends MonitorMessage {
@@ -353,9 +351,9 @@ public class MonitorManager implements Observable<MonitorMessage> {
 	}
 
 	/**
-	 * Message indicating that the node of the given
-	 * {@link #getOwningProcess() owning process} is to be registered. The node
-	 * might have {@link #getProperties() a set of monitorable properties} and a
+	 * Message indicating that the node of the given {@link #getOwningProcess()
+	 * owning process} is to be registered. The node might have
+	 * {@link #getProperties() a set of monitorable properties} and a
 	 * {@link #getWorkflowObject workflow object}.
 	 */
 	public class RegisterNodeMessage extends MonitorMessage {
@@ -377,5 +375,4 @@ public class MonitorManager implements Observable<MonitorMessage> {
 			return workflowObject;
 		}
 	}
-
 }

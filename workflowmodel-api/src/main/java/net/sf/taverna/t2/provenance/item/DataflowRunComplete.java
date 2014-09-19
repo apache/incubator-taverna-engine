@@ -32,10 +32,8 @@ import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
  * enacted to completion
  * 
  * @author Ian Dunlop
- * 
  */
 public class DataflowRunComplete extends AbstractProvenanceItem {
-
 	private SharedVocabulary eventType = SharedVocabulary.END_WORKFLOW_EVENT_TYPE;
 	private Timestamp invocationEnded;
 	private State state;
@@ -44,21 +42,20 @@ public class DataflowRunComplete extends AbstractProvenanceItem {
 		return invocationEnded;
 	}
 
+	@Override
 	public SharedVocabulary getEventType() {
 		return eventType;
 	}
 
 	public void setInvocationEnded(Timestamp invocationEnded) {
 		this.invocationEnded = invocationEnded;
-		
 	}
 
 	public void setState(State state) {
 		this.state = state;
 	}
-	
+
 	public State getState() {
 		return state;
 	}
-
 }

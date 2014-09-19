@@ -20,6 +20,10 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.utils;
 
+import static java.lang.Character.isLetterOrDigit;
+import static net.sf.taverna.t2.workflowmodel.utils.AnnotationTools.addAnnotation;
+import static net.sf.taverna.t2.workflowmodel.utils.AnnotationTools.getAnnotation;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -69,13 +73,11 @@ import org.apache.log4j.Logger;
  * 
  * @author David Withers
  * @author Stian Soiland-Reyes
- * 
  */
 public class Tools {
-	
 	private static Logger logger = Logger.getLogger(Tools.class);
 
-//	private static Edits edits = new EditsImpl();
+	// private static Edits edits = new EditsImpl();
 
 	/**
 	 * Find (and possibly create) an EventHandlingInputPort.
@@ -97,41 +99,38 @@ public class Tools {
 	 *            An EventHandlingInputPort or ActivityInputPort
 	 * @return The found or created EventHandlingInputPort
 	 */
-	@SuppressWarnings("unchecked")
 	protected static EventHandlingInputPort findEventHandlingInputPort(
-			List<Edit<?>> editList, Dataflow dataflow, InputPort inputPort, Edits edits) {
-		if (inputPort instanceof EventHandlingInputPort) {
+			List<Edit<?>> editList, Dataflow dataflow, InputPort inputPort,
+			Edits edits) {
+		if (inputPort instanceof EventHandlingInputPort)
 			return (EventHandlingInputPort) inputPort;
-		} else if (!(inputPort instanceof ActivityInputPort)) {
+		else if (!(inputPort instanceof ActivityInputPort))
 			throw new IllegalArgumentException("Unknown input port type for "
 					+ inputPort);
-		}
+
 		ActivityInputPort activityInput = (ActivityInputPort) inputPort;
-		Collection<Processor> processors = Tools
-				.getProcessorsWithActivityInputPort(dataflow, activityInput);
-		if (processors.isEmpty()) {
+		Collection<Processor> processors = getProcessorsWithActivityInputPort(
+				dataflow, activityInput);
+		if (processors.isEmpty())
 			throw new IllegalArgumentException("Can't find ActivityInputPort "
 					+ activityInput.getName() + " in workflow " + dataflow);
-		}
+
 		// FIXME: Assumes only one matching processor
 		Processor processor = processors.iterator().next();
-		Activity activity = null;
-		for (Activity checkActivity : processor.getActivityList()) {
+		Activity<?> activity = null;
+		for (Activity<?> checkActivity : processor.getActivityList())
 			if (checkActivity.getInputPorts().contains(activityInput)) {
 				activity = checkActivity;
 				break;
 			}
-		}
-		if (activity == null) {
+		if (activity == null)
 			throw new IllegalArgumentException("Can't find activity for port "
 					+ activityInput.getName() + "within processor " + processor);
-		}
 
-		ProcessorInputPort input = Tools.getProcessorInputPort(processor,
-				activity, activityInput);
-		if (input != null) {
+		ProcessorInputPort input = getProcessorInputPort(processor, activity,
+				activityInput);
+		if (input != null)
 			return input;
-		}
 		// port doesn't exist so create a processor port and map it
 		String processorPortName = uniquePortName(activityInput.getName(),
 				processor.getInputPorts());
@@ -164,48 +163,46 @@ public class Tools {
 	 *            An EventForwardingOutputPort or ActivityOutputPort
 	 * @return The found or created EventForwardingOutputPort
 	 */
-	@SuppressWarnings("unchecked")
 	protected static EventForwardingOutputPort findEventHandlingOutputPort(
-			List<Edit<?>> editList, Dataflow dataflow, OutputPort outputPort, Edits edits) {
-		if (outputPort instanceof EventForwardingOutputPort) {
+			List<Edit<?>> editList, Dataflow dataflow, OutputPort outputPort,
+			Edits edits) {
+		if (outputPort instanceof EventForwardingOutputPort)
 			return (EventForwardingOutputPort) outputPort;
-		} else if (!(outputPort instanceof ActivityOutputPort)) {
+		else if (!(outputPort instanceof ActivityOutputPort))
 			throw new IllegalArgumentException("Unknown output port type for "
 					+ outputPort);
-		}
+
 		ActivityOutputPort activityOutput = (ActivityOutputPort) outputPort;
-		Collection<Processor> processors = Tools
-				.getProcessorsWithActivityOutputPort(dataflow, activityOutput);
-		if (processors.isEmpty()) {
+		Collection<Processor> processors = getProcessorsWithActivityOutputPort(
+				dataflow, activityOutput);
+		if (processors.isEmpty())
 			throw new IllegalArgumentException("Can't find ActivityOutputPort "
 					+ activityOutput.getName() + " in workflow " + dataflow);
-		}
+
 		// FIXME: Assumes only one matching processor
 		Processor processor = processors.iterator().next();
-		Activity activity = null;
-		for (Activity checkActivity : processor.getActivityList()) {
+		Activity<?> activity = null;
+		for (Activity<?> checkActivity : processor.getActivityList())
 			if (checkActivity.getOutputPorts().contains(activityOutput)) {
 				activity = checkActivity;
 				break;
 			}
-		}
-		if (activity == null) {
+		if (activity == null)
 			throw new IllegalArgumentException("Can't find activity for port "
 					+ activityOutput.getName() + "within processor "
 					+ processor);
-		}
 
 		ProcessorOutputPort processorOutputPort = Tools.getProcessorOutputPort(
 				processor, activity, activityOutput);
-		if (processorOutputPort != null) {
+		if (processorOutputPort != null)
 			return processorOutputPort;
-		}
+
 		// port doesn't exist so create a processor port and map it
 		String processorPortName = uniquePortName(activityOutput.getName(),
 				processor.getOutputPorts());
 		processorOutputPort = edits.createProcessorOutputPort(processor,
-				processorPortName, activityOutput.getDepth(), activityOutput
-						.getGranularDepth());
+				processorPortName, activityOutput.getDepth(),
+				activityOutput.getGranularDepth());
 		editList.add(edits.getAddProcessorOutputPortEdit(processor,
 				processorOutputPort));
 		editList.add(edits.getAddActivityOutputPortMappingEdit(activity,
@@ -231,7 +228,8 @@ public class Tools {
 	 *         and connects the Datalink
 	 */
 	public static Edit<?> getCreateAndConnectDatalinkEdit(Dataflow dataflow,
-			EventForwardingOutputPort source, EventHandlingInputPort sink, Edits edits) {
+			EventForwardingOutputPort source, EventHandlingInputPort sink,
+			Edits edits) {
 		Edit<?> edit = null;
 
 		Datalink incomingLink = sink.getIncomingLink();
@@ -239,34 +237,36 @@ public class Tools {
 			Datalink datalink = edits.createDatalink(source, sink);
 			edit = edits.getConnectDatalinkEdit(datalink);
 		} else {
-			List<Edit<?>> editList = new ArrayList<Edit<?>>();
+			List<Edit<?>> editList = new ArrayList<>();
 
 			Merge merge = null;
 			int counter = 0; // counter for merge input port names
-			if (incomingLink.getSource() instanceof MergeOutputPort) {
+			if (incomingLink.getSource() instanceof MergeOutputPort)
 				merge = ((MergeOutputPort) incomingLink.getSource()).getMerge();
-			} else {
+			else {
 				merge = edits.createMerge(dataflow);
 				editList.add(edits.getAddMergeEdit(dataflow, merge));
 				editList.add(edits.getDisconnectDatalinkEdit(incomingLink));
 				MergeInputPort mergeInputPort = edits.createMergeInputPort(
-						merge, getUniqueMergeInputPortName(merge, incomingLink
-								.getSource().getName()
-								+ "To" + merge.getLocalName() + "_input",
+						merge,
+						getUniqueMergeInputPortName(merge,
+								incomingLink.getSource().getName() + "To"
+										+ merge.getLocalName() + "_input",
 								counter++), incomingLink.getSink().getDepth());
 				editList.add(edits.getAddMergeInputPortEdit(merge,
 						mergeInputPort));
-				Datalink datalink = edits.createDatalink(incomingLink
-						.getSource(), mergeInputPort);
+				Datalink datalink = edits.createDatalink(
+						incomingLink.getSource(), mergeInputPort);
 				editList.add(edits.getConnectDatalinkEdit(datalink));
 				datalink = edits.createDatalink(merge.getOutputPort(),
 						incomingLink.getSink());
 				editList.add(edits.getConnectDatalinkEdit(datalink));
 			}
-			MergeInputPort mergeInputPort = edits.createMergeInputPort(merge,
+			MergeInputPort mergeInputPort = edits.createMergeInputPort(
+					merge,
 					getUniqueMergeInputPortName(merge, source.getName() + "To"
-							+ merge.getLocalName() + "_input", counter), sink
-							.getDepth());
+							+ merge.getLocalName() + "_input", counter),
+					sink.getDepth());
 			editList.add(edits.getAddMergeInputPortEdit(merge, mergeInputPort));
 			Datalink datalink = edits.createDatalink(source, mergeInputPort);
 			editList.add(edits.getConnectDatalinkEdit(datalink));
@@ -304,21 +304,21 @@ public class Tools {
 	 */
 	public static Edit<?> getCreateAndConnectDatalinkEdit(Dataflow dataflow,
 			OutputPort outputPort, InputPort inputPort, Edits edits) {
-
-		List<Edit<?>> editList = new ArrayList<Edit<?>>();
+		List<Edit<?>> editList = new ArrayList<>();
 		EventHandlingInputPort sink = findEventHandlingInputPort(editList,
 				dataflow, inputPort, edits);
 		EventForwardingOutputPort source = findEventHandlingOutputPort(
 				editList, dataflow, outputPort, edits);
-		editList.add(getCreateAndConnectDatalinkEdit(dataflow, source, sink, edits));
+		editList.add(getCreateAndConnectDatalinkEdit(dataflow, source, sink,
+				edits));
 		return new CompoundEdit(editList);
 	}
 
 	/**
 	 * Find a unique port name given a list of existing ports.
 	 * <p>
-	 * If needed, the returned port name will be prefixed with an underscore and a number, 
-	 * starting from 2. (The original being 'number 1')
+	 * If needed, the returned port name will be prefixed with an underscore and
+	 * a number, starting from 2. (The original being 'number 1')
 	 * <p>
 	 * Although not strictly needed by Taverna, for added user friendliness the
 	 * case of the existing port names are ignored when checking for uniqueness.
@@ -334,120 +334,110 @@ public class Tools {
 	public static String uniquePortName(String suggestedPortName,
 			Collection<? extends Port> existingPorts) {
 		// Make sure we have a unique port name
-		Set<String> existingNames = new HashSet<String>();
-		for (Port existingPort : existingPorts) {
+		Set<String> existingNames = new HashSet<>();
+		for (Port existingPort : existingPorts)
 			existingNames.add(existingPort.getName().toLowerCase());
-		}
 		String candidateName = suggestedPortName;
 		long counter = 2;
-		while (existingNames.contains(candidateName.toLowerCase())) {
+		while (existingNames.contains(candidateName.toLowerCase()))
 			candidateName = suggestedPortName + "_" + counter++;
-		}
 		return candidateName;
 	}
 
 	public static Edit<?> getMoveDatalinkSinkEdit(Dataflow dataflow,
 			Datalink datalink, EventHandlingInputPort sink, Edits edits) {
-		List<Edit<?>> editList = new ArrayList<Edit<?>>();
+		List<Edit<?>> editList = new ArrayList<>();
 		editList.add(edits.getDisconnectDatalinkEdit(datalink));
-		if (datalink.getSink() instanceof ProcessorInputPort) {
-			editList
-					.add(getRemoveProcessorInputPortEdit((ProcessorInputPort) datalink
-							.getSink(), edits));
-		}
-		editList.add(getCreateAndConnectDatalinkEdit(dataflow, datalink
-				.getSource(), sink, edits));
+		if (datalink.getSink() instanceof ProcessorInputPort)
+			editList.add(getRemoveProcessorInputPortEdit(
+					(ProcessorInputPort) datalink.getSink(), edits));
+		editList.add(getCreateAndConnectDatalinkEdit(dataflow,
+				datalink.getSource(), sink, edits));
 		return new CompoundEdit(editList);
 	}
 
 	public static Edit<?> getDisconnectDatalinkAndRemovePortsEdit(
 			Datalink datalink, Edits edits) {
-		List<Edit<?>> editList = new ArrayList<Edit<?>>();
+		List<Edit<?>> editList = new ArrayList<>();
 		editList.add(edits.getDisconnectDatalinkEdit(datalink));
 		if (datalink.getSource() instanceof ProcessorOutputPort) {
 			ProcessorOutputPort processorOutputPort = (ProcessorOutputPort) datalink
 					.getSource();
-			if (processorOutputPort.getOutgoingLinks().size() == 1) {
-				editList
-						.add(getRemoveProcessorOutputPortEdit(processorOutputPort, edits));
-			}
+			if (processorOutputPort.getOutgoingLinks().size() == 1)
+				editList.add(getRemoveProcessorOutputPortEdit(
+						processorOutputPort, edits));
 		}
-		if (datalink.getSink() instanceof ProcessorInputPort) {
-			editList
-					.add(getRemoveProcessorInputPortEdit((ProcessorInputPort) datalink
-							.getSink(), edits));
-		}
+		if (datalink.getSink() instanceof ProcessorInputPort)
+			editList.add(getRemoveProcessorInputPortEdit(
+					(ProcessorInputPort) datalink.getSink(), edits));
 		return new CompoundEdit(editList);
 	}
 
 	public static Edit<?> getRemoveProcessorOutputPortEdit(
 			ProcessorOutputPort port, Edits edits) {
-		List<Edit<?>> editList = new ArrayList<Edit<?>>();
+		List<Edit<?>> editList = new ArrayList<>();
 		Processor processor = port.getProcessor();
 		editList.add(edits.getRemoveProcessorOutputPortEdit(
 				port.getProcessor(), port));
-		for (Activity<?> activity : processor.getActivityList()) {
+		for (Activity<?> activity : processor.getActivityList())
 			editList.add(edits.getRemoveActivityOutputPortMappingEdit(activity,
 					port.getName()));
-		}
 		return new CompoundEdit(editList);
 	}
 
 	public static Edit<?> getRemoveProcessorInputPortEdit(
 			ProcessorInputPort port, Edits edits) {
-		List<Edit<?>> editList = new ArrayList<Edit<?>>();
+		List<Edit<?>> editList = new ArrayList<>();
 		Processor processor = port.getProcessor();
 		editList.add(edits.getRemoveProcessorInputPortEdit(port.getProcessor(),
 				port));
-		for (Activity<?> activity : processor.getActivityList()) {
+		for (Activity<?> activity : processor.getActivityList())
 			editList.add(edits.getRemoveActivityInputPortMappingEdit(activity,
 					port.getName()));
-		}
 		return new CompoundEdit(editList);
 	}
-	
-	public static Edit<?> getEnableDisabledActivityEdit(Processor processor, DisabledActivity disabledActivity, Edits edits) {
-		List<Edit<?>> editList = new ArrayList<Edit<?>>();
+
+	public static Edit<?> getEnableDisabledActivityEdit(Processor processor,
+			DisabledActivity disabledActivity, Edits edits) {
+		List<Edit<?>> editList = new ArrayList<>();
 		Activity<?> brokenActivity = disabledActivity.getActivity();
 		try {
-			Activity ra = brokenActivity.getClass().newInstance();
+			@SuppressWarnings("unchecked")
+			Activity<Object> ra = brokenActivity.getClass().newInstance();
 			Object lastConfig = disabledActivity.getLastWorkingConfiguration();
-			if (lastConfig == null) {
-			    lastConfig = disabledActivity.getActivityConfiguration();
-			}
-		    ra.configure(lastConfig);
+			if (lastConfig == null)
+				lastConfig = disabledActivity.getActivityConfiguration();
+			ra.configure(lastConfig);
 
-		    Map<String, String> portMapping = ra.getInputPortMapping();
-		    Set<String> portNames = new HashSet<String>();
-		    portNames.addAll(portMapping.keySet());
-		    for (String portName : portNames) {
-			editList.add(edits.getRemoveActivityInputPortMappingEdit(ra, portName));
-		    }
-		    portMapping = ra.getOutputPortMapping();
-		    portNames.clear();
-		    portNames.addAll(portMapping.keySet());
-		    for (String portName : portNames) {
-			editList.add(edits.getRemoveActivityOutputPortMappingEdit(ra, portName));
-		    }
-		    
-		    portMapping = disabledActivity.getInputPortMapping();
-		    for (String portName : portMapping.keySet()) {
-			editList.add(edits.getAddActivityInputPortMappingEdit(ra, portName, portMapping.get(portName)));
-		    }
-		    portMapping = disabledActivity.getOutputPortMapping();
-		    for (String portName : portMapping.keySet()) {
-			editList.add(edits.getAddActivityOutputPortMappingEdit(ra, portName, portMapping.get(portName)));
-		    }
-		    
-		    editList.add(edits.getRemoveActivityEdit(processor, disabledActivity));
-		    editList.add(edits.getAddActivityEdit(processor, ra));
-		}
-		catch (ActivityConfigurationException ex) {
-		    logger.error("Configuration exception ", ex);
-		    return null;
-		} catch (InstantiationException e) {
+			Map<String, String> portMapping = ra.getInputPortMapping();
+			Set<String> portNames = new HashSet<>();
+			portNames.addAll(portMapping.keySet());
+			for (String portName : portNames)
+				editList.add(edits.getRemoveActivityInputPortMappingEdit(ra,
+						portName));
+			portMapping = ra.getOutputPortMapping();
+			portNames.clear();
+			portNames.addAll(portMapping.keySet());
+			for (String portName : portNames)
+				editList.add(edits.getRemoveActivityOutputPortMappingEdit(ra,
+						portName));
+
+			portMapping = disabledActivity.getInputPortMapping();
+			for (String portName : portMapping.keySet())
+				editList.add(edits.getAddActivityInputPortMappingEdit(ra,
+						portName, portMapping.get(portName)));
+			portMapping = disabledActivity.getOutputPortMapping();
+			for (String portName : portMapping.keySet())
+				editList.add(edits.getAddActivityOutputPortMappingEdit(ra,
+						portName, portMapping.get(portName)));
+
+			editList.add(edits.getRemoveActivityEdit(processor,
+					disabledActivity));
+			editList.add(edits.getAddActivityEdit(processor, ra));
+		} catch (ActivityConfigurationException ex) {
+			logger.error("Configuration exception ", ex);
 			return null;
-		} catch (IllegalAccessException e) {
+		} catch (InstantiationException | IllegalAccessException e) {
 			return null;
 		}
 		return new CompoundEdit(editList);
@@ -457,18 +447,16 @@ public class Tools {
 			Activity<?> activity, InputPort activityInputPort) {
 		ProcessorInputPort result = null;
 		for (Entry<String, String> mapEntry : activity.getInputPortMapping()
-				.entrySet()) {
+				.entrySet())
 			if (mapEntry.getValue().equals(activityInputPort.getName())) {
 				for (ProcessorInputPort processorInputPort : processor
-						.getInputPorts()) {
+						.getInputPorts())
 					if (processorInputPort.getName().equals(mapEntry.getKey())) {
 						result = processorInputPort;
 						break;
 					}
-				}
 				break;
 			}
-		}
 		return result;
 	}
 
@@ -477,123 +465,99 @@ public class Tools {
 			OutputPort activityOutputPort) {
 		ProcessorOutputPort result = null;
 		for (Entry<String, String> mapEntry : activity.getOutputPortMapping()
-				.entrySet()) {
+				.entrySet())
 			if (mapEntry.getValue().equals(activityOutputPort.getName())) {
 				for (ProcessorOutputPort processorOutputPort : processor
-						.getOutputPorts()) {
+						.getOutputPorts())
 					if (processorOutputPort.getName().equals(mapEntry.getKey())) {
 						result = processorOutputPort;
 						break;
 					}
-				}
 				break;
 			}
-		}
 		return result;
 	}
 
 	public static ActivityInputPort getActivityInputPort(Activity<?> activity,
 			String portName) {
 		ActivityInputPort activityInputPort = null;
-		for (ActivityInputPort inputPort : activity.getInputPorts()) {
+		for (ActivityInputPort inputPort : activity.getInputPorts())
 			if (inputPort.getName().equals(portName)) {
 				activityInputPort = inputPort;
 				break;
 			}
-		}
 		return activityInputPort;
 	}
 
 	public static OutputPort getActivityOutputPort(Activity<?> activity,
 			String portName) {
 		OutputPort activityOutputPort = null;
-		for (OutputPort outputPort : activity.getOutputPorts()) {
+		for (OutputPort outputPort : activity.getOutputPorts())
 			if (outputPort.getName().equals(portName)) {
 				activityOutputPort = outputPort;
 				break;
 			}
-		}
 		return activityOutputPort;
 	}
 
 	public static String getUniqueMergeInputPortName(Merge merge, String name,
 			int count) {
 		String uniqueName = name + count;
-		for (MergeInputPort mergeInputPort : merge.getInputPorts()) {
-			if (mergeInputPort.getName().equals(uniqueName)) {
+		for (MergeInputPort mergeInputPort : merge.getInputPorts())
+			if (mergeInputPort.getName().equals(uniqueName))
 				return getUniqueMergeInputPortName(merge, name, ++count);
-			}
-		}
 		return uniqueName;
 	}
 
 	public static Collection<Processor> getProcessorsWithActivity(
 			Dataflow dataflow, Activity<?> activity) {
-		Set<Processor> processors = new HashSet<Processor>();
-		for (Processor processor : dataflow.getProcessors()) {
-			if (processor.getActivityList().contains(activity)) {
+		Set<Processor> processors = new HashSet<>();
+		for (Processor processor : dataflow.getProcessors())
+			if (processor.getActivityList().contains(activity))
 				processors.add(processor);
-			}
-		}
 		return processors;
-
 	}
 
 	public static Collection<Processor> getProcessorsWithActivityInputPort(
 			Dataflow dataflow, ActivityInputPort inputPort) {
-
-		Set<Processor> processors = new HashSet<Processor>();
+		Set<Processor> processors = new HashSet<>();
 		for (Processor processor : dataflow.getProcessors()) {
-
 			// Does it contain a nested workflow?
-			if (containsNestedWorkflow(processor)) {
+			if (containsNestedWorkflow(processor))
 				// Get the nested workflow and check all its nested processors
-				Dataflow nestedWorkflow = ((NestedDataflow) processor
-						.getActivityList().get(0)).getNestedDataflow();
-				Collection<Processor> nested_processors = getProcessorsWithActivityInputPort(
-						nestedWorkflow, inputPort);
-				if (!nested_processors.isEmpty())
-					processors.addAll(nested_processors);
-			}
+				processors.addAll(getProcessorsWithActivityInputPort(
+						getNestedWorkflow(processor), inputPort));
 
-			// Check all processor's activities (even if the processor contained
-			// a nested workflow,
-			// as its dataflow activity still contains input and output ports)
-			for (Activity<?> activity : processor.getActivityList()) {
-
-				if (activity.getInputPorts().contains(inputPort)) {
+			/*
+			 * Check all processor's activities (even if the processor contained
+			 * a nested workflow, as its dataflow activity still contains input
+			 * and output ports)
+			 */
+			for (Activity<?> activity : processor.getActivityList())
+				if (activity.getInputPorts().contains(inputPort))
 					processors.add(processor);
-				}
-			}
 		}
 		return processors;
 	}
 
 	public static Collection<Processor> getProcessorsWithActivityOutputPort(
 			Dataflow dataflow, OutputPort outputPort) {
-		Set<Processor> processors = new HashSet<Processor>();
+		Set<Processor> processors = new HashSet<>();
 		for (Processor processor : dataflow.getProcessors()) {
-
 			// Does it contain a nested workflow?
-			if (containsNestedWorkflow(processor)) {
+			if (containsNestedWorkflow(processor))
 				// Get the nested workflow and check all its nested processors
-				Dataflow nestedWorkflow = ((NestedDataflow) processor
-						.getActivityList().get(0)).getNestedDataflow();
-				Collection<Processor> nested_processors = getProcessorsWithActivityOutputPort(
-						nestedWorkflow, outputPort);
-				if (!nested_processors.isEmpty())
-					processors.addAll(nested_processors);
-			}
+				processors.addAll(getProcessorsWithActivityOutputPort(
+						getNestedWorkflow(processor), outputPort));
 
-			// Check all processor's activities (even if the processor contained
-			// a nested workflow,
-			// as its dataflow activity still contains input and output ports)
-			for (Activity<?> activity : processor.getActivityList()) {
-
-				if (activity.getOutputPorts().contains(outputPort)) {
+			/*
+			 * Check all processor's activities (even if the processor contained
+			 * a nested workflow, as its dataflow activity still contains input
+			 * and output ports)
+			 */
+			for (Activity<?> activity : processor.getActivityList())
+				if (activity.getOutputPorts().contains(outputPort))
 					processors.add(processor);
-				}
-			}
 		}
 		return processors;
 	}
@@ -610,40 +574,28 @@ public class Tools {
 	 */
 	public static TokenProcessingEntity getTokenProcessingEntityWithEventForwardingOutputPort(
 			EventForwardingOutputPort port, Dataflow workflow) {
-
 		// First check the workflow's inputs
-		for (DataflowInputPort input : workflow.getInputPorts()) {
-			if (input.getInternalOutputPort().equals(port)) {
+		for (DataflowInputPort input : workflow.getInputPorts())
+			if (input.getInternalOutputPort().equals(port))
 				return workflow;
-			}
-		}
 
 		// Check workflow's merges
-		List<? extends Merge> merges = workflow.getMerges();
-		for (Merge merge : merges) {
-			if (merge.getOutputPort().equals(port)) {
+		for (Merge merge : workflow.getMerges())
+			if (merge.getOutputPort().equals(port))
 				return merge;
-			}
-		}
 
 		// Check workflow's processors
-		List<? extends Processor> processors = workflow.getProcessors();
-		for (Processor processor : processors) {
-			for (OutputPort output : processor.getOutputPorts()) {
-				if (output.equals(port)) {
+		for (Processor processor : workflow.getProcessors()) {
+			for (OutputPort output : processor.getOutputPorts())
+				if (output.equals(port))
 					return processor;
-				}
-			}
 
 			// If processor contains a nested workflow - descend into it
 			if (containsNestedWorkflow(processor)) {
-				Dataflow nestedWorkflow = ((NestedDataflow) processor
-						.getActivityList().get(0)).getNestedDataflow();
 				TokenProcessingEntity entity = getTokenProcessingEntityWithEventForwardingOutputPort(
-						port, nestedWorkflow);
-				if (entity != null) {
+						port, getNestedWorkflow(processor));
+				if (entity != null)
 					return entity;
-				}
 			}
 		}
 
@@ -662,42 +614,29 @@ public class Tools {
 	 */
 	public static TokenProcessingEntity getTokenProcessingEntityWithEventHandlingInputPort(
 			EventHandlingInputPort port, Dataflow workflow) {
-
 		// First check the workflow's outputs
-		for (DataflowOutputPort output : workflow.getOutputPorts()) {
-			if (output.getInternalInputPort().equals(port)) {
+		for (DataflowOutputPort output : workflow.getOutputPorts())
+			if (output.getInternalInputPort().equals(port))
 				return workflow;
-			}
-		}
 
 		// Check workflow's merges
-		List<? extends Merge> merges = workflow.getMerges();
-		for (Merge merge : merges) {
-			for (EventHandlingInputPort input : merge.getInputPorts()) {
-				if (input.equals(port)) {
+		for (Merge merge : workflow.getMerges())
+			for (EventHandlingInputPort input : merge.getInputPorts())
+				if (input.equals(port))
 					return merge;
-				}
-			}
-		}
 
 		// Check workflow's processors
-		List<? extends Processor> processors = workflow.getProcessors();
-		for (Processor processor : processors) {
-			for (EventHandlingInputPort output : processor.getInputPorts()) {
-				if (output.equals(port)) {
+		for (Processor processor : workflow.getProcessors()) {
+			for (EventHandlingInputPort output : processor.getInputPorts())
+				if (output.equals(port))
 					return processor;
-				}
-			}
 
 			// If processor contains a nested workflow - descend into it
 			if (containsNestedWorkflow(processor)) {
-				Dataflow nestedWorkflow = ((NestedDataflow) processor
-						.getActivityList().get(0)).getNestedDataflow();
 				TokenProcessingEntity entity = getTokenProcessingEntityWithEventHandlingInputPort(
-						port, nestedWorkflow);
-				if (entity != null) {
+						port, getNestedWorkflow(processor));
+				if (entity != null)
 					return entity;
-				}
 			}
 		}
 
@@ -708,10 +647,20 @@ public class Tools {
 	 * Returns true if processor contains a nested workflow.
 	 */
 	public static boolean containsNestedWorkflow(Processor processor) {
-		return ((!processor.getActivityList().isEmpty()) && processor
-				.getActivityList().get(0) instanceof NestedDataflow);
+		List<?> activities = processor.getActivityList();
+		return !activities.isEmpty()
+				&& activities.get(0) instanceof NestedDataflow;
 	}
-	
+
+	/**
+	 * Get the workflow that is nested inside. Only call this if
+	 * {@link #containsNestedWorkflow()} returns true.
+	 */
+	private static Dataflow getNestedWorkflow(Processor processor) {
+		return ((NestedDataflow) processor.getActivityList().get(0))
+				.getNestedDataflow();
+	}
+
 	/**
 	 * Find the first processor that contains an activity that has the given
 	 * activity input port. See #get
@@ -722,21 +671,17 @@ public class Tools {
 	 */
 	public static Processor getFirstProcessorWithActivityInputPort(
 			Dataflow dataflow, ActivityInputPort targetPort) {
-		Collection<Processor> processorsWithActivityPort = getProcessorsWithActivityInputPort(
-				dataflow, targetPort);
-		for (Processor processor : processorsWithActivityPort) {
+		for (Processor processor : getProcessorsWithActivityInputPort(
+				dataflow, targetPort))
 			return processor;
-		}
 		return null;
 	}
 
 	public static Processor getFirstProcessorWithActivityOutputPort(
 			Dataflow dataflow, ActivityOutputPort targetPort) {
-		Collection<Processor> processorsWithActivityPort = getProcessorsWithActivityOutputPort(
-				dataflow, targetPort);
-		for (Processor processor : processorsWithActivityPort) {
+		for (Processor processor : getProcessorsWithActivityOutputPort(
+				dataflow, targetPort))
 			return processor;
-		}
 		return null;
 	}
 
@@ -760,16 +705,13 @@ public class Tools {
 	 */
 	public static String uniqueProcessorName(String preferredName,
 			Dataflow dataflow) {
-
-		Set<String> existingNames = new HashSet<String>();
-
+		Set<String> existingNames = new HashSet<>();
 		for (NamedWorkflowEntity entity : dataflow
-				.getEntities(NamedWorkflowEntity.class)) {
+				.getEntities(NamedWorkflowEntity.class))
 			existingNames.add(entity.getLocalName().toLowerCase());
-		}
 		return uniqueObjectName(preferredName, existingNames);
 	}
-	
+
 	/**
 	 * Checks that the name does not have any characters that are invalid for a
 	 * Taverna name.
@@ -781,75 +723,73 @@ public class Tools {
 	 * @return the sanitised name
 	 */
 	public static String sanitiseName(String name) {
-		String result = name;
 		if (Pattern.matches("\\w++", name) == false) {
-			result = "";
-			for (char c : name.toCharArray()) {
-				if (Character.isLetterOrDigit(c) || c == '_') {
-					result += c;
-				} else {
-					result += "_";
-				}
-			}
+			StringBuilder result = new StringBuilder(name.length());
+			for (char c : name.toCharArray())
+				result.append(isLetterOrDigit(c) || c == '_' ? c : "_");
+			return result.toString();
 		}
-		return result;
+		return name;
 	}
-	
-	public static String uniqueObjectName(String preferredName, Set<String> existingNames) {
+
+	public static String uniqueObjectName(String preferredName,
+			Set<String> existingNames) {
 		String uniqueName = preferredName;
 		long suffix = 2;
-		while (existingNames.contains(uniqueName.toLowerCase())) {
+		while (existingNames.contains(uniqueName.toLowerCase()))
 			uniqueName = preferredName + "_" + suffix++;
-		}
 		return uniqueName;
-		
+
 	}
-	
+
 	/**
-	 * Add the identification of a Dataflow into its identification annotation chain (if necessary)
+	 * Add the identification of a Dataflow into its identification annotation
+	 * chain (if necessary)
 	 * 
 	 * @return Whether an identification needed to be added
 	 */
-	public static boolean addDataflowIdentification(Dataflow dataflow, String internalId, Edits edits) {
-		boolean added = false;
-		IdentificationAssertion ia = (IdentificationAssertion) (AnnotationTools.getAnnotation(dataflow, IdentificationAssertion.class));
-		if ((ia == null) || !ia.getIdentification().equals(internalId)) {
-			IdentificationAssertion newIa = new IdentificationAssertion();
-			newIa.setIdentification(internalId);
-			try {
-				AnnotationTools.addAnnotation(dataflow, newIa, edits).doEdit();
-			} catch (EditException e) {
-				added = false;
-			}
+	public static boolean addDataflowIdentification(Dataflow dataflow,
+			String internalId, Edits edits) {
+		IdentificationAssertion ia = (IdentificationAssertion) getAnnotation(
+				dataflow, IdentificationAssertion.class);
+		if (ia != null && ia.getIdentification().equals(internalId))
+			return false;
+		IdentificationAssertion newIa = new IdentificationAssertion();
+		newIa.setIdentification(internalId);
+		try {
+			addAnnotation(dataflow, newIa, edits).doEdit();
+			return true;
+		} catch (EditException e) {
+			return false;
 		}
-		return added;
 	}
 
 	/**
-	 * Return a path of processors where the last element is this processor
-	 * and previous ones are nested processors that contain this one all the 
-	 * way to the top but excluding the top level workflow as this is only a
-	 * list of processors.
+	 * Return a path of processors where the last element is this processor and
+	 * previous ones are nested processors that contain this one all the way to
+	 * the top but excluding the top level workflow as this is only a list of
+	 * processors.
 	 */
 	public static List<Processor> getNestedPathForProcessor(
 			Processor processor, Dataflow dataflow) {
-				
-		for (Processor proc : dataflow.getProcessors()){
-			if (proc == processor){ // found it
-				List<Processor> list = new ArrayList<Processor>();
+		for (Processor proc : dataflow.getProcessors())
+			if (proc == processor) { // found it
+				List<Processor> list = new ArrayList<>();
 				list.add(processor);
 				return list;
-			}
-			else if (Tools.containsNestedWorkflow(proc)){ // check inside this nested processor
-				List<Processor> nestedList = getNestedPathForProcessor(processor, ((NestedDataflow)proc.getActivityList().get(0)).getNestedDataflow());
-				if (nestedList == null){ // processor not found in this nested workflow
+			} else if (containsNestedWorkflow(proc)) {
+				/*
+				 * check inside this nested processor
+				 */
+				List<Processor> nestedList = getNestedPathForProcessor(
+						processor, getNestedWorkflow(proc));
+				if (nestedList == null)
+					// processor not found in this nested workflow
 					continue;
-				}
-				nestedList.add(0, proc); // add this nested processor to the list
+				// add this nested processor to the list
+				nestedList.add(0, proc);
 				return nestedList;
 			}
-		}
 		return null;
 	}
-
 }

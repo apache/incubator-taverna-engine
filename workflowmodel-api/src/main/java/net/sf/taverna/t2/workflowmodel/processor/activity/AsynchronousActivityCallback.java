@@ -31,16 +31,14 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchErrorTy
  * results and failure messages back to the invocation layer.
  * 
  * @author Tom Oinn
- * 
  */
 public interface AsynchronousActivityCallback {
-
 	/**
 	 * The invocation context contains resources such as data managers, security
 	 * agents and provenance consumers to be used by the Activity as it runs.
 	 * This replaces the getLocalDataManager and getLocalSecurityManager calls.
 	 */
-	public InvocationContext getContext();
+	InvocationContext getContext();
 
 	/**
 	 * If an activity proxy wants to create a new thread of activity it should
@@ -55,7 +53,7 @@ public interface AsynchronousActivityCallback {
 	 * @param runMe
 	 *            a Runnable to implement the activity proxy logic.
 	 */
-	public void requestRun(Runnable runMe);
+	void requestRun(Runnable runMe);
 
 	/**
 	 * Push a map of named identifiers out to the invocation layer which is then
@@ -71,7 +69,7 @@ public interface AsynchronousActivityCallback {
 	 *            invocation. If there's no streaming involved this should be a
 	 *            zero length int[].
 	 */
-	public void receiveResult(Map<String, T2Reference> data, int[] index);
+	void receiveResult(Map<String, T2Reference> data, int[] index);
 
 	/**
 	 * If (and only if) the activity is streaming data then this method can be
@@ -85,7 +83,7 @@ public interface AsynchronousActivityCallback {
 	 * 
 	 * @param completionIndex
 	 */
-	public void receiveCompletion(int[] completionIndex);
+	void receiveCompletion(int[] completionIndex);
 
 	/**
 	 * If the job fails (as opposed to succeeding and sending an error for which
@@ -100,7 +98,7 @@ public interface AsynchronousActivityCallback {
 	 * @param message
 	 * @param t
 	 */
-	public void fail(String message, Throwable t, DispatchErrorType errorType);
+	void fail(String message, Throwable t, DispatchErrorType errorType);
 
 	/**
 	 * If the job fails (as opposed to succeeding and sending an error for which
@@ -112,7 +110,7 @@ public interface AsynchronousActivityCallback {
 	 * @param message
 	 * @param t
 	 */
-	public void fail(String message, Throwable t);
+	void fail(String message, Throwable t);
 
 	/**
 	 * If the job fails (as opposed to succeeding and sending an error for which
@@ -124,7 +122,7 @@ public interface AsynchronousActivityCallback {
 	 * 
 	 * @param message
 	 */
-	public void fail(String message);
+	void fail(String message);
 
 	/**
 	 * For activities which are going to establish state below the invoke node
@@ -135,6 +133,5 @@ public interface AsynchronousActivityCallback {
 	 * Any calls to Monitor.register... must establish a state tree rooted at
 	 * this node, they may assume that this node already exists.
 	 */
-	public String getParentProcessIdentifier();
-
+	String getParentProcessIdentifier();
 }

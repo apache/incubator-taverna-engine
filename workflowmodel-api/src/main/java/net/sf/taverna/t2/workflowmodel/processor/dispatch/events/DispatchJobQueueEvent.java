@@ -20,6 +20,8 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.processor.dispatch.events;
 
+import static net.sf.taverna.t2.workflowmodel.processor.dispatch.description.DispatchMessageType.JOB_QUEUE;
+
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
@@ -35,11 +37,9 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.description.DispatchMe
  * instances.
  * 
  * @author Tom Oinn
- * 
  */
 public class DispatchJobQueueEvent extends
 		AbstractDispatchEvent<DispatchJobQueueEvent> {
-
 	private BlockingQueue<IterationInternalEvent<? extends IterationInternalEvent<?>>> queue;
 	private List<? extends Activity<?>> activities;
 
@@ -53,7 +53,9 @@ public class DispatchJobQueueEvent extends
 	 * @param queue
 	 * @param activities
 	 */
-	public DispatchJobQueueEvent(String owner, InvocationContext context,
+	public DispatchJobQueueEvent(
+			String owner,
+			InvocationContext context,
 			BlockingQueue<IterationInternalEvent<? extends IterationInternalEvent<?>>> queue,
 			List<? extends Activity<?>> activities) {
 		super(owner, new int[] {}, context);
@@ -83,11 +85,11 @@ public class DispatchJobQueueEvent extends
 	}
 
 	/**
-	 * DispatchMessageType.JOB_QUEUE
+	 * @return Always a {@link DispatchMessageType#JOB_QUEUE}.
 	 */
 	@Override
 	public DispatchMessageType getMessageType() {
-		return DispatchMessageType.JOB_QUEUE;
+		return JOB_QUEUE;
 	}
 
 }

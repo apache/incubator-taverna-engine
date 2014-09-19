@@ -27,58 +27,63 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Factory for creating {@link Activity} instances.
- *
+ * 
  * @author David Withers
  */
 public interface ActivityFactory {
-
 	/**
 	 * Creates a new <code>Activity</code> instance.
-	 *
-	 * @return a new <code>Activity</code> instance
+	 * 
+	 * @return the new <code>Activity</code> instance
 	 */
-	public Activity<?> createActivity();
+	Activity<?> createActivity();
 
 	/**
-	 * Returns the type of the <code>Activity</code>s that this factory can create.
-	 *
-	 * @return the type of the <code>Activity</code>s that this factory can create
+	 * What type of <code>Activity</code>s can this factory create?
+	 * 
+	 * @return the type of the <code>Activity</code>s that this factory can
+	 *         create
 	 */
-	public URI getActivityType();
+	URI getActivityType();
 
 	/**
-	 * Returns the JSON Schema for the configuration required by the <code>Activity</code>.
-	 *
-	 * @return the JSON Schema for the configuration required by the <code>Activity</code>
+	 * Returns the JSON Schema for the configuration required by the
+	 * <code>Activity</code>.
+	 * 
+	 * @return the JSON Schema for the configuration required by the
+	 *         <code>Activity</code>
 	 */
-	public JsonNode getActivityConfigurationSchema();
+	JsonNode getActivityConfigurationSchema();
 
 	/**
-	 * Returns the <code>ActivityInputPort</code>s that the <code>Activity</code> requires to be
-	 * present in order to execute with the specified configuration.
+	 * Returns the <code>ActivityInputPort</code>s that the
+	 * <code>Activity</code> requires to be present in order to execute with the
+	 * specified configuration.
 	 * <p>
-	 * If the <code>Activity</code> does not require any input port for the configuration then an
-	 * empty set is returned.
-	 *
+	 * If the <code>Activity</code> does not require any input port for the
+	 * configuration then an empty set is returned.
+	 * 
 	 * @param configuration
 	 *            the configuration
-	 * @return the <code>ActivityInputPort</code>s that the <code>Activity</code> requires to be
-	 *         present in order to execute
+	 * @return the <code>ActivityInputPort</code>s that the
+	 *         <code>Activity</code> requires to be present in order to execute
 	 */
-	public Set<ActivityInputPort> getInputPorts(JsonNode configuration) throws ActivityConfigurationException;
+	Set<ActivityInputPort> getInputPorts(JsonNode configuration)
+			throws ActivityConfigurationException;
 
 	/**
-	 * Returns the <code>ActivityOutputPort</code>s that the <code>Activity</code> requires to be
-	 * present in order to execute with the specified configuration.
+	 * Returns the <code>ActivityOutputPort</code>s that the
+	 * <code>Activity</code> requires to be present in order to execute with the
+	 * specified configuration.
 	 * <p>
-	 * If the <code>Activity</code> does not require any output ports for the configuration then an
-	 * empty set is returned.
-	 *
+	 * If the <code>Activity</code> does not require any output ports for the
+	 * configuration then an empty set is returned.
+	 * 
 	 * @param configuration
 	 *            the configuration
-	 * @return the <code>ActivityOutputPort</code>s that the <code>Activity</code> requires to be
-	 *         present in order to execute
+	 * @return the <code>ActivityOutputPort</code>s that the
+	 *         <code>Activity</code> requires to be present in order to execute
 	 */
-	public Set<ActivityOutputPort> getOutputPorts(JsonNode configuration) throws ActivityConfigurationException;
-
+	Set<ActivityOutputPort> getOutputPorts(JsonNode configuration)
+			throws ActivityConfigurationException;
 }

@@ -20,7 +20,8 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.processor.iteration;
 
-import java.util.Collections;
+import static java.util.Collections.synchronizedMap;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,53 +36,52 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Job;
  * index arrays of one job in each other input index.
  * 
  * @author Tom Oinn
- * 
  */
+@SuppressWarnings("serial")
 public class DotProduct extends CompletionHandlingAbstractIterationStrategyNode {
-
-	Map<String, TreeCache[]> ownerToCache = Collections.synchronizedMap(new HashMap<String, TreeCache[]>());
+	Map<String, TreeCache[]> ownerToCache = synchronizedMap(new HashMap<String, TreeCache[]>());
 
 	@Override
 	public synchronized void innerReceiveJob(int inputIndex, Job newJob) {
 		if (getChildCount() == 1) {
-			// if there's only one input there's nothing to do here so push the
-			// job through
+			/*
+			 * if there's only one input there's nothing to do here so push the
+			 * job through
+			 */
 			pushJob(newJob);
 			return;
 		}
 		String owningProcess = newJob.getOwningProcess();
 		if (!ownerToCache.containsKey(owningProcess)) {
 			TreeCache[] caches = new TreeCache[getChildCount()];
-			for (int i = 0; i < getChildCount(); i++) {
+			for (int i = 0; i < getChildCount(); i++)
 				caches[i] = new TreeCache();
-			}
 			ownerToCache.put(owningProcess, caches);
 		}
-		// Firstly store the new job in the cache, this isn't optimal but is
-		// safe for now - we can make this more efficient by doing the
-		// comparison first and only storing the job if required
+		/*
+		 * Firstly store the new job in the cache, this isn't optimal but is
+		 * safe for now - we can make this more efficient by doing the
+		 * comparison first and only storing the job if required
+		 */
 		TreeCache[] caches = ownerToCache.get(owningProcess);
 		caches[inputIndex].insertJob(newJob);
 		int[] indexArray = newJob.getIndex();
 		boolean foundMatch = true;
-		Map<String, T2Reference> newDataMap = new HashMap<String, T2Reference>();
-		for (TreeCache cache : caches) {
-
-			if (cache.containsLocation(indexArray)) {
+		Map<String, T2Reference> newDataMap = new HashMap<>();
+		for (TreeCache cache : caches)
+			if (cache.containsLocation(indexArray))
 				newDataMap.putAll(cache.get(indexArray).getData());
-			} else {
+			else
 				foundMatch = false;
-			}
-		}
 		if (foundMatch) {
 			Job j = new Job(owningProcess, indexArray, newDataMap, newJob
 					.getContext());
-			// Remove all copies of the job with this index from the cache,
-			// we'll never use it
-			// again and it pays to be tidy
-			for (TreeCache cache : caches) {
+			/*
+			 * Remove all copies of the job with this index from the cache,
+			 * we'll never use it again and it pays to be tidy
+			 */
+			for (TreeCache cache : caches)
 				cache.cut(indexArray);
-			}
 			pushJob(j);
 		}
 	}
@@ -94,9 +94,11 @@ public class DotProduct extends CompletionHandlingAbstractIterationStrategyNode 
 	@Override
 	public void innerReceiveCompletion(int inputIndex,
 			Completion completion) {
-		// Do nothing, let the superclass handle final completion events, ignore
-		// others for now (although in theory we should be able to do better
-		// than this really)
+		/*
+		 * Do nothing, let the superclass handle final completion events, ignore
+		 * others for now (although in theory we should be able to do better
+		 * than this really)
+		 */
 	}
 
 	@Override
@@ -104,21 +106,18 @@ public class DotProduct extends CompletionHandlingAbstractIterationStrategyNode 
 		ownerToCache.remove(owningProcess);
 	}
 
+	@Override
 	public int getIterationDepth(Map<String, Integer> inputDepths)
 			throws IterationTypeMismatchException {
 		// Check that all input depths are the same
-		if (isLeaf()) {
+		if (isLeaf())
 			// No children!
 			throw new IterationTypeMismatchException("Dot product with no children");			
-		}
 		int depth = getChildAt(0).getIterationDepth(inputDepths);
-		for (IterationStrategyNode childNode : getChildren()) {
-			if (childNode.getIterationDepth(inputDepths) != depth) {
+		for (IterationStrategyNode childNode : getChildren())
+			if (childNode.getIterationDepth(inputDepths) != depth)
 				throw new IterationTypeMismatchException(
 						"Mismatched input types for dot product node");
-			}
-		}
 		return depth;
 	}
-
 }

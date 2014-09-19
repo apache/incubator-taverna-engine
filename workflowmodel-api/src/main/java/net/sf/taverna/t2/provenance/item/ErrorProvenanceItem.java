@@ -30,10 +30,8 @@ import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
  * @author Ian Dunlop
  * @author Stuart Owen
  * @author Paolo Missier
- * 
  */
 public class ErrorProvenanceItem extends AbstractProvenanceItem {
-
 	private Throwable cause;
 	private String message;
 	private String errorType;
@@ -42,6 +40,7 @@ public class ErrorProvenanceItem extends AbstractProvenanceItem {
 	public ErrorProvenanceItem() {
 	}
 
+	@Override
 	public SharedVocabulary getEventType() {
 		return eventType;
 	}
@@ -69,5 +68,4 @@ public class ErrorProvenanceItem extends AbstractProvenanceItem {
 	public void setErrorType(String errorType) {
 		this.errorType = errorType;
 	}
-
 }

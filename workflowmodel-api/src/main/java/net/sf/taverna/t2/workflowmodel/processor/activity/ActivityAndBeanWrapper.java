@@ -28,7 +28,6 @@ import java.awt.datatransfer.Transferable;
  * {@link Activity} and its configuration bean.
  * 
  * @author Ian Dunlop
- * 
  */
 public class ActivityAndBeanWrapper {
 	/** The Activity being dragged */
@@ -60,5 +59,4 @@ public class ActivityAndBeanWrapper {
 	public void setName(String name) {
 		this.name = name;
 	}
-
 }

@@ -31,7 +31,6 @@ import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
  * @author Ian Dunlop
  * @author Stuart Owen
  * @author Paolo Missier
- * 
  */
 public class ProcessorProvenanceItem extends AbstractProvenanceItem {
 	private ActivityProvenanceItem activityProvenanceItem;

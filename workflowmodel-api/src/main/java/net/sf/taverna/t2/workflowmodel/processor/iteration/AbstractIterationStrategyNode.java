@@ -40,29 +40,28 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Job;
  * 
  * @author Tom Oinn
  * @author Stian Soiland-Reyes
- * 
  */
-public abstract class AbstractIterationStrategyNode extends DefaultMutableTreeNode implements
-		IterationStrategyNode {
-
-	private List<IterationStrategyNode> children = new ArrayList<IterationStrategyNode>();
-
+@SuppressWarnings("serial")
+public abstract class AbstractIterationStrategyNode extends
+		DefaultMutableTreeNode implements IterationStrategyNode {
+	private List<IterationStrategyNode> children = new ArrayList<>();
 	private IterationStrategyNode parent = null;
 
 	/**
 	 * Implement TreeNode
 	 */
+	@Override
 	public final synchronized Enumeration<IterationStrategyNode> children() {
-		return new Vector<IterationStrategyNode>(children).elements();
+		return new Vector<>(children).elements(); // TODO arraylist?
 	}
 
 	/**
 	 * Clear the child list and parent of this node
 	 */
+	@Override
 	public final synchronized void clear() {
-		for (IterationStrategyNode child : children) {
+		for (IterationStrategyNode child : children)
 			child.setParent(null);
-		}
 		children.clear();
 		this.parent = null;
 	}
@@ -70,6 +69,7 @@ public abstract class AbstractIterationStrategyNode extends DefaultMutableTreeNo
 	/**
 	 * Implement TreeNode
 	 */
+	@Override
 	public boolean getAllowsChildren() {
 		return true;
 	}
@@ -77,6 +77,7 @@ public abstract class AbstractIterationStrategyNode extends DefaultMutableTreeNo
 	/**
 	 * Implement TreeNode
 	 */
+	@Override
 	public final synchronized IterationStrategyNode getChildAt(int position) {
 		return children.get(position);
 	}
@@ -84,6 +85,7 @@ public abstract class AbstractIterationStrategyNode extends DefaultMutableTreeNo
 	/**
 	 * Implement TreeNode
 	 */
+	@Override
 	public final int getChildCount() {
 		return children.size();
 	}
@@ -91,13 +93,15 @@ public abstract class AbstractIterationStrategyNode extends DefaultMutableTreeNo
 	/**
 	 * Implements IterationStrategyNode
 	 */
+	@Override
 	public final synchronized List<IterationStrategyNode> getChildren() {
-		return new ArrayList<IterationStrategyNode>(this.children);
+		return new ArrayList<>(children);
 	}
 
 	/**
 	 * Implement TreeNode
 	 */
+	@Override
 	public final synchronized int getIndex(TreeNode node) {
 		return children.indexOf(node);
 	}
@@ -105,25 +109,26 @@ public abstract class AbstractIterationStrategyNode extends DefaultMutableTreeNo
 	/**
 	 * Implement TreeNode
 	 */
+	@Override
 	public final IterationStrategyNode getParent() {
 		return parent;
 	}
 
+	@Override
 	public synchronized void insert(MutableTreeNode child) {
 		insert(child, getChildCount());
 	}
 
+	@Override
 	public synchronized void insert(MutableTreeNode child, int index) {
-		if (!getAllowsChildren()) {
+		if (!getAllowsChildren())
 			throw new IllegalStateException("Node does not allow children");
-		}
-		if (!(child instanceof IterationStrategyNode)) {
+		if (!(child instanceof IterationStrategyNode))
 			throw new IllegalArgumentException(
 					"Child not an instance of IterationStrategyNode: " + child);
-		}
-		if (child == this) {
+		if (child == this)
 			throw new IllegalArgumentException("Can't be it's own parent");
-		}
+
 		// Check if it is already there (in case we'll just move it)
 		int alreadyExistsIndex = children.indexOf(child);
 
@@ -132,41 +137,39 @@ public abstract class AbstractIterationStrategyNode extends DefaultMutableTreeNo
 		if (alreadyExistsIndex > -1) {
 			// Remove it from the old position
 			if (index < alreadyExistsIndex
-					&& alreadyExistsIndex + 1 < children.size()) {
+					&& alreadyExistsIndex + 1 < children.size())
 				alreadyExistsIndex++;
-			}
 			children.remove(alreadyExistsIndex);
 		}
-		if (child.getParent() != this) {
+		if (child.getParent() != this)
 			child.setParent(this);
-		}
 	}
 
 	/**
 	 * Implement TreeNode
 	 */
+	@Override
 	public boolean isLeaf() {
 		return children.isEmpty();
 	}
 
+	@Override
 	public void remove(int index) {
-		if (!getAllowsChildren()) {
+		if (!getAllowsChildren())
 			throw new IllegalStateException("Node does not allow children");
-		}
 		children.remove(index);
-
 	}
 
+	@Override
 	public synchronized void remove(MutableTreeNode node) {
-		if (!getAllowsChildren()) {
+		if (!getAllowsChildren())
 			throw new IllegalStateException("Node does not allow children");
-		}
 		children.remove(node);
-		if (node.getParent() == this) {
+		if (node.getParent() == this)
 			node.setParent(null);
-		}
 	}
 
+	@Override
 	public void removeFromParent() {
 		if (parent != null) {
 			IterationStrategyNode oldParent = parent;
@@ -178,27 +181,23 @@ public abstract class AbstractIterationStrategyNode extends DefaultMutableTreeNo
 	/**
 	 * Implements IterationStrategyNode
 	 */
+	@Override
 	public final synchronized void setParent(MutableTreeNode newParent) {
-		if (newParent != null && !(newParent instanceof IterationStrategyNode)) {
+		if (newParent != null && !(newParent instanceof IterationStrategyNode))
 			throw new IllegalArgumentException(
 					"Parent not a IterationStrategyNode instance: " + newParent);
-		}
-		if (newParent != null && !newParent.getAllowsChildren()) {
+		if (newParent != null && !newParent.getAllowsChildren())
 			throw new IllegalStateException(
 					"New parent does not allow children");
-		}
-		if (newParent == this) {
+		if (newParent == this)
 			throw new IllegalArgumentException("Can't be it's own parent");
-		}
 		removeFromParent();
 		parent = (IterationStrategyNode) newParent;
-		if (parent != null) {
-			if (!parent.getChildren().contains(this)) {
-				parent.insert(this);
-			}
-		}
+		if (parent != null && !parent.getChildren().contains(this))
+			parent.insert(this);
 	}
 
+	@Override
 	public void setUserObject(Object object) {
 		throw new UnsupportedOperationException("Can't set user object");
 	}
@@ -207,9 +206,8 @@ public abstract class AbstractIterationStrategyNode extends DefaultMutableTreeNo
 	 * Push the specified completion event to the parent node
 	 */
 	protected final void pushCompletion(Completion completion) {
-		if (parent != null) {
+		if (parent != null)
 			parent.receiveCompletion(parent.getIndex(this), completion);
-		}
 	}
 
 	/**
@@ -218,12 +216,10 @@ public abstract class AbstractIterationStrategyNode extends DefaultMutableTreeNo
 	protected final void pushJob(Job job) {
 		if (parent != null) {
 			int index = parent.getIndex(this);
-			if (index < 0) {
+			if (index < 0)
 				throw new WorkflowStructureException(
 						"Parent doesn't have this node in its child list!");
-			}
 			parent.receiveJob(parent.getIndex(this), job);
 		}
 	}
-
 }

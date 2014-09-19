@@ -36,7 +36,6 @@ package net.sf.taverna.t2.workflowmodel.processor.dispatch;
  */
 public interface PropertyContributingDispatchLayer<ConfigType> extends
 		DispatchLayer<ConfigType> {
-
 	/**
 	 * Inject properties for the specified owning process into the parent
 	 * dispatch stack. At some point prior to this call being made the
@@ -62,5 +61,4 @@ public interface PropertyContributingDispatchLayer<ConfigType> extends
 	 * @param owningProcess
 	 */
 	void injectPropertiesFor(String owningProcess);
-
 }

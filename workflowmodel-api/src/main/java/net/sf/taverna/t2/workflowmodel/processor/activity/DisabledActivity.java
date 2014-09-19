@@ -35,19 +35,17 @@ import org.apache.log4j.Logger;
  * activity.
  *
  * @author alanrw
- *
  */
-public final class DisabledActivity extends NonExecutableActivity<ActivityAndBeanWrapper> {
-
+public final class DisabledActivity extends
+		NonExecutableActivity<ActivityAndBeanWrapper> {
 	public static final String URI = "http://ns.taverna.org.uk/2010/activity/disabled";
-
-	private static Logger logger = Logger.getLogger(DisabledActivity.class);
+	private static final Logger logger = Logger
+			.getLogger(DisabledActivity.class);
 
 	/**
 	 * Conf holds the offline Activity and its configuration.
 	 */
 	private ActivityAndBeanWrapper conf;
-
 	private Object lastWorkingConfiguration;
 
 	/**
@@ -72,7 +70,7 @@ public final class DisabledActivity extends NonExecutableActivity<ActivityAndBea
 	 * @throws IllegalAccessException
 	 * @throws ActivityConfigurationException
 	 */
-	public DisabledActivity(Class<? extends Activity> activityClass,
+	public DisabledActivity(Class<? extends Activity<?>> activityClass,
 			Object config) throws InstantiationException,
 			IllegalAccessException, ActivityConfigurationException {
 		this(activityClass.newInstance(), config);
@@ -87,13 +85,13 @@ public final class DisabledActivity extends NonExecutableActivity<ActivityAndBea
 	 * @param config
 	 *            The configuration of the activity.
 	 */
-	public DisabledActivity(Activity activity, Object config) {
+	public DisabledActivity(Activity<?> activity, Object config) {
 		this();
 		ActivityAndBeanWrapper disabledConfig = new ActivityAndBeanWrapper();
 		disabledConfig.setActivity(activity);
 		disabledConfig.setBean(config);
 		try {
-			this.configure(disabledConfig);
+			configure(disabledConfig);
 		} catch (ActivityConfigurationException e) {
 			logger.error(e);
 		}
@@ -105,37 +103,30 @@ public final class DisabledActivity extends NonExecutableActivity<ActivityAndBea
 	 * case, the ports of the DisabledActivity and their mapping to the
 	 * containing Processor's ports can be inherited from the Activity that is
 	 * now disabled.
-	 *
-	 * @param activity The Activity that is now disabled.
+	 * 
+	 * @param activity
+	 *            The Activity that is now disabled.
 	 */
 	public DisabledActivity(Activity<?> activity) {
 		this(activity, activity.getConfiguration());
-		for (ActivityInputPort aip : activity.getInputPorts()) {
-			this.addInput(aip.getName(), aip.getDepth(), aip
-					.allowsLiteralValues(), aip.getHandledReferenceSchemes(),
+		for (ActivityInputPort aip : activity.getInputPorts())
+			addInput(aip.getName(), aip.getDepth(), aip.allowsLiteralValues(),
+					aip.getHandledReferenceSchemes(),
 					aip.getTranslatedElementClass());
-		}
-		for (OutputPort op : activity.getOutputPorts()) {
-			this.addOutput(op.getName(), op.getDepth(), op.getGranularDepth());
-		}
-		this.getInputPortMapping().clear();
-		this.getInputPortMapping().putAll(activity.getInputPortMapping());
-		this.getOutputPortMapping().clear();
-		this.getOutputPortMapping().putAll(activity.getOutputPortMapping());
+		for (OutputPort op : activity.getOutputPorts())
+			addOutput(op.getName(), op.getDepth(), op.getGranularDepth());
+		getInputPortMapping().clear();
+		getInputPortMapping().putAll(activity.getInputPortMapping());
+		getOutputPortMapping().clear();
+		getOutputPortMapping().putAll(activity.getOutputPortMapping());
 	}
 
-	/* (non-Javadoc)
-	 * @see net.sf.taverna.t2.workflowmodel.processor.activity.AbstractAsynchronousActivity#configure(java.lang.Object)
-	 */
 	@Override
 	public void configure(ActivityAndBeanWrapper conf)
 			throws ActivityConfigurationException {
 		this.conf = conf;
 	}
 
-	/* (non-Javadoc)
-	 * @see net.sf.taverna.t2.workflowmodel.processor.activity.AbstractAsynchronousActivity#getConfiguration()
-	 */
 	@Override
 	public ActivityAndBeanWrapper getConfiguration() {
 		return conf;
@@ -163,41 +154,34 @@ public final class DisabledActivity extends NonExecutableActivity<ActivityAndBea
 		boolean result = true;
 		lastWorkingConfiguration = null;
 		try {
-			Activity aa = (Activity) (conf.getActivity().getClass().newInstance());
+			@SuppressWarnings("unchecked")
+			Activity<Object> aa = conf.getActivity().getClass().newInstance();
 			aa.configure(newConfig);
 			boolean unknownPort = false;
-			Map<String, String> currentInputPortMap = this
-					.getInputPortMapping();
-			HashSet<String> currentInputNames = new HashSet<String>();
+			Map<String, String> currentInputPortMap = getInputPortMapping();
+			HashSet<String> currentInputNames = new HashSet<>();
 			currentInputNames.addAll(currentInputPortMap.values()) ;
-			for (ActivityInputPort aip : ((Activity<?>)aa).getInputPorts()) {
+			for (ActivityInputPort aip : aa.getInputPorts())
 				currentInputNames.remove(aip.getName());
-			}
 			unknownPort = !currentInputNames.isEmpty();
 
 			if (!unknownPort) {
-				Map<String, String> currentOutputPortMap = this
-				.getOutputPortMapping();
-				HashSet<String> currentOutputNames = new HashSet<String>();
-				currentOutputNames.addAll(currentOutputPortMap.values()) ;
-				for (OutputPort aop : ((Activity<?>)aa).getOutputPorts()) {
+				Map<String, String> currentOutputPortMap = getOutputPortMapping();
+				HashSet<String> currentOutputNames = new HashSet<>();
+				currentOutputNames.addAll(currentOutputPortMap.values());
+				for (OutputPort aop : aa.getOutputPorts())
 					currentOutputNames.remove(aop.getName());
-				}
 				unknownPort = !currentOutputNames.isEmpty();
 			}
-			if (unknownPort) {
+			if (unknownPort)
 				result = false;
-			}
 		} catch (ActivityConfigurationException ex) {
 			result = false;
-		} catch (InstantiationException e) {
-			return false;
-		} catch (IllegalAccessException e) {
+		} catch (InstantiationException|IllegalAccessException e) {
 			return false;
 		}
-		if (result) {
+		if (result)
 		    lastWorkingConfiguration = newConfig;
-		}
 		return result;
 	}
 

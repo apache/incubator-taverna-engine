@@ -29,10 +29,10 @@ import net.sf.taverna.t2.workflowmodel.NamedWorkflowEntity;
  * name.
  * 
  * @author Stian Soiland-Reyes
- * 
  */
 public class NamedWorkflowEntityComparator implements
 		Comparator<NamedWorkflowEntity> {
+	@Override
 	public int compare(NamedWorkflowEntity o1, NamedWorkflowEntity o2) {
 		return o1.getLocalName().compareToIgnoreCase(o2.getLocalName());
 	}

@@ -28,11 +28,9 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.description.DispatchMe
  * Superclass of events within the dispatch stack
  * 
  * @author Tom Oinn
- * 
  */
 public abstract class AbstractDispatchEvent<EventType extends AbstractDispatchEvent<EventType>>
 		extends Event<EventType> {
-
 	protected AbstractDispatchEvent(String owner, int[] index,
 			InvocationContext context) {
 		super(owner, index, context);
@@ -44,5 +42,4 @@ public abstract class AbstractDispatchEvent<EventType extends AbstractDispatchEv
 	 * @return instance of DispatchMessageType represented by this event
 	 */
 	public abstract DispatchMessageType getMessageType();
-
 }

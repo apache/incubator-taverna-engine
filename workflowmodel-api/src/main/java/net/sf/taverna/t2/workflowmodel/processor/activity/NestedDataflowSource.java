@@ -7,15 +7,12 @@ import net.sf.taverna.t2.workflowmodel.Dataflow;
 
 /**
  * @author alanrw
- *
  */
 public interface NestedDataflowSource<T extends NestedDataflow> {
+	T getNestedDataflow();
 
-	public T getNestedDataflow();
-
-	public Dataflow getParentDataflow();
+	Dataflow getParentDataflow();
 
 	@Override
-	public String toString();
-
+	String toString();
 }

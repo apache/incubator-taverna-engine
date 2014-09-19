@@ -39,7 +39,6 @@ import javax.swing.tree.TreePath;
  *            Each node in the tree is of this type
  */
 public interface TypedTreeModel<NodeType> {
-
 	/**
 	 * Adds a listener for the TreeModelEvent posted after the tree changes.
 	 */
@@ -115,5 +114,4 @@ public interface TypedTreeModel<NodeType> {
 	 *            the new value from the TreeCellEditor
 	 */
 	void valueForPathChanged(TreePath path, Object newValue);
-
 }

@@ -30,28 +30,28 @@ import java.util.Map;
  * pass respectively.
  * 
  * @author Tom Oinn
- * 
  */
 public interface DataflowValidationReport {
-
 	/**
-	 * Overall validity - if the workflow is valid it can be run, otherwise there
-	 * are problems somewhere and a facade can't be created from it.
+	 * Overall validity - if the workflow is valid it can be run, otherwise
+	 * there are problems somewhere and a facade can't be created from it.
 	 * 
 	 * @return whether the workflow is valid (true) or not (false)
 	 */
-	public boolean isValid();
+	boolean isValid();
 
 	/**
-	 * Whether the workflow is incomplete, i.e. contains no processors and no connected output ports.
-	 * For example, it is empty or contains only input ports. Even though one can technically run such
-	 * a workflow it should be prohibited as it does not make any sense. If a workflow
-	 * is incomplete {@link DataflowValidationReport#isValid()} should return <code>false</code>.
+	 * Whether the workflow is incomplete, i.e. contains no processors and no
+	 * connected output ports. For example, it is empty or contains only input
+	 * ports. Even though one can technically run such a workflow it should be
+	 * prohibited as it does not make any sense. If a workflow is incomplete
+	 * {@link DataflowValidationReport#isValid()} should return
+	 * <code>false</code>.
 	 * 
 	 * @return whether the workflow is incomplete or not
 	 */
-	public boolean isWorkflowIncomplete();
-	
+	boolean isWorkflowIncomplete();
+
 	/**
 	 * The workflow will be marked as invalid if there are entities with
 	 * unlinked input ports or where there are cycles causing the type checking
@@ -63,7 +63,7 @@ public interface DataflowValidationReport {
 	 *         which it is impossible to determine validity due to missing
 	 *         inputs or cyclic dependencies
 	 */
-	public List<? extends TokenProcessingEntity> getUnsatisfiedEntities();
+	List<? extends TokenProcessingEntity> getUnsatisfiedEntities();
 
 	/**
 	 * The workflow will be marked as invalid if any entity fails to type check.
@@ -71,7 +71,7 @@ public interface DataflowValidationReport {
 	 * @return list of TokenProcessingEntity instances within the Dataflow which
 	 *         caused explicit type check failures
 	 */
-	public List<? extends TokenProcessingEntity> getFailedEntities();
+	List<? extends TokenProcessingEntity> getFailedEntities();
 
 	/**
 	 * The workflow will be marked as invalid if any of the dataflow output
@@ -86,17 +86,14 @@ public interface DataflowValidationReport {
 	 *         if the overall depth is -1 this isn't important as the thing
 	 *         won't run anyway.
 	 */
-	public List<? extends DataflowOutputPort> getUnresolvedOutputs();
-	
-	
-	/**
-	 * An entity will be marked invalid if it depends on a nested dataflow
-	 * which itself is invalid. If this is the case the entity will be
-	 * be present both in {@link #getFailedEntities()} and can be used as
-	 * a key with this method to get the DataflowValidationReport explaining
-	 * how the nested dataflow failed.
-	 * 
-	 */
-	public Map<TokenProcessingEntity, DataflowValidationReport> getInvalidDataflows();
+	List<? extends DataflowOutputPort> getUnresolvedOutputs();
 
+	/**
+	 * An entity will be marked invalid if it depends on a nested dataflow which
+	 * itself is invalid. If this is the case the entity will be be present both
+	 * in {@link #getFailedEntities()} and can be used as a key with this method
+	 * to get the DataflowValidationReport explaining how the nested dataflow
+	 * failed.
+	 */
+	Map<TokenProcessingEntity, DataflowValidationReport> getInvalidDataflows();
 }

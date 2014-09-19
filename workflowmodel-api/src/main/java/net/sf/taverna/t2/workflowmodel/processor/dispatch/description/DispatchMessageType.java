@@ -25,10 +25,8 @@ package net.sf.taverna.t2.workflowmodel.processor.dispatch.description;
  * dispatch stack.
  * 
  * @author Tom Oinn
- * 
  */
 public enum DispatchMessageType {
-
 	/**
 	 * A reference to a queue of Job objects waiting to be used as input along
 	 * with a list of activities to process them.
@@ -60,5 +58,4 @@ public enum DispatchMessageType {
 	 * (surprisingly)
 	 */
 	ERROR;
-	
 }

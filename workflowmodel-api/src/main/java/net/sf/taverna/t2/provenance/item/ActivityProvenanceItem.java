@@ -32,10 +32,8 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
  * @author Ian Dunlop
  * @author Stuart Owen
  * @author Paolo Missier
- * 
  */
 public class ActivityProvenanceItem extends AbstractProvenanceItem implements ProvenanceItem  {
-
 	private Activity<?> activity;
 	private IterationProvenanceItem iterationProvenanceItem;
 	
@@ -48,6 +46,7 @@ public class ActivityProvenanceItem extends AbstractProvenanceItem implements Pr
 		return iterationProvenanceItem;
 	}
 
+	@Override
 	public SharedVocabulary getEventType() {
 		return SharedVocabulary.ACTIVITY_EVENT_TYPE;
 	}

@@ -30,18 +30,15 @@ import net.sf.taverna.t2.reference.ReferenceService;
  * provenance injectors.
  * 
  * @author Tom Oinn
- * 
  */
 public interface InvocationContext extends ReferenceContext {
-
 	/**
 	 * Return the reference service to be used within this invocation context
 	 * 
 	 * @return a configured instance of ReferenceService to be used to resolve
 	 *         and register references to data in the workflow
 	 */
-	public ReferenceService getReferenceService();
-	
-	public ProvenanceReporter getProvenanceReporter();
+	ReferenceService getReferenceService();
 
+	ProvenanceReporter getProvenanceReporter();
 }

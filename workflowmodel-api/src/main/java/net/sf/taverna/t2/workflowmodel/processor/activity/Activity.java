@@ -33,17 +33,19 @@ import net.sf.taverna.t2.workflowmodel.Edits;
 /**
  * Defines a single abstract or concrete invokable activity. Each Processor
  * contains at least one of these and may contain many, similarly the dispatch
- * stack may create new Activity instances from e.g. dynamic lookup or resolution
- * of an abstract activity to a concrete activity or set of activities.
- *
- * @param <ConfigurationType> the ConfigurationType associated with the Activity. This is an arbitrary java class that provides details on how the Activity is configured..
+ * stack may create new Activity instances from e.g. dynamic lookup or
+ * resolution of an abstract activity to a concrete activity or set of
+ * activities.
+ * 
+ * @param <ConfigurationType>
+ *            the ConfigurationType associated with the Activity. This is an
+ *            arbitrary java class that provides details on how the Activity is
+ *            configured..
  * @author Tom Oinn
  * @author David Withers
  */
-public interface Activity<ConfigurationType> extends Annotated<Activity<?>>, Configurable<ConfigurationType> {
-
-
-
+public interface Activity<ConfigurationType> extends Annotated<Activity<?>>,
+		Configurable<ConfigurationType> {
 	/**
 	 * An Activity contains a set of named input ports. Names must be unique
 	 * within this set.
@@ -51,43 +53,41 @@ public interface Activity<ConfigurationType> extends Annotated<Activity<?>>, Con
 	 * @return the set of input ports for this activity
 	 */
 	@HierarchyTraversal(hierarchies = { "workflowStructure" }, role = { CHILD })
-	public Set<ActivityInputPort> getInputPorts();
+	Set<ActivityInputPort> getInputPorts();
 
 	/**
 	 * A processor may have different input port names to the activity or
-	 * activities it contains. This map is keyed on the processor input port names
-	 * with the corresponding value being the activity port name.
-	 *
+	 * activities it contains. This map is keyed on the processor input port
+	 * names with the corresponding value being the activity port name.
+	 * 
 	 * @return mapping from processor input port names to activity input port
 	 *         names
 	 */
-	public Map<String, String> getInputPortMapping();
+	Map<String, String> getInputPortMapping();
 
 	/**
-	 * An Activity contains a set of named output ports. As with input ports names
-	 * must be unique within the set.
-	 *
+	 * An Activity contains a set of named output ports. As with input ports
+	 * names must be unique within the set.
+	 * 
 	 * @return
 	 */
 	@HierarchyTraversal(hierarchies = { "workflowStructure" }, role = { CHILD })
-	public Set<ActivityOutputPort> getOutputPorts();
+	Set<ActivityOutputPort> getOutputPorts();
 
 	/**
 	 * Outputs of the activity may be named differently to those of the
 	 * processor. This map is keyed on an activity output port name with each
 	 * corresponding value being the processor output port name to which the
 	 * activity output is bound.
-	 *
+	 * 
 	 * @return mapping from activity output port name to processor output port
 	 *         name
 	 */
-	public Map<String, String> getOutputPortMapping();
+	Map<String, String> getOutputPortMapping();
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public abstract void configure(ConfigurationType conf) throws ActivityConfigurationException;
+	@Override
+	abstract void configure(ConfigurationType conf)
+			throws ActivityConfigurationException;
 
-	public void setEdits(Edits edits);
-
+	void setEdits(Edits edits);
 }

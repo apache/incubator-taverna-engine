@@ -25,9 +25,7 @@ package net.sf.taverna.t2.workflowmodel;
  * processor port
  * 
  * @author Tom Oinn
- * 
  */
 public interface ProcessorOutputPort extends EventForwardingOutputPort,
 		ProcessorPort {
-
 }

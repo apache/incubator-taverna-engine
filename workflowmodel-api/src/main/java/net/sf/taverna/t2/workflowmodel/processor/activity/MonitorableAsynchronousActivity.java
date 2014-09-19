@@ -35,25 +35,22 @@ import net.sf.taverna.t2.reference.T2Reference;
  * the activity implementation providing this information.
  * 
  * @author Tom Oinn
- * 
  */
 public interface MonitorableAsynchronousActivity<ConfigType> extends
 		AsynchronousActivity<ConfigType> {
-
 	/**
 	 * This has the same invocation semantics as
-	 * AsynchronousActivity.executeAsynch and all implementations should also
-	 * implement that method, with the difference that this one returns
-	 * immediately with a set of monitorable properties which represent
-	 * monitorable or steerable state within the invocation itself.
+	 * {@link AsynchronousActivity}<code>.executeAsynch</code> and all
+	 * implementations should also implement that method, with the difference
+	 * that this one returns immediately with a set of monitorable properties
+	 * which represent monitorable or steerable state within the invocation
+	 * itself.
 	 * 
 	 * @param data
 	 * @param callback
 	 * @return a set of monitorable properties representing internal state of
 	 *         the invoked resource
 	 */
-	public Set<MonitorableProperty<?>> executeAsynchWithMonitoring(
-			Map<String, T2Reference> data,
-			AsynchronousActivityCallback callback);
-
+	Set<MonitorableProperty<?>> executeAsynchWithMonitoring(
+			Map<String, T2Reference> data, AsynchronousActivityCallback callback);
 }

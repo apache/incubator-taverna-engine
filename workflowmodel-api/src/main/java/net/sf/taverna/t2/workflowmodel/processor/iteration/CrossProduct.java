@@ -20,8 +20,9 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.processor.iteration;
 
+import static java.util.Collections.synchronizedMap;
+
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -41,9 +42,10 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Job;
  * @author Tom Oinn
  * @author David Withers
  */
-public class CrossProduct extends CompletionHandlingAbstractIterationStrategyNode {
-
-	private Map<String, List<Set<Job>>> ownerToCache = Collections.synchronizedMap(new HashMap<String, List<Set<Job>>>());
+@SuppressWarnings("serial")
+public class CrossProduct extends
+		CompletionHandlingAbstractIterationStrategyNode {
+	private Map<String, List<Set<Job>>> ownerToCache = synchronizedMap(new HashMap<String, List<Set<Job>>>());
 
 	/**
 	 * Receive a job, emit jobs corresponding to the orthogonal join of the new
@@ -52,68 +54,73 @@ public class CrossProduct extends CompletionHandlingAbstractIterationStrategyNod
 	@Override
 	public synchronized void innerReceiveJob(int inputIndex, Job newJob) {
 		if (getChildCount() == 1) {
-			// there's only one input and there's nothing to do here so push the
-			// job through
+			/*
+			 * there's only one input and there's nothing to do here so push the
+			 * job through
+			 */
 			pushJob(newJob);
 			return;
 		}
 		if (!ownerToCache.containsKey(newJob.getOwningProcess())) {
-			List<Set<Job>> perInputCache = new ArrayList<Set<Job>>();
-			for (int i = 0; i < getChildCount(); i++) {
+			List<Set<Job>> perInputCache = new ArrayList<>();
+			for (int i = 0; i < getChildCount(); i++)
 				perInputCache.add(new HashSet<Job>());
-			}
 			ownerToCache.put(newJob.getOwningProcess(), perInputCache);
 		}
 		// Store the new job
-		List<Set<Job>> perInputCache = ownerToCache.get(newJob.getOwningProcess());
+		List<Set<Job>> perInputCache = ownerToCache.get(newJob
+				.getOwningProcess());
 		perInputCache.get(inputIndex).add(newJob);
-		// Find all combinations of the new job with all permutations of jobs in
-		// the other caches. We could make this a lot easier by restricting it
-		// to a single pair of inputs, this might be a more sane way to go in
-		// the future...
+		/*
+		 * Find all combinations of the new job with all permutations of jobs in
+		 * the other caches. We could make this a lot easier by restricting it
+		 * to a single pair of inputs, this might be a more sane way to go in
+		 * the future...
+		 */
 		Set<Job> workingSet = perInputCache.get(0);
 		if (inputIndex == 0) {
-			workingSet = new HashSet<Job>();
+			workingSet = new HashSet<>();
 			workingSet.add(newJob);
 		}
 		for (int i = 1; i < getChildCount(); i++) {
 			Set<Job> thisSet = perInputCache.get(i);
 			if (i == inputIndex) {
-				// This is the cache for the new job, so we rewrite the set to a
-				// single element one containing only the newly submitted job
-				thisSet = new HashSet<Job>();
+				/*
+				 * This is the cache for the new job, so we rewrite the set to a
+				 * single element one containing only the newly submitted job
+				 */
+				thisSet = new HashSet<>();
 				thisSet.add(newJob);
 			}
 			workingSet = merge(workingSet, thisSet);
 		}
-		for (Job outputJob : workingSet) {
+		for (Job outputJob : workingSet)
 			pushJob(outputJob);
-		}
-		if (canClearCache(inputIndex, newJob.getOwningProcess())) {
-			// If we've seen completions for all the other indexes we don't need
-			// to cache jobs for this index
+		if (canClearCache(inputIndex, newJob.getOwningProcess()))
+			/*
+			 * If we've seen completions for all the other indexes we don't need
+			 * to cache jobs for this index
+			 */
 			perInputCache.get(inputIndex).clear();
-		}
 	}
 
 	private Set<Job> merge(Set<Job> set1, Set<Job> set2) {
-		Set<Job> newSet = new HashSet<Job>();
-		for (Job job1 : set1) {
+		Set<Job> newSet = new HashSet<>();
+		for (Job job1 : set1)
 			for (Job job2 : set2) {
-				int[] newIndex = new int[job1.getIndex().length + job2.getIndex().length];
+				int[] newIndex = new int[job1.getIndex().length
+						+ job2.getIndex().length];
 				int j = 0;
-				for (int i = 0; i < job1.getIndex().length; i++) {
+				for (int i = 0; i < job1.getIndex().length; i++)
 					newIndex[j++] = job1.getIndex()[i];
-				}
-				for (int i = 0; i < job2.getIndex().length; i++) {
+				for (int i = 0; i < job2.getIndex().length; i++)
 					newIndex[j++] = job2.getIndex()[i];
-				}
-				Map<String, T2Reference> newDataMap = new HashMap<String, T2Reference>();
+				Map<String, T2Reference> newDataMap = new HashMap<>();
 				newDataMap.putAll(job1.getData());
 				newDataMap.putAll(job2.getData());
-				newSet.add(new Job(job1.getOwningProcess(), newIndex, newDataMap, job1.getContext()));
+				newSet.add(new Job(job1.getOwningProcess(), newIndex,
+						newDataMap, job1.getContext()));
 			}
-		}
 		return newSet;
 	}
 
@@ -136,27 +143,22 @@ public class CrossProduct extends CompletionHandlingAbstractIterationStrategyNod
 	 */
 	private boolean canClearCache(int inputIndex, String owningProcess) {
 		boolean[] completionState = getCompletionState(owningProcess).inputComplete;
-		for (int i = 0; i < completionState.length; i++) {
-			if (i != inputIndex) {
-				if (!completionState[i]) {
-					return false;
-				}
-			}
-		}
+		for (int i = 0; i < completionState.length; i++)
+			if (i != inputIndex && !completionState[i])
+				return false;
 		return true;
 	}
 
+	@Override
 	public int getIterationDepth(Map<String, Integer> inputDepths)
 			throws IterationTypeMismatchException {
-		if (isLeaf()) {
+		if (isLeaf())
 			// No children!
-			throw new IterationTypeMismatchException("Cross product with no children");
-		}
+			throw new IterationTypeMismatchException(
+					"Cross product with no children");
 		int temp = 0;
-		for (IterationStrategyNode child : getChildren()) {
+		for (IterationStrategyNode child : getChildren())
 			temp += child.getIterationDepth(inputDepths);
-		}
 		return temp;
 	}
-
 }

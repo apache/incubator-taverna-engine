@@ -34,11 +34,10 @@ import net.sf.taverna.t2.invocation.InvocationContext;
  * class in role.
  * 
  * @author Tom Oinn
- * 
  */
 @ControlBoundary
-public interface Dataflow extends Annotated<Dataflow>, TokenProcessingEntity, WorkflowItem {
-
+public interface Dataflow extends Annotated<Dataflow>, TokenProcessingEntity,
+		WorkflowItem {
 	/**
 	 * A Dataflow consists of a set of named Processor instances. This method
 	 * returns an unmodifiable list of these processors. Equivalent to calling
@@ -47,7 +46,7 @@ public interface Dataflow extends Annotated<Dataflow>, TokenProcessingEntity, Wo
 	 * @return list of all processors in the dataflow
 	 */
 	@HierarchyTraversal(hierarchies = { "workflowStructure" }, role = { CHILD })
-	public List<? extends Processor> getProcessors();
+	List<? extends Processor> getProcessors();
 
 	/**
 	 * Dataflows also contain a set of merge operations, this method returns an
@@ -55,7 +54,7 @@ public interface Dataflow extends Annotated<Dataflow>, TokenProcessingEntity, Wo
 	 * getEntities(Merge.class)
 	 */
 	@HierarchyTraversal(hierarchies = { "workflowStructure" }, role = { CHILD })
-	public List<? extends Merge> getMerges();
+	List<? extends Merge> getMerges();
 
 	/**
 	 * Dataflows have a list of input ports. These are the input ports the world
@@ -65,8 +64,9 @@ public interface Dataflow extends Annotated<Dataflow>, TokenProcessingEntity, Wo
 	 * 
 	 * @return list of dataflow input port instances
 	 */
+	@Override
 	@HierarchyTraversal(hierarchies = { "workflowStructure" }, role = { CHILD })
-	public List<? extends DataflowInputPort> getInputPorts();
+	List<? extends DataflowInputPort> getInputPorts();
 
 	/**
 	 * Get all workflow entities with the specified type restriction, this
@@ -79,7 +79,7 @@ public interface Dataflow extends Annotated<Dataflow>, TokenProcessingEntity, Wo
 	 *            a class of the type specified by the type variable T. All
 	 *            entities returned in the list can be cast to this type
 	 */
-	public <T extends NamedWorkflowEntity> List<? extends T> getEntities(
+	<T extends NamedWorkflowEntity> List<? extends T> getEntities(
 			Class<T> entityType);
 
 	/**
@@ -91,8 +91,9 @@ public interface Dataflow extends Annotated<Dataflow>, TokenProcessingEntity, Wo
 	 * 
 	 * @return list of dataflow output port instances
 	 */
+	@Override
 	@HierarchyTraversal(hierarchies = { "workflowStructure" }, role = { CHILD })
-	public List<? extends DataflowOutputPort> getOutputPorts();
+	List<? extends DataflowOutputPort> getOutputPorts();
 
 	/**
 	 * The dataflow is largely defined by the links between processors and other
@@ -101,20 +102,20 @@ public interface Dataflow extends Annotated<Dataflow>, TokenProcessingEntity, Wo
 	 * @return list of Datalink implementations
 	 */
 	@HierarchyTraversal(hierarchies = { "workflowStructure" }, role = { CHILD })
-	public List<? extends Datalink> getLinks();
+	List<? extends Datalink> getLinks();
 
 	/**
 	 * Triggers a check for various basic potential problems with the workflow,
 	 * in particular ones related to type checking. Returns a report object
 	 * containing the state of the workflow and any problems found.
-	 * * 
-     * If the workflow has been set immutable with {@link #setImmutable()},
-     * subsequent calls to this method will return the cached
-     * DataflowValidationReport.
-    
+	 * <p>
+	 * If the workflow has been set immutable with {@link #setImmutable()},
+	 * subsequent calls to this method will return the cached
+	 * DataflowValidationReport.
+	 * 
 	 * @return validation report
 	 */
-	public DataflowValidationReport checkValidity();
+	DataflowValidationReport checkValidity();
 
 	/**
 	 * A dataflow with no inputs cannot be driven by the supply of data tokens
@@ -123,7 +124,7 @@ public interface Dataflow extends Annotated<Dataflow>, TokenProcessingEntity, Wo
 	 * must be passed explicitly to the dataflow. This method then calls the
 	 * fire methods of any Processor instances with no input ports.
 	 */
-	public void fire(String owningProcess, InvocationContext context);
+	void fire(String owningProcess, InvocationContext context);
 
 	/**
 	 * The failure transmitter contains event listeners to be notified of
@@ -136,38 +137,37 @@ public interface Dataflow extends Annotated<Dataflow>, TokenProcessingEntity, Wo
 	 * guaranteeing that no tokens will be generated with the id of the failed
 	 * process after the message has been received by the listener
 	 */
-	public FailureTransmitter getFailureTransmitter();
-	
+	FailureTransmitter getFailureTransmitter();
+
 	/**
-	 * An identifier that is unique to this dataflow and its current state.
-	 * The identifier will change whenever the dataflow is modified.
+	 * An identifier that is unique to this dataflow and its current state. The
+	 * identifier will change whenever the dataflow is modified.
 	 * 
 	 * @return a String representing a unique internal identifier.
 	 */
-	public String getIdentifier();
-	
-	public String recordIdentifier();
-	
+	String getIdentifier();
+
+	String recordIdentifier();
+
 	/**
-	 * Check if the given input port is connected to anything 
-	 * in the workflow.
+	 * Check if the given input port is connected to anything in the workflow.
 	 * 
 	 * @param inputPort
-	 * @return true if the given workflow input port is connected, false otherwise.
+	 * @return true if the given workflow input port is connected, false
+	 *         otherwise.
 	 */
-	public boolean isInputPortConnected(DataflowInputPort inputPort);
+	boolean isInputPortConnected(DataflowInputPort inputPort);
 
-    /**
-     * Mark this dataflow as immutable.
-     * 
-     * Subsequent edits to its ports, links, merges, input and output ports will
-     * throw a RuntimeException like UnsupportedOperationException.
-     * 
-     * This method should be called before executing a Dataflow with
-     * {@link #fire(String, InvocationContext)}, in order to guarantee that
-     * datalinks, port depths etc. don't change while the dataflow is running.
-     * 
-     */
-	public void setImmutable();
-	
+	/**
+	 * Mark this dataflow as immutable.
+	 * 
+	 * Subsequent edits to its ports, links, merges, input and output ports will
+	 * throw a RuntimeException like UnsupportedOperationException.
+	 * 
+	 * This method should be called before executing a Dataflow with
+	 * {@link #fire(String, InvocationContext)}, in order to guarantee that
+	 * datalinks, port depths etc. don't change while the dataflow is running.
+	 * 
+	 */
+	void setImmutable();
 }

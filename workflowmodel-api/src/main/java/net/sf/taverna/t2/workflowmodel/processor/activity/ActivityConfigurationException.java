@@ -28,32 +28,35 @@ import net.sf.taverna.t2.workflowmodel.ConfigurationException;
  * activities etc.
  * 
  * @author Tom Oinn
- * 
  */
 public class ActivityConfigurationException extends ConfigurationException {
-
 	private static final long serialVersionUID = 6940385954331153900L;
 
 	/**
-	 * @param msg a message describing the reason for the exception.
+	 * @param msg
+	 *            a message describing the reason for the exception.
 	 */
 	public ActivityConfigurationException(String msg) {
 		super(msg);
 	}
 
 	/**
-	 * @param cause a previous exception that caused this ActivityConfigurationException to be thrown.
+	 * @param cause
+	 *            a previous exception that caused this
+	 *            ActivityConfigurationException to be thrown.
 	 */
 	public ActivityConfigurationException(Throwable cause) {
 		super(cause);
 	}
 
 	/**
-	 * @param msg a message describing the reason for the exception.
-	 * @param cause a previous exception that caused this ActivityConfigurationException to be thrown.
+	 * @param msg
+	 *            a message describing the reason for the exception.
+	 * @param cause
+	 *            a previous exception that caused this
+	 *            ActivityConfigurationException to be thrown.
 	 */
 	public ActivityConfigurationException(String msg, Throwable cause) {
 		super(msg, cause);
 	}
-
 }

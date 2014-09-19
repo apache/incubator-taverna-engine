@@ -35,7 +35,6 @@ package net.sf.taverna.t2.invocation;
  */
 public abstract class IterationInternalEvent<EventType extends IterationInternalEvent<?>>
 		extends Event<EventType> {
-
 	/**
 	 * Protected constructor for the minimum fields required by all Event
 	 * subclasses
@@ -72,22 +71,20 @@ public abstract class IterationInternalEvent<EventType extends IterationInternal
 	 * @return
 	 */
 	protected final String getPushedOwningProcess() {
-		StringBuffer sb = new StringBuffer();
-		for (int i = 0; i < index.length; i++) {
-			if (i != 0) {
-				sb.append(",");
-			}
-			sb.append(index[i]);
+		StringBuilder sb = new StringBuilder(owner).append(":");
+		String sep = "";
+		for (int idx : index) {
+			sb.append(sep).append(idx);
+			sep = ",";
 		}
-		String indexArrayAsString = sb.toString();
-		return (owner + ":" + indexArrayAsString);
+		return sb.toString();
 	}
 
 	/**
 	 * Helper method for the popIndex operation, returns the modified index
 	 * array. Subclasses must still implement logic to get the modified owning
 	 * process but that's relatively easy : <code>
-	 * return new <Event subclass>(owner.substring(0, owner.lastIndexOf(':')),getPoppedIndex(), dataMap);
+	 * return new &lt;Event subclass&gt;(owner.substring(0, owner.lastIndexOf(':')),getPoppedIndex(), dataMap);
 	 * </code>
 	 * 
 	 * @return
@@ -98,13 +95,9 @@ public abstract class IterationInternalEvent<EventType extends IterationInternal
 		String[] parts = indexArrayAsString.split(",");
 		int[] newIndexArray = new int[index.length + parts.length];
 		int pos = 0;
-		for (String part : parts) {
+		for (String part : parts)
 			newIndexArray[pos++] = Integer.parseInt(part);
-		}
-		for (int i : index) {
-			newIndexArray[pos++] = i;
-		}
+		System.arraycopy(index, 0, newIndexArray, pos, index.length);
 		return newIndexArray;
 	}
-
 }

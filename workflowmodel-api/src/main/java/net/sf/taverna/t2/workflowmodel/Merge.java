@@ -36,10 +36,8 @@ import java.util.List;
  * analysis to preclude this from happening.
  * 
  * @author Tom Oinn
- * 
  */
 public interface Merge extends TokenProcessingEntity {
-
 	/**
 	 * The Merge object contains an ordered list of InputPort objects. Data and
 	 * completion events arriving at an input port have the index of that input
@@ -52,6 +50,7 @@ public interface Merge extends TokenProcessingEntity {
 	 * 
 	 * @return Ordered list of InputPort objects
 	 */
+	@Override
 	List<? extends MergeInputPort> getInputPorts();
 
 	/**
@@ -61,5 +60,4 @@ public interface Merge extends TokenProcessingEntity {
 	 * @return OutputPort for this Merge object
 	 */
 	EventForwardingOutputPort getOutputPort();
-
 }

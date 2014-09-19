@@ -32,27 +32,24 @@ import java.util.Date;
  * data streams.
  * 
  * @author Tom Oinn
- * 
  */
 public interface MonitorableProperty<T> {
-
 	/**
 	 * Return the value of this property
 	 */
-	public T getValue() throws NoSuchPropertyException;
+	T getValue() throws NoSuchPropertyException;
 
 	/**
 	 * Return the name of this property, names are heirarchical in nature and
 	 * are defined as an array of String objects. This is to allow e.g. dispatch
 	 * layers to expose a set of related properties under the same root name.
 	 */
-	public String[] getName();
+	String[] getName();
 
 	/**
 	 * Get the last update date for this property, if the property is immutable
 	 * then this should be set to the date at which the implementation is
 	 * created.
 	 */
-	public Date getLastModified();
-
+	Date getLastModified();
 }

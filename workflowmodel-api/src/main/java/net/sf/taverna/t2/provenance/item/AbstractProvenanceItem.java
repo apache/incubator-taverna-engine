@@ -3,22 +3,19 @@ package net.sf.taverna.t2.provenance.item;
 import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
 
 public abstract class AbstractProvenanceItem implements ProvenanceItem {
-
+	@Override
 	public abstract SharedVocabulary getEventType();
 
 	private String identifier, parentId, processId, workflowId;
 
+	@Override
 	public final String getIdentifier() {
 		return identifier;
 	}
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result
-				+ ((identifier == null) ? 0 : identifier.hashCode());
-		return result;
+		return 31 + (identifier == null ? 0 : identifier.hashCode());
 	}
 
 	@Override
@@ -38,30 +35,37 @@ public abstract class AbstractProvenanceItem implements ProvenanceItem {
 		return true;
 	}
 
+	@Override
 	public final void setIdentifier(String identifier) {
 		this.identifier = identifier;
 	}
 
+	@Override
 	public final String getParentId() {
 		return parentId;
 	}
 
+	@Override
 	public final void setParentId(String parentId) {
 		this.parentId = parentId;
 	}
 
+	@Override
 	public final String getProcessId() {
 		return processId;
 	}
 
+	@Override
 	public final void setProcessId(String processId) {
 		this.processId = processId;
 	}
 
+	@Override
 	public final String getWorkflowId() {
 		return workflowId;
 	}
 
+	@Override
 	public final void setWorkflowId(String workflowId) {
 		this.workflowId = workflowId;
 	}
@@ -70,5 +74,4 @@ public abstract class AbstractProvenanceItem implements ProvenanceItem {
 	public String toString() {
 		return getEventType() + " id:" + getIdentifier() + " parent:" + getParentId();
 	}
-
 }

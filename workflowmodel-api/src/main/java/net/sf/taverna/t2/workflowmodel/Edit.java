@@ -29,10 +29,8 @@ package net.sf.taverna.t2.workflowmodel;
  * several others.
  * 
  * @author Tom Oinn
- * 
  */
 public interface Edit<TargetType> {
-
 	/**
 	 * Perform the edit
 	 * 
@@ -41,21 +39,21 @@ public interface Edit<TargetType> {
 	 *             try to ensure the subject is unaltered. Where this is
 	 *             impossible consider breaking edits down into a compound edit.
 	 */
-	public TargetType doEdit() throws EditException;
+	TargetType doEdit() throws EditException;
 
 	/**
 	 * Undo the edit, reverting the subject to the state it was in prior to the
 	 * edit
 	 */
 	@Deprecated
-	public void undo();
+	void undo();
 
 	/**
 	 * Return the object to which this edit applies
 	 * 
 	 * @return
 	 */
-	public Object getSubject();
+	Object getSubject();
 
 	/**
 	 * Has the edit been applied yet?
@@ -63,6 +61,5 @@ public interface Edit<TargetType> {
 	 * @return true if and only if the edit has been successfully applied to the
 	 *         subject
 	 */
-	public boolean isApplied();
-
+	boolean isApplied();
 }

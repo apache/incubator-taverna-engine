@@ -11,10 +11,9 @@ import net.sf.taverna.t2.workflowmodel.processor.iteration.IterationStrategy;
  * {@link IterationStrategy}.
  * 
  * @author Stian Soiland-Reyes
- * 
  */
 public interface WorkflowItem {
-
+	// FIXME: Should this be deleted?
     // TODO: Implement this for every WorkflowItem
     
 //    /**

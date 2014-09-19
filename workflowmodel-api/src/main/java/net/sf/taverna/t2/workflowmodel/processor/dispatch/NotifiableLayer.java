@@ -20,21 +20,21 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.processor.dispatch;
 
+import net.sf.taverna.t2.invocation.Completion;
+import net.sf.taverna.t2.workflowmodel.processor.activity.Job;
+
 /**
  * If a layer requires notification of the arrival of new items to the event
  * queues within the dispatcher it should implement this interface.
  * 
  * @author Tom Oinn
- * 
  */
 public interface NotifiableLayer {
-
 	/**
-	 * Called when a new Job or Completion is added to a queue within the
-	 * dispatch stack
+	 * Called when a new {@link Job} or {@link Completion} is added to a queue
+	 * within the dispatch stack
 	 * 
 	 * @param owningProcess
 	 */
-	public void eventAdded(String owningProcess);
-
+	void eventAdded(String owningProcess);
 }

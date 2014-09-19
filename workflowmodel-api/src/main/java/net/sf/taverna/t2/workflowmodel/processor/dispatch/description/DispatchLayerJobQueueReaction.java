@@ -30,7 +30,6 @@ import java.lang.annotation.Target;
  * Describes how a dispatch layer reacts to a Job Queue message
  * 
  * @author Tom Oinn
- * 
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
@@ -43,5 +42,4 @@ public @interface DispatchLayerJobQueueReaction {
 	public DispatchMessageType[] emits();
 
 	public boolean relaysUnmodified();
-	
 }
