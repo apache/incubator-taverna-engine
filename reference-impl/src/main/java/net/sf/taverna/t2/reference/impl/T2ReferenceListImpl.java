@@ -32,11 +32,9 @@ import net.sf.taverna.t2.reference.h3.HibernateMappedEntity;
  * hibernate.
  * 
  * @author Tom Oinn
- * 
  */
 public class T2ReferenceListImpl extends IdentifiedArrayList<T2Reference>
 		implements HibernateMappedEntity {
-
 	public T2ReferenceListImpl() {
 		super();
 	}
@@ -45,7 +43,7 @@ public class T2ReferenceListImpl extends IdentifiedArrayList<T2Reference>
 	 * This is only called from Hibernate, outside of test code, so is
 	 * relatively safe to leave unchecked.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public List getListContents() {
 		return this.listDelegate;
 	}
@@ -54,23 +52,23 @@ public class T2ReferenceListImpl extends IdentifiedArrayList<T2Reference>
 	 * This is only called from Hibernate, outside of test code, so is
 	 * relatively safe to leave unchecked.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void setListContents(List newList) {
 		this.listDelegate = newList;
 	}
 
 	/**
 	 * Print the contents of this list for vaguely human readable debug
-	 * porpoises.
+	 * purposes.
 	 */
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
-		sb.append(this.getId().toString() + "\n");
+		StringBuilder sb = new StringBuilder();
+		sb.append(getId()).append("\n");
 		int counter = 0;
-		for (T2Reference ref : listDelegate) {
-			sb.append("  " + (++counter) + ") " + ref.toString() + "\n");
-		}
+		for (T2Reference ref : listDelegate)
+			sb.append("  ").append(++counter).append(") ").append(ref)
+					.append("\n");
 		return sb.toString();
 	}
 

@@ -38,81 +38,91 @@ import net.sf.taverna.t2.reference.IdentifiedList;
  */
 public class IdentifiedArrayList<T> extends AbstractEntityImpl implements
 		IdentifiedList<T> {
-
 	protected List<T> listDelegate = null;
 
 	// Constructors copied from ArrayList for convenience
 	public IdentifiedArrayList() {
 		super();
-		this.listDelegate = new ArrayList<T>();
+		this.listDelegate = new ArrayList<>();
 	}
 
 	public IdentifiedArrayList(Collection<T> c) {
 		super();
-		this.listDelegate = new ArrayList<T>(c);
+		this.listDelegate = new ArrayList<>(c);
 	}
 
 	public IdentifiedArrayList(int initialCapacity) {
 		super();
-		this.listDelegate = new ArrayList<T>(initialCapacity);
+		this.listDelegate = new ArrayList<>(initialCapacity);
 	}
 
 	private void checkUndefinedId() {
-		if (this.getId() != null) {
+		if (this.getId() != null)
 			throw new IllegalStateException(
 					"Attempt made to modify a list which has already been named");
-		}
 	}
 
+	@Override
 	public boolean add(T e) {
 		checkUndefinedId();
 		return listDelegate.add(e);
 	}
 
+	@Override
 	public void add(int index, T element) {
 		checkUndefinedId();
 		listDelegate.add(index, element);
 	}
 
+	@Override
 	public boolean addAll(Collection<? extends T> c) {
 		checkUndefinedId();
 		return listDelegate.addAll(c);
 	}
 
+	@Override
 	public boolean addAll(int index, Collection<? extends T> c) {
 		checkUndefinedId();
 		return listDelegate.addAll(index, c);
 	}
 
+	@Override
 	public void clear() {
 		checkUndefinedId();
 		listDelegate.clear();
 	}
 
+	@Override
 	public boolean contains(Object o) {
 		return listDelegate.contains(o);
 	}
 
+	@Override
 	public boolean containsAll(Collection<?> c) {
 		return listDelegate.containsAll(c);
 	}
 
+	@Override
 	public T get(int index) {
 		return listDelegate.get(index);
 	}
 
+	@Override
 	public int indexOf(Object o) {
 		return listDelegate.indexOf(o);
 	}
 
+	@Override
 	public boolean isEmpty() {
 		return listDelegate.isEmpty();
 	}
 
+	@Override
 	public Iterator<T> iterator() {
 		return listDelegate.iterator();
 	}
 
+	@Override
 	public int lastIndexOf(Object o) {
 		return listDelegate.lastIndexOf(o);
 	}
@@ -130,40 +140,49 @@ public class IdentifiedArrayList<T> extends AbstractEntityImpl implements
 	private ListIterator<T> getCheckedListIterator(
 			final ListIterator<T> iteratorDelegate) {
 		return new ListIterator<T>() {
+			@Override
 			public void add(T e) {
 				checkUndefinedId();
 				iteratorDelegate.add(e);
 			}
 
+			@Override
 			public boolean hasNext() {
 				return iteratorDelegate.hasNext();
 			}
 
+			@Override
 			public boolean hasPrevious() {
 				return iteratorDelegate.hasPrevious();
 			}
 
+			@Override
 			public T next() {
 				return iteratorDelegate.next();
 			}
 
+			@Override
 			public int nextIndex() {
 				return iteratorDelegate.nextIndex();
 			}
 
+			@Override
 			public T previous() {
 				return iteratorDelegate.previous();
 			}
 
+			@Override
 			public int previousIndex() {
 				return iteratorDelegate.previousIndex();
 			}
 
+			@Override
 			public void remove() {
 				checkUndefinedId();
 				iteratorDelegate.remove();
 			}
 
+			@Override
 			public void set(T e) {
 				checkUndefinedId();
 				iteratorDelegate.set(e);
@@ -171,53 +190,63 @@ public class IdentifiedArrayList<T> extends AbstractEntityImpl implements
 		};
 	}
 
+	@Override
 	public ListIterator<T> listIterator() {
 		return getCheckedListIterator(listDelegate.listIterator());
 	}
 
+	@Override
 	public ListIterator<T> listIterator(int index) {
 		return getCheckedListIterator(listDelegate.listIterator(index));
 	}
 
+	@Override
 	public boolean remove(Object o) {
 		checkUndefinedId();
 		return listDelegate.remove(o);
 	}
 
+	@Override
 	public T remove(int index) {
 		checkUndefinedId();
 		return listDelegate.remove(index);
 	}
 
+	@Override
 	public boolean removeAll(Collection<?> c) {
 		checkUndefinedId();
 		return listDelegate.removeAll(c);
 	}
 
+	@Override
 	public boolean retainAll(Collection<?> c) {
 		checkUndefinedId();
 		return listDelegate.retainAll(c);
 	}
 
+	@Override
 	public T set(int index, T element) {
 		checkUndefinedId();
 		return listDelegate.set(index, element);
 	}
 
+	@Override
 	public int size() {
 		return listDelegate.size();
 	}
 
+	@Override
 	public List<T> subList(int fromIndex, int toIndex) {
 		return listDelegate.subList(fromIndex, toIndex);
 	}
 
+	@Override
 	public Object[] toArray() {
 		return listDelegate.toArray();
 	}
 
+	@Override
 	public <U> U[] toArray(U[] a) {
 		return listDelegate.toArray(a);
 	}
-
 }

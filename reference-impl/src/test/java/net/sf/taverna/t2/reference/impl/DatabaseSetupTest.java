@@ -109,18 +109,22 @@ public class DatabaseSetupTest {
 			// properties.
 			T2Reference newReference = new T2ReferenceImpl() {
 
+				@Override
 				public boolean containsErrors() {
 					return false;
 				}
 
+				@Override
 				public int getDepth() {
 					return 0;
 				}
 
+				@Override
 				public String getLocalPart() {
 					return "testLocal";
 				}
 
+				@Override
 				public String getNamespacePart() {
 					return "testNamespace";
 				}

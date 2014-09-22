@@ -45,6 +45,7 @@ public class ReferenceSetServiceTest {
 	}
 	
 	@Test
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void testDelete() throws Exception {
 		ReferenceContextImpl invocationContext = new ReferenceContextImpl();
 		invocationContext.addEntity(new WorkflowRunIdEntity("wfRunRefSetTest0"));
@@ -58,6 +59,7 @@ public class ReferenceSetServiceTest {
 	}
 	
 	@Test
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void testDeleteReferenceSetsForWFRun() throws Exception {
 
 		for (ReferenceSetServiceImpl service : serviceList){

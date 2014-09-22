@@ -29,11 +29,9 @@ import net.sf.taverna.t2.reference.T2ReferenceGenerator;
  * {@link SimpleT2ReferenceGenerator}, but IDs will be globally unique.
  * 
  * @author Stian Soiland-Reyes
- * 
  */
 public class UUIDT2ReferenceGenerator extends AbstractT2ReferenceGenerator
 		implements T2ReferenceGenerator {
-
 	private String namespace = "uuid";
 
 	/**
@@ -46,6 +44,7 @@ public class UUIDT2ReferenceGenerator extends AbstractT2ReferenceGenerator
 		this.namespace = newNamespace;
 	}
 	
+	@Override
 	public String getNamespace() {
 		return namespace;
 	}
@@ -54,5 +53,4 @@ public class UUIDT2ReferenceGenerator extends AbstractT2ReferenceGenerator
 	protected String getNextLocalPart() {
 		return UUID.randomUUID().toString();
 	}
-
 }

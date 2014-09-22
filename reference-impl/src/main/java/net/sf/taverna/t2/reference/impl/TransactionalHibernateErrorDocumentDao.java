@@ -20,13 +20,14 @@
  ******************************************************************************/
 package net.sf.taverna.t2.reference.impl;
 
+import static net.sf.taverna.t2.reference.T2ReferenceType.ErrorDocument;
+
 import java.util.List;
 
 import net.sf.taverna.t2.reference.DaoException;
 import net.sf.taverna.t2.reference.ErrorDocument;
 import net.sf.taverna.t2.reference.ErrorDocumentDao;
 import net.sf.taverna.t2.reference.T2Reference;
-import net.sf.taverna.t2.reference.T2ReferenceType;
 import net.sf.taverna.t2.reference.annotations.DeleteIdentifiedOperation;
 import net.sf.taverna.t2.reference.annotations.GetIdentifiedOperation;
 import net.sf.taverna.t2.reference.annotations.PutIdentifiedOperation;
@@ -38,20 +39,18 @@ import org.hibernate.SessionFactory;
  * An implementation of ErrorDocumentDao based on raw hibernate session factory
  * injection and running within a spring managed context through auto-proxy
  * generation. To use this in spring inject a property 'sessionFactory' with
- * either a
- * {@link org.springframework.orm.hibernate3.LocalSessionFactoryBean LocalSessionFactoryBean}
- * or the equivalent class from the T2Platform module to add SPI based
- * implementation discovery and mapping. To use outside of Spring ensure you
- * call the setSessionFactory(..) method before using this (but really, use it
- * from Spring, so much easier).
+ * either a {@link org.springframework.orm.hibernate3.LocalSessionFactoryBean
+ * LocalSessionFactoryBean} or the equivalent class from the T2Platform module
+ * to add SPI based implementation discovery and mapping. To use outside of
+ * Spring ensure you call the setSessionFactory(..) method before using this
+ * (but really, use it from Spring, so much easier).
  * <p>
  * Methods in this Dao require transactional support
  * 
  * @author Tom Oinn
- * 
  */
 public class TransactionalHibernateErrorDocumentDao implements ErrorDocumentDao {
-
+	private static final String GET_ERRORS_FOR_RUN = "FROM ErrorDocumentImpl WHERE namespacePart = :workflow_run_id";
 	private SessionFactory sessionFactory;
 
 	public void setSessionFactory(SessionFactory sessionFactory) {
@@ -69,93 +68,88 @@ public class TransactionalHibernateErrorDocumentDao implements ErrorDocumentDao 
 	 *             something goes wrong fetching the data or connecting to the
 	 *             database
 	 */
+	@Override
 	@GetIdentifiedOperation
 	public ErrorDocument get(T2Reference ref) throws DaoException {
-		if (ref == null) {
+		if (ref == null)
 			throw new DaoException(
 					"Supplied reference is null, can't retrieve.");
-		} else if (ref.getReferenceType().equals(T2ReferenceType.ErrorDocument) == false) {
+		if (!ref.getReferenceType().equals(ErrorDocument))
 			throw new DaoException(
 					"This dao can only retrieve reference of type T2Reference.ErrorDocument");
-		}
-		if (ref instanceof T2ReferenceImpl) {
-			try {
-				return (ErrorDocumentImpl) sessionFactory.getCurrentSession()
-						.get(ErrorDocumentImpl.class,
-								((T2ReferenceImpl) ref).getCompactForm());
-			} catch (Exception ex) {
-				throw new DaoException(ex);
-			}
-		} else {
+		if (!(ref instanceof T2ReferenceImpl))
 			throw new DaoException(
 					"Reference must be an instance of T2ReferenceImpl");
-		}
-	}
 
-	@PutIdentifiedOperation
-	public void store(ErrorDocument theDocument) throws DaoException {
-		if (theDocument.getId() == null) {
-			throw new DaoException(
-					"Supplied error document set has a null ID, allocate "
-							+ "an ID before calling the store method in the dao.");
-		} else if (theDocument.getId().getReferenceType().equals(
-				T2ReferenceType.ErrorDocument) == false) {
-			throw new DaoException("Strangely the list ID doesn't have type "
-					+ "T2ReferenceType.ErrorDocument, something has probably "
-					+ "gone badly wrong somewhere earlier!");
-		}
-		if (theDocument instanceof ErrorDocumentImpl) {
-			try {
-				sessionFactory.getCurrentSession().save(theDocument);
-			} catch (Exception ex) {
-				throw new DaoException(ex);
-			}
-		} else {
-			throw new DaoException(
-					"Supplied ErrorDocument not an instance of ErrorDocumentImpl");
-		}
-	}
-
-	@DeleteIdentifiedOperation
-	public boolean delete(ErrorDocument theDocument) throws DaoException {
-		if (theDocument.getId() == null) {
-			throw new DaoException(
-					"Supplied error document set has a null ID, allocate "
-							+ "an ID before calling the store method in the dao.");
-		} else if (theDocument.getId().getReferenceType().equals(
-				T2ReferenceType.ErrorDocument) == false) {
-			throw new DaoException("Strangely the list ID doesn't have type "
-					+ "T2ReferenceType.ErrorDocument, something has probably "
-					+ "gone badly wrong somewhere earlier!");
-		}
-		if (theDocument instanceof ErrorDocumentImpl) {
-			try {
-				sessionFactory.getCurrentSession().delete(theDocument);
-			} catch (Exception ex) {
-				throw new DaoException(ex);
-			}
-		} else {
-			throw new DaoException(
-					"Supplied ErrorDocument not an instance of ErrorDocumentImpl");
-		}
-		return true;
-	}
-	
-	@SuppressWarnings("unchecked")
-	@DeleteIdentifiedOperation
-	public synchronized void deleteErrorDocumentsForWFRun(String workflowRunId) throws DaoException {	
-		try{
-			// Select all ErrorDocuments for this wf run
-			Query selectQuery= sessionFactory.getCurrentSession().createQuery("FROM ErrorDocumentImpl WHERE namespacePart=:workflow_run_id");
-			selectQuery.setString("workflow_run_id", workflowRunId);
-			List<ErrorDocument> errorDocuments = selectQuery.list(); 
-			for (ErrorDocument errorDocument : errorDocuments){
-				delete(errorDocument);
-			}
-		}
-		catch(Exception ex){
+		try {
+			return (ErrorDocumentImpl) sessionFactory.getCurrentSession().get(
+					ErrorDocumentImpl.class,
+					((T2ReferenceImpl) ref).getCompactForm());
+		} catch (Exception ex) {
 			throw new DaoException(ex);
 		}
-		
+	}
+
+	@Override
+	@PutIdentifiedOperation
+	public void store(ErrorDocument theDocument) throws DaoException {
+		if (theDocument.getId() == null)
+			throw new DaoException(
+					"Supplied error document set has a null ID, allocate "
+							+ "an ID before calling the store method in the dao.");
+		if (!theDocument.getId().getReferenceType().equals(ErrorDocument))
+			throw new DaoException("Strangely the list ID doesn't have type "
+					+ "T2ReferenceType.ErrorDocument, something has probably "
+					+ "gone badly wrong somewhere earlier!");
+		if (!(theDocument instanceof ErrorDocumentImpl))
+			throw new DaoException(
+					"Supplied ErrorDocument not an instance of ErrorDocumentImpl");
+
+		try {
+			sessionFactory.getCurrentSession().save(theDocument);
+		} catch (Exception ex) {
+			throw new DaoException(ex);
+		}
+	}
+
+	@Override
+	@DeleteIdentifiedOperation
+	public boolean delete(ErrorDocument theDocument) throws DaoException {
+		if (theDocument.getId() == null)
+			throw new DaoException(
+					"Supplied error document set has a null ID, allocate "
+							+ "an ID before calling the store method in the dao.");
+		if (!theDocument.getId().getReferenceType().equals(ErrorDocument))
+			throw new DaoException("Strangely the list ID doesn't have type "
+					+ "T2ReferenceType.ErrorDocument, something has probably "
+					+ "gone badly wrong somewhere earlier!");
+		if (!(theDocument instanceof ErrorDocumentImpl))
+			throw new DaoException(
+					"Supplied ErrorDocument not an instance of ErrorDocumentImpl");
+
+		try {
+			sessionFactory.getCurrentSession().delete(theDocument);
+			return true;
+		} catch (Exception ex) {
+			throw new DaoException(ex);
+		}
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	@DeleteIdentifiedOperation
+	public synchronized void deleteErrorDocumentsForWFRun(String workflowRunId)
+			throws DaoException {
+		try {
+			// Select all ErrorDocuments for this wf run
+			Query selectQuery = sessionFactory.getCurrentSession().createQuery(
+					GET_ERRORS_FOR_RUN);
+			selectQuery.setString("workflow_run_id", workflowRunId);
+			List<ErrorDocument> errorDocuments = selectQuery.list();
+			for (ErrorDocument errorDocument : errorDocuments)
+				delete(errorDocument);
+		} catch (Exception ex) {
+			throw new DaoException(ex);
+		}
 	}
 }

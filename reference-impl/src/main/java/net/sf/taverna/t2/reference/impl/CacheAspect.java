@@ -34,7 +34,6 @@ import org.aspectj.lang.ProceedingJoinPoint;
  * @author Tom Oinn
  */
 public class CacheAspect {
-
 	private ReferenceServiceCacheProvider cacheProvider;
 
 	/**
@@ -67,34 +66,28 @@ public class CacheAspect {
 	 */
 	public final Identified getObject(final ProceedingJoinPoint pjp)
 			throws DaoException {
-
 		Identified result = null;
 
 		// Get the T2Reference from the argument to the get method
 		T2Reference id = (T2Reference) pjp.getArgs()[0];
 		if (id != null) {
 			result = getCacheProvider().get(id);
-			if (result != null) {
+			if (result != null)
 				return result;
-			}
 		}
 		// If we miss the cache then call the method as usual
 		try {
 			result = (Identified) pjp.proceed();
+		} catch (DaoException e) {
+			throw e;
 		} catch (Throwable e) {
-			if (e instanceof DaoException) {
-				throw ((DaoException) e);
-			} else {
-				throw new DaoException(
-						"Unexpected exception type during aspect "
-								+ "based invocation", e);
-			}
+			throw new DaoException("Unexpected exception type during aspect "
+					+ "based invocation", e);
 		}
 
 		// Write back to the cache
-		if (result != null) {
+		if (result != null)
 			getCacheProvider().put(result);
-		}
 
 		return result;
 	}
@@ -110,30 +103,25 @@ public class CacheAspect {
 	 *             if anything goes wrong
 	 */
 	public void putObject(final ProceedingJoinPoint pjp) throws DaoException {
-
 		// Get the Identified being stored by the method we're advising
 		Identified storedObject = (Identified) pjp.getArgs()[0];
 
 		try {
 			// Run the store or update method
 			pjp.proceed();
+		} catch (DaoException e) {
+			throw e;
 		} catch (Throwable e) {
-			if (e instanceof DaoException) {
-				throw ((DaoException) e);
-			} else {
-				throw new DaoException(
-						"Unexpected exception type during aspect "
-								+ "based invocation", e);
-			}
+			throw new DaoException("Unexpected exception type during aspect "
+					+ "based invocation", e);
 		}
 
-		// Assuming the method isn't null and has an identifier (which it will
-		// if we haven't thrown an exception before now) write it back to the
-		// cache provider
-		if (storedObject != null && storedObject.getId() != null) {
+		/*
+		 * Assuming the method isn't null and has an identifier (which it will
+		 * if we haven't thrown an exception before now) write it back to the
+		 * cache provider
+		 */
+		if (storedObject != null && storedObject.getId() != null)
 			getCacheProvider().put(storedObject);
-		}
-
 	}
-
 }

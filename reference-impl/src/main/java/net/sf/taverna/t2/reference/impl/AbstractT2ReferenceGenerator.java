@@ -20,46 +20,56 @@
  ******************************************************************************/
 package net.sf.taverna.t2.reference.impl;
 
+import static net.sf.taverna.t2.reference.T2ReferenceType.ErrorDocument;
+import static net.sf.taverna.t2.reference.T2ReferenceType.IdentifiedList;
+import static net.sf.taverna.t2.reference.T2ReferenceType.ReferenceSet;
+
 import java.util.List;
 
 import net.sf.taverna.t2.reference.ReferenceContext;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.reference.T2ReferenceGenerator;
-import net.sf.taverna.t2.reference.T2ReferenceType;
 import net.sf.taverna.t2.reference.WorkflowRunIdEntity;
 
 /**
  * An abstract class for implementing simple {@link T2ReferenceGenerator}s.
  * 
  * @author Stian Soiland-Reyes
- * 
  */
 public abstract class AbstractT2ReferenceGenerator implements
 		T2ReferenceGenerator {
-
 	public AbstractT2ReferenceGenerator() {
 		super();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public synchronized T2Reference nextReferenceSetReference(ReferenceContext context) {
-		
-		T2ReferenceImpl r = new T2ReferenceImpl();
-		if (context == null){
-			r.setNamespacePart(getNamespace()); // this is not good, just use the default namespace
-		} else {
-			List<WorkflowRunIdEntity> workflowRunIdEntities = context.getEntities(WorkflowRunIdEntity.class);
-			if (workflowRunIdEntities == null || workflowRunIdEntities.isEmpty()){ // this is not good, just use the default namespace
-				r.setNamespacePart(getNamespace());
-			} else { // there should be only one wf run id entity
-				String workflowRunId = ((WorkflowRunIdEntity)workflowRunIdEntities.get(0)).getWorkflowRunId();
-				r.setNamespacePart(workflowRunId);
-			}
+	private void initReferenceNamespace(T2ReferenceImpl r, ReferenceContext context) {
+		if (context == null) {
+			// this is not good, just use the default namespace
+			r.setNamespacePart(getNamespace());
+			return;
 		}
+
+		List<WorkflowRunIdEntity> workflowRunIdEntities = context
+				.getEntities(WorkflowRunIdEntity.class);
+		if (workflowRunIdEntities == null || workflowRunIdEntities.isEmpty()) {
+			// this is not good, just use the default namespace
+			r.setNamespacePart(getNamespace());
+			return;
+		}
+
+		// there should be only one wf run id entity
+		String workflowRunId = ((WorkflowRunIdEntity) workflowRunIdEntities
+				.get(0)).getWorkflowRunId();
+		r.setNamespacePart(workflowRunId);
+	}
+
+	@Override
+	public synchronized T2Reference nextReferenceSetReference(
+			ReferenceContext context) {
+		T2ReferenceImpl r = new T2ReferenceImpl();
+		initReferenceNamespace(r, context);
 		r.setLocalPart(getNextLocalPart());
-		r.setReferenceType(T2ReferenceType.ReferenceSet);
+		r.setReferenceType(ReferenceSet);
 		r.setDepth(0);
 		r.setContainsErrors(false);
 		return r;
@@ -74,51 +84,28 @@ public abstract class AbstractT2ReferenceGenerator implements
 	 */
 	protected abstract String getNextLocalPart();
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public T2Reference nextListReference(boolean containsErrors, int listDepth, ReferenceContext context) {
+	@Override
+	public T2Reference nextListReference(boolean containsErrors, int listDepth,
+			ReferenceContext context) {
 		T2ReferenceImpl r = new T2ReferenceImpl();
-		if (context == null){
-			r.setNamespacePart(getNamespace()); // this is not good, just use the default namespace
-		} else {
-			List<WorkflowRunIdEntity> workflowRunIdEntities = context.getEntities(WorkflowRunIdEntity.class);
-			if (workflowRunIdEntities == null || workflowRunIdEntities.isEmpty()){ // this is not good, just use the default namespace
-				r.setNamespacePart(getNamespace());
-			} else { // there should be only one wf run id entity
-				String workflowRunId = ((WorkflowRunIdEntity)workflowRunIdEntities.get(0)).getWorkflowRunId();
-				r.setNamespacePart(workflowRunId);
-			}
-		}
+		initReferenceNamespace(r, context);
 		r.setLocalPart(getNextLocalPart());
-		r.setReferenceType(T2ReferenceType.IdentifiedList);
+		r.setReferenceType(IdentifiedList);
 		r.setDepth(listDepth);
 		r.setContainsErrors(containsErrors);
 		return r;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public T2Reference nextErrorDocumentReference(int depth, ReferenceContext context) {
+	@Override
+	public T2Reference nextErrorDocumentReference(int depth,
+			ReferenceContext context) {
 		T2ReferenceImpl r = new T2ReferenceImpl();
-		if (context == null){
-			r.setNamespacePart(getNamespace()); // this is not good, just use the default namespace
-		} else {
-			List<WorkflowRunIdEntity> workflowRunIdEntities = context.getEntities(WorkflowRunIdEntity.class);
-			if (workflowRunIdEntities == null || workflowRunIdEntities.isEmpty()){ // this is not good, just use the default namespace
-				r.setNamespacePart(getNamespace());
-			} else { // there should be only one wf run id entity
-				String workflowRunId = ((WorkflowRunIdEntity)workflowRunIdEntities.get(0)).getWorkflowRunId();
-				r.setNamespacePart(workflowRunId);
-			}
-		}
+		initReferenceNamespace(r, context);
 		r.setLocalPart(getNextLocalPart());
-		r.setReferenceType(T2ReferenceType.ErrorDocument);
+		r.setReferenceType(ErrorDocument);
 		r.setDepth(depth);
 		// This is an error document, it contains errors by definition
 		r.setContainsErrors(true);
 		return r;
 	}
-
 }

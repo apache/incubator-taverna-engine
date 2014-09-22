@@ -38,7 +38,6 @@ import net.sf.taverna.t2.reference.T2ReferenceGenerator;
  */
 public abstract class AbstractListServiceImpl extends AbstractServiceImpl
 		implements ListService {
-
 	protected ListDao listDao = null;
 	protected T2ReferenceGenerator t2ReferenceGenerator = null;
 
@@ -46,7 +45,7 @@ public abstract class AbstractListServiceImpl extends AbstractServiceImpl
 	 * Inject the list data access object.
 	 */
 	public final void setListDao(ListDao dao) {
-		this.listDao = dao;
+		listDao = dao;
 	}
 
 	/**
@@ -54,7 +53,7 @@ public abstract class AbstractListServiceImpl extends AbstractServiceImpl
 	 * registering lists of T2Reference
 	 */
 	public final void setT2ReferenceGenerator(T2ReferenceGenerator t2rg) {
-		this.t2ReferenceGenerator = t2rg;
+		t2ReferenceGenerator = t2rg;
 	}
 
 	/**
@@ -64,10 +63,9 @@ public abstract class AbstractListServiceImpl extends AbstractServiceImpl
 	 *             if the dao is still null
 	 */
 	protected final void checkDao() throws ListServiceException {
-		if (listDao == null) {
+		if (listDao == null)
 			throw new ListServiceException("ListDao not initialized, list "
 					+ "service operations are not available");
-		}
 	}
 
 	/**
@@ -77,17 +75,18 @@ public abstract class AbstractListServiceImpl extends AbstractServiceImpl
 	 *             if the generator is still null
 	 */
 	protected final void checkGenerator() throws ListServiceException {
-		if (t2ReferenceGenerator == null) {
+		if (t2ReferenceGenerator == null)
 			throw new ListServiceException(
 					"T2ReferenceGenerator not initialized, list "
 							+ "service operations not available");
-		}
 	}
 
+	@Override
 	public final void getListAsynch(final T2Reference id,
 			final ListServiceCallback callback) throws ListServiceException {
 		checkDao();
 		Runnable r = new Runnable() {
+			@Override
 			public void run() {
 				try {
 					callback.listRetrieved(getList(id));
@@ -98,5 +97,4 @@ public abstract class AbstractListServiceImpl extends AbstractServiceImpl
 		};
 		executeRunnable(r);
 	}
-
 }

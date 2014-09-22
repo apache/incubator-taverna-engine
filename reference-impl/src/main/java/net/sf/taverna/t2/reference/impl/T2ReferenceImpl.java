@@ -20,6 +20,8 @@
  ******************************************************************************/
 package net.sf.taverna.t2.reference.impl;
 
+import static net.sf.taverna.t2.reference.T2ReferenceType.ErrorDocument;
+
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -43,7 +45,6 @@ import org.apache.log4j.Logger;
  * @author David Withers
  */
 public class T2ReferenceImpl implements T2Reference, Serializable, HibernateComponentClass {
-
 	private static Logger logger = Logger.getLogger(T2ReferenceImpl.class);
 
 	private static final long serialVersionUID = 8363330461158750319L;
@@ -74,16 +75,15 @@ public class T2ReferenceImpl implements T2Reference, Serializable, HibernateComp
 	}
 
 	public static T2ReferenceImpl getAsImpl(T2Reference source) {
-		if (source instanceof T2ReferenceImpl) {
+		if (source instanceof T2ReferenceImpl)
 			return (T2ReferenceImpl) source;
-		} else {
-			return new T2ReferenceImpl(source);
-		}
+		return new T2ReferenceImpl(source);
 	}
 
 	/**
 	 * Return whether the identified entity either is or contains errors
 	 */
+	@Override
 	public boolean containsErrors() {
 		return this.containsErrors;
 	}
@@ -98,6 +98,7 @@ public class T2ReferenceImpl implements T2Reference, Serializable, HibernateComp
 	/**
 	 * Get the depth of the entity referred to by this reference
 	 */
+	@Override
 	public int getDepth() {
 		return this.depth;
 	}
@@ -105,6 +106,7 @@ public class T2ReferenceImpl implements T2Reference, Serializable, HibernateComp
 	/**
 	 * Get the local part of the URI for this reference
 	 */
+	@Override
 	public String getLocalPart() {
 		if (localPart == null) {
 			UUID localPartUUID = new UUID(localMostSigBits, localLeastSigBits);
@@ -116,6 +118,7 @@ public class T2ReferenceImpl implements T2Reference, Serializable, HibernateComp
 	/**
 	 * Get the namespace part of the URI for this reference
 	 */
+	@Override
 	public String getNamespacePart() {
 		return namespacePart;
 	}
@@ -123,6 +126,7 @@ public class T2ReferenceImpl implements T2Reference, Serializable, HibernateComp
 	/**
 	 * Get the type of the entity to which this reference refers
 	 */
+	@Override
 	public T2ReferenceType getReferenceType() {
 		return referenceType;
 	}
@@ -193,20 +197,20 @@ public class T2ReferenceImpl implements T2Reference, Serializable, HibernateComp
 	 * this as long as it is at least depth 1.
 	 */
 	T2ReferenceImpl getDeeperErrorReference() {
-		if (getReferenceType().equals(T2ReferenceType.ErrorDocument)) {
-			if (getDepth() == 0) {
-				throw new AssertionError("Error identifier already has depth 0, cannot decrease");
-			}
-			T2ReferenceImpl result = new T2ReferenceImpl();
-			result.setContainsErrors(true);
-			result.setDepth(getDepth() - 1);
-			result.setLocalPart(getLocalPart());
-			result.setNamespacePart(getNamespacePart());
-			result.setReferenceType(T2ReferenceType.ErrorDocument);
-			return result;
-		}
-		throw new AssertionError(
-				"Attempt to get a deeper reference on something that isn't an error ref");
+		if (!getReferenceType().equals(ErrorDocument))
+			throw new AssertionError(
+					"Attempt to get a deeper reference on something that isn't an error ref");
+		if (getDepth() == 0)
+			throw new AssertionError(
+					"Error identifier already has depth 0, cannot decrease");
+
+		T2ReferenceImpl result = new T2ReferenceImpl();
+		result.setContainsErrors(true);
+		result.setDepth(getDepth() - 1);
+		result.setLocalPart(getLocalPart());
+		result.setNamespacePart(getNamespacePart());
+		result.setReferenceType(ErrorDocument);
+		return result;
 	}
 
 	/**
@@ -216,41 +220,34 @@ public class T2ReferenceImpl implements T2Reference, Serializable, HibernateComp
 	 * <code>new URI("t2:ref//" + namespacePart + "?" + localPart)</code>
 	 * leading to URIs of the form <code>t2:ref//namespace?local</code>
 	 */
+	@Override
 	public synchronized URI toUri() {
-		URI result = null;
-		if (referenceType.equals(T2ReferenceType.ReferenceSet)) {
-			try {
-				result = new URI("t2:ref//" + getNamespacePart() + "?" + getLocalPart());
-			} catch (URISyntaxException e) {
-				logger.error("Unable to create URI", e);
+		try {
+			switch (referenceType) {
+			case ReferenceSet:
+				return new URI("t2:ref//" + getNamespacePart() + "?"
+						+ getLocalPart());
+			case IdentifiedList:
+				return new URI("t2:list//" + getNamespacePart() + "?"
+						+ getLocalPart() + "/" + containsErrors + "/" + depth);
+			case ErrorDocument:
+				return new URI("t2:error//" + getNamespacePart() + "?"
+						+ getLocalPart() + "/" + depth);
 			}
-		} else if (referenceType.equals(T2ReferenceType.IdentifiedList)) {
-			try {
-				result = new URI("t2:list//" + getNamespacePart() + "?" + getLocalPart() + "/"
-						+ containsErrors + "/" + depth);
-			} catch (URISyntaxException e) {
-				logger.error("Unable to create URI", e);
-			}
-		} else if (referenceType.equals(T2ReferenceType.ErrorDocument)) {
-			try {
-				result = new URI("t2:error//" + getNamespacePart() + "?" + getLocalPart() + "/"
-						+ depth);
-			} catch (URISyntaxException e) {
-				logger.error("Unable to create URI", e);
-			}
+		} catch (URISyntaxException e) {
+			logger.error("Unable to create URI", e);
 		}
-		return result;
+		return null;
 	}
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
 		int result = 1;
-		result = prime * result + depth;
-		result = prime * result + (int) (localLeastSigBits ^ (localLeastSigBits >>> 32));
-		result = prime * result + (int) (localMostSigBits ^ (localMostSigBits >>> 32));
-		result = prime * result + ((localPart == null) ? 0 : localPart.hashCode());
-		result = prime * result + ((namespacePart == null) ? 0 : namespacePart.hashCode());
+		result = 31 * result + depth;
+		result = 31 * result + (int) (localLeastSigBits ^ (localLeastSigBits >>> 32));
+		result = 31 * result + (int) (localMostSigBits ^ (localMostSigBits >>> 32));
+		result = 31 * result + ((localPart == null) ? 0 : localPart.hashCode());
+		result = 31 * result + ((namespacePart == null) ? 0 : namespacePart.hashCode());
 		return result;
 	}
 
@@ -285,5 +282,4 @@ public class T2ReferenceImpl implements T2Reference, Serializable, HibernateComp
 	public synchronized String getCompactForm() {
 		return getNamespacePart() + ":" + getLocalPart() + ":" + getDepth();
 	}
-
 }

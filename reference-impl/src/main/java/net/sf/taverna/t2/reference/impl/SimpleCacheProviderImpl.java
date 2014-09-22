@@ -35,22 +35,23 @@ import org.apache.log4j.Logger;
  * it's really just here as a test!
  * 
  * @author Tom Oinn
- * 
  */
 public class SimpleCacheProviderImpl implements ReferenceServiceCacheProvider {
-
 	private final Logger log = Logger.getLogger(SimpleCacheProviderImpl.class);
+	private Map<T2Reference, Identified> cache = new HashMap<>();
 
-	private Map<T2Reference, Identified> cache = new HashMap<T2Reference, Identified>();
-
+	@Override
 	public Identified get(T2Reference id) {
-		log.debug("Get " + id.toString() + " (" + cache.containsKey(id) + ")");
+		if (log.isDebugEnabled())
+			log.debug("Get " + id.toString() + " (" + cache.containsKey(id)
+					+ ")");
 		return cache.get(id);
 	}
 
+	@Override
 	public void put(Identified i) {
-		log.debug("Put " + i.getId().toString());
+		if (log.isDebugEnabled())
+			log.debug("Put " + i.getId().toString());
 		cache.put(i.getId(), i);
 	}
-
 }

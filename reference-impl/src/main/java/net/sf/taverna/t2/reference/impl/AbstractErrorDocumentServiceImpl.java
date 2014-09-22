@@ -41,7 +41,6 @@ import net.sf.taverna.t2.reference.T2ReferenceGenerator;
  */
 public abstract class AbstractErrorDocumentServiceImpl extends
 		AbstractServiceImpl implements ErrorDocumentService {
-
 	protected ErrorDocumentDao errorDao = null;
 	protected T2ReferenceGenerator t2ReferenceGenerator = null;
 
@@ -49,7 +48,7 @@ public abstract class AbstractErrorDocumentServiceImpl extends
 	 * Inject the error document data access object.
 	 */
 	public final void setErrorDao(ErrorDocumentDao dao) {
-		this.errorDao = dao;
+		errorDao = dao;
 	}
 
 	/**
@@ -57,7 +56,7 @@ public abstract class AbstractErrorDocumentServiceImpl extends
 	 * registering ErrorDocuments
 	 */
 	public final void setT2ReferenceGenerator(T2ReferenceGenerator t2rg) {
-		this.t2ReferenceGenerator = t2rg;
+		t2ReferenceGenerator = t2rg;
 	}
 
 	/**
@@ -67,11 +66,10 @@ public abstract class AbstractErrorDocumentServiceImpl extends
 	 *             if the dao is still null
 	 */
 	protected final void checkDao() throws ErrorDocumentServiceException {
-		if (errorDao == null) {
+		if (errorDao == null)
 			throw new ErrorDocumentServiceException(
 					"ErrorDocumentDao not initialized, error document "
 							+ "service operations are not available");
-		}
 	}
 
 	/**
@@ -81,41 +79,41 @@ public abstract class AbstractErrorDocumentServiceImpl extends
 	 *             if the generator is still null
 	 */
 	protected final void checkGenerator() throws ErrorDocumentServiceException {
-		if (t2ReferenceGenerator == null) {
+		if (t2ReferenceGenerator == null)
 			throw new ErrorDocumentServiceException(
 					"T2ReferenceGenerator not initialized, error document "
 							+ "service operations not available");
-		}
 	}
 
+	@Override
 	public final void getErrorAsynch(final T2Reference id,
 			final ErrorDocumentServiceCallback callback)
 			throws ErrorDocumentServiceException {
 		checkDao();
 		Runnable r = new Runnable() {
+			@Override
 			public void run() {
 				try {
 					ErrorDocument e = errorDao.get(id);
 					callback.errorRetrieved(e);
 				} catch (DaoException de) {
-					callback
-							.errorRetrievalFailed(new ErrorDocumentServiceException(
-									de));
+					callback.errorRetrievalFailed(new ErrorDocumentServiceException(
+							de));
 				}
 			}
 		};
 		executeRunnable(r);
-
 	}
 
-	public final ErrorDocument registerError(String message, int depth, ReferenceContext context)
-			throws ErrorDocumentServiceException {
+	@Override
+	public final ErrorDocument registerError(String message, int depth,
+			ReferenceContext context) throws ErrorDocumentServiceException {
 		return registerError(message, (Throwable) null, depth, context);
 	}
 
-	public final ErrorDocument registerError(Throwable t, int depth, ReferenceContext context)
-			throws ErrorDocumentServiceException {
+	@Override
+	public final ErrorDocument registerError(Throwable t, int depth,
+			ReferenceContext context) throws ErrorDocumentServiceException {
 		return registerError("", t, depth, context);
 	}
-
 }

@@ -28,12 +28,9 @@ import net.sf.taverna.t2.reference.T2Reference;
  * hibernate backing.
  * 
  * @author Tom Oinn
- * 
  */
 public class AbstractEntityImpl {
-
 	private T2ReferenceImpl id;
-
 	private String compactId = null;
 
 	public T2Reference getId() {
@@ -45,7 +42,7 @@ public class AbstractEntityImpl {
 	 * initialize the unique ID of this reference set.
 	 */
 	public void setTypedId(T2ReferenceImpl newId) {
-		this.id = newId;
+		id = newId;
 	}
 
 	/**
@@ -54,18 +51,16 @@ public class AbstractEntityImpl {
 	 * needs to construct concrete input and output types!
 	 */
 	public T2ReferenceImpl getTypedId() {
-		return this.id;
+		return id;
 	}
 
 	public void setInternalId(String newId) {
-		this.compactId = newId;
+		compactId = newId;
 	}
 
 	public final String getInternalId() {
-		if (this.compactId == null) {
-			this.compactId = id.getCompactForm();
-		}
-		return this.compactId;
+		if (compactId == null)
+			compactId = id.getCompactForm();
+		return compactId;
 	}
-
 }

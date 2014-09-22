@@ -27,7 +27,6 @@ package net.sf.taverna.t2.reference.impl;
  * @author Tom Oinn
  */
 public class AbstractServiceImpl {
-
 	/**
 	 * Schedule a runnable for execution - current naive implementation uses a
 	 * new thread and executes immediately, but this is where any thread pool
@@ -36,7 +35,10 @@ public class AbstractServiceImpl {
 	 * @param r
 	 */
 	protected void executeRunnable(Runnable r) {
-		new Thread(r).start();
+		makeExecutionThread(r).start();
 	}
 
+	protected Thread makeExecutionThread(Runnable r) {
+		return new Thread(r);
+	}
 }

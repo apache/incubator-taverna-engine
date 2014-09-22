@@ -36,13 +36,10 @@ import net.sf.taverna.t2.reference.h3.HibernateMappedEntity;
  * (including this one).
  * 
  * @author Tom Oinn
- * 
  */
 public class ReferenceSetImpl extends AbstractEntityImpl implements
 		ReferenceSet, HibernateMappedEntity {
-
 	private Set<ExternalReferenceSPI> externalReferences;
-	
 	private Long approximateSizeInBytes = new Long(-1);
 	
 	/**
@@ -92,19 +89,16 @@ public class ReferenceSetImpl extends AbstractEntityImpl implements
 	 */
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
-		sb.append(getId() + " [" + externalReferences.size() + "]\n");
-
-		for (ExternalReferenceSPI ref : externalReferences) {
-			sb.append("  " + ref.toString() + "\n");
-		}
+		StringBuilder sb = new StringBuilder();
+		sb.append(getId()).append(" [").append(externalReferences.size())
+				.append("]\n");
+		for (ExternalReferenceSPI ref : externalReferences)
+			sb.append("  ").append(ref).append("\n");
 		return sb.toString();
 
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public Set<ExternalReferenceSPI> getExternalReferences() {
 		return this.externalReferences;
 	}
@@ -121,8 +115,8 @@ public class ReferenceSetImpl extends AbstractEntityImpl implements
 		this.approximateSizeInBytes = sizeInBytes;
 	}
 
+	@Override
 	public Long getApproximateSizeInBytes() {
 		return approximateSizeInBytes;
 	}
-
 }

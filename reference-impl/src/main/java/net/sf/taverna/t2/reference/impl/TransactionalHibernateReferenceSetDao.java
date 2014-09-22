@@ -20,13 +20,14 @@
  ******************************************************************************/
 package net.sf.taverna.t2.reference.impl;
 
+import static net.sf.taverna.t2.reference.T2ReferenceType.ReferenceSet;
+
 import java.util.List;
 
 import net.sf.taverna.t2.reference.DaoException;
 import net.sf.taverna.t2.reference.ReferenceSet;
 import net.sf.taverna.t2.reference.ReferenceSetDao;
 import net.sf.taverna.t2.reference.T2Reference;
-import net.sf.taverna.t2.reference.T2ReferenceType;
 import net.sf.taverna.t2.reference.annotations.DeleteIdentifiedOperation;
 import net.sf.taverna.t2.reference.annotations.GetIdentifiedOperation;
 import net.sf.taverna.t2.reference.annotations.PutIdentifiedOperation;
@@ -38,20 +39,18 @@ import org.hibernate.SessionFactory;
  * An implementation of ReferenceSetDao based on raw hibernate session factory
  * injection and running within a spring managed context through auto-proxy
  * generation. To use this in spring inject a property 'sessionFactory' with
- * either a
- * {@link org.springframework.orm.hibernate3.LocalSessionFactoryBean LocalSessionFactoryBean}
- * or the equivalent class from the T2Platform module to add SPI based
- * implementation discovery and mapping. To use outside of Spring ensure you
- * call the setSessionFactory(..) method before using this (but really, use it
- * from Spring, so much easier).
+ * either a {@link org.springframework.orm.hibernate3.LocalSessionFactoryBean
+ * LocalSessionFactoryBean} or the equivalent class from the T2Platform module
+ * to add SPI based implementation discovery and mapping. To use outside of
+ * Spring ensure you call the setSessionFactory(..) method before using this
+ * (but really, use it from Spring, so much easier).
  * <p>
  * Methods in this Dao require transactional support
  * 
  * @author Tom Oinn
- * 
  */
 public class TransactionalHibernateReferenceSetDao implements ReferenceSetDao {
-
+	private static final String GET_REFSETS_FOR_RUN = "FROM ReferenceSetImpl WHERE namespacePart=:workflow_run_id";
 	private SessionFactory sessionFactory;
 
 	public void setSessionFactory(SessionFactory sessionFactory) {
@@ -68,28 +67,26 @@ public class TransactionalHibernateReferenceSetDao implements ReferenceSetDao {
 	 *             reference set isn't an instance of ReferenceSetImpl or if
 	 *             something else goes wrong connecting to the database
 	 */
+	@Override
 	@PutIdentifiedOperation
 	public void store(ReferenceSet rs) throws DaoException {
-		if (rs.getId() == null) {
+		if (rs.getId() == null)
 			throw new DaoException(
 					"Supplied reference set has a null ID, allocate "
 							+ "an ID before calling the store method in the dao.");
-		} else if (rs.getId().getReferenceType().equals(
-				T2ReferenceType.ReferenceSet) == false) {
+		if (!rs.getId().getReferenceType().equals(ReferenceSet))
 			throw new DaoException(
 					"Strangely the reference set ID doesn't have type "
 							+ "T2ReferenceType.ReferenceSet, something has probably "
 							+ "gone badly wrong somewhere earlier!");
-		}
-		if (rs instanceof ReferenceSetImpl) {
-			try {
-				sessionFactory.getCurrentSession().save(rs);
-			} catch (Exception ex) {
-				throw new DaoException(ex);
-			}
-		} else {
+		if (!(rs instanceof ReferenceSetImpl))
 			throw new DaoException(
 					"Supplied reference set not an instance of ReferenceSetImpl");
+
+		try {
+			sessionFactory.getCurrentSession().save(rs);
+		} catch (Exception ex) {
+			throw new DaoException(ex);
 		}
 	}
 
@@ -101,28 +98,26 @@ public class TransactionalHibernateReferenceSetDao implements ReferenceSetDao {
 	 *            database
 	 * @throws DaoException
 	 */
+	@Override
 	@PutIdentifiedOperation
 	public void update(ReferenceSet rs) throws DaoException {
-		if (rs.getId() == null) {
+		if (rs.getId() == null)
 			throw new DaoException(
 					"Supplied reference set has a null ID, allocate "
 							+ "an ID before calling the store method in the dao.");
-		} else if (rs.getId().getReferenceType().equals(
-				T2ReferenceType.ReferenceSet) == false) {
+		if (!rs.getId().getReferenceType().equals(ReferenceSet))
 			throw new DaoException(
 					"Strangely the reference set ID doesn't have type "
 							+ "T2ReferenceType.ReferenceSet, something has probably "
 							+ "gone badly wrong somewhere earlier!");
-		}
-		if (rs instanceof ReferenceSetImpl) {
-			try {
-				sessionFactory.getCurrentSession().update(rs);
-			} catch (Exception ex) {
-				throw new DaoException(ex);
-			}
-		} else {
+		if (!(rs instanceof ReferenceSetImpl))
 			throw new DaoException(
 					"Supplied reference set not an instance of ReferenceSetImpl");
+
+		try {
+			sessionFactory.getCurrentSession().update(rs);
+		} catch (Exception ex) {
+			throw new DaoException(ex);
 		}
 	}
 
@@ -137,71 +132,67 @@ public class TransactionalHibernateReferenceSetDao implements ReferenceSetDao {
 	 *             something goes wrong fetching the data or connecting to the
 	 *             database
 	 */
+	@Override
 	@GetIdentifiedOperation
 	public ReferenceSetImpl get(T2Reference ref) throws DaoException {
-		if (ref == null) {
+		if (ref == null)
 			throw new DaoException(
 					"Supplied reference is null, can't retrieve.");
-		} else if (ref.getReferenceType().equals(T2ReferenceType.ReferenceSet) == false) {
+		if (!ref.getReferenceType().equals(ReferenceSet))
 			throw new DaoException(
 					"This dao can only retrieve reference of type T2Reference.ReferenceSet");
-		}
-		if (ref instanceof T2ReferenceImpl) {
-			try {
-				return (ReferenceSetImpl) sessionFactory.getCurrentSession()
-						.get(ReferenceSetImpl.class,
-								((T2ReferenceImpl) ref).getCompactForm());
-			} catch (Exception ex) {
-				throw new DaoException(ex);
-			}
-		} else {
+		if (!(ref instanceof T2ReferenceImpl))
 			throw new DaoException(
 					"Reference must be an instance of T2ReferenceImpl");
+
+		try {
+			return (ReferenceSetImpl) sessionFactory.getCurrentSession().get(
+					ReferenceSetImpl.class,
+					((T2ReferenceImpl) ref).getCompactForm());
+		} catch (Exception ex) {
+			throw new DaoException(ex);
 		}
 	}
 
+	@Override
 	@DeleteIdentifiedOperation
 	public boolean delete(ReferenceSet rs) throws DaoException {
-		if (rs.getId() == null) {
+		if (rs.getId() == null)
 			throw new DaoException(
 					"Supplied reference set has a null ID, allocate "
 							+ "an ID before calling the store method in the dao.");
-		} else if (rs.getId().getReferenceType().equals(
-				T2ReferenceType.ReferenceSet) == false) {
+		if (!rs.getId().getReferenceType().equals(ReferenceSet))
 			throw new DaoException(
 					"Strangely the reference set ID doesn't have type "
 							+ "T2ReferenceType.ReferenceSet, something has probably "
 							+ "gone badly wrong somewhere earlier!");
-		}
-		if (rs instanceof ReferenceSetImpl) {
-			try {
-				sessionFactory.getCurrentSession().delete(rs);
-			} catch (Exception ex) {
-				throw new DaoException(ex);
-			}
-		} else {
+		if (!(rs instanceof ReferenceSetImpl))
 			throw new DaoException(
 					"Supplied reference set not an instance of ReferenceSetImpl");
-		}
-		return true;
-	}
-	
-	@SuppressWarnings("unchecked")
-	@DeleteIdentifiedOperation
-	public synchronized void deleteReferenceSetsForWFRun(String workflowRunId) throws DaoException {
-		try{
-			// Select all ReferenceSets for this wf run
-			Query selectQuery= sessionFactory.getCurrentSession().createQuery("FROM ReferenceSetImpl WHERE namespacePart=:workflow_run_id");
-			selectQuery.setString("workflow_run_id", workflowRunId);
-			List<ReferenceSet> referenceSets = selectQuery.list();
-			for (ReferenceSet referenceSet : referenceSets){
-				delete(referenceSet);
-			}
-		}
-		catch(Exception ex){
+
+		try {
+			sessionFactory.getCurrentSession().delete(rs);
+			return true;
+		} catch (Exception ex) {
 			throw new DaoException(ex);
 		}
-		
 	}
 
+	@Override
+	@SuppressWarnings("unchecked")
+	@DeleteIdentifiedOperation
+	public synchronized void deleteReferenceSetsForWFRun(String workflowRunId)
+			throws DaoException {
+		try {
+			// Select all ReferenceSets for this wf run
+			Query selectQuery = sessionFactory.getCurrentSession().createQuery(
+					GET_REFSETS_FOR_RUN);
+			selectQuery.setString("workflow_run_id", workflowRunId);
+			List<ReferenceSet> referenceSets = selectQuery.list();
+			for (ReferenceSet referenceSet : referenceSets)
+				delete(referenceSet);
+		} catch (Exception ex) {
+			throw new DaoException(ex);
+		}
+	}
 }

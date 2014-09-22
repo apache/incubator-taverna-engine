@@ -33,35 +33,37 @@ import net.sf.taverna.t2.reference.T2Reference;
  * very lightweight embedded systems. Uses a java Map as the backing store.
  * 
  * @author Tom Oinn
- * 
  */
 public class InMemoryErrorDocumentDao implements ErrorDocumentDao {
-
 	private Map<T2Reference, ErrorDocument> store;
 
 	public InMemoryErrorDocumentDao() {
-		this.store = new ConcurrentHashMap<T2Reference, ErrorDocument>();
+		this.store = new ConcurrentHashMap<>();
 	}
 
+	@Override
 	public synchronized ErrorDocument get(T2Reference reference)
 			throws DaoException {
-		return store.get(reference);		
+		return store.get(reference);
 	}
 
+	@Override
 	public synchronized void store(ErrorDocument theDoc) throws DaoException {
 		store.put(theDoc.getId(), theDoc);
 	}
-	
-	public synchronized boolean delete(ErrorDocument theDoc) throws DaoException {
-		return store.remove(theDoc.getId())!=null;
+
+	@Override
+	public synchronized boolean delete(ErrorDocument theDoc)
+			throws DaoException {
+		return store.remove(theDoc.getId()) != null;
 	}
-	
-	public synchronized void deleteErrorDocumentsForWFRun(String workflowRunId) throws DaoException {
-		for (T2Reference reference: store.keySet()){
-			if (reference.getNamespacePart().equals(workflowRunId)){
+
+	@Override
+	public synchronized void deleteErrorDocumentsForWFRun(String workflowRunId)
+			throws DaoException {
+		for (T2Reference reference : store.keySet())
+			if (reference.getNamespacePart().equals(workflowRunId))
 				store.remove(reference);
-			}
-		}
 	}
 
 }

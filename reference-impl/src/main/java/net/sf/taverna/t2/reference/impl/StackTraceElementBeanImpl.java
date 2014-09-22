@@ -27,11 +27,9 @@ import net.sf.taverna.t2.reference.h3.HibernateComponentClass;
  * Simple bean implementation of StackTraceElement for Hibernate
  * 
  * @author Tom Oinn
- * 
  */
 public class StackTraceElementBeanImpl implements StackTraceElementBean,
 		HibernateComponentClass {
-
 	private String className;
 	private String fileName;
 	private String methodName;
@@ -41,6 +39,7 @@ public class StackTraceElementBeanImpl implements StackTraceElementBean,
 		//
 	}
 
+	@Override
 	public String getClassName() {
 		return this.className;
 	}
@@ -49,6 +48,7 @@ public class StackTraceElementBeanImpl implements StackTraceElementBean,
 		this.className = className;
 	}
 
+	@Override
 	public String getFileName() {
 		return this.fileName;
 	}
@@ -57,6 +57,7 @@ public class StackTraceElementBeanImpl implements StackTraceElementBean,
 		this.fileName = fileName;
 	}
 
+	@Override
 	public int getLineNumber() {
 		return lineNumber;
 	}
@@ -65,6 +66,7 @@ public class StackTraceElementBeanImpl implements StackTraceElementBean,
 		this.lineNumber = lineNumber;
 	}
 
+	@Override
 	public String getMethodName() {
 		return this.methodName;
 	}
@@ -72,5 +74,4 @@ public class StackTraceElementBeanImpl implements StackTraceElementBean,
 	public void setMethodName(String methodName) {
 		this.methodName = methodName;
 	}
-
 }

@@ -20,6 +20,12 @@
  ******************************************************************************/
 package net.sf.taverna.t2.reference.impl;
 
+import static java.lang.Float.MAX_VALUE;
+import static net.sf.taverna.t2.reference.T2ReferenceType.ErrorDocument;
+import static net.sf.taverna.t2.reference.T2ReferenceType.IdentifiedList;
+import static net.sf.taverna.t2.reference.T2ReferenceType.ReferenceSet;
+import static net.sf.taverna.t2.reference.impl.T2ReferenceImpl.getAsImpl;
+
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,7 +50,6 @@ import net.sf.taverna.t2.reference.ReferenceSet;
 import net.sf.taverna.t2.reference.ReferenceSetServiceException;
 import net.sf.taverna.t2.reference.StreamToValueConverterSPI;
 import net.sf.taverna.t2.reference.T2Reference;
-import net.sf.taverna.t2.reference.T2ReferenceType;
 import net.sf.taverna.t2.reference.ValueCarryingExternalReference;
 import net.sf.taverna.t2.reference.ValueToReferenceConversionException;
 import net.sf.taverna.t2.reference.ValueToReferenceConverterSPI;
@@ -62,7 +67,6 @@ import org.apache.log4j.Logger;
  */
 public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 		implements ReferenceService {
-
 	private final Logger log = Logger.getLogger(ReferenceServiceImpl.class);
 
 	/**
@@ -128,210 +132,208 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 	 *             occurs during registration. Also thrown if attempting to use
 	 *             the converter SPI without an attached registry.
 	 */
+	@Override
 	public T2Reference register(Object o, int targetDepth,
 			boolean useConverterSPI, ReferenceContext context)
 			throws ReferenceServiceException {
 		checkServices();
-		if (context == null) {
+		if (context == null)
 			context = new EmptyReferenceContext();
-		}
-		if (useConverterSPI) {
+		if (useConverterSPI)
 			checkConverterRegistry();
-		}
 		return getNameForObject(o, targetDepth, useConverterSPI, context);
 	}
 
+	@SuppressWarnings("unchecked")
 	private T2Reference getNameForObject(Object o, int currentDepth,
 			boolean useConverterSPI, ReferenceContext context)
 			throws ReferenceServiceException {
-	
-		if (currentDepth < 0) {
-			throw new ReferenceServiceException("Cannot register at depth " + currentDepth + ": " + o);
-		}
-		// First check whether this is an Identified, and if so whether it
-		// already has an ID. If this is the case then return it, we assume that
-		// anything which has an identifier already allocated must have been
-		// registered (this is implicit in the contract for the various
-		// sub-services
+		if (currentDepth < 0)
+			throw new ReferenceServiceException("Cannot register at depth "
+					+ currentDepth + ": " + o);
+		/*
+		 * First check whether this is an Identified, and if so whether it
+		 * already has an ID. If this is the case then return it, we assume that
+		 * anything which has an identifier already allocated must have been
+		 * registered (this is implicit in the contract for the various
+		 * sub-services
+		 */
 		if (o instanceof Identified) {
 			Identified i = (Identified) o;
-			if (i.getId() != null) {
+			if (i.getId() != null)
 				return i.getId();
-			}
 		}
-		// Then check whether the item *is* a T2Reference, in which case we can
-		// just return it (useful for when registering lists of existing
-		// references)
-		if (o instanceof T2Reference) {
+		/*
+		 * Then check whether the item *is* a T2Reference, in which case we can
+		 * just return it (useful for when registering lists of existing
+		 * references)
+		 */
+		if (o instanceof T2Reference)
 			return (T2Reference) o;
-		}
-		
+
 		if (o.getClass().isArray()) {
 			Class<?> elementType = o.getClass().getComponentType();
 			if (elementType.getCanonicalName().equals("char")) {
 				char[] cArray = (char[]) o;
-				List<Character> cList = new ArrayList<Character>();
-				for (char c : cArray) {
+				List<Character> cList = new ArrayList<>();
+				for (char c : cArray)
 					cList.add(new Character(c));
-				}
 				o = cList;
 			} else if (elementType.getCanonicalName().equals("short")) {
 				short[] cArray = (short[]) o;
-				List<Short> cList = new ArrayList<Short>();
-				for (short c : cArray) {
+				List<Short> cList = new ArrayList<>();
+				for (short c : cArray)
 					cList.add(new Short(c));
-				}			
 				o = cList;
 			} else if (elementType.getCanonicalName().equals("int")) {
 				int[] cArray = (int[]) o;
-				List<Integer> cList = new ArrayList<Integer>();
-				for (int c : cArray) {
+				List<Integer> cList = new ArrayList<>();
+				for (int c : cArray)
 					cList.add(new Integer(c));
-				}			
 				o = cList;
-			}  else if (elementType.getCanonicalName().equals("long")) {
+			} else if (elementType.getCanonicalName().equals("long")) {
 				long[] cArray = (long[]) o;
-				List<Long> cList = new ArrayList<Long>();
-				for (long c : cArray) {
+				List<Long> cList = new ArrayList<>();
+				for (long c : cArray)
 					cList.add(new Long(c));
-				}			
 				o = cList;
 			} else if (elementType.getCanonicalName().equals("float")) {
 				float[] cArray = (float[]) o;
-				List<Float> cList = new ArrayList<Float>();
-				for (float c : cArray) {
+				List<Float> cList = new ArrayList<>();
+				for (float c : cArray)
 					cList.add(new Float(c));
-				}			
 				o = cList;
 			} else if (elementType.getCanonicalName().equals("double")) {
 				double[] cArray = (double[]) o;
-				List<Double> cList = new ArrayList<Double>();
-				for (double c : cArray) {
+				List<Double> cList = new ArrayList<>();
+				for (double c : cArray)
 					cList.add(new Double(c));
-				}			
 				o = cList;
-			}  else if (elementType.getCanonicalName().equals("boolean")) {
+			} else if (elementType.getCanonicalName().equals("boolean")) {
 				boolean[] cArray = (boolean[]) o;
-				List<Boolean> cList = new ArrayList<Boolean>();
-				for (boolean c : cArray) {
+				List<Boolean> cList = new ArrayList<>();
+				for (boolean c : cArray)
 					cList.add(new Boolean(c));
-				}			
 				o = cList;
-			} else if (!elementType.getCanonicalName().equals("byte")){
+			} else if (!elementType.getCanonicalName().equals("byte")) {
 				// Covert arrays of objects
 				Object[] cArray = (Object[]) o;
-				List<Object> cList = new ArrayList<Object>();
-				for (Object c : cArray) {
+				List<Object> cList = new ArrayList<>();
+				for (Object c : cArray)
 					cList.add(c);
-				}			
 				o = cList;
 			}
 		}
-		
+
 		// If a Collection but not a List
 		if ((o instanceof Collection) && !(o instanceof List)) {
-			List<Object> cList = new ArrayList<Object>();
-			cList.addAll((Collection)o);
+			List<Object> cList = new ArrayList<>();
+			cList.addAll((Collection<Object>) o);
 			o = cList;
 		}
 		// Next check lists.
 		if (o instanceof List) {
-			if (currentDepth < 1) {
-				throw new ReferenceServiceException("Cannot register list at depth " + currentDepth);
-			}
+			if (currentDepth < 1)
+				throw new ReferenceServiceException(
+						"Cannot register list at depth " + currentDepth);
 			List<?> l = (List<?>) o;
-			// If the list is empty then register a new empty list of the
-			// appropriate depth and return it
-			if (l.isEmpty()) {
+			/*
+			 * If the list is empty then register a new empty list of the
+			 * appropriate depth and return it
+			 */
+			if (l.isEmpty())
 				try {
-					IdentifiedList<T2Reference> newList = listService
-							.registerEmptyList(currentDepth, context);
-					return newList.getId();
+					return listService.registerEmptyList(currentDepth, context)
+							.getId();
 				} catch (ListServiceException lse) {
 					throw new ReferenceServiceException(lse);
 				}
-			}
-			// Otherwise construct a new list of T2Reference and register it,
-			// calling the getNameForObject method on all children of the list
-			// to construct the list of references
+			/*
+			 * Otherwise construct a new list of T2Reference and register it,
+			 * calling the getNameForObject method on all children of the list
+			 * to construct the list of references
+			 */
 			else {
-				List<T2Reference> references = new ArrayList<T2Reference>();
-				for (Object item : l) {
-					// Recursively call this method with a depth one lower than
-					// the current depth
+				List<T2Reference> references = new ArrayList<>();
+				for (Object item : l)
+					/*
+					 * Recursively call this method with a depth one lower than
+					 * the current depth
+					 */
 					references.add(getNameForObject(item, currentDepth - 1,
 							useConverterSPI, context));
-				}
 				try {
-					IdentifiedList<T2Reference> newList = listService
-							.registerList(references, context);
-					return newList.getId();
+					return listService.registerList(references, context)
+							.getId();
 				} catch (ListServiceException lse) {
 					throw new ReferenceServiceException(lse);
 				}
 			}
 		} else {
-			// Neither a list nor an already identified object, first thing is
-			// to engage the converters if enabled. Only engage if we don't
-			// already have a Throwable or an ExternalReferenceSPI instance
+			/*
+			 * Neither a list nor an already identified object, first thing is
+			 * to engage the converters if enabled. Only engage if we don't
+			 * already have a Throwable or an ExternalReferenceSPI instance
+			 */
 			if (useConverterSPI && (o instanceof Throwable == false)
 					&& (o instanceof ExternalReferenceSPI == false)) {
-				if (currentDepth != 0) {
+				if (currentDepth != 0)
 					throw new ReferenceServiceException(
 							"Cannot register object " + o + " at depth "
 									+ currentDepth);
-				}
-				
-				for (ValueToReferenceConverterSPI converter : converters) {
-					if (converter.canConvert(o, context)) {
+
+				for (ValueToReferenceConverterSPI converter : converters)
+					if (converter.canConvert(o, context))
 						try {
-							ExternalReferenceSPI ers = converter.convert(o,
-									context);
-							o = ers;
+							o = converter.convert(o, context);
 							break;
 						} catch (ValueToReferenceConversionException vtrce) {
-							// Fail, but that doesn't matter at the moment as
-							// there may be more converters to try. TODO - log
-							// this!
+							/*
+							 * Fail, but that doesn't matter at the moment as
+							 * there may be more converters to try.
+							 * 
+							 * TODO - log this!
+							 */
 						}
-					}
-				}
 			}
-			// If the object is neither a Throwable nor an ExternalReferenceSPI
-			// instance at this point we should fail the registration process,
-			// this means either that the conversion process wasn't enabled or
-			// that it failed to map the object type correctly.
-			if ((o instanceof Throwable == false)
-					&& (o instanceof ExternalReferenceSPI == false)) {
+			/*
+			 * If the object is neither a Throwable nor an ExternalReferenceSPI
+			 * instance at this point we should fail the registration process,
+			 * this means either that the conversion process wasn't enabled or
+			 * that it failed to map the object type correctly.
+			 */
+			if (!(o instanceof Throwable)
+					&& !(o instanceof ExternalReferenceSPI))
 				throw new ReferenceServiceException(
-						"Failed to register object " + o + ", found a type '"
+						"Failed to register object "
+								+ o
+								+ ", found a type '"
 								+ o.getClass().getCanonicalName()
 								+ "' which cannot currently be registered with the reference manager");
-			}
+
 			// Have either a Throwable or an ExternalReferenceSPI
-			else {
-				if (o instanceof Throwable) {
-					// Wrap in an ErrorDocument and return the ID
-					try {
-						ErrorDocument doc = errorDocumentService.registerError(
-								(Throwable) o, currentDepth, context);
-						return doc.getId();
-					} catch (ErrorDocumentServiceException edse) {
-						throw new ReferenceServiceException(edse);
-					}
-				} else if (o instanceof ExternalReferenceSPI) {
-					if (currentDepth != 0) {
-						throw new ReferenceServiceException("Cannot register external references at depth " + currentDepth);
-					}
-					try {
-						Set<ExternalReferenceSPI> references = new HashSet<ExternalReferenceSPI>();
-						references.add((ExternalReferenceSPI) o);
-						ReferenceSet rs = referenceSetService
-								.registerReferenceSet(references, context);
-						return rs.getId();
-					} catch (ReferenceSetServiceException rsse) {
-						throw new ReferenceServiceException(rsse);
-					}
+			if (o instanceof Throwable)
+				// Wrap in an ErrorDocument and return the ID
+				try {
+					ErrorDocument doc = errorDocumentService.registerError(
+							(Throwable) o, currentDepth, context);
+					return doc.getId();
+				} catch (ErrorDocumentServiceException edse) {
+					throw new ReferenceServiceException(edse);
+				}
+			if (o instanceof ExternalReferenceSPI) {
+				if (currentDepth != 0)
+					throw new ReferenceServiceException(
+							"Cannot register external references at depth "
+									+ currentDepth);
+				try {
+					Set<ExternalReferenceSPI> references = new HashSet<ExternalReferenceSPI>();
+					references.add((ExternalReferenceSPI) o);
+					ReferenceSet rs = referenceSetService.registerReferenceSet(
+							references, context);
+					return rs.getId();
+				} catch (ReferenceSetServiceException rsse) {
+					throw new ReferenceServiceException(rsse);
 				}
 			}
 		}
@@ -365,27 +367,25 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 	 * @throws ReferenceServiceException
 	 *             if any problems occur during resolution
 	 */
+	@Override
 	public Identified resolveIdentifier(T2Reference id,
 			Set<Class<ExternalReferenceSPI>> ensureTypes,
 			ReferenceContext context) throws ReferenceServiceException {
 		checkServices();
-		if (context == null) {
+		if (context == null)
 			context = new EmptyReferenceContext();
-		}
 		switch (id.getReferenceType()) {
-
 		case ReferenceSet:
 			try {
 				ReferenceSet rs;
-				if (ensureTypes == null) {
+				if (ensureTypes == null)
 					rs = referenceSetService.getReferenceSet(id);
-				} else {
+				else
 					rs = referenceSetService.getReferenceSetWithAugmentation(
 							id, ensureTypes, context);
-				}
-				if (rs == null) {
-					throw new ReferenceServiceException("Could not find ReferenceSet " + id);
-				}
+				if (rs == null)
+					throw new ReferenceServiceException(
+							"Could not find ReferenceSet " + id);
 				return rs;
 			} catch (ReferenceSetServiceException rsse) {
 				throw new ReferenceServiceException(rsse);
@@ -394,9 +394,9 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 		case ErrorDocument:
 			try {
 				ErrorDocument ed = errorDocumentService.getError(id);
-				if (ed == null) {
-					throw new ReferenceServiceException("Could not find ErrorDocument " + id);
-				}
+				if (ed == null)
+					throw new ReferenceServiceException(
+							"Could not find ErrorDocument " + id);
 				return ed;
 			} catch (ErrorDocumentServiceException edse) {
 				throw new ReferenceServiceException(edse);
@@ -405,16 +405,17 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 		case IdentifiedList:
 			try {
 				IdentifiedList<T2Reference> idList = listService.getList(id);
-				if (idList == null) {
-					throw new ReferenceServiceException("Could not find IdentifiedList " + id);
-				}
-				// Construct a new list, and populate with the result of
-				// resolving each ID in turn
-				IdentifiedArrayList<Identified> newList = new IdentifiedArrayList<Identified>();
-				for (T2Reference item : idList) {
+				if (idList == null)
+					throw new ReferenceServiceException(
+							"Could not find IdentifiedList " + id);
+				/*
+				 * Construct a new list, and populate with the result of
+				 * resolving each ID in turn
+				 */
+				IdentifiedArrayList<Identified> newList = new IdentifiedArrayList<>();
+				for (T2Reference item : idList)
 					newList.add(resolveIdentifier(item, ensureTypes, context));
-				}
-				newList.setTypedId(T2ReferenceImpl.getAsImpl(id));
+				newList.setTypedId(getAsImpl(id));
 				return newList;
 			} catch (ListServiceException lse) {
 				throw new ReferenceServiceException(lse);
@@ -426,26 +427,26 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 		}
 	}
 
+	@Override
 	public Object renderIdentifier(T2Reference id, Class<?> leafClass,
 			ReferenceContext context) throws ReferenceServiceException {
 		// Check we have the services installed
 		checkServices();
 
 		// Insert an empty context if context was null
-		if (context == null) {
+		if (context == null)
 			context = new EmptyReferenceContext();
-		}
-
 		// Reject if the source reference contains errors
-		if (id.containsErrors()) {
+		if (id.containsErrors())
 			throw new ReferenceServiceException(
 					"Can't render an identifier which contains errors to a POJO");
-		}
 
-		// Attempt to find an appropriate StreamToValueConverterSPI instance to
-		// build the specified class
+		/*
+		 * Attempt to find an appropriate StreamToValueConverterSPI instance to
+		 * build the specified class
+		 */
 		StreamToValueConverterSPI<?> converter = null;
-		if (valueBuilders != null) {
+		if (valueBuilders != null)
 			for (StreamToValueConverterSPI<?> stvc : valueBuilders) {
 				Class<?> builtClass = stvc.getPojoClass();
 				if (leafClass.isAssignableFrom(builtClass)) {
@@ -453,11 +454,9 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 					break;
 				}
 			}
-		}
-		if (converter == null) {
+		if (converter == null)
 			log.warn("No stream->value converters found for type '"
 					+ leafClass.getCanonicalName() + "'");
-		}
 
 		// Render the identifier
 		return renderIdentifierInner(id, leafClass, context, converter);
@@ -469,18 +468,16 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 		checkServices();
 
 		switch (id.getReferenceType()) {
-
 		case IdentifiedList:
 			try {
 				IdentifiedList<T2Reference> idList = listService.getList(id);
-				if (idList == null) {
-					throw new ReferenceServiceException("Could not find IdentifiedList " + id);
-				}
-				List<Object> result = new ArrayList<Object>();
-				for (T2Reference child : idList) {
+				if (idList == null)
+					throw new ReferenceServiceException(
+							"Could not find IdentifiedList " + id);
+				List<Object> result = new ArrayList<>();
+				for (T2Reference child : idList)
 					result.add(renderIdentifierInner(child, leafClass, context,
 							converter));
-				}
 				return result;
 			} catch (ListServiceException lse) {
 				throw new ReferenceServiceException(lse);
@@ -489,25 +486,25 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 		case ReferenceSet:
 			try {
 				ReferenceSet rs = referenceSetService.getReferenceSet(id);
-				if (rs == null) {
-					throw new ReferenceServiceException("Could not find ReferenceSet " + id);
-				}
+				if (rs == null)
+					throw new ReferenceServiceException(
+							"Could not find ReferenceSet " + id);
 				// Check that there are references in the set
-				if (rs.getExternalReferences().isEmpty()) {
+				if (rs.getExternalReferences().isEmpty())
 					throw new ReferenceServiceException(
 							"Can't render an empty reference set to a POJO");
-				}
-				// If we can't directly map to an appropriate value keep track
-				// of the cheapest reference from which to try to build the pojo
-				// from a stream
+				/*
+				 * If we can't directly map to an appropriate value keep track
+				 * of the cheapest reference from which to try to build the pojo
+				 * from a stream
+				 */
 				ExternalReferenceSPI cheapestReference = null;
-				float cheapestReferenceCost = Float.MAX_VALUE;
+				float cheapestReferenceCost = MAX_VALUE;
 				for (ExternalReferenceSPI ers : rs.getExternalReferences()) {
 					if (ers instanceof ValueCarryingExternalReference<?>) {
 						ValueCarryingExternalReference<?> vcer = (ValueCarryingExternalReference<?>) ers;
-						if (leafClass.isAssignableFrom(vcer.getValueType())) {
+						if (leafClass.isAssignableFrom(vcer.getValueType()))
 							return vcer.getValue();
-						}
 					}
 					// Got here so this wasn't an appropriate value type
 					if (cheapestReference == null
@@ -516,11 +513,13 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 						cheapestReferenceCost = ers.getResolutionCost();
 					}
 				}
-				if (converter != null) {
-					try (InputStream stream = cheapestReference.openStream(context)) {
-						return converter.renderFrom(stream, cheapestReference.getDataNature(), cheapestReference.getCharset());
+				if (converter != null && cheapestReference != null)
+					try (InputStream stream = cheapestReference
+							.openStream(context)) {
+						return converter.renderFrom(stream,
+								cheapestReference.getDataNature(),
+								cheapestReference.getCharset());
 					}
-				}
 			} catch (Exception e) {
 				throw new ReferenceServiceException(e);
 			}
@@ -555,30 +554,27 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 	 *             when used. If the iterator fails it will do so by throwing
 	 *             one of the underlying sub-service exceptions.
 	 */
+	@Override
 	public Iterator<ContextualizedT2Reference> traverseFrom(T2Reference source,
 			int desiredDepth) throws ReferenceServiceException {
 		checkServices();
-		if (desiredDepth < 0) {
+		if (desiredDepth < 0)
 			throw new ReferenceServiceException(
 					"Cannot traverse to a negative depth");
-		}
-		List<ContextualizedT2Reference> workingSet = new ArrayList<ContextualizedT2Reference>();
+		List<ContextualizedT2Reference> workingSet = new ArrayList<>();
 		workingSet.add(new ContextualizedT2ReferenceImpl(source, new int[0]));
 		int currentDepth = source.getDepth();
 		while (currentDepth > desiredDepth) {
-			List<ContextualizedT2Reference> newSet = new ArrayList<ContextualizedT2Reference>();
+			List<ContextualizedT2Reference> newSet = new ArrayList<>();
 			for (ContextualizedT2Reference ci : workingSet) {
 				T2ReferenceImpl ref = (T2ReferenceImpl) ci.getReference();
 				switch (ref.getReferenceType()) {
 				case IdentifiedList:
 					try {
-						List<T2Reference> children = getListService().getList(
-								ref);
 						int position = 0;
-						for (T2Reference child : children) {
+						for (T2Reference child : getListService().getList(ref))
 							newSet.add(new ContextualizedT2ReferenceImpl(child,
 									addIndex(ci.getIndex(), position++)));
-						}
 					} catch (ListServiceException lse) {
 						throw new ReferenceServiceException(lse);
 					}
@@ -622,6 +618,7 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 	 * Parse the reference contained in the string and return a
 	 * {@link T2Reference} with the correct properties
 	 */
+	@Override
 	public T2Reference referenceFromString(String reference) {
 		T2ReferenceImpl newRef = new T2ReferenceImpl();
 		Map<String, String> parseRef = parseRef(reference);
@@ -629,15 +626,14 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 		newRef.setLocalPart(parseRef.get("localPart"));
 		String type = parseRef.get("type");
 		if (type.equals("ref")) {
-			newRef.setReferenceType(T2ReferenceType.ReferenceSet);
+			newRef.setReferenceType(ReferenceSet);
 		} else if (type.equals("list")) {
-			newRef.setReferenceType(T2ReferenceType.IdentifiedList);
-			newRef.setContainsErrors(Boolean
-					.parseBoolean(parseRef.get("error")));
+			newRef.setReferenceType(IdentifiedList);
+			newRef.setContainsErrors(Boolean.parseBoolean(parseRef.get("error")));
 			newRef.setDepth(Integer.parseInt(parseRef.get("depth")));
 		} else if (type.equals("error")) {
 			newRef.setContainsErrors(true);
-			newRef.setReferenceType(T2ReferenceType.ErrorDocument);
+			newRef.setReferenceType(ErrorDocument);
 			newRef.setDepth(Integer.parseInt(parseRef.get("depth")));
 		} else {
 			return null;
@@ -656,8 +652,10 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 	 */
 	private Map<String, String> parseRef(String ref) {
 		String[] split = ref.split("\\?");
-		// get the bit before and after the final '/' ie. the local part and the
-		// depth, there might not be a split1[1] since it might not be a list
+		/*
+		 * get the bit before and after the final '/' ie. the local part and the
+		 * depth, there might not be a split1[1] since it might not be a list
+		 */
 		String[] split2 = split[1].split("/");
 		// get the t2:abc:// and the namespace
 		String[] split3 = split[0].split("//");
@@ -673,69 +671,61 @@ public class ReferenceServiceImpl extends AbstractReferenceServiceImpl
 			refPartsMap.put("error", split2[1]);
 			refPartsMap.put("depth", split2[2]);
 		}
-		if (refPartsMap.get("type").equals("error")) {
+		if (refPartsMap.get("type").equals("error"))
 			refPartsMap.put("depth", split2[1]);
-		}
 
 		return refPartsMap;
 
-	}	
-	
+	}
 
+	@Override
 	public boolean delete(List<T2Reference> references)
 			throws ReferenceServiceException {
-		boolean result=true;
-		for (T2Reference reference : references) {
+		for (T2Reference reference : references)
 			delete(reference);
-		}
-		return result;
+		return true;
 	}
 
+	@Override
 	public boolean delete(T2Reference reference)
 			throws ReferenceServiceException {
-		boolean result=false;
 		switch (reference.getReferenceType()) {
 		case IdentifiedList:
-			result=listService.delete(reference);
-			break;
+			return listService.delete(reference);
 		case ReferenceSet:
-			result=referenceSetService.delete(reference);
-			break;
+			return referenceSetService.delete(reference);
 		case ErrorDocument:
-			result=errorDocumentService.delete(reference);
-			break;
+			return errorDocumentService.delete(reference);
 		default:
-			throw new ReferenceServiceException(
-					"Unknown reference type!");
+			throw new ReferenceServiceException("Unknown reference type!");
 		}
-		return result;
 	}
 
+	@Override
 	public void deleteReferencesForWorkflowRun(String workflowRunId)
 			throws ReferenceServiceException {
-		
 		String errorString = "";
-		try{
+		try {
 			listService.deleteIdentifiedListsForWorkflowRun(workflowRunId);
+		} catch (ReferenceServiceException resex) {
+			errorString += "Failed to delete lists for workflow run: "
+					+ workflowRunId + ".";
 		}
-		catch(ReferenceServiceException resex){
-			errorString += "Failed to delete lists for workflow run: " + workflowRunId + ".";
+		try {
+			referenceSetService
+					.deleteReferenceSetsForWorkflowRun(workflowRunId);
+		} catch (ReferenceServiceException resex) {
+			errorString += "Failed to delete reference sets for workflow run: "
+					+ workflowRunId + ".";
 		}
-		try{
-			referenceSetService.deleteReferenceSetsForWorkflowRun(workflowRunId);
+		try {
+			errorDocumentService
+					.deleteErrorDocumentsForWorkflowRun(workflowRunId);
+		} catch (ReferenceServiceException resex) {
+			errorString += "Failed to delete error documents for workflow run: "
+					+ workflowRunId + ".";
 		}
-		catch(ReferenceServiceException resex){
-			errorString += "Failed to delete reference sets for workflow run: " + workflowRunId + ".";
-		}
-		try{
-			errorDocumentService.deleteErrorDocumentsForWorkflowRun(workflowRunId);
-		}
-		catch(ReferenceServiceException resex){
-			errorString += "Failed to delete error documents for workflow run: " + workflowRunId +".";
-		}
-		if (!errorString.equals("")){
+		if (!errorString.equals(""))
 			throw new ReferenceServiceException(errorString);
-		}
 	}
-
 }

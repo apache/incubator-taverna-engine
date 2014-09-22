@@ -34,20 +34,19 @@ import net.sf.taverna.t2.reference.h3.HibernateMappedEntity;
  * Simple bean implementation of ErrorDocument
  * 
  * @author Tom Oinn
- * 
  */
 public class ErrorDocumentImpl extends AbstractEntityImpl implements
 		ErrorDocument, HibernateMappedEntity {
-
 	private String exceptionMessage = "";
 	private String message = "";
 	List<StackTraceElementBean> stackTrace;
-	Set<T2Reference> errorReferences = new HashSet<T2Reference>();
+	Set<T2Reference> errorReferences = new HashSet<>();
 	
 	public ErrorDocumentImpl() {
-		this.stackTrace = new ArrayList<StackTraceElementBean>();
+		this.stackTrace = new ArrayList<>();
 	}
 
+	@Override
 	public String getExceptionMessage() {
 		return this.exceptionMessage;
 	}
@@ -56,6 +55,7 @@ public class ErrorDocumentImpl extends AbstractEntityImpl implements
 		this.exceptionMessage = exceptionMessage;
 	}
 
+	@Override
 	public String getMessage() {
 		return this.message;
 	}
@@ -67,6 +67,7 @@ public class ErrorDocumentImpl extends AbstractEntityImpl implements
 	/**
 	 * From interface, not used by hibernate internally
 	 */
+	@Override
 	public List<StackTraceElementBean> getStackTraceStrings() {
 		return this.stackTrace;
 	}
@@ -75,7 +76,7 @@ public class ErrorDocumentImpl extends AbstractEntityImpl implements
 	 * Used by Hibernate to bodge around problems with interface types in the
 	 * API
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void setStackTraceList(List newList) {
 		this.stackTrace = newList;
 	}
@@ -84,11 +85,12 @@ public class ErrorDocumentImpl extends AbstractEntityImpl implements
 	 * Used by Hibernate to bodge around problems with interface types in the
 	 * API
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public List getStackTraceList() {
 		return this.stackTrace;
 	}
 
+	@Override
 	public Set<T2Reference> getErrorReferences() {
 		return errorReferences;
 	}
@@ -97,7 +99,7 @@ public class ErrorDocumentImpl extends AbstractEntityImpl implements
 	 * Used by Hibernate to bodge around problems with interface types in the
 	 * API
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void setErrorReferenceSet(Set errorReferenceSet) {
 		this.errorReferences = errorReferenceSet;
 	}
@@ -106,7 +108,7 @@ public class ErrorDocumentImpl extends AbstractEntityImpl implements
 	 * Used by Hibernate to bodge around problems with interface types in the
 	 * API
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public Set getErrorReferenceSet() {
 		return this.errorReferences;
 	}
@@ -115,5 +117,4 @@ public class ErrorDocumentImpl extends AbstractEntityImpl implements
 	public String toString() {
 		return getMessage();
 	}
-
 }

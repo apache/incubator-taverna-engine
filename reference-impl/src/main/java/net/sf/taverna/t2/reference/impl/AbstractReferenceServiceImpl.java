@@ -45,11 +45,9 @@ import net.sf.taverna.t2.reference.ValueToReferenceConverterSPI;
  * reference service logic.
  * 
  * @author Tom Oinn
- * 
  */
 public abstract class AbstractReferenceServiceImpl extends AbstractServiceImpl
 		implements ReferenceService {
-
 	protected ErrorDocumentService errorDocumentService = null;
 	protected ReferenceSetService referenceSetService = null;
 	protected ListService listService = null;
@@ -60,7 +58,8 @@ public abstract class AbstractReferenceServiceImpl extends AbstractServiceImpl
 	/**
 	 * Inject value to reference convertor SPI
 	 */
-	public final void setConverters(List<ValueToReferenceConverterSPI> converters) {
+	public final void setConverters(
+			List<ValueToReferenceConverterSPI> converters) {
 		this.converters = converters;
 	}
 
@@ -68,7 +67,8 @@ public abstract class AbstractReferenceServiceImpl extends AbstractServiceImpl
 	 * Inject stream to value converter SPI
 	 */
 	@SuppressWarnings("rawtypes")
-	public final void setValueBuilders(List<StreamToValueConverterSPI> valueBuilders) {
+	public final void setValueBuilders(
+			List<StreamToValueConverterSPI> valueBuilders) {
 		this.valueBuilders = valueBuilders;
 	}
 
@@ -98,21 +98,18 @@ public abstract class AbstractReferenceServiceImpl extends AbstractServiceImpl
 	 * called without the necessary sub-services configured.
 	 */
 	protected final void checkServices() throws ReferenceServiceException {
-		if (errorDocumentService == null) {
+		if (errorDocumentService == null)
 			throw new ReferenceServiceException(
 					"Reference service must be configued with an "
 							+ "instance of ErrorDocumentService to function");
-		}
-		if (referenceSetService == null) {
+		if (referenceSetService == null)
 			throw new ReferenceServiceException(
 					"Reference service must be configued with an "
 							+ "instance of ReferenceSetService to function");
-		}
-		if (listService == null) {
+		if (listService == null)
 			throw new ReferenceServiceException(
 					"Reference service must be configued with an "
 							+ "instance of ListService to function");
-		}
 	}
 
 	/**
@@ -121,25 +118,27 @@ public abstract class AbstractReferenceServiceImpl extends AbstractServiceImpl
 	 */
 	protected final void checkConverterRegistry()
 			throws ReferenceServiceException {
-		if (converters == null) {
+		if (converters == null)
 			throw new ReferenceServiceException(
 					"Reference service must be configued with an "
 							+ "instance registry of ValueToReferenceConvertorSPI "
 							+ "to enable on the fly mapping of arbitrary objects "
 							+ "during compound registration");
-		}
 	}
 
+	@Override
 	public final ErrorDocumentService getErrorDocumentService() {
 		checkServices();
 		return this.errorDocumentService;
 	}
 
+	@Override
 	public final ListService getListService() {
 		checkServices();
 		return this.listService;
 	}
 
+	@Override
 	public final ReferenceSetService getReferenceSetService() {
 		checkServices();
 		return this.referenceSetService;
@@ -149,6 +148,7 @@ public abstract class AbstractReferenceServiceImpl extends AbstractServiceImpl
 	 * Wraps the synchronous form, using the executeRunnable method to schedule
 	 * it.
 	 */
+	@Override
 	public void resolveIdentifierAsynch(final T2Reference id,
 			final Set<Class<ExternalReferenceSPI>> ensureTypes,
 			final ReferenceContext context,
@@ -156,6 +156,7 @@ public abstract class AbstractReferenceServiceImpl extends AbstractServiceImpl
 			throws ReferenceServiceException {
 		checkServices();
 		Runnable r = new Runnable() {
+			@Override
 			public void run() {
 				try {
 					callback.identifierResolved(resolveIdentifier(id,
@@ -167,5 +168,4 @@ public abstract class AbstractReferenceServiceImpl extends AbstractServiceImpl
 		};
 		executeRunnable(r);
 	}
-
 }

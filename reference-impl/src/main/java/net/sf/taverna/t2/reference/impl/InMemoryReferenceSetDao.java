@@ -33,39 +33,40 @@ import net.sf.taverna.t2.reference.T2Reference;
  * very lightweight embedded systems. Uses a java Map as the backing store.
  * 
  * @author Tom Oinn
- * 
  */
 public class InMemoryReferenceSetDao implements ReferenceSetDao {
-
 	private Map<T2Reference, ReferenceSet> store;
 
 	public InMemoryReferenceSetDao() {
-		this.store = new ConcurrentHashMap<T2Reference, ReferenceSet>();
+		this.store = new ConcurrentHashMap<>();
 	}
 
+	@Override
 	public synchronized ReferenceSet get(T2Reference reference)
 			throws DaoException {
-		return store.get(reference);		
+		return store.get(reference);
 	}
 
+	@Override
 	public synchronized void store(ReferenceSet refSet) throws DaoException {
 		store.put(refSet.getId(), refSet);
 	}
 
+	@Override
 	public synchronized void update(ReferenceSet refSet) throws DaoException {
-		store.put(refSet.getId(), refSet);		
+		store.put(refSet.getId(), refSet);
 	}
-	
+
+	@Override
 	public synchronized boolean delete(ReferenceSet refSet) throws DaoException {
-		return store.remove(refSet.getId())!=null;
+		return store.remove(refSet.getId()) != null;
 	}
 
-	public synchronized void deleteReferenceSetsForWFRun(String workflowRunId) throws DaoException {	
-		for (T2Reference reference: store.keySet()){
-			if (reference.getNamespacePart().equals(workflowRunId)){
+	@Override
+	public synchronized void deleteReferenceSetsForWFRun(String workflowRunId)
+			throws DaoException {
+		for (T2Reference reference : store.keySet())
+			if (reference.getNamespacePart().equals(workflowRunId))
 				store.remove(reference);
-			}
-		}
 	}
-
 }

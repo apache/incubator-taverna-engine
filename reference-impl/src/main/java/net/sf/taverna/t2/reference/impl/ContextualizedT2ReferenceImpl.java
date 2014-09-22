@@ -27,10 +27,8 @@ import net.sf.taverna.t2.reference.T2Reference;
  * Simple implementation of ContextualizedT2Reference
  * 
  * @author Tom Oinn
- * 
  */
 public class ContextualizedT2ReferenceImpl implements ContextualizedT2Reference {
-
 	private T2Reference reference;
 	private int[] index;
 
@@ -39,28 +37,25 @@ public class ContextualizedT2ReferenceImpl implements ContextualizedT2Reference 
 		this.index = context;
 	}
 
+	@Override
 	public int[] getIndex() {
 		return this.index;
 	}
 
+	@Override
 	public T2Reference getReference() {
 		return this.reference;
 	}
 
+	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
-		sb.append("[");
-		boolean doneFirst = false;
-		for (int i = 0; i < index.length; i++) {
-			if (doneFirst) {
-				sb.append(",");
-			}
-			doneFirst = true;
-			sb.append(index[i]);
+		StringBuilder sb = new StringBuilder("[");
+		String sep = "";
+		for (int idx : index) {
+			sb.append(sep).append(idx);
+			sep = ",";
 		}
-		sb.append("]");
-		sb.append(reference.toString());		
-		return sb.toString();
+		return sb.append("]").append(reference).toString();
 	}
 	
 }

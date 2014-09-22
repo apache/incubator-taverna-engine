@@ -20,6 +20,8 @@
  ******************************************************************************/
 package net.sf.taverna.platform.spring.jdbc;
 
+import static java.io.File.createTempFile;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -60,16 +62,14 @@ import java.io.IOException;
  * </pre>
  * 
  * @author Stian Soiland-Reyes
- * 
  */
 public class TemporaryJDBC {
 	public String getTemporaryDerbyJDBC() throws IOException {
-		File tmpDir = File.createTempFile("t2platform-", ".db");
+		File tmpDir = createTempFile("t2platform-", ".db");
 		tmpDir.delete();
-		if (!tmpDir.mkdir()) {
+		if (!tmpDir.mkdir())
 			throw new IOException("Could not create temporary directory "
 					+ tmpDir);
-		}
 		return "jdbc:derby:" + tmpDir.getPath() + "/database;create=true";
 	}
 }

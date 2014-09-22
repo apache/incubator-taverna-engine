@@ -20,6 +20,8 @@
  ******************************************************************************/
 package net.sf.taverna.t2.reference.impl;
 
+import static net.sf.taverna.t2.reference.impl.T2ReferenceImpl.getAsImpl;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -39,14 +41,10 @@ import net.sf.taverna.t2.reference.T2Reference;
  * appropriate ReferenceSetAugmentor implementation is injected.
  * 
  * @author Tom Oinn
- * 
  */
 public class ReferenceSetServiceImpl extends AbstractReferenceSetServiceImpl
 		implements ReferenceSetService {
-
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public ReferenceSet getReferenceSet(T2Reference id)
 			throws ReferenceSetServiceException {
 		checkDao();
@@ -57,34 +55,36 @@ public class ReferenceSetServiceImpl extends AbstractReferenceSetServiceImpl
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public ReferenceSet getReferenceSetWithAugmentation(T2Reference id,
 			Set<Class<ExternalReferenceSPI>> ensureTypes,
 			ReferenceContext context) throws ReferenceSetServiceException {
 		checkDao();
 		checkAugmentor();
-		if (context == null) {
+		if (context == null)
 			context = new EmptyReferenceContext();
-		}
 		// Obtain the reference set
 
 		try {
-			// Synchronize on the reference set, should ensure that we don't
-			// have multiple concurrent translations assuming that Hibernate
-			// retrieves the same entity each time. To work around this
-			// potentially not being the case we can synchronize on the
-			// stringified form of the identifier.
+			// HERE BE DRAGONS!
+			/*
+			 * Synchronize on the reference set, should ensure that we don't
+			 * have multiple concurrent translations assuming that Hibernate
+			 * retrieves the same entity each time. To work around this
+			 * potentially not being the case we can synchronize on the
+			 * stringified form of the identifier.
+			 */
+			//TODO Does this even work? Is assuming that the string forms are all the same object safe?
 			synchronized (id.toString()) {
 				ReferenceSet rs = getReferenceSet(id);
 				Set<ExternalReferenceSPI> newReferences = referenceSetAugmentor
 						.augmentReferenceSet(rs, ensureTypes, context);
 				if (newReferences.isEmpty() == false) {
-					// Write back changes to the store if we got here, this can
-					// potentially throw an unsupported operation exception in
-					// which
-					// case we have to fail the augmentation.
+					/*
+					 * Write back changes to the store if we got here, this can
+					 * potentially throw an unsupported operation exception in
+					 * which case we have to fail the augmentation.
+					 */
 					try {
 						rs.getExternalReferences().addAll(newReferences);
 					} catch (RuntimeException re) {
@@ -95,38 +95,22 @@ public class ReferenceSetServiceImpl extends AbstractReferenceSetServiceImpl
 				}
 				return rs;
 			}
-
 		} catch (ReferenceSetAugmentationException rsae) {
 			throw new ReferenceSetServiceException(rsae);
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public ReferenceSet registerReferenceSet(
 			Set<ExternalReferenceSPI> references, ReferenceContext context)
 			throws ReferenceSetServiceException {
 		checkDao();
 		checkGenerator();
-		/*ReferenceSetImpl rsi = new ReferenceSetImpl();
-		rsi
-				.setExternalReferences(new HashSet<ExternalReferenceSPI>(
-						references));
-		T2Reference id = t2ReferenceGenerator.nextReferenceSetReference(context);
-		rsi.setTypedId(T2ReferenceImpl.getAsImpl(id));
 		
-		//  Should be at least one external reference - otherwise we cannot calculate the data size
-		if (references != null && references.size() > 0){		
-			// Just take the first ExternalReferenceSPI returned
-			ExternalReferenceSPI externalReferenceSPI = references.toArray(new ExternalReferenceSPI[0])[0];
-			rsi.setApproximateSizeInBytes(externalReferenceSPI.getApproximateSizeInBytes());
-		}*/
-		
-		T2Reference id = t2ReferenceGenerator.nextReferenceSetReference(context);
-		ReferenceSetImpl rsi = new ReferenceSetImpl(new HashSet<ExternalReferenceSPI>(
-				references), T2ReferenceImpl.getAsImpl(id));	
-		
+		ReferenceSetImpl rsi = new ReferenceSetImpl(new HashSet<>(references),
+				getAsImpl(t2ReferenceGenerator
+						.nextReferenceSetReference(context)));
+
 		try {
 			referenceSetDao.store(rsi);
 			return rsi;
@@ -135,14 +119,17 @@ public class ReferenceSetServiceImpl extends AbstractReferenceSetServiceImpl
 		}
 	}
 
+	@Override
 	public boolean delete(T2Reference reference)
 			throws ReferenceServiceException {
 		checkDao();
-		ReferenceSet set=referenceSetDao.get(reference);
-		if (set==null) return false;
+		ReferenceSet set = referenceSetDao.get(reference);
+		if (set == null)
+			return false;
 		return referenceSetDao.delete(set);
 	}
 
+	@Override
 	public void deleteReferenceSetsForWorkflowRun(String workflowRunId)
 			throws ReferenceServiceException {
 		checkDao();

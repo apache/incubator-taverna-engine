@@ -20,6 +20,8 @@
  ******************************************************************************/
 package net.sf.taverna.t2.reference.impl;
 
+import static net.sf.taverna.t2.reference.impl.T2ReferenceImpl.getAsImpl;
+
 import java.util.Set;
 
 import net.sf.taverna.t2.reference.ErrorDocument;
@@ -34,11 +36,10 @@ import net.sf.taverna.t2.reference.T2Reference;
  * ErrorDocumentDao and T2ReferenceGenerator to enable.
  * 
  * @author Tom Oinn
- * 
  */
 public class ErrorDocumentServiceImpl extends AbstractErrorDocumentServiceImpl
 		implements ErrorDocumentService {
-
+	@Override
 	public ErrorDocument getError(T2Reference id)
 			throws ErrorDocumentServiceException {
 		checkDao();
@@ -53,27 +54,26 @@ public class ErrorDocumentServiceImpl extends AbstractErrorDocumentServiceImpl
 	 * Register the specified error and any child errors (which have the same
 	 * namespace and local part but a lower depth, down to depth of zero
 	 */
-	public ErrorDocument registerError(String message, Throwable t, int depth, ReferenceContext context)
-			throws ErrorDocumentServiceException {
+	@Override
+	public ErrorDocument registerError(String message, Throwable t, int depth,
+			ReferenceContext context) throws ErrorDocumentServiceException {
 		checkDao();
 		checkGenerator();
 
-		T2Reference ref = t2ReferenceGenerator
-				.nextErrorDocumentReference(depth, context);
-		T2ReferenceImpl typedId = T2ReferenceImpl.getAsImpl(ref);
+		T2Reference ref = t2ReferenceGenerator.nextErrorDocumentReference(
+				depth, context);
+		T2ReferenceImpl typedId = getAsImpl(ref);
 
 		ErrorDocument docToReturn = null;
-		while (depth >= 0) {
+		for (; depth >= 0; depth--) {
 			ErrorDocumentImpl edi = new ErrorDocumentImpl();
-			if (docToReturn == null) {
+			if (docToReturn == null)
 				docToReturn = edi;
-			}
 			edi.setTypedId(typedId);
-			if (message != null) {
+			if (message != null)
 				edi.setMessage(message);
-			} else {
+			else
 				edi.setMessage("");
-			}
 			if (t != null) {
 				edi.setExceptionMessage(t.toString());
 				for (StackTraceElement ste : t.getStackTrace()) {
@@ -84,47 +84,42 @@ public class ErrorDocumentServiceImpl extends AbstractErrorDocumentServiceImpl
 					stebi.setMethodName(ste.getMethodName());
 					edi.stackTrace.add(stebi);
 				}
-			} else {
+			} else
 				edi.setExceptionMessage("");
-			}
 			try {
 				errorDao.store(edi);
 			} catch (Throwable t2) {
 				throw new ErrorDocumentServiceException(t2);
 			}
-			if (depth > 0) {
+			if (depth > 0)
 				typedId = typedId.getDeeperErrorReference();
-			}
-			depth--;
 		}
 		return docToReturn;
-
 	}
 
-	public ErrorDocument registerError(String message, Set<T2Reference> errors, int depth, ReferenceContext context) 
+	@Override
+	public ErrorDocument registerError(String message, Set<T2Reference> errors,
+			int depth, ReferenceContext context)
 			throws ErrorDocumentServiceException {
 		checkDao();
 		checkGenerator();
 
-		T2Reference ref = t2ReferenceGenerator
-		.nextErrorDocumentReference(depth, context);
+		T2Reference ref = t2ReferenceGenerator.nextErrorDocumentReference(
+				depth, context);
 		T2ReferenceImpl typedId = T2ReferenceImpl.getAsImpl(ref);
 
 		ErrorDocument docToReturn = null;
-		while (depth >= 0) {
+		for (; depth >= 0; depth--) {
 			ErrorDocumentImpl edi = new ErrorDocumentImpl();
-			if (docToReturn == null) {
+			if (docToReturn == null)
 				docToReturn = edi;
-			}
 			edi.setTypedId(typedId);
-			if (message != null) {
+			if (message != null)
 				edi.setMessage(message);
-			} else {
+			else
 				edi.setMessage("");
-			}
-			if (errors != null) {
+			if (errors != null)
 				edi.setErrorReferenceSet(errors);
-			}
 			edi.setExceptionMessage("");
 
 			try {
@@ -132,17 +127,16 @@ public class ErrorDocumentServiceImpl extends AbstractErrorDocumentServiceImpl
 			} catch (Throwable t2) {
 				throw new ErrorDocumentServiceException(t2);
 			}
-			if (depth > 0) {
+			if (depth > 0)
 				typedId = typedId.getDeeperErrorReference();
-			}
-			depth--;
 		}
 		return docToReturn;
 	}
 
+	@Override
 	public T2Reference getChild(T2Reference errorId)
 			throws ErrorDocumentServiceException {
-		T2ReferenceImpl refImpl = T2ReferenceImpl.getAsImpl(errorId);
+		T2ReferenceImpl refImpl = getAsImpl(errorId);
 		try {
 			return refImpl.getDeeperErrorReference();
 		} catch (Throwable t) {
@@ -150,18 +144,20 @@ public class ErrorDocumentServiceImpl extends AbstractErrorDocumentServiceImpl
 		}
 	}
 
+	@Override
 	public boolean delete(T2Reference reference)
 			throws ReferenceServiceException {
 		checkDao();
 		ErrorDocument doc = errorDao.get(reference);
-		if (doc==null) return false;
+		if (doc == null)
+			return false;
 		return errorDao.delete(doc);
 	}
 
+	@Override
 	public void deleteErrorDocumentsForWorkflowRun(String workflowRunId)
 			throws ReferenceServiceException {
 		checkDao();
 		errorDao.deleteErrorDocumentsForWFRun(workflowRunId);
 	}
-
 }

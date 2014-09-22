@@ -30,19 +30,17 @@ import net.sf.taverna.t2.reference.ReferenceContext;
  * to any service method is null.
  * 
  * @author Tom Oinn
- * 
  */
 public class EmptyReferenceContext implements ReferenceContext {
-
 	/**
 	 * Return an empty entity set for all queries.
 	 */
+	@Override
 	public <T> List<T> getEntities(Class<T> arg0) {
-		return new ArrayList<T>();
+		return new ArrayList<>();
 	}
 
+	@Override
 	public void addEntity(Object entity) {
-		// TODO Auto-generated method stub
 	}
-
 }

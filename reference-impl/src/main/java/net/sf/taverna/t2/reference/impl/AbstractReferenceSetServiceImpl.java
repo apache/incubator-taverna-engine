@@ -42,11 +42,9 @@ import net.sf.taverna.t2.reference.T2ReferenceGenerator;
  * implementation of the actual service logic to the subclass.
  * 
  * @author Tom Oinn
- * 
  */
 public abstract class AbstractReferenceSetServiceImpl extends
 		AbstractServiceImpl implements ReferenceSetService {
-
 	protected ReferenceSetDao referenceSetDao = null;
 	protected T2ReferenceGenerator t2ReferenceGenerator = null;
 	protected ReferenceSetAugmentor referenceSetAugmentor = null;
@@ -81,11 +79,10 @@ public abstract class AbstractReferenceSetServiceImpl extends
 	 *             if the dao is still null
 	 */
 	protected final void checkDao() throws ReferenceSetServiceException {
-		if (referenceSetDao == null) {
+		if (referenceSetDao == null)
 			throw new ReferenceSetServiceException(
 					"ReferenceSetDao not initialized, reference set "
 							+ "service operations are not available");
-		}
 	}
 
 	/**
@@ -95,11 +92,10 @@ public abstract class AbstractReferenceSetServiceImpl extends
 	 *             if the generator is still null
 	 */
 	protected final void checkGenerator() throws ReferenceSetServiceException {
-		if (t2ReferenceGenerator == null) {
+		if (t2ReferenceGenerator == null)
 			throw new ReferenceSetServiceException(
 					"T2ReferenceGenerator not initialized, reference "
 							+ "set service operations not available");
-		}
 	}
 
 	/**
@@ -109,29 +105,26 @@ public abstract class AbstractReferenceSetServiceImpl extends
 	 *             if the reference set augmentor is still null
 	 */
 	protected final void checkAugmentor() throws ReferenceSetServiceException {
-		if (referenceSetAugmentor == null) {
+		if (referenceSetAugmentor == null)
 			throw new ReferenceSetServiceException(
 					"ReferenceSetAugmentor not initialized, reference "
 							+ "set service operations not available");
-		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public final void getReferenceSetAsynch(final T2Reference id,
 			final ReferenceSetServiceCallback callback)
 			throws ReferenceSetServiceException {
 		checkDao();
 		Runnable r = new Runnable() {
+			@Override
 			public void run() {
 				try {
 					ReferenceSet rs = referenceSetDao.get(id);
 					callback.referenceSetRetrieved(rs);
 				} catch (DaoException de) {
-					callback
-							.referenceSetRetrievalFailed(new ReferenceSetServiceException(
-									de));
+					callback.referenceSetRetrievalFailed(new ReferenceSetServiceException(
+							de));
 				}
 			}
 		};
@@ -141,6 +134,7 @@ public abstract class AbstractReferenceSetServiceImpl extends
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public final void getReferenceSetWithAugmentationAsynch(
 			final T2Reference id,
 			final Set<Class<ExternalReferenceSPI>> ensureTypes,
@@ -150,12 +144,11 @@ public abstract class AbstractReferenceSetServiceImpl extends
 		checkDao();
 		checkAugmentor();
 		Runnable r = new Runnable() {
+			@Override
 			public void run() {
 				try {
-					callback
-							.referenceSetRetrieved(getReferenceSetWithAugmentation(
-									id, ensureTypes, context));
-
+					callback.referenceSetRetrieved(getReferenceSetWithAugmentation(
+							id, ensureTypes, context));
 				} catch (ReferenceSetServiceException rsse) {
 					callback.referenceSetRetrievalFailed(rsse);
 				}

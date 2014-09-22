@@ -12,6 +12,7 @@ class ReferenceContextImpl implements ReferenceContext{
 		entities = new ArrayList<Object>();
 	}
 	
+	@Override
 	public <T> List<T> getEntities(Class<T> entityType) {
 		List<T> entitiesOfType = new ArrayList<T>();
 		for (Object entity : entities){
@@ -22,6 +23,7 @@ class ReferenceContextImpl implements ReferenceContext{
 		return entitiesOfType;
 	}
 
+	@Override
 	public void addEntity(Object entity){
 		entities.add(entity);
 	}
