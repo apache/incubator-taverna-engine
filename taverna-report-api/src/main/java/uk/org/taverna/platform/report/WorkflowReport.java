@@ -39,13 +39,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * @author David Withers
  */
 public class WorkflowReport extends StatusReport<Workflow, ActivityReport> {
-
+	@SuppressWarnings("unused")
 	private static final Logger logger = Logger.getLogger(WorkflowReport.class.getName());
-
 	private static final String dateFormatString = "yyyy-MM-dd HH:mm:ss";
 
 	private Set<ProcessorReport> processorReports = new LinkedHashSet<>();
-
 	private Bundle dataBundle;
 
 	public WorkflowReport(Workflow workflow) {
@@ -69,11 +67,12 @@ public class WorkflowReport extends StatusReport<Workflow, ActivityReport> {
 		this.dataBundle = dataBundle;
 	}
 
+	@Override
 	public String toString() {
 		DateFormat dateFormat = new SimpleDateFormat(dateFormatString);
 		StringBuilder sb = new StringBuilder();
 		int max = getLongestName(this, 0);
-		sb.append(spaces(max + 1));
+		spaces(sb, max + 1);
 		sb.append("Status    ");
 		sb.append("Queued    ");
 		sb.append("Started   ");
@@ -82,60 +81,57 @@ public class WorkflowReport extends StatusReport<Workflow, ActivityReport> {
 		sb.append("Started             ");
 		sb.append("Finished\n");
 		sb.append(getSubject().getName());
-		sb.append(spaces(max - getSubject().getName().length() + 1));
+		spaces(sb, max - getSubject().getName().length() + 1);
 		sb.append(getState());
-		sb.append(spaces(10 - getState().name().length()));
+		spaces(sb, 10 - getState().name().length());
 		sb.append("-");
-		sb.append(spaces(9));
+		spaces(sb, 9);
 		sb.append("-");
-		sb.append(spaces(9));
+		spaces(sb, 9);
 		sb.append("-");
-		sb.append(spaces(9));
+		spaces(sb, 9);
 		sb.append("-");
-		sb.append(spaces(9));
+		spaces(sb, 9);
 		addDates(sb, getStartedDate(), getCompletedDate(), dateFormat);
-		for (ProcessorReport processorReport : getProcessorReports()) {
+		for (ProcessorReport processorReport : getProcessorReports())
 			addProcessor(sb, max, 0, processorReport, dateFormat);
-		}
 		return sb.toString();
 	}
 
 	private void addProcessor(StringBuilder sb, int max, int level, ProcessorReport processorReport, DateFormat dateFormat) {
 		String processorName = processorReport.getSubject().getName();
-		sb.append(spaces(level));
+		spaces(sb, level);
 		sb.append(processorName);
-		sb.append(spaces(max - processorName.length() - level + 1));
+		spaces(sb, max - processorName.length() - level + 1);
 
 		State processorState = processorReport.getState();
 		sb.append(processorState);
-		sb.append(spaces(10 - processorState.name().length()));
+		spaces(sb, 10 - processorState.name().length());
 
 		String jobsQueued = String.valueOf(processorReport.getJobsQueued());
 		sb.append(jobsQueued);
-		sb.append(spaces(10 - jobsQueued.length()));
+		spaces(sb, 10 - jobsQueued.length());
 
 		String jobsStarted = String.valueOf(processorReport.getJobsStarted());
 		sb.append(jobsStarted);
-		sb.append(spaces(10 - jobsStarted.length()));
+		spaces(sb, 10 - jobsStarted.length());
 
 		String jobsCompleted = String.valueOf(processorReport.getJobsCompleted());
 		sb.append(jobsCompleted);
-		sb.append(spaces(10 - jobsCompleted.length()));
+		spaces(sb, 10 - jobsCompleted.length());
 
 		String jobsCompletedWithErrors = String.valueOf(processorReport
 				.getJobsCompletedWithErrors());
 		sb.append(jobsCompletedWithErrors);
-		sb.append(spaces(10 - jobsCompletedWithErrors.length()));
+		spaces(sb, 10 - jobsCompletedWithErrors.length());
 
 		addDates(sb, processorReport.getStartedDate(), processorReport.getCompletedDate(), dateFormat);
 
 		for (ActivityReport activityReport : processorReport.getActivityReports()) {
 			WorkflowReport nestedWorkflowReport = activityReport.getNestedWorkflowReport();
-			if (nestedWorkflowReport != null) {
-				for (ProcessorReport nestedProcessorReport : nestedWorkflowReport.getProcessorReports()) {
+			if (nestedWorkflowReport != null)
+				for (ProcessorReport nestedProcessorReport : nestedWorkflowReport.getProcessorReports())
 					addProcessor(sb, max, level + 1, nestedProcessorReport, dateFormat);
-				}
-			}
 		}
 	}
 
@@ -145,13 +141,12 @@ public class WorkflowReport extends StatusReport<Workflow, ActivityReport> {
 			sb.append(' ');
 		} else {
 			sb.append('-');
-			sb.append(spaces(dateFormatString.length()));
+			spaces(sb, dateFormatString.length());
 		}
-		if (stopped != null) {
+		if (stopped != null)
 			sb.append(dateFormat.format(stopped) + "\n");
-		} else {
+		else
 			sb.append("-\n");
-		}
 	}
 
 	private int getLongestName(WorkflowReport workflowReport, int level) {
@@ -161,20 +156,15 @@ public class WorkflowReport extends StatusReport<Workflow, ActivityReport> {
 			result = Math.max(result, processorReport.getSubject().getName().length());
 			for (ActivityReport activityReport : processorReport.getActivityReports()) {
 				WorkflowReport nestedWorkflowReport = activityReport.getNestedWorkflowReport();
-				if (nestedWorkflowReport != null) {
+				if (nestedWorkflowReport != null)
 					result = Math.max(result, getLongestName(nestedWorkflowReport, level + 1));
-				}
 			}
 		}
 		return result;
 	}
 
-	private String spaces(int length) {
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < length; i++) {
+	private static void spaces(StringBuilder sb, int length) {
+		for (int i = 0; i < length; i++)
 			sb.append(' ');
-		}
-		return sb.toString();
 	}
-
 }

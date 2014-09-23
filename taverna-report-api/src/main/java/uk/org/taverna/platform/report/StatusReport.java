@@ -49,21 +49,14 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({ "subject", "parent", "state", "createdDate", "startedDate", "pausedDate",
     "pausedDates", "resumedDate", "resumedDates", "cancelledDate", "failedDate", "completedDate"})
 public class StatusReport<SUBJECT extends Ported, PARENT extends StatusReport<?, ?>> {
-
 	private final SUBJECT subject;
-
 	private PARENT parentReport;
-
 	private State state;
-
 	private NavigableSet<Invocation> invocations = new TreeSet<>();
-
 	private Date createdDate, startedDate, pausedDate, resumedDate, cancelledDate, completedDate,
 			failedDate;
-
-	private final List<Date> pausedDates = new ArrayList<Date>(),
-			resumedDates = new ArrayList<Date>();
-
+	private final List<Date> pausedDates = new ArrayList<>(),
+			resumedDates = new ArrayList<>();
 	private List<ReportListener> reportListeners = new ArrayList<>();
 
 	/**
@@ -133,9 +126,8 @@ public class StatusReport<SUBJECT extends Ported, PARENT extends StatusReport<?,
 			if (this.state != state) {
 				State oldState = this.state;
 				this.state = state;
-				for (ReportListener reportListener : reportListeners) {
+				for (ReportListener reportListener : reportListeners)
 					reportListener.stateChanged(oldState, state);
-				}
 			}
 		}
 	}
@@ -178,9 +170,8 @@ public class StatusReport<SUBJECT extends Ported, PARENT extends StatusReport<?,
 	 *            the date that the status changed to RUNNING
 	 */
 	public void setStartedDate(Date startedDate) {
-		if (this.startedDate == null) {
+		if (this.startedDate == null)
 			this.startedDate = startedDate;
-		}
 		setState(State.RUNNING);
 	}
 
@@ -349,9 +340,8 @@ public class StatusReport<SUBJECT extends Ported, PARENT extends StatusReport<?,
 	 */
 	public void outputAdded(Path path, String portName, int[] index) {
 		synchronized (reportListeners) {
-			for (ReportListener reportListener : reportListeners) {
+			for (ReportListener reportListener : reportListeners)
 				reportListener.outputAdded(path, portName, index);
-			}
 		}
 	}
 
@@ -376,10 +366,8 @@ public class StatusReport<SUBJECT extends Ported, PARENT extends StatusReport<?,
         NavigableSet<Invocation> invocs = getInvocations();
         // A Comparable Invocation with the desired name
         SortedSet<Invocation> tailSet = invocs.tailSet(new Invocation(invocationName));
-        if (!tailSet.isEmpty()) {
+        if (!tailSet.isEmpty())
         	return tailSet.first();
-        }
         return null;
     }
-
 }

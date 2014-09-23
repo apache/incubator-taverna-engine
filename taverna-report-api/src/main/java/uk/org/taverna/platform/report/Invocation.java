@@ -41,21 +41,13 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  */
 @JsonPropertyOrder({"id","parent", "name",  "index", "state", "startedDate", "completedDate", "inputs", "outputs"})
 public class Invocation implements Comparable<Invocation> {
-
 	private final String name;
-
 	private final int[] index;
-
 	private final Invocation parent;
-
 	private State state;
-
 	private Date startedDate, completedDate;
-
 	private final SortedSet<Invocation> invocations;
-
 	private final StatusReport<?, ?> report;
-
 	private SortedMap<String, Path> inputs, outputs;
 
 	/**
@@ -88,20 +80,17 @@ public class Invocation implements Comparable<Invocation> {
 		invocations = new TreeSet<>();
 
 		inputs = new TreeMap<>();
-		for (Port port : report.getSubject().getInputPorts()) {
+		for (Port port : report.getSubject().getInputPorts())
 			inputs.put(port.getName(), null);
-		}
 
 		outputs = new TreeMap<>();
-		for (Port port : report.getSubject().getOutputPorts()) {
+		for (Port port : report.getSubject().getOutputPorts())
 			outputs.put(port.getName(), null);
-		}
 
 		setStartedDate(new Date());
 
-		if (parent != null) {
+		if (parent != null)
 			parent.getInvocations().add(this);
-		}
 		report.addInvocation(this);
 	}
 
@@ -129,9 +118,8 @@ public class Invocation implements Comparable<Invocation> {
 	public String getId() {
 		if (parent != null) {
 			String parentId = parent.getId();
-			if (parentId != null && !parentId.isEmpty()) {
+			if (parentId != null && !parentId.isEmpty())
 				return parent.getId() + "/" + name;
-			}
 		}
 		return name;
 	}
@@ -155,9 +143,8 @@ public class Invocation implements Comparable<Invocation> {
 
 	@JsonProperty("parent")
 	public String getParentId() {
-	    if (parent == null) {
+	    if (parent == null)
 	        return null;
-	    }
 	    return parent.getId();
 	}
 
@@ -301,23 +288,19 @@ public class Invocation implements Comparable<Invocation> {
 	public int compareTo(Invocation o) {
 		String id = getId();
 		String otherId = o.getId();
-		if (id.length() == otherId.length()) {
+		if (id.length() == otherId.length())
 			return id.compareTo(otherId);
-		} else  {
-		    // Make "invoc5" be sorted before "invoc49"
-			return id.length() - otherId.length();
-		}
+		// Make "invoc5" be sorted before "invoc49"
+		return id.length() - otherId.length();
 	}
 
 	private String indexToString(int[] index) {
 		StringBuilder indexString = new StringBuilder();
-		for (int i = 0; i < index.length; i++) {
-			if (i != 0) {
-				indexString.append(":");
-			}
-			indexString.append(index[i] + 1);
+		String sep = "";
+		for (int idx : index) {
+			indexString.append(sep).append(idx + 1);
+			sep = ":";
 		}
 		return indexString.toString();
 	}
-
 }

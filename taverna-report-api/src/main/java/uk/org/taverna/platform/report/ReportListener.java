@@ -23,14 +23,10 @@ package uk.org.taverna.platform.report;
 import java.nio.file.Path;
 
 /**
- *
- *
  * @author David Withers
  */
 public interface ReportListener {
+	void outputAdded(Path path, String portName, int[] index);
 
-	public void outputAdded(Path path, String portName, int[] index);
-
-	public void stateChanged(State oldState, State newState);
-
+	void stateChanged(State oldState, State newState);
 }

@@ -43,17 +43,11 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
         "jobsQueued", "jobsStarted", "jobsCompleted",
         "jobsCompletedWithErrors", "invocations", "activityReports"})
 public class ProcessorReport extends StatusReport<Processor, WorkflowReport> {
-
 	private Set<ActivityReport> activityReports = new LinkedHashSet<>();
-
 	private int jobsCompleted;
-
     private int jobsCompletedWithErrors;
-
     private int jobsQueued;
-
     private int jobsStarted;
-
     private SortedMap<String, Object> properties = new TreeMap<>();
 
     /**
@@ -115,7 +109,7 @@ public class ProcessorReport extends StatusReport<Processor, WorkflowReport> {
 
 	@JsonIgnore 
 	public Set<String> getPropertyKeys() {
-		return new HashSet<String>(properties.keySet());
+		return new HashSet<>(properties.keySet());
 	}
 
 	/**
@@ -167,5 +161,4 @@ public class ProcessorReport extends StatusReport<Processor, WorkflowReport> {
 			// }
 		}
 	}
-
 }
