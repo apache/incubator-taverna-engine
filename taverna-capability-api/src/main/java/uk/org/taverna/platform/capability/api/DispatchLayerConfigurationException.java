@@ -20,14 +20,12 @@
  ******************************************************************************/
 package uk.org.taverna.platform.capability.api;
 
-
 /**
  * Thrown when a dispatch layer's configuration is incorrect.
- *
+ * 
  * @author David Withers
  */
 public class DispatchLayerConfigurationException extends ConfigurationException {
-
 	private static final long serialVersionUID = -6180865500734235308L;
 
 	public DispatchLayerConfigurationException() {
@@ -45,5 +43,4 @@ public class DispatchLayerConfigurationException extends ConfigurationException 
 	public DispatchLayerConfigurationException(Throwable cause) {
 		super(cause);
 	}
-
 }

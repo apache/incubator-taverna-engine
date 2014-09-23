@@ -25,6 +25,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.purl.wf4ever.robundle.Bundle;
 
@@ -41,6 +42,7 @@ import uk.org.taverna.scufl2.api.profiles.Profile;
  *
  * @author David Withers
  */
+@Ignore
 public class RunProfileTest {
 
 	private RunProfile runProfile;

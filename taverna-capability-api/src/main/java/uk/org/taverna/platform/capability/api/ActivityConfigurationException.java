@@ -20,14 +20,12 @@
  ******************************************************************************/
 package uk.org.taverna.platform.capability.api;
 
-
 /**
  * Thrown when an activity's configuration is incorrect.
- *
+ * 
  * @author David Withers
  */
 public class ActivityConfigurationException extends ConfigurationException {
-
 	private static final long serialVersionUID = 3132495676192826758L;
 
 	public ActivityConfigurationException() {
@@ -45,5 +43,4 @@ public class ActivityConfigurationException extends ConfigurationException {
 	public ActivityConfigurationException(Throwable cause) {
 		super(cause);
 	}
-
 }

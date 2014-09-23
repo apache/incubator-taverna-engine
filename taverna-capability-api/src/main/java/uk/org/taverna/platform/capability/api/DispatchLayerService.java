@@ -24,64 +24,67 @@ import java.net.URI;
 import java.util.Set;
 
 import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayer;
-import uk.org.taverna.scufl2.api.configurations.Configuration;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 /**
- * Service for discovering available dispatch layers and the properties required to configure the
- * layers.
- *
+ * Service for discovering available dispatch layers and the properties required
+ * to configure the layers.
+ * 
  * @author David Withers
  */
 public interface DispatchLayerService {
-
 	/**
 	 * Returns the available dispatch layer types.
-	 *
-	 * @return a  the available dispatch layer types
+	 * 
+	 * @return a the available dispatch layer types
 	 */
-	public Set<URI> getDispatchLayerTypes();
+	Set<URI> getDispatchLayerTypes();
 
 	/**
 	 * Returns true iff a dispatch layer exists for the specified URI.
-	 *
+	 * 
 	 * @param dispatchLayerType
 	 *            the dispatch layer type to check
 	 * @return true if a dispatch layer exists for the specified URI
 	 */
-	public boolean dispatchLayerExists(URI dispatchLayerType);
+	boolean dispatchLayerExists(URI dispatchLayerType);
 
 	/**
-	 * Returns the JSON Schema for the configuration required by a dispatch layer.
-	 *
+	 * Returns the JSON Schema for the configuration required by a dispatch
+	 * layer.
+	 * 
 	 * @param activityType
 	 *            the activity type
-	 * @return the JSON Schema for the configuration required by a dispatch layer
+	 * @return the JSON Schema for the configuration required by a dispatch
+	 *         layer
 	 * @throws DispatchLayerNotFoundException
 	 *             if a dispatch layer cannot be found for the specified URI
 	 * @throws DispatchLayerConfigurationException
 	 *             if the JSON Schema cannot be created
 	 */
-	public JsonNode getDispatchLayerConfigurationSchema(URI dispatchLayerType)
-			throws DispatchLayerNotFoundException, DispatchLayerConfigurationException;
+	JsonNode getDispatchLayerConfigurationSchema(URI dispatchLayerType)
+			throws DispatchLayerNotFoundException,
+			DispatchLayerConfigurationException;
 
 	/**
 	 * Returns the dispatch layer for the specified URI.
-	 *
-	 * If configuration is not null the returned dispatch layer will be configured.
-	 *
+	 * 
+	 * If configuration is not null the returned dispatch layer will be
+	 * configured.
+	 * 
 	 * @param uri
 	 *            a URI that identifies a dispatch layer
 	 * @param configuration
-	 *            the configuration for the dispatch layer, can be <code>null</code>
+	 *            the configuration for the dispatch layer, can be
+	 *            <code>null</code>
 	 * @return the dispatch layer for the specified URI
 	 * @throws DispatchLayerNotFoundException
 	 *             if a dispatch layer cannot be found for the specified URI
 	 * @throws DispatchLayerConfigurationException
 	 *             if the configuration is not valid
 	 */
-	public DispatchLayer<?> createDispatchLayer(URI uri, JsonNode configuration)
-			throws DispatchLayerNotFoundException, DispatchLayerConfigurationException;
-
+	DispatchLayer<?> createDispatchLayer(URI uri, JsonNode configuration)
+			throws DispatchLayerNotFoundException,
+			DispatchLayerConfigurationException;
 }

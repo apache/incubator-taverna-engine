@@ -21,12 +21,12 @@
 package uk.org.taverna.platform.run.api;
 
 /**
- * Thrown when a <code>RunProfile</code> doesn't contain the correct components to run a workflow.
+ * Thrown when a <code>RunProfile</code> doesn't contain the correct components
+ * to run a workflow.
  * 
  * @author David Withers
  */
 public class RunProfileException extends Exception {
-
 	private static final long serialVersionUID = 4717267498382223527L;
 
 	public RunProfileException() {
@@ -44,5 +44,4 @@ public class RunProfileException extends Exception {
 	public RunProfileException(Throwable cause) {
 		super(cause);
 	}
-
 }

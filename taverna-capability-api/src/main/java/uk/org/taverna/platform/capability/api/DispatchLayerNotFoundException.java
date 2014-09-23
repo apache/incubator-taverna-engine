@@ -26,7 +26,6 @@ package uk.org.taverna.platform.capability.api;
  * @author David Withers
  */
 public class DispatchLayerNotFoundException extends Exception {
-
 	private static final long serialVersionUID = -7227237239711803139L;
 
 	public DispatchLayerNotFoundException() {
@@ -44,5 +43,4 @@ public class DispatchLayerNotFoundException extends Exception {
 	public DispatchLayerNotFoundException(Throwable cause) {
 		super(cause);
 	}
-
 }

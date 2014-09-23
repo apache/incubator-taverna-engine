@@ -26,7 +26,6 @@ package uk.org.taverna.platform.capability.api;
  * @author David Withers
  */
 public class ActivityNotFoundException extends Exception {
-
 	private static final long serialVersionUID = 1232220199558615801L;
 
 	public ActivityNotFoundException() {
@@ -44,5 +43,4 @@ public class ActivityNotFoundException extends Exception {
 	public ActivityNotFoundException(Throwable cause) {
 		super(cause);
 	}
-
 }

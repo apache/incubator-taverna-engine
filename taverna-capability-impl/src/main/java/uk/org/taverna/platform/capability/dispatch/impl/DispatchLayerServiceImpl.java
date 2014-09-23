@@ -35,75 +35,78 @@ import uk.org.taverna.platform.capability.api.DispatchLayerService;
 import com.fasterxml.jackson.databind.JsonNode;
 
 /**
- *
  * @author David Withers
  */
 public class DispatchLayerServiceImpl implements DispatchLayerService {
-
-	private static Logger logger = Logger.getLogger(DispatchLayerServiceImpl.class.getName());
+	@SuppressWarnings("unused")
+	private static Logger logger = Logger
+			.getLogger(DispatchLayerServiceImpl.class.getName());
 
 	private List<DispatchLayerFactory> dispatchLayerFactories;
 
 	@Override
 	public Set<URI> getDispatchLayerTypes() {
 		Set<URI> dispatchLayerTypes = new HashSet<>();
-		for (DispatchLayerFactory dispatchLayerFactory : dispatchLayerFactories) {
-			dispatchLayerTypes.addAll(dispatchLayerFactory.getDispatchLayerTypes());
-		}
+		for (DispatchLayerFactory dispatchLayerFactory : dispatchLayerFactories)
+			dispatchLayerTypes.addAll(dispatchLayerFactory
+					.getDispatchLayerTypes());
 		return dispatchLayerTypes;
 	}
 
 	@Override
 	public boolean dispatchLayerExists(URI dispatchLayerType) {
-		for (DispatchLayerFactory dispatchLayerFactory : dispatchLayerFactories) {
-			if (dispatchLayerFactory.getDispatchLayerTypes().contains(dispatchLayerType)) {
+		for (DispatchLayerFactory dispatchLayerFactory : dispatchLayerFactories)
+			if (dispatchLayerFactory.getDispatchLayerTypes().contains(
+					dispatchLayerType))
 				return true;
-			}
-		}
 		return false;
 	}
 
 	@Override
-	public JsonNode getDispatchLayerConfigurationSchema(URI dispatchLayerType) throws DispatchLayerNotFoundException {
+	public JsonNode getDispatchLayerConfigurationSchema(URI dispatchLayerType)
+			throws DispatchLayerNotFoundException {
 		DispatchLayerFactory factory = getDispatchLayerFactory(dispatchLayerType);
 		return factory.getDispatchLayerConfigurationSchema(dispatchLayerType);
 	}
 
 	@Override
-	public DispatchLayer<?> createDispatchLayer(URI dispatchLayerType, JsonNode configuration)
-			throws DispatchLayerNotFoundException, DispatchLayerConfigurationException {
+	public DispatchLayer<?> createDispatchLayer(URI dispatchLayerType,
+			JsonNode configuration) throws DispatchLayerNotFoundException,
+			DispatchLayerConfigurationException {
 		DispatchLayerFactory factory = getDispatchLayerFactory(dispatchLayerType);
-		DispatchLayer<JsonNode> dispatchLayer = (DispatchLayer<JsonNode>) factory.createDispatchLayer(dispatchLayerType);
+		@SuppressWarnings("unchecked")
+		DispatchLayer<JsonNode> dispatchLayer = (DispatchLayer<JsonNode>) factory
+				.createDispatchLayer(dispatchLayerType);
 
-		if (configuration != null) {
-			try {
+		try {
+			if (configuration != null)
 				dispatchLayer.configure(configuration);
-			} catch (net.sf.taverna.t2.workflowmodel.ConfigurationException e) {
-				throw new DispatchLayerConfigurationException(e);
-			}
+		} catch (net.sf.taverna.t2.workflowmodel.ConfigurationException e) {
+			throw new DispatchLayerConfigurationException(e);
 		}
 		return dispatchLayer;
 	}
 
 	/**
 	 * Sets the list of available <code>DispatchLayerFactory</code>s.
-	 *
+	 * 
 	 * In a production environment this should be set by Spring DM.
-	 *
+	 * 
 	 * @param dispatchLayerFactories
 	 *            the list of available <code>DispatchLayerFactory</code>s
 	 */
-	public void setDispatchLayerFactories(List<DispatchLayerFactory> dispatchLayerFactories) {
+	public void setDispatchLayerFactories(
+			List<DispatchLayerFactory> dispatchLayerFactories) {
 		this.dispatchLayerFactories = dispatchLayerFactories;
 	}
 
-	private DispatchLayerFactory getDispatchLayerFactory(URI dispatchLayerType) throws DispatchLayerNotFoundException {
-		for (DispatchLayerFactory dispatchLayerFactory : dispatchLayerFactories) {
-			if (dispatchLayerFactory.getDispatchLayerTypes().contains(dispatchLayerType)) {
+	private DispatchLayerFactory getDispatchLayerFactory(URI dispatchLayerType)
+			throws DispatchLayerNotFoundException {
+		for (DispatchLayerFactory dispatchLayerFactory : dispatchLayerFactories)
+			if (dispatchLayerFactory.getDispatchLayerTypes().contains(
+					dispatchLayerType))
 				return dispatchLayerFactory;
-			}
-		}
-		throw new DispatchLayerNotFoundException("Could not find a dispatch layer for " + dispatchLayerType);
+		throw new DispatchLayerNotFoundException(
+				"Could not find a dispatch layer for " + dispatchLayerType);
 	}
-
 }

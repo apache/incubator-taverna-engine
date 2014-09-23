@@ -21,13 +21,13 @@
 package uk.org.taverna.platform.capability.api;
 
 /**
- * Thrown when a {@link uk.org.taverna.scufl2.api.common.Configurable Configurable} cannot be
- * configured by a {@link uk.org.taverna.scufl2.api.configurations.Configuration Configuration}.
- *
+ * Thrown when a {@link uk.org.taverna.scufl2.api.common.Configurable
+ * Configurable} cannot be configured by a
+ * {@link uk.org.taverna.scufl2.api.configurations.Configuration Configuration}.
+ * 
  * @author David Withers
  */
 public class ConfigurationException extends Exception {
-
 	private static final long serialVersionUID = -6129960388197785712L;
 
 	public ConfigurationException() {
@@ -45,5 +45,4 @@ public class ConfigurationException extends Exception {
 	public ConfigurationException(Throwable cause) {
 		super(cause);
 	}
-
 }

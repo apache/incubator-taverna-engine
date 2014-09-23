@@ -18,120 +18,126 @@ import uk.org.taverna.scufl2.api.profiles.Profile;
 
 /**
  * Service for managing runs of Taverna workflows.
- *
+ * 
  * @author David Withers
  */
 public interface RunService {
-
-	public static final String EVENT_TOPIC_ROOT = "uk/org/taverna/platform/run/RunService/";
-	public static final String RUN_CREATED = EVENT_TOPIC_ROOT + "RUN_CREATED";
-	public static final String RUN_DELETED = EVENT_TOPIC_ROOT + "RUN_DELETED";
-	public static final String RUN_STARTED = EVENT_TOPIC_ROOT + "RUN_STARTED";
-	public static final String RUN_STOPPED = EVENT_TOPIC_ROOT + "RUN_STOPPED";
-	public static final String RUN_PAUSED = EVENT_TOPIC_ROOT + "RUN_PAUSED";
-	public static final String RUN_RESUMED = EVENT_TOPIC_ROOT + "RUN_RESUMED";
-	public static final String RUN_OPENED = EVENT_TOPIC_ROOT + "RUN_OPENED";
-	public static final String RUN_CLOSED = EVENT_TOPIC_ROOT + "RUN_CLOSED";
+	String EVENT_TOPIC_ROOT = "uk/org/taverna/platform/run/RunService/";
+	String RUN_CREATED = EVENT_TOPIC_ROOT + "RUN_CREATED";
+	String RUN_DELETED = EVENT_TOPIC_ROOT + "RUN_DELETED";
+	String RUN_STARTED = EVENT_TOPIC_ROOT + "RUN_STARTED";
+	String RUN_STOPPED = EVENT_TOPIC_ROOT + "RUN_STOPPED";
+	String RUN_PAUSED = EVENT_TOPIC_ROOT + "RUN_PAUSED";
+	String RUN_RESUMED = EVENT_TOPIC_ROOT + "RUN_RESUMED";
+	String RUN_OPENED = EVENT_TOPIC_ROOT + "RUN_OPENED";
+	String RUN_CLOSED = EVENT_TOPIC_ROOT + "RUN_CLOSED";
 
 	/**
 	 * Returns the available <code>ExecutionEnvironment</code>s.
-	 *
+	 * 
 	 * @return the available <code>ExecutionEnvironment</code>s
 	 */
-	public Set<ExecutionEnvironment> getExecutionEnvironments();
+	Set<ExecutionEnvironment> getExecutionEnvironments();
 
 	/**
-	 * Returns the <code>ExecutionEnvironment</code>s that can execute the specified
-	 * <code>WorkflowBundle</code> using its default <code>Profile</code>.
-	 *
-	 * @param workflowBundle
-	 *            the <code>WorkflowBundle</code> to find <code>ExecutionEnvironment</code>s for
-	 * @return the <code>ExecutionEnvironment</code>s that can execute the specified
-	 *         <code>WorkflowBundle</code>
-	 */
-	public Set<ExecutionEnvironment> getExecutionEnvironments(WorkflowBundle workflowBundle);
-
-	/**
-	 * Returns the <code>ExecutionEnvironment</code>s that can execute the specified
+	 * Returns the <code>ExecutionEnvironment</code>s that can execute the
+	 * specified <code>WorkflowBundle</code> using its default
 	 * <code>Profile</code>.
-	 *
-	 * @param profile
-	 *            the <code>Profile</code> to find <code>ExecutionEnvironment</code>s for
-	 * @return the <code>ExecutionEnvironment</code>s that can execute the specified
-	 *         <code>Profile</code>
+	 * 
+	 * @param workflowBundle
+	 *            the <code>WorkflowBundle</code> to find
+	 *            <code>ExecutionEnvironment</code>s for
+	 * @return the <code>ExecutionEnvironment</code>s that can execute the
+	 *         specified <code>WorkflowBundle</code>
 	 */
-	public Set<ExecutionEnvironment> getExecutionEnvironments(Profile profile);
+	Set<ExecutionEnvironment> getExecutionEnvironments(
+			WorkflowBundle workflowBundle);
+
+	/**
+	 * Returns the <code>ExecutionEnvironment</code>s that can execute the
+	 * specified <code>Profile</code>.
+	 * 
+	 * @param profile
+	 *            the <code>Profile</code> to find
+	 *            <code>ExecutionEnvironment</code>s for
+	 * @return the <code>ExecutionEnvironment</code>s that can execute the
+	 *         specified <code>Profile</code>
+	 */
+	Set<ExecutionEnvironment> getExecutionEnvironments(Profile profile);
 
 	/**
 	 * Creates a new run and returns the ID for the run.
-	 *
+	 * 
 	 * To start the run use the {@link #start(String)} method.
-	 *
+	 * 
 	 * @param runProfile
 	 *            the workflow to run
 	 * @return the run ID
 	 * @throws InvalidWorkflowException
 	 * @throws RunProfileException
 	 */
-	public String createRun(RunProfile runProfile) throws InvalidWorkflowException,
+	String createRun(RunProfile runProfile) throws InvalidWorkflowException,
 			RunProfileException;
 
 	/**
 	 * Returns the list of runs that this service is managing.
 	 * <p>
 	 * If there are no runs this method returns an empty list.
-	 *
+	 * 
 	 * @return the list of runs that this service is managing
 	 */
-	public List<String> getRuns();
+	List<String> getRuns();
 
 	/**
 	 * Opens a run and returns the ID for the run.
-	 *
+	 * 
 	 * @param runFile
 	 *            the workflow run to open
 	 * @return the run ID
 	 * @throws InvalidWorkflowException
 	 * @throws RunProfileException
 	 */
-	public String open(File runFile) throws IOException;
+	String open(File runFile) throws IOException;
 
 	/**
 	 * Closes a run.
-	 *
+	 * 
 	 * @param runID
 	 *            the ID of the run
 	 * @throws InvalidRunIdException
 	 *             if the run ID is not valid
 	 * @throws InvalidExecutionIdException
 	 */
-	public void close(String runID) throws InvalidRunIdException, InvalidExecutionIdException;
+	void close(String runID) throws InvalidRunIdException,
+			InvalidExecutionIdException;
 
 	/**
 	 * Saves a run.
-	 *
+	 * 
 	 * @param runID
 	 *            the ID of the run
 	 * @throws InvalidRunIdException
 	 *             if the run ID is not valid
 	 * @throws InvalidExecutionIdException
 	 */
-	public void save(String runID, File runFile) throws InvalidRunIdException, IOException;
+	void save(String runID, File runFile) throws InvalidRunIdException,
+			IOException;
 
 	/**
 	 * Deletes a run.
-	 *
+	 * 
 	 * @param runID
 	 *            the ID of the run
 	 * @throws InvalidRunIdException
 	 *             if the run ID is not valid
 	 * @throws InvalidExecutionIdException
 	 */
-	public void delete(String runID) throws InvalidRunIdException, InvalidExecutionIdException;
+	void delete(String runID) throws InvalidRunIdException,
+			InvalidExecutionIdException;
 
 	/**
 	 * Starts a run.
-	 *
+	 * 
 	 * @param runID
 	 *            the ID of the run
 	 * @throws InvalidRunIdException
@@ -140,12 +146,12 @@ public interface RunService {
 	 *             if the run state is not CREATED
 	 * @throws InvalidExecutionIdException
 	 */
-	public void start(String runID) throws InvalidRunIdException, RunStateException,
+	void start(String runID) throws InvalidRunIdException, RunStateException,
 			InvalidExecutionIdException;
 
 	/**
 	 * Pauses a running run.
-	 *
+	 * 
 	 * @param runID
 	 *            the ID of the run
 	 * @throws InvalidRunIdException
@@ -154,12 +160,12 @@ public interface RunService {
 	 *             if the run state is not RUNNING
 	 * @throws InvalidExecutionIdException
 	 */
-	public void pause(String runID) throws InvalidRunIdException, RunStateException,
+	void pause(String runID) throws InvalidRunIdException, RunStateException,
 			InvalidExecutionIdException;
 
 	/**
 	 * Resumes a paused run.
-	 *
+	 * 
 	 * @param runID
 	 *            the ID of the run
 	 * @throws InvalidRunIdException
@@ -168,12 +174,12 @@ public interface RunService {
 	 *             if the run state is not PAUSED
 	 * @throws InvalidExecutionIdException
 	 */
-	public void resume(String runID) throws InvalidRunIdException, RunStateException,
+	void resume(String runID) throws InvalidRunIdException, RunStateException,
 			InvalidExecutionIdException;
 
 	/**
 	 * Cancels a running or paused run.
-	 *
+	 * 
 	 * @param runID
 	 *            the ID of the run
 	 * @throws InvalidRunIdException
@@ -182,48 +188,48 @@ public interface RunService {
 	 *             if the run state is not RUNNING or PAUSED
 	 * @throws InvalidExecutionIdException
 	 */
-	public void cancel(String runID) throws InvalidRunIdException, RunStateException,
+	void cancel(String runID) throws InvalidRunIdException, RunStateException,
 			InvalidExecutionIdException;
 
 	/**
 	 * Returns the current state of the run.
-	 *
-	 * A run's state can be CREATED, RUNNING, COMPLETED, PAUSED, CANCELLED or FAILED.
-	 *
+	 * 
+	 * A run's state can be CREATED, RUNNING, COMPLETED, PAUSED, CANCELLED or
+	 * FAILED.
+	 * 
 	 * @param runID
 	 *            the ID of the run
 	 * @return the current state of the run
 	 * @throws InvalidRunIdException
 	 *             if the run ID is not valid
 	 */
-	public State getState(String runID) throws InvalidRunIdException;
+	State getState(String runID) throws InvalidRunIdException;
 
 	/**
 	 * Returns the <code>Bundle</code> containing the data values of the run.
-	 *
+	 * 
 	 * @param runID
 	 *            the ID of the run
 	 * @return the <code>Databundle</code> containing the data values of the run
 	 * @throws InvalidRunIdException
 	 *             if the run ID is not valid
 	 */
-	public Bundle getDataBundle(String runID) throws InvalidRunIdException;
+	Bundle getDataBundle(String runID) throws InvalidRunIdException;
 
 	/**
 	 * Returns the status report for the run.
-	 *
+	 * 
 	 * @param runID
 	 *            the ID of the run
 	 * @return the status report for the run
 	 * @throws InvalidRunIdException
 	 *             if the run ID is not valid
 	 */
-	public WorkflowReport getWorkflowReport(String runID) throws InvalidRunIdException;
+	WorkflowReport getWorkflowReport(String runID) throws InvalidRunIdException;
 
-	public Workflow getWorkflow(String runID) throws InvalidRunIdException;
+	Workflow getWorkflow(String runID) throws InvalidRunIdException;
 
-	public Profile getProfile(String runID) throws InvalidRunIdException;
+	Profile getProfile(String runID) throws InvalidRunIdException;
 
-	public String getRunName(String runID) throws InvalidRunIdException;
-
+	String getRunName(String runID) throws InvalidRunIdException;
 }

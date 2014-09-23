@@ -26,7 +26,6 @@ package uk.org.taverna.platform.run.api;
  * @author David Withers
  */
 public class InvalidRunIdException extends Exception {
-
 	private static final long serialVersionUID = -8524012164316151704L;
 
 	public InvalidRunIdException() {
@@ -44,5 +43,4 @@ public class InvalidRunIdException extends Exception {
 	public InvalidRunIdException(Throwable cause) {
 		super(cause);
 	}
-
 }

@@ -8,11 +8,10 @@ import uk.org.taverna.scufl2.api.container.WorkflowBundle;
 /**
  * A <code>RunProfile</code> specifies the parameters required to run a
  * {@link uk.org.taverna.scufl2.api.core.Workflow}.
- *
+ * 
  * @author David Withers
  */
 public class RunProfile {
-
 	private ExecutionEnvironment executionEnvironment;
 	private WorkflowBundle workflowBundle;
 	private Bundle dataBundle;
@@ -20,42 +19,51 @@ public class RunProfile {
 	private String profileName;
 
 	/**
-	 * Constructs a <code>RunProfile</code> that specifies the parameters required to run a
-	 * {@link uk.org.taverna.scufl2.api.core.Workflow}. The main <code>Workflow</code> and
-	 * <code>Profile</code> from the <code>WorkflowBundle</code> are used.
-	 *
+	 * Constructs a <code>RunProfile</code> that specifies the parameters
+	 * required to run a {@link uk.org.taverna.scufl2.api.core.Workflow}. The
+	 * main <code>Workflow</code> and <code>Profile</code> from the
+	 * <code>WorkflowBundle</code> are used.
+	 * 
 	 * @param executionEnvironment
-	 *            the {@link ExecutionEnvironment} used to execute the <code>Workflow</code>
+	 *            the {@link ExecutionEnvironment} used to execute the
+	 *            <code>Workflow</code>
 	 * @param workflowBundle
-	 *            the <code>WorkflowBundle</code> containing the <code>Workflow</code> to run
+	 *            the <code>WorkflowBundle</code> containing the
+	 *            <code>Workflow</code> to run
 	 * @param dataBundle
-	 *            the <code>Bundle</code> containing the data values for the <code>Workflow</code>
+	 *            the <code>Bundle</code> containing the data values for the
+	 *            <code>Workflow</code>
 	 */
-	public RunProfile(ExecutionEnvironment executionEnvironment, WorkflowBundle workflowBundle,
-			Bundle dataBundle) {
+	public RunProfile(ExecutionEnvironment executionEnvironment,
+			WorkflowBundle workflowBundle, Bundle dataBundle) {
 		this(executionEnvironment, workflowBundle, null, null, dataBundle);
 	}
 
 	/**
-	 * Constructs a <code>RunProfile</code> that specifies the parameters required to run a
-	 * {@link uk.org.taverna.scufl2.api.core.Workflow}.
-	 *
+	 * Constructs a <code>RunProfile</code> that specifies the parameters
+	 * required to run a {@link uk.org.taverna.scufl2.api.core.Workflow}.
+	 * 
 	 * @param executionEnvironment
-	 *            the {@link ExecutionEnvironment} used to execute the <code>Workflow</code>
+	 *            the {@link ExecutionEnvironment} used to execute the
+	 *            <code>Workflow</code>
 	 * @param workflowBundle
-	 *            the <code>WorkflowBundle</code> containing the <code>Workflow</code> to run
+	 *            the <code>WorkflowBundle</code> containing the
+	 *            <code>Workflow</code> to run
 	 * @param workflow
-	 *            the <code>Workflow</code> to run. If <code>null</code> uses the main
-	 *            <code>Workflow</code> from the <code>WorkflowBundle</code>
+	 *            the <code>Workflow</code> to run. If <code>null</code> uses
+	 *            the main <code>Workflow</code> from the
+	 *            <code>WorkflowBundle</code>
 	 * @param profile
-	 *            the {@link uk.org.taverna.scufl2.api.profiles.Profile} to use when running the
-	 *            <code>Workflow</code>. If null uses
-	 *            the main <code>Profile</code> from the <code>WorkflowBundle</code>
+	 *            the {@link uk.org.taverna.scufl2.api.profiles.Profile} to use
+	 *            when running the <code>Workflow</code>. If null uses the main
+	 *            <code>Profile</code> from the <code>WorkflowBundle</code>
 	 * @param dataBundle
-	 *            the <code>Bundle</code> containing the data values for the <code>Workflow</code>
+	 *            the <code>Bundle</code> containing the data values for the
+	 *            <code>Workflow</code>
 	 */
-	public RunProfile(ExecutionEnvironment executionEnvironment, WorkflowBundle workflowBundle,
-			String workflowName, String profileName, Bundle dataBundle) {
+	public RunProfile(ExecutionEnvironment executionEnvironment,
+			WorkflowBundle workflowBundle, String workflowName,
+			String profileName, Bundle dataBundle) {
 		this.executionEnvironment = executionEnvironment;
 		this.workflowBundle = workflowBundle;
 		this.workflowName = workflowName;
@@ -65,7 +73,7 @@ public class RunProfile {
 
 	/**
 	 * Returns the <code>WorkflowBundle</code>.
-	 *
+	 * 
 	 * @return the <code>WorkflowBundle</code>
 	 */
 	public WorkflowBundle getWorkflowBundle() {
@@ -73,34 +81,35 @@ public class RunProfile {
 	}
 
 	/**
-	 * Sets the <code>WorkflowBundle</code> containing the <code>Workflow</code> to run.
-	 *
+	 * Sets the <code>WorkflowBundle</code> containing the <code>Workflow</code>
+	 * to run.
+	 * 
 	 * @param workflowBundle
-	 *            the <code>WorkflowBundle</code> containing the <code>Workflow</code> to run
+	 *            the <code>WorkflowBundle</code> containing the
+	 *            <code>Workflow</code> to run
 	 */
 	public void setWorkflowBundle(WorkflowBundle workflowBundle) {
 		this.workflowBundle = workflowBundle;
 	}
 
 	/**
-	 * Returns the name of the <code>Workflow</code> to run.
-	 * If no <code>Workflow</code> name is set the main <code>Workflow</code> from the
+	 * Returns the name of the <code>Workflow</code> to run. If no
+	 * <code>Workflow</code> name is set the main <code>Workflow</code> from the
 	 * <code>WorkflowBundle</code> will be run.
-	 *
+	 * 
 	 * @return the <code>Workflow</code> to run
 	 */
 	public String getWorkflowName() {
-		if (workflowName == null && workflowBundle.getMainWorkflow() != null) {
+		if (workflowName == null && workflowBundle.getMainWorkflow() != null)
 			return workflowBundle.getMainWorkflow().getName();
-		}
 		return workflowName;
 	}
 
 	/**
-	 * Sets the name of the <code>Workflow</code> to run.
-	 * If no <code>Workflow</code> name is set the main <code>Workflow</code> from the
+	 * Sets the name of the <code>Workflow</code> to run. If no
+	 * <code>Workflow</code> name is set the main <code>Workflow</code> from the
 	 * <code>WorkflowBundle</code> will be run.
-	 *
+	 * 
 	 * @param workflowName
 	 *            the name of the <code>Workflow</code> to run
 	 */
@@ -109,11 +118,12 @@ public class RunProfile {
 	}
 
 	/**
-	 * Returns the name of the <code>Profile</code> to use when running the <code>Workflow</code>.
-	 * If no <code>Profile</code> name is set the main <code>Profile</code> from the
-	 * <code>WorkflowBundle</code> will be used.
-	 *
-	 * @return the <code>Profile</code> to use when running the <code>Workflow</code>
+	 * Returns the name of the <code>Profile</code> to use when running the
+	 * <code>Workflow</code>. If no <code>Profile</code> name is set the main
+	 * <code>Profile</code> from the <code>WorkflowBundle</code> will be used.
+	 * 
+	 * @return the <code>Profile</code> to use when running the
+	 *         <code>Workflow</code>
 	 */
 	public String getProfileName() {
 		if (profileName == null && workflowBundle.getMainProfile() != null) {
@@ -123,54 +133,64 @@ public class RunProfile {
 	}
 
 	/**
-	 * Sets the name of the <code>Profile</code> to use when running the <code>Workflow</code>.
+	 * Sets the name of the <code>Profile</code> to use when running the
+	 * <code>Workflow</code>.
 	 * <p>
-	 * If no <code>Profile</code> name is set the main <code>Profile</code> from the
-	 * <code>WorkflowBundle</code> will be used.
-	 *
+	 * If no <code>Profile</code> name is set the main <code>Profile</code> from
+	 * the <code>WorkflowBundle</code> will be used.
+	 * 
 	 * @param profileName
-	 *            the name of the <code>Profile</code> to use when running the <code>Workflow</code>
+	 *            the name of the <code>Profile</code> to use when running the
+	 *            <code>Workflow</code>
 	 */
 	public void setProfileName(String profileName) {
 		this.profileName = profileName;
 	}
 
 	/**
-	 * Returns the <code>Bundle</code> containing the data values for the <code>Workflow</code>.
-	 *
-	 * @return the <code>Bundle</code> containing the data values for the <code>Workflow</code>
+	 * Returns the <code>Bundle</code> containing the data values for the
+	 * <code>Workflow</code>.
+	 * 
+	 * @return the <code>Bundle</code> containing the data values for the
+	 *         <code>Workflow</code>
 	 */
 	public Bundle getDataBundle() {
 		return dataBundle;
 	}
 
 	/**
-	 * Sets the <code>Bundle</code> containing the data values for the <code>Workflow</code>.
-	 *
+	 * Sets the <code>Bundle</code> containing the data values for the
+	 * <code>Workflow</code>.
+	 * 
 	 * @param dataBundle
-	 *            the <code>Bundle</code> containing the data values for the <code>Workflow</code>
+	 *            the <code>Bundle</code> containing the data values for the
+	 *            <code>Workflow</code>
 	 */
 	public void setDataBundle(Bundle dataBundle) {
 		this.dataBundle = dataBundle;
 	}
 
 	/**
-	 * Returns the <code>ExecutionEnvironment</code> used to execute the <code>Workflow</code>.
-	 *
-	 * @return the <code>ExecutionEnvironment</code> used to execute the <code>Workflow</code>
+	 * Returns the <code>ExecutionEnvironment</code> used to execute the
+	 * <code>Workflow</code>.
+	 * 
+	 * @return the <code>ExecutionEnvironment</code> used to execute the
+	 *         <code>Workflow</code>
 	 */
 	public ExecutionEnvironment getExecutionEnvironment() {
 		return executionEnvironment;
 	}
 
 	/**
-	 * Sets the <code>ExecutionEnvironment</code> used to execute the <code>Workflow</code>.
-	 *
+	 * Sets the <code>ExecutionEnvironment</code> used to execute the
+	 * <code>Workflow</code>.
+	 * 
 	 * @param executionEnvironment
-	 *            the <code>ExecutionEnvironment</code> used to execute the <code>Workflow</code>
+	 *            the <code>ExecutionEnvironment</code> used to execute the
+	 *            <code>Workflow</code>
 	 */
-	public void setExecutionEnvironment(ExecutionEnvironment executionEnvironment) {
+	public void setExecutionEnvironment(
+			ExecutionEnvironment executionEnvironment) {
 		this.executionEnvironment = executionEnvironment;
 	}
-
 }

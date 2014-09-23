@@ -21,13 +21,12 @@
 package uk.org.taverna.platform.run.api;
 
 /**
- * Thrown when an operation is attempted when a workflow is in the wrong state, e.g. resuming a
- * workflow that is not paused.
+ * Thrown when an operation is attempted when a workflow is in the wrong state,
+ * e.g., resuming a workflow that is not paused.
  * 
  * @author David Withers
  */
 public class RunStateException extends Exception {
-
 	private static final long serialVersionUID = 6759341273715906131L;
 
 	public RunStateException() {
@@ -45,5 +44,4 @@ public class RunStateException extends Exception {
 	public RunStateException(Throwable cause) {
 		super(cause);
 	}
-
 }

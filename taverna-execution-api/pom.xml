@@ -35,8 +35,12 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-                        <version>${junit.version}</version>
+			<version>${junit.version}</version>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.purl.wf4ever.robundle</groupId>
+			<artifactId>robundle</artifactId>
 		</dependency>
 	</dependencies>
 	<repositories>

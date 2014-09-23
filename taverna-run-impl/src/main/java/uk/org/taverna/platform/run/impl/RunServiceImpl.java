@@ -65,15 +65,11 @@ import uk.org.taverna.scufl2.api.profiles.Profile;
  * @author David Withers
  */
 public class RunServiceImpl implements RunService {
-
 	private static final Logger logger = Logger.getLogger(RunServiceImpl.class.getName());
-
 	private static SimpleDateFormat ISO_8601 = new SimpleDateFormat("yyyy-MM-dd_HHmmss");
 
 	private final Map<String, Run> runMap;
-
 	private ExecutionEnvironmentService executionEnvironmentService;
-
 	private EventAdmin eventAdmin;
 
 	public RunServiceImpl() {
@@ -114,9 +110,8 @@ public class RunServiceImpl implements RunService {
 		try {
 			String runID = runFile.getName();
 			int dot = runID.indexOf('.');
-			if (dot > 0) {
+			if (dot > 0)
 				runID = runID.substring(0, dot);
-			}
 			if (!runMap.containsKey(runID)) {
 				Bundle bundle = DataBundles.openBundle(runFile.toPath());
 				Run run = new Run(runID, bundle);
@@ -224,9 +219,8 @@ public class RunServiceImpl implements RunService {
 
 	private Run getRun(String runID) throws InvalidRunIdException {
 		Run run = runMap.get(runID);
-		if (run == null) {
+		if (run == null)
 			throw new InvalidRunIdException("Run ID " + runID + " is not valid");
-		}
 		return run;
 	}
 
@@ -250,7 +244,6 @@ public class RunServiceImpl implements RunService {
 	}
 
 	private class RunReportListener implements ReportListener {
-
 		private final String runId;
 
 		public RunReportListener(String runId) {
@@ -267,10 +260,9 @@ public class RunServiceImpl implements RunService {
 			case COMPLETED:
 			case FAILED:
 				postEvent(RUN_STOPPED, runId);
+			default:
 				break;
 			}
 		}
-
 	}
-
 }

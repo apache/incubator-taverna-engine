@@ -23,38 +23,38 @@ package uk.org.taverna.platform.capability.api;
 import java.net.URI;
 import java.util.Set;
 
+import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
 import uk.org.taverna.scufl2.api.port.InputActivityPort;
 import uk.org.taverna.scufl2.api.port.OutputActivityPort;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 /**
- * Service for discovering available activities and the properties required to configure the
- * activities.
- *
+ * Service for discovering available activities and the properties required to
+ * configure the activities.
+ * 
  * @author David Withers
  */
 public interface ActivityService {
-
 	/**
 	 * Returns the available activity types.
-	 *
+	 * 
 	 * @return the available activity types
 	 */
-	public Set<URI> getActivityTypes();
+	Set<URI> getActivityTypes();
 
 	/**
-	 * Returns true iff the activity type exists.
-	 *
+	 * Returns true if and only if the activity type exists.
+	 * 
 	 * @param uri
 	 *            the activity type to check
-	 * @return true iff the activity type exists
+	 * @return whether the activity type exists
 	 */
-	public boolean activityExists(URI activityType);
+	boolean activityExists(URI activityType);
 
 	/**
 	 * Returns the JSON Schema for the configuration required by an activity.
-	 *
+	 * 
 	 * @param activityType
 	 *            the activity type
 	 * @return the JSON Schema for the configuration required by an activity
@@ -63,63 +63,64 @@ public interface ActivityService {
 	 * @throws ActivityConfigurationException
 	 *             if the JSON Schema cannot be created
 	 */
-	public JsonNode getActivityConfigurationSchema(URI activityType)
+	JsonNode getActivityConfigurationSchema(URI activityType)
 			throws ActivityNotFoundException, ActivityConfigurationException;
 
 	/**
-	 * Returns the input ports that the activity type requires to be present in order to execute
-	 * with the specified configuration.
+	 * Returns the input ports that the activity type requires to be present in
+	 * order to execute with the specified configuration.
 	 * <p>
-	 * If the activity does not require any input port for the configuration then an empty set is
-	 * returned.
-	 *
+	 * If the activity does not require any input port for the configuration
+	 * then an empty set is returned.
+	 * 
 	 * @param configuration
 	 *            the activity configuration
 	 * @throws ActivityNotFoundException
 	 *             if the activity cannot be found
 	 * @throws ActivityConfigurationException
 	 *             if the activity configuration is incorrect
-	 * @return the input ports that the activity requires to be present in order to execute
+	 * @return the input ports that the activity requires to be present in order
+	 *         to execute
 	 */
-	public Set<InputActivityPort> getActivityInputPorts(URI activityType,
+	Set<InputActivityPort> getActivityInputPorts(URI activityType,
 			JsonNode configuration) throws ActivityNotFoundException,
 			ActivityConfigurationException;
 
 	/**
-	 * Returns the output ports that the activity type requires to be present in order to execute
-	 * with the specified configuration.
+	 * Returns the output ports that the activity type requires to be present in
+	 * order to execute with the specified configuration.
 	 * <p>
-	 * If the activity type does not require any output ports for the configuration then an empty
-	 * set is returned.
-	 *
+	 * If the activity type does not require any output ports for the
+	 * configuration then an empty set is returned.
+	 * 
 	 * @param configuration
 	 *            the activity configuration
 	 * @throws ActivityNotFoundException
 	 *             if the activity cannot be found
 	 * @throws ActivityConfigurationException
 	 *             if the activity configuration is incorrect
-	 * @return the output ports that the activity requires to be present in order to execute
+	 * @return the output ports that the activity requires to be present in
+	 *         order to execute
 	 */
-	public Set<OutputActivityPort> getActivityOutputPorts(URI activityType,
+	Set<OutputActivityPort> getActivityOutputPorts(URI activityType,
 			JsonNode configuration) throws ActivityNotFoundException,
 			ActivityConfigurationException;
 
 	/**
-	 * Returns the activity for the specified activity type.
-	 * If configuration is not null the returned activity will be configured.
-	 *
+	 * Returns the activity for the specified activity type. If configuration is
+	 * not null the returned activity will be configured.
+	 * 
 	 * @param activityType
 	 *            the activity type
 	 * @param configuration
 	 *            the configuration for the activity, can be <code>null</code>
 	 * @return the activity for the specified activityType
 	 * @throws ActivityNotFoundException
-	 *             if an activity cannot be found for the specified activity type
+	 *             if an activity cannot be found for the specified activity
+	 *             type
 	 * @throws ActivityConfigurationException
 	 *             if the configuration is not valid
 	 */
-	public net.sf.taverna.t2.workflowmodel.processor.activity.Activity<?> createActivity(
-			URI activityType, JsonNode configuration) throws ActivityNotFoundException,
-			ActivityConfigurationException;
-
+	Activity<?> createActivity(URI activityType, JsonNode configuration)
+			throws ActivityNotFoundException, ActivityConfigurationException;
 }

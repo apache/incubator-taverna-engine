@@ -24,6 +24,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.purl.wf4ever.robundle.Bundle;
 
@@ -38,19 +39,14 @@ import uk.org.taverna.scufl2.api.core.Workflow;
 import uk.org.taverna.scufl2.api.profiles.Profile;
 
 /**
- *
  * @author David Withers
  */
+@Ignore
 public class AbstractExecutionTest {
-
 	private WorkflowBundle workflowBundle;
-
 	private Execution execution;
-
 	private Workflow workflow;
-
 	private Profile profile;
-
 	private Bundle dataBundle;
 
 	/**
@@ -129,5 +125,4 @@ public class AbstractExecutionTest {
 	public void testGetWorkflowReport() {
 		assertNotNull(execution.getWorkflowReport());
 	}
-
 }
