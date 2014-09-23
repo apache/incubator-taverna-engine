@@ -22,8 +22,11 @@ package net.sf.taverna.t2.reference.impl;
 
 import static net.sf.taverna.t2.reference.impl.T2ReferenceImpl.getAsImpl;
 
+import java.net.URI;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 import net.sf.taverna.t2.reference.DaoException;
 import net.sf.taverna.t2.reference.ExternalReferenceSPI;
@@ -55,6 +58,20 @@ public class ReferenceSetServiceImpl extends AbstractReferenceSetServiceImpl
 		}
 	}
 
+	private Map<URI,Object> locks = new WeakHashMap<>();
+
+	private Object getLock(T2Reference id) {
+		URI uri = id.toUri();
+		synchronized (locks) {
+			Object lock = locks.get(uri);
+			if (lock == null) {
+				lock = new Object();
+				locks.put(uri, lock);
+			}
+			return lock;
+		}
+	}
+
 	@Override
 	public ReferenceSet getReferenceSetWithAugmentation(T2Reference id,
 			Set<Class<ExternalReferenceSPI>> ensureTypes,
@@ -66,20 +83,18 @@ public class ReferenceSetServiceImpl extends AbstractReferenceSetServiceImpl
 		// Obtain the reference set
 
 		try {
-			// HERE BE DRAGONS!
 			/*
 			 * Synchronize on the reference set, should ensure that we don't
 			 * have multiple concurrent translations assuming that Hibernate
-			 * retrieves the same entity each time. To work around this
-			 * potentially not being the case we can synchronize on the
-			 * stringified form of the identifier.
+			 * retrieves the same entity each time. Except we have to
+			 * synchronize on the reference, and in fact we have to synchronize
+			 * on the URI form.
 			 */
-			//TODO Does this even work? Is assuming that the string forms are all the same object safe?
-			synchronized (id.toString()) {
+			synchronized (getLock(id)) {
 				ReferenceSet rs = getReferenceSet(id);
 				Set<ExternalReferenceSPI> newReferences = referenceSetAugmentor
 						.augmentReferenceSet(rs, ensureTypes, context);
-				if (newReferences.isEmpty() == false) {
+				if (!newReferences.isEmpty()) {
 					/*
 					 * Write back changes to the store if we got here, this can
 					 * potentially throw an unsupported operation exception in

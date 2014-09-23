@@ -54,6 +54,7 @@ public class T2ReferenceImpl implements T2Reference, Serializable, HibernateComp
 	private boolean containsErrors = false;
 	private T2ReferenceType referenceType = T2ReferenceType.ReferenceSet;
 	private int depth = 0;
+	private transient URI cachedURI;
 
 	public T2ReferenceImpl() {
 		// Default constructor for Hibernate et al
@@ -223,21 +224,23 @@ public class T2ReferenceImpl implements T2Reference, Serializable, HibernateComp
 	@Override
 	public synchronized URI toUri() {
 		try {
-			switch (referenceType) {
-			case ReferenceSet:
-				return new URI("t2:ref//" + getNamespacePart() + "?"
-						+ getLocalPart());
-			case IdentifiedList:
-				return new URI("t2:list//" + getNamespacePart() + "?"
-						+ getLocalPart() + "/" + containsErrors + "/" + depth);
-			case ErrorDocument:
-				return new URI("t2:error//" + getNamespacePart() + "?"
-						+ getLocalPart() + "/" + depth);
-			}
+			if (cachedURI == null)
+				switch (referenceType) {
+				case ReferenceSet:
+					cachedURI = new URI("t2:ref//" + getNamespacePart() + "?"
+							+ getLocalPart());
+				case IdentifiedList:
+					cachedURI = new URI("t2:list//" + getNamespacePart() + "?"
+							+ getLocalPart() + "/" + containsErrors + "/"
+							+ depth);
+				case ErrorDocument:
+					cachedURI = new URI("t2:error//" + getNamespacePart() + "?"
+							+ getLocalPart() + "/" + depth);
+				}
 		} catch (URISyntaxException e) {
 			logger.error("Unable to create URI", e);
 		}
-		return null;
+		return cachedURI;
 	}
 
 	@Override

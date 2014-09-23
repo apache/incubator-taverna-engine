@@ -33,7 +33,6 @@ import static net.sf.taverna.t2.reference.ReferencedDataNature.*;
  * @author Tom Oinn
  */
 public abstract class AbstractExternalReference implements ExternalReferenceSPI {
-
 	// Used internally by Hibernate for this class and subclasses
 	private int primaryKey;
 
@@ -62,6 +61,7 @@ public abstract class AbstractExternalReference implements ExternalReferenceSPI 
 	/**
 	 * Default to returning DataReferenceNature.UNKNOWN
 	 */
+	@Override
 	public ReferencedDataNature getDataNature() {
 		return UNKNOWN;
 	}
@@ -69,6 +69,7 @@ public abstract class AbstractExternalReference implements ExternalReferenceSPI 
 	/**
 	 * Default to returning null for charset
 	 */
+	@Override
 	public String getCharset() {
 		return null;
 	}
@@ -77,9 +78,12 @@ public abstract class AbstractExternalReference implements ExternalReferenceSPI 
 	 * Default to a value of 0.0f for the resolution cost, but implementations
 	 * should at least attempt to set this to a more sensible level!
 	 */
+	@Override
 	public float getResolutionCost() {
 		return 0.0f;
 	}
-	
-	public abstract ExternalReferenceSPI clone() throws CloneNotSupportedException;
+
+	@Override
+	public abstract ExternalReferenceSPI clone()
+			throws CloneNotSupportedException;
 }
