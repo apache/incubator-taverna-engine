@@ -2,6 +2,7 @@
 .classpath
 .project
 .settings/
+.springBeans
 catalog-v001.xml
 
 # ignore target files #
