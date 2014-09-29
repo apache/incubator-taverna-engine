@@ -101,23 +101,23 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 	 */
 	public synchronized void setBuilders(
 			List<ExternalReferenceBuilderSPI<?>> builders) {
-		if (this.builders == null) {
-			this.builders = builders;
-			if (log.isDebugEnabled()) {
-				log.debug("* Builders injected :");
-				int counter = 0;
-				for (ExternalReferenceBuilderSPI<?> builder : builders)
-					log.debug("*   " + (++counter) + ") "
-							+ builder.getClass().getSimpleName() + ", builds "
-							+ builder.getReferenceType().getSimpleName());
-			}
-			cacheValid = false;
-		} else {
+		if (this.builders != null) {
 			log.error("Builder registry already injected, invalid operation");
 			throw new IllegalStateException(
 					"Can't inject the external reference builder registry "
 							+ "multiple times.");
 		}
+
+		this.builders = builders;
+		if (log.isDebugEnabled()) {
+			log.debug("* Builders injected :");
+			int counter = 0;
+			for (ExternalReferenceBuilderSPI<?> builder : builders)
+				log.debug("*   " + (++counter) + ") "
+						+ builder.getClass().getSimpleName() + ", builds "
+						+ builder.getReferenceType().getSimpleName());
+		}
+		cacheValid = false;
 	}
 
 	/**
@@ -195,19 +195,14 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 		return neighbours;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public final Set<ExternalReferenceSPI> augmentReferenceSet(
 			ReferenceSet references,
 			Set<Class<ExternalReferenceSPI>> targetReferenceTypes,
 			ReferenceContext context) throws ReferenceSetAugmentationException {
-
 		synchronized (this) {
-			if (!cacheValid) {
+			if (!cacheValid)
 				update();
-			}
 		}
 
 		// Synchronize on the reference set itself
@@ -376,9 +371,9 @@ public class ReferenceSetAugmentorImpl implements ReferenceSetAugmentor {
 		public ShortestPathSolver(Class<ExternalReferenceSPI> targetType) {
 			log.debug("# Constructing shortest paths to '"
 					+ targetType.getSimpleName() + "'");
-			predecessors = new HashMap<Class<ExternalReferenceSPI>, Class<ExternalReferenceSPI>>();
-			translators = new HashMap<Class<ExternalReferenceSPI>, ExternalReferenceTranslatorSPI<?, ?>>();
-			shortestDistances = new HashMap<Class<ExternalReferenceSPI>, Float>();
+			predecessors = new HashMap<>();
+			translators = new HashMap<>();
+			shortestDistances = new HashMap<>();
 			setShortestDistance(targetType, 0.0f);
 			unsettledNodes.add(targetType);
 			while (!unsettledNodes.isEmpty()) {

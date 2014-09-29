@@ -60,12 +60,13 @@ public class ReferenceSetImpl extends AbstractEntityImpl implements
 		this.externalReferences = references;
 		
 		//  Should be at least one - otherwise we cannot calculate the data size
-		if (externalReferences != null && externalReferences.size() > 0){		
+		if (externalReferences != null && externalReferences.size() > 0) {
 			// Just take the first ExternalReferenceSPI returned
-			ExternalReferenceSPI externalReferenceSPI = externalReferences.toArray(new ExternalReferenceSPI[0])[0];
-			approximateSizeInBytes = externalReferenceSPI.getApproximateSizeInBytes();
+			ExternalReferenceSPI externalReferenceSPI = externalReferences
+					.toArray(new ExternalReferenceSPI[0])[0];
+			approximateSizeInBytes = externalReferenceSPI
+					.getApproximateSizeInBytes();
 		}
-	
 	}
 
 	/**
@@ -100,7 +101,7 @@ public class ReferenceSetImpl extends AbstractEntityImpl implements
 
 	@Override
 	public Set<ExternalReferenceSPI> getExternalReferences() {
-		return this.externalReferences;
+		return externalReferences;
 	}
 
 	/**

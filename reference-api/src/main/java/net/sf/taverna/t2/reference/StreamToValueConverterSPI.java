@@ -26,10 +26,8 @@ import java.io.InputStream;
  * SPI for objects that can render a POJO from an InputStream
  * 
  * @author Tom Oinn
- * 
  */
 public interface StreamToValueConverterSPI<T> {
-
 	/**
 	 * The class of objects which this builder can construct from a stream
 	 */
@@ -39,11 +37,12 @@ public interface StreamToValueConverterSPI<T> {
 	 * Render the stream to the target object type
 	 * 
 	 * @param stream
-	 *            input stream of data to render to the object
-	 * @param charset 
-	 * @param dataNature 
+	 *            input stream of data to render to the object; the caller will
+	 *            close it
+	 * @param charset
+	 * @param dataNature
 	 * @return the newly created object
 	 */
-	public T renderFrom(InputStream stream, ReferencedDataNature dataNature, String charset);
-
+	public T renderFrom(InputStream stream, ReferencedDataNature dataNature,
+			String charset);
 }
