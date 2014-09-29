@@ -33,8 +33,6 @@ package net.sf.taverna.t2.reference.h3;
  * the preloadRegistries property of the SpiRegistryAwareLocalSessionFactoryBean
  * 
  * @author Tom Oinn
- * 
  */
 public interface HibernateComponentClass {
-
 }
