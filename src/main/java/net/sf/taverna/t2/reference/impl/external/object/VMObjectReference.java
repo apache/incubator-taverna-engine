@@ -38,33 +38,26 @@ import net.sf.taverna.t2.reference.ReferenceContext;
  * 
  * @author Stian Soiland-Reyes
  * @author Alex Nenadic
- * 
  */
 public class VMObjectReference extends AbstractExternalReference implements
 		ExternalReferenceSPI, Serializable {
+	private static final long serialVersionUID = 6708284419760319684L;
+	private static final Charset UTF8 = Charset.forName("UTF-8");
 
 	/**
-	 * 
+	 * Mapping from objects to their UUIDs.
 	 */
-	private static final long serialVersionUID = 6708284419760319684L;
+	private static Map<Object, UUID> objectToUUID = new HashMap<>();
+	/**
+	 * Mapping from UUIDs to objects.
+	 */
+	private static Map<UUID, Object> uuidToObject = new HashMap<>();
 
 	/**
 	 * Unique reference to the object.
 	 */
 	private String uuid;
 
-	/**
-	 * Mapping from objects to their UUIDs.
-	 */
-	private static Map<Object, UUID> objectToUUID = new HashMap<Object, UUID>();
-
-	/**
-	 * Mapping from UUIDs to objects.
-	 */
-	private static Map<UUID, Object> uuidToObject = new HashMap<UUID, Object>();
-
-	private Charset UTF8 = Charset.forName("UTF-8");
-	
 	@Override
 	public InputStream openStream(ReferenceContext context) {
 		return new ByteArrayInputStream(getObject().toString().getBytes(UTF8));
@@ -81,16 +74,14 @@ public class VMObjectReference extends AbstractExternalReference implements
 	 * Setter used by hibernate to set the object uuid property.
 	 */
 	public void setUuid(String id) {
-		if (uuid != null) {
+		if (uuid != null)
 			throw new IllegalStateException("Can't set UUID of an object twice");
-		}
 		this.uuid = id;
 	}
 
 	public void setObject(Object object) {
-		if (uuid != null) {
+		if (uuid != null)
 			throw new IllegalStateException("Can't set UUID an object twice");
-		}
 		UUID knownUUID = objectToUUID.get(object);
 		if (knownUUID == null) {
 			// register object
@@ -117,5 +108,4 @@ public class VMObjectReference extends AbstractExternalReference implements
 		result.setUuid(this.getUuid());
 		return result;
 	}
-	
 }

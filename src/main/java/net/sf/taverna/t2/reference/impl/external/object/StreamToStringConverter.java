@@ -20,6 +20,8 @@
  ******************************************************************************/
 package net.sf.taverna.t2.reference.impl.external.object;
 
+import static net.sf.taverna.t2.reference.ReferencedDataNature.TEXT;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,26 +36,23 @@ import net.sf.taverna.t2.reference.StreamToValueConverterSPI;
  * Build a String from an InputStream
  * 
  * @author Tom Oinn
- * 
  */
 public class StreamToStringConverter implements
 		StreamToValueConverterSPI<String> {
-
 	private static final int END_OF_FILE = -1;
 	private static final int CHUNK_SIZE = 4096;
 	private static final Charset UTF8 = Charset.forName("UTF-8");
 
-	/***************************************************************************
-	 * = readFile(): reads a text file and returns a string *
-	 **************************************************************************/
-	static String readFile(Reader reader) throws IOException {
-		StringBuffer buffer = new StringBuffer();
+	/**
+	 * Reads a text file and returns a string.
+	 */
+	private static String readFile(Reader reader) throws IOException {
+		BufferedReader br = new BufferedReader(reader);
+		StringBuilder buffer = new StringBuilder();
 		char[] chunk = new char[CHUNK_SIZE];
 		int character;
-		while ((character = reader.read(chunk)) != END_OF_FILE) {
+		while ((character = br.read(chunk)) != END_OF_FILE)
 			buffer.append(chunk, 0, character);
-		}
-		reader.close();
 		return buffer.toString();
 	}
 
@@ -65,23 +64,17 @@ public class StreamToStringConverter implements
 	@Override
 	public String renderFrom(InputStream stream,
 			ReferencedDataNature dataNature, String charset) {
-		BufferedReader in;
-		if ((charset == null) || !dataNature.equals(ReferencedDataNature.TEXT)){
-			in = new BufferedReader(new InputStreamReader(stream, UTF8));
-		} else {			
-			try {
-				Charset c = Charset.forName(charset);
-				in = new BufferedReader(new InputStreamReader(stream, c));
-			}
-			catch (IllegalArgumentException e1) {
-				in = new BufferedReader(new InputStreamReader(stream, UTF8));
-			}					
-		}
 		try {
-			return readFile(in);
+			if (charset != null && dataNature.equals(TEXT))
+				try {
+					Charset c = Charset.forName(charset);
+					return readFile(new InputStreamReader(stream, c));
+				} catch (IllegalArgumentException e1) {
+					// Ignore; fallback below is good enough
+				}
+			return readFile(new InputStreamReader(stream, UTF8));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-
 	}
 }

@@ -20,9 +20,11 @@
  ******************************************************************************/
 package net.sf.taverna.t2.reference.impl.external.object;
 
+import static org.apache.commons.codec.binary.Base64.decodeBase64;
+import static org.apache.commons.codec.binary.Base64.encodeBase64;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 
 import net.sf.taverna.t2.reference.AbstractExternalReference;
@@ -30,16 +32,13 @@ import net.sf.taverna.t2.reference.DereferenceException;
 import net.sf.taverna.t2.reference.ReferenceContext;
 import net.sf.taverna.t2.reference.ValueCarryingExternalReference;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.log4j.Logger;
-
 /**
  * A reference implementation that inlines an array of bytes. Rather
  * unpleasantly this currently exposes the byte array to Hibernate through a
  * textual value, as Derby allows long textual values but not long binary ones
  * (yuck). As it uses a fixed character set (UTF-8) to store and load I believe
  * this doesn't break things.
- * 
+ * <p>
  * Unfortunately this does break things (binaries get corrupted) so I've added
  * base64 encoding of the value as a workaround.
  * 
@@ -48,10 +47,6 @@ import org.apache.log4j.Logger;
  */
 public class InlineByteArrayReference extends AbstractExternalReference
 		implements ValueCarryingExternalReference<byte[]> {
-
-	private static Logger logger = Logger
-			.getLogger(InlineByteArrayReference.class);
-
 	private byte[] bytes = new byte[0];
 
 	public void setValue(byte[] newBytes) {
@@ -74,24 +69,14 @@ public class InlineByteArrayReference extends AbstractExternalReference
 		return new ByteArrayInputStream(bytes);
 	}
 
-	private static Charset charset = Charset.forName("UTF-8");
+	private static final Charset charset = Charset.forName("UTF-8");
 
 	public String getContents() {
-		try {
-			return new String(Base64.encodeBase64(bytes), charset.toString());
-		} catch (UnsupportedEncodingException e) {
-			logger.error("Could not encode bytes", e);
-		}
-		return null;
+		return new String(encodeBase64(bytes), charset);
 	}
 
 	public void setContents(String contentsAsString) {
-		try {
-			this.bytes = Base64.decodeBase64(contentsAsString.getBytes(charset
-					.toString()));
-		} catch (UnsupportedEncodingException e) {
-			logger.error("Could not decode string", e);
-		}
+		this.bytes = decodeBase64(contentsAsString.getBytes(charset));
 	}
 
 	@Override

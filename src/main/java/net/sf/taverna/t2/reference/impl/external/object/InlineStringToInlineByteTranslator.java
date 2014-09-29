@@ -7,8 +7,7 @@ import net.sf.taverna.t2.reference.ReferenceContext;
 
 public class InlineStringToInlineByteTranslator implements
 		ExternalReferenceTranslatorSPI<InlineStringReference, InlineByteArrayReference> {
-	
-	private final Charset UTF8 = Charset.forName("UTF-8");
+	private static final Charset UTF8 = Charset.forName("UTF-8");
 	
 	@Override
 	public InlineByteArrayReference createReference(
@@ -38,5 +37,4 @@ public class InlineStringToInlineByteTranslator implements
 	public float getTranslationCost() {
 		return 0.001f;
 	}
-
 }

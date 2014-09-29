@@ -34,7 +34,6 @@ import net.sf.taverna.t2.reference.ValueToReferenceConverterSPI;
  * 
  */
 public class UrlToHttpReference implements ValueToReferenceConverterSPI {
-
 	/**
 	 * Can convert if the object is an instance of java.net.URL and the protocol
 	 * is HTTP
@@ -43,9 +42,8 @@ public class UrlToHttpReference implements ValueToReferenceConverterSPI {
 	public boolean canConvert(Object o, ReferenceContext context) {
 		if (o instanceof URL) {
 			String protocol = ((URL) o).getProtocol();
-			if (protocol.equalsIgnoreCase("http") || protocol.equals("https")) {
+			if (protocol.equalsIgnoreCase("http") || protocol.equals("https"))
 				return true;
-			}
 		}
 		return false;
 	}
@@ -61,5 +59,4 @@ public class UrlToHttpReference implements ValueToReferenceConverterSPI {
 		result.setHttpUrlString(((URL) o).toExternalForm());
 		return result;
 	}
-
 }

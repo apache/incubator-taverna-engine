@@ -10,11 +10,9 @@ import net.sf.taverna.t2.reference.StreamToValueConverterSPI;
 
 /**
  * @author alanrw
- * 
  */
 public class StreamToIntegerConverter implements
 		StreamToValueConverterSPI<Integer> {
-
 	@Override
 	public Class<Integer> getPojoClass() {
 		return Integer.class;
@@ -27,7 +25,5 @@ public class StreamToIntegerConverter implements
 		String s = stringConverter.renderFrom(stream, dataNature, charset);
 		Integer result = Integer.valueOf(s.trim());
 		return result;
-
 	}
-
 }

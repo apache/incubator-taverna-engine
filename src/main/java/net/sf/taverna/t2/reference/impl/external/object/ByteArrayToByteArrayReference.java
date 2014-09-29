@@ -29,11 +29,9 @@ import net.sf.taverna.t2.reference.ValueToReferenceConverterSPI;
  * Convert a byte[] to a ByteArrayReference
  * 
  * @author Tom Oinn
- * 
  */
 public class ByteArrayToByteArrayReference implements
 		ValueToReferenceConverterSPI {
-
 	/**
 	 * Can convert if the object is an instance of byte[]
 	 */
@@ -52,5 +50,4 @@ public class ByteArrayToByteArrayReference implements
 		result.setValue((byte[]) o);
 		return result;
 	}
-
 }

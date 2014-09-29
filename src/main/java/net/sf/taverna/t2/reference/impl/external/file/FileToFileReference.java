@@ -32,11 +32,9 @@ import net.sf.taverna.t2.reference.ValueToReferenceConverterSPI;
  * Converts java.lang.File instances to FileReference reference type
  * 
  * @author Tom Oinn
- * 
  */
 public class FileToFileReference implements ValueToReferenceConverterSPI {
-
-	/**
+	/*
 	 * TODO - should probably do more sophisticated checks such as whether the
 	 * file is a file or directory etc etc, for now just checks whether the
 	 * specified object is a java.io.File
@@ -60,5 +58,4 @@ public class FileToFileReference implements ValueToReferenceConverterSPI {
 		}
 		return result;
 	}
-
 }

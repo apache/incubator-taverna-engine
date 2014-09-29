@@ -20,6 +20,8 @@
  ******************************************************************************/
 package net.sf.taverna.t2.reference.impl.external.object;
 
+import static net.sf.taverna.t2.reference.impl.external.object.StreamToByteArrayConverter.readFile;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -35,12 +37,11 @@ import net.sf.taverna.t2.reference.ReferenceContext;
  */
 public class InlineByteArrayReferenceBuilder implements
 		ExternalReferenceBuilderSPI<InlineByteArrayReference> {
-
 	@Override
 	public InlineByteArrayReference createReference(InputStream byteStream,
 			ReferenceContext context) {
 		try {
-			byte[] contents = StreamToByteArrayConverter.readFile(byteStream);
+			byte[] contents = readFile(byteStream);
 			InlineByteArrayReference ref = new InlineByteArrayReference();
 			ref.setValue(contents);
 			return ref;
@@ -63,5 +64,4 @@ public class InlineByteArrayReferenceBuilder implements
 	public boolean isEnabled(ReferenceContext context) {
 		return true;
 	}
-
 }

@@ -34,14 +34,15 @@ import net.sf.taverna.t2.reference.ValueCarryingExternalReference;
  * Contains and references a String value
  * 
  * @author Tom Oinn
- * 
  */
 public class InlineStringReference extends AbstractExternalReference implements
 		ValueCarryingExternalReference<String> {
-
-	// Hold the 'value' of this reference, probably the simplest backing store
-	// possible for an ExternalReferenceSPI implementation :)
+	/**
+	 * Hold the 'value' of this reference, probably the simplest backing store
+	 * possible for an ExternalReferenceSPI implementation :)
+	 */
 	private String contents;
+	private transient Long length;
 
 	/**
 	 * Set the 'value' of this reference as a string. It's not really a
@@ -68,8 +69,7 @@ public class InlineStringReference extends AbstractExternalReference implements
 	@Override
 	public InputStream openStream(ReferenceContext arg0) {
 		try {
-			return new ByteArrayInputStream(
-					this.contents.getBytes(getCharset()));
+			return new ByteArrayInputStream(contents.getBytes(getCharset()));
 		} catch (UnsupportedEncodingException e) {
 			throw new DereferenceException(e);
 		}
@@ -119,7 +119,9 @@ public class InlineStringReference extends AbstractExternalReference implements
 
 	@Override
 	public Long getApproximateSizeInBytes() {
-		return new Long(contents.getBytes().length);
+		if (length == null)
+			length = new Long(contents.getBytes().length);
+		return length;
 	}
 
 	@Override
@@ -128,5 +130,4 @@ public class InlineStringReference extends AbstractExternalReference implements
 		result.setContents(this.getContents());
 		return result;
 	}
-
 }

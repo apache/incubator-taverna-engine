@@ -29,16 +29,14 @@ import net.sf.taverna.t2.reference.ValueToReferenceConverterSPI;
  * Convert a String to a StringReference
  * 
  * @author Tom Oinn
- * 
  */
 public class StringToStringReference implements ValueToReferenceConverterSPI {
-
 	/**
 	 * Can convert if the object is an instance of java.lang.String
 	 */
 	@Override
 	public boolean canConvert(Object o, ReferenceContext context) {
-		return (o instanceof java.lang.String);
+		return o instanceof String;
 	}
 
 	/**
@@ -51,5 +49,4 @@ public class StringToStringReference implements ValueToReferenceConverterSPI {
 		result.setContents((String) o);
 		return result;
 	}
-
 }

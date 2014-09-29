@@ -20,6 +20,8 @@
  ******************************************************************************/
 package net.sf.taverna.t2.reference.impl.external.object;
 
+import static net.sf.taverna.t2.reference.impl.external.object.StreamToStringConverter.readFile;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,22 +36,21 @@ import net.sf.taverna.t2.reference.ReferenceContext;
  * Build an InlineStringReference from an InputStream
  * 
  * @author Tom Oinn
- * 
  */
 public class InlineStringReferenceBuilder implements
 		ExternalReferenceBuilderSPI<InlineStringReference> {
-
-	private final Charset UTF8 = Charset.forName("UTF-8");
+	private static final Charset UTF8 = Charset.forName("UTF-8");
 	
 	@Override
 	public InlineStringReference createReference(InputStream byteStream,
 			ReferenceContext context) {
 		try {
-			// UTF8 is a slightly saner default than system default
-			// for most bytestreams
-			String contents = StreamToStringConverter
-					.readFile(new BufferedReader(new InputStreamReader(
-							byteStream, UTF8)));
+			/*
+			 * UTF8 is a slightly saner default than system default for most
+			 * bytestreams
+			 */
+			String contents = readFile(new BufferedReader(
+					new InputStreamReader(byteStream, UTF8)));
 			InlineStringReference ref = new InlineStringReference();
 			ref.setContents(contents);
 			return ref;
@@ -72,5 +73,4 @@ public class InlineStringReferenceBuilder implements
 	public boolean isEnabled(ReferenceContext context) {
 		return true;
 	}
-
 }

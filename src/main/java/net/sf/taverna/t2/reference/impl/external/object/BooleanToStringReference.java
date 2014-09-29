@@ -29,16 +29,14 @@ import net.sf.taverna.t2.reference.ValueToReferenceConverterSPI;
  * Convert a java.lang.Boolean to a StringReference.
  * 
  * @author Alan R Williams
- * 
  */
 public class BooleanToStringReference implements ValueToReferenceConverterSPI {
-
 	/**
 	 * Can convert if the object is an instance of java.lang.Boolean
 	 */
 	@Override
 	public boolean canConvert(Object o, ReferenceContext context) {
-		return (o instanceof Boolean);
+		return o instanceof Boolean;
 	}
 
 	/**
@@ -52,5 +50,4 @@ public class BooleanToStringReference implements ValueToReferenceConverterSPI {
 		result.setContents(stringValue);
 		return result;
 	}
-
 }

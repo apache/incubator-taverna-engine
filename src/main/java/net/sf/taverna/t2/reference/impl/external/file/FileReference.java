@@ -38,15 +38,12 @@ import net.sf.taverna.t2.reference.ReferencedDataNature;
  * AbstractExternalReference} to enable hibernate based persistence.
  * 
  * @author Tom Oinn
- * 
  */
 public class FileReference extends AbstractExternalReference implements
 		ExternalReferenceSPI {
-
 	private String filePathString = null;
 	private String charset = null;
 	private File file = null;
-
 	private String dataNatureName = ReferencedDataNature.UNKNOWN.name();
 
 	/**
@@ -174,12 +171,6 @@ public class FileReference extends AbstractExternalReference implements
 		return file;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.sf.taverna.t2.reference.AbstractExternalReference#getResolutionCost()
-	 */
 	@Override
 	public float getResolutionCost() {
 		return (float) 100.0;
@@ -216,5 +207,4 @@ public class FileReference extends AbstractExternalReference implements
 		result.setDataNature(this.getDataNature());
 		return result;
 	}
-
 }

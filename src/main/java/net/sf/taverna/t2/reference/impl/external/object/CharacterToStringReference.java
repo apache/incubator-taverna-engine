@@ -26,13 +26,11 @@ import net.sf.taverna.t2.reference.ValueToReferenceConversionException;
 import net.sf.taverna.t2.reference.ValueToReferenceConverterSPI;
 
 /**
- * Convert a java.lang.Character to a StringReference.
+ * Convert a {@link Character} to a StringReference.
  * 
  * @author Alan R Williams
- * 
  */
 public class CharacterToStringReference implements ValueToReferenceConverterSPI {
-
 	/**
 	 * Can convert if the object is an instance of java.lang.Character
 	 */
@@ -42,7 +40,7 @@ public class CharacterToStringReference implements ValueToReferenceConverterSPI 
 	}
 
 	/**
-	 * Return a new InlineStringReference wrapping the supplied String
+	 * Return a new {@link InlineStringReference} wrapping the supplied String
 	 */
 	@Override
 	public ExternalReferenceSPI convert(Object o, ReferenceContext context)
@@ -52,5 +50,4 @@ public class CharacterToStringReference implements ValueToReferenceConverterSPI 
 		result.setContents(stringValue);
 		return result;
 	}
-
 }

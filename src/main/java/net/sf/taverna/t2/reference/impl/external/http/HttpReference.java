@@ -20,10 +20,14 @@
  ******************************************************************************/
 package net.sf.taverna.t2.reference.impl.external.http;
 
+import static java.lang.System.currentTimeMillis;
+
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Date;
 
 import net.sf.taverna.t2.reference.AbstractExternalReference;
 import net.sf.taverna.t2.reference.DereferenceException;
@@ -42,16 +46,15 @@ import org.apache.commons.httpclient.methods.HeadMethod;
  * AbstractExternalReference} to enable hibernate based persistence.
  * 
  * @author Tom Oinn
- * 
  */
 public class HttpReference extends AbstractExternalReference implements
 		ExternalReferenceSPI {
-
 	private String httpUrlString = null;
 	private URL httpUrl = null;
-
 	private String charsetName = null;
 	private boolean charsetFetched = false;
+	private transient Long cachedLength;
+	private transient Date cacheTime;
 
 	/**
 	 * Explicitly declare default constructor, will be used by hibernate when
@@ -74,14 +77,10 @@ public class HttpReference extends AbstractExternalReference implements
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getCharset() throws DereferenceException {
-		if (charsetFetched) {
+		if (charsetFetched)
 			return charsetName;
-		}
 		charsetFetched = true;
 		if (!httpUrl.getProtocol().equals("http")
 				&& !httpUrl.getProtocol().equals("https")) {
@@ -164,22 +163,32 @@ public class HttpReference extends AbstractExternalReference implements
 		return true;
 	}
 
+	// One minute
+	private static final int CACHE_TIMEOUT = 60000;
+
 	@Override
 	public Long getApproximateSizeInBytes() {
+		long now = currentTimeMillis();
+		if (cachedLength != null && cacheTime != null
+				&& cacheTime.getTime() + CACHE_TIMEOUT > now)
+			return cachedLength;
 		try {
-			String lenString = httpUrl.openConnection().getHeaderField(
-					"Content-Length");
-			if (lenString == null || lenString.equals("")) { // there is no
-																// Content-Length
-																// field so we
-																// cannot know
-																// the size
-				return new Long(-1);
+			HttpURLConnection c = (HttpURLConnection) httpUrl.openConnection();
+			c.setRequestMethod("HEAD");
+			c.connect();
+			String lenString = c.getHeaderField("Content-Length");
+			if (lenString != null && !lenString.isEmpty()) {
+				cachedLength = new Long(lenString);
+				cacheTime = new Date(now);
+				return cachedLength;
 			}
-			return new Long(lenString);
+			// there is no Content-Length field so we cannot know the size
 		} catch (Exception e) {
-			return new Long(-1);
+			// something went wrong, but we don't care what
 		}
+		cachedLength = null;
+		cacheTime = null;
+		return new Long(-1);
 	}
 
 	/**
@@ -189,12 +198,6 @@ public class HttpReference extends AbstractExternalReference implements
 		return httpUrl;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.sf.taverna.t2.reference.AbstractExternalReference#getResolutionCost()
-	 */
 	@Override
 	public float getResolutionCost() {
 		return (float) 200.0;
@@ -211,5 +214,4 @@ public class HttpReference extends AbstractExternalReference implements
 		result.setHttpUrlString(this.getHttpUrlString());
 		return result;
 	}
-
 }

@@ -10,11 +10,9 @@ import net.sf.taverna.t2.reference.StreamToValueConverterSPI;
 
 /**
  * @author alanrw
- * 
  */
 public class StreamToBooleanConverter implements
 		StreamToValueConverterSPI<Boolean> {
-
 	@Override
 	public Class<Boolean> getPojoClass() {
 		return Boolean.class;
@@ -27,7 +25,5 @@ public class StreamToBooleanConverter implements
 		String s = stringConverter.renderFrom(stream, dataNature, charset);
 		Boolean result = Boolean.valueOf(s.trim());
 		return result;
-
 	}
-
 }

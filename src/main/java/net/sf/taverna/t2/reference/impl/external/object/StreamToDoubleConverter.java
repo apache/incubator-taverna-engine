@@ -10,11 +10,9 @@ import net.sf.taverna.t2.reference.StreamToValueConverterSPI;
 
 /**
  * @author alanrw
- * 
  */
 public class StreamToDoubleConverter implements
 		StreamToValueConverterSPI<Double> {
-
 	@Override
 	public Class<Double> getPojoClass() {
 		return Double.class;
@@ -27,7 +25,5 @@ public class StreamToDoubleConverter implements
 		String s = stringConverter.renderFrom(stream, dataNature, charset);
 		Double result = Double.valueOf(s.trim());
 		return result;
-
 	}
-
 }
