@@ -28,14 +28,12 @@ package net.sf.taverna.t2.reference;
  * scheme.
  * 
  * @author Tom Oinn
- * 
  */
 public class ExternalReferenceValidationException extends RuntimeException {
-
 	private static final long serialVersionUID = 3031393671457773057L;
 
 	public ExternalReferenceValidationException() {
-		// 
+		//
 	}
 
 	public ExternalReferenceValidationException(String message) {
@@ -49,5 +47,4 @@ public class ExternalReferenceValidationException extends RuntimeException {
 	public ExternalReferenceValidationException(String message, Throwable cause) {
 		super(message, cause);
 	}
-
 }

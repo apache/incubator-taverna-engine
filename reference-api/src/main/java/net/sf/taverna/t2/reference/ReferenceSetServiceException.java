@@ -26,10 +26,8 @@ package net.sf.taverna.t2.reference;
  * or wrapped in this exception (or a subclass) and rethrown.
  * 
  * @author Tom Oinn
- * 
  */
 public class ReferenceSetServiceException extends RuntimeException {
-
 	private static final long serialVersionUID = -2762995062729638168L;
 
 	public ReferenceSetServiceException() {
@@ -47,5 +45,4 @@ public class ReferenceSetServiceException extends RuntimeException {
 	public ReferenceSetServiceException(String message, Throwable cause) {
 		super(message, cause);
 	}
-
 }

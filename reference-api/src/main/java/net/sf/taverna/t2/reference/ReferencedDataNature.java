@@ -26,10 +26,8 @@ package net.sf.taverna.t2.reference;
  * enumeration contains values for textual, binary and unknown data natures.
  * 
  * @author Tom Oinn
- * 
  */
 public enum ReferencedDataNature {
-
 	/**
 	 * The data is binary, no character encoding will be specified.
 	 */
@@ -44,5 +42,4 @@ public enum ReferencedDataNature {
 	 * Unknown data nature.
 	 */
 	UNKNOWN;
-
 }

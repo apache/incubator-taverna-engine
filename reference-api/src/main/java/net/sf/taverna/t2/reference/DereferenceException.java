@@ -26,14 +26,12 @@ package net.sf.taverna.t2.reference;
  * reference such as those infering character set or data natures.
  * 
  * @author Tom Oinn
- * 
  */
 public class DereferenceException extends RuntimeException {
-
 	private static final long serialVersionUID = 8054381613840005541L;
 
 	public DereferenceException() {
-		// 
+		//
 	}
 
 	public DereferenceException(String message) {
@@ -47,5 +45,4 @@ public class DereferenceException extends RuntimeException {
 	public DereferenceException(String message, Throwable cause) {
 		super(message, cause);
 	}
-
 }

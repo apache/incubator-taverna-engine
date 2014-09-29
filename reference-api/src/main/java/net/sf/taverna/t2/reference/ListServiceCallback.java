@@ -25,10 +25,8 @@ package net.sf.taverna.t2.reference;
  * {@link ListService} interface
  * 
  * @author Tom Oinn
- * 
  */
 public interface ListServiceCallback {
-
 	/**
 	 * Called when the requested {@link ReferenceSet} has been successfully
 	 * retrieved.
@@ -36,7 +34,7 @@ public interface ListServiceCallback {
 	 * @param references
 	 *            the ReferenceSet requested
 	 */
-	public void listRetrieved(IdentifiedList<T2Reference> references);
+	void listRetrieved(IdentifiedList<T2Reference> references);
 
 	/**
 	 * Called if the retrieval failed for some reason
@@ -45,6 +43,5 @@ public interface ListServiceCallback {
 	 *            a ListServiceException explaining the retrieval
 	 *            failure
 	 */
-	public void listRetrievalFailed(ListServiceException cause);
-
+	void listRetrievalFailed(ListServiceException cause);
 }

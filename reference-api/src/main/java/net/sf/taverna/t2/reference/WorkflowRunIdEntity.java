@@ -21,18 +21,16 @@
 package net.sf.taverna.t2.reference;
 
 /**
- * Entity that wraps workflow run id and can be passed
- * through ({@link ReferenceContext} to be used by {@link T2ReferenceGenerator}
- * to generate references that are specific for a workflow run.
+ * Entity that wraps workflow run id and can be passed through (
+ * {@link ReferenceContext} to be used by {@link T2ReferenceGenerator} to
+ * generate references that are specific for a workflow run.
  * 
  * @author Alex Nenadic
- *
  */
 public class WorkflowRunIdEntity {
-	
 	private String workflowRunId;
-	
-	public WorkflowRunIdEntity(String workflowRunId){
+
+	public WorkflowRunIdEntity(String workflowRunId) {
 		this.setWorkflowRunId(workflowRunId);
 	}
 
@@ -43,5 +41,4 @@ public class WorkflowRunIdEntity {
 	public String getWorkflowRunId() {
 		return workflowRunId;
 	}
-
 }

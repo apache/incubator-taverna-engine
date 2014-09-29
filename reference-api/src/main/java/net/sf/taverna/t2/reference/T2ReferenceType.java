@@ -28,23 +28,20 @@ package net.sf.taverna.t2.reference;
  * T2Reference in the form of one of these enumerated types.
  * 
  * @author Tom Oinn
- * 
  */
 public enum T2ReferenceType {
-
 	/**
 	 * A reference to a ReferenceSet
 	 */
 	ReferenceSet,
-	
+
 	/**
 	 * A reference to an IdentifiedList of other T2References
 	 */
 	IdentifiedList,
-	
+
 	/**
 	 * A reference to an ErrorDocument
 	 */
 	ErrorDocument;
-
 }

@@ -25,14 +25,12 @@ import java.util.Set;
 /**
  * Callback interface used when augmenting a ReferenceSet in an asynchronous
  * fashion through
- * {@link ReferenceSetAugmentor#augmentReferenceSetAsynch(ReferenceSet, Set, ReferenceContext, ReferenceSetAugmentorCallback) augmentReferenceSetAsynch}
- * in {@link ReferenceSetAugmentor}.
+ * {@link ReferenceSetAugmentor#augmentReferenceSetAsynch(ReferenceSet, Set, ReferenceContext, ReferenceSetAugmentorCallback)
+ * augmentReferenceSetAsynch} in {@link ReferenceSetAugmentor}.
  * 
  * @author Tom Oinn
- * 
  */
 public interface ReferenceSetAugmentorCallback {
-
 	/**
 	 * Called when the augmentation has succeeded
 	 * 
@@ -42,7 +40,7 @@ public interface ReferenceSetAugmentorCallback {
 	 *            to re-integrate these back into the ReferenceSet used in the
 	 *            translation
 	 */
-	public void augmentationCompleted(Set<ExternalReferenceSPI> newReferences);
+	void augmentationCompleted(Set<ExternalReferenceSPI> newReferences);
 
 	/**
 	 * Called when the augmentation has failed for some reason
@@ -51,6 +49,5 @@ public interface ReferenceSetAugmentorCallback {
 	 *            a {@link ReferenceSetAugmentationException} object describing
 	 *            the failure.
 	 */
-	public void augmentationFailed(ReferenceSetAugmentationException cause);
-
+	void augmentationFailed(ReferenceSetAugmentationException cause);
 }

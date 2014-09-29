@@ -26,32 +26,31 @@ package net.sf.taverna.t2.reference;
  * sets, error documents and lists.
  * 
  * @author Tom Oinn
- * 
+ * @see T2Reference
  */
 public interface T2ReferenceGenerator {
-
 	/**
 	 * All T2Reference objects will have this namespace
 	 * 
 	 * @return the namespace as a string
 	 */
-	public String getNamespace();
+	String getNamespace();
 
 	/**
-	 * Create a new and otherwise unused T2Reference to a ReferenceSet. The 
-	 * namespace of the reference will depend on the current workflow run 
-	 * read from the ReferenceContext.
+	 * Create a new and otherwise unused T2Reference to a ReferenceSet. The
+	 * namespace of the reference will depend on the current workflow run read
+	 * from the ReferenceContext.
 	 * 
 	 * @return new T2Reference for a ReferenceSet, namespace and local parts
 	 *         will be initialized and the reference is ready to use when
 	 *         returned.
 	 */
-	public T2Reference nextReferenceSetReference(ReferenceContext context);
+	T2Reference nextReferenceSetReference(ReferenceContext context);
 
 	/**
-	 * Create a new and otherwise unused T2Reference to an IdentifiedList. The 
-	 * namespace of the reference will depend on the current workflow run 
-	 * read from the ReferenceContext.
+	 * Create a new and otherwise unused T2Reference to an IdentifiedList. The
+	 * namespace of the reference will depend on the current workflow run read
+	 * from the ReferenceContext.
 	 * 
 	 * @param containsErrors
 	 *            whether the list this reference is generated for contains
@@ -65,18 +64,18 @@ public interface T2ReferenceGenerator {
 	 *         still be at their default values of '0' and 'false' respectively,
 	 *         these will need to be re-set before the reference is viable.
 	 */
-	public T2Reference nextListReference(boolean containsErrors, int listDepth, ReferenceContext context);
+	T2Reference nextListReference(boolean containsErrors, int listDepth,
+			ReferenceContext context);
 
 	/**
-	 * Create a new and otherwise unused T2Reference to an ErrorDocument. The 
-	 * namespace of the reference will depend on the current workflow run 
-	 * read from the ReferenceContext.
+	 * Create a new and otherwise unused T2Reference to an ErrorDocument. The
+	 * namespace of the reference will depend on the current workflow run read
+	 * from the ReferenceContext.
 	 * 
 	 * @param depth
 	 *            the depth of the error document to which this identifier will
 	 *            refer
 	 * @return a new T2Reference for an ErrorDocument
 	 */
-	public T2Reference nextErrorDocumentReference(int depth, ReferenceContext context);
-
+	T2Reference nextErrorDocumentReference(int depth, ReferenceContext context);
 }

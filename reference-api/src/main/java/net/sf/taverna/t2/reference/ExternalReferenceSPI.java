@@ -65,7 +65,6 @@ import java.io.InputStream;
  * @author Tom Oinn
  */
 public interface ExternalReferenceSPI extends Cloneable {
-
 	/**
 	 * Determine, if possible, whether the data this reference refers to is
 	 * textual or binary in nature. If this determination is impossible, either
@@ -75,7 +74,7 @@ public interface ExternalReferenceSPI extends Cloneable {
 	 * 
 	 * @return the nature of the referenced data
 	 */
-	public ReferencedDataNature getDataNature();
+	ReferencedDataNature getDataNature();
 
 	/**
 	 * For textual data return the character set that should be used to pull
@@ -86,7 +85,7 @@ public interface ExternalReferenceSPI extends Cloneable {
 	 * @return string character set, for example 'utf-8', or <code>null</code>
 	 *         if binary or unknown type.
 	 */
-	public String getCharset();
+	String getCharset();
 
 	/**
 	 * Open and return an InputStream to the data referenced using, if required,
@@ -104,13 +103,13 @@ public interface ExternalReferenceSPI extends Cloneable {
 	 *             de-reference (as in the case of a non-serializable API
 	 *             consumer reference).
 	 */
-	public InputStream openStream(ReferenceContext context)
+	InputStream openStream(ReferenceContext context)
 			throws DereferenceException;
 
 	/**
 	 * Approximate size of the stored data or -1 if we do not know.
 	 */
-	public Long getApproximateSizeInBytes();
+	Long getApproximateSizeInBytes();
 
 	/**
 	 * Resolution cost is an informal guide to how costly the process of
@@ -127,7 +126,7 @@ public interface ExternalReferenceSPI extends Cloneable {
 	 * @return a float representing some notion of resolution cost, lower values
 	 *         represent cheaper de-reference paths.
 	 */
-	public float getResolutionCost();
+	float getResolutionCost();
 
-	public ExternalReferenceSPI clone() throws CloneNotSupportedException;
+	ExternalReferenceSPI clone() throws CloneNotSupportedException;
 }

@@ -20,7 +20,9 @@
  ******************************************************************************/
 package net.sf.taverna.t2.reference;
 
-import org.springframework.transaction.annotation.Propagation;
+import static org.springframework.transaction.annotation.Propagation.REQUIRED;
+import static org.springframework.transaction.annotation.Propagation.SUPPORTS;
+
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -29,7 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Tom Oinn
  */
 public interface ErrorDocumentDao {
-
 	/**
 	 * Store a named ErrorDocument to the database.
 	 * 
@@ -39,8 +40,8 @@ public interface ErrorDocumentDao {
 	 *             if any exception is thrown when connecting to the underlying
 	 *             store or when storing the error document
 	 */
-	@Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-	public void store(ErrorDocument errorDoc) throws DaoException;
+	@Transactional(propagation = REQUIRED, readOnly = false)
+	void store(ErrorDocument errorDoc) throws DaoException;
 
 	/**
 	 * Retrieves a named and populated ErrorDocument
@@ -52,12 +53,12 @@ public interface ErrorDocumentDao {
 	 *             if any exception is thrown when connecting to the underlying
 	 *             data store or when attempting retrieval of the error document
 	 */
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public ErrorDocument get(T2Reference reference) throws DaoException;
-	
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = false)
-	public boolean delete(ErrorDocument errorDoc) throws DaoException;
+	@Transactional(propagation = SUPPORTS, readOnly = true)
+	ErrorDocument get(T2Reference reference) throws DaoException;
 
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = false)
-	public void deleteErrorDocumentsForWFRun(String workflowRunId) throws DaoException;
+	@Transactional(propagation = SUPPORTS, readOnly = false)
+	boolean delete(ErrorDocument errorDoc) throws DaoException;
+
+	@Transactional(propagation = SUPPORTS, readOnly = false)
+	void deleteErrorDocumentsForWFRun(String workflowRunId) throws DaoException;
 }

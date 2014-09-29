@@ -30,17 +30,15 @@ import java.net.URI;
  * either is or contains an error document at any point in its structure.
  * 
  * @author Tom Oinn
- * 
  */
 public interface T2Reference {
-
 	/**
 	 * To determine the entity that this reference points to we use an
 	 * enumeration of possible entity types
 	 * 
 	 * @return the type of entity to which this reference refers.
 	 */
-	public T2ReferenceType getReferenceType();
+	T2ReferenceType getReferenceType();
 
 	/**
 	 * All entities identified by a T2Reference have a conceptual depth. In the
@@ -52,7 +50,7 @@ public interface T2Reference {
 	 * 
 	 * @return the depth of the entity identified by this T2Reference
 	 */
-	public int getDepth();
+	int getDepth();
 
 	/**
 	 * Error documents always return true, as do any lists where at least one
@@ -70,7 +68,7 @@ public interface T2Reference {
 	 *         contains an error document. Containment is transitive, so a list
 	 *         containing a list that contained an error would return true.
 	 */
-	public boolean containsErrors();
+	boolean containsErrors();
 
 	/**
 	 * T2Reference instances retain a reference to the reference manager which
@@ -84,7 +82,7 @@ public interface T2Reference {
 	 * 
 	 * @return the namespace of this T2Reference as a string.
 	 */
-	public String getNamespacePart();
+	String getNamespacePart();
 
 	/**
 	 * In addition to the namespace the T2Reference contains a local identifier.
@@ -93,13 +91,12 @@ public interface T2Reference {
 	 * 
 	 * @return the local part of this T2Reference as a string.
 	 */
-	public String getLocalPart();
+	String getLocalPart();
 
 	/**
 	 * All T2Reference instances can be represented as a URI.
 	 * 
 	 * @return representation of this T2Reference as a URI
 	 */
-	public URI toUri();
-
+	URI toUri();
 }

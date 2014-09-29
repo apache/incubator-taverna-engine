@@ -27,10 +27,8 @@ package net.sf.taverna.t2.reference;
  * through the ExternalReferenceTranslatorSPI interface.
  * 
  * @author Tom Oinn
- * 
  */
 public class ExternalReferenceConstructionException extends RuntimeException {
-
 	private static final long serialVersionUID = 8334725795238353354L;
 
 	public ExternalReferenceConstructionException() {
@@ -49,5 +47,4 @@ public class ExternalReferenceConstructionException extends RuntimeException {
 			Throwable cause) {
 		super(message, cause);
 	}
-
 }

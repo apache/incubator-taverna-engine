@@ -29,10 +29,8 @@ package net.sf.taverna.t2.reference;
  * useConverterSPI parameter is set to true on that method.
  * 
  * @author Tom Oinn
- * 
  */
 public interface ValueToReferenceConverterSPI {
-
 	/**
 	 * Can this SPI implementation convert the specified object to an
 	 * ExternalReferenceSPI? This test should be as lightweight as possible, and
@@ -46,7 +44,7 @@ public interface ValueToReferenceConverterSPI {
 	 * 
 	 * @return whether this converter is applicable to the specified object
 	 */
-	public boolean canConvert(Object o, ReferenceContext context);
+	boolean canConvert(Object o, ReferenceContext context);
 
 	/**
 	 * Construct and return a new ExternalReferenceSPI implementation which is
@@ -62,7 +60,6 @@ public interface ValueToReferenceConverterSPI {
 	 * @throws ValueToReferenceConversionException
 	 *             if any problem occurs during the conversion
 	 */
-	public ExternalReferenceSPI convert(Object o, ReferenceContext context)
+	ExternalReferenceSPI convert(Object o, ReferenceContext context)
 			throws ValueToReferenceConversionException;
-
 }

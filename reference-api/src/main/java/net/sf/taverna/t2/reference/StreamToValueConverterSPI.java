@@ -31,7 +31,7 @@ public interface StreamToValueConverterSPI<T> {
 	/**
 	 * The class of objects which this builder can construct from a stream
 	 */
-	public Class<T> getPojoClass();
+	Class<T> getPojoClass();
 
 	/**
 	 * Render the stream to the target object type
@@ -43,6 +43,6 @@ public interface StreamToValueConverterSPI<T> {
 	 * @param dataNature
 	 * @return the newly created object
 	 */
-	public T renderFrom(InputStream stream, ReferencedDataNature dataNature,
+	T renderFrom(InputStream stream, ReferencedDataNature dataNature,
 			String charset);
 }

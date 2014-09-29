@@ -41,10 +41,8 @@ import java.util.List;
  * concerns.
  * 
  * @author Tom Oinn
- * 
  */
 public interface ReferenceContext {
-
 	/**
 	 * Return a list of all entities in the resolution context which match the
 	 * supplied entity type argument.
@@ -59,10 +57,10 @@ public interface ReferenceContext {
 	 * @return a list of entities from the reference context which can be cast
 	 *         to the specified type.
 	 */
-	public <T extends Object> List<T> getEntities(Class<T> entityType);
+	<T extends Object> List<T> getEntities(Class<T> entityType);
 
 	/**
 	 * Add an entity to the context.
 	 */
-	public void addEntity(Object entity);
+	void addEntity(Object entity);
 }

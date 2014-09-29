@@ -26,10 +26,8 @@ package net.sf.taverna.t2.reference;
  * or wrapped in this exception (or a subclass) and rethrown.
  * 
  * @author Tom Oinn
- * 
  */
 public class ErrorDocumentServiceException extends RuntimeException {
-
 	private static final long serialVersionUID = 5556399589785258956L;
 
 	public ErrorDocumentServiceException() {
@@ -47,5 +45,4 @@ public class ErrorDocumentServiceException extends RuntimeException {
 	public ErrorDocumentServiceException(Throwable cause) {
 		super(cause);
 	}
-
 }

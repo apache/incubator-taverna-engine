@@ -25,10 +25,8 @@ package net.sf.taverna.t2.reference;
  * {@link ErrorDocumentService} interface
  * 
  * @author Tom Oinn
- * 
  */
 public interface ErrorDocumentServiceCallback {
-
 	/**
 	 * Called when the requested {@link ReferenceSet} has been successfully
 	 * retrieved.
@@ -36,7 +34,7 @@ public interface ErrorDocumentServiceCallback {
 	 * @param errorDoc
 	 *            the ErrorDocument requested
 	 */
-	public void errorRetrieved(ErrorDocument errorDoc);
+	void errorRetrieved(ErrorDocument errorDoc);
 
 	/**
 	 * Called if the retrieval failed for some reason
@@ -45,6 +43,5 @@ public interface ErrorDocumentServiceCallback {
 	 *            an ErrorDocumentServiceException explaining the retrieval
 	 *            failure
 	 */
-	public void errorRetrievalFailed(ErrorDocumentServiceException cause);
-
+	void errorRetrievalFailed(ErrorDocumentServiceException cause);
 }

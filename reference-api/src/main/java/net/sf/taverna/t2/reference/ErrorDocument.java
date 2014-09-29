@@ -30,29 +30,27 @@ import java.util.Set;
  * @author David Withers
  */
 public interface ErrorDocument extends Identified {
+	/**
+	 * If the error document is created from a {@link Throwable} it will have a
+	 * stack trace, in this case the stack trace is represented as a list of
+	 * {@link StackTraceElement} beans
+	 */
+	List<StackTraceElementBean> getStackTraceStrings();
 
 	/**
-	 * If the error document is created from a Throwable it will have a stack
-	 * trace, in this case the stack trace is represented as a list of
-	 * StackTraceElement beans
+	 * If the error document is created from a {@link Throwable}, this contains
+	 * the message part of the {@link Throwable}.
 	 */
-	public List<StackTraceElementBean> getStackTraceStrings();
-
-	/**
-	 * If the error document is created from a Throwable this contains the
-	 * message part of the Throwable
-	 */
-	public String getExceptionMessage();
+	String getExceptionMessage();
 
 	/**
 	 * Error documents can carry an arbitrary string message, this returns it.
 	 */
-	public String getMessage();
-	
-	/**
-	 * If the error document is created from set of references that contain error
-	 * documents, this method returns them. 
-	 */
-	public Set<T2Reference> getErrorReferences();
+	String getMessage();
 
+	/**
+	 * If the error document is created from set of references that contain
+	 * error documents, this method returns them.
+	 */
+	Set<T2Reference> getErrorReferences();
 }

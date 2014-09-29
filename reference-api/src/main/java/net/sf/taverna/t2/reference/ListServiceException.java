@@ -28,7 +28,6 @@ package net.sf.taverna.t2.reference;
  * @author Tom Oinn
  */
 public class ListServiceException extends RuntimeException {
-
 	private static final long serialVersionUID = 5049346991071587866L;
 
 	public ListServiceException() {
@@ -46,5 +45,4 @@ public class ListServiceException extends RuntimeException {
 	public ListServiceException(String message, Throwable cause) {
 		super(message, cause);
 	}
-
 }

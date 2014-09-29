@@ -38,12 +38,12 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 public interface ErrorDocumentService {
-
 	/**
-	 * Register a new error document. 
+	 * Register a new error document.
 	 * <p>
-	 * The created reference will be related with a workflow run id passed 
-	 * through ReferenceContext so we can track all data referenced by a specific run. 
+	 * The created reference will be related with a workflow run id passed
+	 * through ReferenceContext so we can track all data referenced by a
+	 * specific run.
 	 * 
 	 * @param message
 	 *            a free text message describing the error, if available. If
@@ -59,28 +59,29 @@ public interface ErrorDocumentService {
 	 *         underlying storage system
 	 */
 	@Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-	public ErrorDocument registerError(String message, Throwable t, int depth,  ReferenceContext context)
-			throws ErrorDocumentServiceException;
+	ErrorDocument registerError(String message, Throwable t, int depth,
+			ReferenceContext context) throws ErrorDocumentServiceException;
 
 	/**
 	 * Equivalent to <code>registerError(message, null, depth, context)</code>.
 	 */
 	@Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-	public ErrorDocument registerError(String message, int depth, ReferenceContext context)
-			throws ErrorDocumentServiceException;
+	ErrorDocument registerError(String message, int depth,
+			ReferenceContext context) throws ErrorDocumentServiceException;
 
 	/**
 	 * Equivalent to <code>registerError("", t, depth, context)</code>.
 	 */
 	@Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-	public ErrorDocument registerError(Throwable t, int depth, ReferenceContext context)
+	ErrorDocument registerError(Throwable t, int depth, ReferenceContext context)
 			throws ErrorDocumentServiceException;
 
 	/**
 	 * Register a new error document.
 	 * <p>
-	 * The created reference will be related with a workflow run id passed 
-	 * through ReferenceContext so we can track all data referenced by a specific run. 
+	 * The created reference will be related with a workflow run id passed
+	 * through ReferenceContext so we can track all data referenced by a
+	 * specific run.
 	 * 
 	 * @param message
 	 *            a free text message describing the error, if available. If
@@ -94,7 +95,8 @@ public interface ErrorDocumentService {
 	 *         underlying storage system
 	 */
 	@Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-	public ErrorDocument registerError(String message, Set<T2Reference> errors, int depth, ReferenceContext context)
+	ErrorDocument registerError(String message, Set<T2Reference> errors,
+			int depth, ReferenceContext context)
 			throws ErrorDocumentServiceException;
 
 	/**
@@ -109,8 +111,7 @@ public interface ErrorDocumentService {
 	 *             is something wrong with the reference (such as it being of
 	 *             the wrong reference type).
 	 */
-	public ErrorDocument getError(T2Reference id)
-			throws ErrorDocumentServiceException;
+	ErrorDocument getError(T2Reference id) throws ErrorDocumentServiceException;
 
 	/**
 	 * Functionality the same as {@link #getError(T2Reference) getError} but in
@@ -129,23 +130,23 @@ public interface ErrorDocumentService {
 	 *             are not returned here, for obvious reasons, and are instead
 	 *             messaged through the callback interface.
 	 */
-	public void getErrorAsynch(T2Reference id,
-			ErrorDocumentServiceCallback callback)
+	void getErrorAsynch(T2Reference id, ErrorDocumentServiceCallback callback)
 			throws ErrorDocumentServiceException;
 
 	/**
 	 * Return the T2Reference for the sole child of an error document
 	 * identifier.
 	 */
-	public T2Reference getChild(T2Reference errorId)
+	T2Reference getChild(T2Reference errorId)
 			throws ErrorDocumentServiceException;
-	
+
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = false)
-	public boolean delete(T2Reference reference) throws ReferenceServiceException;
+	boolean delete(T2Reference reference) throws ReferenceServiceException;
 
 	/**
 	 * Delete all {@link ErrorDocument}S used by the specific workflow run.
 	 */
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = false)
-	public void deleteErrorDocumentsForWorkflowRun(String workflowRunId) throws ReferenceServiceException;
+	void deleteErrorDocumentsForWorkflowRun(String workflowRunId)
+			throws ReferenceServiceException;
 }

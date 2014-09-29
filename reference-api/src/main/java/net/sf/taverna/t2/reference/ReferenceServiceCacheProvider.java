@@ -25,15 +25,14 @@ package net.sf.taverna.t2.reference;
  * intended to be used to inject cache implementations through AoP
  * 
  * @author Tom Oinn
- * 
  */
 public interface ReferenceServiceCacheProvider {
-
 	/**
-	 * Called after an Identified has been written to the backing store, either
-	 * for the first time or after modification. In our model ReferenceSet is
-	 * the only Identified that is modifiable, specifically only by the addition
-	 * of ExternalReferenceSPI instances to its reference set.
+	 * Called after an {@link Identified} has been written to the backing store,
+	 * either for the first time or after modification. In our model
+	 * {@link ReferenceSet} is the only {@link Identified} that is modifiable,
+	 * specifically only by the addition of {@link ExternalReferenceSPI}
+	 * instances to its reference set.
 	 * 
 	 * @param i
 	 *            the Identified written to the backing store
@@ -46,9 +45,8 @@ public interface ReferenceServiceCacheProvider {
 	 * 
 	 * @param id
 	 *            the T2Reference of the item to retrieve
-	 * @return a cached item with matching T2Reference, or null if the cache
-	 *         does not contain that item
+	 * @return a cached item with matching {@link T2Reference}, or <tt>null</tt>
+	 *         if the cache does not contain that item
 	 */
 	Identified get(T2Reference id);
-
 }

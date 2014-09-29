@@ -37,7 +37,6 @@ import java.util.Set;
  * @author Tom Oinn
  */
 public interface ReferenceSetAugmentor {
-
 	/**
 	 * Attempts to modify the supplied ReferenceSet such that it contains an
 	 * implementation of at least one of the ExternalReferenceSPI classes
@@ -64,7 +63,7 @@ public interface ReferenceSetAugmentor {
 	 *             ReferenceSetAugmentor or in the augmentation process itself.
 	 *             Any other exception types are wrapped in this and re-thrown.
 	 */
-	public Set<ExternalReferenceSPI> augmentReferenceSet(ReferenceSet references,
+	Set<ExternalReferenceSPI> augmentReferenceSet(ReferenceSet references,
 			Set<Class<ExternalReferenceSPI>> targetReferenceTypes,
 			ReferenceContext context) throws ReferenceSetAugmentationException;
 
@@ -86,9 +85,8 @@ public interface ReferenceSetAugmentor {
 	 *             method only throws the exception if it can't even try to do
 	 *             the augmentation for some reason.
 	 */
-	public void augmentReferenceSetAsynch(ReferenceSet references,
+	void augmentReferenceSetAsynch(ReferenceSet references,
 			Set<Class<ExternalReferenceSPI>> targetReferenceTypes,
 			ReferenceContext context, ReferenceSetAugmentorCallback callback)
 			throws ReferenceSetAugmentationException;
-
 }

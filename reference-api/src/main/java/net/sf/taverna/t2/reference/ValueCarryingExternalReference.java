@@ -30,18 +30,15 @@ package net.sf.taverna.t2.reference;
  * return a java.lang.String
  * 
  * @author Tom Oinn
- * 
  */
 public interface ValueCarryingExternalReference<T> extends ExternalReferenceSPI {
-
 	/**
 	 * Returns the type of the inlined value
 	 */
-	public Class<T> getValueType();
+	Class<T> getValueType();
 
 	/**
 	 * Returns the value
 	 */
-	public T getValue();
-
+	T getValue();
 }

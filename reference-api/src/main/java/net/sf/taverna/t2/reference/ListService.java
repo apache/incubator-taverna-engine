@@ -20,10 +20,12 @@
  ******************************************************************************/
 package net.sf.taverna.t2.reference;
 
+import static org.springframework.transaction.annotation.Propagation.REQUIRED;
+import static org.springframework.transaction.annotation.Propagation.SUPPORTS;
+
 import java.util.List;
 
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.annotation.Propagation;
 
 /**
  * Provides facilities to register list of T2References, register empty lists at
@@ -36,9 +38,8 @@ import org.springframework.transaction.annotation.Propagation;
  * 
  * @author Tom Oinn
  */
-@Transactional(propagation=Propagation.SUPPORTS, readOnly=true)
+@Transactional(propagation = SUPPORTS, readOnly = true)
 public interface ListService {
-
 	/**
 	 * Register a new list of T2References. The depth of the list will be
 	 * calculated based on the depth of the references within it - if these are
@@ -50,8 +51,9 @@ public interface ListService {
 	 * Implementations should copy the input list rather than keeping a
 	 * reference to it to preserve this property.
 	 * <p>
-	 * The created references will be related with a workflow run id passed 
-	 * through ReferenceContext so we can track all data referenced by a specific run. 
+	 * The created references will be related with a workflow run id passed
+	 * through ReferenceContext so we can track all data referenced by a
+	 * specific run.
 	 * 
 	 * @param items
 	 *            the T2Reference instances to store as a list.
@@ -62,9 +64,9 @@ public interface ListService {
 	 *             if there is a problem either with the specified list of
 	 *             references or with the storage subsystem.
 	 */
-	@Transactional(propagation=Propagation.REQUIRED, readOnly=false)
-	public IdentifiedList<T2Reference> registerList(List<T2Reference> items, ReferenceContext context)
-			throws ListServiceException;
+	@Transactional(propagation = REQUIRED, readOnly = false)
+	IdentifiedList<T2Reference> registerList(List<T2Reference> items,
+			ReferenceContext context) throws ListServiceException;
 
 	/**
 	 * Register a new empty list with the specified depth. This is needed
@@ -74,8 +76,9 @@ public interface ListService {
 	 * enactor - we need to know that this is an empty list that
 	 * <em>would have</em> contained lists, for example.
 	 * <p>
-	 * The created references will be related with a workflow run id passed 
-	 * through ReferenceContext so we can track all data referenced by a specific run. 
+	 * The created references will be related with a workflow run id passed
+	 * through ReferenceContext so we can track all data referenced by a
+	 * specific run.
 	 * 
 	 * @param depth
 	 *            the depth of the empty list, must be >=1
@@ -85,9 +88,9 @@ public interface ListService {
 	 *             if there is a problem with the storage subsystem or if called
 	 *             with an invalid depth argument
 	 */
-	@Transactional(propagation=Propagation.REQUIRED, readOnly=false)
-	public IdentifiedList<T2Reference> registerEmptyList(int depth, ReferenceContext context)
-			throws ListServiceException;
+	@Transactional(propagation = REQUIRED, readOnly = false)
+	IdentifiedList<T2Reference> registerEmptyList(int depth,
+			ReferenceContext context) throws ListServiceException;
 
 	/**
 	 * Retrieve a previously named and registered list of T2Reference instances
@@ -106,7 +109,7 @@ public interface ListService {
 	 *             is something wrong with the reference (such as it being of
 	 *             the wrong reference type).
 	 */
-	public IdentifiedList<T2Reference> getList(T2Reference id)
+	IdentifiedList<T2Reference> getList(T2Reference id)
 			throws ListServiceException;
 
 	/**
@@ -126,15 +129,16 @@ public interface ListService {
 	 *             are not returned here, for obvious reasons, and are instead
 	 *             messaged through the callback interface.
 	 */
-	public void getListAsynch(T2Reference id, ListServiceCallback callback)
+	void getListAsynch(T2Reference id, ListServiceCallback callback)
 			throws ListServiceException;
-	
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = false)
-	public boolean delete(T2Reference reference) throws ReferenceServiceException;
+
+	@Transactional(propagation = SUPPORTS, readOnly = false)
+	boolean delete(T2Reference reference) throws ReferenceServiceException;
 
 	/**
 	 * Delete all {@link IdentifiedList}S used by the specific workflow run.
 	 */
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = false)
-	public void deleteIdentifiedListsForWorkflowRun(String workflowRunId) throws ReferenceServiceException;
+	@Transactional(propagation = SUPPORTS, readOnly = false)
+	void deleteIdentifiedListsForWorkflowRun(String workflowRunId)
+			throws ReferenceServiceException;
 }

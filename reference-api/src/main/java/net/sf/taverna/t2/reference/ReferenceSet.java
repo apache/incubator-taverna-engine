@@ -36,21 +36,18 @@ import java.util.Set;
  * there may be occasions where this is the desired behaviour.
  * 
  * @author Tom Oinn
- * 
  */
 public interface ReferenceSet extends Identified {
-
 	/**
 	 * The reference set contains a set of ExternalReferenceSPI instances, all
 	 * of which point to byte equivalent data.
 	 * 
 	 * @return the set of references to external data
 	 */
-	public Set<ExternalReferenceSPI> getExternalReferences();
-	
+	Set<ExternalReferenceSPI> getExternalReferences();
+
 	/**
 	 * Get approximate size of the data pointed to by this ReferenceSet.
 	 */
-	public Long getApproximateSizeInBytes();
-
+	Long getApproximateSizeInBytes();
 }

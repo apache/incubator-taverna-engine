@@ -37,7 +37,6 @@ import java.io.InputStream;
  * @author Tom Oinn
  */
 public interface ExternalReferenceBuilderSPI<TargetType extends ExternalReferenceSPI> {
-
 	/**
 	 * Given a stream of bytes, build the appropriate target
 	 * ExternalReferenceSPI implementation which would de-reference to the value
@@ -54,8 +53,7 @@ public interface ExternalReferenceBuilderSPI<TargetType extends ExternalReferenc
 	 *             if an error occurs instantiating the new reference.
 	 * @return the newly constructed ExternalReferenceSPI instance.
 	 */
-	public TargetType createReference(InputStream byteStream,
-			ReferenceContext context);
+	TargetType createReference(InputStream byteStream, ReferenceContext context);
 
 	/**
 	 * Expose the type of the ExternalReferenceSPI that this builder can
@@ -64,7 +62,7 @@ public interface ExternalReferenceBuilderSPI<TargetType extends ExternalReferenc
 	 * @return the class of ExternalReferenceSPI returned by the create
 	 *         reference methods.
 	 */
-	public Class<TargetType> getReferenceType();
+	Class<TargetType> getReferenceType();
 
 	/**
 	 * Because the reference builder may rely on facilities provided to it
@@ -77,7 +75,7 @@ public interface ExternalReferenceBuilderSPI<TargetType extends ExternalReferenc
 	 * @return whether the context contains necessary resources for the
 	 *         reference construction process
 	 */
-	public boolean isEnabled(ReferenceContext context);
+	boolean isEnabled(ReferenceContext context);
 
 	/**
 	 * Return an approximate complexity cost of the reference construction. In
@@ -88,6 +86,5 @@ public interface ExternalReferenceBuilderSPI<TargetType extends ExternalReferenc
 	 * though we assign an approximation, the default value is 1.0f and lower
 	 * values represent less costly operations.
 	 */
-	public float getConstructionCost();
-
+	float getConstructionCost();
 }

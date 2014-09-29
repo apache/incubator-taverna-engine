@@ -25,10 +25,8 @@ package net.sf.taverna.t2.reference;
  * exceptions from lower layers.
  * 
  * @author Tom Oinn
- * 
  */
 public class ReferenceServiceException extends RuntimeException {
-
 	private static final long serialVersionUID = -2607675495513408333L;
 
 	public ReferenceServiceException() {
@@ -46,5 +44,4 @@ public class ReferenceServiceException extends RuntimeException {
 	public ReferenceServiceException(String message, Throwable cause) {
 		super(message, cause);
 	}
-
 }

@@ -36,7 +36,6 @@ package net.sf.taverna.t2.reference;
  * @author Tom Oinn
  */
 public interface ExternalReferenceTranslatorSPI<SourceType extends ExternalReferenceSPI, TargetType extends ExternalReferenceSPI> {
-
 	/**
 	 * Given an existing ExternalReferenceSPI, build the appropriate target
 	 * ExternalReferenceSPI implementation and return it.
@@ -52,7 +51,7 @@ public interface ExternalReferenceTranslatorSPI<SourceType extends ExternalRefer
 	 *             if an error occurs instantiating the new reference.
 	 * @return the newly constructed ExternalReferenceSPI instance.
 	 */
-	public TargetType createReference(SourceType sourceReference,
+	TargetType createReference(SourceType sourceReference,
 			ReferenceContext context);
 
 	/**
@@ -61,7 +60,7 @@ public interface ExternalReferenceTranslatorSPI<SourceType extends ExternalRefer
 	 * @return ExternalReferenceSPI class corresponding to the reference type
 	 *         used as a source by this translator.
 	 */
-	public Class<SourceType> getSourceReferenceType();
+	Class<SourceType> getSourceReferenceType();
 
 	/**
 	 * Return the type of external reference this translator constructs.
@@ -69,7 +68,7 @@ public interface ExternalReferenceTranslatorSPI<SourceType extends ExternalRefer
 	 * @return ExternalReferenceSPI class corresponding to the reference type
 	 *         emitted by this translator.
 	 */
-	public Class<TargetType> getTargetReferenceType();
+	Class<TargetType> getTargetReferenceType();
 
 	/**
 	 * Because the reference translator may rely on facilities provided to it
@@ -82,7 +81,7 @@ public interface ExternalReferenceTranslatorSPI<SourceType extends ExternalRefer
 	 * @return whether the context contains necessary resources for the
 	 *         reference construction process
 	 */
-	public boolean isEnabled(ReferenceContext context);
+	boolean isEnabled(ReferenceContext context);
 
 	/**
 	 * Return an approximate complexity cost of the translation. In general we
@@ -93,6 +92,5 @@ public interface ExternalReferenceTranslatorSPI<SourceType extends ExternalRefer
 	 * assign an approximation, the default value is 1.0f and lower values
 	 * represent less costly operations.
 	 */
-	public float getTranslationCost();
-
+	float getTranslationCost();
 }

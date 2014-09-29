@@ -25,10 +25,8 @@ package net.sf.taverna.t2.reference;
  * exception.
  * 
  * @author Tom Oinn
- * 
  */
 public class DaoException extends RuntimeException {
-
 	static final long serialVersionUID = 8496141798637577803L;
 
 	public DaoException() {
@@ -46,5 +44,4 @@ public class DaoException extends RuntimeException {
 	public DaoException(String message, Throwable cause) {
 		super(message, cause);
 	}
-
 }

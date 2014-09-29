@@ -25,10 +25,8 @@ package net.sf.taverna.t2.reference;
  * the desired types for any reason.
  * 
  * @author Tom Oinn
- * 
  */
 public class ReferenceSetAugmentationException extends RuntimeException {
-
 	private static final long serialVersionUID = -6156508424485682266L;
 
 	public ReferenceSetAugmentationException() {
@@ -46,5 +44,4 @@ public class ReferenceSetAugmentationException extends RuntimeException {
 	public ReferenceSetAugmentationException(String message, Throwable cause) {
 		super(message, cause);
 	}
-
 }

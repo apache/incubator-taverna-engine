@@ -20,7 +20,9 @@
  ******************************************************************************/
 package net.sf.taverna.t2.reference;
 
-import org.springframework.transaction.annotation.Propagation;
+import static org.springframework.transaction.annotation.Propagation.REQUIRED;
+import static org.springframework.transaction.annotation.Propagation.SUPPORTS;
+
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -29,7 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Tom Oinn
  */
 public interface ListDao {
-
 	/**
 	 * Store a named and populated IdentifiedList of T2Reference to the
 	 * database.
@@ -40,8 +41,8 @@ public interface ListDao {
 	 *             if any exception is thrown when connecting to the underlying
 	 *             store or when storing the list
 	 */
-	@Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-	public void store(IdentifiedList<T2Reference> theList) throws DaoException;
+	@Transactional(propagation = REQUIRED, readOnly = false)
+	void store(IdentifiedList<T2Reference> theList) throws DaoException;
 
 	/**
 	 * Retrieves a named and populated IdentifiedList of T2Reference from the
@@ -54,15 +55,13 @@ public interface ListDao {
 	 *             if any exception is thrown when connecting to the underlying
 	 *             data store or when attempting retrieval of the list
 	 */
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public IdentifiedList<T2Reference> get(T2Reference reference)
-			throws DaoException;
-	
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = false)
-	public boolean delete(IdentifiedList<T2Reference> theList)
-			throws DaoException;
-	
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = false)
-	public void deleteIdentifiedListsForWFRun(String workflowRunId) throws DaoException;
+	@Transactional(propagation = SUPPORTS, readOnly = true)
+	IdentifiedList<T2Reference> get(T2Reference reference) throws DaoException;
 
+	@Transactional(propagation = SUPPORTS, readOnly = false)
+	boolean delete(IdentifiedList<T2Reference> theList) throws DaoException;
+
+	@Transactional(propagation = SUPPORTS, readOnly = false)
+	void deleteIdentifiedListsForWFRun(String workflowRunId)
+			throws DaoException;
 }

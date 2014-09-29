@@ -20,7 +20,9 @@
  ******************************************************************************/
 package net.sf.taverna.t2.reference;
 
-import org.springframework.transaction.annotation.Propagation;
+import static org.springframework.transaction.annotation.Propagation.REQUIRED;
+import static org.springframework.transaction.annotation.Propagation.SUPPORTS;
+
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -33,10 +35,8 @@ import org.springframework.transaction.annotation.Transactional;
  * propagated it is wrapped in a DaoException and passed on to the caller.
  * 
  * @author Tom Oinn
- * 
  */
 public interface ReferenceSetDao {
-
 	/**
 	 * Store the specified new reference set
 	 * 
@@ -46,8 +46,8 @@ public interface ReferenceSetDao {
 	 *             if the entry already exists in the database or some other
 	 *             database related problem occurs
 	 */
-	@Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-	public void store(ReferenceSet rs) throws DaoException;
+	@Transactional(propagation = REQUIRED, readOnly = false)
+	void store(ReferenceSet rs) throws DaoException;
 
 	/**
 	 * Update a pre-existing entry in the database
@@ -57,8 +57,8 @@ public interface ReferenceSetDao {
 	 *            database
 	 * @throws DaoException
 	 */
-	@Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-	public void update(ReferenceSet rs) throws DaoException;
+	@Transactional(propagation = REQUIRED, readOnly = false)
+	void update(ReferenceSet rs) throws DaoException;
 
 	/**
 	 * Fetch a reference set by id
@@ -71,12 +71,12 @@ public interface ReferenceSetDao {
 	 *             something goes wrong fetching the data or connecting to the
 	 *             database
 	 */
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public ReferenceSet get(T2Reference ref) throws DaoException;
-	
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = false)
-	public boolean delete(ReferenceSet rs) throws DaoException;
+	@Transactional(propagation = SUPPORTS, readOnly = true)
+	ReferenceSet get(T2Reference ref) throws DaoException;
 
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = false)
-	public void deleteReferenceSetsForWFRun(String workflowRunId) throws DaoException;
+	@Transactional(propagation = SUPPORTS, readOnly = false)
+	boolean delete(ReferenceSet rs) throws DaoException;
+
+	@Transactional(propagation = SUPPORTS, readOnly = false)
+	void deleteReferenceSetsForWFRun(String workflowRunId) throws DaoException;
 }
