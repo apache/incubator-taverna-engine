@@ -20,7 +20,6 @@
  ******************************************************************************/
 package net.sf.taverna.t2.security.credentialmanager.impl;
 
-import net.sf.taverna.t2.security.credentialmanager.CMUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -848,7 +847,7 @@ public class CredentialManagerImpl implements CredentialManager,
 					// Look up the no-fragment uri as an additional mapping
 					URI noFragment;
 					try {
-						noFragment = CMUtils
+						noFragment = dnParser
 								.setFragmentForURI(serviceURI, null);
 					} catch (URISyntaxException e) {
 						logger.warn("Could not reset fragment for service URI "
@@ -884,7 +883,7 @@ public class CredentialManagerImpl implements CredentialManager,
 			boolean usePathRecursion) {
 		try {
 			serviceURI = serviceURI.normalize();
-			serviceURI = CMUtils.setUserInfoForURI(serviceURI, null);
+			serviceURI = dnParser.setUserInfoForURI(serviceURI, null);
 		} catch (URISyntaxException ex) {
 			logger.warn("Could not strip userinfo from " + serviceURI, ex);
 		}
@@ -931,7 +930,7 @@ public class CredentialManagerImpl implements CredentialManager,
 			for (URI withFragment : new ArrayList<>(possibles))
 				try {
 					possibles
-							.add(CMUtils.setFragmentForURI(withFragment, null));
+							.add(dnParser.setFragmentForURI(withFragment, null));
 				} catch (URISyntaxException e) {
 					logger.warn("Could not non-fragment URI " + withFragment);
 				}
@@ -2365,9 +2364,9 @@ public class CredentialManagerImpl implements CredentialManager,
 	public URI normalizeServiceURI(URI serviceURI) {
 		try {
 			// Strip userinfo, keep fragment
-			URI normalized = CMUtils.setUserInfoForURI(serviceURI, null)
+			URI normalized = dnParser.setUserInfoForURI(serviceURI, null)
 					.normalize();
-			return CMUtils.setFragmentForURI(normalized.resolve("."),
+			return dnParser.setFragmentForURI(normalized.resolve("."),
 					serviceURI.getFragment());
 		} catch (URISyntaxException ex) {
 			return serviceURI;
@@ -2423,7 +2422,7 @@ public class CredentialManagerImpl implements CredentialManager,
 
 	private void loadDefaultSecurityFiles() {
 		if (credentialManagerDirectory == null)
-			credentialManagerDirectory = CMUtils
+			credentialManagerDirectory = dnParser
 					.getCredentialManagerDefaultDirectory(applicationConfiguration);
 		if (keystoreFile == null)
 			keystoreFile = new File(credentialManagerDirectory,

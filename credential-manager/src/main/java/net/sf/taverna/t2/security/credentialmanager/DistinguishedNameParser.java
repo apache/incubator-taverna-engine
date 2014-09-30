@@ -20,8 +20,12 @@
  ******************************************************************************/
 package net.sf.taverna.t2.security.credentialmanager;
 
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
+import uk.org.taverna.configuration.app.ApplicationConfiguration;
 
 /**
  * Utility methods for Credential Manager and security-related stuff.
@@ -32,17 +36,23 @@ import java.security.cert.X509Certificate;
  */
 public interface DistinguishedNameParser {
 
-	/**
-	 * Parses a DN string and fills in fields with DN parts. Heavily based on
-	 * uk.ac.omii.security.utils.DNParser class from omii-security-utils
-	 * library.
-	 * 
-	 * http://maven.omii.ac.uk/maven2/repository/omii/omii-security-utils/
-	 */
-	public ParsedDistinguishedName parseDN(String DNstr);
+    /**
+     * Parses a DN string and fills in fields with DN parts. Heavily based on
+     * uk.ac.omii.security.utils.DNParser class from omii-security-utils
+     * library.
+     * 
+     * http://maven.omii.ac.uk/maven2/repository/omii/omii-security-utils/
+    */
+    public ParsedDistinguishedName parseDN(String DNstr);
 
-        public String getMessageDigestAsFormattedString(byte[] certBinaryEncoding, String shA1);
+    public String getMessageDigestAsFormattedString(byte[] certBinaryEncoding, String shA1);
 
-	public X509Certificate convertCertificate(Certificate certificate) throws CMException;
+    public X509Certificate convertCertificate(Certificate certificate) throws CMException;
 
- }
+    public URI setUserInfoForURI(URI uri, String userinfo) throws URISyntaxException;
+
+    public URI setFragmentForURI(URI uri, String userinfo) throws URISyntaxException;
+
+    public File getCredentialManagerDefaultDirectory(ApplicationConfiguration applicationConfiguration);
+
+ } 

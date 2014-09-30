@@ -20,6 +20,7 @@
  ******************************************************************************/
 package net.sf.taverna.t2.security.credentialmanager.impl;
 
+import java.net.URI;
 import java.util.ArrayList;
 import net.sf.taverna.t2.security.credentialmanager.ParsedDistinguishedName;
 import org.apache.log4j.Logger;

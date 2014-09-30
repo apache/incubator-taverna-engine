@@ -7,7 +7,6 @@ import java.net.PasswordAuthentication;
 import java.net.URI;
 import java.net.URISyntaxException;
 import net.sf.taverna.t2.security.credentialmanager.CMException;
-import net.sf.taverna.t2.security.credentialmanager.CMUtils;
 import net.sf.taverna.t2.security.credentialmanager.CredentialManager;
 import net.sf.taverna.t2.security.credentialmanager.UsernamePassword;
 
@@ -85,7 +84,7 @@ public class CredentialManagerAuthenticator extends Authenticator {
 			usePathRecursion = true;
 			if (realm != null && realm.length() > 0)
 				try {
-					uri = CMUtils.resolveUriFragment(uri, realm);
+					uri = DistinguishedNameParserImpl.resolveUriFragment(uri, realm);
 				} catch (URISyntaxException e) {
 					logger.warn("Could not URI-encode fragment for realm: "
 							+ realm);

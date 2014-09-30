@@ -58,7 +58,7 @@ public class DistinguishedNameParserImpl implements DistinguishedNameParser{
 	 * Get the configuration directory where the security stuff will be/is saved
 	 * to.
 	 */
-	static File getCredentialManagerDefaultDirectory(
+	public static File getTheCredentialManagerDefaultDirectory(
 			ApplicationConfiguration applicationConfiguration) {
 		File home = applicationConfiguration.getApplicationHomeDir();
 		File secConfigDirectory = new File(home, "security");
@@ -67,7 +67,17 @@ public class DistinguishedNameParserImpl implements DistinguishedNameParser{
 		return secConfigDirectory;
 	}
 
-	static URI resolveUriFragment(URI uri, String realm)
+	/**
+	 * Get the configuration directory where the security stuff will be/is saved
+	 * to.
+	 */
+        @Override
+	public final File getCredentialManagerDefaultDirectory(
+			ApplicationConfiguration applicationConfiguration) {
+		return getTheCredentialManagerDefaultDirectory(applicationConfiguration);
+	}
+
+        static URI resolveUriFragment(URI uri, String realm)
 			throws URISyntaxException {
 		/*
 		 * Little hack to encode the fragment correctly - why does not
@@ -78,13 +88,15 @@ public class DistinguishedNameParserImpl implements DistinguishedNameParser{
 		return uri.resolve(fragment);
 	}
 
-	static URI setFragmentForURI(URI uri, String fragment)
+        @Override
+	public final URI setFragmentForURI(URI uri, String fragment)
 			throws URISyntaxException {
 		return new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost(),
 				uri.getPort(), uri.getPath(), uri.getQuery(), fragment);
 	}
 
-	static URI setUserInfoForURI(URI uri, String userinfo)
+        @Override
+	public final URI setUserInfoForURI(URI uri, String userinfo)
 			throws URISyntaxException {
 		return new URI(uri.getScheme(), userinfo, uri.getHost(), uri.getPort(),
 				uri.getPath(), uri.getQuery(), uri.getFragment());
@@ -232,4 +244,5 @@ public class DistinguishedNameParserImpl implements DistinguishedNameParser{
 	public ParsedDistinguishedNameImpl parseDN(String DNstr) {
             return new ParsedDistinguishedNameImpl(DNstr);
         }
+
 }
