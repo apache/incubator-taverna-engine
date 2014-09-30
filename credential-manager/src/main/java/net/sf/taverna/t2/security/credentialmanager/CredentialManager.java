@@ -21,6 +21,7 @@
 package net.sf.taverna.t2.security.credentialmanager;
 
 import java.io.File;
+import java.net.Authenticator;
 import java.net.URI;
 import java.security.Key;
 import java.security.KeyStore;
@@ -408,4 +409,7 @@ public interface CredentialManager {
 	 * @throws CMException
 	 */
 	SSLSocketFactory getTavernaSSLSocketFactory() throws CMException;
+        
+        public Authenticator getAuthenticator();
+
 }

@@ -20,10 +20,7 @@
  ******************************************************************************/
 package net.sf.taverna.t2.security.credentialmanager.impl;
 
-import static javax.security.auth.x500.X500Principal.RFC2253;
-import static net.sf.taverna.t2.security.credentialmanager.CredentialManager.KeystoreType.KEYSTORE;
-import static net.sf.taverna.t2.security.credentialmanager.CredentialManager.KeystoreType.TRUSTSTORE;
-
+import net.sf.taverna.t2.security.credentialmanager.CMUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -58,7 +55,6 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-
 import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManager;
@@ -70,23 +66,25 @@ import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509ExtendedKeyManager;
 import javax.net.ssl.X509KeyManager;
 import javax.net.ssl.X509TrustManager;
-
+import static javax.security.auth.x500.X500Principal.RFC2253;
 import net.sf.taverna.t2.lang.observer.MultiCaster;
 import net.sf.taverna.t2.lang.observer.Observable;
 import net.sf.taverna.t2.lang.observer.Observer;
 import net.sf.taverna.t2.security.credentialmanager.CMException;
 import net.sf.taverna.t2.security.credentialmanager.CredentialManager;
+import static net.sf.taverna.t2.security.credentialmanager.CredentialManager.KeystoreType.KEYSTORE;
+import static net.sf.taverna.t2.security.credentialmanager.CredentialManager.KeystoreType.TRUSTSTORE;
+import net.sf.taverna.t2.security.credentialmanager.DistinguishedNameParser;
 import net.sf.taverna.t2.security.credentialmanager.JavaTruststorePasswordProvider;
 import net.sf.taverna.t2.security.credentialmanager.KeystoreChangedEvent;
 import net.sf.taverna.t2.security.credentialmanager.MasterPasswordProvider;
+import net.sf.taverna.t2.security.credentialmanager.ParsedDistinguishedName;
 import net.sf.taverna.t2.security.credentialmanager.ServiceUsernameAndPasswordProvider;
 import net.sf.taverna.t2.security.credentialmanager.TrustConfirmationProvider;
 import net.sf.taverna.t2.security.credentialmanager.UsernamePassword;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
 import uk.org.taverna.configuration.app.ApplicationConfiguration;
 
 /**
@@ -204,6 +202,8 @@ public class CredentialManagerImpl implements CredentialManager,
 
 	private File certificatesRevokedIndicatorFile;
 	
+        private DistinguishedNameParser dnParser = new DistinguishedNameParserImpl();
+
 	/**
 	 * Return an array of URLs for 'special' trusted CAs' certificates contained in
 	 * the resources folder that need to be loaded into Truststore, so that we can establish trust 
@@ -1146,9 +1146,8 @@ public class CredentialManagerImpl implements CredentialManager,
 			// "keypair#"<CERT_SUBJECT_COMMON_NAME>"#"<CERT_ISSUER_COMMON_NAME>"#"<CERT_SERIAL_NUMBER>
 			String ownerDN = ((X509Certificate) certs[0])
 					.getSubjectX500Principal().getName(RFC2253);
-			CMUtils util = new CMUtils();
-			util.parseDN(ownerDN);
-			String ownerCN = util.getCN(); // owner's common name
+			ParsedDistinguishedName parsedDN = dnParser.parseDN(ownerDN);
+			String ownerCN = parsedDN.getCN(); // owner's common name
 
 			// Get the hexadecimal representation of the certificate's serial
 			// number
@@ -1158,8 +1157,8 @@ public class CredentialManagerImpl implements CredentialManager,
 
 			String issuerDN = ((X509Certificate) certs[0])
 					.getIssuerX500Principal().getName(RFC2253);
-			util.parseDN(issuerDN);
-			String issuerCN = util.getCN(); // issuer's common name
+			parsedDN = dnParser.parseDN(issuerDN);
+			String issuerCN = parsedDN.getCN(); // issuer's common name
 
 			alias = "keypair#" + ownerCN + "#" + issuerCN + "#" + serialNumber;
 
@@ -1264,14 +1263,14 @@ public class CredentialManagerImpl implements CredentialManager,
 
 				String sDN = ((X509Certificate) certChain[0])
 						.getSubjectX500Principal().getName(RFC2253);
-				CMUtils util = new CMUtils();
-				util.parseDN(sDN);
-				String sCN = util.getCN();
+                                
+                                ParsedDistinguishedName parsedDN = dnParser.parseDN(sDN);
+				String sCN = parsedDN.getCN();
 
 				String iDN = ((X509Certificate) certChain[0])
 						.getIssuerX500Principal().getName(RFC2253);
-				util.parseDN(iDN);
-				String iCN = util.getCN();
+                                parsedDN = dnParser.parseDN(iDN);
+				String iCN = parsedDN.getCN();
 
 				String pkcs12Alias = sCN + "'s " + iCN + " ID";
 				newPkcs12.setKeyEntry(pkcs12Alias, privateKey, new char[0],
@@ -1436,9 +1435,8 @@ public class CredentialManagerImpl implements CredentialManager,
 	public String createKeyPairAlias(Key privateKey, Certificate certs[]) {
 		String ownerDN = ((X509Certificate) certs[0]).getSubjectX500Principal()
 				.getName(RFC2253);
-		CMUtils util = new CMUtils();
-		util.parseDN(ownerDN);
-		String ownerCN = util.getCN(); // owner's common name
+                ParsedDistinguishedName parsedDN = dnParser.parseDN(ownerDN);
+		String ownerCN = parsedDN.getCN(); // owner's common name
 
 		/*
 		 * Get the hexadecimal representation of the certificate's serial number
@@ -1448,8 +1446,8 @@ public class CredentialManagerImpl implements CredentialManager,
 
 		String issuerDN = ((X509Certificate) certs[0]).getIssuerX500Principal()
 				.getName(RFC2253);
-		util.parseDN(issuerDN);
-		String issuerCN = util.getCN(); // issuer's common name
+		parsedDN = dnParser.parseDN(issuerDN);
+		String issuerCN = parsedDN.getCN(); // issuer's common name
 
 		String alias = "keypair#" + ownerCN + "#" + issuerCN + "#"
 				+ serialNumber;
@@ -1469,12 +1467,11 @@ public class CredentialManagerImpl implements CredentialManager,
 	@Override
 	public String createTrustedCertificateAlias(X509Certificate cert) {
 		String ownerDN = cert.getSubjectX500Principal().getName(RFC2253);
-		CMUtils util = new CMUtils();
-		util.parseDN(ownerDN);
+		ParsedDistinguishedName parsedDN = dnParser.parseDN(ownerDN);
 		String owner;
-		String ownerCN = util.getCN(); // owner's common name
-		String ownerOU = util.getOU();
-		String ownerO = util.getO();
+		String ownerCN = parsedDN.getCN(); // owner's common name
+		String ownerOU = parsedDN.getOU();
+		String ownerO = parsedDN.getO();
 		if (!ownerCN.equals("none")) { // try owner's CN first
 			owner = ownerCN;
 		} // try owner's OU
@@ -1491,11 +1488,11 @@ public class CredentialManagerImpl implements CredentialManager,
 				.toByteArray()).toString(16).toUpperCase();
 
 		String issuerDN = cert.getIssuerX500Principal().getName(RFC2253);
-		util.parseDN(issuerDN);
+		parsedDN = dnParser.parseDN(issuerDN);
 		String issuer;
-		String issuerCN = util.getCN(); // issuer's common name
-		String issuerOU = util.getOU();
-		String issuerO = util.getO();
+		String issuerCN = parsedDN.getCN(); // issuer's common name
+		String issuerOU = parsedDN.getOU();
+		String issuerO = parsedDN.getO();
 		if (!issuerCN.equals("none")) { // try issuer's CN first
 			issuer = issuerCN;
 		} // try issuer's OU
@@ -2007,6 +2004,11 @@ public class CredentialManagerImpl implements CredentialManager,
 			return createSSLSocketFactory();
 		return tavernaSSLSocketFactory;
 	}
+
+        @Override
+        public Authenticator getAuthenticator() {
+            return new CredentialManagerAuthenticator(this);
+        }
 
 	/**
 	 * Taverna's Key Manager is a customised X509KeyManager that initilises

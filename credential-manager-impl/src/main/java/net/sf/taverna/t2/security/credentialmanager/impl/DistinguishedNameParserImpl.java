@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2007 The University of Manchester
+ * Copyright (C) 2014 The University of Manchester
  *
  *  Modifications to the initial code base are copyright of their
  *  respective authors, or their employers as appropriate.
@@ -31,9 +31,9 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 
 import net.sf.taverna.t2.security.credentialmanager.CMException;
+import net.sf.taverna.t2.security.credentialmanager.DistinguishedNameParser;
 
 import org.apache.log4j.Logger;
 
@@ -44,15 +44,21 @@ import uk.org.taverna.configuration.app.ApplicationConfiguration;
  * 
  * @author Alex Nenadic
  * @author Stian Soiland-Reyes
+ * @author Christian Brenninkmeijer
  */
-public class CMUtils {
-	private static Logger logger = Logger.getLogger(CMUtils.class);
+public class DistinguishedNameParserImpl implements DistinguishedNameParser{
+	private static Logger logger = Logger.getLogger(DistinguishedNameParserImpl.class);
 
+        public DistinguishedNameParserImpl(){
+            System.out.println("Creating DistinguishedNameParserImpl");
+            System.out.println(this instanceof net.sf.taverna.t2.security.credentialmanager.DistinguishedNameParser);
+        }
+        
 	/**
 	 * Get the configuration directory where the security stuff will be/is saved
 	 * to.
 	 */
-	public static File getCredentialManagerDefaultDirectory(
+	static File getCredentialManagerDefaultDirectory(
 			ApplicationConfiguration applicationConfiguration) {
 		File home = applicationConfiguration.getApplicationHomeDir();
 		File secConfigDirectory = new File(home, "security");
@@ -61,7 +67,7 @@ public class CMUtils {
 		return secConfigDirectory;
 	}
 
-	public static URI resolveUriFragment(URI uri, String realm)
+	static URI resolveUriFragment(URI uri, String realm)
 			throws URISyntaxException {
 		/*
 		 * Little hack to encode the fragment correctly - why does not
@@ -72,13 +78,13 @@ public class CMUtils {
 		return uri.resolve(fragment);
 	}
 
-	public static URI setFragmentForURI(URI uri, String fragment)
+	static URI setFragmentForURI(URI uri, String fragment)
 			throws URISyntaxException {
 		return new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost(),
 				uri.getPort(), uri.getPath(), uri.getQuery(), fragment);
 	}
 
-	public static URI setUserInfoForURI(URI uri, String userinfo)
+	static URI setUserInfoForURI(URI uri, String userinfo)
 			throws URISyntaxException {
 		return new URI(uri.getScheme(), userinfo, uri.getHost(), uri.getPort(),
 				uri.getPath(), uri.getQuery(), uri.getFragment());
@@ -87,7 +93,7 @@ public class CMUtils {
 	/**
 	 * Convert the certificate object into an X509Certificate object.
 	 */
-	public static X509Certificate convertCertificate(Certificate cert)
+	public final X509Certificate convertCertificate(Certificate cert)
 			throws CMException {
 		try {
 			// Get the factory for X509 certificates
@@ -109,7 +115,7 @@ public class CMUtils {
 	 * Get the message digest of the given byte array as a string of hexadecimal
 	 * characters in the form XX:XX:XX... using the given digest algorithm.
 	 */
-	public static String getMessageDigestAsFormattedString(byte[] messageBytes,
+	public String getMessageDigestAsFormattedString(byte[] messageBytes,
 			String digestAlgorithm) {
 
 		MessageDigest messageDigest;
@@ -223,145 +229,7 @@ public class CMUtils {
 	 * 
 	 * http://maven.omii.ac.uk/maven2/repository/omii/omii-security-utils/
 	 */
-
-	public void parseDN(String DNstr) {
-		// ///////////////////////////////////////////////////////////////////////////////////////////////////
-		// Parse the DN String and put into variables. First, tokenise using a
-		// "," character as a delimiter
-		// UNLESS escaped with a "\" character. Put the tokens into an
-		// ArrayList. These should be name value pairs
-		// separated by "=". Tokenise these using a StringTokenizer class, test
-		// for the name, and if one of the
-		// recognised names, copy into the correct variable. The reason
-		// StringTokenizer is not used for the major
-		// token list is that the StringTokenizer class does not handle escaped
-		// delimiters so an escaped delimiter
-		// in the code would be treated as a valid one.
-
-		int i = 0;
-
-		char majorListDelimiter = ',';
-		char majorListEscapeChar = '\\';
-
-		// String minorListDelimiter = "=";
-
-		String DNchars = DNstr;
-
-		int startIndex = 0;
-		int endIndex = 0;
-		boolean ignoreThisChar = false;
-
-		boolean inQuotes = false;
-
-		ArrayList<String> majorTokenList = new ArrayList<String>();
-
-		for (i = 0; i < DNchars.length(); i++) {
-			if (ignoreThisChar == true) {
-				ignoreThisChar = false;
-			} else if ((inQuotes == false) && (DNchars.charAt(i) == '\"')) {
-				inQuotes = true;
-			} else if ((inQuotes == true) && (DNchars.charAt(i) == '\"')) {
-				inQuotes = false;
-			} else if (inQuotes == true) {
-				continue;
-			} else if (DNchars.charAt(i) == majorListEscapeChar) {
-				ignoreThisChar = true;
-			} else if ((DNchars.charAt(i) == majorListDelimiter)
-					&& (ignoreThisChar == false)) {
-				endIndex = i;
-				majorTokenList.add(DNchars.substring(startIndex, endIndex));
-				startIndex = i + 1;
-			}
-		}
-
-		// Add last token - after the last delimiter
-		endIndex = DNchars.length();
-		majorTokenList.add(DNchars.substring(startIndex, endIndex));
-
-		for (String currentToken : majorTokenList) {
-			currentToken = currentToken.trim();
-
-			// split on first equals only, as value can contain an equals char
-			String[] minorTokenList = currentToken.split("=", 2);
-
-			if (minorTokenList.length == 2) {
-				// there had better be a key and a value only
-				String DNTokenName = minorTokenList[0].toUpperCase();
-				String DNTokenValue = minorTokenList[1];
-
-				if (DNTokenName.equals("CN")
-						|| DNTokenName.equals("COMMONNAME")) {
-					CN = DNTokenValue;
-				} else if (DNTokenName.equals("EMAIL")
-						|| DNTokenName.equals("EMAILADDRESS")) {
-					emailAddress = DNTokenValue;
-				} else if (DNTokenName.equals("OU")
-						|| DNTokenName.equals("ORGANIZATIONALUNITNAME")) {
-					OU = DNTokenValue;
-				} else if (DNTokenName.equals("O")
-						|| DNTokenName.equals("ORGANIZATIONNAME")) {
-					O = DNTokenValue;
-				} else if (DNTokenName.equals("L")
-						|| DNTokenName.equals("LOCALITYNAME")) {
-					L = DNTokenValue;
-				} else if (DNTokenName.equals("ST")
-						|| DNTokenName.equals("STATEORPROVINCENAME")) {
-					ST = DNTokenValue;
-				} else if (DNTokenName.equals("C")
-						|| DNTokenName.equals("COUNTRYNAME")) {
-					C = DNTokenValue;
-				}
-			}
-			// else we have a key with no value, so skip processing the key
-		}
-
-		if (CN == null)
-			CN = "none";
-
-		if (emailAddress == null)
-			emailAddress = "none";
-
-		if (OU == null)
-			OU = "none";
-
-		if (O == null)
-			O = "none";
-
-		if (L == null)
-			L = "none";
-
-		if (ST == null)
-			ST = "none";
-
-		if (C == null)
-			C = "none";
-	}
-
-	public String getCN() {
-		return CN;
-	}
-
-	public String getEmailAddress() {
-		return emailAddress;
-	}
-
-	public String getOU() {
-		return OU;
-	}
-
-	public String getO() {
-		return O;
-	}
-
-	public String getL() {
-		return L;
-	}
-
-	public String getST() {
-		return ST;
-	}
-
-	public String getC() {
-		return C;
-	}
+	public ParsedDistinguishedNameImpl parseDN(String DNstr) {
+            return new ParsedDistinguishedNameImpl(DNstr);
+        }
 }

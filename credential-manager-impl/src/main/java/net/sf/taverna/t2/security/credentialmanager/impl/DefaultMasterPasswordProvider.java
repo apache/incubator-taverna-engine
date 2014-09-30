@@ -1,5 +1,6 @@
 package net.sf.taverna.t2.security.credentialmanager.impl;
 
+import net.sf.taverna.t2.security.credentialmanager.CMUtils;
 import static net.sf.taverna.t2.security.credentialmanager.CredentialManager.USER_SET_MASTER_PASSWORD_INDICATOR_FILE_NAME;
 
 import java.io.File;
