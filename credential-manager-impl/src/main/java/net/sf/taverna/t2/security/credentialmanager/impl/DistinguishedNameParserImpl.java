@@ -67,10 +67,6 @@ public class DistinguishedNameParserImpl implements DistinguishedNameParser{
 		return secConfigDirectory;
 	}
 
-	/**
-	 * Get the configuration directory where the security stuff will be/is saved
-	 * to.
-	 */
         @Override
 	public final File getCredentialManagerDefaultDirectory(
 			ApplicationConfiguration applicationConfiguration) {
@@ -102,9 +98,7 @@ public class DistinguishedNameParserImpl implements DistinguishedNameParser{
 				uri.getPath(), uri.getQuery(), uri.getFragment());
 	}
 
-	/**
-	 * Convert the certificate object into an X509Certificate object.
-	 */
+        @Override
 	public final X509Certificate convertCertificate(Certificate cert)
 			throws CMException {
 		try {
@@ -160,69 +154,6 @@ public class DistinguishedNameParserImpl implements DistinguishedNameParser{
 		return strBuff.toString();
 	}
 
-	// /**
-	// * Gets the intended certificate uses, i.e. Netscape Certificate Type
-	// * extension (2.16.840.1.113730.1.1) as a string.
-	// */
-	// // From openssl's documentation: "The [above] extension is non standard,
-	// Netscape
-	// // specific and largely obsolete. Their use in new applications is
-	// discouraged."
-	// // TODO replace with "basicConstraints, keyUsage and extended key usage
-	// extensions
-	// // which are now used instead."
-	// public static String getIntendedCertificateUses(byte[] value) {
-	//
-	// // Netscape Certificate Types (2.16.840.1.113730.1.1) denoting the
-	// // intended uses of a certificate
-	// int[] INTENDED_USES = new int[] { NetscapeCertType.sslClient,
-	// NetscapeCertType.sslServer, NetscapeCertType.smime,
-	// NetscapeCertType.objectSigning, NetscapeCertType.reserved,
-	// NetscapeCertType.sslCA, NetscapeCertType.smimeCA,
-	// NetscapeCertType.objectSigningCA, };
-	//
-	// // Netscape Certificate Type strings (2.16.840.1.113730.1.1)
-	// HashMap<String, String> INTENDED_USES_STRINGS = new HashMap<String,
-	// String>();
-	// INTENDED_USES_STRINGS.put("128", "SSL Client");
-	// INTENDED_USES_STRINGS.put("64", "SSL Server");
-	// INTENDED_USES_STRINGS.put("32", "S/MIME");
-	// INTENDED_USES_STRINGS.put("16", "Object Signing");
-	// INTENDED_USES_STRINGS.put("8", "Reserved");
-	// INTENDED_USES_STRINGS.put("4", "SSL CA");
-	// INTENDED_USES_STRINGS.put("2", "S/MIME CA");
-	// INTENDED_USES_STRINGS.put("1", "Object Signing CA");
-	//
-	// // Get DER octet string from extension value
-	// ASN1OctetString derOctetString = new DEROctetString(value);
-	// byte[] octets = derOctetString.getOctets();
-	// // Get DER bit string
-	// DERBitString derBitString = new DERBitString(octets);
-	// int val = new NetscapeCertType(derBitString).intValue();
-	// StringBuffer strBuff = new StringBuffer();
-	// for (int i = 0, len = INTENDED_USES.length; i < len; i++) {
-	// int use = INTENDED_USES[i];
-	// if ((val & use) == use) {
-	// strBuff.append(INTENDED_USES_STRINGS.get(String.valueOf(use))
-	// + ", \n");
-	// }
-	// }
-	// // remove the last ", \n" from the end of the buffer
-	// String str = strBuff.toString();
-	// str = str.substring(0, str.length() - 3);
-	// return str;
-	// }
-
-	// FROM RFC 2253:
-	// CN commonName
-	// L localityName
-	// ST stateOrProvinceName
-	// O organizationName
-	// OU organizationalUnitName
-	// C countryName
-	// STREET streetAddress
-	// DC domainComponent
-	// UID userid
 
 	private String emailAddress; // not from RFC 2253, yet some certificates
 									// contain this field

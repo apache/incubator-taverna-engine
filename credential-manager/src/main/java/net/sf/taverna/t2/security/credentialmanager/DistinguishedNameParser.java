@@ -28,7 +28,7 @@ import java.security.cert.X509Certificate;
 import uk.org.taverna.configuration.app.ApplicationConfiguration;
 
 /**
- * Utility methods for Credential Manager and security-related stuff.
+ * Methods for parsing Distinguished Names and various associated utility methods.
  * 
  * @author Alex Nenadic
  * @author Stian Soiland-Reyes
@@ -37,22 +37,25 @@ import uk.org.taverna.configuration.app.ApplicationConfiguration;
 public interface DistinguishedNameParser {
 
     /**
-     * Parses a DN string and fills in fields with DN parts. Heavily based on
-     * uk.ac.omii.security.utils.DNParser class from omii-security-utils
-     * library.
-     * 
-     * http://maven.omii.ac.uk/maven2/repository/omii/omii-security-utils/
+     * Parses a DN string and fills in fields with DN parts. 
     */
     public ParsedDistinguishedName parseDN(String DNstr);
-
+  
     public String getMessageDigestAsFormattedString(byte[] certBinaryEncoding, String shA1);
 
+    /**
+     * Convert the certificate object into an X509Certificate object.
+     */
     public X509Certificate convertCertificate(Certificate certificate) throws CMException;
 
     public URI setUserInfoForURI(URI uri, String userinfo) throws URISyntaxException;
 
     public URI setFragmentForURI(URI uri, String userinfo) throws URISyntaxException;
 
+    /**
+     * Get the configuration directory where the security stuff will be/is saved
+     * to.
+     */
     public File getCredentialManagerDefaultDirectory(ApplicationConfiguration applicationConfiguration);
 
  } 

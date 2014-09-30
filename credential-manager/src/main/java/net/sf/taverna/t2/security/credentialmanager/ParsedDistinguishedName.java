@@ -22,24 +22,53 @@ package net.sf.taverna.t2.security.credentialmanager;
 
 
 /**
- * Utility methods for Credential Manager and security-related stuff.
+ * A parsed Distinguished Name with getters for parts.
  * 
  * @author Alex Nenadic
  * @author Stian Soiland-Reyes
+ * @author Christian Brenninkmeijer
  */
 public interface ParsedDistinguishedName {
-
+    
+        /**
+         * 
+         * @return The common name
+         */
 	public String getCN();
 
+        /**
+         * 
+         * @return The Email address
+         */
 	public String getEmailAddress();
 
+        /**
+         * 
+         * @return The organizational unit name
+         */
 	public String getOU();
-
+        
+        /**
+         * 
+         * @return The organization name
+         */
 	public String getO();
 
+        /**
+         * 
+         * @return The locality name 
+         */
 	public String getL();
 
+        /**
+         * 
+         * @return The state or province name
+         */
 	public String getST();
 
+        /**
+         * 
+         * @return The country name 
+         */
 	public String getC();
 }
