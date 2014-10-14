@@ -36,7 +36,7 @@ public class StreamToByteArrayConverter implements
 		StreamToValueConverterSPI<byte[]> {
 	private static final int CHUNK_SIZE = 4096;
 
-	private static byte[] readFile(InputStream reader) throws IOException {
+	static byte[] readFile(InputStream reader) throws IOException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		byte[] buf = new byte[CHUNK_SIZE];
 		int len;
