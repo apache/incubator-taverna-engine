@@ -127,7 +127,7 @@ public class ProcessorHealthReportTest {
 		
 
 		@Override
-		public Class<Visitor> getVisitorClass() {
+		public Class<Visitor<Object>> getVisitorClass() {
 			return null;
 		}
 
