@@ -2,15 +2,10 @@ package org.purl.wf4ever.provtaverna.ui;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
 
 import javax.swing.AbstractAction;
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 
 import net.sf.taverna.t2.workbench.icons.WorkbenchIcons;
-import net.sf.taverna.t2.workbench.ui.impl.Workbench;
 import net.sf.taverna.t2.workbench.views.results.saveactions.SaveAllResultsSPI;
 
 import org.purl.wf4ever.provtaverna.export.Saver;
