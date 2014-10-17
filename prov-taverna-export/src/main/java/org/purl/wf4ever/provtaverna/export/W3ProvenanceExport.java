@@ -828,18 +828,13 @@ public class W3ProvenanceExport {
         manifest.getAggregation(workflowRunProvenance).setMediatype(
                 "text/turtle");
 
-        Agent taverna = new Agent();
-        taverna.setName(applicationConfig.getTitle());
-        taverna.setUri(getTavernaVersion());
-        
         Agent provPlugin = new Agent();
-        provPlugin.setName("Taverna-PROV plugin");
+        provPlugin.setName("Taverna-PROV plugin, " + applicationConfig.getTitle() + " " + applicationConfig.getName());
         provPlugin.setUri(getPluginIdentifier(getClass()));
         manifest.getAggregation(workflowRunProvenance).setCreatedBy(
-                Arrays.asList(taverna, provPlugin));        
-
-        manifest.getCreatedBy().add(provPlugin);
-
+                provPlugin);        
+        manifest.setCreatedBy(provPlugin);
+        
         
         // Media types:
         for (Entry<URI, String> e : mediaTypes.entrySet()) {
@@ -863,6 +858,12 @@ public class W3ProvenanceExport {
         bundleAboutRun.setAbout(runURI);
         bundleAboutRun.setContent(URI.create("/"));
         manifest.getAnnotations().add(bundleAboutRun);
+        
+        // Also aggregate the run by ID, and that it was done by taverna
+		Agent taverna = new Agent();
+		taverna.setName(applicationConfig.getTitle());
+		taverna.setUri(getTavernaVersion());
+        manifest.getAggregation(runURI).setCreatedBy(taverna);
 
         // TODO: Do we need both the "history" link and the annotation below?
         manifest.setHistory(Arrays.asList(workflowRunProvenance));
@@ -896,12 +897,13 @@ public class W3ProvenanceExport {
         URI wfBundlePath = URI.create(workflow.toUri().getPath());
         wfBundleAboutWf.setContent(wfBundlePath);
         manifest.getAnnotations().add(wfBundleAboutWf);
+        manifest.getAggregation(mainWorkflow);
 
         // hasWorkflowDefinition
         PathAnnotation hasWorkflowDefinition = new PathAnnotation();
         hasWorkflowDefinition.setAbout(wfBundlePath);
         UUID uuid = UUID.randomUUID();
-        hasWorkflowDefinition.setAnnotation(URI.create("urn:uuid:" + uuid));
+        hasWorkflowDefinition.setUri(URI.create("urn:uuid:" + uuid));
         Path annotationBody = DataBundles.getAnnotations(dataBundle).resolve(
                 uuid + ".ttl");
         hasWorkflowDefinition.setContent(URI.create(annotationBody.toUri()
