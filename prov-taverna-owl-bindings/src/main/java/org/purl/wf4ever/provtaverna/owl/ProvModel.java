@@ -8,7 +8,6 @@ import org.apache.jena.riot.IO_Jena;
 import org.apache.jena.riot.system.IO_JenaWriters;
 import org.apache.log4j.Logger;
 
-import com.hp.hpl.jena.n3.turtle.TurtleReader;
 import com.hp.hpl.jena.ontology.DatatypeProperty;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.ObjectProperty;
@@ -19,8 +18,6 @@ import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.impl.NTripleReader;
-import com.hp.hpl.jena.rdfxml.xmlinput.JenaReader;
 import com.hp.hpl.jena.util.FileManager;
 import com.hp.hpl.jena.util.LocationMapper;
 
@@ -143,23 +140,7 @@ public class ProvModel {
     }
 
     public void resetJena() {
-        // Disabled due to JENA-520 NullPointerException
-//      IO_Jena.resetJena();
-         
-        IO_Jena.registerForModelRead("N-TRIPLES", NTripleReader.class) ;
-        IO_Jena.registerForModelRead("N-Triples",  NTripleReader.class) ;
-        IO_Jena.registerForModelRead("N-TRIPLE",  NTripleReader.class) ;
-        
-        IO_Jena.registerForModelRead("N3",     TurtleReader.class) ;
-        IO_Jena.registerForModelRead("TURTLE", TurtleReader.class) ;
-        IO_Jena.registerForModelRead("Turtle", TurtleReader.class) ;
-        IO_Jena.registerForModelRead("TTL",    TurtleReader.class) ;
-
-        // which somehow does not reset the most important ones:
-        IO_Jena.registerForModelRead( "RDF/XML", JenaReader.class);
-        IO_Jena.registerForModelRead( "RDF/XML-ABBREV", JenaReader.class);
-
-        IO_JenaWriters.resetJena();
+		IO_Jena.resetJena();
     }
 
     public void addKeyPair(Individual dictionary, long position,
