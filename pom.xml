@@ -19,7 +19,6 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-		<jena.version>2.11.0</jena.version>
 
 		<!-- Update according to latest Taverna version in www.mygrid.org.uk/dev/wiki/display/developer/Maven+module+version+numbers -->
 <!-- should come from taverna-parent
@@ -32,9 +31,10 @@
 		<t2.results.version>1.5</t2.results.version>
 		<t2.taverna-commandline.version>1.5</t2.taverna-commandline.version>
 -->
+		<jena.version>2.12.1</jena.version>
 		<scufl2.version>0.14.0</scufl2.version>
-		<scufl2.wfdesc.version>0.3.8-SNAPSHOT</scufl2.wfdesc.version>
-		<databundle.version>0.3.3-SNAPSHOT</databundle.version>
+		<scufl2.wfdesc.version>0.3.8</scufl2.wfdesc.version>
+		<databundle.version>0.3.3</databundle.version>
 	</properties>
 
 	<build>
