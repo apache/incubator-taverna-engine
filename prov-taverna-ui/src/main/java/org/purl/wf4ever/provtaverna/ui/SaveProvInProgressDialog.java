@@ -27,6 +27,24 @@ import net.sf.taverna.t2.workbench.icons.WorkbenchIcons;
  */
 public class SaveProvInProgressDialog extends JDialog implements PropertyChangeListener{
 
+	public final static class CancelAction extends AbstractAction {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 3357059144578265636L;
+		private final SaveProvSwingWorker worker;
+
+		private CancelAction(SaveProvSwingWorker worker) {
+			super("Cancel");
+			this.worker = worker;
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			worker.cancel(true);
+		}
+	}
+
 	private static final long serialVersionUID = 3022516542431968398L;
 
 	public SaveProvInProgressDialog(final SaveProvSwingWorker worker) {
@@ -48,12 +66,7 @@ public class SaveProvInProgressDialog extends JDialog implements PropertyChangeL
 		textPanel.add(text);
 		panel.add(textPanel, BorderLayout.CENTER);
 		
-		JButton cancelButton = new JButton(new AbstractAction("Cancel") {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				worker.cancel(true);
-			}
-		});
+		JButton cancelButton = new JButton(new CancelAction(worker));
 		JPanel buttons = new JPanel();
 		buttons.add(cancelButton, BorderLayout.CENTER);		
 		panel.add(buttons, BorderLayout.SOUTH);
