@@ -1,5 +1,7 @@
 # Taverna PROV support
 
+[![Build Status](https://travis-ci.org/taverna/taverna-prov.svg?branch=maintenance)](https://travis-ci.org/taverna/taverna-prov)
+
 This is a plugin for the [Taverna](http://www.taverna.org.uk/) Workbench
 and Taverna Command Line which allows export of the provenance of a
 workflow run according to the [W3C PROV-O
