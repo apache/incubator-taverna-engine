@@ -124,10 +124,8 @@ public class ProcessorHealthReportTest {
 	}
 	
 	private static class DummyKind extends VisitKind {
-		
-
 		@Override
-		public Class<? extends Visitor> getVisitorClass() {
+		public Class<? extends Visitor<?>> getVisitorClass() {
 			return null;
 		}
 
