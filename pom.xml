@@ -59,12 +59,12 @@
 		</repository>
 	</repositories>
 	<modules>
-		<module>beans</module>
-		<module>io</module>
-		<module>observer</module>
-		<module>partition</module>
-		<module>ui</module>
-		<module>uibuilder</module>
+		<module>taverna-beans</module>
+		<module>taverna-io</module>
+		<module>taverna-observer</module>
+		<module>taverna-partition</module>
+		<module>taverna-ui</module>
+		<module>taverna-uibuilder</module>
 	</modules>
         <scm>
                 <connection>scm:git:https://github.com/taverna/taverna-support-utilities.git</connection>
