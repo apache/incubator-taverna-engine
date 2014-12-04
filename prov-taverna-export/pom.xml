@@ -67,12 +67,22 @@
                     <groupId>org.slf4j</groupId>
                     <artifactId>jcl-over-slf4j</artifactId>
                 </exclusion>
+                <exclusion>
+                	<groupId>org.apache.thrift</groupId>
+                	<artifactId>libthrift</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>prov-taverna-owl-bindings</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                	<groupId>org.apache.thrift</groupId>
+                	<artifactId>libthrift</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.tika</groupId>
