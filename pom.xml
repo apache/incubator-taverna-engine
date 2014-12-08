@@ -32,8 +32,8 @@
 		<t2.taverna-commandline.version>1.5</t2.taverna-commandline.version>
 -->
 		<jena.version>2.12.1</jena.version>
-		<scufl2.version>0.14.0</scufl2.version>
-		<scufl2.wfdesc.version>0.3.8</scufl2.wfdesc.version>
+		<scufl2.version>0.14.1-SNAPSHOT</scufl2.version>
+		<scufl2.wfdesc.version>0.3.9-SNAPSHOT</scufl2.wfdesc.version>
 		<databundle.version>0.3.3</databundle.version>
 	</properties>
 
