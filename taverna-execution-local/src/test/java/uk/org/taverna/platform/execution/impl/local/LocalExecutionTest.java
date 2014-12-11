@@ -143,6 +143,7 @@ public class LocalExecutionTest {
 	// System.out.println(report);
 	// }
 
+	@SuppressWarnings("unused")
 	private void waitForResult(Map<String, Object> results, String port, WorkflowReport report)
 			throws InterruptedException {
 		int wait = 0;

@@ -64,7 +64,7 @@ public interface ExecutionService {
 	 *
 	 * @return the ExecutionEnvironments available for this ExecutionService
 	 */
-	public Set<ExecutionEnvironment> getExecutionEnvivonments();
+	public Set<ExecutionEnvironment> getExecutionEnvironments();
 
 	/**
 	 * Creates a workflow execution and returns its ID.

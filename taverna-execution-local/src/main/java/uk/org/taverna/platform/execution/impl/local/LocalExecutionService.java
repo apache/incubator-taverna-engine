@@ -47,37 +47,39 @@ import uk.org.taverna.scufl2.api.profiles.Profile;
  *
  * @author David Withers
  */
-public class LocalExecutionService extends AbstractExecutionService implements WorkflowCompiler {
-
+public class LocalExecutionService extends AbstractExecutionService implements
+		WorkflowCompiler {
 	private Edits edits;
-
 	private ActivityService activityService;
-
 	private DispatchLayerService dispatchLayerService;
-
 	private ReferenceService referenceService;
 
 	/**
-	 * Constructs an execution service that executes workflows using the T2 dataflow engine.
+	 * Constructs an execution service that executes workflows using the T2
+	 * dataflow engine.
 	 */
 	public LocalExecutionService() {
-		super(LocalExecutionService.class.getName(), "Taverna Local Execution Service",
+		super(
+				LocalExecutionService.class.getName(),
+				"Taverna Local Execution Service",
 				"Execution Service for executing Taverna workflows using a local Taverna Dataflow Engine");
 	}
 
 	@Override
-	public Set<ExecutionEnvironment> getExecutionEnvivonments() {
-		Set<ExecutionEnvironment> executionEnvironments = new HashSet<ExecutionEnvironment>();
-		executionEnvironments.add(new LocalExecutionEnvironment(this, activityService,
-				dispatchLayerService));
+	public Set<ExecutionEnvironment> getExecutionEnvironments() {
+		Set<ExecutionEnvironment> executionEnvironments = new HashSet<>();
+		executionEnvironments.add(new LocalExecutionEnvironment(this,
+				activityService, dispatchLayerService));
 		return executionEnvironments;
 	}
 
 	@Override
-	protected Execution createExecutionImpl(WorkflowBundle workflowBundle, Workflow workflow,
-			Profile profile, Bundle dataBundle) throws InvalidWorkflowException {
-		return new LocalExecution(workflowBundle, workflow, profile, dataBundle,
-				referenceService, edits, activityService, dispatchLayerService);
+	protected Execution createExecutionImpl(WorkflowBundle workflowBundle,
+			Workflow workflow, Profile profile, Bundle dataBundle)
+			throws InvalidWorkflowException {
+		return new LocalExecution(workflowBundle, workflow, profile,
+				dataBundle, referenceService, edits, activityService,
+				dispatchLayerService);
 	}
 
 	/**

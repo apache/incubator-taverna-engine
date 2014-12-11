@@ -87,7 +87,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Translates a scufl2 {@link Workflow} into a {@link Dataflow}.
- *
+ * 
  * @author David Withers
  */
 public class WorkflowToDataflowMapper {
@@ -105,13 +105,15 @@ public class WorkflowToDataflowMapper {
 	private final Map<net.sf.taverna.t2.workflowmodel.Processor, Processor> dataflowToWorkflowProcessors;
 	private final Map<Activity, net.sf.taverna.t2.workflowmodel.processor.activity.Activity<?>> workflowToDataflowActivities;
 	private final Map<net.sf.taverna.t2.workflowmodel.processor.activity.Activity<?>, Activity> dataflowToWorkflowActivities;
+	@SuppressWarnings("unused")
 	private final WorkflowBundle workflowBundle;
 	private final Profile profile;
 	private final ActivityService activityService;
 	private final DispatchLayerService dispatchLayerService;
 
-	public WorkflowToDataflowMapper(WorkflowBundle workflowBundle, Profile profile, Edits edits,
-			ActivityService activityService, DispatchLayerService dispatchLayerService) {
+	public WorkflowToDataflowMapper(WorkflowBundle workflowBundle,
+			Profile profile, Edits edits, ActivityService activityService,
+			DispatchLayerService dispatchLayerService) {
 		this.workflowBundle = workflowBundle;
 		this.profile = profile;
 		this.edits = edits;
@@ -132,7 +134,8 @@ public class WorkflowToDataflowMapper {
 		return dataflowToWorkflow.get(dataflow);
 	}
 
-	public Dataflow getDataflow(Workflow workflow) throws InvalidWorkflowException {
+	public Dataflow getDataflow(Workflow workflow)
+			throws InvalidWorkflowException {
 		if (!workflowToDataflow.containsKey(workflow)) {
 			try {
 				Dataflow dataflow = createDataflow(workflow);
@@ -175,7 +178,7 @@ public class WorkflowToDataflowMapper {
 		// create the dataflow
 		Dataflow dataflow = edits.createDataflow();
 		// set the dataflow name
-		edits.getUpdateDataflowNameEdit(dataflow, new String(workflow.getName())).doEdit();
+		edits.getUpdateDataflowNameEdit(dataflow, workflow.getName()).doEdit();
 
 		addInputPorts(workflow, dataflow);
 		addOutputPorts(workflow, dataflow);
@@ -186,10 +189,10 @@ public class WorkflowToDataflowMapper {
 		return dataflow;
 	}
 
-	private void addProcessors(Workflow workflow, Dataflow dataflow) throws EditException,
-			ActivityNotFoundException, ActivityConfigurationException,
-			InvalidWorkflowException, DispatchLayerNotFoundException,
-			DispatchLayerConfigurationException {
+	private void addProcessors(Workflow workflow, Dataflow dataflow)
+			throws EditException, ActivityNotFoundException,
+			ActivityConfigurationException, InvalidWorkflowException,
+			DispatchLayerNotFoundException, DispatchLayerConfigurationException {
 		for (Processor processor : workflow.getProcessors()) {
 			net.sf.taverna.t2.workflowmodel.Processor dataflowProcessor = edits
 					.createProcessor(processor.getName());
@@ -198,8 +201,9 @@ public class WorkflowToDataflowMapper {
 			workflowToDataflowProcessors.put(processor, dataflowProcessor);
 			dataflowToWorkflowProcessors.put(dataflowProcessor, processor);
 			// add input ports
-			for (InputProcessorPort inputProcessorPort : processor.getInputPorts()) {
-				if (scufl2Tools.datalinksTo(inputProcessorPort).isEmpty())
+			for (InputProcessorPort inputProcessorPort : processor
+					.getInputPorts()) {
+				if (inputProcessorPort.getDatalinksTo().isEmpty())
 					continue;
 				ProcessorInputPort processorInputPort = edits
 						.createProcessorInputPort(dataflowProcessor,
@@ -210,12 +214,15 @@ public class WorkflowToDataflowMapper {
 				inputPorts.put(inputProcessorPort, processorInputPort);
 			}
 			// add output ports
-			for (OutputProcessorPort outputProcessorPort : processor.getOutputPorts()) {
-				ProcessorOutputPort processorOutputPort = edits.createProcessorOutputPort(
-						dataflowProcessor, outputProcessorPort.getName(),
-						outputProcessorPort.getDepth(), outputProcessorPort.getGranularDepth());
-				edits.getAddProcessorOutputPortEdit(dataflowProcessor, processorOutputPort)
-						.doEdit();
+			for (OutputProcessorPort outputProcessorPort : processor
+					.getOutputPorts()) {
+				ProcessorOutputPort processorOutputPort = edits
+						.createProcessorOutputPort(dataflowProcessor,
+								outputProcessorPort.getName(),
+								outputProcessorPort.getDepth(),
+								outputProcessorPort.getGranularDepth());
+				edits.getAddProcessorOutputPortEdit(dataflowProcessor,
+						processorOutputPort).doEdit();
 				outputPorts.put(outputProcessorPort, processorOutputPort);
 			}
 
@@ -233,14 +240,13 @@ public class WorkflowToDataflowMapper {
 
 	private void addDispatchStack(Processor processor,
 			net.sf.taverna.t2.workflowmodel.Processor dataflowProcessor)
-			throws DispatchLayerNotFoundException, DispatchLayerConfigurationException,
-			EditException {
+			throws DispatchLayerNotFoundException,
+			DispatchLayerConfigurationException, EditException {
 		DispatchStack dispatchStack = dataflowProcessor.getDispatchStack();
 
 		JsonNode json = null;
 		try {
-			Configuration configuration = scufl2Tools.configurationFor(processor, profile);
-			json = configuration.getJson();
+			json = processor.getConfiguration(profile).getJson();
 		} catch (IndexOutOfBoundsException e) {
 			// no configuration for processor
 		}
@@ -254,49 +260,59 @@ public class WorkflowToDataflowMapper {
 				dispatchStack,
 				URI.create("http://ns.taverna.org.uk/2010/scufl2/taverna/dispatchlayer/ErrorBounce"),
 				layer++, null);
-		addDispatchLayer(dispatchStack,
+		addDispatchLayer(
+				dispatchStack,
 				URI.create("http://ns.taverna.org.uk/2010/scufl2/taverna/dispatchlayer/Failover"),
 				layer++, null);
-		addDispatchLayer(dispatchStack,
+		addDispatchLayer(
+				dispatchStack,
 				URI.create("http://ns.taverna.org.uk/2010/scufl2/taverna/dispatchlayer/Retry"),
 				layer++, json == null ? null : json.get("retry"));
-		addDispatchLayer(dispatchStack,
+		addDispatchLayer(
+				dispatchStack,
 				URI.create("http://ns.taverna.org.uk/2010/scufl2/taverna/dispatchlayer/Stop"),
 				layer++, null);
-		addDispatchLayer(dispatchStack,
+		addDispatchLayer(
+				dispatchStack,
 				URI.create("http://ns.taverna.org.uk/2010/scufl2/taverna/dispatchlayer/Invoke"),
 				layer++, null);
 
 	}
 
-	private void addDispatchLayer(DispatchStack dispatchStack, URI dispatchLayerType, int layer,
-			JsonNode json) throws DispatchLayerConfigurationException,
+	private void addDispatchLayer(DispatchStack dispatchStack,
+			URI dispatchLayerType, int layer, JsonNode json)
+			throws DispatchLayerConfigurationException,
 			DispatchLayerNotFoundException, EditException {
 		// create the dispatch layer
-		DispatchLayer<?> dispatchLayer = dispatchLayerService.createDispatchLayer(
-				dispatchLayerType, json);
+		DispatchLayer<?> dispatchLayer = dispatchLayerService
+				.createDispatchLayer(dispatchLayerType, json);
 		// add the dispatch layer to the dispatch layer stack
-		edits.getAddDispatchLayerEdit(dispatchStack, dispatchLayer, layer).doEdit();
+		edits.getAddDispatchLayerEdit(dispatchStack, dispatchLayer, layer)
+				.doEdit();
 	}
 
 	private void addIterationStrategy(Processor processor,
-			net.sf.taverna.t2.workflowmodel.Processor dataflowProcessor) throws EditException,
-			InvalidWorkflowException {
+			net.sf.taverna.t2.workflowmodel.Processor dataflowProcessor)
+			throws EditException, InvalidWorkflowException {
 		// get the iteration strategy from the processor
 		net.sf.taverna.t2.workflowmodel.processor.iteration.IterationStrategyStack dataflowIterationStrategyStack = dataflowProcessor
 				.getIterationStrategy();
 		// clear the iteration strategy
-		edits.getClearIterationStrategyStackEdit(dataflowIterationStrategyStack).doEdit();
-		IterationStrategyStack iterationStrategyStack = processor.getIterationStrategyStack();
+		edits.getClearIterationStrategyStackEdit(dataflowIterationStrategyStack)
+				.doEdit();
+		IterationStrategyStack iterationStrategyStack = processor
+				.getIterationStrategyStack();
 		for (IterationStrategyTopNode iterationStrategyTopNode : iterationStrategyStack) {
 			// create iteration strategy
-			IterationStrategy dataflowIterationStrategy = edits.createIterationStrategy();
+			IterationStrategy dataflowIterationStrategy = edits
+					.createIterationStrategy();
 			// add iteration strategy to the stack
 			edits.getAddIterationStrategyEdit(dataflowIterationStrategyStack,
 					dataflowIterationStrategy).doEdit();
 			// add the node to the iteration strategy
 			addIterationStrategyNode(dataflowIterationStrategy,
-					dataflowIterationStrategy.getTerminalNode(), iterationStrategyTopNode);
+					dataflowIterationStrategy.getTerminalNode(),
+					iterationStrategyTopNode);
 		}
 	}
 
@@ -311,39 +327,45 @@ public class WorkflowToDataflowMapper {
 			childDataflowIterationStrategyNode = new net.sf.taverna.t2.workflowmodel.processor.iteration.CrossProduct();
 			for (IterationStrategyNode iterationStrategyNode2 : crossProduct)
 				addIterationStrategyNode(dataflowIterationStrategy,
-						childDataflowIterationStrategyNode, iterationStrategyNode2);
+						childDataflowIterationStrategyNode,
+						iterationStrategyNode2);
 		} else if (iterationStrategyNode instanceof DotProduct) {
 			DotProduct dotProduct = (DotProduct) iterationStrategyNode;
 			childDataflowIterationStrategyNode = new net.sf.taverna.t2.workflowmodel.processor.iteration.DotProduct();
 			for (IterationStrategyNode iterationStrategyNode2 : dotProduct)
 				addIterationStrategyNode(dataflowIterationStrategy,
-						childDataflowIterationStrategyNode, iterationStrategyNode2);
+						childDataflowIterationStrategyNode,
+						iterationStrategyNode2);
 		} else if (iterationStrategyNode instanceof PortNode) {
 			PortNode portNode = (PortNode) iterationStrategyNode;
 			Integer desiredDepth = portNode.getDesiredDepth();
 			if (desiredDepth == null)
 				desiredDepth = portNode.getInputProcessorPort().getDepth();
-			NamedInputPortNode namedInputPortNode = new NamedInputPortNode(portNode
-					.getInputProcessorPort().getName(), desiredDepth);
-			edits.getAddIterationStrategyInputNodeEdit(dataflowIterationStrategy,
-					namedInputPortNode).doEdit();
+			NamedInputPortNode namedInputPortNode = new NamedInputPortNode(
+					portNode.getInputProcessorPort().getName(), desiredDepth);
+			edits.getAddIterationStrategyInputNodeEdit(
+					dataflowIterationStrategy, namedInputPortNode).doEdit();
 			childDataflowIterationStrategyNode = namedInputPortNode;
 		} else {
-			throw new InvalidWorkflowException("Unknown IterationStrategyNode type : "
-					+ iterationStrategyNode.getClass().getName());
+			throw new InvalidWorkflowException(
+					"Unknown IterationStrategyNode type : "
+							+ iterationStrategyNode.getClass().getName());
 		}
-		childDataflowIterationStrategyNode.setParent(dataflowIterationStrategyNode);
+		childDataflowIterationStrategyNode
+				.setParent(dataflowIterationStrategyNode);
 	}
 
-	private void addActivity(ProcessorBinding processorBinding) throws EditException,
-			ActivityNotFoundException, ActivityConfigurationException, InvalidWorkflowException {
+	private void addActivity(ProcessorBinding processorBinding)
+			throws EditException, ActivityNotFoundException,
+			ActivityConfigurationException, InvalidWorkflowException {
 		net.sf.taverna.t2.workflowmodel.Processor processor = workflowToDataflowProcessors
 				.get(processorBinding.getBoundProcessor());
 		Activity scufl2Activity = processorBinding.getBoundActivity();
 		URI activityType = scufl2Activity.getType();
 		if (!activityService.activityExists(activityType))
-			throw new ActivityNotFoundException("No activity exists for " + activityType);
-		Configuration configuration = scufl2Tools.configurationFor(scufl2Activity, profile);
+			throw new ActivityNotFoundException("No activity exists for "
+					+ activityType);
+		Configuration configuration = scufl2Activity.getConfiguration();
 
 		// create the activity
 		net.sf.taverna.t2.workflowmodel.processor.activity.Activity<?> activity = activityService
@@ -351,52 +373,67 @@ public class WorkflowToDataflowMapper {
 		// check if we have a nested workflow
 		if (activityType.equals(NESTED_WORKFLOW_URI)) {
 			if (activity instanceof NestedDataflow) {
-				Workflow nestedWorkflow = scufl2Tools.nestedWorkflowForProcessor(
-						processorBinding.getBoundProcessor(), profile);
+				Workflow nestedWorkflow = scufl2Tools
+						.nestedWorkflowForProcessor(
+								processorBinding.getBoundProcessor(), profile);
 				((NestedDataflow) activity)
 						.setNestedDataflow(getDataflow(nestedWorkflow));
-			} else {
+			} else
 				throw new ActivityConfigurationException(
 						"Activity is not an instance of NestedDataflow");
-			}
 		}
 
 		// add the activity to the processor
 		edits.getAddActivityEdit(processor, activity).doEdit();
 
 		// add input ports
-		for (InputActivityPort inputActivityPort : scufl2Activity.getInputPorts()) {
-			ActivityInputPort activityInputPort = edits.createActivityInputPort(
-					inputActivityPort.getName(), inputActivityPort.getDepth(), false,
-					new ArrayList<Class<? extends ExternalReferenceSPI>>(), String.class);
-			edits.getAddActivityInputPortEdit(activity, activityInputPort).doEdit();
+		for (InputActivityPort inputActivityPort : scufl2Activity
+				.getInputPorts()) {
+			ActivityInputPort activityInputPort = edits
+					.createActivityInputPort(
+							inputActivityPort.getName(),
+							inputActivityPort.getDepth(),
+							false,
+							new ArrayList<Class<? extends ExternalReferenceSPI>>(),
+							String.class);
+			edits.getAddActivityInputPortEdit(activity, activityInputPort)
+					.doEdit();
 		}
 		// add output ports
-		for (OutputActivityPort outputActivityPort : scufl2Activity.getOutputPorts()) {
-			ActivityOutputPort activitytOutputPort = edits.createActivityOutputPort(
-					outputActivityPort.getName(), outputActivityPort.getDepth(),
-					outputActivityPort.getGranularDepth());
-			edits.getAddActivityOutputPortEdit(activity, activitytOutputPort).doEdit();
+		for (OutputActivityPort outputActivityPort : scufl2Activity
+				.getOutputPorts()) {
+			ActivityOutputPort activitytOutputPort = edits
+					.createActivityOutputPort(outputActivityPort.getName(),
+							outputActivityPort.getDepth(),
+							outputActivityPort.getGranularDepth());
+			edits.getAddActivityOutputPortEdit(activity, activitytOutputPort)
+					.doEdit();
 		}
 		// map input ports
-		for (ProcessorInputPortBinding portBinding : processorBinding.getInputPortBindings()) {
-			InputProcessorPort processorPort = portBinding.getBoundProcessorPort();
+		for (ProcessorInputPortBinding portBinding : processorBinding
+				.getInputPortBindings()) {
+			InputProcessorPort processorPort = portBinding
+					.getBoundProcessorPort();
 			InputActivityPort activityPort = portBinding.getBoundActivityPort();
-			edits.getAddActivityInputPortMappingEdit(activity, processorPort.getName(),
-					activityPort.getName()).doEdit();
+			edits.getAddActivityInputPortMappingEdit(activity,
+					processorPort.getName(), activityPort.getName()).doEdit();
 		}
 		// map output ports
-		for (ProcessorOutputPortBinding portBinding : processorBinding.getOutputPortBindings()) {
-			OutputProcessorPort processorPort = portBinding.getBoundProcessorPort();
-			OutputActivityPort activityPort = portBinding.getBoundActivityPort();
-			edits.getAddActivityOutputPortMappingEdit(activity, processorPort.getName(),
-					activityPort.getName()).doEdit();
+		for (ProcessorOutputPortBinding portBinding : processorBinding
+				.getOutputPortBindings()) {
+			OutputProcessorPort processorPort = portBinding
+					.getBoundProcessorPort();
+			OutputActivityPort activityPort = portBinding
+					.getBoundActivityPort();
+			edits.getAddActivityOutputPortMappingEdit(activity,
+					processorPort.getName(), activityPort.getName()).doEdit();
 		}
 		workflowToDataflowActivities.put(scufl2Activity, activity);
 		dataflowToWorkflowActivities.put(activity, scufl2Activity);
 	}
 
-	private void addDataLinks(Workflow workflow, Dataflow dataflow) throws EditException {
+	private void addDataLinks(Workflow workflow, Dataflow dataflow)
+			throws EditException {
 		for (DataLink dataLink : workflow.getDataLinks()) {
 			ReceiverPort receiverPort = dataLink.getSendsTo();
 			SenderPort senderPort = dataLink.getReceivesFrom();
@@ -411,33 +448,35 @@ public class WorkflowToDataflowMapper {
 				}
 				Merge merge = merges.get(receiverPort);
 				// create merge input port
-				MergeInputPort mergeInputPort = edits.createMergeInputPort(merge, "input"
-						+ mergePosition, sink.getDepth());
+				MergeInputPort mergeInputPort = edits.createMergeInputPort(
+						merge, "input" + mergePosition, sink.getDepth());
 				// add it to the correct position in the merge
 				@SuppressWarnings("unchecked")
-				List<MergeInputPort> mergeInputPorts = (List<MergeInputPort>) merge.getInputPorts();
-				if (mergePosition > mergeInputPorts.size()) {
+				List<MergeInputPort> mergeInputPorts = (List<MergeInputPort>) merge
+						.getInputPorts();
+				if (mergePosition > mergeInputPorts.size())
 					mergeInputPorts.add(mergeInputPort);
-				} else {
+				else
 					mergeInputPorts.add(mergePosition, mergeInputPort);
-				}
 				// connect a datalink into the merge
-				Datalink datalinkIn = edits.createDatalink(source, mergeInputPort);
+				Datalink datalinkIn = edits.createDatalink(source,
+						mergeInputPort);
 				edits.getConnectDatalinkEdit(datalinkIn).doEdit();
 				// check if the merge output has been connected
-				EventForwardingOutputPort mergeOutputPort = merge.getOutputPort();
-				if (mergeOutputPort.getOutgoingLinks().size() == 0) {
-					Datalink datalinkOut = edits.createDatalink(merge.getOutputPort(), sink);
+				EventForwardingOutputPort mergeOutputPort = merge
+						.getOutputPort();
+				if (mergeOutputPort.getOutgoingLinks().isEmpty()) {
+					Datalink datalinkOut = edits.createDatalink(
+							merge.getOutputPort(), sink);
 					edits.getConnectDatalinkEdit(datalinkOut).doEdit();
 				} else if (mergeOutputPort.getOutgoingLinks().size() == 1) {
-					if (mergeOutputPort.getOutgoingLinks().iterator().next().getSink() != sink) {
+					if (mergeOutputPort.getOutgoingLinks().iterator().next()
+							.getSink() != sink)
 						throw new EditException(
 								"Cannot add a different sinkPort to a Merge that already has one defined");
-					}
-				} else {
+				} else
 					throw new EditException(
 							"The merge instance cannot have more that 1 outgoing Datalink");
-				}
 			} else {
 				Datalink datalink = edits.createDatalink(source, sink);
 				edits.getConnectDatalinkEdit(datalink).doEdit();
@@ -449,31 +488,40 @@ public class WorkflowToDataflowMapper {
 		for (ControlLink controlLink : workflow.getControlLinks()) {
 			if (controlLink instanceof BlockingControlLink) {
 				BlockingControlLink blockingControlLink = (BlockingControlLink) controlLink;
-				Processor untilFinished = blockingControlLink.getUntilFinished();
+				Processor untilFinished = blockingControlLink
+						.getUntilFinished();
 				Processor block = blockingControlLink.getBlock();
-				edits.getCreateConditionEdit(workflowToDataflowProcessors.get(untilFinished),
+				edits.getCreateConditionEdit(
+						workflowToDataflowProcessors.get(untilFinished),
 						workflowToDataflowProcessors.get(block)).doEdit();
 			}
 		}
 	}
 
-	private void addOutputPorts(Workflow workflow, Dataflow dataflow) throws EditException {
+	private void addOutputPorts(Workflow workflow, Dataflow dataflow)
+			throws EditException {
 		for (OutputWorkflowPort outputWorkflowPort : workflow.getOutputPorts()) {
-			DataflowOutputPort dataflowOutputPort = edits.createDataflowOutputPort(
-					outputWorkflowPort.getName(), dataflow);
-			edits.getAddDataflowOutputPortEdit(dataflow, dataflowOutputPort).doEdit();
-			inputPorts.put(outputWorkflowPort, dataflowOutputPort.getInternalInputPort());
+			DataflowOutputPort dataflowOutputPort = edits
+					.createDataflowOutputPort(outputWorkflowPort.getName(),
+							dataflow);
+			edits.getAddDataflowOutputPortEdit(dataflow, dataflowOutputPort)
+					.doEdit();
+			inputPorts.put(outputWorkflowPort,
+					dataflowOutputPort.getInternalInputPort());
 		}
 	}
 
-	private void addInputPorts(Workflow workflow, Dataflow dataflow) throws EditException {
+	private void addInputPorts(Workflow workflow, Dataflow dataflow)
+			throws EditException {
 		for (InputWorkflowPort inputWorkflowPort : workflow.getInputPorts()) {
-			DataflowInputPort dataflowInputPort = edits.createDataflowInputPort(
-					inputWorkflowPort.getName(), inputWorkflowPort.getDepth(),
-					inputWorkflowPort.getDepth(), dataflow);
-			edits.getAddDataflowInputPortEdit(dataflow, dataflowInputPort).doEdit();
-			outputPorts.put(inputWorkflowPort, dataflowInputPort.getInternalOutputPort());
+			DataflowInputPort dataflowInputPort = edits
+					.createDataflowInputPort(inputWorkflowPort.getName(),
+							inputWorkflowPort.getDepth(),
+							inputWorkflowPort.getDepth(), dataflow);
+			edits.getAddDataflowInputPortEdit(dataflow, dataflowInputPort)
+					.doEdit();
+			outputPorts.put(inputWorkflowPort,
+					dataflowInputPort.getInternalOutputPort());
 		}
 	}
-
 }

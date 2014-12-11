@@ -53,7 +53,7 @@ public class RemoteExecutionService extends AbstractExecutionService {
 	}
 
 	@Override
-	public Set<ExecutionEnvironment> getExecutionEnvivonments() {
+	public Set<ExecutionEnvironment> getExecutionEnvironments() {
 		return Collections.<ExecutionEnvironment>emptySet();
 	}
 

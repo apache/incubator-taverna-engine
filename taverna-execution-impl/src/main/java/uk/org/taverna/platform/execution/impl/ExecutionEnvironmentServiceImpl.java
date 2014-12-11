@@ -49,18 +49,18 @@ import com.fasterxml.jackson.databind.JsonNode;
  * @author David Withers
  */
 public class ExecutionEnvironmentServiceImpl implements ExecutionEnvironmentService {
-
 	private static final Logger logger = Logger.getLogger(ExecutionEnvironmentServiceImpl.class.getName());
 
+	@SuppressWarnings("unused")
 	private final Scufl2Tools scufl2Tools = new Scufl2Tools();
-
 	private Set<ExecutionService> executionServices;
 
 	@Override
 	public Set<ExecutionEnvironment> getExecutionEnvironments() {
 		Set<ExecutionEnvironment> executionEnvironments = new HashSet<>();
 		for (ExecutionService executionService : executionServices)
-			executionEnvironments.addAll(executionService.getExecutionEnvivonments());
+			executionEnvironments.addAll(executionService
+					.getExecutionEnvironments());
 		return executionEnvironments;
 	}
 
@@ -98,7 +98,7 @@ public class ExecutionEnvironmentServiceImpl implements ExecutionEnvironmentServ
 						executionEnvironment.getName(), activity.getType()));
 				return false;
 			}
-			Configuration activityConfiguration = scufl2Tools.configurationFor(activity, profile);
+			Configuration activityConfiguration = activity.getConfiguration();
 			if (!isValidActivityConfiguration(executionEnvironment, activityConfiguration, activity)) {
 				logger.fine(MessageFormat.format("Invalid activity configuration for {1} in {0}",
 						executionEnvironment.getName(), activity.getType()));
