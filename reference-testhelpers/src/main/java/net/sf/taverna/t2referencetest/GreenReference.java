@@ -74,6 +74,7 @@ public class GreenReference extends AbstractExternalReference implements
 	 * Fakes a de-reference operation, returning a byte stream over the string
 	 * data.
 	 */
+	@Override
 	public InputStream openStream(ReferenceContext arg0) {
 		try {
 			return new ByteArrayInputStream(this.contents
@@ -115,6 +116,7 @@ public class GreenReference extends AbstractExternalReference implements
 		return "green{" + contents + "}";
 	}
 
+	@Override
 	public Long getApproximateSizeInBytes() {
 		return new Long(contents.getBytes().length);
 	}

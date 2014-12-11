@@ -54,6 +54,7 @@ public class GreenBuilder implements
 	 *             if there are any issues building the new GreenReference
 	 *             (which there won't be)
 	 */
+	@Override
 	public GreenReference createReference(InputStream is,
 			ReferenceContext context)
 			throws ExternalReferenceConstructionException {
@@ -80,6 +81,7 @@ public class GreenBuilder implements
 	 * 
 	 * @return <code>1.5f</code>
 	 */
+	@Override
 	public float getConstructionCost() {
 		return 1.5f;
 	}
@@ -87,6 +89,7 @@ public class GreenBuilder implements
 	/**
 	 * @return <code>{@link net.sf.taverna.t2referencetest.GreenReference GreenReference}.class</code>
 	 */
+	@Override
 	public Class<GreenReference> getReferenceType() {
 		return GreenReference.class;
 	}
@@ -96,6 +99,7 @@ public class GreenBuilder implements
 	 * 
 	 * @return <code>true</code>
 	 */
+	@Override
 	public boolean isEnabled(ReferenceContext arg0) {
 		return true;
 	}

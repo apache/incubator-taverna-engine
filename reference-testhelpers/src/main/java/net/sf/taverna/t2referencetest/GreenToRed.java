@@ -26,6 +26,7 @@ import net.sf.taverna.t2.reference.ReferenceContext;
 public class GreenToRed implements
 		ExternalReferenceTranslatorSPI<GreenReference, RedReference> {
 
+	@Override
 	public RedReference createReference(GreenReference ref,
 			ReferenceContext context) {
 		RedReference newReference = new RedReference();
@@ -41,18 +42,22 @@ public class GreenToRed implements
 		return newReference;
 	}
 
+	@Override
 	public Class<GreenReference> getSourceReferenceType() {
 		return GreenReference.class;
 	}
 
+	@Override
 	public Class<RedReference> getTargetReferenceType() {
 		return RedReference.class;
 	}
 
+	@Override
 	public float getTranslationCost() {
 		return 0.4f;
 	}
 
+	@Override
 	public boolean isEnabled(ReferenceContext arg0) {
 		return true;
 	}
