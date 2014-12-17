@@ -22,46 +22,34 @@ import com.fasterxml.jackson.databind.JsonNode;
  * runs. It does so by intercepting jobs sent to the layer.
  *
  * @author alanrw
- *
  */
 public class Stop extends AbstractDispatchLayer<JsonNode> {
-
 	public static final String URI = "http://ns.taverna.org.uk/2010/scufl2/taverna/dispatchlayer/Stop";
-
 	/**
 	 * The set of ids of workflow runs that have been cancelled.
 	 */
-	private static Set<String> cancelledWorkflowRuns = new HashSet<String>();
-
+	private static Set<String> cancelledWorkflowRuns = new HashSet<>();
 	/**
 	 * A map from workflow run ids to the set of Stop layers where jobs have
 	 * been intercepted for that run.
 	 */
-	private static Map<String, Set<Stop>> pausedLayerMap = new HashMap<String, Set<Stop>>();
-
+	private static Map<String, Set<Stop>> pausedLayerMap = new HashMap<>();
 	/**
 	 * A map for a given Stop from ids of suspended workflow runs to the jobs
 	 * that have been intercepted.
 	 */
-	private Map<String, Set<DispatchJobEvent>> suspendedJobEventMap = new HashMap<String, Set<DispatchJobEvent>>();
+	private Map<String, Set<DispatchJobEvent>> suspendedJobEventMap = new HashMap<>();
 
+	@Override
 	public void configure(JsonNode conf) throws ConfigurationException {
 		// nothing
 	}
 
+	@Override
 	public JsonNode getConfiguration() {
 		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see
-	 * net.sf.taverna.t2.workflowmodel.processor.dispatch.AbstractDispatchLayer
-	 * #receiveJob
-	 * (net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchJobEvent
-	 * )
-	 */
 	@Override
 	public void receiveJob(final DispatchJobEvent jobEvent) {
 		List<WorkflowRunIdEntity> entities = jobEvent.getContext().getEntities(
@@ -70,11 +58,10 @@ public class Stop extends AbstractDispatchLayer<JsonNode> {
 			final String wfRunId = entities.get(0).getWorkflowRunId();
 			// If the workflow run is cancelled then simply "eat" the jobEvent.
 			// This does a hard-cancel.
-			if (cancelledWorkflowRuns.contains(wfRunId)) {
+			if (cancelledWorkflowRuns.contains(wfRunId))
 				return;
-			}
 			// If the workflow run is paused
-			if (pausedLayerMap.containsKey(wfRunId)) {
+			if (pausedLayerMap.containsKey(wfRunId))
 				synchronized (Stop.class) {
 					// double check as pausedLayerMap may have been changed
 					// waiting for the lock
@@ -82,30 +69,20 @@ public class Stop extends AbstractDispatchLayer<JsonNode> {
 						// Remember that this Stop layer was affected by the
 						// workflow pause
 						pausedLayerMap.get(wfRunId).add(this);
-						if (!suspendedJobEventMap.containsKey(wfRunId)) {
+						if (!suspendedJobEventMap.containsKey(wfRunId))
 							suspendedJobEventMap.put(wfRunId,
 									new HashSet<DispatchJobEvent>());
-						}
 						// Remember the suspended jobEvent
 						suspendedJobEventMap.get(wfRunId).add(jobEvent);
 						return;
 					}
 				}
-			}
 		}
 		// By default pass the jobEvent down to the next layer
 		super.receiveJob(jobEvent);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see
-	 * net.sf.taverna.t2.workflowmodel.processor.dispatch.AbstractDispatchLayer
-	 * #receiveJobQueue
-	 * (net.sf.taverna.t2.workflowmodel.processor.dispatch.events
-	 * .DispatchJobQueueEvent)
-	 */
+	@Override
 	public void receiveJobQueue(DispatchJobQueueEvent jobQueueEvent) {
 		super.receiveJobQueue(jobQueueEvent);
 	}
@@ -119,17 +96,12 @@ public class Stop extends AbstractDispatchLayer<JsonNode> {
 	 *         cancelled then false.
 	 */
 	public static synchronized boolean cancelWorkflow(String workflowRunId) {
-
-		if (cancelledWorkflowRuns.contains(workflowRunId)) {
+		if (cancelledWorkflowRuns.contains(workflowRunId))
 			return false;
-		}
-		Set<String> cancelledWorkflowRunsCopy = new HashSet<String>(
+		Set<String> cancelledWorkflowRunsCopy = new HashSet<>(
 				cancelledWorkflowRuns);
-
 		cancelledWorkflowRunsCopy.add(workflowRunId);
-
 		cancelledWorkflowRuns = cancelledWorkflowRunsCopy;
-
 		return true;
 	}
 
@@ -142,20 +114,14 @@ public class Stop extends AbstractDispatchLayer<JsonNode> {
 	 *         paused or cancelled then false.
 	 */
 	public static synchronized boolean pauseWorkflow(String workflowRunId) {
-
-		if (cancelledWorkflowRuns.contains(workflowRunId)) {
+		if (cancelledWorkflowRuns.contains(workflowRunId))
 			return false;
-		}
-		if (!pausedLayerMap.containsKey(workflowRunId)) {
-			Map<String, Set<Stop>> pausedLayerMapCopy = new HashMap<String, Set<Stop>>();
-			pausedLayerMapCopy.putAll(pausedLayerMap);
-			pausedLayerMapCopy.put(workflowRunId, new HashSet<Stop>());
-			pausedLayerMap = pausedLayerMapCopy;
-			return true;
-		} else {
+		if (pausedLayerMap.containsKey(workflowRunId))
 			return false;
-		}
-
+		Map<String, Set<Stop>> pausedLayerMapCopy = new HashMap<>(pausedLayerMap);
+		pausedLayerMapCopy.put(workflowRunId, new HashSet<Stop>());
+		pausedLayerMap = pausedLayerMapCopy;
+		return true;
 	}
 
 	/**
@@ -167,23 +133,17 @@ public class Stop extends AbstractDispatchLayer<JsonNode> {
 	 *         was not paused or it was cancelled, then false.
 	 */
 	public static synchronized boolean resumeWorkflow(String workflowRunId) {
-
-		if (cancelledWorkflowRuns.contains(workflowRunId)) {
+		if (cancelledWorkflowRuns.contains(workflowRunId))
 			return false;
-		}
-		if (pausedLayerMap.containsKey(workflowRunId)) {
-			Map<String, Set<Stop>> pausedLayerMapCopy = new HashMap<String, Set<Stop>>();
-			pausedLayerMapCopy.putAll(pausedLayerMap);
-			Set<Stop> stops = pausedLayerMapCopy.remove(workflowRunId);
-			pausedLayerMap = pausedLayerMapCopy;
-			for (Stop s : stops) {
-				s.resumeLayerWorkflow(workflowRunId);
-			}
-			return true;
-		} else {
+		if (!pausedLayerMap.containsKey(workflowRunId))
 			return false;
-		}
-
+		Map<String, Set<Stop>> pausedLayerMapCopy = new HashMap<>();
+		pausedLayerMapCopy.putAll(pausedLayerMap);
+		Set<Stop> stops = pausedLayerMapCopy.remove(workflowRunId);
+		pausedLayerMap = pausedLayerMapCopy;
+		for (Stop s : stops)
+			s.resumeLayerWorkflow(workflowRunId);
+		return true;
 	}
 
 	/**
@@ -196,11 +156,8 @@ public class Stop extends AbstractDispatchLayer<JsonNode> {
 	private void resumeLayerWorkflow(String workflowRunId) {
 		synchronized (Stop.class) {
 			for (DispatchJobEvent dje : suspendedJobEventMap
-					.remove(workflowRunId)) {
-
-				this.receiveJob(dje);
-			}
+					.remove(workflowRunId))
+				receiveJob(dje);
 		}
 	}
-
 }

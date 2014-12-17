@@ -1,7 +1,5 @@
 package net.sf.taverna.t2.workflowmodel.processor.dispatch.layers;
 
-import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchJobEvent;
-
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;

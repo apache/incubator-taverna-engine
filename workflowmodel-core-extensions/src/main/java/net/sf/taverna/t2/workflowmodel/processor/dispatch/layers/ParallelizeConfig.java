@@ -27,13 +27,11 @@ import net.sf.taverna.t2.workflowmodel.processor.config.ConfigurationProperty;
  * Bean to hold the configuration for the parallelize layer, specifically a
  * single int property defining the number of concurrent jobs in that processor
  * instance per owning process ID.
- *
+ * 
  * @author Tom Oinn
- *
  */
 @ConfigurationBean(uri = Parallelize.URI + "#Config")
 public class ParallelizeConfig {
-
 	private int maxJobs;
 
 	public ParallelizeConfig() {
@@ -41,7 +39,7 @@ public class ParallelizeConfig {
 		this.maxJobs = 1;
 	}
 
-	@ConfigurationProperty(name = "maxJobs", label = "Maximum Parallel Jobs", description = "The maximum number of jobs that can run in parallel", required=false)
+	@ConfigurationProperty(name = "maxJobs", label = "Maximum Parallel Jobs", description = "The maximum number of jobs that can run in parallel", required = false)
 	public void setMaximumJobs(int maxJobs) {
 		this.maxJobs = maxJobs;
 	}
@@ -49,5 +47,4 @@ public class ParallelizeConfig {
 	public int getMaximumJobs() {
 		return this.maxJobs;
 	}
-
 }

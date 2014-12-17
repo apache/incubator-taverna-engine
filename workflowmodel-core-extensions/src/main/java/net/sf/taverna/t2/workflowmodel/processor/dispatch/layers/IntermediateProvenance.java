@@ -20,6 +20,8 @@
  ******************************************************************************/
 package net.sf.taverna.t2.workflowmodel.processor.dispatch.layers;
 
+import static java.lang.System.currentTimeMillis;
+
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
 import java.io.ByteArrayInputStream;
@@ -66,27 +68,20 @@ import org.apache.log4j.Logger;
  * 
  */
 public class IntermediateProvenance extends AbstractDispatchLayer<String> {
-
 	public static final String URI = "http://ns.taverna.org.uk/2010/scufl2/taverna/dispatchlayer/IntermediateProvenance";
-
-	Logger logger = Logger.getLogger(IntermediateProvenance.class);
+	private static final Logger logger = Logger.getLogger(IntermediateProvenance.class);
 
 	private ProvenanceReporter reporter;
+	private Map<String, Map<String, IterationProvenanceItem>> processToIndexes = new HashMap<>();
+	private Map<ActivityProvenanceItem, List<Object>> activityProvenanceItemMap = new HashMap<>();
+	private Map<InputDataProvenanceItem, List<Object>> inputDataProvenanceItemMap = new HashMap<>();
 
-	Map<String, Map<String, IterationProvenanceItem>> processToIndexes = new HashMap<String, Map<String, IterationProvenanceItem>>();
-
-	private Map<ActivityProvenanceItem, List<Object>> activityProvenanceItemMap = new HashMap<ActivityProvenanceItem, List<Object>>();
-
-	private Map<InputDataProvenanceItem, List<Object>> inputDataProvenanceItemMap = new HashMap<InputDataProvenanceItem, List<Object>>();
-
-	// private List<ActivityProvenanceItem> activityProvenanceItemList = new
-	// ArrayList<ActivityProvenanceItem>();
-	//
-	// private List<InputDataProvenanceItem> inputDataProvenanceItemList = new
-	// ArrayList<InputDataProvenanceItem>();
+	// private List<ActivityProvenanceItem> activityProvenanceItemList = new ArrayList<>();
+	// private List<InputDataProvenanceItem> inputDataProvenanceItemList = new ArrayList<>();
 
 	private WorkflowProvenanceItem workflowItem;
 
+	@Override
 	public void configure(String o) {
 	}
 
@@ -100,6 +95,7 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 		processToIndexes.remove(owningProcess);
 	}
 
+	@Override
 	public String getConfiguration() {
 		return null;
 	}
@@ -110,7 +106,7 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 			Map<String, IterationProvenanceItem> indexes = processToIndexes
 					.get(owningProcess);
 			if (indexes == null) {
-				indexes = new HashMap<String, IterationProvenanceItem>();
+				indexes = new HashMap<>();
 				processToIndexes.put(owningProcess, indexes);
 			}
 			return indexes;
@@ -133,11 +129,14 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 				try {
 					index = removeLastIndex(index);
 					iterationProvenanceItem = indexes.get(indexStr(index));
-					// if we have a 'parent' iteration then create a new
-					// iteration for the original index and link it to the
-					// activity and the input data
-					// FIXME should this be linked to the parent iteration
-					// instead?
+					/*
+					 * if we have a 'parent' iteration then create a new
+					 * iteration for the original index and link it to the
+					 * activity and the input data
+					 * 
+					 * FIXME should this be linked to the parent iteration
+					 * instead?
+					 */
 					if (iterationProvenanceItem != null) {
 						// set the index to the one from the event
 						IterationProvenanceItem iterationProvenanceItem1 = new IterationProvenanceItem();
@@ -160,10 +159,9 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 //
 //							if (owningProcess.equalsIgnoreCase(owner)
 //									&& indexString
-//											.equalsIgnoreCase(indexString2)) {
+//											.equalsIgnoreCase(indexString2))
 //								iterationProvenanceItem1.setParentId(entrySet
 //										.getKey().getIdentifier());
-//							}
 //						}
 //						for (Entry<InputDataProvenanceItem, List<Object>> entrySet : inputDataProvenanceItemMap
 //								.entrySet()) {
@@ -174,11 +172,9 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 //							String indexString2 = indexStr(index);
 //							if (owningProcess.equalsIgnoreCase(owner)
 //									&& indexString
-//											.equalsIgnoreCase(indexString2)) {
+//											.equalsIgnoreCase(indexString2))
 //								iterationProvenanceItem1
 //										.setInputDataItem(entrySet.getKey());
-//							}
-//
 //						}
 
 						// for (ActivityProvenanceItem item :
@@ -206,12 +202,11 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 								iterationProvenanceItem1);
 						return iterationProvenanceItem1;
 					}
-					// if we have not found an iteration items and the index
-					// is
-					// [] then something is wrong
-					// remove the last index in the int array before we go
-					// back
-					// through the while
+					/*
+					 * if we have not found an iteration items and the index is
+					 * [] then something is wrong remove the last index in the
+					 * int array before we go back through the while
+					 */
 				} catch (IllegalStateException e) {
 					logger
 							.warn("Cannot find a parent iteration with index [] for owning process: "
@@ -250,11 +245,10 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 	}
 
 	private String indexStr(int[] index) {
-		String indexStr = "";
-		for (int ind : index) {
-			indexStr += ":" + ind;
-		}
-		return indexStr;
+		StringBuilder indexStr = new StringBuilder();
+		for (int ind : index)
+			indexStr.append(":").append(ind);
+		return indexStr.toString();
 	}
 
 	/**
@@ -265,14 +259,8 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 	 */
 	@SuppressWarnings("unused")
 	private String[] stripLastIndex(int[] index) {
-		String indexStr = "";
-		for (int ind : index) {
-			indexStr += ":" + ind;
-		}
 		// will be in form :1:2:3
-		String[] split = indexStr.split(":");
-
-		return split;
+		return indexStr(index).split(":");
 	}
 
 	/**
@@ -282,15 +270,17 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 	 * @return
 	 */
 	private int[] removeLastIndex(int[] index) {
-		if (index.length == 0) {
+		if (index.length == 0)
 			throw new IllegalStateException(
 					"There is no parent iteration of index [] for this result");
-		}
 		int[] newIntArray = new int[index.length - 1];
-		for (int i = 0; i < index.length - 1; i++) {
+		for (int i = 0; i < index.length - 1; i++)
 			newIntArray[i] = index[i];
-		}
 		return newIntArray;
+	}
+
+	private static String uuid() {
+		return UUID.randomUUID().toString();
 	}
 
 	/**
@@ -310,7 +300,7 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 		errorItem.setMessage(errorEvent.getMessage());
 		
 		errorItem.setProcessId(errorEvent.getOwningProcess());
-		errorItem.setIdentifier(UUID.randomUUID().toString());
+		errorItem.setIdentifier(uuid());
 		errorItem.setParentId(iterationProvItem.getIdentifier());
 		// iterationProvItem.setErrorItem(errorItem);
 		// FIXME don't need to add to the processor item earlier
@@ -337,14 +327,14 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 			provenanceItem.setFacadeID(split[0]);
 			provenanceItem.setDataflowID(split[1]);
 			provenanceItem.setProcessId(jobEvent.getOwningProcess());
-			provenanceItem.setIdentifier(UUID.randomUUID().toString());
+			provenanceItem.setIdentifier(uuid());
 			provenanceItem.setParentId(workflowItem.getIdentifier());
 			ProcessorProvenanceItem processorProvItem;
 			processorProvItem = new ProcessorProvenanceItem();
 			processorProvItem.setWorkflowId(parentDataflowId);
 			processorProvItem.setProcessId(jobEvent
 					.getOwningProcess());
-			processorProvItem.setIdentifier(UUID.randomUUID().toString());
+			processorProvItem.setIdentifier(uuid());
 			processorProvItem.setParentId(provenanceItem.getIdentifier());
 			provenanceItem.setProcessId(jobEvent.getOwningProcess());
 			getReporter().addProvenanceItem(provenanceItem);
@@ -354,8 +344,7 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 			iterationProvItem = new IterationProvenanceItem();
 			iterationProvItem.setWorkflowId(parentDataflowId);
 			iterationProvItem.setIteration(jobEvent.getIndex());
-			iterationProvItem.setIdentifier(UUID.randomUUID().toString());
-			
+			iterationProvItem.setIdentifier(uuid());
 			
 			ReferenceService referenceService = jobEvent.getContext()
 					.getReferenceService();
@@ -363,11 +352,11 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 			InputDataProvenanceItem inputDataItem = new InputDataProvenanceItem();
 			inputDataItem.setDataMap(jobEvent.getData());
 			inputDataItem.setReferenceService(referenceService);
-			inputDataItem.setIdentifier(UUID.randomUUID().toString());
+			inputDataItem.setIdentifier(uuid());
 			inputDataItem.setParentId(iterationProvItem.getIdentifier());
 			inputDataItem.setProcessId(jobEvent.getOwningProcess());
 	
-			List<Object> inputIndexOwnerList = new ArrayList<Object>();
+			List<Object> inputIndexOwnerList = new ArrayList<>();
 			inputIndexOwnerList.add(jobEvent.getIndex());
 			inputIndexOwnerList.add(jobEvent.getOwningProcess());
 			inputDataProvenanceItemMap.put(inputDataItem, inputIndexOwnerList);
@@ -377,17 +366,17 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 			iterationProvItem.setIteration(jobEvent.getIndex());
 			iterationProvItem.setProcessId(jobEvent.getOwningProcess());
 	
-			for (Activity<?> activity : jobEvent.getActivities()) {
+			for (Activity<?> activity : jobEvent.getActivities())
 				if (activity instanceof AsynchronousActivity) {
 					ActivityProvenanceItem activityProvItem = new ActivityProvenanceItem();
 					activityProvItem.setWorkflowId(parentDataflowId);
-					activityProvItem.setIdentifier(UUID.randomUUID().toString());
+					activityProvItem.setIdentifier(uuid());
 					iterationProvItem.setParentId(activityProvItem.getIdentifier());
 					// getConnector().addProvenanceItem(iterationProvItem);
 					activityProvItem.setParentId(processorProvItem.getIdentifier());
 					// processorProvItem.setActivityProvenanceItem(activityProvItem);
 					activityProvItem.setProcessId(jobEvent.getOwningProcess());
-					List<Object> activityIndexOwnerList = new ArrayList<Object>();
+					List<Object> activityIndexOwnerList = new ArrayList<>();
 					activityIndexOwnerList.add(jobEvent.getOwningProcess());
 					activityIndexOwnerList.add(jobEvent.getIndex());
 					activityProvenanceItemMap.put(activityProvItem,
@@ -397,10 +386,9 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 					getReporter().addProvenanceItem(activityProvItem);
 					break;
 				}
-			}
 			getIndexesByProcess(jobEvent.getOwningProcess()).put(
 					indexStr(jobEvent.getIndex()), iterationProvItem);
-			iterationProvItem.setEnactmentStarted(new Timestamp(System.currentTimeMillis()));
+			iterationProvItem.setEnactmentStarted(new Timestamp(currentTimeMillis()));
 			getReporter().addProvenanceItem(iterationProvItem);
 		} catch (RuntimeException ex) {
 			logger.error("Could not store provenance for " + jobEvent, ex);
@@ -411,7 +399,6 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 
 	@Override
 	public void receiveJobQueue(DispatchJobQueueEvent jobQueueEvent) {
-
 		super.receiveJobQueue(jobQueueEvent);
 	}
 
@@ -425,16 +412,15 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 		try {
 			// FIXME use the connector from the result event context
 			IterationProvenanceItem iterationProvItem = getIterationProvItem(resultEvent);
-			iterationProvItem.setEnactmentEnded(new Timestamp(System.currentTimeMillis()));
+			iterationProvItem.setEnactmentEnded(new Timestamp(currentTimeMillis()));
 			
 			ReferenceService referenceService = resultEvent.getContext()
 					.getReferenceService();
-			
-	
+
 			OutputDataProvenanceItem outputDataItem = new OutputDataProvenanceItem();
 			outputDataItem.setDataMap(resultEvent.getData());
 			outputDataItem.setReferenceService(referenceService);
-			outputDataItem.setIdentifier(UUID.randomUUID().toString());
+			outputDataItem.setIdentifier(uuid());
 			outputDataItem.setProcessId(resultEvent.getOwningProcess());
 			outputDataItem.setParentId(iterationProvItem.getIdentifier());
 			iterationProvItem.setOutputDataItem(outputDataItem);
@@ -446,7 +432,6 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 			// add xencoding of data value here??
 	//		Map<String, T2Reference> inputDataMap = iterationProvItem.getInputDataItem().getDataMap();
 	//		for(Map.Entry<String, T2Reference> entry:inputDataMap.entrySet()) {
-	//			
 	//			// create a simpler bean that we can serialize?
 	//			
 	//			T2Reference ref = entry.getValue();
@@ -472,11 +457,8 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 		super.receiveResult(resultEvent);
 	}
 
-
-	
 	@Override
 	public void receiveResultCompletion(DispatchCompletionEvent completionEvent) {
-		// TODO Auto-generated method stub		
 		super.receiveResultCompletion(completionEvent);
 	}
 
@@ -505,21 +487,22 @@ public class IntermediateProvenance extends AbstractDispatchLayer<String> {
 		this.workflowItem = workflowItem;
 	}
 
-	
-	  public static String SerializeParam(Object ParamValue) {
-		    ByteArrayOutputStream BStream = new ByteArrayOutputStream();
-		    XMLEncoder encoder = new XMLEncoder(BStream);
-		    encoder.writeObject(ParamValue);
-		    encoder.close();
-		    return BStream.toString();
-		  }
-	  
-	  public static Object DeserializeParam (String SerializedParam) {
-		    InputStream IStream = new ByteArrayInputStream(SerializedParam.getBytes()); 
-		    XMLDecoder decoder = new XMLDecoder(IStream);
-		    Object output = decoder.readObject();
-		    decoder.close(); 
-		    return output;
-		  }
-	  
+	// TODO is this unused?
+	public static String SerializeParam(Object ParamValue) {
+		ByteArrayOutputStream BStream = new ByteArrayOutputStream();
+		XMLEncoder encoder = new XMLEncoder(BStream);
+		encoder.writeObject(ParamValue);
+		encoder.close();
+		return BStream.toString();
+	}
+
+	// TODO is this unused?
+	public static Object DeserializeParam(String SerializedParam) {
+		InputStream IStream = new ByteArrayInputStream(
+				SerializedParam.getBytes());
+		XMLDecoder decoder = new XMLDecoder(IStream);
+		Object output = decoder.readObject();
+		decoder.close();
+		return output;
+	}
 }

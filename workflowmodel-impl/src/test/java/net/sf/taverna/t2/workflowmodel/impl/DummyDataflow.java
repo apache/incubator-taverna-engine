@@ -44,41 +44,50 @@ public class DummyDataflow extends AbstractAnnotatedThing<Dataflow> implements
 	public List<Processor> processors = new ArrayList<Processor>();
 	public List<Merge> merges = new ArrayList<Merge>();
 
+	@Override
 	public DataflowValidationReport checkValidity() {
 		return new DummyValidationReport(true);
 	}
 
+	@Override
 	public <T extends NamedWorkflowEntity> List<? extends T> getEntities(
 			Class<T> entityType) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	@Override
 	public List<? extends DataflowInputPort> getInputPorts() {
 		return inputPorts;
 	}
 
+	@Override
 	public List<? extends Datalink> getLinks() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	@Override
 	public List<? extends DataflowOutputPort> getOutputPorts() {
 		return outputPorts;
 	}
 
+	@Override
 	public List<? extends Processor> getProcessors() {
 		return processors;
 	}
 
+	@Override
 	public List<? extends Merge> getMerges() {
 		return merges;
 	}
 
+	@Override
 	public String getLocalName() {
 		return "test_dataflow";
 	}
 
+	@Override
 	public void fire(String owningProcess, InvocationContext context) {
 		String newOwningProcess = owningProcess + ":" + getLocalName();
 		for (Processor p : processors) {
@@ -88,16 +97,19 @@ public class DummyDataflow extends AbstractAnnotatedThing<Dataflow> implements
 		}
 	}
 
+	@Override
 	public FailureTransmitter getFailureTransmitter() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	@Override
 	public boolean doTypeCheck() throws IterationTypeMismatchException {
 		throw new UnsupportedOperationException(
 				"Not implemented for this class");
 	}
 
+	@Override
 	public String getIdentifier() {
 		return "an id";
 	}
@@ -112,10 +124,12 @@ public class DummyDataflow extends AbstractAnnotatedThing<Dataflow> implements
 		
 	}
 
+	@Override
 	public boolean isInputPortConnected(DataflowInputPort inputPort) {
 		return false;
 	}
 
+	@Override
 	public String recordIdentifier() {
 		return getIdentifier();
 	}

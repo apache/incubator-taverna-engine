@@ -45,86 +45,103 @@ public class DummyProcessor implements Processor{
 	public List<Condition> preConditionList = new ArrayList<Condition>();
 	public List<ProcessorInputPort> inputPorts = new ArrayList<ProcessorInputPort>();
 	
+	@Override
 	public boolean doTypeCheck() throws IterationTypeMismatchException {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
+	@Override
 	public void fire(String owningProcess, InvocationContext context) {
 		firedOwningProcess=owningProcess;
 		
 	}
 
+	@Override
 	public List<? extends Activity<?>> getActivityList() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	@Override
 	public List<? extends Condition> getControlledPreconditionList() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	@Override
 	public DispatchStack getDispatchStack() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	@Override
 	public List<? extends ProcessorInputPort> getInputPorts() {
 		return inputPorts;
 	}
 
+	@Override
 	public IterationStrategyStack getIterationStrategy() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	@Override
 	public List<? extends ProcessorOutputPort> getOutputPorts() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	@Override
 	public List<? extends Condition> getPreconditionList() {
 		return preConditionList;
 	}
 
+	@Override
 	public String getLocalName() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	@Override
 	public Edit<? extends Processor> getAddAnnotationEdit(
 			AnnotationChain newAnnotation) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	@Override
 	public Set<? extends AnnotationChain> getAnnotations() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	@Override
 	public Edit<? extends Processor> getRemoveAnnotationEdit(
 			AnnotationChain annotationToRemove) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	@Override
 	public void setAnnotations(Set<AnnotationChain> annotations) {
 		// TODO Auto-generated method stub
 		
 	}
 
+	@Override
 	public void addObserver(Observer<ProcessorFinishedEvent> observer) {
 		// TODO Auto-generated method stub
 		
 	}
 
+	@Override
 	public List<Observer<ProcessorFinishedEvent>> getObservers() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	@Override
 	public void removeObserver(Observer<ProcessorFinishedEvent> observer) {
 		// TODO Auto-generated method stub
 		

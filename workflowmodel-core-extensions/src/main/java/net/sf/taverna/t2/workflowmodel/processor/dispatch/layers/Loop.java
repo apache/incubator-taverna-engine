@@ -56,7 +56,6 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
  * has been set as the
  * {@link LoopConfiguration#setCondition(net.sf.taverna.t2.workflowmodel.processor.activity.Activity)
  * condition}.
- * </p>
  * <p>
  * After a job has been successful further down the dispatch stack, the loop
  * layer will invoke the conditional activity to determine if the job will be
@@ -64,47 +63,39 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
  * will be performed even before the first invocation. (The default
  * runFirst=true is equivalent to a do..while construct, while runFirst=false is
  * equivalent to a while.. construct.)
- * </p>
  * <p>
  * A job will be resent down the dispatch stack only if the conditional activity
  * returns a reference to a string equal to "true" on its output port "loop".
- * </p>
  * <p>
  * If a job or the conditional activity fails, the while-loop is interrupted and
  * the error is sent further up.
- * </p>
  * <p>
  * Note that the LoopLayer will be invoked for each item in an iteration, if you
  * want to do the loop for the whole collection (ie. re-iterating if the
  * loop-condition fails after processing the full list) - create a nested
  * workflow with the desired depths on it's input ports and insert this
  * LoopLayer in the stack of the nested workflow's processor in parent workflow.
- * </p>
  * <p>
  * It is recommended that the LoopLayer is to be inserted after the
  * {@link ErrorBounce} layer, as this layer is needed for registering errors
  * produced by the LoopLayer. If the user requires {@link Retry retries} and
  * {@link Failover failovers} before checking the while condition, such layers
  * should be below LoopLayer.
- * </p>
  *
  * @author Stian Soiland-Reyes
- *
  */
-
-@SuppressWarnings("unchecked")
+// FIXME Doesn't work
+@SuppressWarnings({"unchecked","rawtypes"})
 public class Loop extends AbstractDispatchLayer<JsonNode> {
-
 	public static final String URI = "http://ns.taverna.org.uk/2010/scufl2/taverna/dispatchlayer/Loop";
-
 	private static Logger logger = Logger.getLogger(Loop.class);
 
 	private JsonNode config = JsonNodeFactory.instance.objectNode();
 
-	protected Map<String, AbstractDispatchEvent> incomingJobs = new HashMap<String, AbstractDispatchEvent>();
+	protected Map<String, AbstractDispatchEvent> incomingJobs = new HashMap<>();
+	protected Map<String, AbstractDispatchEvent> outgoingJobs = new HashMap<>();
 
-	protected Map<String, AbstractDispatchEvent> outgoingJobs = new HashMap<String, AbstractDispatchEvent>();
-
+	@Override
 	public void configure(JsonNode config) {
 		this.config = config;
 	}
@@ -113,21 +104,18 @@ public class Loop extends AbstractDispatchLayer<JsonNode> {
 	public void finishedWith(String owningProcess) {
 		String prefix = owningProcess + "[";
 		synchronized (outgoingJobs) {
-			for (String key : new ArrayList<String>(outgoingJobs.keySet())) {
-				if (key.startsWith(prefix)) {
+			for (String key : new ArrayList<>(outgoingJobs.keySet()))
+				if (key.startsWith(prefix))
 					outgoingJobs.remove(key);
-				}
-			}
 		}
 		synchronized (incomingJobs) {
-			for (String key : new ArrayList<String>(incomingJobs.keySet())) {
-				if (key.startsWith(prefix)) {
+			for (String key : new ArrayList<>(incomingJobs.keySet()))
+				if (key.startsWith(prefix))
 					incomingJobs.remove(key);
-				}
-			}
 		}
 	}
 
+	@Override
 	public JsonNode getConfiguration() {
 		return config;
 	}
@@ -157,10 +145,15 @@ public class Loop extends AbstractDispatchLayer<JsonNode> {
 		}
 		checkCondition(jobQueueEvent);
 	}
+	
+	private Activity<?> getCondition() {
+		//return config.getCondition();
+		return null;
+	}
 
 	@Override
 	public void receiveResult(DispatchResultEvent resultEvent) {
-		Activity<?> condition = null;//config.getCondition();
+		Activity<?> condition = getCondition();
 		if (condition == null) {
 			super.receiveResult(resultEvent);
 			return;
@@ -173,7 +166,7 @@ public class Loop extends AbstractDispatchLayer<JsonNode> {
 
 	@Override
 	public void receiveResultCompletion(DispatchCompletionEvent completionEvent) {
-		Activity<?> condition = null;//config.getCondition();
+		Activity<?> condition = getCondition();
 		if (condition == null) {
 			super.receiveResultCompletion(completionEvent);
 			return;
@@ -185,7 +178,7 @@ public class Loop extends AbstractDispatchLayer<JsonNode> {
 	}
 
 	private void checkCondition(AbstractDispatchEvent event) {
-		Activity<?> condition = null;//config.getCondition();
+		Activity<?> condition = getCondition();
 		if (condition == null) {
 			super.receiveError(new DispatchErrorEvent(event.getOwningProcess(),
 					event.getIndex(), event.getContext(),
@@ -216,20 +209,19 @@ public class Loop extends AbstractDispatchLayer<JsonNode> {
 
 	private Map<String, T2Reference> prepareInputs(
 			AbstractAsynchronousActivity asyncCondition, String jobIdentifier) {
-		Map<String, T2Reference> inputs = new HashMap<String, T2Reference>();
+		Map<String, T2Reference> inputs = new HashMap<>();
 		Map<String, T2Reference> inData = getInData(jobIdentifier);
 		Map<String, T2Reference> outData = getOutData(jobIdentifier);
 
 		Set<ActivityInputPort> inputPorts = asyncCondition.getInputPorts();
 		for (ActivityInputPort conditionIn : inputPorts) {
 			String conditionPort = conditionIn.getName();
-			if (outData.containsKey(conditionPort)) {
+			if (outData.containsKey(conditionPort))
 				// Copy from previous output
 				inputs.put(conditionPort, outData.get(conditionPort));
-			} else if (inData.containsKey(conditionPort)) {
+			else if (inData.containsKey(conditionPort))
 				// Copy from original input
 				inputs.put(conditionPort, inData.get(conditionPort));
-			}
 		}
 		return inputs;
 	}
@@ -239,10 +231,9 @@ public class Loop extends AbstractDispatchLayer<JsonNode> {
 		synchronized (incomingJobs) {
 			inEvent = incomingJobs.get(jobIdentifier);
 		}
-		Map<String, T2Reference> inData = new HashMap<String, T2Reference>();
-		if (inEvent instanceof DispatchJobEvent) {
+		Map<String, T2Reference> inData = new HashMap<>();
+		if (inEvent instanceof DispatchJobEvent)
 			inData = ((DispatchJobEvent) inEvent).getData();
-		}
 		return inData;
 	}
 
@@ -251,10 +242,9 @@ public class Loop extends AbstractDispatchLayer<JsonNode> {
 		synchronized (outgoingJobs) {
 			outEvent = outgoingJobs.get(jobIdentifier);
 		}
-		Map<String, T2Reference> outData = new HashMap<String, T2Reference>();
-		if (outEvent instanceof DispatchResultEvent) {
+		Map<String, T2Reference> outData = new HashMap<>();
+		if (outEvent instanceof DispatchResultEvent)
 			outData = ((DispatchResultEvent) outEvent).getData();
-		}
 		return outData;
 	}
 
@@ -265,7 +255,6 @@ public class Loop extends AbstractDispatchLayer<JsonNode> {
 	}
 
 	public static final String LOOP_PORT = "loop";
-
 
 	public class ConditionCallBack implements AsynchronousActivityCallback {
 		private InvocationContext context;
@@ -282,14 +271,17 @@ public class Loop extends AbstractDispatchLayer<JsonNode> {
 			processId = originalEvent.getOwningProcess() + ":condition";
 		}
 
+		@Override
 		public void fail(String message) {
 			fail(message, null, DispatchErrorType.INVOCATION);
 		}
 
+		@Override
 		public void fail(String message, Throwable t) {
 			fail(message, t, DispatchErrorType.INVOCATION);
 		}
 
+		@Override
 		public void fail(String message, Throwable t,
 				DispatchErrorType errorType) {
 			logger.warn("Failed (" + errorType + ") invoking condition service "
@@ -306,18 +298,22 @@ public class Loop extends AbstractDispatchLayer<JsonNode> {
 					DispatchErrorType.INVOCATION, null));
 		}
 
+		@Override
 		public InvocationContext getContext() {
 			return context;
 		}
 
+		@Override
 		public String getParentProcessIdentifier() {
 			return processId;
 		}
 
+		@Override
 		public void receiveCompletion(int[] completionIndex) {
 			// Ignore streaming
 		}
 
+		@Override
 		public void receiveResult(Map<String, T2Reference> data, int[] index) {
 			if (index.length > 0) {
 				// Ignore streaming
@@ -395,18 +391,21 @@ public class Loop extends AbstractDispatchLayer<JsonNode> {
 					.getOwningProcess(), dispatchEvent.getIndex(),
 					dispatchEvent.getContext(), newInputs,
 					((DispatchJobEvent) dispatchEvent).getActivities());
-			// TODO: Should this be registered as an incomingJobs? If so the
-			// conditional
-			// could even feed to itself, and we should also keep a list of
-			// originalJobs.
+			/*
+			 * TODO: Should this be registered as an incomingJobs? If so the
+			 * conditional could even feed to itself, and we should also keep a
+			 * list of originalJobs.
+			 */
 			return newJobEvent;
 		}
 
+		@Override
 		public void requestRun(Runnable runMe) {
 			String newThreadName = "Condition service "
 					+ getParentProcessIdentifier();
 			Thread thread = new Thread(runMe, newThreadName);
 			thread.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+				@Override
 				public void uncaughtException(Thread t, Throwable e) {
 					fail("Uncaught exception while invoking " + jobIdentifier,
 							e);
@@ -416,11 +415,10 @@ public class Loop extends AbstractDispatchLayer<JsonNode> {
 		}
 	}
 
+	@Override
 	public Processor getProcessor() {
-		if (dispatchStack == null) {
+		if (dispatchStack == null)
 			return null;
-		}
 		return dispatchStack.getProcessor();
 	}
-
 }

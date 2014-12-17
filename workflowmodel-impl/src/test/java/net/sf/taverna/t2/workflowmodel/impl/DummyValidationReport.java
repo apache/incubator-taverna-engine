@@ -37,26 +37,32 @@ public class DummyValidationReport implements DataflowValidationReport {
 		this.valid = valid;
 	}
 
+	@Override
 	public boolean isValid() {
 		return valid;
 	}
 
+	@Override
 	public List<? extends TokenProcessingEntity> getUnsatisfiedEntities() {
 		return null;
 	}
 
+	@Override
 	public List<? extends DataflowOutputPort> getUnresolvedOutputs() {
 		return null;
 	}
 
+	@Override
 	public List<? extends TokenProcessingEntity> getFailedEntities() {
 		return null;
 	}
 
+	@Override
 	public Map<TokenProcessingEntity, DataflowValidationReport> getInvalidDataflows() {
 		return null;
 	}
 
+	@Override
 	public boolean isWorkflowIncomplete() {
 		return false;
 	}

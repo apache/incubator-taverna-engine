@@ -36,7 +36,7 @@ import net.sf.taverna.t2.workflowmodel.processor.activity.Job;
  * @author Tom Oinn
  * 
  */
-@SuppressWarnings("unchecked") //suppressed to avoid jdk1.5 compilation errors caused by the declaration IterationInternalEvent<? extends IterationInternalEvent<?>> e
+@SuppressWarnings({ "rawtypes", "serial" }) //suppressed to avoid jdk1.5 compilation errors caused by the declaration IterationInternalEvent<? extends IterationInternalEvent<?>> e
 public class DiagnosticIterationStrategyNode extends
 		AbstractIterationStrategyNode {
 
@@ -101,6 +101,7 @@ public class DiagnosticIterationStrategyNode extends
 		return true;
 	}
 
+	@Override
 	public synchronized void receiveCompletion(int inputIndex,
 			Completion completion) {
 		String owningProcess = completion.getOwningProcess();
@@ -112,6 +113,7 @@ public class DiagnosticIterationStrategyNode extends
 		jobs.add(completion);
 	}
 
+	@Override
 	public synchronized void receiveJob(int inputIndex, Job newJob) {
 		List<IterationInternalEvent> jobs = ownerToJobList.get(newJob.getOwningProcess());
 		if (jobs == null) {
@@ -121,6 +123,7 @@ public class DiagnosticIterationStrategyNode extends
 		jobs.add(newJob);
 	}
 
+	@Override
 	public int getIterationDepth(Map<String, Integer> inputDepths) throws IterationTypeMismatchException {
 		// TODO Auto-generated method stub
 		return 0;

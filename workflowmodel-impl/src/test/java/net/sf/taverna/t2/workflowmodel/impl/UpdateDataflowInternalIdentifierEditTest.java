@@ -22,7 +22,7 @@ package net.sf.taverna.t2.workflowmodel.impl;
 
 import static org.junit.Assert.assertEquals;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
-import net.sf.taverna.t2.workflowmodel.Edit;
+//import net.sf.taverna.t2.workflowmodel.Edit;
 import net.sf.taverna.t2.workflowmodel.Edits;
 
 import org.junit.Test;

@@ -53,32 +53,22 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchJobEven
  * @author Tom Oinn
  * @author David Withers
  * @author Stian Soiland-Reyes
- *
  */
 @DispatchLayerErrorReaction(emits = { JOB }, relaysUnmodified = true, stateEffects = {
 		UPDATE_LOCAL_STATE, REMOVE_LOCAL_STATE })
 @DispatchLayerJobReaction(emits = {}, relaysUnmodified = true, stateEffects = { CREATE_LOCAL_STATE })
 @DispatchLayerResultReaction(emits = {}, relaysUnmodified = true, stateEffects = { REMOVE_LOCAL_STATE })
 public class Retry extends AbstractErrorHandlerLayer<JsonNode> {
-
 	private static final String BACKOFF_FACTOR = "backoffFactor";
-
     private static final String MAX_DELAY = "maxDelay";
-
     private static final String MAX_RETRIES = "maxRetries";
-
     private static final String INITIAL_DELAY = "initialDelay";
-
     public static final String URI = "http://ns.taverna.org.uk/2010/scufl2/taverna/dispatchlayer/Retry";
 
 	private ObjectNode config;
-
     private int maxRetries;
-
     private int initialDelay;
-
     private int maxDelay;
-
     private double backoffFactor;
 
 	private static Timer retryTimer = new Timer("Retry timer", true);
@@ -100,7 +90,6 @@ public class Retry extends AbstractErrorHandlerLayer<JsonNode> {
 	}
 
 	class RetryState extends JobState {
-
 		int currentRetryCount = 0;
 
 		public RetryState(DispatchJobEvent jobEvent) {
@@ -116,10 +105,9 @@ public class Retry extends AbstractErrorHandlerLayer<JsonNode> {
 		 */
 		@Override
 		public boolean handleError() {
-			if (currentRetryCount >= maxRetries) {
+			if (currentRetryCount >= maxRetries)
 				return false;
-			}
-			int delay = (int) (initialDelay * (Math.pow(backoffFactor, currentRetryCount)));
+			int delay = (int) (initialDelay * Math.pow(backoffFactor, currentRetryCount));
 			delay = Math.min(delay, maxDelay);
 			TimerTask task = new TimerTask() {
 				@Override
@@ -127,12 +115,10 @@ public class Retry extends AbstractErrorHandlerLayer<JsonNode> {
 					currentRetryCount++;
 					getBelow().receiveJob(jobEvent);
 				}
-
 			};
 			retryTimer.schedule(task, delay);
 			return true;
 		}
-
 	}
 
 	@Override
@@ -140,6 +126,7 @@ public class Retry extends AbstractErrorHandlerLayer<JsonNode> {
 		return new RetryState(jobEvent);
 	}
 
+	@Override
 	public void configure(JsonNode config) {
 	    ObjectNode defaultConfig = defaultConfig();
         setAllMissingFields((ObjectNode) config, defaultConfig);
@@ -152,11 +139,9 @@ public class Retry extends AbstractErrorHandlerLayer<JsonNode> {
 	}
 
     private void setAllMissingFields(ObjectNode config, ObjectNode defaults) {
-        for (String fieldName : forEach(defaults.fieldNames())) {
-	        if (! config.has(fieldName) || config.get(fieldName).isNull()) {
+        for (String fieldName : forEach(defaults.fieldNames()))
+	        if (! config.has(fieldName) || config.get(fieldName).isNull())
 	            config.put(fieldName, defaults.get(fieldName));
-	        }
-	    }
     }
 
 	private <T> Iterable<T> forEach(final Iterator<T> iterator) {
@@ -169,18 +154,14 @@ public class Retry extends AbstractErrorHandlerLayer<JsonNode> {
     }
 
     private void checkConfig(ObjectNode conf) {
-        if (conf.get(MAX_RETRIES).intValue() < 0) {
+        if (conf.get(MAX_RETRIES).intValue() < 0)
             throw new IllegalArgumentException("maxRetries < 0");
-        }
-        if (conf.get(INITIAL_DELAY).intValue() < 0) { 
+        if (conf.get(INITIAL_DELAY).intValue() < 0)
             throw new IllegalArgumentException("initialDelay < 0");
-        }
-        if (conf.get(MAX_DELAY).intValue() < conf.get(INITIAL_DELAY).intValue()) {
+        if (conf.get(MAX_DELAY).intValue() < conf.get(INITIAL_DELAY).intValue())
             throw new IllegalArgumentException("maxDelay < initialDelay");
-        }
-        if (conf.get(BACKOFF_FACTOR).doubleValue() < 0.0) {
+        if (conf.get(BACKOFF_FACTOR).doubleValue() < 0.0)
             throw new IllegalArgumentException("backoffFactor < 0.0");
-        }
     }
 
     public static ObjectNode defaultConfig() {
@@ -192,7 +173,8 @@ public class Retry extends AbstractErrorHandlerLayer<JsonNode> {
 	    return conf;
     }
 
-    public JsonNode getConfiguration() {
+    @Override
+	public JsonNode getConfiguration() {
 		return this.config;
 	}
 }

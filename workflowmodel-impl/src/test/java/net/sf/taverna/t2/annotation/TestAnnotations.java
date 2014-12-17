@@ -48,7 +48,7 @@ import org.junit.Test;
 
 public class TestAnnotations {
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes", "deprecation" })
 	@Test
 	@Ignore("utterly broken")
 	public void getAnnotationsForADataFlow() {

@@ -35,7 +35,6 @@ public class RetryConfig {
 	private int maxDelay = MAX_DELAY;
 	private int maxRetries = MAX_RETRIES;
 
-
 	/**
 	 * Factor by which the initial delay is multiplied for each retry after the
 	 * first, this allows for exponential backoff of retry times up to a certain
@@ -95,5 +94,4 @@ public class RetryConfig {
 	public void setMaxRetries(int max) {
 		this.maxRetries = max;
 	}
-
 }

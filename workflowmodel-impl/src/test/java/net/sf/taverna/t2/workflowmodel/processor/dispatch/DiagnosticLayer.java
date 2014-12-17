@@ -62,10 +62,12 @@ public class DiagnosticLayer extends AbstractDispatchLayer<Object> {
 		System.out.println("  Purging caches for " + process);
 	}
 
+	@Override
 	public void configure(Object config) {
 		// Do nothing
 	}
 
+	@Override
 	public Object getConfiguration() {
 		return null;
 	}

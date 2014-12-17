@@ -84,17 +84,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public class Parallelize extends AbstractDispatchLayer<JsonNode>
 		implements NotifiableLayer,
 		PropertyContributingDispatchLayer<JsonNode> {
-
 	public static final String URI = "http://ns.taverna.org.uk/2010/scufl2/taverna/dispatchlayer/Parallelize";
-
 	private static Logger logger = Logger.getLogger(Parallelize.class);
 
-	private Map<String, StateModel> stateMap = new HashMap<String, StateModel>();
-
+	private Map<String, StateModel> stateMap = new HashMap<>();
 	private JsonNode config = JsonNodeFactory.instance.objectNode();
-
 	int sentJobsCount = 0;
-
 	int completedJobsCount = 0;
 
 	public Parallelize() {
@@ -112,19 +107,19 @@ public class Parallelize extends AbstractDispatchLayer<JsonNode>
 		((ObjectNode)config).put("maxJobs", maxJobs);
 	}
 
+	@Override
 	public void eventAdded(String owningProcess) {
 		StateModel stateModel;
 		synchronized (stateMap) {
 			stateModel = stateMap.get(owningProcess);
 		}
-		if (stateModel == null) {
+		if (stateModel == null)
 			/*
 			 * Should never see this here, it means we've had duplicate
 			 * completion events from upstream
 			 */
 			throw new WorkflowStructureException(
 					"Unknown owning process " + owningProcess);
-		}
 		synchronized (stateModel) {
 			stateModel.fillFromQueue();
 		}
@@ -132,8 +127,9 @@ public class Parallelize extends AbstractDispatchLayer<JsonNode>
 
 	@Override
 	public void receiveJobQueue(DispatchJobQueueEvent queueEvent) {
-		StateModel model = new StateModel(queueEvent, config.has("maxJobs") ? config.get("maxJobs").intValue() : 1);
-		synchronized(stateMap) {
+		StateModel model = new StateModel(queueEvent,
+				config.has("maxJobs") ? config.get("maxJobs").intValue() : 1);
+		synchronized (stateMap) {
 			stateMap.put(queueEvent.getOwningProcess(), model);
 		}
 		model.fillFromQueue();
@@ -143,7 +139,6 @@ public class Parallelize extends AbstractDispatchLayer<JsonNode>
 		throw new WorkflowStructureException(
 				"Parallelize layer cannot handle job events");
 	}
-
 
 	@Override
 	public void receiveError(DispatchErrorEvent errorEvent) {
@@ -202,8 +197,7 @@ public class Parallelize extends AbstractDispatchLayer<JsonNode>
 
 	@Override
 	public void finishedWith(final String owningProcess) {
-		// Delay the removal of the state to give the monitor
-		// a chance to poll
+		// Delay the removal of the state to give the monitor a chance to poll
 		cleanupTimer.schedule(new TimerTask() {
 			@Override
 			public void run() {
@@ -214,17 +208,18 @@ public class Parallelize extends AbstractDispatchLayer<JsonNode>
 		}, CLEANUP_DELAY_MS);
 	}
 
+	@Override
 	public void configure(JsonNode config) {
 		this.config = config;
 	}
 
+	@Override
 	public JsonNode getConfiguration() {
 		return this.config;
 	}
 
 	/**
-	 * Injects the following properties into its parent processor's property set
-	 * :
+	 * Injects the following properties into its parent processor's property set:
 	 * <ul>
 	 * <li><code>dispatch.parallelize.queuesize [Integer]</code><br/>The current
 	 * size of the incomming job queue, or -1 if the state isn't defined for the
@@ -233,6 +228,7 @@ public class Parallelize extends AbstractDispatchLayer<JsonNode>
 	 * some kind.</li>
 	 * </ul>
 	 */
+	@Override
 	public void injectPropertiesFor(final String owningProcess) {
 		/**
 		 * Property for the queue depth, will evaluate to -1 if there isn't a
@@ -240,69 +236,68 @@ public class Parallelize extends AbstractDispatchLayer<JsonNode>
 		 * if we haven't created the state yet or the queue has been collected)
 		 */
 		MonitorableProperty<Integer> queueSizeProperty = new MonitorableProperty<Integer>() {
-
+			@Override
 			public Date getLastModified() {
 				return new Date();
 			}
 
+			@Override
 			public String[] getName() {
 				return new String[] { "dispatch", "parallelize", "queuesize" };
 			}
 
+			@Override
 			public Integer getValue() throws NoSuchPropertyException {
-
 				StateModel model;
 				synchronized(stateMap) {
 					model = stateMap.get(owningProcess);
 				}
-				if (model != null) {
-					return model.queueSize();
-				} else {
+				if (model == null)
 					return -1;
-				}
+				return model.queueSize();
 			}
-
 		};
 		dispatchStack.receiveMonitorableProperty(queueSizeProperty,
 				owningProcess);
 
 		MonitorableProperty<Integer> sentJobsProperty = new MonitorableProperty<Integer>() {
-
+			@Override
 			public Date getLastModified() {
 				return new Date();
 			}
 
+			@Override
 			public String[] getName() {
 				return new String[] { "dispatch", "parallelize", "sentjobs" };
 			}
 
+			@Override
 			public Integer getValue() throws NoSuchPropertyException {
 				return sentJobsCount;
 			}
-
 		};
 		dispatchStack.receiveMonitorableProperty(sentJobsProperty,
 				owningProcess);
 
 		MonitorableProperty<Integer> completedJobsProperty = new MonitorableProperty<Integer>() {
-
+			@Override
 			public Date getLastModified() {
 				return new Date();
 			}
 
+			@Override
 			public String[] getName() {
 				return new String[] { "dispatch", "parallelize",
 						"completedjobs" };
 			}
 
+			@Override
 			public Integer getValue() throws NoSuchPropertyException {
 				return completedJobsCount;
 			}
-
 		};
 		dispatchStack.receiveMonitorableProperty(completedJobsProperty,
 				owningProcess);
-
 	}
 
 	/**
@@ -311,17 +306,13 @@ public class Parallelize extends AbstractDispatchLayer<JsonNode>
 	 * @author Tom Oinn
 	 *
 	 */
+	// suppressed to avoid jdk1.5 error messages caused by the declaration
+	// IterationInternalEvent<? extends IterationInternalEvent<?>> e
+	@SuppressWarnings("rawtypes")
 	class StateModel {
-
 		private DispatchJobQueueEvent queueEvent;
-
-		@SuppressWarnings("unchecked")
-		// suppressed to avoid jdk1.5 error messages caused by the declaration
-		// IterationInternalEvent<? extends IterationInternalEvent<?>> e
-		private BlockingQueue<IterationInternalEvent> pendingEvents = new LinkedBlockingQueue<IterationInternalEvent>();
-
+		private BlockingQueue<IterationInternalEvent> pendingEvents = new LinkedBlockingQueue<>();
 		private int activeJobs = 0;
-
 		private int maximumJobs;
 
 		/**
@@ -362,9 +353,6 @@ public class Parallelize extends AbstractDispatchLayer<JsonNode>
 		 * jobs list and return
 		 * </ul>
 		 */
-		@SuppressWarnings("unchecked")
-		// suppressed to avoid jdk1.5 error messages caused by the declaration
-		// IterationInternalEvent<? extends IterationInternalEvent<?>> e
 		protected void fillFromQueue() {
 			synchronized (this) {
 				while (queueEvent.getQueue().peek() != null
@@ -374,6 +362,7 @@ public class Parallelize extends AbstractDispatchLayer<JsonNode>
 
 					if (e instanceof Completion && pendingEvents.peek() == null) {
 						new Thread(new Runnable() {
+							@Override
 							public void run() {
 								getAbove().receiveResultCompletion(
 										new DispatchCompletionEvent(e
@@ -415,63 +404,60 @@ public class Parallelize extends AbstractDispatchLayer<JsonNode>
 		 * @param index
 		 * @return
 		 */
-		@SuppressWarnings("unchecked")
-		// suppressed to avoid jdk1.5 error messages caused by the declaration
-		// IterationInternalEvent<? extends IterationInternalEvent<?>> e
 		protected boolean finishWith(int[] index) {
 			synchronized (this) {
+				for (IterationInternalEvent e : new ArrayList<>(pendingEvents)) {
+					if (!(e instanceof Job))
+						continue;
+					Job j = (Job) e;
+					if (!arrayEquals(j.getIndex(), index))
+						continue;
 
-				for (IterationInternalEvent e : new ArrayList<IterationInternalEvent>(
-						pendingEvents)) {
-					if (e instanceof Job) {
-						Job j = (Job) e;
-						if (arrayEquals(j.getIndex(), index)) {
-							// Found a job in the pending events list which has
-							// the same index, remove it and decrement the
-							// current count of active jobs
-							pendingEvents.remove(e);
-							activeJobs--;
-							completedJobsCount++;
-							// Now pull any completion events that have reached
-							// the head of the queue - this indicates that all
-							// the job events which came in before them have
-							// been processed and we can emit the completions
-							while (pendingEvents.peek() != null
-									&& pendingEvents.peek() instanceof Completion) {
-								Completion c = (Completion) pendingEvents
-										.remove();
-								getAbove().receiveResultCompletion(
-										new DispatchCompletionEvent(c
-												.getOwningProcess(), c
-												.getIndex(), c.getContext()));
-
-							}
-							// Refresh from the queue; as we've just decremented
-							// the active job count there should be a worker
-							// available
-							fillFromQueue();
-							// Return true to indicate that we removed a job
-							// event from the queue, that is to say that the
-							// index wasn't that of a partial completion.
-							return true;
-						}
+					/*
+					 * Found a job in the pending events list which has the
+					 * same index, remove it and decrement the current count
+					 * of active jobs
+					 */
+					pendingEvents.remove(e);
+					activeJobs--;
+					completedJobsCount++;
+					/*
+					 * Now pull any completion events that have reached the head
+					 * of the queue - this indicates that all the job events
+					 * which came in before them have been processed and we can
+					 * emit the completions
+					 */
+					while (pendingEvents.peek() != null
+							&& pendingEvents.peek() instanceof Completion) {
+						Completion c = (Completion) pendingEvents.remove();
+						getAbove().receiveResultCompletion(
+								new DispatchCompletionEvent(c
+										.getOwningProcess(), c.getIndex(), c
+										.getContext()));
 					}
+					/*
+					 * Refresh from the queue; as we've just decremented the
+					 * active job count there should be a worker available
+					 */
+					fillFromQueue();
+					/*
+					 * Return true to indicate that we removed a job event from
+					 * the queue, that is to say that the index wasn't that of a
+					 * partial completion.
+					 */
+					return true;
 				}
 			}
 			return false;
 		}
 
 		private boolean arrayEquals(int[] a, int[] b) {
-			if (a.length != b.length) {
+			if (a.length != b.length)
 				return false;
-			}
-			for (int i = 0; i < a.length; i++) {
-				if (a[i] != b[i]) {
+			for (int i = 0; i < a.length; i++)
+				if (a[i] != b[i])
 					return false;
-				}
-			}
 			return true;
 		}
 	}
-
 }

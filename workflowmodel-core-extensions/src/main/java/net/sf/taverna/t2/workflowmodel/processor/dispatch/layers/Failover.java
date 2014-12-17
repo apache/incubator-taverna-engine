@@ -44,18 +44,15 @@ import com.fasterxml.jackson.databind.JsonNode;
  * in the original list and so on. If a failure is received and there are no
  * further activities to use the job fails and the failure is sent back up to
  * the layer above.
- *
+ * 
  * @author Tom Oinn
  * @author Stian Soiland-Reyes
- *
- *
  */
 @DispatchLayerErrorReaction(emits = { JOB }, relaysUnmodified = true, stateEffects = {
 		UPDATE_LOCAL_STATE, REMOVE_LOCAL_STATE })
 @DispatchLayerJobReaction(emits = {}, relaysUnmodified = true, stateEffects = { CREATE_LOCAL_STATE })
 @DispatchLayerResultReaction(emits = {}, relaysUnmodified = true, stateEffects = { REMOVE_LOCAL_STATE })
 public class Failover extends AbstractErrorHandlerLayer<JsonNode> {
-
 	public static final String URI = "http://ns.taverna.org.uk/2010/scufl2/taverna/dispatchlayer/Failover";
 
 	@Override
@@ -71,7 +68,7 @@ public class Failover extends AbstractErrorHandlerLayer<JsonNode> {
 	@Override
 	public void receiveJob(DispatchJobEvent jobEvent) {
 		addJobToStateList(jobEvent);
-		List<Activity<?>> newActivityList = new ArrayList<Activity<?>>();
+		List<Activity<?>> newActivityList = new ArrayList<>();
 		newActivityList.add(jobEvent.getActivities().get(0));
 		getBelow().receiveJob(
 				new DispatchJobEvent(jobEvent.getOwningProcess(), jobEvent
@@ -80,7 +77,6 @@ public class Failover extends AbstractErrorHandlerLayer<JsonNode> {
 	}
 
 	class FailoverState extends JobState {
-
 		int currentActivityIndex = 0;
 
 		public FailoverState(DispatchJobEvent jobEvent) {
@@ -90,27 +86,26 @@ public class Failover extends AbstractErrorHandlerLayer<JsonNode> {
 		@Override
 		public boolean handleError() {
 			currentActivityIndex++;
-			if (currentActivityIndex == jobEvent.getActivities().size()) {
+			if (currentActivityIndex == jobEvent.getActivities().size())
 				return false;
-			} else {
-				List<Activity<?>> newActivityList = new ArrayList<Activity<?>>();
-				newActivityList.add(jobEvent.getActivities().get(
-						currentActivityIndex));
-				getBelow().receiveJob(
-						new DispatchJobEvent(jobEvent.getOwningProcess(),
-								jobEvent.getIndex(), jobEvent.getContext(),
-								jobEvent.getData(), newActivityList));
-				return true;
-			}
+			List<Activity<?>> newActivityList = new ArrayList<>();
+			newActivityList.add(jobEvent.getActivities().get(
+					currentActivityIndex));
+			getBelow().receiveJob(
+					new DispatchJobEvent(jobEvent.getOwningProcess(), jobEvent
+							.getIndex(), jobEvent.getContext(), jobEvent
+							.getData(), newActivityList));
+			return true;
 		}
 	}
 
+	@Override
 	public void configure(JsonNode config) {
 		// Do nothing - there is no configuration to do
 	}
 
+	@Override
 	public JsonNode getConfiguration() {
 		return null;
 	}
-
 }

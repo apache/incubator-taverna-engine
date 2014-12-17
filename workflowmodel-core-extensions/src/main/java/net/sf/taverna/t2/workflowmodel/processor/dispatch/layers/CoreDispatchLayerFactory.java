@@ -47,7 +47,6 @@ import com.fasterxml.jackson.databind.JsonNode;
  * @author David Withers
  */
 public class CoreDispatchLayerFactory implements DispatchLayerFactory {
-
 	private static final URI parallelizeLayer = URI.create(Parallelize.URI);
 	private static final URI errorBounceLayer = URI.create(ErrorBounce.URI);
 	private static final URI failoverLayer = URI.create(Failover.URI);
@@ -72,25 +71,23 @@ public class CoreDispatchLayerFactory implements DispatchLayerFactory {
 
 	@Override
 	public DispatchLayer<?> createDispatchLayer(URI uri) {
-		DispatchLayer<?> dispatchLayer = null;
-		if (parallelizeLayer.equals(uri)) {
-			dispatchLayer = new Parallelize();
-		} else if (errorBounceLayer.equals(uri)) {
-			dispatchLayer = new ErrorBounce();
-		} else if (failoverLayer.equals(uri)) {
-			dispatchLayer = new Failover();
-		} else if (retryLayer.equals(uri)) {
-			dispatchLayer = new Retry();
-		} else if (invokeLayer.equals(uri)) {
-			dispatchLayer = new Invoke();
-		} else if (loopLayer.equals(uri)) {
-			dispatchLayer = new Loop();
-		} else if (intermediateProvenanceLayer.equals(uri)) {
-			dispatchLayer = new IntermediateProvenance();
-		} else if (stopLayer.equals(uri)) {
-			dispatchLayer = new Stop();
-		}
-		return dispatchLayer;
+		if (parallelizeLayer.equals(uri))
+			return new Parallelize();
+		else if (errorBounceLayer.equals(uri))
+			return new ErrorBounce();
+		else if (failoverLayer.equals(uri))
+			return new Failover();
+		else if (retryLayer.equals(uri))
+			return new Retry();
+		else if (invokeLayer.equals(uri))
+			return new Invoke();
+		else if (loopLayer.equals(uri))
+			return new Loop();
+		else if (intermediateProvenanceLayer.equals(uri))
+			return new IntermediateProvenance();
+		else if (stopLayer.equals(uri))
+			return new Stop();
+		return null;
 	}
 
 	@Override
@@ -103,5 +100,4 @@ public class CoreDispatchLayerFactory implements DispatchLayerFactory {
 	public Set<URI> getDispatchLayerTypes() {
 		return dispatchLayerURIs;
 	}
-
 }

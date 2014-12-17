@@ -38,6 +38,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import net.sf.taverna.t2.invocation.Event;
 import net.sf.taverna.t2.monitor.MonitorableProperty;
 import net.sf.taverna.t2.monitor.NoSuchPropertyException;
+import net.sf.taverna.t2.reference.ErrorDocument;
 import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.reference.T2Reference;
 import net.sf.taverna.t2.workflowmodel.OutputPort;
@@ -64,9 +65,9 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchResultE
  * layer should be placed immediately below the parallelize layer in most
  * default cases (this will guarantee the processor never sees a failure message
  * though, which may or may not be desirable)
- *
+ * 
  * @author Tom Oinn
- *
+ * 
  */
 @DispatchLayerErrorReaction(emits = { RESULT }, relaysUnmodified = false, stateEffects = {
 		CREATE_PROCESS_STATE, UPDATE_PROCESS_STATE })
@@ -77,26 +78,23 @@ import net.sf.taverna.t2.workflowmodel.processor.dispatch.events.DispatchResultE
 @SupportsStreamedResult
 public class ErrorBounce extends AbstractDispatchLayer<JsonNode> implements
 		PropertyContributingDispatchLayer<JsonNode> {
-
 	public static final String URI = "http://ns.taverna.org.uk/2010/scufl2/taverna/dispatchlayer/ErrorBounce";
 
 	/**
 	 * Track the number of reflected and translated errors handled by this error
 	 * bounce instance
 	 */
-	private Map<String, ErrorBounceState> state = new ConcurrentHashMap<String, ErrorBounceState>();
+	private Map<String, ErrorBounceState> state = new ConcurrentHashMap<>();
 
 	private int totalTranslatedErrors = 0;
 	private int totalReflectedErrors = 0;
 
 	private synchronized ErrorBounceState getState(String owningProcess) {
-		if (state.containsKey(owningProcess)) {
+		if (state.containsKey(owningProcess))
 			return state.get(owningProcess);
-		} else {
-			ErrorBounceState ebs = new ErrorBounceState();
-			state.put(owningProcess, ebs);
-			return ebs;
-		}
+		ErrorBounceState ebs = new ErrorBounceState();
+		state.put(owningProcess, ebs);
+		return ebs;
 	}
 
 	/**
@@ -106,21 +104,17 @@ public class ErrorBounce extends AbstractDispatchLayer<JsonNode> implements
 	 */
 	@Override
 	public void receiveJob(DispatchJobEvent jobEvent) {
-		Set<T2Reference> errorReferences = new HashSet<T2Reference>();
-		for (T2Reference ei : jobEvent.getData().values()) {
-			if (ei.containsErrors()) {
+		Set<T2Reference> errorReferences = new HashSet<>();
+		for (T2Reference ei : jobEvent.getData().values())
+			if (ei.containsErrors())
 				errorReferences.add(ei);
-			}
-		}
-		if (errorReferences.isEmpty()) {
+		if (errorReferences.isEmpty())
 			// relay the message down...
 			getBelow().receiveJob(jobEvent);
-		} else {
-			getState(jobEvent.getOwningProcess())
-			.incrementErrorsReflected();
+		else {
+			getState(jobEvent.getOwningProcess()).incrementErrorsReflected();
 			sendErrorOutput(jobEvent, null, errorReferences);
 		}
-
 	}
 
 	/**
@@ -137,48 +131,55 @@ public class ErrorBounce extends AbstractDispatchLayer<JsonNode> implements
 	/**
 	 * Construct and send a new result message with error documents in place of
 	 * all outputs at the appropriate depth
-	 *
+	 * 
 	 * @param event
 	 * @param cause
 	 * @param errorReferences
 	 */
-	private void sendErrorOutput(Event<?> event, Throwable cause, Set<T2Reference> errorReferences) {
+	private void sendErrorOutput(Event<?> event, Throwable cause,
+			Set<T2Reference> errorReferences) {
 		ReferenceService rs = event.getContext().getReferenceService();
 
 		Processor p = dispatchStack.getProcessor();
-		Map<String, T2Reference> outputDataMap = new HashMap<String, T2Reference>();
+		Map<String, T2Reference> outputDataMap = new HashMap<>();
 		String[] owningProcessArray = event.getOwningProcess().split(":");
 		String processor = owningProcessArray[owningProcessArray.length - 1];
 		for (OutputPort op : p.getOutputPorts()) {
-			String message = "Processor '" + processor + "' - Port '" + op.getName() + "'";
-			if (event instanceof DispatchErrorEvent) {
+			String message = "Processor '" + processor + "' - Port '"
+					+ op.getName() + "'";
+			if (event instanceof DispatchErrorEvent)
 				message += ": " + ((DispatchErrorEvent) event).getMessage();
-			}
-			if (cause != null) {
-				outputDataMap.put(op.getName(), rs.getErrorDocumentService()
-						.registerError(message, cause, op.getDepth(), event.getContext()).getId());
-			} else {
-				outputDataMap.put(op.getName(), rs.getErrorDocumentService()
-						.registerError(message, errorReferences, op.getDepth(), event.getContext()).getId());
-			}
+			ErrorDocument ed;
+			if (cause != null)
+				ed = rs.getErrorDocumentService().registerError(message, cause,
+						op.getDepth(), event.getContext());
+			else
+				ed = rs.getErrorDocumentService().registerError(message,
+						errorReferences, op.getDepth(), event.getContext());
+			outputDataMap.put(op.getName(), ed.getId());
 		}
-		DispatchResultEvent dre = new DispatchResultEvent(event.getOwningProcess(),
-				event.getIndex(), event.getContext(), outputDataMap, false);
+		DispatchResultEvent dre = new DispatchResultEvent(
+				event.getOwningProcess(), event.getIndex(), event.getContext(),
+				outputDataMap, false);
 		getAbove().receiveResult(dre);
 	}
 
+	@Override
 	public void configure(JsonNode config) {
 		// Do nothing - no configuration required
 	}
 
+	@Override
 	public JsonNode getConfiguration() {
 		// Layer has no configuration associated
 		return null;
 	}
 
+	@Override
 	public void finishedWith(final String owningProcess) {
-		// Delay the removal of the state to give the monitor
-		// a chance to poll
+		/*
+		 * Delay the removal of the state to give the monitor a chance to poll
+		 */
 		cleanupTimer.schedule(new TimerTask() {
 			@Override
 			public void run() {
@@ -194,91 +195,96 @@ public class ErrorBounce extends AbstractDispatchLayer<JsonNode> implements
 	 * downstream in the stack that have been re-written as complete results
 	 * containing error documents.
 	 */
+	@Override
 	public void injectPropertiesFor(final String owningProcess) {
-
 		MonitorableProperty<Integer> errorsReflectedProperty = new MonitorableProperty<Integer>() {
+			@Override
 			public Date getLastModified() {
 				return new Date();
 			}
 
+			@Override
 			public String[] getName() {
 				return new String[] { "dispatch", "errorbounce", "reflected" };
 			}
 
+			@Override
 			public Integer getValue() throws NoSuchPropertyException {
 				ErrorBounceState ebs = state.get(owningProcess);
-				if (ebs == null) {
+				if (ebs == null)
 					return 0;
-				} else {
-					return ebs.getErrorsReflected();
-				}
+				return ebs.getErrorsReflected();
 			}
 		};
 		dispatchStack.receiveMonitorableProperty(errorsReflectedProperty,
 				owningProcess);
 
 		MonitorableProperty<Integer> errorsTranslatedProperty = new MonitorableProperty<Integer>() {
+			@Override
 			public Date getLastModified() {
 				return new Date();
 			}
 
+			@Override
 			public String[] getName() {
 				return new String[] { "dispatch", "errorbounce", "translated" };
 			}
 
+			@Override
 			public Integer getValue() throws NoSuchPropertyException {
 				ErrorBounceState ebs = state.get(owningProcess);
-				if (ebs == null) {
+				if (ebs == null)
 					return 0;
-				} else {
-					return ebs.getErrorsTranslated();
-				}
+				return ebs.getErrorsTranslated();
 			}
 		};
 		dispatchStack.receiveMonitorableProperty(errorsTranslatedProperty,
 				owningProcess);
 
 		MonitorableProperty<Integer> totalTranslatedTranslatedProperty = new MonitorableProperty<Integer>() {
+			@Override
 			public Date getLastModified() {
 				return new Date();
 			}
 
+			@Override
 			public String[] getName() {
-				return new String[] { "dispatch", "errorbounce", "totalTranslated" };
+				return new String[] { "dispatch", "errorbounce",
+						"totalTranslated" };
 			}
 
+			@Override
 			public Integer getValue() throws NoSuchPropertyException {
 				return totalTranslatedErrors;
 			}
 		};
-		dispatchStack.receiveMonitorableProperty(totalTranslatedTranslatedProperty,
-				owningProcess);
+		dispatchStack.receiveMonitorableProperty(
+				totalTranslatedTranslatedProperty, owningProcess);
 
 		MonitorableProperty<Integer> totalReflectedTranslatedProperty = new MonitorableProperty<Integer>() {
+			@Override
 			public Date getLastModified() {
 				return new Date();
 			}
 
+			@Override
 			public String[] getName() {
-				return new String[] { "dispatch", "errorbounce", "totalReflected" };
+				return new String[] { "dispatch", "errorbounce",
+						"totalReflected" };
 			}
 
+			@Override
 			public Integer getValue() throws NoSuchPropertyException {
 				return totalReflectedErrors;
 			}
 		};
-		dispatchStack.receiveMonitorableProperty(totalReflectedTranslatedProperty,
-				owningProcess);
-
-
-
+		dispatchStack.receiveMonitorableProperty(
+				totalReflectedTranslatedProperty, owningProcess);
 	}
-
 
 	public class ErrorBounceState {
 		private int errorsReflected = 0;
 		private int errorsTranslated = 0;
-
 
 		/**
 		 * Number of times the bounce layer has converted an incoming job event
@@ -294,26 +300,25 @@ public class ErrorBounce extends AbstractDispatchLayer<JsonNode> implements
 		 * event into a result containing error tokens
 		 */
 		int getErrorsTranslated() {
-			return this.errorsTranslated;
+			return errorsTranslated;
 		}
 
 		void incrementErrorsReflected() {
-			 synchronized(this) {
-				 errorsReflected++;
-			 }
-			synchronized(ErrorBounce.this) {
+			synchronized (this) {
+				errorsReflected++;
+			}
+			synchronized (ErrorBounce.this) {
 				totalReflectedErrors++;
 			}
 		}
 
 		void incrementErrorsTranslated() {
-			synchronized(this) {
+			synchronized (this) {
 				errorsTranslated++;
 			}
-			synchronized(ErrorBounce.this) {
+			synchronized (ErrorBounce.this) {
 				totalTranslatedErrors++;
 			}
 		}
 	}
-
 }

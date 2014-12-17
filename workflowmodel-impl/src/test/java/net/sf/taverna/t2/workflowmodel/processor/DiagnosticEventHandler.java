@@ -37,6 +37,7 @@ public class DiagnosticEventHandler extends AbstractAnnotatedThing<Port> impleme
 	
 	protected int eventCount = 0;
 
+	@Override
 	public synchronized void receiveEvent(WorkflowDataToken token) {
 		eventCount++;
 		logger.debug(token);
@@ -50,14 +51,17 @@ public class DiagnosticEventHandler extends AbstractAnnotatedThing<Port> impleme
 		this.eventCount = 0;
 	}
 
+	@Override
 	public int getDepth() {
 		return 0;
 	}
 
+	@Override
 	public String getName() {
 		return "Test port";
 	}
 
+	@Override
 	public Datalink getIncomingLink() {
 		// TODO Auto-generated method stub
 		return null;
