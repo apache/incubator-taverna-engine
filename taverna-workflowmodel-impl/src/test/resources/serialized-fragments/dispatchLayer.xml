@@ -1,0 +1,11 @@
+<dispatchLayer xmlns="http://taverna.sf.net/2008/xml/t2flow">
+	<class>
+		net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.Parallelize
+	</class>
+	<configBean encoding="xstream">
+		<net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.ParallelizeConfig
+			xmlns="">
+			<maxJobs>7</maxJobs>
+		</net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.ParallelizeConfig>
+	</configBean>
+</dispatchLayer>

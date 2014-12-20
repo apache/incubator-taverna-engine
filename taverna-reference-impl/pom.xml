@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.sf.taverna.t2</groupId>
+		<artifactId>core</artifactId>
+		<version>2.0.1-SNAPSHOT</version>
+	</parent>
+	<groupId>net.sf.taverna.t2.core</groupId>
+	<artifactId>reference-impl</artifactId>
+	<packaging>bundle</packaging>
+	<name>Implementation package for the T2 reference manager</name>
+	<description>
+		Implementations of the core APIs, not including extension point
+		implementations. The extension point implementations that can be
+		considered as core functionality (files, URLs etc) are held in
+		the t2reference-core-extensions package. This package contains
+		implementations of the data access objects, translator
+		infrastructure etc.
+    </description>
+
+	<properties>
+		<aspectj.version>1.6.0</aspectj.version>
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Import-Package>
+							org.aspectj.lang,
+							org.springframework.orm.*,
+							org.hibernate.*,
+							org.hibernate.cfg,
+							org.hibernate.proxy, *
+						</Import-Package>
+						<!-- <Import-Package> org.aspectj.lang;resolution:=optional, org.springframework.orm.*;resolution:=optional,
+							org.hibernate.*;resolution:=optional, org.hibernate.proxy;resolution:=optional,
+							org.apache.derby.jdbc, * </Import-Package> -->
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<dependencies>
+		<dependency>
+			<groupId>net.sf.taverna.t2.core</groupId>
+			<artifactId>reference-api</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>uk.org.taverna.configuration</groupId>
+			<artifactId>taverna-database-configuration-api</artifactId>
+			<version>${taverna.configuration.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>org.springframework.orm</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>org.springframework.transaction</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>com.springsource.org.aspectj.weaver</artifactId>
+			<version>${aspectj.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.taverna.t2.core</groupId>
+			<artifactId>reference-testhelpers</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>com.springsource.org.hibernate</artifactId>
+			<version>${hibernate.version}</version>
+			<!-- <optional>true</optional> -->
+			<exclusions>
+				<exclusion>
+					<groupId>javax.transaction</groupId>
+					<artifactId>jta</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>net.sf.ehcache</groupId>
+					<artifactId>ehcache</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>asm</groupId>
+					<artifactId>asm-attrs</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>antlr</groupId>
+					<artifactId>antlr</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>javax.transaction</groupId>
+			<artifactId>com.springsource.javax.transaction</artifactId>
+			<version>${javax.transaction.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.derby</groupId>
+			<artifactId>com.springsource.org.apache.derby</artifactId>
+			<version>${derby.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>geronimo-spec</groupId>
+			<artifactId>geronimo-spec-jta</artifactId>
+			<version>${geronimo.spec.jta.version}</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>

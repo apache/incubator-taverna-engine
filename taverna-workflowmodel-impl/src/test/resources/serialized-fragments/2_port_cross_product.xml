@@ -1,0 +1,10 @@
+<iterationStrategyStack xmlns="http://taverna.sf.net/2008/xml/t2flow">
+	<iteration>
+		<strategy>
+			<cross>
+				<port name="nested_beanshell_in" depth="0" />
+				<port name="nested_beanshell_in2" depth="1" />
+			</cross>
+		</strategy>
+	</iteration>
+</iterationStrategyStack>

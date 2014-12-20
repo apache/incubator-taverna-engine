@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                           http://www.springframework.org/schema/beans/spring-beans.xsd">
+                           
+	<bean id="uriSource" class="net.sf.taverna.t2.annotation.impl.URISource" />
+	
+	<bean id="disputeEventDetails" class="net.sf.taverna.t2.annotation.impl.DisputeEventDetails" />
+	
+	<bean id="editsImpl" class="net.sf.taverna.t2.workflowmodel.impl.EditsImpl" />
+	
+</beans>

@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml:Package xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:uml="http://www.eclipse.org/uml2/3.0.0/UML" xmi:id="_sneugE7WEd-4z_lD9gn2Tw" name="database-schema">
+  <elementImport xmi:id="_sr1DAE7WEd-4z_lD9gn2Tw">
+    <importedElement xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Boolean"/>
+  </elementImport>
+  <elementImport xmi:id="_sr6ikE7WEd-4z_lD9gn2Tw">
+    <importedElement xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+  </elementImport>
+  <elementImport xmi:id="_sr7JoE7WEd-4z_lD9gn2Tw">
+    <importedElement xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#UnlimitedNatural"/>
+  </elementImport>
+  <elementImport xmi:id="_sr7JoU7WEd-4z_lD9gn2Tw">
+    <importedElement xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+  </elementImport>
+  <packagedElement xmi:type="uml:Class" xmi:id="_v8DdoE7WEd-4z_lD9gn2Tw" name="WorkflowRun">
+    <ownedAttribute xmi:id="_EGXv8E7ZEd-4z_lD9gn2Tw" name="&lt;PK> workflowRunId" aggregation="composite"/>
+    <ownedAttribute xmi:id="_GHJU4E7ZEd-4z_lD9gn2Tw" name="workflowId" aggregation="composite"/>
+    <ownedAttribute xmi:id="_HPA74E7ZEd-4z_lD9gn2Tw" name="runStarted" aggregation="composite"/>
+    <ownedAttribute xmi:id="_JEjboFESEd-nO4bXYmJbIQ" name="&lt;PK> nestedProcessorEnactmentId" aggregation="composite"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Class" xmi:id="_yEqv8E7WEd-4z_lD9gn2Tw" name="Workflow">
+    <ownedAttribute xmi:id="_FPXDME7XEd-4z_lD9gn2Tw" name="&lt;PK> workflowId" aggregation="composite">
+      <defaultValue xmi:type="uml:LiteralString" xmi:id="_4vFHkE7YEd-4z_lD9gn2Tw" value=""/>
+    </ownedAttribute>
+    <ownedAttribute xmi:id="_M4h0AE7XEd-4z_lD9gn2Tw" name="dataflow" aggregation="composite"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Association" xmi:id="_KN69AE7ZEd-4z_lD9gn2Tw" memberEnd="_KN7kEE7ZEd-4z_lD9gn2Tw _KN8yMU7ZEd-4z_lD9gn2Tw">
+    <ownedEnd xmi:id="_KN7kEE7ZEd-4z_lD9gn2Tw" name="workflowId" type="_v8DdoE7WEd-4z_lD9gn2Tw" association="_KN69AE7ZEd-4z_lD9gn2Tw">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_KN8yME7ZEd-4z_lD9gn2Tw" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_KN8LIE7ZEd-4z_lD9gn2Tw" value="1"/>
+    </ownedEnd>
+    <ownedEnd xmi:id="_KN8yMU7ZEd-4z_lD9gn2Tw" name="dst" type="_yEqv8E7WEd-4z_lD9gn2Tw" association="_KN69AE7ZEd-4z_lD9gn2Tw">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_KN9ZQU7ZEd-4z_lD9gn2Tw" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_KN9ZQE7ZEd-4z_lD9gn2Tw" value="1"/>
+    </ownedEnd>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Class" xmi:id="_OKWWUE7ZEd-4z_lD9gn2Tw" name="Processor">
+    <ownedAttribute xmi:id="_RdvZsE7ZEd-4z_lD9gn2Tw" name="&lt;PK> processorId" aggregation="composite"/>
+    <ownedAttribute xmi:id="_WVP7ME7ZEd-4z_lD9gn2Tw" name="processorName" aggregation="composite"/>
+    <ownedAttribute xmi:id="_XbvpME7ZEd-4z_lD9gn2Tw" name="workflowId" aggregation="composite"/>
+    <ownedAttribute xmi:id="_YjvzEE7ZEd-4z_lD9gn2Tw" name="firstActivityClass" aggregation="composite"/>
+    <ownedAttribute xmi:id="_ZYtFIE7ZEd-4z_lD9gn2Tw" name="isTopLevel" aggregation="composite"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Association" xmi:id="_aUdiwE7ZEd-4z_lD9gn2Tw" name="workflowId" memberEnd="_aUeJ0E7ZEd-4z_lD9gn2Tw _aUfX8E7ZEd-4z_lD9gn2Tw">
+    <ownedEnd xmi:id="_aUeJ0E7ZEd-4z_lD9gn2Tw" name="workflowId" type="_OKWWUE7ZEd-4z_lD9gn2Tw" association="_aUdiwE7ZEd-4z_lD9gn2Tw">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_aUew4U7ZEd-4z_lD9gn2Tw" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_aUew4E7ZEd-4z_lD9gn2Tw" value="1"/>
+    </ownedEnd>
+    <ownedEnd xmi:id="_aUfX8E7ZEd-4z_lD9gn2Tw" name="dst" type="_yEqv8E7WEd-4z_lD9gn2Tw" association="_aUdiwE7ZEd-4z_lD9gn2Tw">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_aUf_AU7ZEd-4z_lD9gn2Tw" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_aUf_AE7ZEd-4z_lD9gn2Tw" value="1"/>
+    </ownedEnd>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Class" xmi:id="_JrqIAE7aEd-4z_lD9gn2Tw" name="Port" clientDependency="_VoSR4FEmEd-nO4bXYmJbIQ">
+    <ownedAttribute xmi:id="_WtxukFELEd-nO4bXYmJbIQ" name="&lt;PK> portId" aggregation="composite"/>
+    <ownedAttribute xmi:id="_ZN-acFELEd-nO4bXYmJbIQ" name="portName" aggregation="composite"/>
+    <ownedAttribute xmi:id="_Z4GVgFELEd-nO4bXYmJbIQ" name="processorId" aggregation="composite"/>
+    <ownedAttribute xmi:id="_cb-ngFELEd-nO4bXYmJbIQ" name="workflowId" aggregation="composite"/>
+    <ownedAttribute xmi:id="_eQtUgFELEd-nO4bXYmJbIQ" name="depth" aggregation="composite"/>
+    <ownedAttribute xmi:id="_fij98FELEd-nO4bXYmJbIQ" name="resolvedDepth" aggregation="composite"/>
+    <ownedAttribute xmi:id="_g184cFELEd-nO4bXYmJbIQ" name="iterationStrategyOrder" aggregation="composite"/>
+    <ownedAttribute xmi:id="_hYIYcFELEd-nO4bXYmJbIQ" name="anlSet" aggregation="composite"/>
+    <ownedAttribute xmi:id="_L2VjkFEOEd-nO4bXYmJbIQ" name="isInputPort" aggregation="composite"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Association" xmi:id="__5-xMFELEd-nO4bXYmJbIQ" name="" memberEnd="__6BNcFELEd-nO4bXYmJbIQ __6DCoVELEd-nO4bXYmJbIQ">
+    <ownedEnd xmi:id="__6BNcFELEd-nO4bXYmJbIQ" name="src" type="_OKWWUE7ZEd-4z_lD9gn2Tw" association="__5-xMFELEd-nO4bXYmJbIQ">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="__6DCoFELEd-nO4bXYmJbIQ" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="__6CbkFELEd-nO4bXYmJbIQ" value="1"/>
+    </ownedEnd>
+    <ownedEnd xmi:id="__6DCoVELEd-nO4bXYmJbIQ" name="processorId" type="_JrqIAE7aEd-4z_lD9gn2Tw" association="__5-xMFELEd-nO4bXYmJbIQ">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="__6DpsVELEd-nO4bXYmJbIQ" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="__6DpsFELEd-nO4bXYmJbIQ" value="1"/>
+    </ownedEnd>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Class" xmi:id="_BFzOoFENEd-nO4bXYmJbIQ" name="Datalink">
+    <ownedAttribute xmi:id="_DiWJkFENEd-nO4bXYmJbIQ" name="&lt;PK> sourcePortId" aggregation="composite"/>
+    <ownedAttribute xmi:id="_F_kZ8FENEd-nO4bXYmJbIQ" name="&lt;PK> destinationPortId" aggregation="composite"/>
+    <ownedAttribute xmi:id="_OnfckFEOEd-nO4bXYmJbIQ" name="sourcePortName" aggregation="composite"/>
+    <ownedAttribute xmi:id="_P1ObAFEOEd-nO4bXYmJbIQ" name="sourceProcessorName" aggregation="composite"/>
+    <ownedAttribute xmi:id="_RbdZAFEOEd-nO4bXYmJbIQ" name="destinationPortName" aggregation="composite"/>
+    <ownedAttribute xmi:id="_Ssx28FEOEd-nO4bXYmJbIQ" name="destinationProcessorName" aggregation="composite"/>
+    <ownedAttribute xmi:id="_YeNqEFEOEd-nO4bXYmJbIQ" name="workflowId" aggregation="composite"/>
+    <ownedAttribute xmi:id="_QohIAFHxEd-nO4bXYmJbIQ" name="&lt;PK> mergePosition" aggregation="composite"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Association" xmi:id="_PsnuEFENEd-nO4bXYmJbIQ" memberEnd="_PsoVIFENEd-nO4bXYmJbIQ _Pso8MVENEd-nO4bXYmJbIQ">
+    <ownedEnd xmi:id="_PsoVIFENEd-nO4bXYmJbIQ" name="sourcePortId" type="_BFzOoFENEd-nO4bXYmJbIQ" association="_PsnuEFENEd-nO4bXYmJbIQ">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_Pso8MFENEd-nO4bXYmJbIQ" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_PsoVIVENEd-nO4bXYmJbIQ" value="1"/>
+    </ownedEnd>
+    <ownedEnd xmi:id="_Pso8MVENEd-nO4bXYmJbIQ" name="dst" type="_JrqIAE7aEd-4z_lD9gn2Tw" association="_PsnuEFENEd-nO4bXYmJbIQ">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_PspjQVENEd-nO4bXYmJbIQ" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_PspjQFENEd-nO4bXYmJbIQ" value="1"/>
+    </ownedEnd>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Association" xmi:id="_RgRdAFENEd-nO4bXYmJbIQ" memberEnd="_RgSEEFENEd-nO4bXYmJbIQ _RgTSMVENEd-nO4bXYmJbIQ">
+    <ownedEnd xmi:id="_RgSEEFENEd-nO4bXYmJbIQ" name="src" type="_JrqIAE7aEd-4z_lD9gn2Tw" association="_RgRdAFENEd-nO4bXYmJbIQ">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_RgTSMFENEd-nO4bXYmJbIQ" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_RgSrIFENEd-nO4bXYmJbIQ" value="1"/>
+    </ownedEnd>
+    <ownedEnd xmi:id="_RgTSMVENEd-nO4bXYmJbIQ" name="destinationPortId" type="_BFzOoFENEd-nO4bXYmJbIQ" association="_RgRdAFENEd-nO4bXYmJbIQ">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_RgT5QVENEd-nO4bXYmJbIQ" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_RgT5QFENEd-nO4bXYmJbIQ" value="1"/>
+    </ownedEnd>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Class" xmi:id="_VA7gUFENEd-nO4bXYmJbIQ" name="PortValue" clientDependency="_UV0kcFEmEd-nO4bXYmJbIQ">
+    <ownedAttribute xmi:id="_Yz_iQFENEd-nO4bXYmJbIQ" name="&lt;PK> portId" aggregation="composite"/>
+    <ownedAttribute xmi:id="_baKTQFENEd-nO4bXYmJbIQ" name="workflowRunId" aggregation="composite"/>
+    <ownedAttribute xmi:id="_rZgr4FENEd-nO4bXYmJbIQ" name="&lt;PK> iteration" aggregation="composite"/>
+    <ownedAttribute xmi:id="_yNKJ8FENEd-nO4bXYmJbIQ" name="valueT2Reference" aggregation="composite"/>
+    <ownedAttribute xmi:id="_YQGDoFEQEd-nO4bXYmJbIQ" name="portName" aggregation="composite"/>
+    <ownedAttribute xmi:id="_ZiuJIFEQEd-nO4bXYmJbIQ" name="workflowId" aggregation="composite"/>
+    <ownedAttribute xmi:id="_a1RWIFEQEd-nO4bXYmJbIQ" name="collectionValueRef" aggregation="composite"/>
+    <ownedAttribute xmi:id="_f2J2EFEQEd-nO4bXYmJbIQ" name="collectionPosition" aggregation="composite"/>
+    <ownedAttribute xmi:id="_kEh7AFEQEd-nO4bXYmJbIQ" name="valueType" aggregation="composite"/>
+    <ownedAttribute xmi:id="_bUoJoFEmEd-nO4bXYmJbIQ" name="processorId" aggregation="composite"/>
+    <ownedAttribute xmi:id="_OCA-4FE4Ed-nO4bXYmJbIQ" name="&lt;PK> processorEnactmentId" aggregation="composite"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Association" xmi:id="_nKV8wFENEd-nO4bXYmJbIQ" memberEnd="_nKWj0FENEd-nO4bXYmJbIQ _nKXx8VENEd-nO4bXYmJbIQ">
+    <ownedEnd xmi:id="_nKWj0FENEd-nO4bXYmJbIQ" name="workflowRunId" type="_VA7gUFENEd-nO4bXYmJbIQ" association="_nKV8wFENEd-nO4bXYmJbIQ">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_nKXx8FENEd-nO4bXYmJbIQ" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_nKXK4FENEd-nO4bXYmJbIQ" value="1"/>
+    </ownedEnd>
+    <ownedEnd xmi:id="_nKXx8VENEd-nO4bXYmJbIQ" name="dst" type="_v8DdoE7WEd-4z_lD9gn2Tw" association="_nKV8wFENEd-nO4bXYmJbIQ">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_nKYZAVENEd-nO4bXYmJbIQ" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_nKYZAFENEd-nO4bXYmJbIQ" value="1"/>
+    </ownedEnd>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Class" xmi:id="_9CkNQFENEd-nO4bXYmJbIQ" name="PortCollection">
+    <ownedAttribute xmi:id="__sA7wFENEd-nO4bXYmJbIQ" name="&lt;PK> portId" aggregation="composite"/>
+    <ownedAttribute xmi:id="_AXQ4MFEOEd-nO4bXYmJbIQ" name="workflowRunId" aggregation="composite"/>
+    <ownedAttribute xmi:id="_BhWFsFEOEd-nO4bXYmJbIQ" name="&lt;PK> iteration" isOrdered="true" aggregation="composite"/>
+    <ownedAttribute xmi:id="_B7qqMFEOEd-nO4bXYmJbIQ" name="collectionT2Reference" aggregation="composite"/>
+    <ownedAttribute xmi:id="_Yi3zsFEmEd-nO4bXYmJbIQ" name="processorId" aggregation="composite"/>
+    <ownedAttribute xmi:id="_dDQOoFEmEd-nO4bXYmJbIQ" name="portName" aggregation="composite"/>
+    <ownedAttribute xmi:id="_j0l_kFEmEd-nO4bXYmJbIQ" name="parentCollectionT2Reference" aggregation="composite"/>
+    <ownedAttribute xmi:id="_cYxCAFE4Ed-nO4bXYmJbIQ" name="&lt;PK> processorEnactmentId" aggregation="composite"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Association" xmi:id="_ZzvSkFEOEd-nO4bXYmJbIQ" memberEnd="_ZzvSkVEOEd-nO4bXYmJbIQ _ZzwgsVEOEd-nO4bXYmJbIQ">
+    <ownedEnd xmi:id="_ZzvSkVEOEd-nO4bXYmJbIQ" name="workflowId" type="_BFzOoFENEd-nO4bXYmJbIQ" association="_ZzvSkFEOEd-nO4bXYmJbIQ">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_ZzwgsFEOEd-nO4bXYmJbIQ" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_Zzv5oFEOEd-nO4bXYmJbIQ" value="1"/>
+    </ownedEnd>
+    <ownedEnd xmi:id="_ZzwgsVEOEd-nO4bXYmJbIQ" name="dst" type="_yEqv8E7WEd-4z_lD9gn2Tw" association="_ZzvSkFEOEd-nO4bXYmJbIQ">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_ZzxHwVEOEd-nO4bXYmJbIQ" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_ZzxHwFEOEd-nO4bXYmJbIQ" value="1"/>
+    </ownedEnd>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Class" xmi:id="_mzS5QFEOEd-nO4bXYmJbIQ" name="NestedWorkflow">
+    <ownedAttribute xmi:id="_o6U3MFEOEd-nO4bXYmJbIQ" name="&lt;PK> workflowId" aggregation="composite"/>
+    <ownedAttribute xmi:id="_pvfkoFEOEd-nO4bXYmJbIQ" name="parentWorkflowId" aggregation="composite"/>
+    <ownedAttribute xmi:id="_qllfIFEOEd-nO4bXYmJbIQ" name="&lt;PK> processorId" aggregation="composite"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Association" xmi:id="_u7KYQFEOEd-nO4bXYmJbIQ" memberEnd="_u7K_UFEOEd-nO4bXYmJbIQ _u7MNcFEOEd-nO4bXYmJbIQ">
+    <ownedEnd xmi:id="_u7K_UFEOEd-nO4bXYmJbIQ" name="processorId" type="_mzS5QFEOEd-nO4bXYmJbIQ" association="_u7KYQFEOEd-nO4bXYmJbIQ">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_u7LmYVEOEd-nO4bXYmJbIQ" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_u7LmYFEOEd-nO4bXYmJbIQ" value="1"/>
+    </ownedEnd>
+    <ownedEnd xmi:id="_u7MNcFEOEd-nO4bXYmJbIQ" name="dst" type="_OKWWUE7ZEd-4z_lD9gn2Tw" association="_u7KYQFEOEd-nO4bXYmJbIQ">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_u7M0gVEOEd-nO4bXYmJbIQ" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_u7M0gFEOEd-nO4bXYmJbIQ" value="1"/>
+    </ownedEnd>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Association" xmi:id="_vWUqQFEOEd-nO4bXYmJbIQ" memberEnd="_vWUqQVEOEd-nO4bXYmJbIQ _vWVRUlEOEd-nO4bXYmJbIQ">
+    <ownedEnd xmi:id="_vWUqQVEOEd-nO4bXYmJbIQ" name="workflowId" type="_mzS5QFEOEd-nO4bXYmJbIQ" association="_vWUqQFEOEd-nO4bXYmJbIQ">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_vWVRUVEOEd-nO4bXYmJbIQ" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_vWVRUFEOEd-nO4bXYmJbIQ" value="1"/>
+    </ownedEnd>
+    <ownedEnd xmi:id="_vWVRUlEOEd-nO4bXYmJbIQ" name="dst" type="_yEqv8E7WEd-4z_lD9gn2Tw" association="_vWUqQFEOEd-nO4bXYmJbIQ">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_vWV4YVEOEd-nO4bXYmJbIQ" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_vWV4YFEOEd-nO4bXYmJbIQ" value="1"/>
+    </ownedEnd>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Association" xmi:id="_-kyYgFEOEd-nO4bXYmJbIQ" memberEnd="_-ky_kFEOEd-nO4bXYmJbIQ _-k0NsVEOEd-nO4bXYmJbIQ">
+    <ownedEnd xmi:id="_-ky_kFEOEd-nO4bXYmJbIQ" name="parentWorkflowId" type="_mzS5QFEOEd-nO4bXYmJbIQ" association="_-kyYgFEOEd-nO4bXYmJbIQ">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_-k0NsFEOEd-nO4bXYmJbIQ" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_-kzmoFEOEd-nO4bXYmJbIQ" value="1"/>
+    </ownedEnd>
+    <ownedEnd xmi:id="_-k0NsVEOEd-nO4bXYmJbIQ" name="dst" type="_yEqv8E7WEd-4z_lD9gn2Tw" association="_-kyYgFEOEd-nO4bXYmJbIQ">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_-k00wVEOEd-nO4bXYmJbIQ" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_-k00wFEOEd-nO4bXYmJbIQ" value="1"/>
+    </ownedEnd>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Association" xmi:id="_CSqYcFEPEd-nO4bXYmJbIQ" memberEnd="_CSq_gFEPEd-nO4bXYmJbIQ _CSsNoFEPEd-nO4bXYmJbIQ">
+    <ownedEnd xmi:id="_CSq_gFEPEd-nO4bXYmJbIQ" name="portId" type="_9CkNQFENEd-nO4bXYmJbIQ" association="_CSqYcFEPEd-nO4bXYmJbIQ">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_CSrmkVEPEd-nO4bXYmJbIQ" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_CSrmkFEPEd-nO4bXYmJbIQ" value="1"/>
+    </ownedEnd>
+    <ownedEnd xmi:id="_CSsNoFEPEd-nO4bXYmJbIQ" name="dst" type="_JrqIAE7aEd-4z_lD9gn2Tw" association="_CSqYcFEPEd-nO4bXYmJbIQ">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_CSs0sVEPEd-nO4bXYmJbIQ" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_CSs0sFEPEd-nO4bXYmJbIQ" value="1"/>
+    </ownedEnd>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Association" xmi:id="_G9lPcFEPEd-nO4bXYmJbIQ" memberEnd="_G9l2gFEPEd-nO4bXYmJbIQ _G9mdkVEPEd-nO4bXYmJbIQ">
+    <ownedEnd xmi:id="_G9l2gFEPEd-nO4bXYmJbIQ" name="workflowRunId" type="_9CkNQFENEd-nO4bXYmJbIQ" association="_G9lPcFEPEd-nO4bXYmJbIQ">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_G9mdkFEPEd-nO4bXYmJbIQ" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_G9l2gVEPEd-nO4bXYmJbIQ" value="1"/>
+    </ownedEnd>
+    <ownedEnd xmi:id="_G9mdkVEPEd-nO4bXYmJbIQ" name="dst" type="_v8DdoE7WEd-4z_lD9gn2Tw" association="_G9lPcFEPEd-nO4bXYmJbIQ">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_G9mdk1EPEd-nO4bXYmJbIQ" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_G9mdklEPEd-nO4bXYmJbIQ" value="1"/>
+    </ownedEnd>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Association" xmi:id="_vXCKAFEQEd-nO4bXYmJbIQ" memberEnd="_vXCKAVEQEd-nO4bXYmJbIQ _vXDYIVEQEd-nO4bXYmJbIQ">
+    <ownedEnd xmi:id="_vXCKAVEQEd-nO4bXYmJbIQ" name="collectionT2Reference" type="_VA7gUFENEd-nO4bXYmJbIQ" association="_vXCKAFEQEd-nO4bXYmJbIQ">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_vXDYIFEQEd-nO4bXYmJbIQ" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_vXCxEFEQEd-nO4bXYmJbIQ" value="1"/>
+    </ownedEnd>
+    <ownedEnd xmi:id="_vXDYIVEQEd-nO4bXYmJbIQ" name="dst" type="_9CkNQFENEd-nO4bXYmJbIQ" association="_vXCKAFEQEd-nO4bXYmJbIQ">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_vXD_MVEQEd-nO4bXYmJbIQ" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_vXD_MFEQEd-nO4bXYmJbIQ" value="1"/>
+    </ownedEnd>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Association" xmi:id="_vzp_IFEREd-nO4bXYmJbIQ" memberEnd="_vzqmMFEREd-nO4bXYmJbIQ _vzrNQVEREd-nO4bXYmJbIQ">
+    <ownedEnd xmi:id="_vzqmMFEREd-nO4bXYmJbIQ" name="portId" type="_VA7gUFENEd-nO4bXYmJbIQ" association="_vzp_IFEREd-nO4bXYmJbIQ">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_vzrNQFEREd-nO4bXYmJbIQ" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_vzqmMVEREd-nO4bXYmJbIQ" value="1"/>
+    </ownedEnd>
+    <ownedEnd xmi:id="_vzrNQVEREd-nO4bXYmJbIQ" name="dst" type="_JrqIAE7aEd-4z_lD9gn2Tw" association="_vzp_IFEREd-nO4bXYmJbIQ">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_vzsbYFEREd-nO4bXYmJbIQ" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_vzr0UFEREd-nO4bXYmJbIQ" value="1"/>
+    </ownedEnd>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Association" xmi:id="_B4RTwFEVEd-nO4bXYmJbIQ" memberEnd="_B4R60FEVEd-nO4bXYmJbIQ _B4TI8FEVEd-nO4bXYmJbIQ">
+    <ownedEnd xmi:id="_B4R60FEVEd-nO4bXYmJbIQ" name="nestedWorkflowProcessorId" type="_v8DdoE7WEd-4z_lD9gn2Tw" association="_B4RTwFEVEd-nO4bXYmJbIQ">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_B4Sh4VEVEd-nO4bXYmJbIQ" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_B4Sh4FEVEd-nO4bXYmJbIQ" value="1"/>
+    </ownedEnd>
+    <ownedEnd xmi:id="_B4TI8FEVEd-nO4bXYmJbIQ" name="dst" type="_OKWWUE7ZEd-4z_lD9gn2Tw" association="_B4RTwFEVEd-nO4bXYmJbIQ">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_B4TwAFEVEd-nO4bXYmJbIQ" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_B4TI8VEVEd-nO4bXYmJbIQ" value="1"/>
+    </ownedEnd>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Dependency" xmi:id="_UV0kcFEmEd-nO4bXYmJbIQ" supplier="_yEqv8E7WEd-4z_lD9gn2Tw" client="_VA7gUFENEd-nO4bXYmJbIQ"/>
+  <packagedElement xmi:type="uml:Dependency" xmi:id="_VoSR4FEmEd-nO4bXYmJbIQ" supplier="_yEqv8E7WEd-4z_lD9gn2Tw" client="_JrqIAE7aEd-4z_lD9gn2Tw"/>
+  <packagedElement xmi:type="uml:Association" xmi:id="_LGTbsFE4Ed-nO4bXYmJbIQ" memberEnd="_LGUp0FE4Ed-nO4bXYmJbIQ _LGVQ4FE4Ed-nO4bXYmJbIQ">
+    <ownedEnd xmi:id="_LGUp0FE4Ed-nO4bXYmJbIQ" name="processorEnactmentId" type="_VA7gUFENEd-nO4bXYmJbIQ" association="_LGTbsFE4Ed-nO4bXYmJbIQ">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_LGUp0lE4Ed-nO4bXYmJbIQ" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_LGUp0VE4Ed-nO4bXYmJbIQ" value="1"/>
+    </ownedEnd>
+    <ownedEnd xmi:id="_LGVQ4FE4Ed-nO4bXYmJbIQ" name="dst" type="_eoBMAFExEd-nO4bXYmJbIQ" association="_LGTbsFE4Ed-nO4bXYmJbIQ">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_LGVQ4lE4Ed-nO4bXYmJbIQ" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_LGVQ4VE4Ed-nO4bXYmJbIQ" value="1"/>
+    </ownedEnd>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Association" xmi:id="_9zNacFHmEd-nO4bXYmJbIQ" memberEnd="_9zOBgFHmEd-nO4bXYmJbIQ _9zOokVHmEd-nO4bXYmJbIQ">
+    <ownedEnd xmi:id="_9zOBgFHmEd-nO4bXYmJbIQ" name="processEnactmentId" type="_9CkNQFENEd-nO4bXYmJbIQ" association="_9zNacFHmEd-nO4bXYmJbIQ">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_9zOokFHmEd-nO4bXYmJbIQ" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_9zOBgVHmEd-nO4bXYmJbIQ" value="1"/>
+    </ownedEnd>
+    <ownedEnd xmi:id="_9zOokVHmEd-nO4bXYmJbIQ" name="dst" type="_eoBMAFExEd-nO4bXYmJbIQ" association="_9zNacFHmEd-nO4bXYmJbIQ">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_9zPPoVHmEd-nO4bXYmJbIQ" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_9zPPoFHmEd-nO4bXYmJbIQ" value="1"/>
+    </ownedEnd>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Class" xmi:id="_eoBMAFExEd-nO4bXYmJbIQ" name="ProcessorEnactment">
+    <ownedAttribute xmi:id="_4fjKsFExEd-nO4bXYmJbIQ" name="&lt;PK> processEnactmentId" aggregation="composite"/>
+    <ownedAttribute xmi:id="_63SeIFExEd-nO4bXYmJbIQ" name="workflowRunId" aggregation="composite"/>
+    <ownedAttribute xmi:id="_8whQoFExEd-nO4bXYmJbIQ" name="processId" aggregation="composite"/>
+    <ownedAttribute xmi:id="__Ek98FExEd-nO4bXYmJbIQ" name="processIdentifier" aggregation="composite"/>
+    <ownedAttribute xmi:id="_FqBn8FEyEd-nO4bXYmJbIQ" name="iteration" aggregation="composite"/>
+    <ownedAttribute xmi:id="_HLwgcFEyEd-nO4bXYmJbIQ" name="parentProcessEnactmentId" aggregation="composite"/>
+    <ownedAttribute xmi:id="_Ji5W8FEyEd-nO4bXYmJbIQ" name="enactmentStarted" aggregation="composite"/>
+    <ownedAttribute xmi:id="_Li-_YFEyEd-nO4bXYmJbIQ" name="enactmentEnded" aggregation="composite"/>
+    <ownedAttribute xmi:id="_NE76UFEyEd-nO4bXYmJbIQ" name="initialInputs" aggregation="composite"/>
+    <ownedAttribute xmi:id="_OC0e4FEyEd-nO4bXYmJbIQ" name="finalOutputs" aggregation="composite"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Association" xmi:id="_VY1LQFQ0Ed-2MdC0gorhYw" memberEnd="_VY3AcFQ0Ed-2MdC0gorhYw _VY4OkVQ0Ed-2MdC0gorhYw">
+    <ownedEnd xmi:id="_VY3AcFQ0Ed-2MdC0gorhYw" name="src" type="_eoBMAFExEd-nO4bXYmJbIQ" association="_VY1LQFQ0Ed-2MdC0gorhYw">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_VY4OkFQ0Ed-2MdC0gorhYw" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_VY3ngFQ0Ed-2MdC0gorhYw" value="1"/>
+    </ownedEnd>
+    <ownedEnd xmi:id="_VY4OkVQ0Ed-2MdC0gorhYw" name="nestedProcessorEnactmentId" type="_v8DdoE7WEd-4z_lD9gn2Tw" association="_VY1LQFQ0Ed-2MdC0gorhYw">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_VY41oVQ0Ed-2MdC0gorhYw" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_VY41oFQ0Ed-2MdC0gorhYw" value="1"/>
+    </ownedEnd>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Association" xmi:id="_clJA8FQ0Ed-2MdC0gorhYw" memberEnd="_clJA8VQ0Ed-2MdC0gorhYw _clKPEVQ0Ed-2MdC0gorhYw">
+    <ownedEnd xmi:id="_clJA8VQ0Ed-2MdC0gorhYw" name="workflowRunId" type="_eoBMAFExEd-nO4bXYmJbIQ" association="_clJA8FQ0Ed-2MdC0gorhYw">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_clKPEFQ0Ed-2MdC0gorhYw" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_clJoAFQ0Ed-2MdC0gorhYw" value="1"/>
+    </ownedEnd>
+    <ownedEnd xmi:id="_clKPEVQ0Ed-2MdC0gorhYw" name="dst" type="_v8DdoE7WEd-4z_lD9gn2Tw" association="_clJA8FQ0Ed-2MdC0gorhYw">
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_clK2IVQ0Ed-2MdC0gorhYw" value="1"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_clK2IFQ0Ed-2MdC0gorhYw" value="1"/>
+    </ownedEnd>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Class" xmi:id="_XUGAgFEzEd-nO4bXYmJbIQ" name="DataBinding">
+    <ownedAttribute xmi:id="_s92-QFEzEd-nO4bXYmJbIQ" name="&lt;PK> dataBindingId" aggregation="composite"/>
+    <ownedAttribute xmi:id="_uNk5sFEzEd-nO4bXYmJbIQ" name="&lt;PK> portId" aggregation="composite"/>
+    <ownedAttribute xmi:id="_viznQFEzEd-nO4bXYmJbIQ" name="t2Reference" aggregation="composite"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Class" xmi:id="_9Oi-gFEzEd-nO4bXYmJbIQ" name="Activity">
+    <ownedAttribute xmi:id="_-NQpgFEzEd-nO4bXYmJbIQ" name="&lt;PK> activityId" aggregation="composite"/>
+    <ownedAttribute xmi:id="_-_rk8FEzEd-nO4bXYmJbIQ" name="activityDefinition" aggregation="composite"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Class" xmi:id="_fiAIAFExEd-nO4bXYmJbIQ" name="ServiceInvocation">
+    <ownedAttribute xmi:id="_IflqYFEzEd-nO4bXYmJbIQ" name="&lt;PK> processorEnactmentId" aggregation="composite"/>
+    <ownedAttribute xmi:id="_LAAYsFEzEd-nO4bXYmJbIQ" name="&lt;PK> invocationNumber" aggregation="composite"/>
+    <ownedAttribute xmi:id="_NTjvsFEzEd-nO4bXYmJbIQ" name="invocationStarted" aggregation="composite"/>
+    <ownedAttribute xmi:id="_OzX8oFEzEd-nO4bXYmJbIQ" name="invocationEnded" aggregation="composite"/>
+    <ownedAttribute xmi:id="_QBf8oFEzEd-nO4bXYmJbIQ" name="inputs" aggregation="composite"/>
+    <ownedAttribute xmi:id="_QqKfIFEzEd-nO4bXYmJbIQ" name="outputs" aggregation="composite"/>
+    <ownedAttribute xmi:id="_ReuvoFEzEd-nO4bXYmJbIQ" name="failureT2Reference" aggregation="composite"/>
+    <ownedAttribute xmi:id="_S-tUoFEzEd-nO4bXYmJbIQ" name="activityId" aggregation="composite"/>
+    <ownedAttribute xmi:id="_udhIQFE1Ed-nO4bXYmJbIQ" name="initiatingDispatchLayer" aggregation="composite"/>
+    <ownedAttribute xmi:id="_hCNc4FE5Ed-nO4bXYmJbIQ" name="finalDispatchLayer" aggregation="composite"/>
+  </packagedElement>
+</uml:Package>
+
