@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Created by Paolo Ciccarese http://www.paolociccarese.info on April 12th, 2010 -->
+
+<!DOCTYPE rdf:RDF [
+    <!-- Other namespaces -->
+    <!ENTITY xsd  "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY rdf  "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY owl  "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY dct  "http://dublincore.org/documents/dcmi-terms/" >
+    <!ENTITY ans  "http://www.w3.org/2000/10/annotation-ns#" >
+    <!ENTITY bkm  "http://www.w3.org/2002/01/bookmark#" >
+    <!ENTITY foaf "http://xmlns.com/foaf/0.1/">
+    <!ENTITY pav  "http://purl.org/pav/">
+    
+    <!-- Main namespace -->
+    <!ENTITY annotation "http://purl.org/ao/" >
+]>
+
+<rdf:RDF
+    xml:base="&annotation;"
+    xmlns="&annotation;"
+    xmlns:pav="&pav;"
+    xmlns:rdfs="&rdfs;"
+    xmlns:owl="&owl;"
+    xmlns:rdf="&rdf;"
+    xmlns:xsd="&xsd;"
+    xmlns:dct="&dct;"
+    xmlns:foaf="&foaf;"
+    xmlns:ans="&ans;"
+    xmlns:bkm="&bkm;">
+    
+    <owl:Ontology rdf:about="&annotation;">
+        <rdf:type rdf:resource="&owl;Ontology"/>
+        <rdfs:label rdf:datatype="&xsd;string">Annotation Ontology v. 1.0</rdfs:label>
+        
+        <owl:imports rdf:resource="http://purl.org/ao/core/"/>
+        <owl:imports rdf:resource="http://purl.org/ao/annotea/"/>
+        <owl:imports rdf:resource="http://purl.org/ao/selectors/"/>
+        <owl:imports rdf:resource="http://purl.org/ao/types/"/>
+        <owl:imports rdf:resource="http://purl.org/ao/foaf/"/>
+        
+        <owl:imports rdf:resource="http://purl.org/pav/2.0/"/>
+
+    	<dct:language>en</dct:language>
+    	<dct:title xml:lang="en">Annotation Ontology</dct:title>
+    	<dct:creator rdf:resource="http://www.hcklab.org/foaf.rdf#me"/>
+    	<dct:publisher rdf:resource="http://www.mindinformatics.org"/>
+    	<dct:contributor rdf:datatype="&xsd;string">Paolo Ciccarese</dct:contributor>
+        <dct:created rdf:datatype="&xsd;string">April 12, 2010</dct:created>
+        <dct:date rdf:datatype="&xsd;string">May 26, 2010</dct:date>
+        <dct:format rdf:datatype="&xsd;string">rdf/xml</dct:format>    
+    </owl:Ontology> 
+  
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+     
+    <rdf:Description rdf:about="&dct;title">
+        <rdf:type rdf:resource="&owl;AnnotationProperty"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="&dct;created">
+        <rdf:type rdf:resource="&owl;AnnotationProperty"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="&dct;date">
+        <rdf:type rdf:resource="&owl;AnnotationProperty"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="&dct;creator">
+        <rdf:type rdf:resource="&owl;AnnotationProperty"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="&dct;format">
+        <rdf:type rdf:resource="&owl;AnnotationProperty"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="&dct;language">
+        <rdf:type rdf:resource="&owl;AnnotationProperty"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="&dct;publisher">
+        <rdf:type rdf:resource="&owl;AnnotationProperty"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="&dct;contributor">
+        <rdf:type rdf:resource="&owl;AnnotationProperty"/>
+    </rdf:Description>          
+
+</rdf:RDF>

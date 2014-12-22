@@ -1,0 +1,333 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY prov "http://www.w3.org/ns/prov#" >
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY wfdesc "http://purl.org/wf4ever/wfdesc#" >
+    <!ENTITY wfprov "http://purl.org/wf4ever/wfprov#" >
+    <!ENTITY cnt "http://www.w3.org/2011/content#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY xml "http://www.w3.org/XML/1998/namespace" >
+    <!ENTITY scufl2 "http://ns.taverna.org.uk/2010/scufl2#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY tavernaprov "http://ns.taverna.org.uk/2012/tavernaprov/" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+]>
+
+
+<rdf:RDF xmlns="&tavernaprov;#"
+     xml:base="http://ns.taverna.org.uk/2012/tavernaprov/"
+     xmlns:prov="http://www.w3.org/ns/prov#"
+     xmlns:cnt="http://www.w3.org/2011/content#"
+     xmlns:wfprov="http://purl.org/wf4ever/wfprov#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:wfdesc="http://purl.org/wf4ever/wfdesc#"
+     xmlns:tavernaprov="http://ns.taverna.org.uk/2012/tavernaprov/"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:scufl2="http://ns.taverna.org.uk/2010/scufl2#">
+    <owl:Ontology rdf:about="http://ns.taverna.org.uk/2012/tavernaprov/">
+        <owl:imports rdf:resource="http://ns.taverna.org.uk/2010/scufl2"/>
+        <owl:versionIRI rdf:resource="&tavernaprov;0.2-SNAPSHOT/"/>
+        <owl:imports rdf:resource="http://purl.org/wf4ever/wfdesc"/>
+        <owl:imports rdf:resource="http://purl.org/wf4ever/wfprov"/>
+        <owl:imports rdf:resource="http://www.w3.org/2011/content"/>
+        <owl:imports rdf:resource="http://www.w3.org/ns/prov#"/>
+    </owl:Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://ns.taverna.org.uk/2012/tavernaprov/errorMessage -->
+
+    <owl:AnnotationProperty rdf:about="&tavernaprov;errorMessage">
+        <rdfs:domain rdf:resource="&tavernaprov;Error"/>
+    </owl:AnnotationProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://ns.taverna.org.uk/2012/tavernaprov/content -->
+
+    <owl:ObjectProperty rdf:about="&tavernaprov;content">
+        <rdfs:range rdf:resource="&tavernaprov;Content"/>
+        <rdfs:domain rdf:resource="&wfprov;Artifact"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://purl.org/wf4ever/wfdesc#hasDataLink -->
+
+    <rdf:Description rdf:about="&wfdesc;hasDataLink">
+        <rdfs:subPropertyOf rdf:resource="http://purl.org/dc/terms/hasPart"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://purl.org/wf4ever/wfdesc#hasInput -->
+
+    <rdf:Description rdf:about="&wfdesc;hasInput">
+        <rdfs:subPropertyOf rdf:resource="http://purl.org/dc/terms/hasPart"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://purl.org/wf4ever/wfdesc#hasOutput -->
+
+    <rdf:Description rdf:about="&wfdesc;hasOutput">
+        <rdfs:subPropertyOf rdf:resource="http://purl.org/dc/terms/hasPart"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://purl.org/wf4ever/wfdesc#hasSubProcess -->
+
+    <rdf:Description rdf:about="&wfdesc;hasSubProcess">
+        <rdfs:subPropertyOf rdf:resource="http://purl.org/dc/terms/hasPart"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://purl.org/wf4ever/wfprov#usedInput -->
+
+    <rdf:Description rdf:about="&wfprov;usedInput">
+        <rdfs:subPropertyOf rdf:resource="&prov;used"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://purl.org/wf4ever/wfprov#wasOutputFrom -->
+
+    <rdf:Description rdf:about="&wfprov;wasOutputFrom">
+        <rdfs:subPropertyOf rdf:resource="&prov;wasGeneratedBy"/>
+    </rdf:Description>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://ns.taverna.org.uk/2012/tavernaprov/byteCount -->
+
+    <owl:DatatypeProperty rdf:about="&tavernaprov;byteCount">
+        <rdfs:domain rdf:resource="&tavernaprov;Content"/>
+        <rdfs:range rdf:resource="&xsd;nonNegativeInteger"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://ns.taverna.org.uk/2012/tavernaprov/checksum -->
+
+    <owl:DatatypeProperty rdf:about="&tavernaprov;checksum">
+        <rdfs:domain rdf:resource="&tavernaprov;Content"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://ns.taverna.org.uk/2012/tavernaprov/errorMessage -->
+
+    <owl:DatatypeProperty rdf:about="&tavernaprov;errorMessage">
+        <rdfs:subPropertyOf rdf:resource="http://purl.org/dc/terms/description"/>
+        <rdfs:range rdf:resource="&rdf;PlainLiteral"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://ns.taverna.org.uk/2012/tavernaprov/sha1 -->
+
+    <owl:DatatypeProperty rdf:about="&tavernaprov;sha1">
+        <rdfs:subPropertyOf rdf:resource="&tavernaprov;checksum"/>
+        <rdfs:range rdf:resource="&rdf;PlainLiteral"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://ns.taverna.org.uk/2012/tavernaprov/sha512 -->
+
+    <owl:DatatypeProperty rdf:about="&tavernaprov;sha512">
+        <rdfs:subPropertyOf rdf:resource="&tavernaprov;checksum"/>
+        <rdfs:range rdf:resource="&rdf;PlainLiteral"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://ns.taverna.org.uk/2012/tavernaprov/stackTrace -->
+
+    <owl:DatatypeProperty rdf:about="&tavernaprov;stackTrace">
+        <rdfs:domain rdf:resource="&tavernaprov;Error"/>
+        <rdfs:range rdf:resource="&rdf;PlainLiteral"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://purl.org/dc/terms/description -->
+
+    <owl:DatatypeProperty rdf:about="http://purl.org/dc/terms/description"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://ns.taverna.org.uk/2010/scufl2#DataLink -->
+
+    <rdf:Description rdf:about="&scufl2;DataLink">
+        <rdfs:subClassOf rdf:resource="&wfdesc;DataLink"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://ns.taverna.org.uk/2010/scufl2#Processor -->
+
+    <rdf:Description rdf:about="&scufl2;Processor">
+        <rdfs:subClassOf rdf:resource="&wfdesc;Process"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://ns.taverna.org.uk/2010/scufl2#ReceiverPort -->
+
+    <rdf:Description rdf:about="&scufl2;ReceiverPort">
+        <rdfs:subClassOf rdf:resource="&wfdesc;Input"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://ns.taverna.org.uk/2010/scufl2#SenderPort -->
+
+    <rdf:Description rdf:about="&scufl2;SenderPort">
+        <rdfs:subClassOf rdf:resource="&wfdesc;Output"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://ns.taverna.org.uk/2010/scufl2#Workflow -->
+
+    <rdf:Description rdf:about="&scufl2;Workflow">
+        <rdfs:subClassOf rdf:resource="&wfdesc;WorkflowTemplate"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://ns.taverna.org.uk/2012/tavernaprov/Content -->
+
+    <owl:Class rdf:about="&tavernaprov;Content">
+        <rdfs:subClassOf rdf:resource="&cnt;Content"/>
+    </owl:Class>
+    
+
+
+    <!-- http://ns.taverna.org.uk/2012/tavernaprov/Error -->
+
+    <owl:Class rdf:about="&tavernaprov;Error">
+        <rdfs:subClassOf rdf:resource="&wfdesc;Artifact"/>
+    </owl:Class>
+    
+
+
+    <!-- http://ns.taverna.org.uk/2012/tavernaprov/TavernaEngine -->
+
+    <owl:Class rdf:about="&tavernaprov;TavernaEngine">
+        <rdfs:subClassOf rdf:resource="&wfprov;WorkflowEngine"/>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/wf4ever/wfdesc#Parameter -->
+
+    <rdf:Description rdf:about="&wfdesc;Parameter">
+        <rdfs:subClassOf rdf:resource="&prov;Role"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://purl.org/wf4ever/wfdesc#Process -->
+
+    <rdf:Description rdf:about="&wfdesc;Process">
+        <rdfs:subClassOf rdf:resource="&prov;Plan"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://purl.org/wf4ever/wfprov#Artifact -->
+
+    <rdf:Description rdf:about="&wfprov;Artifact">
+        <rdfs:subClassOf rdf:resource="&prov;Entity"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://purl.org/wf4ever/wfprov#ProcessRun -->
+
+    <rdf:Description rdf:about="&wfprov;ProcessRun">
+        <rdfs:subClassOf rdf:resource="&prov;Activity"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://purl.org/wf4ever/wfprov#WorkflowEngine -->
+
+    <rdf:Description rdf:about="&wfprov;WorkflowEngine">
+        <rdfs:subClassOf rdf:resource="&prov;Agent"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://www.w3.org/2011/content#ContentAsBase64 -->
+
+    <rdf:Description rdf:about="&cnt;ContentAsBase64">
+        <rdfs:subClassOf rdf:resource="&tavernaprov;Content"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://www.w3.org/2011/content#ContentAsText -->
+
+    <rdf:Description rdf:about="&cnt;ContentAsText">
+        <rdfs:subClassOf rdf:resource="&tavernaprov;Content"/>
+    </rdf:Description>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 3.4.2) http://owlapi.sourceforge.net -->
+

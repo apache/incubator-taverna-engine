@@ -1,0 +1,399 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Created by Paolo Ciccarese http://www.paolociccarese.info on April 12th, 2010 -->
+
+<!DOCTYPE rdf:RDF [
+    <!-- Other namespaces -->
+    <!ENTITY xsd  "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY rdf  "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY owl  "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY dct  "http://dublincore.org/documents/dcmi-terms/" >
+    <!ENTITY foaf "http://xmlns.com/foaf/0.1/">
+    <!ENTITY pav  "http://purl.org/pav/">
+    
+    <!-- Ontology -->
+    <!ENTITY ontology "http://purl.org/ao/core/" >
+    
+    <!-- Main namespace -->
+    <!ENTITY annotation-core "http://purl.org/ao/" >
+]>
+
+<rdf:RDF
+    xml:base="&annotation-core;"
+    xmlns="&annotation-core;"
+    xmlns:pav="&pav;"
+    xmlns:rdfs="&rdfs;"
+    xmlns:owl="&owl;"
+    xmlns:rdf="&rdf;"
+    xmlns:xsd="&xsd;"
+    xmlns:dct="&dct;"
+    xmlns:foaf="&foaf;">
+   
+    <owl:Ontology rdf:about="&ontology;">
+        <rdf:type rdf:resource="&owl;Ontology"/>
+        <rdfs:label rdf:datatype="&xsd;string">Annotation Ontology Core v. 1.0</rdfs:label>
+
+		<owl:imports rdf:resource="http://purl.org/pav/2.0/"/>
+
+    	<dct:language>en</dct:language>
+    	<dct:title xml:lang="en">Annotation Ontology Core</dct:title>
+    	<dct:creator rdf:resource="http://www.hcklab.org/foaf.rdf#me"/>
+    	<dct:publisher rdf:resource="http://www.mindinformatics.org"/>
+    	<dct:contributor rdf:datatype="&xsd;string">Paolo Ciccarese</dct:contributor>
+    	<dct:contributor rdf:datatype="&xsd;string">Marco Ocana</dct:contributor>
+        <dct:created rdf:datatype="&xsd;string">April 12, 2010</dct:created>
+        <dct:date rdf:datatype="&xsd;string">May 9, 2010</dct:date>
+        <dct:format rdf:datatype="&xsd;string">rdf/xml</dct:format>    
+    </owl:Ontology> 
+  
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+     
+    <rdf:Description rdf:about="&dct;title">
+        <rdf:type rdf:resource="&owl;AnnotationProperty"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="&dct;created">
+        <rdf:type rdf:resource="&owl;AnnotationProperty"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="&dct;date">
+        <rdf:type rdf:resource="&owl;AnnotationProperty"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="&dct;creator">
+        <rdf:type rdf:resource="&owl;AnnotationProperty"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="&dct;format">
+        <rdf:type rdf:resource="&owl;AnnotationProperty"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="&dct;language">
+        <rdf:type rdf:resource="&owl;AnnotationProperty"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="&dct;publisher">
+        <rdf:type rdf:resource="&owl;AnnotationProperty"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="&dct;contributor">
+        <rdf:type rdf:resource="&owl;AnnotationProperty"/>
+    </rdf:Description>      
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation Ontology Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+  	
+    <owl:Class rdf:about="Annotation" rdfs:label="(ao) Annotation">
+    	<rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <owl:disjointWith rdf:resource="AnnotationCuration"/>
+        <owl:disjointWith rdf:resource="Selector"/>
+        <owl:disjointWith rdf:resource="AnnotationSet"/>
+        <owl:disjointWith rdf:resource="DocumentAnnotation"/>
+    	
+        <rdfs:comment rdf:datatype="&xsd;string">
+            Generic annotation class.
+        </rdfs:comment>
+        
+        <!-- created by -->
+        <rdfs:subClassOf>
+            <owl:Restriction>                <owl:onProperty rdf:resource="&pav;createdBy"/>                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>            </owl:Restriction>
+        </rdfs:subClassOf>	
+		
+        <!-- created on -->
+        <rdfs:subClassOf>
+            <owl:Restriction>                <owl:onProperty rdf:resource="&pav;createdOn"/>                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>            </owl:Restriction>
+        </rdfs:subClassOf>	
+        
+        <!-- annotates -->
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="annotatesResource"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>	
+        
+        <!-- selector -->
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="context"/>
+                <owl:someValuesFrom>
+                    <owl:Class rdf:about="Selector"/>
+                </owl:someValuesFrom>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="context"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">0</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        
+        <!-- has topic -->
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="hasTopic"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">0</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>	
+        
+        <!-- body -->
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="body"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">0</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>	
+    </owl:Class>
+    
+    <owl:Class rdf:about="Selector" rdfs:label="(ao) Selector">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <owl:disjointWith rdf:resource="Annotation"/>
+        <owl:disjointWith rdf:resource="AnnotationCuration"/>
+        <owl:disjointWith rdf:resource="AnnotationSet"/>
+        <owl:disjointWith rdf:resource="DocumentAnnotation"/>
+    	
+        <rdfs:comment rdf:datatype="&xsd;string">
+            Selectors identify document fragments.
+        </rdfs:comment>
+    </owl:Class>
+      	
+    <owl:Class rdf:about="AnnotationCuration" rdfs:label="(ao) Annotation Curation">
+    	<rdfs:subClassOf rdf:resource="&pav;Curation"/>
+        <owl:disjointWith rdf:resource="Annotation"/>
+        <owl:disjointWith rdf:resource="Selector"/> 
+        <owl:disjointWith rdf:resource="AnnotationSet"/> 
+        <owl:disjointWith rdf:resource="DocumentAnnotation"/> 
+    
+        <rdfs:comment rdf:datatype="&xsd;string">
+        </rdfs:comment>
+  		
+        <!-- created by -->
+        <rdfs:subClassOf>
+            <owl:Restriction>                <owl:onProperty rdf:resource="&pav;createdBy"/>                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>            </owl:Restriction>
+        </rdfs:subClassOf>	
+		
+        <!-- created on -->
+        <rdfs:subClassOf>
+            <owl:Restriction>                <owl:onProperty rdf:resource="&pav;createdOn"/>                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>            </owl:Restriction>
+        </rdfs:subClassOf>
+        
+        <!-- curates (exactly one annotation) -->
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&pav;curates"/>
+                <owl:allValuesFrom>
+                    <owl:Class rdf:about="Annotation"/>
+                </owl:allValuesFrom>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&pav;curates"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&pav;curates"/>
+                <owl:maxCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:maxCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&pav;curatedBy"/>
+                <owl:maxCardinality rdf:datatype="&xsd;nonNegativeInteger">0</owl:maxCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        
+        <!-- status -->
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="status"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>	
+    </owl:Class>
+    
+    <owl:Class rdf:about="AnnotationSet" rdfs:label="(ao) Annotation Set">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <owl:disjointWith rdf:resource="Annotation"/>
+        <owl:disjointWith rdf:resource="Selector"/>   
+        <owl:disjointWith rdf:resource="AnnotationCuration"/>
+        <owl:disjointWith rdf:resource="DocumentAnnotation"/>
+    
+        <rdfs:comment rdf:datatype="&xsd;string">
+        </rdfs:comment>
+  		
+        <!-- created by -->
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&pav;createdBy"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>	
+		
+        <!-- created on -->
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&pav;createdOn"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+
+        <!-- has topic -->
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="hasTopic"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">0</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>	
+        
+        <!-- items -->
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="item"/>
+                <owl:allValuesFrom>
+                    <owl:Class rdf:about="Annotation"/>
+                </owl:allValuesFrom>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="item"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>	
+        
+        <!-- source document -->
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="onResource"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>	
+    </owl:Class>
+    
+    <owl:Class rdf:about="DocumentAnnotation" rdfs:label="(ao) Document Annotation">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <owl:disjointWith rdf:resource="Annotation"/>
+        <owl:disjointWith rdf:resource="AnnotationCuration"/>
+        <owl:disjointWith rdf:resource="Selector"/>    
+        <owl:disjointWith rdf:resource="AnnotationSet"/>
+    
+        <rdfs:comment rdf:datatype="&xsd;string">
+        </rdfs:comment>
+  		
+        <!-- created by -->
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&pav;createdBy"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>	
+		
+        <!-- created on -->
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&pav;createdOn"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+
+        <!-- has topic -->
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="hasTopic"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">0</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>	
+        
+        <!-- items -->
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="item"/>
+                <owl:allValuesFrom>
+                    <owl:Class rdf:about="AnnotationSet"/>
+                </owl:allValuesFrom>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="item"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>	
+        
+        <!-- source document -->
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="onResource"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>	
+    </owl:Class>
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation Ontology Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+    <owl:ObjectProperty rdf:about="onResource">
+    </owl:ObjectProperty> 
+    
+    <owl:ObjectProperty rdf:about="annotatesResource">
+    </owl:ObjectProperty> 
+    
+    <owl:ObjectProperty rdf:about="onSourceDocument">
+    	<rdfs:range rdf:resource="&pav;SourceDocument" />
+    </owl:ObjectProperty>
+    
+    <owl:ObjectProperty rdf:about="hasTopic">
+    </owl:ObjectProperty>
+    
+    <owl:ObjectProperty rdf:about="body">
+    </owl:ObjectProperty>
+    
+    <owl:ObjectProperty rdf:about="item">
+    </owl:ObjectProperty>
+    
+    <owl:ObjectProperty rdf:about="&pav;curates">
+        <owl:inverseOf rdf:resource="&pav;curatedBy" />
+    </owl:ObjectProperty>
+    
+    <owl:DatatypeProperty rdf:about="status">
+    </owl:DatatypeProperty>
+    
+    <owl:ObjectProperty rdf:about="context">
+    	<rdfs:domain rdf:resource="Annotation" />
+    	<rdfs:range rdf:resource="Selector" />
+    </owl:ObjectProperty>
+    
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Integration
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+    <rdf:Description rdf:about="&pav;Curation" rdfs:label="(pav) Curation">
+    	<rdfs:subClassOf rdf:resource="&owl;Thing"/>
+    </rdf:Description> 
+    
+    <rdf:Description rdf:about="&pav;SourceDocument" rdfs:label="(pav) Source Document">
+    	<rdfs:subClassOf rdf:resource="&owl;Thing"/>
+    	
+    	<owl:disjointWith rdf:resource="Annotation"/>
+        <owl:disjointWith rdf:resource="AnnotationCuration"/>
+        <owl:disjointWith rdf:resource="Selector"/>    
+        <owl:disjointWith rdf:resource="AnnotationSet"/>
+    </rdf:Description> 
+
+</rdf:RDF>
