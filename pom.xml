@@ -24,7 +24,6 @@
     <module>taverna-activity-test-utils</module>
     <module>taverna-capability-api</module>
     <module>taverna-capability-impl</module>
-    <module>taverna-component-repository</module>
     <module>taverna-credential-manager</module>
     <module>taverna-credential-manager-impl</module>
     <module>taverna-database-configuration-api</module>

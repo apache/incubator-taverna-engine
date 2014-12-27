@@ -2,48 +2,30 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>net.sf.taverna.t2</groupId>
-        <artifactId>core</artifactId>
-        <version>2.0.1-SNAPSHOT</version>
+			<groupId>org.apache.taverna.engine</groupId>
+			<artifactId>taverna-engine</artifactId>
+			<version>3.0.0-SNAPSHOT</version>
     </parent>
-	<groupId>net.sf.taverna.t2.core</groupId>
-	<artifactId>workflowmodel-core-extensions</artifactId>
+	<artifactId>taverna-workflowmodel-core-extensions</artifactId>
 	<packaging>bundle</packaging>
-	<name>Implementation of core extension points to the workflow model</name>
+	<name>Apache Taverna Workflow Model Core Extension Points</name>
+	<description>Implementation of core extension points to the workflow model</description>
 	<dependencies>
-		<dependency>
-			<groupId>net.sf.taverna.t2.core</groupId>
-			<artifactId>workflowmodel-api</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
+    <dependency>
+        <groupId>${project.parent.groupId}</groupId>
+        <artifactId>taverna-workflowmodel-api</artifactId>
+        <version>${project.parent.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>${jackson-databind.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>${junit.version}</version>
+        <scope>test</scope>
+    </dependency>
 	</dependencies>
-	<repositories>
-		<repository>
-			<releases />
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<id>mygrid-repository</id>
-			<name>myGrid Repository</name>
-			<url>http://www.mygrid.org.uk/maven/repository</url>
-		</repository>
-		<repository>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-			<snapshots />
-			<id>mygrid-snapshot-repository</id>
-			<name>myGrid Snapshot Repository</name>
-			<url>http://www.mygrid.org.uk/maven/snapshot-repository</url>
-		</repository>
-	</repositories>
 </project>

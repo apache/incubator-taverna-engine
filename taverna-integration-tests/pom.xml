@@ -2,16 +2,16 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>uk.org.taverna</groupId>
-		<artifactId>platform</artifactId>
-		<version>0.1.3-SNAPSHOT</version>
+		<groupId>org.apache.taverna.engine</groupId>
+		<artifactId>taverna-engine</artifactId>
+		<version>3.0.0-SNAPSHOT</version>
 	</parent>
-	<groupId>uk.org.taverna.platform</groupId>
 	<artifactId>taverna-integration-tests</artifactId>
+	<name>Apache Taverna Integration Tests</name>
 	<dependencies>
 		<dependency>
-			<groupId>uk.org.taverna.osgi</groupId>
-			<artifactId>taverna-starter</artifactId>
+			<groupId>org.apache.taverna.engine</groupId>
+			<artifactId>taverna-engine-product</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 			<scope>test</scope>
 			<exclusions>
@@ -26,15 +26,15 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>uk.org.taverna.scufl2</groupId>
-			<artifactId>scufl2-api</artifactId>
-			<version>${scufl2.version}</version>
+			<groupId>org.apache.taverna.language</groupId>
+			<artifactId>taverna-scufl2-api</artifactId>
+			<version>${taverna.language.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>uk.org.taverna.databundle</groupId>
-			<artifactId>databundle</artifactId>
-			<version>${taverna.databundle.version}</version>
+			<groupId>org.apache.taverna.language</groupId>
+			<artifactId>taverna-databundle</artifactId>
+			<version>${taverna.language.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>log4j</groupId>
@@ -43,21 +43,21 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>uk.org.taverna.platform</groupId>
+			<groupId>${project.parent.groupId}</groupId>
 			<artifactId>taverna-execution-api</artifactId>
-			<version>${project.version}</version>
+			<version>${project.parent.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>uk.org.taverna.platform</groupId>
+			<groupId>${project.parent.groupId}</groupId>
 			<artifactId>taverna-report-api</artifactId>
-			<version>${project.version}</version>
+			<version>${project.parent.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>uk.org.taverna.platform</groupId>
+			<groupId>${project.parent.groupId}</groupId>
 			<artifactId>taverna-run-api</artifactId>
-			<version>${project.version}</version>
+			<version>${project.parent.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -90,25 +90,4 @@
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
-	<repositories>
-		<repository>
-			<releases />
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<id>mygrid-repository</id>
-			<name>myGrid Repository</name>
-			<url>http://www.mygrid.org.uk/maven/repository
-			</url>
-		</repository>
-		<repository>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-			<snapshots />
-			<id>mygrid-snapshot-repository</id>
-			<name>myGrid Snapshot Repository</name>
-			<url>http://www.mygrid.org.uk/maven/snapshot-repository</url>
-		</repository>
-	</repositories>
 </project>

@@ -2,13 +2,12 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<artifactId>platform</artifactId>
-		<groupId>uk.org.taverna</groupId>
-		<version>0.1.3-SNAPSHOT</version>
+		<groupId>org.apache.taverna.engine</groupId>
+		<artifactId>taverna-engine</artifactId>
+		<version>3.0.0-SNAPSHOT</version>
 	</parent>
-	<groupId>uk.org.taverna.platform</groupId>
-	<artifactId>integration-tests</artifactId>
-	<name>Taverna Platform integration tests</name>
+	<artifactId>taverna-integration-tests</artifactId>
+	<name>Apache Taverna Platform integration tests</name>
 	<properties>
 		<spring.dm.version>2.0.0.M1</spring.dm.version>
 		<spring.version>3.0.0.RC1</spring.version>
@@ -57,18 +56,6 @@
 			</plugin>
 		</plugins>
 	</build>
-	<repositories>
-		<repository>
-			<id>spring-maven-milestone</id>
-			<name>Springframework Maven Repository</name>
-			<url>http://maven.springframework.org/milestone</url>
-		</repository>
-		<repository>
-			<id>com.springsource.repository.bundles.milestone</id>
-			<name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Milestones</name>
-			<url>http://repository.springsource.com/maven/bundles/milestone</url>
-		</repository>
-	</repositories>
 	<dependencies>
 		<!-- Spring OSGI testing framework -->
 		<dependency>
@@ -235,14 +222,14 @@
 		</dependency>
 
 		<!-- Taverna OSGI Services -->
-		<!-- <dependency> <groupId>uk.org.taverna.osgi.services</groupId> <artifactId>xml-parser-service</artifactId>
-			<version>0.0.1-SNAPSHOT</version> <exclusions> <exclusion> <groupId>org.apache.xerces</groupId>
+		<!-- <dependency> <groupId>org.apache.taverna.osgi</groupId> <artifactId>xml-parser-service</artifactId>
+			<version>${taverna.osgi.version}</version> <exclusions> <exclusion> <groupId>org.apache.xerces</groupId>
 			<artifactId>com.springsource.org.apache.xerces</artifactId> </exclusion>
 			</exclusions> </dependency> -->
 		<dependency>
-			<groupId>uk.org.taverna.osgi.services</groupId>
+			<groupId>org.apache.taverna.osgi</groupId>
 			<artifactId>xml-transformer-service</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>${taverna.osgi.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.apache.xalan</groupId>
@@ -253,158 +240,155 @@
 
 		<!-- Taverna -->
 		<dependency>
-			<groupId>net.sf.taverna.t2.core</groupId>
-			<artifactId>workflowmodel-api</artifactId>
-			<version>${t2.core.version}</version>
+			<groupId>${project.parent.groupId}</groupId>
+			<artifactId>taverna-workflowmodel-api</artifactId>
+			<version>${project.parent.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>net.sf.taverna.t2.core</groupId>
-			<artifactId>workflowmodel-core-extensions</artifactId>
-			<version>${t2.core.version}</version>
+			<groupId>${project.parent.groupId}</groupId>
+			<artifactId>taverna-workflowmodel-core-extensions</artifactId>
+			<version>${project.parent.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>net.sf.taverna.t2.core</groupId>
-			<artifactId>workflowmodel-impl</artifactId>
-			<version>${t2.core.version}</version>
+			<groupId>${project.parent.groupId}</groupId>
+			<artifactId>taverna-workflowmodel-impl</artifactId>
+			<version>${project.parent.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>net.sf.taverna.t2.core</groupId>
-			<artifactId>reference-api</artifactId>
-			<version>${t2.core.version}</version>
+			<groupId>${project.parent.groupId}</groupId>
+			<artifactId>taverna-reference-api</artifactId>
+			<version>${project.parent.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>net.sf.taverna.t2.core</groupId>
-			<artifactId>reference-core-extensions</artifactId>
-			<version>${t2.core.version}</version>
+			<groupId>${project.parent.groupId}</groupId>
+			<artifactId>taverna-reference-types</artifactId>
+			<version>${project.parent.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>net.sf.taverna.t2.core</groupId>
+			<groupId>${project.parent.groupId}</groupId>
 			<artifactId>reference-impl</artifactId>
-			<version>${t2.core.version}</version>
+			<version>${project.parent.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>net.sf.taverna.t2.lang</groupId>
-			<artifactId>observer</artifactId>
-			<version>${t2.lang.version}</version>
+			<groupId>${project.parent.groupId}</groupId>
+			<artifactId>taverna-observer</artifactId>
+			<version>${project.parent.version}</version>
 		</dependency>
+		<!-- is this needed here?  (Why?)
 		<dependency>
-			<groupId>net.sf.taverna.t2.lang</groupId>
+			<groupId>${project.parent.groupId}</groupId>
 			<artifactId>ui</artifactId>
-			<version>${t2.lang.version}</version>
+			<version>${project.parent.version}</version>
+		</dependency>
+	-->
+		<dependency>
+			<groupId>${project.parent.groupId}</groupId>
+			<artifactId>taverna-credential-manager</artifactId>
+			<version>${project.parent.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>net.sf.taverna.t2.security</groupId>
-			<artifactId>credential-manager</artifactId>
-			<version>${t2.security.version}</version>
+			<groupId>${project.parent.groupId}</groupId>
+			<artifactId>taverna-credential-manager-impl</artifactId>
+			<version>${project.parent.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>net.sf.taverna.t2.security</groupId>
-			<artifactId>credential-manager-impl</artifactId>
-			<version>${t2.security.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>uk.org.taverna.configuration</groupId>
+			<groupId>org.apache.taverna.osgi</groupId>
 			<artifactId>taverna-configuration-api</artifactId>
-			<version>${taverna.configuration.version}</version>
+			<version>${taverna.osgi.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>uk.org.taverna.configuration</groupId>
+			<groupId>org.apache.taverna.osgi</groupId>
 			<artifactId>taverna-configuration-impl</artifactId>
-			<version>${taverna.configuration.version}</version>
+			<version>${taverna.osgi.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>uk.org.taverna.configuration</groupId>
+			<groupId>org.apache.taverna.osgi</groupId>
 			<artifactId>taverna-app-configuration-api</artifactId>
-			<version>${taverna.configuration.version}</version>
+			<version>${taverna.osgi.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>uk.org.taverna.configuration</groupId>
+			<groupId>org.apache.taverna.osgi</groupId>
 			<artifactId>taverna-app-configuration-impl</artifactId>
-			<version>${taverna.configuration.version}</version>
+			<version>${taverna.osgi.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>uk.org.taverna.configuration</groupId>
+			<groupId>${project.parent.groupId}</groupId>
 			<artifactId>taverna-database-configuration-api</artifactId>
-			<version>${taverna.configuration.version}</version>
+			<version>${project.parent.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>uk.org.taverna.configuration</groupId>
+			<groupId>${project.parent.groupId}</groupId>
 			<artifactId>taverna-database-configuration-impl</artifactId>
-			<version>${taverna.configuration.version}</version>
+			<version>${project.parent.version}</version>
 		</dependency>
 
 		<!-- Taverna Platform -->
 		<dependency>
-			<groupId>uk.org.taverna.platform</groupId>
+			<groupId>${project.parent.groupId}</groupId>
 			<artifactId>taverna-capability-impl</artifactId>
-			<version>${project.version}</version>
+			<version>${project.parent.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>uk.org.taverna.platform</groupId>
-			<artifactId>data</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>uk.org.taverna.platform</groupId>
+			<groupId>${project.parent.groupId}</groupId>
 			<artifactId>taverna-execution-impl</artifactId>
-			<version>${project.version}</version>
+			<version>${project.parent.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>uk.org.taverna.platform</groupId>
+			<groupId>${project.parent.groupId}</groupId>
 			<artifactId>taverna-run-impl</artifactId>
-			<version>${project.version}</version>
+			<version>${project.parent.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>uk.org.taverna.platform</groupId>
-			<artifactId>execution-local</artifactId>
-			<version>${project.version}</version>
+			<groupId>${project.parent.groupId}</groupId>
+			<artifactId>taverna-execution-local</artifactId>
+			<version>${project.parent.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>uk.org.taverna.platform</groupId>
-			<artifactId>report</artifactId>
-			<version>${project.version}</version>
+			<groupId>${project.parent.groupId}</groupId>
+			<artifactId>taverna-report-api</artifactId>
+			<version>${project.parent.version}</version>
 		</dependency>
 
 		<!-- Scufl2 -->
 		<dependency>
-			<groupId>uk.org.taverna.scufl2</groupId>
-			<artifactId>scufl2-api</artifactId>
-			<version>${scufl2.version}</version>
+			<groupId>org.apache.taverna.language</groupId>
+			<artifactId>taverna-scufl2-api</artifactId>
+			<version>${taverna.language.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>uk.org.taverna.scufl2</groupId>
-			<artifactId>scufl2-t2flow</artifactId>
-			<version>${scufl2.version}</version>
+			<groupId>org.apache.taverna.language</groupId>
+			<artifactId>taverna-scufl2-t2flow</artifactId>
+			<version>${taverna.language.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>uk.org.taverna.scufl2</groupId>
-			<artifactId>scufl2-rdfxml</artifactId>
-			<version>${scufl2.version}</version>
+			<groupId>org.apache.taverna.language</groupId>
+			<artifactId>taverna-scufl2-rdfxml</artifactId>
+			<version>${taverna.language.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>uk.org.taverna.scufl2</groupId>
-			<artifactId>scufl2-ucfpackage</artifactId>
-			<version>${scufl2.version}</version>
+			<groupId>org.apache.taverna.language</groupId>
+			<artifactId>taverna-scufl2-ucfpackage</artifactId>
+			<version>${taverna.language.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>uk.org.taverna.scufl2</groupId>
-			<artifactId>scufl2-validation</artifactId>
-			<version>${scufl2.version}</version>
+			<groupId>org.apache.taverna.language</groupId>
+			<artifactId>taverna-scufl2-validation</artifactId>
+			<version>${taverna.language.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>uk.org.taverna.scufl2</groupId>
-			<artifactId>scufl2-validation-correctness</artifactId>
-			<version>${scufl2.version}</version>
+			<groupId>org.apache.taverna.language</groupId>
+			<artifactId>taverna-scufl2-validation-correctness</artifactId>
+			<version>${taverna.language.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>uk.org.taverna.scufl2</groupId>
-			<artifactId>scufl2-validation-structural</artifactId>
-			<version>${scufl2.version}</version>
+			<groupId>org.apache.taverna.language</groupId>
+			<artifactId>taverna-scufl2-validation-structural</artifactId>
+			<version>${taverna.language.version}</version>
 		</dependency>
 
 		<!-- Taverna CommandLine Tool -->
 		<dependency>
-			<groupId>net.sf.taverna.t2.taverna-commandline</groupId>
+			<groupId>org.apache.taverna.commandline</groupId>
 			<artifactId>taverna-commandline-common</artifactId>
 			<version>2.0-SNAPSHOT</version>
 		</dependency>
@@ -599,6 +583,7 @@
 			<version>1.5.8</version> <scope>test</scope> <exclusions> <exclusion> <groupId>org.apache.xalan</groupId>
 			<artifactId>com.springsource.org.apache.xalan</artifactId> </exclusion> </exclusions>
 			</dependency> -->
+			<!--
 		<dependency>
 			<groupId>org.beanshell</groupId>
 			<artifactId>com.springsource.bsh</artifactId>
@@ -609,6 +594,7 @@
 			<artifactId>martservice</artifactId>
 			<version>2.0-SNAPSHOT</version>
 		</dependency>
+	-->
 		<dependency>
 			<groupId>org.dom4j</groupId>
 			<artifactId>com.springsource.org.dom4j</artifactId>

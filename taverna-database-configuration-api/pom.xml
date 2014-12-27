@@ -2,41 +2,18 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>taverna-commons</artifactId>
-        <groupId>uk.org.taverna.commons</groupId>
-        <version>1.0.0-SNAPSHOT</version>
+			<groupId>org.apache.taverna.engine</groupId>
+			<artifactId>taverna-engine</artifactId>
+			<version>3.0.0-SNAPSHOT</version>
     </parent>
-    <groupId>uk.org.taverna.configuration</groupId>
-    <version>0.1.1-SNAPSHOT</version>
 	<artifactId>taverna-database-configuration-api</artifactId>
 	<packaging>bundle</packaging>
+	<name>Apache Taverna Database Configuration API</name>
 	<dependencies>
 		<dependency>
-			<groupId>uk.org.taverna.configuration</groupId>
+			<groupId>org.apache.taverna.osgi</groupId>
 			<artifactId>taverna-configuration-api</artifactId>
-			<version>${taverna.configuration.version}</version>
+			<version>${taverna.osgi.version}</version>
 		</dependency>
 	</dependencies>
-	<repositories>
-		<repository>
-			<releases />
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<id>mygrid-repository</id>
-			<name>myGrid Repository</name>
-			<url>http://www.mygrid.org.uk/maven/repository
-			</url>
-		</repository>
-		<repository>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-			<snapshots />
-			<id>mygrid-snapshot-repository</id>
-			<name>myGrid Snapshot Repository</name>
-			<url>http://www.mygrid.org.uk/maven/snapshot-repository</url>
-		</repository>
-	</repositories>
-	<name>Taverna Database Configuration API</name>
 </project>

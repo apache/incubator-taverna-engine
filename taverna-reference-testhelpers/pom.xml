@@ -2,47 +2,37 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>net.sf.taverna.t2</groupId>
-		<artifactId>core</artifactId>
-		<version>2.0.1-SNAPSHOT</version>
+		<groupId>org.apache.taverna.engine</groupId>
+		<artifactId>taverna-engine</artifactId>
+		<version>3.0.0-SNAPSHOT</version>
 	</parent>
-	<groupId>net.sf.taverna.t2.core</groupId>
-	<artifactId>reference-testhelpers</artifactId>
+	<artifactId>taverna-reference-testhelpers</artifactId>
 	<packaging>bundle</packaging>
-
-	<name>T2reference dummy implementations for testing</name>
+	<name>Apache Taverna Reference Test Helpers</name>
 
 	<description>
-		In order to properly test the raven-aware functionality within
-		the t2reference modules we need a module that is entire external
+		In order to properly test OSGi-loaded t2ference modules
+		we need a module that is entire external
 		to t2reference and to the test cases. If the test
 		implementations are included in either the api, core
 		implementation or test modules they will be loaded by the root
 		classloader of the test runner - by putting them in an
-		independent artifact we allow them to be loaded through raven's
+		independent artifact we allow them to be loaded through
 		various SPI discovery mechanisms as they would be in a 'real'
 		environment.
 	</description>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<extensions>true</extensions>
-			</plugin>
-		</plugins>
-	</build>
 	<dependencies>
 		<!-- Only depend on the t2reference API package here -->
 		<dependency>
-			<groupId>net.sf.taverna.t2.core</groupId>
-			<artifactId>reference-api</artifactId>
-			<version>${project.version}</version>
+			<groupId>${project.parent.groupId}</groupId>
+			<artifactId>taverna-reference-api</artifactId>
+			<version>${project.parent.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
+			<groupId>org.apache.log4j</groupId>
+			<artifactId>com.springsource.org.apache.log4j</artifactId>
+      <version>${log4j.version}</version>
 		</dependency>
 	</dependencies>
 </project>

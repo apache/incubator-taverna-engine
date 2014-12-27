@@ -3,30 +3,61 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>net.sf.taverna.t2</groupId>
-		<artifactId>security</artifactId>
-		<version>2.0.1-SNAPSHOT</version>
+    <groupId>org.apache.taverna.engine</groupId>
+    <artifactId>taverna-engine</artifactId>
+    <version>3.0.0-SNAPSHOT</version>
 	</parent>
-
-	<groupId>net.sf.taverna.t2.security</groupId>
-	<artifactId>credential-manager-impl</artifactId>
+	<artifactId>taverna-credential-manager-impl</artifactId>
 	<packaging>bundle</packaging>
-	<name>Credential Manager Implementation</name>
+	<name>Apache Taverna Credential Manager Implementation</name>
+
+  <profiles>
+    <profile>
+      <id>strongEncryption</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <version>2.9</version>
+            <configuration>
+              <forkMode>always</forkMode>
+            </configuration>
+            <executions>
+              <execution>
+                <id>integration-test</id>
+                <goals>
+                  <goal>integration-test</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>verify</id>
+                <goals>
+                  <goal>verify</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
 	<dependencies>
 		<dependency>
-			<groupId>net.sf.taverna.t2.security</groupId>
-			<artifactId>credential-manager</artifactId>
-			<version>${project.version}</version>
+      <groupId>${project.parent.groupId}</groupId>
+			<artifactId>taverna-credential-manager</artifactId>
+			<version>${project.parent.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>uk.org.taverna.configuration</groupId>
+			<groupId>org.apache.taverna.osgi</groupId>
 			<artifactId>taverna-app-configuration-api</artifactId>
-			<version>${taverna.configuration.version}</version>
+			<version>${taverna.osgi.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>net.sf.taverna.t2.lang</groupId>
-			<artifactId>observer</artifactId>
-			<version>${t2.lang.version}</version>
+      <groupId>${project.parent.groupId}</groupId>
+			<artifactId>taverna-observer</artifactId>
+			<version>${project.parent.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
@@ -36,17 +67,17 @@
 		<dependency>
 			<groupId>org.apache.log4j</groupId>
 			<artifactId>com.springsource.org.apache.log4j</artifactId>
-                        <version>${log4j.version}</version>
+      <version>${log4j.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-                        <version>${commons.io.version}</version>
+      <version>${commons.io.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-                        <version>${junit.version}</version>
+      <version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -56,24 +87,4 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	<repositories>
-		<repository>
-			<releases />
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<id>mygrid-repository</id>
-			<name>myGrid Repository</name>
-			<url>http://www.mygrid.org.uk/maven/repository</url>
-		</repository>
-		<repository>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-			<snapshots />
-			<id>mygrid-snapshot-repository</id>
-			<name>myGrid Snapshot Repository</name>
-			<url>http://www.mygrid.org.uk/maven/snapshot-repository</url>
-		</repository>
-	</repositories>
 </project>
