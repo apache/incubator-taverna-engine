@@ -238,7 +238,7 @@ public class CredentialManagerImpl implements CredentialManager,
 				
 				List<URL> certURLsToDelete = new ArrayList<>();
 				Class<?> c = CredentialManager.class;
-				certURLsToDelete.add(c.getResource("/www.biocatalogue.org-revoked.pem"));
+				certURLsToDelete.add(c.getResource("/trusted-certificates/www.biocatalogue.org-revoked.pem"));
 				certURLsToDelete.add(c.getResource("/trusted-certificates/www.biodiversitycatalogue.org-revoked.pem"));
 				certURLsToDelete.add(c.getResource("/trusted-certificates/heater.cs.man.ac.uk-not-needed.pem"));
 
@@ -256,7 +256,7 @@ public class CredentialManagerImpl implements CredentialManager,
 									+ aliasToDelete);
 						}
 					} catch (Exception ex) {
-						logger.error(ex.getMessage(), ex);
+						logger.info("Can't delete revoked certificate " + certURLToDelete, ex);
 					}
 				}
 				
