@@ -50,8 +50,6 @@ public class DistinguishedNameParserImpl implements DistinguishedNameParser{
 	private static Logger logger = Logger.getLogger(DistinguishedNameParserImpl.class);
 
         public DistinguishedNameParserImpl(){
-            System.out.println("Creating DistinguishedNameParserImpl");
-            System.out.println(this instanceof net.sf.taverna.t2.security.credentialmanager.DistinguishedNameParser);
         }
         
 	/**
