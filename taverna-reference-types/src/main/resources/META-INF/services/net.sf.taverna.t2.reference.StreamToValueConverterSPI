@@ -1,7 +1,0 @@
-# Implementation classes of StreamToValueConverterSPI go here, one per line
-net.sf.taverna.t2.reference.impl.external.object.StreamToStringConverter
-net.sf.taverna.t2.reference.impl.external.object.StreamToByteArrayConverter
-net.sf.taverna.t2.reference.impl.external.object.StreamToVMObjectReferenceConverter
-net.sf.taverna.t2.reference.impl.external.object.StreamToDoubleConverter
-net.sf.taverna.t2.reference.impl.external.object.StreamToBooleanConverter
-net.sf.taverna.t2.reference.impl.external.object.StreamToIntegerConverter

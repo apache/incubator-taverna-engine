@@ -1,3 +1,0 @@
-# Implementation classes of ExternalReferenceTranslatorSPI go here, one per line
-net.sf.taverna.t2.reference.impl.external.object.InlineByteToInlineStringTranslator
-net.sf.taverna.t2.reference.impl.external.object.InlineStringToInlineByteTranslator

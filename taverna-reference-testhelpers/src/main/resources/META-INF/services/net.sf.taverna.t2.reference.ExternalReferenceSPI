@@ -1,5 +1,0 @@
-# Implementation classes of ExternalReferenceSPI go here, one per line
-net.sf.taverna.t2referencetest.GreenReference
-net.sf.taverna.t2referencetest.BlueReference
-net.sf.taverna.t2referencetest.RedReference
-net.sf.taverna.t2referencetest.YellowReference
