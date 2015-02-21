@@ -47,9 +47,9 @@ import net.sf.taverna.t2.workflowmodel.DataflowInputPort;
 import net.sf.taverna.t2.workflowmodel.Edits;
 import net.sf.taverna.t2.workflowmodel.InvalidDataflowException;
 
-import org.purl.wf4ever.robundle.Bundle;
+import org.apache.taverna.robundle.Bundle;
 
-import uk.org.taverna.databundle.DataBundles;
+import org.apache.taverna.databundle.DataBundles;
 import uk.org.taverna.platform.capability.api.ActivityService;
 import uk.org.taverna.platform.capability.api.DispatchLayerService;
 import uk.org.taverna.platform.execution.api.AbstractExecution;

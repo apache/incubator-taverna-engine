@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
-import org.purl.wf4ever.robundle.Bundle;
+import org.apache.taverna.robundle.Bundle;
 
 import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
 import uk.org.taverna.platform.execution.api.InvalidExecutionIdException;

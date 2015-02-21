@@ -8,9 +8,9 @@ import java.util.TimeZone;
 import java.util.UUID;
 
 import org.junit.Before;
-import org.purl.wf4ever.robundle.Bundle;
+import org.apache.taverna.robundle.Bundle;
 
-import uk.org.taverna.databundle.DataBundles;
+import org.apache.taverna.databundle.DataBundles;
 import uk.org.taverna.platform.report.ActivityReport;
 import uk.org.taverna.platform.report.Invocation;
 import uk.org.taverna.platform.report.ProcessorReport;

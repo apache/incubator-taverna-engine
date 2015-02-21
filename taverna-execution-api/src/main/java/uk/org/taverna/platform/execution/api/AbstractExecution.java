@@ -22,7 +22,7 @@ package uk.org.taverna.platform.execution.api;
 
 import java.util.UUID;
 
-import org.purl.wf4ever.robundle.Bundle;
+import org.apache.taverna.robundle.Bundle;
 
 import uk.org.taverna.platform.report.ActivityReport;
 import uk.org.taverna.platform.report.ProcessorReport;

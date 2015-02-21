@@ -44,9 +44,9 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
-import org.purl.wf4ever.robundle.Bundle;
+import org.apache.taverna.robundle.Bundle;
 
-import uk.org.taverna.databundle.DataBundles;
+import org.apache.taverna.databundle.DataBundles;
 import uk.org.taverna.osgi.starter.TavernaStarter;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
 import uk.org.taverna.platform.report.State;

@@ -23,7 +23,7 @@ package uk.org.taverna.platform.execution.impl.remote;
 import java.util.Collections;
 import java.util.Set;
 
-import org.purl.wf4ever.robundle.Bundle;
+import org.apache.taverna.robundle.Bundle;
 
 import uk.org.taverna.platform.execution.api.AbstractExecutionService;
 import uk.org.taverna.platform.execution.api.Execution;

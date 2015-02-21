@@ -27,8 +27,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import org.purl.wf4ever.robundle.Bundle;
-
+import org.apache.taverna.robundle.Bundle;
 import org.apache.taverna.scufl2.api.core.Workflow;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;

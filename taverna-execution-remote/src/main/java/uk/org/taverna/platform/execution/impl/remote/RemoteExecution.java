@@ -20,7 +20,7 @@
  ******************************************************************************/
 package uk.org.taverna.platform.execution.impl.remote;
 
-import org.purl.wf4ever.robundle.Bundle;
+import org.apache.taverna.robundle.Bundle;
 
 import uk.org.taverna.platform.execution.api.AbstractExecution;
 import uk.org.taverna.platform.report.ActivityReport;

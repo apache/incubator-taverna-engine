@@ -29,7 +29,7 @@ import net.sf.taverna.t2.reference.ReferenceService;
 import net.sf.taverna.t2.workflowmodel.Dataflow;
 import net.sf.taverna.t2.workflowmodel.Edits;
 
-import org.purl.wf4ever.robundle.Bundle;
+import org.apache.taverna.robundle.Bundle;
 
 import uk.org.taverna.platform.capability.api.ActivityService;
 import uk.org.taverna.platform.capability.api.DispatchLayerService;

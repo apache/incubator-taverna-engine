@@ -20,7 +20,7 @@
  ******************************************************************************/
 package uk.org.taverna.platform.execution.api;
 
-import org.purl.wf4ever.robundle.Bundle;
+import org.apache.taverna.robundle.Bundle;
 
 import uk.org.taverna.platform.report.WorkflowReport;
 import org.apache.taverna.scufl2.api.container.WorkflowBundle;

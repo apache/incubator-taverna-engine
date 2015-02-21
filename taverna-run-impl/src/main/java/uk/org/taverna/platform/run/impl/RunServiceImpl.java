@@ -38,9 +38,9 @@ import java.util.logging.Logger;
 
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
-import org.purl.wf4ever.robundle.Bundle;
+import org.apache.taverna.robundle.Bundle;
 
-import uk.org.taverna.databundle.DataBundles;
+import org.apache.taverna.databundle.DataBundles;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironmentService;
 import uk.org.taverna.platform.execution.api.InvalidExecutionIdException;
