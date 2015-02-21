@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.apache.taverna.engine</groupId>
+		<artifactId>taverna-engine</artifactId>
+		<version>3.1.0-incubating-SNAPSHOT</version>
+	</parent>
+	<artifactId>taverna-reference-testhelpers</artifactId>
+	<packaging>bundle</packaging>
+	<name>Apache Taverna Reference Test Helpers</name>
+
+	<description>
+		In order to properly test OSGi-loaded t2ference modules
+		we need a module that is entire external
+		to t2reference and to the test cases. If the test
+		implementations are included in either the api, core
+		implementation or test modules they will be loaded by the root
+		classloader of the test runner - by putting them in an
+		independent artifact we allow them to be loaded through
+		various SPI discovery mechanisms as they would be in a 'real'
+		environment.
+	</description>
+
+	<dependencies>
+		<!-- Only depend on the t2reference API package here -->
+		<dependency>
+			<groupId>${project.parent.groupId}</groupId>
+			<artifactId>taverna-reference-api</artifactId>
+			<version>${project.parent.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+      <version>${log4j.version}</version>
+		</dependency>
+	</dependencies>
+</project>

@@ -1,0 +1,10 @@
+net.sf.taverna.t2.annotation.impl.annotationbeans.Author
+net.sf.taverna.t2.annotation.impl.annotationbeans.DescriptiveTitle
+net.sf.taverna.t2.annotation.impl.annotationbeans.FreeTextDescription
+net.sf.taverna.t2.annotation.impl.annotationbeans.HostInstitution
+#net.sf.taverna.t2.annotation.impl.annotationbeans.MimeType
+net.sf.taverna.t2.annotation.impl.annotationbeans.DocumentationUrl
+net.sf.taverna.t2.annotation.impl.annotationbeans.Optional
+net.sf.taverna.t2.annotation.impl.annotationbeans.ExampleValue
+net.sf.taverna.t2.annotation.impl.annotationbeans.SemanticAnnotation
+net.sf.taverna.t2.annotation.impl.annotationbeans.IdentificationAssertion

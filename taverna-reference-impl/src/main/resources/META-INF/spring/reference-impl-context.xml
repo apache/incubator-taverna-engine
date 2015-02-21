@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans.xsd">
+	
+	<bean id="referenceSetAugmentor" class="net.sf.taverna.t2.reference.impl.ReferenceSetAugmentorImpl">
+		<property name="builders" ref="builders" />
+		<property name="translators" ref="translators" />
+	</bean>
+
+	<bean id="t2ReferenceGenerator" class="net.sf.taverna.t2.reference.impl.UUIDT2ReferenceGenerator">
+		<property name="namespace" value="taverna" />
+	</bean>
+
+</beans>

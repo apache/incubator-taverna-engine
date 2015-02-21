@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+    <groupId>org.apache.taverna.engine</groupId>
+    <artifactId>taverna-engine</artifactId>
+    <version>3.1.0-incubating-SNAPSHOT</version>
+	</parent>
+	<artifactId>taverna-workflowmodel-impl</artifactId>
+	<packaging>bundle</packaging>
+	<name>Apache Taverna Workflow Model implementation</name>
+	<description> Implementation of the core workflow object model for
+		Taverna workflows including
+		concrete instances of the workflow
+		definition objects and enactment behaviours.
+	</description>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Export-Package>
+						net.sf.taverna.t2.invocation.impl,
+						net.sf.taverna.t2.workflowmodel.impl,
+						net.sf.taverna.t2.workflowmodel.processor.iteration.impl,
+						</Export-Package>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<dependencies>
+		<dependency>
+			<groupId>${project.parent.groupId}</groupId>
+			<artifactId>taverna-workflowmodel-api</artifactId>
+			<version>${project.parent.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jdom</groupId>
+			<artifactId>com.springsource.org.jdom</artifactId>
+      <version>${jdom.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.thoughtworks.xstream</groupId>
+			<artifactId>com.springsource.com.thoughtworks.xstream</artifactId>
+			<version>${xstream.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.parent.groupId}</groupId>
+			<artifactId>taverna-workflowmodel-core-extensions</artifactId>
+			<version>${project.parent.version}</version>
+			<!--<scope>test</scope> -->
+		</dependency>
+
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+      <version>${log4j.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+      <version>${junit.version}</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>

@@ -1,0 +1,25 @@
+PREFIX prov: <http://www.w3.org/ns/prov#> 
+PREFIX wfdesc: <http://purl.org/wf4ever/wfdesc#> 
+PREFIX wfprov: <http://purl.org/wf4ever/wfprov#> 
+PREFIX tavernaprov: <http://ns.taverna.org.uk/2012/tavernaprov/>
+PREFIX cnt:  <http://www.w3.org/2011/content#> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+PREFIX wf4ever: <http://purl.org/wf4ever/wf4ever#> 
+
+
+SELECT DISTINCT ?paramName ?name ?value ?ended ?script
+WHERE {
+    ?greeting tavernaprov:content <outputs/greeting.txt> .
+    ?greeting prov:wasGeneratedBy ?concatenate .
+    ?concatenate prov:endedAtTime ?ended ;
+        wfprov:wasPartOfWorkflowRun ?run ;
+	wfprov:describedByProcess ?plan .
+    ?concatenate wfprov:usedInput ?input .
+    ?input tavernaprov:content ?name .
+    OPTIONAL { ?name cnt:chars ?value }  .
+    OPTIONAL { ?plan wf4ever:script ?script } .
+    ?input wfprov:describedByParameter ?param .
+    ?plan wfdesc:hasInput ?param .
+    OPTIONAL { ?param rdfs:label ?paramName } .  
+}
+

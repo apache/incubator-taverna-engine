@@ -1,0 +1,87 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.apache.taverna</groupId>
+		<artifactId>taverna-parent</artifactId>
+		<version>1-incubating-SNAPSHOT</version>
+	</parent>
+	<groupId>org.apache.taverna.engine</groupId>
+	<artifactId>taverna-engine</artifactId>
+	<version>3.1.0-incubating-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>Apache Taverna Engine and Platform</name>
+  <properties>
+    <taverna.language.version>0.15.0-incubating-SNAPSHOT</taverna.language.version>
+    <taverna.osgi.version>0.2.0-incubating-SNAPSHOT</taverna.osgi.version>
+  </properties>
+	<modules>
+    <!-- Avoid spaghetti dependencies
+    <module>taverna-platform-integration-tests</module>
+    <module>taverna-integration-tests</module>
+	-->
+    <module>taverna-activity-archetype</module>
+    <module>taverna-activity-test-utils</module>
+    <module>taverna-capability-api</module>
+    <module>taverna-capability-impl</module>
+    <module>taverna-credential-manager</module>
+    <module>taverna-credential-manager-impl</module>
+    <module>taverna-database-configuration-api</module>
+    <module>taverna-database-configuration-impl</module>
+
+    <module>taverna-dataflow-activity</module>
+    <module>taverna-execution-api</module>
+    <module>taverna-execution-hadoop</module>
+    <module>taverna-execution-impl</module>
+    <module>taverna-execution-local</module>
+    <module>taverna-execution-remote</module>
+    <module>taverna-observer</module>
+
+    <!-- FIXME: Upgrade to T3
+    <module>taverna-prov</module>
+    -->
+    <module>taverna-prov-owl-bindings</module>
+    <!--
+    <module>taverna-provenanceconnector</module>
+    -->
+    <module>taverna-reference-api</module>
+    <module>taverna-reference-impl</module>
+    <module>taverna-reference-testhelpers</module>
+    <module>taverna-reference-types</module>
+    <module>taverna-report-api</module>
+    <module>taverna-run-api</module>
+    <module>taverna-run-impl</module>
+    <module>taverna-services-api</module>
+    <module>taverna-services-impl</module>
+    <module>taverna-stringconstant-activity</module>
+    <module>taverna-workflowmodel-api</module>
+    <module>taverna-workflowmodel-core-extensions</module>
+    <module>taverna-workflowmodel-impl</module>
+  </modules>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>log4j</groupId>
+				<artifactId>log4j</artifactId>
+				<version>${log4j.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>${junit.version}</version>
+				<scope>test</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+  <repositories>
+    <repository>
+      <id>taverna-incubating</id>
+      <name>Apache Taverna incubating Repository</name>
+        <url>http://repository.mygrid.org.uk/artifactory/incubator-snapshot-local/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots />
+    </repository>
+  </repositories>
+</project>

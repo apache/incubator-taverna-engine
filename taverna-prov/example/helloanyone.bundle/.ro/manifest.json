@@ -1,0 +1,68 @@
+{
+  "@context" : [ "https://w3id.org/bundle/context" ],
+  "id" : "/",
+  "manifest" : [ "/.ro/manifest.json" ],
+  "createdOn" : "2014-05-28T10:49:48.072Z",
+  "createdBy" : [ {
+    "uri" : "http://ns.taverna.org.uk/2010/xml/t2flow/raven/org.purl.wf4ever.provtaverna/prov-taverna-export/2.2.0/org.purl.wf4ever.provtaverna.export.W3ProvenanceExport",
+    "name" : "Taverna-PROV plugin"
+  } ],
+  "aggregates" : [ {
+    "file" : "/workflow.wfbundle",
+    "folder" : "/",
+    "mediatype" : "application/vnd.taverna.scufl2.workflow-bundle",
+    "createdOn" : "2014-05-28T10:49:46.586Z",
+    "proxy" : "urn:uuid:1494a65e-5b3a-4ddb-8818-c74f968aa332"
+  }, {
+    "file" : "/intermediates/3a/3a82e39d-a537-40cf-91a0-2c89d4a2e62b.txt",
+    "folder" : "/intermediates/3a/",
+    "mediatype" : "text/plain",
+    "createdOn" : "2014-05-28T10:49:45.655Z",
+    "proxy" : "urn:uuid:3d4a1129-e6f7-456a-9332-eee30cf4182e"
+  }, {
+    "file" : "/inputs/name.txt",
+    "folder" : "/inputs/",
+    "mediatype" : "text/plain",
+    "createdOn" : "2014-05-28T10:49:45.606Z",
+    "proxy" : "urn:uuid:c2677561-6885-4085-8502-6a3c9072e402"
+  }, {
+    "file" : "/workflowrun.prov.ttl",
+    "folder" : "/",
+    "mediatype" : "text/turtle",
+    "createdOn" : "2014-05-28T10:49:45.769Z",
+    "createdBy" : [ {
+      "uri" : "http://ns.taverna.org.uk/2011/software/taverna-cmd-core-2.5.0",
+      "name" : "Taverna command line core 2.5.0"
+    }, {
+      "uri" : "http://ns.taverna.org.uk/2010/xml/t2flow/raven/org.purl.wf4ever.provtaverna/prov-taverna-export/2.2.0/org.purl.wf4ever.provtaverna.export.W3ProvenanceExport",
+      "name" : "Taverna-PROV plugin"
+    } ],
+    "proxy" : "urn:uuid:78b482dd-407f-4334-b620-b0cff550c601"
+  }, {
+    "file" : "/outputs/greeting.txt",
+    "folder" : "/outputs/",
+    "mediatype" : "text/plain",
+    "createdOn" : "2014-05-28T10:49:45.614Z",
+    "proxy" : "urn:uuid:e5b9333d-d82d-4bcd-96e5-74fbf87e6225"
+  } ],
+  "annotations" : [ {
+    "annotation" : "urn:uuid:a2f03983-8836-4c36-bfb2-d713d9a1928f",
+    "about" : "/workflow.wfbundle",
+    "content" : "/.ro/annotations/a2f03983-8836-4c36-bfb2-d713d9a1928f.ttl"
+  }, {
+    "about" : "http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/",
+    "content" : "/workflow.wfbundle"
+  }, {
+    "about" : "http://ns.taverna.org.uk/2011/run/a85ef801-3db0-4c56-93a7-532d1b4afbf1/",
+    "content" : "/"
+  }, {
+    "about" : "http://ns.taverna.org.uk/2010/workflowBundle/01348671-5aaa-4cc2-84cc-477329b70b0d/workflow/Hello_Anyone/",
+    "content" : "/workflow.wfbundle"
+  }, {
+    "about" : "/workflow.wfbundle",
+    "content" : "/.ro/annotations/workflow.wfdesc.ttl"
+  }, {
+    "about" : "/",
+    "content" : "/workflowrun.prov.ttl"
+  } ]
+}
