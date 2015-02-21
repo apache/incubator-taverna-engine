@@ -22,7 +22,7 @@ package uk.org.taverna.platform.execution.api;
 
 import java.util.Set;
 
-import uk.org.taverna.scufl2.api.profiles.Profile;
+import org.apache.taverna.scufl2.api.profiles.Profile;
 
 /**
  * Service for finding <code>ExecutionEnvironment</code>s.

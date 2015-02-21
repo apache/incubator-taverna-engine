@@ -71,7 +71,7 @@ public class LocalExecutionTest {
 
 	/**
 	 * Test method for
-	 * {@link uk.org.taverna.platform.execution.impl.local.LocalExecution#DataflowExecution(uk.org.taverna.scufl2.api.core.Workflow, java.util.Map, net.sf.taverna.t2.reference.ReferenceService)}
+	 * {@link uk.org.taverna.platform.execution.impl.local.LocalExecution#DataflowExecution(org.apache.taverna.scufl2.api.core.Workflow, java.util.Map, net.sf.taverna.t2.reference.ReferenceService)}
 	 * .
 	 * 
 	 * @throws Exception

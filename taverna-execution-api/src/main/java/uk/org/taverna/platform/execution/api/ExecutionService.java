@@ -25,9 +25,9 @@ import java.util.Set;
 import org.purl.wf4ever.robundle.Bundle;
 
 import uk.org.taverna.platform.report.WorkflowReport;
-import uk.org.taverna.scufl2.api.container.WorkflowBundle;
-import uk.org.taverna.scufl2.api.core.Workflow;
-import uk.org.taverna.scufl2.api.profiles.Profile;
+import org.apache.taverna.scufl2.api.container.WorkflowBundle;
+import org.apache.taverna.scufl2.api.core.Workflow;
+import org.apache.taverna.scufl2.api.profiles.Profile;
 
 /**
  * Service for executing Taverna workflows. There may be several <code>ExecutionService</code>s

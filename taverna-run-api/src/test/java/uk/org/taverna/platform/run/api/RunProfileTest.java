@@ -33,9 +33,9 @@ import uk.org.taverna.databundle.DataBundles;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
 import uk.org.taverna.platform.execution.impl.local.LocalExecutionEnvironment;
 import uk.org.taverna.platform.execution.impl.local.LocalExecutionService;
-import uk.org.taverna.scufl2.api.container.WorkflowBundle;
-import uk.org.taverna.scufl2.api.core.Workflow;
-import uk.org.taverna.scufl2.api.profiles.Profile;
+import org.apache.taverna.scufl2.api.container.WorkflowBundle;
+import org.apache.taverna.scufl2.api.core.Workflow;
+import org.apache.taverna.scufl2.api.profiles.Profile;
 
 /**
  *
@@ -74,7 +74,7 @@ public class RunProfileTest {
 
 	/**
 	 * Test method for
-	 * {@link uk.org.taverna.platform.run.api.RunProfile#RunProfile(uk.org.taverna.scufl2.api.container.WorkflowBundle, java.util.Map, net.sf.taverna.t2.reference.ReferenceService, uk.org.taverna.platform.execution.api.ExecutionService)}
+	 * {@link uk.org.taverna.platform.run.api.RunProfile#RunProfile(org.apache.taverna.scufl2.api.container.WorkflowBundle, java.util.Map, net.sf.taverna.t2.reference.ReferenceService, uk.org.taverna.platform.execution.api.ExecutionService)}
 	 * .
 	 */
 	@Test
@@ -84,7 +84,7 @@ public class RunProfileTest {
 
 	/**
 	 * Test method for
-	 * {@link uk.org.taverna.platform.run.api.RunProfile#RunProfile(uk.org.taverna.scufl2.api.container.WorkflowBundle, uk.org.taverna.scufl2.api.core.Workflow, uk.org.taverna.scufl2.api.profiles.Profile, java.util.Map, net.sf.taverna.t2.reference.ReferenceService, uk.org.taverna.platform.execution.api.ExecutionService)}
+	 * {@link uk.org.taverna.platform.run.api.RunProfile#RunProfile(org.apache.taverna.scufl2.api.container.WorkflowBundle, org.apache.taverna.scufl2.api.core.Workflow, org.apache.taverna.scufl2.api.profiles.Profile, java.util.Map, net.sf.taverna.t2.reference.ReferenceService, uk.org.taverna.platform.execution.api.ExecutionService)}
 	 * .
 	 */
 	@Test
@@ -105,7 +105,7 @@ public class RunProfileTest {
 
 	/**
 	 * Test method for
-	 * {@link uk.org.taverna.platform.run.api.RunProfile#setWorkflowBundle(uk.org.taverna.scufl2.api.container.WorkflowBundle)}
+	 * {@link uk.org.taverna.platform.run.api.RunProfile#setWorkflowBundle(org.apache.taverna.scufl2.api.container.WorkflowBundle)}
 	 * .
 	 */
 	@Test
@@ -132,7 +132,7 @@ public class RunProfileTest {
 
 	/**
 	 * Test method for
-	 * {@link uk.org.taverna.platform.run.api.RunProfile#setWorkflow(uk.org.taverna.scufl2.api.core.Workflow)}
+	 * {@link uk.org.taverna.platform.run.api.RunProfile#setWorkflow(org.apache.taverna.scufl2.api.core.Workflow)}
 	 * .
 	 */
 	@Test
@@ -165,7 +165,7 @@ public class RunProfileTest {
 
 	/**
 	 * Test method for
-	 * {@link uk.org.taverna.platform.run.api.RunProfile#setProfile(uk.org.taverna.scufl2.api.profiles.Profile)}
+	 * {@link uk.org.taverna.platform.run.api.RunProfile#setProfile(org.apache.taverna.scufl2.api.profiles.Profile)}
 	 * .
 	 */
 	@Test

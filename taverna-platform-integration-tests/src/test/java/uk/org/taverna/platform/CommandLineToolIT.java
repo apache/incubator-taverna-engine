@@ -26,8 +26,8 @@ import org.osgi.framework.ServiceReference;
 
 import uk.org.taverna.commandline.args.CommandLineArguments;
 import uk.org.taverna.platform.run.api.RunService;
-import uk.org.taverna.scufl2.api.io.WorkflowBundleIO;
-import uk.org.taverna.scufl2.api.io.WorkflowBundleReader;
+import org.apache.taverna.scufl2.api.io.WorkflowBundleIO;
+import org.apache.taverna.scufl2.api.io.WorkflowBundleReader;
 
 public class CommandLineToolIT extends PlatformIT {
 
@@ -45,7 +45,7 @@ public class CommandLineToolIT extends PlatformIT {
 
 		if (workflowReader == null) {
 			ServiceReference workflowBundleReaderServiceReference = bundleContext
-					.getServiceReferences("uk.org.taverna.scufl2.api.io.WorkflowBundleReader",
+					.getServiceReferences("org.apache.taverna.scufl2.api.io.WorkflowBundleReader",
 							"(mediaType=application/vnd.taverna.t2flow+xml)")[0];
 			workflowBundleReader = (WorkflowBundleReader) bundleContext
 					.getService(workflowBundleReaderServiceReference);
@@ -53,7 +53,7 @@ public class CommandLineToolIT extends PlatformIT {
 
 		if (workflowBundleIO == null) {
 			ServiceReference workflowBundleIOServiceReference = bundleContext
-					.getServiceReference("uk.org.taverna.scufl2.api.io.WorkflowBundleIO");
+					.getServiceReference("org.apache.taverna.scufl2.api.io.WorkflowBundleIO");
 			workflowBundleIO = (WorkflowBundleIO) bundleContext
 					.getService(workflowBundleIOServiceReference);
 		}

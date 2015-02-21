@@ -1,8 +1,8 @@
 package uk.org.taverna.platform.execution.api;
 
 import net.sf.taverna.t2.workflowmodel.Dataflow;
-import uk.org.taverna.scufl2.api.container.WorkflowBundle;
-import uk.org.taverna.scufl2.api.core.Workflow;
+import org.apache.taverna.scufl2.api.container.WorkflowBundle;
+import org.apache.taverna.scufl2.api.core.Workflow;
 
 /**
  * A workflow compilation service converts a workflow (in a

@@ -13,7 +13,7 @@ import javax.swing.JTextField;
 import net.sf.taverna.t2.workbench.ui.views.contextualviews.activity.ActivityConfigurationPanel;
 
 import uk.org.taverna.commons.services.ServiceRegistry;
-import uk.org.taverna.scufl2.api.activity.Activity;
+import org.apache.taverna.scufl2.api.activity.Activity;
 
 @SuppressWarnings("serial")
 public class ${classPrefix}ConfigurationPanel extends ActivityConfigurationPanel {

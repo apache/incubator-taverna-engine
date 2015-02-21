@@ -23,8 +23,8 @@ package uk.org.taverna.commons.services;
 import java.net.URI;
 import java.util.Set;
 
-import uk.org.taverna.scufl2.api.port.InputActivityPort;
-import uk.org.taverna.scufl2.api.port.OutputActivityPort;
+import org.apache.taverna.scufl2.api.port.InputActivityPort;
+import org.apache.taverna.scufl2.api.port.OutputActivityPort;
 
 import com.fasterxml.jackson.databind.JsonNode;
 

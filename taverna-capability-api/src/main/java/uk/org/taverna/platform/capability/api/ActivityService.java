@@ -24,8 +24,8 @@ import java.net.URI;
 import java.util.Set;
 
 import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
-import uk.org.taverna.scufl2.api.port.InputActivityPort;
-import uk.org.taverna.scufl2.api.port.OutputActivityPort;
+import org.apache.taverna.scufl2.api.port.InputActivityPort;
+import org.apache.taverna.scufl2.api.port.OutputActivityPort;
 
 import com.fasterxml.jackson.databind.JsonNode;
 

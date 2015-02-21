@@ -22,8 +22,8 @@ import uk.org.taverna.platform.report.Invocation;
 import uk.org.taverna.platform.report.ProcessorReport;
 import uk.org.taverna.platform.report.State;
 import uk.org.taverna.platform.report.WorkflowReport;
-import uk.org.taverna.scufl2.api.common.URITools;
-import uk.org.taverna.scufl2.api.core.Processor;
+import org.apache.taverna.scufl2.api.common.URITools;
+import org.apache.taverna.scufl2.api.core.Processor;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -47,9 +47,9 @@ import uk.org.taverna.configuration.database.DatabaseConfiguration;
 import uk.org.taverna.platform.data.api.Data;
 import uk.org.taverna.platform.report.State;
 import uk.org.taverna.platform.report.WorkflowReport;
-import uk.org.taverna.scufl2.api.container.WorkflowBundle;
-import uk.org.taverna.scufl2.api.io.WorkflowBundleReader;
-import uk.org.taverna.scufl2.translator.t2flow.T2FlowReader;
+import org.apache.taverna.scufl2.api.container.WorkflowBundle;
+import org.apache.taverna.scufl2.api.io.WorkflowBundleReader;
+import org.apache.taverna.scufl2.translator.t2flow.T2FlowReader;
 
 public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 
@@ -197,13 +197,13 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 				"uk.org.taverna.osgi.services, xml-parser-service, 0.0.1-SNAPSHOT",
 				"uk.org.taverna.osgi.services, xml-transformer-service, 0.0.1-SNAPSHOT",
 				// FIXME: Add the other scufl2 modules
-				"uk.org.taverna.scufl2, scufl2-api, 0.9.2",
-				"uk.org.taverna.scufl2, scufl2-rdfxml, 0.9.2",
-				"uk.org.taverna.scufl2, scufl2-ucfpackage, 0.9.2",
-				"uk.org.taverna.scufl2, scufl2-t2flow, 0.9.2",
-				"uk.org.taverna.scufl2, scufl2-validation, 0.9.2",
-				"uk.org.taverna.scufl2, scufl2-validation-correctness, 0.9.2",
-				"uk.org.taverna.scufl2, scufl2-validation-structural, 0.9.2",
+				"org.apache.taverna.scufl2, scufl2-api, 0.9.2",
+				"org.apache.taverna.scufl2, scufl2-rdfxml, 0.9.2",
+				"org.apache.taverna.scufl2, scufl2-ucfpackage, 0.9.2",
+				"org.apache.taverna.scufl2, scufl2-t2flow, 0.9.2",
+				"org.apache.taverna.scufl2, scufl2-validation, 0.9.2",
+				"org.apache.taverna.scufl2, scufl2-validation-correctness, 0.9.2",
+				"org.apache.taverna.scufl2, scufl2-validation-structural, 0.9.2",
 				"net.sf.taverna.t2, results, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2, baclava, 0.1-SNAPSHOT",
 		// "net.sf.taverna.t2.taverna-commandline, taverna-commandline-common, 2.0-SNAPSHOT"
@@ -239,7 +239,7 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 
 		if (workflowBundleReader == null) {
 			ServiceReference[] workflowBundleReaderReferences = bundleContext.getServiceReferences(
-					"uk.org.taverna.scufl2.api.io.WorkflowBundleReader", null);
+					"org.apache.taverna.scufl2.api.io.WorkflowBundleReader", null);
 			for (ServiceReference serviceReference : workflowBundleReaderReferences) {
 				workflowBundleReader = (WorkflowBundleReader) bundleContext
 						.getService(serviceReference);

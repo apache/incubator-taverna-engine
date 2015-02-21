@@ -32,7 +32,7 @@ import uk.org.taverna.platform.report.State;
 import uk.org.taverna.platform.report.WorkflowReport;
 import uk.org.taverna.platform.run.api.RunProfile;
 import uk.org.taverna.platform.run.api.RunService;
-import uk.org.taverna.scufl2.api.container.WorkflowBundle;
+import org.apache.taverna.scufl2.api.container.WorkflowBundle;
 
 public class RunWorkflowsIT extends PlatformIT {
 

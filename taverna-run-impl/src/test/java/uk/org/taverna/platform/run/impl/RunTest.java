@@ -20,7 +20,7 @@ import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
 import uk.org.taverna.platform.execution.api.ExecutionService;
 import uk.org.taverna.platform.report.State;
 import uk.org.taverna.platform.run.api.RunProfile;
-import uk.org.taverna.scufl2.api.io.WorkflowBundleIO;
+import org.apache.taverna.scufl2.api.io.WorkflowBundleIO;
 
 public class RunTest extends DummyWorkflowReport {
 

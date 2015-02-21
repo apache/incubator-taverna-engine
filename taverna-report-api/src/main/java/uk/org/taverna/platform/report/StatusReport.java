@@ -29,8 +29,8 @@ import java.util.NavigableSet;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import uk.org.taverna.scufl2.api.common.Ported;
-import uk.org.taverna.scufl2.api.common.URITools;
+import org.apache.taverna.scufl2.api.common.Ported;
+import org.apache.taverna.scufl2.api.common.URITools;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;

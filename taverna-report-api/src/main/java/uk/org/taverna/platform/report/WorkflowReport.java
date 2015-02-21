@@ -29,7 +29,7 @@ import java.util.logging.Logger;
 
 import org.purl.wf4ever.robundle.Bundle;
 
-import uk.org.taverna.scufl2.api.core.Workflow;
+import org.apache.taverna.scufl2.api.core.Workflow;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 

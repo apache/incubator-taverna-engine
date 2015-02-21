@@ -21,9 +21,9 @@
 package uk.org.taverna.platform.capability.api;
 
 /**
- * Thrown when a {@link uk.org.taverna.scufl2.api.common.Configurable
+ * Thrown when a {@link org.apache.taverna.scufl2.api.common.Configurable
  * Configurable} cannot be configured by a
- * {@link uk.org.taverna.scufl2.api.configurations.Configuration Configuration}.
+ * {@link org.apache.taverna.scufl2.api.configurations.Configuration Configuration}.
  * 
  * @author David Withers
  */

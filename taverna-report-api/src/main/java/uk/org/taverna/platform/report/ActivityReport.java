@@ -20,7 +20,7 @@
  ******************************************************************************/
 package uk.org.taverna.platform.report;
 
-import uk.org.taverna.scufl2.api.activity.Activity;
+import org.apache.taverna.scufl2.api.activity.Activity;
 
 /**
  * Report about the {@link State} of an {@link Activity} invocation.

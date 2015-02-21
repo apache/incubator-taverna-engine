@@ -27,9 +27,9 @@ import java.util.Map;
 import org.purl.wf4ever.robundle.Bundle;
 
 import uk.org.taverna.platform.report.WorkflowReport;
-import uk.org.taverna.scufl2.api.container.WorkflowBundle;
-import uk.org.taverna.scufl2.api.core.Workflow;
-import uk.org.taverna.scufl2.api.profiles.Profile;
+import org.apache.taverna.scufl2.api.container.WorkflowBundle;
+import org.apache.taverna.scufl2.api.core.Workflow;
+import org.apache.taverna.scufl2.api.profiles.Profile;
 
 /**
  * A common super type for concrete implementations of <code>ExecutionService</code>s.

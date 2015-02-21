@@ -3,11 +3,11 @@ package uk.org.taverna.platform.run.api;
 import org.purl.wf4ever.robundle.Bundle;
 
 import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
-import uk.org.taverna.scufl2.api.container.WorkflowBundle;
+import org.apache.taverna.scufl2.api.container.WorkflowBundle;
 
 /**
  * A <code>RunProfile</code> specifies the parameters required to run a
- * {@link uk.org.taverna.scufl2.api.core.Workflow}.
+ * {@link org.apache.taverna.scufl2.api.core.Workflow}.
  * 
  * @author David Withers
  */
@@ -20,7 +20,7 @@ public class RunProfile {
 
 	/**
 	 * Constructs a <code>RunProfile</code> that specifies the parameters
-	 * required to run a {@link uk.org.taverna.scufl2.api.core.Workflow}. The
+	 * required to run a {@link org.apache.taverna.scufl2.api.core.Workflow}. The
 	 * main <code>Workflow</code> and <code>Profile</code> from the
 	 * <code>WorkflowBundle</code> are used.
 	 * 
@@ -41,7 +41,7 @@ public class RunProfile {
 
 	/**
 	 * Constructs a <code>RunProfile</code> that specifies the parameters
-	 * required to run a {@link uk.org.taverna.scufl2.api.core.Workflow}.
+	 * required to run a {@link org.apache.taverna.scufl2.api.core.Workflow}.
 	 * 
 	 * @param executionEnvironment
 	 *            the {@link ExecutionEnvironment} used to execute the
@@ -54,7 +54,7 @@ public class RunProfile {
 	 *            the main <code>Workflow</code> from the
 	 *            <code>WorkflowBundle</code>
 	 * @param profile
-	 *            the {@link uk.org.taverna.scufl2.api.profiles.Profile} to use
+	 *            the {@link org.apache.taverna.scufl2.api.profiles.Profile} to use
 	 *            when running the <code>Workflow</code>. If null uses the main
 	 *            <code>Profile</code> from the <code>WorkflowBundle</code>
 	 * @param dataBundle

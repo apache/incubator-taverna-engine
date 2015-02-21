@@ -57,9 +57,9 @@ import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
 import uk.org.taverna.platform.report.ActivityReport;
 import uk.org.taverna.platform.report.ProcessorReport;
 import uk.org.taverna.platform.report.WorkflowReport;
-import uk.org.taverna.scufl2.api.container.WorkflowBundle;
-import uk.org.taverna.scufl2.api.core.Workflow;
-import uk.org.taverna.scufl2.api.profiles.Profile;
+import org.apache.taverna.scufl2.api.container.WorkflowBundle;
+import org.apache.taverna.scufl2.api.core.Workflow;
+import org.apache.taverna.scufl2.api.profiles.Profile;
 
 /**
  * An {@link uk.org.taverna.platform.execution.api.Execution Execution} for
@@ -192,13 +192,13 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 
 	@Override
 	public ProcessorReport createProcessorReport(
-			uk.org.taverna.scufl2.api.core.Processor processor) {
+			org.apache.taverna.scufl2.api.core.Processor processor) {
 		return new LocalProcessorReport(processor);
 	}
 
 	@Override
 	public ActivityReport createActivityReport(
-			uk.org.taverna.scufl2.api.activity.Activity activity) {
+			org.apache.taverna.scufl2.api.activity.Activity activity) {
 		return new ActivityReport(activity);
 	}
 

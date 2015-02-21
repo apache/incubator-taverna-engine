@@ -30,7 +30,7 @@ import org.osgi.framework.ServiceReference;
 import uk.org.taverna.platform.capability.activity.ActivityConfigurationException;
 import uk.org.taverna.platform.capability.activity.ActivityNotFoundException;
 import uk.org.taverna.platform.capability.activity.ActivityService;
-import uk.org.taverna.scufl2.api.configurations.ConfigurationDefinition;
+import org.apache.taverna.scufl2.api.configurations.ConfigurationDefinition;
 
 public class ActivityIT extends PlatformIT {
 

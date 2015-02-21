@@ -37,8 +37,8 @@ import uk.org.taverna.databundle.DataBundles;
 import uk.org.taverna.databundle.ErrorDocument;
 import uk.org.taverna.platform.report.State;
 import uk.org.taverna.platform.report.WorkflowReport;
-import uk.org.taverna.scufl2.api.container.WorkflowBundle;
-import uk.org.taverna.scufl2.api.io.WorkflowBundleIO;
+import org.apache.taverna.scufl2.api.container.WorkflowBundle;
+import org.apache.taverna.scufl2.api.io.WorkflowBundleIO;
 
 @Ignore
 public class PlatformIT {
