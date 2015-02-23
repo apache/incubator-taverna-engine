@@ -246,7 +246,7 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.parent.groupId}</groupId>
-			<artifactId>taverna-workflowmodel-core-extensions</artifactId>
+			<artifactId>taverna-workflowmodel-extensions</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>
 		<dependency>

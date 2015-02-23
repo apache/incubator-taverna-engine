@@ -55,7 +55,7 @@
     <module>taverna-services-impl</module>
     <module>taverna-stringconstant-activity</module>
     <module>taverna-workflowmodel-api</module>
-    <module>taverna-workflowmodel-core-extensions</module>
+    <module>taverna-workflowmodel-extensions</module>
     <module>taverna-workflowmodel-impl</module>
   </modules>
 	<dependencyManagement>
