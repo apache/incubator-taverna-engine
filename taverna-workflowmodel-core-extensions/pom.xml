@@ -7,7 +7,7 @@
     </parent>
 	<artifactId>taverna-workflowmodel-core-extensions</artifactId>
 	<packaging>bundle</packaging>
-	<name>Apache Taverna Workflow Model Core Extension Points</name>
+	<name>Apache Taverna Workflow Model Extension Points</name>
 	<description>Implementation of core extension points to the workflow model</description>
 	<dependencies>
     <dependency>

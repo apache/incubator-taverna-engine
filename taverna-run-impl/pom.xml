@@ -7,7 +7,7 @@
 	</parent>
 	<artifactId>taverna-run-impl</artifactId>
 	<packaging>bundle</packaging>
-	<name>Apache Taverna Platform Run Service Implementation</name>
+	<name>Apache Taverna Platform Run Service impl</name>
 	<build>
 		<plugins>
 			<plugin>

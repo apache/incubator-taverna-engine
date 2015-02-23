@@ -8,7 +8,7 @@
 	</parent>
 	<artifactId>taverna-reference-impl</artifactId>
 	<packaging>bundle</packaging>
-	<name>Apache Taverna Reference Manager Implementation</name>
+	<name>Apache Taverna Reference Manager impl</name>
 	<description>
 		Implementations of the core APIs, not including extension point
 		implementations.

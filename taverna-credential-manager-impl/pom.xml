@@ -8,7 +8,7 @@
 	</parent>
 	<artifactId>taverna-credential-manager-impl</artifactId>
 	<packaging>bundle</packaging>
-	<name>Apache Taverna Credential Manager Implementation</name>
+	<name>Apache Taverna Credential Manager impl</name>
 
   <profiles>
     <profile>

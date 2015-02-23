@@ -7,7 +7,7 @@
 	</parent>
 	<artifactId>taverna-capability-impl</artifactId>
 	<packaging>bundle</packaging>
-	<name>Apache Taverna Platform Capability Implementation</name>
+	<name>Apache Taverna Platform Capability impl</name>
 	<build>
 		<plugins>
 			<plugin>

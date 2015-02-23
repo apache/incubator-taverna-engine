@@ -7,7 +7,7 @@
 	</parent>
 	<artifactId>taverna-database-configuration-impl</artifactId>
 	<packaging>bundle</packaging>
-	<name>Apache Taverna Database Configuration implementation</name>
+	<name>Apache Taverna Database Configuration impl</name>
 	<build>
 		<plugins>
 			<plugin>

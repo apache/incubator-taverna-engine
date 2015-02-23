@@ -7,7 +7,7 @@
 	</parent>
 	<artifactId>taverna-execution-impl</artifactId>
 	<packaging>bundle</packaging>
-	<name>Apache Taverna Platform Execution Service Implementation</name>
+	<name>Apache Taverna Platform Execution Service impl</name>
 	<description>A Service for executing Taverna workflows</description>
 	<build>
 		<plugins>

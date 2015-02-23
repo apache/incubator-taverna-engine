@@ -9,7 +9,7 @@
 	<artifactId>taverna-observer</artifactId>
   <packaging>bundle</packaging>
 	<name>Apache Taverna Observer pattern</name>
-	<description>Implementation of the Observer pattern</description>
+	<description>impl of the Observer pattern</description>
 	<dependencies>
 		<dependency>
 			<groupId>log4j</groupId>

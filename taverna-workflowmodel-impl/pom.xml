@@ -8,7 +8,7 @@
 	</parent>
 	<artifactId>taverna-workflowmodel-impl</artifactId>
 	<packaging>bundle</packaging>
-	<name>Apache Taverna Workflow Model implementation</name>
+	<name>Apache Taverna Workflow Model impl</name>
 	<description> Implementation of the core workflow object model for
 		Taverna workflows including
 		concrete instances of the workflow
