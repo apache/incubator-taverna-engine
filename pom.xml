@@ -73,15 +73,21 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+  <scm>
+    <connection>scm:git:https://git-wip-us.apache.org/repos/asf/incubator-taverna-engine.git</connection>
+    <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/incubator-taverna-engine.git</developerConnection>
+    <url>https://github.com/apache/incubator-taverna-engine</url>
+    <tag>HEAD</tag>
+  </scm>
   <repositories>
     <repository>
-      <id>taverna-incubating</id>
-      <name>Apache Taverna incubating Repository</name>
-        <url>http://repository.mygrid.org.uk/artifactory/incubator-snapshot-local/</url>
+      <id>apache.snapshots</id>
+      <name>Apache Snapshot Repository</name>
+      <url>http://repository.apache.org/snapshots</url>
       <releases>
         <enabled>false</enabled>
       </releases>
-      <snapshots />
     </repository>
   </repositories>
+
 </project>
