@@ -40,14 +40,16 @@
         </dependency>
         <dependency>
             <groupId>org.apache.taverna.language</groupId>
-            <artifactId>taverna-scufl2-rdfxml</artifactId>
+            <artifactId>taverna-scufl2-wfbundle</artifactId>
             <version>${taverna.language.version}</version>
         </dependency>
+        <!--
         <dependency>
             <groupId>org.apache.taverna.language</groupId>
             <artifactId>taverna-scufl2-wfdesc</artifactId>
             <version>${taverna.language.version}</version>
         </dependency>
+        -->
 
         <dependency>
             <groupId>org.apache.taverna.language</groupId>
