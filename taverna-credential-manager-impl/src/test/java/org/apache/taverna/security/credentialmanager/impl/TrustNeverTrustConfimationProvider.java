@@ -17,22 +17,19 @@
 * under the License.
 */
 
-package org.apache.taverna.security.credentialmanager;
+package org.apache.taverna.security.credentialmanager.impl;
 
-import org.apache.taverna.security.credentialmanager.CredentialManager.KeystoreType;
+import java.security.cert.X509Certificate;
 
-/**
- * An event given to {@link CredentialManagerOld} observers registered using
- * {@link Observable#addObserver(net.sf.taverna.t2.lang.observer.Observer)} to
- * let them know the Keystore or Truststore have been changed.
- * 
- * @author Alex Nenadic
- */
-public class KeystoreChangedEvent {
-	// Whether the change is on the Keystore or the Truststore
-	public final KeystoreType keystoreType;
+import org.apache.taverna.security.credentialmanager.TrustConfirmationProvider;
 
-	public KeystoreChangedEvent(KeystoreType keystoreType) {
-		this.keystoreType = keystoreType;
+public class TrustNeverTrustConfimationProvider implements TrustConfirmationProvider{
+
+	@Override
+	public Boolean shouldTrustCertificate(X509Certificate[] chain) {
+		
+		// Never trust
+		return Boolean.FALSE;
 	}
+
 }

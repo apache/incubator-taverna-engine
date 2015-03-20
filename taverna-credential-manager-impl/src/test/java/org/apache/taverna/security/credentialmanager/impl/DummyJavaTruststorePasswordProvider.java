@@ -17,44 +17,22 @@
 * under the License.
 */
 
-package org.apache.taverna.security.credentialmanager;
+package org.apache.taverna.security.credentialmanager.impl;
 
-/**
- * Represents a (cryptographic or any other) exception thrown by Credential
- * Manager.
- * 
- * @author Alexandra Nenadic
- */
-public class CMException extends Exception {
+import org.apache.taverna.security.credentialmanager.JavaTruststorePasswordProvider;
 
-	private static final long serialVersionUID = 3885885604048806903L;
+public class DummyJavaTruststorePasswordProvider implements JavaTruststorePasswordProvider{
 
-	/**
-	 * Creates a new CMException.
-	 */
-	public CMException() {
-		super();
+	String javaTruststorePassword;
+	
+	@Override
+	public String getJavaTruststorePassword() {
+		return javaTruststorePassword;
 	}
 
-	/**
-	 * Creates a new CMException with the specified message.
-	 */
-	public CMException(String message) {
-		super(message);
+	@Override
+	public void setJavaTruststorePassword(String password) {
+		javaTruststorePassword = password;		
 	}
 
-	/**
-	 * Creates a new CMException with the specified message and cause.
-	 * 
-	 */
-	public CMException(String message, Throwable cause) {
-		super(message, cause);
-	}
-
-	/**
-	 * Creates a new CMException with the specified cause throwable.
-	 */
-	public CMException(Throwable cause) {
-		super(cause);
-	}
 }

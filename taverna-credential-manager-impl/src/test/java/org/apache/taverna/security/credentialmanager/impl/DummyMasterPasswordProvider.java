@@ -17,44 +17,33 @@
 * under the License.
 */
 
-package org.apache.taverna.security.credentialmanager;
+package org.apache.taverna.security.credentialmanager.impl;
 
-/**
- * Represents a (cryptographic or any other) exception thrown by Credential
- * Manager.
- * 
- * @author Alexandra Nenadic
- */
-public class CMException extends Exception {
+import org.apache.taverna.security.credentialmanager.MasterPasswordProvider;
 
-	private static final long serialVersionUID = 3885885604048806903L;
+public class DummyMasterPasswordProvider implements MasterPasswordProvider{
 
-	/**
-	 * Creates a new CMException.
-	 */
-	public CMException() {
-		super();
+	private String masterPassword;
+	private int priority = 0;
+
+	@Override
+	public String getMasterPassword(boolean firstTime) {
+		return masterPassword;
 	}
 
-	/**
-	 * Creates a new CMException with the specified message.
-	 */
-	public CMException(String message) {
-		super(message);
+	@Override
+	public int getProviderPriority() {
+		return priority;
+	}
+	
+	@Override
+	public void setMasterPassword(String password) {
+		masterPassword = password;
 	}
 
-	/**
-	 * Creates a new CMException with the specified message and cause.
-	 * 
-	 */
-	public CMException(String message, Throwable cause) {
-		super(message, cause);
-	}
-
-	/**
-	 * Creates a new CMException with the specified cause throwable.
-	 */
-	public CMException(Throwable cause) {
-		super(cause);
-	}
+//	@Override
+//	public void setProviderPriority(int priority) {
+//		this.priority = priority;
+//	}
+	
 }
