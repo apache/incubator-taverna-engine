@@ -23,10 +23,10 @@ package uk.org.taverna.platform.execution.api;
 import java.net.URI;
 import java.util.Set;
 
-import uk.org.taverna.platform.capability.api.ActivityConfigurationException;
-import uk.org.taverna.platform.capability.api.ActivityNotFoundException;
-import uk.org.taverna.platform.capability.api.DispatchLayerConfigurationException;
-import uk.org.taverna.platform.capability.api.DispatchLayerNotFoundException;
+import org.apache.taverna.platform.capability.api.ActivityConfigurationException;
+import org.apache.taverna.platform.capability.api.ActivityNotFoundException;
+import org.apache.taverna.platform.capability.api.DispatchLayerConfigurationException;
+import org.apache.taverna.platform.capability.api.DispatchLayerNotFoundException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 

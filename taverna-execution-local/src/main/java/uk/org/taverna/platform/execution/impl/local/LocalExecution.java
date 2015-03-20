@@ -50,8 +50,8 @@ import net.sf.taverna.t2.workflowmodel.InvalidDataflowException;
 import org.apache.taverna.robundle.Bundle;
 
 import org.apache.taverna.databundle.DataBundles;
-import uk.org.taverna.platform.capability.api.ActivityService;
-import uk.org.taverna.platform.capability.api.DispatchLayerService;
+import org.apache.taverna.platform.capability.api.ActivityService;
+import org.apache.taverna.platform.capability.api.DispatchLayerService;
 import uk.org.taverna.platform.execution.api.AbstractExecution;
 import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
 import uk.org.taverna.platform.report.ActivityReport;

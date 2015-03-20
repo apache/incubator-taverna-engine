@@ -31,8 +31,8 @@ import net.sf.taverna.t2.workflowmodel.Edits;
 
 import org.apache.taverna.robundle.Bundle;
 
-import uk.org.taverna.platform.capability.api.ActivityService;
-import uk.org.taverna.platform.capability.api.DispatchLayerService;
+import org.apache.taverna.platform.capability.api.ActivityService;
+import org.apache.taverna.platform.capability.api.DispatchLayerService;
 import uk.org.taverna.platform.execution.api.AbstractExecutionService;
 import uk.org.taverna.platform.execution.api.Execution;
 import uk.org.taverna.platform.execution.api.ExecutionEnvironment;

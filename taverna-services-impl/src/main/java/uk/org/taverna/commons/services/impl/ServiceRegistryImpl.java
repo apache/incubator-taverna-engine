@@ -26,9 +26,9 @@ import java.util.Set;
 import uk.org.taverna.commons.services.ActivityTypeNotFoundException;
 import uk.org.taverna.commons.services.InvalidConfigurationException;
 import uk.org.taverna.commons.services.ServiceRegistry;
-import uk.org.taverna.platform.capability.api.ActivityConfigurationException;
-import uk.org.taverna.platform.capability.api.ActivityNotFoundException;
-import uk.org.taverna.platform.capability.api.ActivityService;
+import org.apache.taverna.platform.capability.api.ActivityConfigurationException;
+import org.apache.taverna.platform.capability.api.ActivityNotFoundException;
+import org.apache.taverna.platform.capability.api.ActivityService;
 import org.apache.taverna.scufl2.api.port.InputActivityPort;
 import org.apache.taverna.scufl2.api.port.OutputActivityPort;
 
