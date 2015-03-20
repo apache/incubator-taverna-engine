@@ -18,22 +18,28 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package net.sf.taverna.t2.security.credentialmanager;
-
-import net.sf.taverna.t2.security.credentialmanager.CredentialManager.KeystoreType;
+package org.apache.taverna.security.credentialmanager;
 
 /**
- * An event given to {@link CredentialManagerOld} observers registered using
- * {@link Observable#addObserver(net.sf.taverna.t2.lang.observer.Observer)} to
- * let them know the Keystore or Truststore have been changed.
+ * Represents an exception thrown by Credential Manager if an application tries
+ * to invoke certain methods on it before it has been initialised.
  * 
  * @author Alex Nenadic
  */
-public class KeystoreChangedEvent {
-	// Whether the change is on the Keystore or the Truststore
-	public final KeystoreType keystoreType;
+public class CMNotInitialisedException extends Exception {
+	private static final long serialVersionUID = 6041577726294822985L;
 
-	public KeystoreChangedEvent(KeystoreType keystoreType) {
-		this.keystoreType = keystoreType;
+	/**
+	 * Creates a new CMNotInitialisedException.
+	 */
+	public CMNotInitialisedException() {
+		super();
+	}
+
+	/**
+	 * Creates a new CMNotInitialisedException with the specified message.
+	 */
+	public CMNotInitialisedException(String message) {
+		super(message);
 	}
 }

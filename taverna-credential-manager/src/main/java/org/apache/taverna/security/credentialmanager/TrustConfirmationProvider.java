@@ -1,4 +1,4 @@
-package net.sf.taverna.t2.security.credentialmanager;
+package org.apache.taverna.security.credentialmanager;
 
 import java.security.cert.X509Certificate;
 
