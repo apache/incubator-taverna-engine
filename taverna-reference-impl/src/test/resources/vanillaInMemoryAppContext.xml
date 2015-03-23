@@ -13,17 +13,17 @@
 
 	<!-- Test data access object -->
 	<bean id="testDao"
-		class="net.sf.taverna.t2.reference.impl.InMemoryReferenceSetDao">
+		class="org.apache.taverna.reference.impl.InMemoryReferenceSetDao">
 	</bean>
 
 	<!-- Test list data access object -->
 	<bean id="testListDao"
-		class="net.sf.taverna.t2.reference.impl.InMemoryListDao">
+		class="org.apache.taverna.reference.impl.InMemoryListDao">
 	</bean>
 	
 	<!-- Test list data access object -->
 	<bean id="testErrorDao"
-		class="net.sf.taverna.t2.reference.impl.InMemoryErrorDocumentDao">
+		class="org.apache.taverna.reference.impl.InMemoryErrorDocumentDao">
 	</bean>
 
 </beans>

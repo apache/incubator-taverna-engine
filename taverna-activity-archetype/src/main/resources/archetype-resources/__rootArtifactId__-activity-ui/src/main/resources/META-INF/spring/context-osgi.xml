@@ -6,21 +6,21 @@
                       http://www.springframework.org/schema/osgi
                       http://www.springframework.org/schema/osgi/spring-osgi.xsd">
 
-	<service ref="${classPrefix}ServiceIcon" interface="net.sf.taverna.t2.workbench.activityicons.ActivityIconSPI" />
+	<service ref="${classPrefix}ServiceIcon" interface="org.apache.taverna.workbench.activityicons.ActivityIconSPI" />
 
-	<service ref="${classPrefix}ServiceProvider" interface="net.sf.taverna.t2.servicedescriptions.ServiceDescriptionProvider" />
+	<service ref="${classPrefix}ServiceProvider" interface="org.apache.taverna.servicedescriptions.ServiceDescriptionProvider" />
 
 	<service ref="${classPrefix}ConfigureMenuAction" auto-export="interfaces" />
 
-	<service ref="${classPrefix}ActivityContextViewFactory" interface="net.sf.taverna.t2.workbench.ui.views.contextualviews.activity.ContextualViewFactory" />
+	<service ref="${classPrefix}ActivityContextViewFactory" interface="org.apache.taverna.workbench.ui.views.contextualviews.activity.ContextualViewFactory" />
 
-	<reference id="editManager" interface="net.sf.taverna.t2.workbench.edits.EditManager" />
-	<reference id="fileManager" interface="net.sf.taverna.t2.workbench.file.FileManager" />
-	<reference id="menuManager" interface="net.sf.taverna.t2.ui.menu.MenuManager" />
-	<reference id="selectionManager" interface="net.sf.taverna.t2.workbench.selection.SelectionManager" />
-	<reference id="activityIconManager" interface="net.sf.taverna.t2.workbench.activityicons.ActivityIconManager" />
-	<reference id="colourManager" interface="net.sf.taverna.t2.workbench.configuration.colour.ColourManager" />
-	<reference id="serviceDescriptionRegistry" interface="net.sf.taverna.t2.servicedescriptions.ServiceDescriptionRegistry" />
-	<reference id="serviceRegistry" interface="uk.org.taverna.commons.services.ServiceRegistry" />
+	<reference id="editManager" interface="org.apache.taverna.workbench.edits.EditManager" />
+	<reference id="fileManager" interface="org.apache.taverna.workbench.file.FileManager" />
+	<reference id="menuManager" interface="org.apache.taverna.ui.menu.MenuManager" />
+	<reference id="selectionManager" interface="org.apache.taverna.workbench.selection.SelectionManager" />
+	<reference id="activityIconManager" interface="org.apache.taverna.workbench.activityicons.ActivityIconManager" />
+	<reference id="colourManager" interface="org.apache.taverna.workbench.configuration.colour.ColourManager" />
+	<reference id="serviceDescriptionRegistry" interface="org.apache.taverna.servicedescriptions.ServiceDescriptionRegistry" />
+	<reference id="serviceRegistry" interface="org.apache.taverna.commons.services.ServiceRegistry" />
 
 </beans:beans>

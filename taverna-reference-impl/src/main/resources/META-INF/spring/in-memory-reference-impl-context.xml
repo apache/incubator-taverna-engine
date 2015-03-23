@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans 
         http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-	<bean id="inMemoryReferenceService" class="net.sf.taverna.t2.reference.impl.ReferenceServiceImpl">
+	<bean id="inMemoryReferenceService" class="org.apache.taverna.reference.impl.ReferenceServiceImpl">
 		<property name="converters" ref="converters" />
 		<property name="valueBuilders" ref="valueBuilders" />
 		<property name="referenceSetService">
@@ -17,7 +17,7 @@
 		</property>
 	</bean>
 
-	<bean id="referenceSetService" class="net.sf.taverna.t2.reference.impl.ReferenceSetServiceImpl">
+	<bean id="referenceSetService" class="org.apache.taverna.reference.impl.ReferenceSetServiceImpl">
 		<property name="referenceSetDao">
 			<ref local="referenceSetDao" />
 		</property>
@@ -25,22 +25,22 @@
 		<property name="referenceSetAugmentor" ref="referenceSetAugmentor" />
 	</bean>
 
-	<bean id="listService" class="net.sf.taverna.t2.reference.impl.ListServiceImpl">
+	<bean id="listService" class="org.apache.taverna.reference.impl.ListServiceImpl">
 		<property name="listDao">
 			<ref local="listDao" />
 		</property>
 		<property name="t2ReferenceGenerator" ref="t2ReferenceGenerator" />
 	</bean>
 
-	<bean id="errorDocumentService" class="net.sf.taverna.t2.reference.impl.ErrorDocumentServiceImpl">
+	<bean id="errorDocumentService" class="org.apache.taverna.reference.impl.ErrorDocumentServiceImpl">
 		<property name="errorDao">
 			<ref local="errorDocumentDao" />
 		</property>
 		<property name="t2ReferenceGenerator" ref="t2ReferenceGenerator" />
 	</bean>
 	
-	<bean id="referenceSetDao" class="net.sf.taverna.t2.reference.impl.InMemoryReferenceSetDao" />
-	<bean id="listDao" class="net.sf.taverna.t2.reference.impl.InMemoryListDao" />
-	<bean id="errorDocumentDao" class="net.sf.taverna.t2.reference.impl.InMemoryErrorDocumentDao" />
+	<bean id="referenceSetDao" class="org.apache.taverna.reference.impl.InMemoryReferenceSetDao" />
+	<bean id="listDao" class="org.apache.taverna.reference.impl.InMemoryListDao" />
+	<bean id="errorDocumentDao" class="org.apache.taverna.reference.impl.InMemoryErrorDocumentDao" />
 
 </beans>

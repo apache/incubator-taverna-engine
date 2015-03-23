@@ -4,13 +4,13 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans 
                            http://www.springframework.org/schema/beans/spring-beans.xsd">
                            
-	<bean id="greenBuilder" class="net.sf.taverna.t2referencetest.GreenBuilder" />
+	<bean id="greenBuilder" class="org.apache.taverna.t2referencetest.GreenBuilder" />
 
-	<bean id="greenReference" class="net.sf.taverna.t2referencetest.GreenReference" />
-	<bean id="blueReference" class="net.sf.taverna.t2referencetest.BlueReference" />
-	<bean id="redReference" class="net.sf.taverna.t2referencetest.RedReference" />
-	<bean id="yellowReference" class="net.sf.taverna.t2referencetest.YellowReference" />
+	<bean id="greenReference" class="org.apache.taverna.t2referencetest.GreenReference" />
+	<bean id="blueReference" class="org.apache.taverna.t2referencetest.BlueReference" />
+	<bean id="redReference" class="org.apache.taverna.t2referencetest.RedReference" />
+	<bean id="yellowReference" class="org.apache.taverna.t2referencetest.YellowReference" />
 
-	<bean id="greenToRedTranslator" class="net.sf.taverna.t2referencetest.GreenToRed" />
+	<bean id="greenToRedTranslator" class="org.apache.taverna.t2referencetest.GreenToRed" />
 
 </beans>

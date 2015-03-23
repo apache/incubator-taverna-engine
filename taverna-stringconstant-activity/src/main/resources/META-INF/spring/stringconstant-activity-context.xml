@@ -3,9 +3,9 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
                            http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-	<bean id="stringconstantActivityHealthChecker" class="net.sf.taverna.t2.activities.stringconstant.StringConstantActivityHealthChecker" />
+	<bean id="stringconstantActivityHealthChecker" class="org.apache.taverna.activities.stringconstant.StringConstantActivityHealthChecker" />
 
-	<bean id="stringconstantActivityFactory" class="net.sf.taverna.t2.activities.stringconstant.StringConstantActivityFactory">
+	<bean id="stringconstantActivityFactory" class="org.apache.taverna.activities.stringconstant.StringConstantActivityFactory">
 		<property name="edits" ref="edits" />
 	</bean>
 

@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
                            http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-	<bean id="executionEnvironmentService" class="uk.org.taverna.platform.execution.impl.ExecutionEnvironmentServiceImpl">
+	<bean id="executionEnvironmentService" class="org.apache.taverna.platform.execution.impl.ExecutionEnvironmentServiceImpl">
 		<property name="executionServices" ref="executionServices" />
 	</bean>
 

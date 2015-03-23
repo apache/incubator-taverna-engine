@@ -1,0 +1,6 @@
+# Implementation classes of ExternalReferenceSPI go here, one per line
+org.apache.taverna.reference.impl.external.file.FileReference
+org.apache.taverna.reference.impl.external.http.HttpReference
+org.apache.taverna.reference.impl.external.object.InlineStringReference
+org.apache.taverna.reference.impl.external.object.InlineByteArrayReference
+org.apache.taverna.reference.impl.external.object.VMObjectReference

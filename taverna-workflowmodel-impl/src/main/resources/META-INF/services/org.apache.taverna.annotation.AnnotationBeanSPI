@@ -1,0 +1,10 @@
+org.apache.taverna.annotation.impl.annotationbeans.Author
+org.apache.taverna.annotation.impl.annotationbeans.DescriptiveTitle
+org.apache.taverna.annotation.impl.annotationbeans.FreeTextDescription
+org.apache.taverna.annotation.impl.annotationbeans.HostInstitution
+#org.apache.taverna.annotation.impl.annotationbeans.MimeType
+org.apache.taverna.annotation.impl.annotationbeans.DocumentationUrl
+org.apache.taverna.annotation.impl.annotationbeans.Optional
+org.apache.taverna.annotation.impl.annotationbeans.ExampleValue
+org.apache.taverna.annotation.impl.annotationbeans.SemanticAnnotation
+org.apache.taverna.annotation.impl.annotationbeans.IdentificationAssertion

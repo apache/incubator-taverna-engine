@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Hibernate mapping for http and https reference bean -->
+<hibernate-mapping>
+  <joined-subclass extends="org.apache.taverna.reference.AbstractExternalReference" name="org.apache.taverna.reference.impl.external.http.HttpReference">
+    <!-- Link to primary key from abstract superclass -->
+    <key column="bean_id"/>
+    <!-- HttpReference specific properties below here -->
+    <property name="httpUrlString" type="string"/>
+  </joined-subclass>
+</hibernate-mapping>

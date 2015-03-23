@@ -6,13 +6,13 @@
                                  http://www.springframework.org/schema/osgi 
                                  http://www.springframework.org/schema/osgi/spring-osgi.xsd" >
 
-	<service ref="greenBuilder" interface="net.sf.taverna.t2.reference.ExternalReferenceBuilderSPI" />
+	<service ref="greenBuilder" interface="org.apache.taverna.reference.ExternalReferenceBuilderSPI" />
 
-	<service ref="greenReference" interface="net.sf.taverna.t2.reference.ExternalReferenceSPI" />
-	<service ref="blueReference" interface="net.sf.taverna.t2.reference.ExternalReferenceSPI" />
-	<service ref="redReference" interface="net.sf.taverna.t2.reference.ExternalReferenceSPI" />
-	<service ref="yellowReference" interface="net.sf.taverna.t2.reference.ExternalReferenceSPI" />
+	<service ref="greenReference" interface="org.apache.taverna.reference.ExternalReferenceSPI" />
+	<service ref="blueReference" interface="org.apache.taverna.reference.ExternalReferenceSPI" />
+	<service ref="redReference" interface="org.apache.taverna.reference.ExternalReferenceSPI" />
+	<service ref="yellowReference" interface="org.apache.taverna.reference.ExternalReferenceSPI" />
 		
-	<service ref="greenToRedTranslator" interface="net.sf.taverna.t2.reference.ExternalReferenceTranslatorSPI" />
+	<service ref="greenToRedTranslator" interface="org.apache.taverna.reference.ExternalReferenceTranslatorSPI" />
 
 </beans:beans>

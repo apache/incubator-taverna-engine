@@ -4,6 +4,6 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans 
                            http://www.springframework.org/schema/beans/spring-beans.xsd">
                            
-	<bean id="coreDispatchLayerFactory" class="net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.CoreDispatchLayerFactory" />
+	<bean id="coreDispatchLayerFactory" class="org.apache.taverna.workflowmodel.processor.dispatch.layers.CoreDispatchLayerFactory" />
 
 </beans>

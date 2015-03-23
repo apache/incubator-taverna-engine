@@ -1,0 +1,3 @@
+org.apache.taverna.workflowmodel.health.StringHealthChecker
+org.apache.taverna.workflowmodel.health.FloatHealthChecker
+org.apache.taverna.workflowmodel.health.FloatHealthChecker2

@@ -6,6 +6,6 @@
                                  http://www.springframework.org/schema/osgi 
                                  http://www.springframework.org/schema/osgi/spring-osgi.xsd" >
 
-	<service ref="coreDispatchLayerFactory" interface="net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayerFactory" />
+	<service ref="coreDispatchLayerFactory" interface="org.apache.taverna.workflowmodel.processor.dispatch.DispatchLayerFactory" />
 
 </beans:beans>

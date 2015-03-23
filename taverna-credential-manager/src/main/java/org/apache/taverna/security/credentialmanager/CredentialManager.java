@@ -31,7 +31,7 @@ import java.util.List;
 
 import javax.net.ssl.SSLSocketFactory;
 
-import net.sf.taverna.t2.lang.observer.Observer;
+import org.apache.taverna.lang.observer.Observer;
 
 /**
  * Provides a wrapper for Taverna's Keystore and Truststore and implements

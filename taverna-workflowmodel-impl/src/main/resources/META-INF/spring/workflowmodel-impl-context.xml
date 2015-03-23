@@ -4,10 +4,10 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans 
                            http://www.springframework.org/schema/beans/spring-beans.xsd">
                            
-	<bean id="uriSource" class="net.sf.taverna.t2.annotation.impl.URISource" />
+	<bean id="uriSource" class="org.apache.taverna.annotation.impl.URISource" />
 	
-	<bean id="disputeEventDetails" class="net.sf.taverna.t2.annotation.impl.DisputeEventDetails" />
+	<bean id="disputeEventDetails" class="org.apache.taverna.annotation.impl.DisputeEventDetails" />
 	
-	<bean id="editsImpl" class="net.sf.taverna.t2.workflowmodel.impl.EditsImpl" />
+	<bean id="editsImpl" class="org.apache.taverna.workflowmodel.impl.EditsImpl" />
 	
 </beans>

@@ -24,10 +24,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
-import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityFactory;
-import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityInputPort;
-import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityOutputPort;
+import org.apache.taverna.workflowmodel.processor.activity.Activity;
+import org.apache.taverna.workflowmodel.processor.activity.ActivityFactory;
+import org.apache.taverna.workflowmodel.processor.activity.ActivityInputPort;
+import org.apache.taverna.workflowmodel.processor.activity.ActivityOutputPort;
 import org.apache.taverna.platform.capability.api.ActivityConfigurationException;
 import org.apache.taverna.platform.capability.api.ActivityNotFoundException;
 import org.apache.taverna.platform.capability.api.ActivityService;
@@ -72,7 +72,7 @@ public class ActivityServiceImpl implements ActivityService {
 		try {
 			if (configuration != null)
 				activity.configure(configuration);
-		} catch (net.sf.taverna.t2.workflowmodel.processor.activity.ActivityConfigurationException e) {
+		} catch (org.apache.taverna.workflowmodel.processor.activity.ActivityConfigurationException e) {
 			throw new ActivityConfigurationException(e);
 		}
 		return activity;
@@ -92,7 +92,7 @@ public class ActivityServiceImpl implements ActivityService {
 				inputPorts.add(inputActivityPort);
 			}
 			return inputPorts;
-		} catch (net.sf.taverna.t2.workflowmodel.processor.activity.ActivityConfigurationException e) {
+		} catch (org.apache.taverna.workflowmodel.processor.activity.ActivityConfigurationException e) {
 			throw new ActivityConfigurationException(e);
 		}
 	}
@@ -111,7 +111,7 @@ public class ActivityServiceImpl implements ActivityService {
 				outputActivityPort.setGranularDepth(port.getGranularDepth());
 				outputPorts.add(outputActivityPort);
 			}
-		} catch (net.sf.taverna.t2.workflowmodel.processor.activity.ActivityConfigurationException e) {
+		} catch (org.apache.taverna.workflowmodel.processor.activity.ActivityConfigurationException e) {
 			throw new ActivityConfigurationException(e);
 		}
 		return outputPorts;

@@ -6,28 +6,28 @@
                                  http://www.springframework.org/schema/osgi 
                                  http://www.springframework.org/schema/osgi/spring-osgi.xsd" >
 
-	<service ref="inlineStringReferenceBuilder" interface="net.sf.taverna.t2.reference.ExternalReferenceBuilderSPI" />
-	<service ref="inlineByteArrayReferenceBuilder" interface="net.sf.taverna.t2.reference.ExternalReferenceBuilderSPI" />
+	<service ref="inlineStringReferenceBuilder" interface="org.apache.taverna.reference.ExternalReferenceBuilderSPI" />
+	<service ref="inlineByteArrayReferenceBuilder" interface="org.apahce.taverna.reference.ExternalReferenceBuilderSPI" />
 
-	<service ref="fileReference" interface="net.sf.taverna.t2.reference.ExternalReferenceSPI" />
-	<service ref="httpReference" interface="net.sf.taverna.t2.reference.ExternalReferenceSPI" />
-	<service ref="inlineStringReference" interface="net.sf.taverna.t2.reference.ExternalReferenceSPI" />
-	<service ref="inlineByteArrayReference" interface="net.sf.taverna.t2.reference.ExternalReferenceSPI" />
-	<service ref="vmObjectReference" interface="net.sf.taverna.t2.reference.ExternalReferenceSPI" />
+	<service ref="fileReference" interface="org.apache.taverna.reference.ExternalReferenceSPI" />
+	<service ref="httpReference" interface="org.apache.taverna.reference.ExternalReferenceSPI" />
+	<service ref="inlineStringReference" interface="org.apache.taverna.reference.ExternalReferenceSPI" />
+	<service ref="inlineByteArrayReference" interface="org.apache.taverna.reference.ExternalReferenceSPI" />
+	<service ref="vmObjectReference" interface="org.apache.taverna.reference.ExternalReferenceSPI" />
 		
-	<service ref="streamToStringConverter" interface="net.sf.taverna.t2.reference.StreamToValueConverterSPI" />
-	<service ref="streamToByteArrayConverter" interface="net.sf.taverna.t2.reference.StreamToValueConverterSPI" />
-	<service ref="streamToVMObjectReferenceConverter" interface="net.sf.taverna.t2.reference.StreamToValueConverterSPI" />
-	<service ref="streamToDoubleConverter" interface="net.sf.taverna.t2.reference.StreamToValueConverterSPI" />
-	<service ref="streamToBooleanConverter" interface="net.sf.taverna.t2.reference.StreamToValueConverterSPI" />
-	<service ref="streamToIntegerConverter" interface="net.sf.taverna.t2.reference.StreamToValueConverterSPI" />
+	<service ref="streamToStringConverter" interface="org.apache.taverna.reference.StreamToValueConverterSPI" />
+	<service ref="streamToByteArrayConverter" interface="org.apache.taverna.reference.StreamToValueConverterSPI" />
+	<service ref="streamToVMObjectReferenceConverter" interface="org.apache.taverna.reference.StreamToValueConverterSPI" />
+	<service ref="streamToDoubleConverter" interface="org.apache.taverna.reference.StreamToValueConverterSPI" />
+	<service ref="streamToBooleanConverter" interface="org.apache.taverna.reference.StreamToValueConverterSPI" />
+	<service ref="streamToIntegerConverter" interface="org.apache.taverna.reference.StreamToValueConverterSPI" />
 
-	<service ref="fileToFileReference" interface="net.sf.taverna.t2.reference.ValueToReferenceConverterSPI" />
-	<service ref="urlToHttpReference" interface="net.sf.taverna.t2.reference.ValueToReferenceConverterSPI" />
-	<service ref="stringToStringReference" interface="net.sf.taverna.t2.reference.ValueToReferenceConverterSPI" />
-	<service ref="byteArrayToByteArrayReference" interface="net.sf.taverna.t2.reference.ValueToReferenceConverterSPI" />
-	<service ref="numberToStringReference" interface="net.sf.taverna.t2.reference.ValueToReferenceConverterSPI" />
-	<service ref="characterToStringReference" interface="net.sf.taverna.t2.reference.ValueToReferenceConverterSPI" />
-	<service ref="booleanToStringReference" interface="net.sf.taverna.t2.reference.ValueToReferenceConverterSPI" />
+	<service ref="fileToFileReference" interface="org.apache.taverna.reference.ValueToReferenceConverterSPI" />
+	<service ref="urlToHttpReference" interface="org.apache.taverna.reference.ValueToReferenceConverterSPI" />
+	<service ref="stringToStringReference" interface="org.apache.taverna.reference.ValueToReferenceConverterSPI" />
+	<service ref="byteArrayToByteArrayReference" interface="org.apache.taverna.reference.ValueToReferenceConverterSPI" />
+	<service ref="numberToStringReference" interface="org.apache.taverna.reference.ValueToReferenceConverterSPI" />
+	<service ref="characterToStringReference" interface="org.apache.taverna.reference.ValueToReferenceConverterSPI" />
+	<service ref="booleanToStringReference" interface="org.apache.taverna.reference.ValueToReferenceConverterSPI" />
 
 </beans:beans>

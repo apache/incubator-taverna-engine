@@ -4,7 +4,7 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
                            http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <bean id="runService" class="uk.org.taverna.platform.run.impl.RunServiceImpl" >
+    <bean id="runService" class="org.apache.taverna.platform.run.impl.RunServiceImpl" >
     		<property name="executionEnvironmentService" ref="executionEnvironmentService"/>
     		<property name="eventAdmin" ref="eventAdmin"/>
     		<property name="workflowBundleIO" ref="workflowBundleIO"/>

@@ -22,7 +22,7 @@ package org.apache.taverna.platform.capability.api;
 import java.net.URI;
 import java.util.Set;
 
-import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
+import org.apache.taverna.workflowmodel.processor.activity.Activity;
 import org.apache.taverna.scufl2.api.port.InputActivityPort;
 import org.apache.taverna.scufl2.api.port.OutputActivityPort;
 

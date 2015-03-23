@@ -6,12 +6,12 @@
                                  http://www.springframework.org/schema/osgi
                                  http://www.springframework.org/schema/osgi/spring-osgi.xsd">
 
-	<service ref="activityService" interface="uk.org.taverna.platform.capability.api.ActivityService" />
+	<service ref="activityService" interface="org.apache.taverna.platform.capability.api.ActivityService" />
 
-	<list id="activityFactories" interface="net.sf.taverna.t2.workflowmodel.processor.activity.ActivityFactory" cardinality="0..N" />
+	<list id="activityFactories" interface="org.apache.taverna.workflowmodel.processor.activity.ActivityFactory" cardinality="0..N" />
 
-	<service ref="dispatchLayerService" interface="uk.org.taverna.platform.capability.api.DispatchLayerService" />
+	<service ref="dispatchLayerService" interface="org.apache.taverna.platform.capability.api.DispatchLayerService" />
 
-	<list id="dispatchLayerFactories" interface="net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayerFactory" cardinality="0..N" />
+	<list id="dispatchLayerFactories" interface="org.apache.taverna.workflowmodel.processor.dispatch.DispatchLayerFactory" cardinality="0..N" />
 
 </beans:beans>

@@ -11,17 +11,17 @@
 
 	<!-- t2 reference generator -->
 	<bean id="t2reference.referenceGenerator"
-		raven:artifact="net.sf.taverna.t2.core:reference-impl:2.0.1-SNAPSHOT"
+		raven:artifact="org.apache.taverna.core:reference-impl:2.0.1-SNAPSHOT"
 		raven:repository="raven.repository"
-		class="net.sf.taverna.t2.reference.impl.SimpleT2ReferenceGenerator">
+		class="org.apache.taverna.reference.impl.SimpleT2ReferenceGenerator">
 		<property name="namespace" value="testNamespace" />
 	</bean>
 
 	<!-- reference set service -->
 	<bean id="t2reference.service.referenceSetService"
-		raven:artifact="net.sf.taverna.t2.core:reference-impl:2.0.1-SNAPSHOT"
+		raven:artifact="org.apache.taverna.core:reference-impl:2.0.1-SNAPSHOT"
 		raven:repository="raven.repository"
-		class="net.sf.taverna.t2.reference.impl.ReferenceSetServiceImpl">
+		class="org.apache.taverna.reference.impl.ReferenceSetServiceImpl">
 		<property name="referenceSetDao">
 			<ref bean="t2reference.dao.referenceSetDao" />
 		</property>
@@ -34,35 +34,35 @@
 	</bean>
 
 	<bean id="t2reference.augmentor"
-		class="net.sf.taverna.t2.reference.impl.ReferenceSetAugmentorImpl"
-		raven:artifact="net.sf.taverna.t2.core:reference-impl:2.0.1-SNAPSHOT"
+		class="org.apache.taverna.reference.impl.ReferenceSetAugmentorImpl"
+		raven:artifact="org.apache.taverna.core:reference-impl:2.0.1-SNAPSHOT"
 		raven:repository="raven.repository">
 		<property name="builderRegistry">
 			<bean
-				class="net.sf.taverna.platform.spring.InstanceRegistryFactoryBean">
+				class="org.apache.taverna.platform.spring.InstanceRegistryFactoryBean">
 				<property name="spiRegistry">
 					<bean
-						class="net.sf.taverna.platform.spring.SpiRegistryFactoryBean">
+						class="org.apache.taverna.platform.spring.SpiRegistryFactoryBean">
 						<property name="repository">
 							<ref bean="raven.repository" />
 						</property>
 						<property name="spiClassName"
-							value="net.sf.taverna.t2.reference.ExternalReferenceBuilderSPI" />
+							value="org.apache.taverna.reference.ExternalReferenceBuilderSPI" />
 					</bean>
 				</property>
 			</bean>
 		</property>
 		<property name="translatorRegistry">
 			<bean
-				class="net.sf.taverna.platform.spring.InstanceRegistryFactoryBean">
+				class="org.apache.taverna.platform.spring.InstanceRegistryFactoryBean">
 				<property name="spiRegistry">
 					<bean
-						class="net.sf.taverna.platform.spring.SpiRegistryFactoryBean">
+						class="org.apache.taverna.platform.spring.SpiRegistryFactoryBean">
 						<property name="repository">
 							<ref bean="raven.repository" />
 						</property>
 						<property name="spiClassName"
-							value="net.sf.taverna.t2.reference.ExternalReferenceTranslatorSPI" />
+							value="org.apache.taverna.reference.ExternalReferenceTranslatorSPI" />
 					</bean>
 				</property>
 			</bean>
@@ -71,9 +71,9 @@
 
 	<!-- error document service -->
 	<bean id="t2reference.service.errorDocumentService"
-		raven:artifact="net.sf.taverna.t2.core:reference-impl:2.0.1-SNAPSHOT"
+		raven:artifact="org.apache.taverna.core:reference-impl:2.0.1-SNAPSHOT"
 		raven:repository="raven.repository"
-		class="net.sf.taverna.t2.reference.impl.ErrorDocumentServiceImpl">
+		class="org.apache.taverna.reference.impl.ErrorDocumentServiceImpl">
 		<property name="errorDao">
 			<ref bean="t2reference.dao.errorDocumentDao" />
 		</property>
@@ -84,9 +84,9 @@
 
 	<!-- list service -->
 	<bean id="t2reference.service.listService"
-		raven:artifact="net.sf.taverna.t2.core:reference-impl:2.0.1-SNAPSHOT"
+		raven:artifact="org.apache.taverna.core:reference-impl:2.0.1-SNAPSHOT"
 		raven:repository="raven.repository"
-		class="net.sf.taverna.t2.reference.impl.ListServiceImpl">
+		class="org.apache.taverna.reference.impl.ListServiceImpl">
 		<property name="listDao">
 			<ref bean="t2reference.dao.listDao" />
 		</property>

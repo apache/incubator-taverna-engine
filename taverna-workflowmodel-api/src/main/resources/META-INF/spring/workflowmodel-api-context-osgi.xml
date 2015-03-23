@@ -6,20 +6,20 @@
                                  http://www.springframework.org/schema/osgi 
                                  http://www.springframework.org/schema/osgi/spring-osgi.xsd">
 
-	<service ref="author" interface="net.sf.taverna.t2.annotation.AnnotationBeanSPI" />
-	<service ref="descriptiveTitle" interface="net.sf.taverna.t2.annotation.AnnotationBeanSPI" />
-	<service ref="freeTextDescription" interface="net.sf.taverna.t2.annotation.AnnotationBeanSPI" />
-	<service ref="hostInstitution" interface="net.sf.taverna.t2.annotation.AnnotationBeanSPI" />
-	<!--<service ref="mimeType" interface="net.sf.taverna.t2.annotation.AnnotationBeanSPI" />-->
-	<service ref="documentationUrl" interface="net.sf.taverna.t2.annotation.AnnotationBeanSPI" />
-	<service ref="optional" interface="net.sf.taverna.t2.annotation.AnnotationBeanSPI" />
-	<service ref="exampleValue" interface="net.sf.taverna.t2.annotation.AnnotationBeanSPI" />
-	<service ref="semanticAnnotation" interface="net.sf.taverna.t2.annotation.AnnotationBeanSPI" />
-	<service ref="identificationAssertion" interface="net.sf.taverna.t2.annotation.AnnotationBeanSPI" />
+	<service ref="author" interface="org.apache.taverna.annotation.AnnotationBeanSPI" />
+	<service ref="descriptiveTitle" interface="org.apache.taverna.annotation.AnnotationBeanSPI" />
+	<service ref="freeTextDescription" interface="org.apache.taverna.annotation.AnnotationBeanSPI" />
+	<service ref="hostInstitution" interface="org.apache.taverna.annotation.AnnotationBeanSPI" />
+	<!--<service ref="mimeType" interface="org.apache.taverna.annotation.AnnotationBeanSPI" />-->
+	<service ref="documentationUrl" interface="org.apache.taverna.annotation.AnnotationBeanSPI" />
+	<service ref="optional" interface="org.apache.taverna.annotation.AnnotationBeanSPI" />
+	<service ref="exampleValue" interface="org.apache.taverna.annotation.AnnotationBeanSPI" />
+	<service ref="semanticAnnotation" interface="org.apache.taverna.annotation.AnnotationBeanSPI" />
+	<service ref="identificationAssertion" interface="org.apache.taverna.annotation.AnnotationBeanSPI" />
 
-	<service ref="healthCheck" interface="net.sf.taverna.t2.visit.VisitKind" />
+	<service ref="healthCheck" interface="org.apache.taverna.visit.VisitKind" />
 	
-	<service ref="disabledActivityHealthChecker" interface="net.sf.taverna.t2.workflowmodel.health.HealthChecker" />
-	<service ref="unrecognizedActivityHealthChecker" interface="net.sf.taverna.t2.workflowmodel.health.HealthChecker" />
+	<service ref="disabledActivityHealthChecker" interface="org.apache.taverna.workflowmodel.health.HealthChecker" />
+	<service ref="unrecognizedActivityHealthChecker" interface="org.apache.taverna.workflowmodel.health.HealthChecker" />
 
 </beans:beans>

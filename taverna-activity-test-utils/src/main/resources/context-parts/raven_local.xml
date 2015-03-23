@@ -16,10 +16,10 @@
 		<system>
 			<!-- T2Reference API -->
 			<sys
-				artifact="net.sf.taverna.t2.core:reference-api:0.8" />
+				artifact="org.apache.taverna.core:reference-api:0.8" />
 
 			<!-- T2Platform -->
-			<sys artifact="net.sf.taverna.t2:platform:0.1" />
+			<sys artifact="org.apache.taverna:platform:0.1" />
 			<sys artifact="commons-logging:commons-logging:1.1.1" />
 
 			<!-- Raven -->

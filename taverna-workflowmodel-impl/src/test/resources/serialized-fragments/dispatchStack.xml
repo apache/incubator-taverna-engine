@@ -1,18 +1,18 @@
 <dispatchStack xmlns="http://taverna.sf.net/2008/xml/t2flow">
 	<dispatchLayer>
 		<class>
-			net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.Parallelize
+			org.apache.taverna.workflowmodel.processor.dispatch.layers.Parallelize
 		</class>
 		<configBean encoding="xstream">
-			<net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.ParallelizeConfig
+			<org.apache.taverna.workflowmodel.processor.dispatch.layers.ParallelizeConfig
 				xmlns="">
 				<maxJobs>1</maxJobs>
-			</net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.ParallelizeConfig>
+			</org.apache.taverna.workflowmodel.processor.dispatch.layers.ParallelizeConfig>
 		</configBean>
 	</dispatchLayer>
 	<dispatchLayer>
 		<class>
-			net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.ErrorBounce
+			org.apache.taverna.workflowmodel.processor.dispatch.layers.ErrorBounce
 		</class>
 		<configBean encoding="xstream">
 			<null xmlns="" />
@@ -20,7 +20,7 @@
 	</dispatchLayer>
 	<dispatchLayer>
 		<class>
-			net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.Failover
+			org.apache.taverna.workflowmodel.processor.dispatch.layers.Failover
 		</class>
 		<configBean encoding="xstream">
 			<null xmlns="" />
@@ -28,21 +28,21 @@
 	</dispatchLayer>
 	<dispatchLayer>
 		<class>
-			net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.Retry
+			org.apache.taverna.workflowmodel.processor.dispatch.layers.Retry
 		</class>
 		<configBean encoding="xstream">
-			<net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.RetryConfig
+			<org.apache.taverna.workflowmodel.processor.dispatch.layers.RetryConfig
 				xmlns="">
 				<backoffFactor>1.0</backoffFactor>
 				<initialDelay>0</initialDelay>
 				<maxDelay>0</maxDelay>
 				<maxRetries>0</maxRetries>
-			</net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.RetryConfig>
+			</org.apache.taverna.workflowmodel.processor.dispatch.layers.RetryConfig>
 		</configBean>
 	</dispatchLayer>
 	<dispatchLayer>
 		<class>
-			net.sf.taverna.t2.workflowmodel.processor.dispatch.layers.Invoke
+			org.apache.taverna.workflowmodel.processor.dispatch.layers.Invoke
 		</class>
 		<configBean encoding="xstream">
 			<null xmlns="" />

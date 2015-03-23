@@ -11,9 +11,9 @@
 
 	<!-- Reference service bean -->
 	<bean id="t2reference.service.referenceService"
-		raven:artifact="net.sf.taverna.t2.core:reference-impl:2.0.1-SNAPSHOT"
+		raven:artifact="org.apache.taverna.core:reference-impl:2.0.1-SNAPSHOT"
 		raven:repository="raven.repository"
-		class="net.sf.taverna.t2.reference.impl.ReferenceServiceImpl">
+		class="org.apache.taverna.reference.impl.ReferenceServiceImpl">
 		<property name="referenceSetService">
 			<ref bean="t2reference.service.referenceSetService" />
 		</property>
@@ -25,30 +25,30 @@
 		</property>
 		<property name="converterRegistry">
 			<bean id="converterRegistry"
-				class="net.sf.taverna.platform.spring.InstanceRegistryFactoryBean">
+				class="org.apache.taverna.platform.spring.InstanceRegistryFactoryBean">
 				<property name="spiRegistry">
 					<bean
-						class="net.sf.taverna.platform.spring.SpiRegistryFactoryBean">
+						class="org.apache.taverna.platform.spring.SpiRegistryFactoryBean">
 						<property name="repository">
 							<ref bean="raven.repository" />
 						</property>
 						<property name="spiClassName"
-							value="net.sf.taverna.t2.reference.ValueToReferenceConverterSPI" />
+							value="org.apache.taverna.reference.ValueToReferenceConverterSPI" />
 					</bean>
 				</property>
 			</bean>
 		</property>
 		<property name="valueBuilderRegistry">
 			<bean
-				class="net.sf.taverna.platform.spring.InstanceRegistryFactoryBean">
+				class="org.apache.taverna.platform.spring.InstanceRegistryFactoryBean">
 				<property name="spiRegistry">
 					<bean
-						class="net.sf.taverna.platform.spring.SpiRegistryFactoryBean">
+						class="org.apache.taverna.platform.spring.SpiRegistryFactoryBean">
 						<property name="repository">
 							<ref bean="raven.repository" />
 						</property>
 						<property name="spiClassName"
-							value="net.sf.taverna.t2.reference.StreamToValueConverterSPI" />
+							value="org.apache.taverna.reference.StreamToValueConverterSPI" />
 					</bean>
 				</property>
 			</bean>

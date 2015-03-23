@@ -3,9 +3,9 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
                            http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-	<bean id="dataflowActivityHealthChecker" class="net.sf.taverna.t2.activities.dataflow.DataflowActivityHealthChecker" />
+	<bean id="dataflowActivityHealthChecker" class="org.apache.taverna.activities.dataflow.DataflowActivityHealthChecker" />
 
-	<bean id="dataflowActivityFactory" class="net.sf.taverna.t2.activities.dataflow.DataflowActivityFactory" >
+	<bean id="dataflowActivityFactory" class="org.apache.taverna.activities.dataflow.DataflowActivityFactory" >
 		<property name="edits" ref="edits" />
 	</bean>
 

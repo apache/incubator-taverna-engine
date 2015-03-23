@@ -1,0 +1,2 @@
+# Implementation classes of ExternalReferenceTranslatorSPI go here, one per line
+org.apache.taverna.t2referencetest.GreenToRed

@@ -11,11 +11,11 @@
 		</layout>
 	</appender>
 
-	<logger name="net.sf.taverna.platform.spring.orm">
+	<logger name="org.apache.taverna.platform.spring.orm">
 		<level value="TRACE" />
 	</logger>
 
-	<logger name="net.sf.taverna.platform.spring">
+	<logger name="org.apache.taverna.platform.spring">
 		<level value="INFO" />
 	</logger>
 

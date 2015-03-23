@@ -3,12 +3,12 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans 
         http://www.springframework.org/schema/beans/spring-beans.xsd">
 	
-	<bean id="referenceSetAugmentor" class="net.sf.taverna.t2.reference.impl.ReferenceSetAugmentorImpl">
+	<bean id="referenceSetAugmentor" class="org.apache.taverna.reference.impl.ReferenceSetAugmentorImpl">
 		<property name="builders" ref="builders" />
 		<property name="translators" ref="translators" />
 	</bean>
 
-	<bean id="t2ReferenceGenerator" class="net.sf.taverna.t2.reference.impl.UUIDT2ReferenceGenerator">
+	<bean id="t2ReferenceGenerator" class="org.apache.taverna.reference.impl.UUIDT2ReferenceGenerator">
 		<property name="namespace" value="taverna" />
 	</bean>
 

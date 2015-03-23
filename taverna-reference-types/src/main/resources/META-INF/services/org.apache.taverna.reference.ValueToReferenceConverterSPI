@@ -1,0 +1,8 @@
+# Implementation classes of ValueToReferenceConverterSPI go here, one per line
+org.apache.taverna.reference.impl.external.file.FileToFileReference
+org.apache.taverna.reference.impl.external.http.UrlToHttpReference
+org.apache.taverna.reference.impl.external.object.StringToStringReference
+org.apache.taverna.reference.impl.external.object.ByteArrayToByteArrayReference
+org.apache.taverna.reference.impl.external.object.NumberToStringReference
+org.apache.taverna.reference.impl.external.object.CharacterToStringReference
+org.apache.taverna.reference.impl.external.object.BooleanToStringReference

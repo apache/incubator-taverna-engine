@@ -21,7 +21,7 @@
 
 	<!-- Apache Derby rooted at a temporary directory -->
 	<bean id="t2reference.jdbc.temporaryjdbc"
-		class="net.sf.taverna.platform.spring.jdbc.TemporaryJDBC">
+		class="org.apache.taverna.platform.spring.jdbc.TemporaryJDBC">
 	</bean>
 	<bean id="t2reference.jdbc.url" class="java.lang.String"
 		factory-bean="t2reference.jdbc.temporaryjdbc"
@@ -76,16 +76,16 @@
 		<property name="mappingResources">
 			<list>
 				<value>
-					net/sf/taverna/t2/reference/AbstractExternalReference.hbm.xml
+					org/apache/taverna/reference/AbstractExternalReference.hbm.xml
 				</value>
 				<value>
-					net/sf/taverna/t2/reference/impl/ReferenceSetImpl.hbm.xml
+					org/apache/taverna/reference/impl/ReferenceSetImpl.hbm.xml
 				</value>
 				<value>
-					net/sf/taverna/t2/reference/impl/T2ReferenceListImpl.hbm.xml
+					org/apache/taverna/reference/impl/T2ReferenceListImpl.hbm.xml
 				</value>
 				<value>
-					net/sf/taverna/t2/reference/impl/ErrorDocumentImpl.hbm.xml
+					org/apache/taverna/reference/impl/ErrorDocumentImpl.hbm.xml
 				</value>
 			</list>
 		</property>
@@ -93,7 +93,7 @@
 
 	<!-- Test data access object -->
 	<bean id="testDao"
-		class="net.sf.taverna.t2.reference.impl.TransactionalHibernateReferenceSetDao">
+		class="org.apache.taverna.reference.impl.TransactionalHibernateReferenceSetDao">
 		<property name="sessionFactory">
 			<ref local="sessionFactoryBean" />
 		</property>
@@ -101,7 +101,7 @@
 
 	<!-- Test list data access object -->
 	<bean id="testListDao"
-		class="net.sf.taverna.t2.reference.impl.TransactionalHibernateListDao">
+		class="org.apache.taverna.reference.impl.TransactionalHibernateListDao">
 		<property name="sessionFactory">
 			<ref local="sessionFactoryBean" />
 		</property>
@@ -109,7 +109,7 @@
 	
 	<!-- Test list data access object -->
 	<bean id="testErrorDao"
-		class="net.sf.taverna.t2.reference.impl.TransactionalHibernateErrorDocumentDao">
+		class="org.apache.taverna.reference.impl.TransactionalHibernateErrorDocumentDao">
 		<property name="sessionFactory">
 			<ref local="sessionFactoryBean" />
 		</property>

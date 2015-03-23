@@ -62,7 +62,7 @@ import org.mortbay.jetty.webapp.WebAppContext;
 
 /**
  * 
- * Based on net.sf.tavenra.security.credentialmanager.FixedPasswordProvider from the
+ * Based on org.apache.tavenra.security.credentialmanager.FixedPasswordProvider from the
  * Taverna 2 codebase. 
  * 
  * @author Stian Soiland-Reyes

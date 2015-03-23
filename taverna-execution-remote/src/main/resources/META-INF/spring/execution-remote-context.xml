@@ -3,6 +3,6 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans 
                            http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-	<bean id="remoteExecution" class="uk.org.taverna.platform.execution.impl.remote.RemoteExecutionService" />
+	<bean id="remoteExecution" class="org.apache.taverna.platform.execution.impl.remote.RemoteExecutionService" />
 
 </beans>

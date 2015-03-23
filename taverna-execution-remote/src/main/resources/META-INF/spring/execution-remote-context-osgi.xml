@@ -7,6 +7,6 @@
                                  http://www.springframework.org/schema/osgi 
                                  http://www.springframework.org/schema/osgi/spring-osgi.xsd">
 
-    <service ref="remoteExecution" interface="uk.org.taverna.platform.execution.api.ExecutionService" />
+    <service ref="remoteExecution" interface="org.apache.taverna.platform.execution.api.ExecutionService" />
       
 </beans:beans>

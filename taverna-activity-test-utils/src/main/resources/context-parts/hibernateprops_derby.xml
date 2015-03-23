@@ -12,13 +12,13 @@
 
 	<!-- Apache Derby rooted at a temporary directory -->
 	<bean id="t2reference.jdbc.temporaryjdbc"
-		class="net.sf.taverna.platform.spring.jdbc.TemporaryJDBC">
+		class="org.apache.taverna.platform.spring.jdbc.TemporaryJDBC">
 	</bean>
 	<bean id="t2reference.jdbc.url" class="java.lang.String"
 		factory-bean="t2reference.jdbc.temporaryjdbc"
 		factory-method="getTemporaryDerbyJDBC" />
 	<bean id="t2reference.jdbc.datasource"
-		class="net.sf.taverna.platform.spring.jdbc.InterpolatingDriverManagerDataSource">
+		class="org.apache.taverna.platform.spring.jdbc.InterpolatingDriverManagerDataSource">
 		<property name="driverClassName">
 			<value>org.apache.derby.jdbc.EmbeddedDriver</value>
 		</property>

@@ -1,0 +1,7 @@
+# Implementation classes of StreamToValueConverterSPI go here, one per line
+org.apache.taverna.reference.impl.external.object.StreamToStringConverter
+org.apache.taverna.reference.impl.external.object.StreamToByteArrayConverter
+org.apache.taverna.reference.impl.external.object.StreamToVMObjectReferenceConverter
+org.apache.taverna.reference.impl.external.object.StreamToDoubleConverter
+org.apache.taverna.reference.impl.external.object.StreamToBooleanConverter
+org.apache.taverna.reference.impl.external.object.StreamToIntegerConverter

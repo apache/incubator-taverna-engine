@@ -1,2 +1,0 @@
-net.sf.taverna.t2.workflowmodel.health.DisabledActivityHealthChecker
-net.sf.taverna.t2.workflowmodel.health.UnrecognizedActivityHealthChecker

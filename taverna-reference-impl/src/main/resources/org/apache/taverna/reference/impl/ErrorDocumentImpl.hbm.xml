@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Hibernate mapping for ErrorDocumentImpl -->
+<hibernate-mapping>
+  <class abstract="false" name="org.apache.taverna.reference.impl.ErrorDocumentImpl">
+    <id column="id" name="internalId" type="string"/>
+    <!--  Composite key constructed from the namespace and local -->
+    <!--  parts of the T2Reference implementation type           -->
+    <component class="org.apache.taverna.reference.impl.T2ReferenceImpl" name="typedId">
+      <property name="namespacePart"/>
+      <property name="localPart"/>
+      <property name="containsErrors"/>
+      <property name="depth"/>
+      <property name="referenceType"/>
+    </component>
+    <property length="10000" name="message"/>
+    <property length="10000" name="exceptionMessage"/>
+    <list cascade="all" lazy="false" name="stackTraceList">
+      <key column="id" not-null="true"/>
+      <list-index base="0" column="i"/>
+      <composite-element class="org.apache.taverna.reference.impl.StackTraceElementBeanImpl">
+        <property name="fileName"/>
+        <property name="className"/>
+        <property name="methodName"/>
+        <property name="lineNumber"/>
+      </composite-element>
+    </list>
+    <set cascade="all" lazy="false" name="errorReferenceSet">
+      <key column="id" not-null="true"/>
+      <composite-element class="org.apache.taverna.reference.impl.T2ReferenceImpl">
+        <property name="namespacePart"/>
+        <property name="localPart"/>
+        <property name="containsErrors"/>
+        <property name="depth"/>
+        <property name="referenceType"/>
+      </composite-element>
+    </set>
+  </class>
+</hibernate-mapping>

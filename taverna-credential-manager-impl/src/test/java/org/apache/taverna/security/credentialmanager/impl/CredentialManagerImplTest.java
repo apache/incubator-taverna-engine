@@ -46,8 +46,8 @@ import java.util.Random;
 
 import javax.net.ssl.SSLSocketFactory;
 
-import net.sf.taverna.t2.lang.observer.Observable;
-import net.sf.taverna.t2.lang.observer.Observer;
+import org.apache.taverna.lang.observer.Observable;
+import org.apache.taverna.lang.observer.Observer;
 import org.apache.taverna.security.credentialmanager.CMException;
 import org.apache.taverna.security.credentialmanager.CredentialManager;
 import org.apache.taverna.security.credentialmanager.CredentialManager.KeystoreType;
@@ -225,7 +225,7 @@ public class CredentialManagerImplTest {
 	}
 	
 	/**
-	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#CredentialManagerImpl()}.
+	 * Test method for {@link org.apache.taverna.security.credentialmanager.impl.CredentialManagerImpl#CredentialManagerImpl()}.
 	 * @throws CMException 
 	 */
 	@Test
@@ -234,7 +234,7 @@ public class CredentialManagerImplTest {
 	}
 
 	/**
-	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#getUsernameAndPasswordForService(java.net.URI, boolean, java.lang.String)}.
+	 * Test method for {@link org.apache.taverna.security.credentialmanager.impl.CredentialManagerImpl#getUsernameAndPasswordForService(java.net.URI, boolean, java.lang.String)}.
 	 * @throws URISyntaxException 
 	 * @throws CMException 
 	 */
@@ -252,7 +252,7 @@ public class CredentialManagerImplTest {
 	}
 
 	/**
-	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#addUsernameAndPasswordForService(net.sf.taverna.t2.security.credentialmanager.UsernamePassword, java.net.URI)}.
+	 * Test method for {@link org.apache.taverna.security.credentialmanager.impl.CredentialManagerImpl#addUsernameAndPasswordForService(net.sf.taverna.t2.security.credentialmanager.UsernamePassword, java.net.URI)}.
 	 * @throws URISyntaxException 
 	 * @throws CMException 
 	 */
@@ -269,7 +269,7 @@ public class CredentialManagerImplTest {
 	}
 
 	/**
-	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#hasUsernamePasswordForService(java.net.URI)}.
+	 * Test method for {@link org.apache.taverna.security.credentialmanager.impl.CredentialManagerImpl#hasUsernamePasswordForService(java.net.URI)}.
 	 * @throws CMException 
 	 */
 	@Test
@@ -287,7 +287,7 @@ public class CredentialManagerImplTest {
 	}
 	
 	/**
-	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#deleteUsernameAndPasswordForService(java.net.URI)}.
+	 * Test method for {@link org.apache.taverna.security.credentialmanager.impl.CredentialManagerImpl#deleteUsernameAndPasswordForService(java.net.URI)}.
 	 * @throws URISyntaxException 
 	 * @throws CMException 
 	 */
@@ -305,7 +305,7 @@ public class CredentialManagerImplTest {
 	}
 
 	/**
-	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#addKeyPair(java.security.Key, java.security.cert.Certificate[])}.
+	 * Test method for {@link org.apache.taverna.security.credentialmanager.impl.CredentialManagerImpl#addKeyPair(java.security.Key, java.security.cert.Certificate[])}.
 	 * @throws CMException 
 	 * @throws KeyStoreException 
 	 * @throws NoSuchAlgorithmException 
@@ -327,7 +327,7 @@ public class CredentialManagerImplTest {
 	}
 
 	/**
-	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#hasKeyPair(java.security.Key, java.security.cert.Certificate[])}.
+	 * Test method for {@link org.apache.taverna.security.credentialmanager.impl.CredentialManagerImpl#hasKeyPair(java.security.Key, java.security.cert.Certificate[])}.
 	 * @throws CMException 
 	 * @throws KeyStoreException 
 	 * @throws NoSuchAlgorithmException 
@@ -344,7 +344,7 @@ public class CredentialManagerImplTest {
 	}
 
 	/**
-	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#deleteKeyPair(java.lang.String)}.
+	 * Test method for {@link org.apache.taverna.security.credentialmanager.impl.CredentialManagerImpl#deleteKeyPair(java.lang.String)}.
 	 * @throws CMException 
 	 * @throws KeyStoreException 
 	 * @throws NoSuchAlgorithmException 
@@ -365,7 +365,7 @@ public class CredentialManagerImplTest {
 	}
 	
 	/**
-	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#deleteKeyPair(Key, Certificate[])}.
+	 * Test method for {@link org.apache.taverna.security.credentialmanager.impl.CredentialManagerImpl#deleteKeyPair(Key, Certificate[])}.
 	 * @throws CMException 
 	 */
 	@Test
@@ -377,7 +377,7 @@ public class CredentialManagerImplTest {
 	}
 
 	/**
-	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#exportKeyPair(java.lang.String, java.io.File, java.lang.String)}.
+	 * Test method for {@link org.apache.taverna.security.credentialmanager.impl.CredentialManagerImpl#exportKeyPair(java.lang.String, java.io.File, java.lang.String)}.
 	 * @throws CMException 
 	 * @throws KeyStoreException 
 	 * @throws NoSuchAlgorithmException 
@@ -413,7 +413,7 @@ public class CredentialManagerImplTest {
 	}
 
 	/**
-	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#getCertificate(java.lang.String, java.lang.String)}.
+	 * Test method for {@link org.apache.taverna.security.credentialmanager.impl.CredentialManagerImpl#getCertificate(java.lang.String, java.lang.String)}.
 	 * @throws CMException 
 	 */
 	@Test
@@ -434,7 +434,7 @@ public class CredentialManagerImplTest {
 	}
 
 	/**
-	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#getKeyPairsCertificateChain(java.lang.String)}.
+	 * Test method for {@link org.apache.taverna.security.credentialmanager.impl.CredentialManagerImpl#getKeyPairsCertificateChain(java.lang.String)}.
 	 * @throws CMException 
 	 */
 	@Test
@@ -446,7 +446,7 @@ public class CredentialManagerImplTest {
 	}
 	
 	/**
-	 * Test method for {@link net.sf.taverna.t2.security.credentialmanager.impl.CredentialManagerImpl#getKeyPairsPrivateKey(java.lang.String)}.
+	 * Test method for {@link org.apache.taverna.security.credentialmanager.impl.CredentialManagerImpl#getKeyPairsPrivateKey(java.lang.String)}.
 	 * @throws CMException 
 	 */
 	@Test

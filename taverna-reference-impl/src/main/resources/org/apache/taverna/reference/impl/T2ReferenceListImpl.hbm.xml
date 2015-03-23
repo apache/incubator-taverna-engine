@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Hibernate mapping for T2ReferenceListImpl, used by HibernateListDao -->
+<hibernate-mapping>
+  <class abstract="false" name="org.apache.taverna.reference.impl.T2ReferenceListImpl">
+    <id column="id" name="internalId" type="string"/>
+    <!--  Composite key constructed from the namespace and local -->
+    <!--  parts of the T2Reference implementation type, used as  -->
+    <!--  the foreign key in the one to many relationship with   -->
+    <!--  extensions of AbstractExternalReference                -->
+    <component class="org.apache.taverna.reference.impl.T2ReferenceImpl" name="typedId">
+      <property name="namespacePart"/>
+      <property name="localPart"/>
+      <property name="containsErrors"/>
+      <property name="depth"/>
+      <property name="referenceType"/>
+    </component>
+    <list cascade="all" lazy="false" name="listContents">
+      <key column="id"/>
+      <list-index base="0" column="i"/>
+      <composite-element class="org.apache.taverna.reference.impl.T2ReferenceImpl">
+        <!-- Explicit column mapping otherwise we collide with the implicit -->
+        <!-- mapping used in the key columns. Oh the joys of composites.. -->
+        <property column="c_namespace" name="namespacePart"/>
+        <property column="c_local" name="localPart"/>
+        <property column="c_errors" name="containsErrors"/>
+        <property column="c_depth" name="depth"/>
+        <property column="c_type" name="referenceType"/>
+      </composite-element>
+    </list>
+  </class>
+</hibernate-mapping>

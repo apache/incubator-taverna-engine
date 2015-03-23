@@ -8,18 +8,18 @@
         http://www.springframework.org/schema/osgi-compendium
        	http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium.xsd">
 
-	<list id="converters" interface="net.sf.taverna.t2.reference.ValueToReferenceConverterSPI" cardinality="0..N" />
-	<list id="valueBuilders" interface="net.sf.taverna.t2.reference.StreamToValueConverterSPI" cardinality="0..N" />
-	<list id="builders" interface="net.sf.taverna.t2.reference.ExternalReferenceBuilderSPI" cardinality="0..N">
+	<list id="converters" interface="org.apache.taverna.reference.ValueToReferenceConverterSPI" cardinality="0..N" />
+	<list id="valueBuilders" interface="org.apache.taverna.reference.StreamToValueConverterSPI" cardinality="0..N" />
+	<list id="builders" interface="org.apache.taverna.reference.ExternalReferenceBuilderSPI" cardinality="0..N">
 		<listener ref="referenceSetAugmentor" bind-method="buildersUpdated" unbind-method="buildersUpdated" />
 	</list>
-	<list id="translators" interface="net.sf.taverna.t2.reference.ExternalReferenceTranslatorSPI" cardinality="0..N">
+	<list id="translators" interface="org.apache.taverna.reference.ExternalReferenceTranslatorSPI" cardinality="0..N">
 		<listener ref="referenceSetAugmentor" bind-method="translatorsUpdated" unbind-method="translatorsUpdated" />
 	</list>
 
-    <reference id="databaseManager" interface="uk.org.taverna.configuration.database.DatabaseManager"/>
+    <reference id="databaseManager" interface="org.apache.taverna.configuration.database.DatabaseManager"/>
 
-	<service ref="inMemoryReferenceService" interface="net.sf.taverna.t2.reference.ReferenceService" />
-	<service ref="hibernateReferenceService" interface="net.sf.taverna.t2.reference.ReferenceService" />
+	<service ref="inMemoryReferenceService" interface="org.apache.taverna.reference.ReferenceService" />
+	<service ref="hibernateReferenceService" interface="org.apache.taverna.reference.ReferenceService" />
 
 </beans:beans>

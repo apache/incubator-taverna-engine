@@ -23,7 +23,7 @@ import org.apache.taverna.security.credentialmanager.CredentialManager.KeystoreT
 
 /**
  * An event given to {@link CredentialManagerOld} observers registered using
- * {@link Observable#addObserver(net.sf.taverna.t2.lang.observer.Observer)} to
+ * {@link Observable#addObserver(org.apache.taverna.lang.observer.Observer)} to
  * let them know the Keystore or Truststore have been changed.
  * 
  * @author Alex Nenadic

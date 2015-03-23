@@ -4,20 +4,20 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans 
                            http://www.springframework.org/schema/beans/spring-beans.xsd">
                            
-	<bean id="author" class="net.sf.taverna.t2.annotation.annotationbeans.Author" />
-	<bean id="descriptiveTitle" class="net.sf.taverna.t2.annotation.annotationbeans.DescriptiveTitle" />
-	<bean id="freeTextDescription" class="net.sf.taverna.t2.annotation.annotationbeans.FreeTextDescription" />
-	<bean id="hostInstitution" class="net.sf.taverna.t2.annotation.annotationbeans.HostInstitution" />
-	<!--<bean id="mimeType" class="net.sf.taverna.t2.annotation.annotationbeans.MimeType" />-->
-	<bean id="documentationUrl" class="net.sf.taverna.t2.annotation.annotationbeans.DocumentationUrl" />
-	<bean id="optional" class="net.sf.taverna.t2.annotation.annotationbeans.Optional" />
-	<bean id="exampleValue" class="net.sf.taverna.t2.annotation.annotationbeans.ExampleValue" />
-	<bean id="semanticAnnotation" class="net.sf.taverna.t2.annotation.annotationbeans.SemanticAnnotation" />
-	<bean id="identificationAssertion" class="net.sf.taverna.t2.annotation.annotationbeans.IdentificationAssertion" />
+	<bean id="author" class="org.apache.taverna.annotation.annotationbeans.Author" />
+	<bean id="descriptiveTitle" class="org.apache.taverna.annotation.annotationbeans.DescriptiveTitle" />
+	<bean id="freeTextDescription" class="org.apache.taverna.annotation.annotationbeans.FreeTextDescription" />
+	<bean id="hostInstitution" class="org.apache.taverna.annotation.annotationbeans.HostInstitution" />
+	<!--<bean id="mimeType" class="org.apache.taverna.annotation.annotationbeans.MimeType" />-->
+	<bean id="documentationUrl" class="org.apache.taverna.annotation.annotationbeans.DocumentationUrl" />
+	<bean id="optional" class="org.apache.taverna.annotation.annotationbeans.Optional" />
+	<bean id="exampleValue" class="org.apache.taverna.annotation.annotationbeans.ExampleValue" />
+	<bean id="semanticAnnotation" class="org.apache.taverna.annotation.annotationbeans.SemanticAnnotation" />
+	<bean id="identificationAssertion" class="org.apache.taverna.annotation.annotationbeans.IdentificationAssertion" />
 
-	<bean id="healthCheck" class="net.sf.taverna.t2.workflowmodel.health.HealthCheck" />
+	<bean id="healthCheck" class="org.apache.taverna.workflowmodel.health.HealthCheck" />
 
-	<bean id="disabledActivityHealthChecker" class="net.sf.taverna.t2.workflowmodel.health.DisabledActivityHealthChecker" />
-	<bean id="unrecognizedActivityHealthChecker" class="net.sf.taverna.t2.workflowmodel.health.UnrecognizedActivityHealthChecker" />
+	<bean id="disabledActivityHealthChecker" class="org.apache.taverna.workflowmodel.health.DisabledActivityHealthChecker" />
+	<bean id="unrecognizedActivityHealthChecker" class="org.apache.taverna.workflowmodel.health.UnrecognizedActivityHealthChecker" />
 		
 </beans>

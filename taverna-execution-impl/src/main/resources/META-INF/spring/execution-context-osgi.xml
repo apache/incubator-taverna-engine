@@ -6,8 +6,8 @@
                                  http://www.springframework.org/schema/osgi
                                  http://www.springframework.org/schema/osgi/spring-osgi.xsd">
 
-	<service ref="executionEnvironmentService" interface="uk.org.taverna.platform.execution.api.ExecutionEnvironmentService" />
+	<service ref="executionEnvironmentService" interface="org.apache.taverna.platform.execution.api.ExecutionEnvironmentService" />
 
-	<set id="executionServices" interface="uk.org.taverna.platform.execution.api.ExecutionService" />
+	<set id="executionServices" interface="org.apache.taverna.platform.execution.api.ExecutionService" />
 
 </beans:beans>

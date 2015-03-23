@@ -41,8 +41,8 @@ import java.util.Random;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import net.sf.taverna.t2.lang.observer.Observable;
-import net.sf.taverna.t2.lang.observer.Observer;
+import org.apache.taverna.lang.observer.Observable;
+import org.apache.taverna.lang.observer.Observer;
 import org.apache.taverna.security.credentialmanager.CMException;
 import org.apache.taverna.security.credentialmanager.KeystoreChangedEvent;
 import org.apache.taverna.security.credentialmanager.MasterPasswordProvider;

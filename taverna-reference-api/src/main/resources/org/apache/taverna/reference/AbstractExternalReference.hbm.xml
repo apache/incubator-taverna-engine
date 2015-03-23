@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Hibernate mapping for the abstract superclass of -->
+<!-- ExternalReferenceSPI implementations             -->
+<hibernate-mapping>
+  <class abstract="true" name="org.apache.taverna.reference.AbstractExternalReference">
+    <!-- Let hibernate choose the primary key generation strategy -->
+    <id column="bean_id" name="primaryKey" unsaved-value="0">
+      <generator class="native"/>
+    </id>
+  </class>
+</hibernate-mapping>

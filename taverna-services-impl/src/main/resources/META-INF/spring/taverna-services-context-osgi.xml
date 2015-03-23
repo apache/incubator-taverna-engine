@@ -6,7 +6,7 @@
                                  http://www.springframework.org/schema/osgi
                                  http://www.springframework.org/schema/osgi/spring-osgi.xsd">
 
-	<service ref="serviceRegistry" interface="uk.org.taverna.commons.services.ServiceRegistry" />
+	<service ref="serviceRegistry" interface="org.apache.taverna.commons.services.ServiceRegistry" />
 
     <reference id="activityService" interface="uk.org.taverna.platform.capability.api.ActivityService" />
 

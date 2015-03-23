@@ -22,7 +22,7 @@ package org.apache.taverna.platform.capability.api;
 import java.net.URI;
 import java.util.Set;
 
-import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayer;
+import org.apache.taverna.workflowmodel.processor.dispatch.DispatchLayer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 

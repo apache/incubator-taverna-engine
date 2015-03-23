@@ -6,10 +6,10 @@
                                  http://www.springframework.org/schema/osgi
                                  http://www.springframework.org/schema/osgi/spring-osgi.xsd">
 
-	<service ref="uriSource" interface="net.sf.taverna.t2.annotation.AnnotationSourceSPI" />
+	<service ref="uriSource" interface="org.apache.taverna.annotation.AnnotationSourceSPI" />
 
-	<service ref="disputeEventDetails" interface="net.sf.taverna.t2.annotation.CurationEventBeanSPI" />
+	<service ref="disputeEventDetails" interface="org.apache.taverna.annotation.CurationEventBeanSPI" />
 
-	<service ref="editsImpl" interface="net.sf.taverna.t2.workflowmodel.Edits" />
+	<service ref="editsImpl" interface="org.apache.taverna.workflowmodel.Edits" />
 
 </beans:beans>

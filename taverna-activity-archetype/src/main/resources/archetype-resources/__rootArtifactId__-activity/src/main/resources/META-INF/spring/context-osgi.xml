@@ -7,11 +7,11 @@
                                  http://www.springframework.org/schema/osgi/spring-osgi.xsd">
 
 	<!-- Services to be registered with the OSGi service register -->
-	<service ref="${classPrefix}ActivityHealthChecker" interface="net.sf.taverna.t2.workflowmodel.health.HealthChecker" />
+	<service ref="${classPrefix}ActivityHealthChecker" interface="org.apache.taverna.workflowmodel.health.HealthChecker" />
 
-	<service ref="${classPrefix}ActivityFactory" interface="net.sf.taverna.t2.workflowmodel.processor.activity.ActivityFactory" />
+	<service ref="${classPrefix}ActivityFactory" interface="org.apache.taverna.workflowmodel.processor.activity.ActivityFactory" />
 
 	<!-- References to services required from the OSGi service register -->
-	<reference id="edits" interface="net.sf.taverna.t2.workflowmodel.Edits" />
+	<reference id="edits" interface="org.apache.taverna.workflowmodel.Edits" />
 
 </beans:beans>

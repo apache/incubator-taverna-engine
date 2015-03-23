@@ -25,8 +25,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayer;
-import net.sf.taverna.t2.workflowmodel.processor.dispatch.DispatchLayerFactory;
+import org.apache.taverna.workflowmodel.processor.dispatch.DispatchLayer;
+import org.apache.taverna.workflowmodel.processor.dispatch.DispatchLayerFactory;
 import org.apache.taverna.platform.capability.api.DispatchLayerConfigurationException;
 import org.apache.taverna.platform.capability.api.DispatchLayerNotFoundException;
 import org.apache.taverna.platform.capability.api.DispatchLayerService;
@@ -80,7 +80,7 @@ public class DispatchLayerServiceImpl implements DispatchLayerService {
 		try {
 			if (configuration != null)
 				dispatchLayer.configure(configuration);
-		} catch (net.sf.taverna.t2.workflowmodel.ConfigurationException e) {
+		} catch (org.apache.taverna.workflowmodel.ConfigurationException e) {
 			throw new DispatchLayerConfigurationException(e);
 		}
 		return dispatchLayer;
