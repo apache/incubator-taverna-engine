@@ -6,12 +6,12 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import net.sf.taverna.t2.provenance.item.DataProvenanceItem;
-import net.sf.taverna.t2.reference.ErrorDocument;
-import net.sf.taverna.t2.reference.ExternalReferenceSPI;
-import net.sf.taverna.t2.reference.IdentifiedList;
-import net.sf.taverna.t2.reference.ReferenceService;
-import net.sf.taverna.t2.reference.ReferenceSet;
-import net.sf.taverna.t2.reference.T2Reference;
+import org.apache.taverna.reference.ErrorDocument;
+import org.apache.taverna.reference.ExternalReferenceSPI;
+import org.apache.taverna.reference.IdentifiedList;
+import org.apache.taverna.reference.ReferenceService;
+import org.apache.taverna.reference.ReferenceSet;
+import org.apache.taverna.reference.T2Reference;
 
 import org.jdom.Element;
 import org.tupeloproject.kernel.NotFoundException;

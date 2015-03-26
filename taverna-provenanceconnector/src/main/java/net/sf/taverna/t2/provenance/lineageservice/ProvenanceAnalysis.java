@@ -27,7 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.sf.taverna.t2.invocation.InvocationContext;
+import org.apache.taverna.invocation.InvocationContext;
 import net.sf.taverna.t2.provenance.api.NativeAnswer;
 import net.sf.taverna.t2.provenance.api.QueryAnswer;
 import net.sf.taverna.t2.provenance.lineageservice.utils.DataLink;
@@ -37,7 +37,7 @@ import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
 import net.sf.taverna.t2.provenance.lineageservice.utils.QueryPort;
 import net.sf.taverna.t2.provenance.lineageservice.utils.WorkflowRun;
 import net.sf.taverna.t2.provenance.opm.OPMManager;
-import net.sf.taverna.t2.reference.T2Reference;
+import org.apache.taverna.reference.T2Reference;
 
 import org.apache.log4j.Logger;
 import org.tupeloproject.kernel.OperatorException;

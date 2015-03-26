@@ -32,7 +32,7 @@ import net.sf.taverna.t2.provenance.connector.AbstractProvenanceConnector;
 import net.sf.taverna.t2.provenance.item.ProvenanceItem;
 import net.sf.taverna.t2.provenance.item.WorkflowProvenanceItem;
 import net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary;
-import net.sf.taverna.t2.workflowmodel.Dataflow;
+import org.apache.taverna.workflowmodel.Dataflow;
 
 import org.apache.log4j.Logger;
 
