@@ -6,13 +6,13 @@
                       http://www.springframework.org/schema/osgi
                       http://www.springframework.org/schema/osgi/spring-osgi.xsd">
 
-	<bean id="ProvenanceAccess" class="net.sf.taverna.t2.provenance.api.ProvenanceAccess">
+	<bean id="ProvenanceAccess" class="org.apache.taverna.provenance.api.ProvenanceAccess">
 		<property name="referenceService" ref="referenceService" />
 		<property name="provenanceConnector" ref="provenanceConnector" />
 	</bean>
 
-	<osgi:service ref="ProvenanceAccess" interface="net.sf.taverna.t2.provenance.Provenance"/>
+	<osgi:service ref="ProvenanceAccess" interface="org.apache.taverna.provenance.Provenance"/>
 
-	<osgi:reference id="referenceService" interface="net.sf.taverna.t2.reference.ReferenceService"/>
-	<osgi:reference id="provenanceConnector" interface="net.sf.taverna.t2.provenance.reporter.ProvenanceReporter"/>
+	<osgi:reference id="referenceService" interface="org.apache.taverna.reference.ReferenceService"/>
+	<osgi:reference id="provenanceConnector" interface="org.apache.taverna.provenance.reporter.ProvenanceReporter"/>
 </beans>
