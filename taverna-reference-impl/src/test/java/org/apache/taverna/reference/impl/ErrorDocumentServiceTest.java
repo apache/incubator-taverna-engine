@@ -33,6 +33,7 @@ import org.apache.taverna.reference.WorkflowRunIdEntity;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.context.ApplicationContext;
 
 public class ErrorDocumentServiceTest {
 	
@@ -45,20 +46,12 @@ public class ErrorDocumentServiceTest {
 		
 		ErrorDocumentServiceImpl service = null;
 
+		for (ApplicationContext context : AppContextSetup.contextList) {
 			service = new ErrorDocumentServiceImpl();
-			service.setErrorDao((ErrorDocumentDao)AppContextSetup.contextList.get(0).getBean("testErrorDao")); // hiberate
+			service.setErrorDao((ErrorDocumentDao) context.getBean("testErrorDao"));
 			service.setT2ReferenceGenerator(new SimpleT2ReferenceGenerator());
 			serviceList.add(service);	
-		
-			service = new ErrorDocumentServiceImpl();
-			service.setErrorDao((ErrorDocumentDao)AppContextSetup.contextList.get(1).getBean("testErrorDao")); // in memory
-			service.setT2ReferenceGenerator(new SimpleT2ReferenceGenerator());
-			serviceList.add(service);
-		
-			service = new ErrorDocumentServiceImpl();
-			service.setErrorDao((ErrorDocumentDao)AppContextSetup.contextList.get(2).getBean("testErrorDao")); // transactional hibernate
-			service.setT2ReferenceGenerator(new SimpleT2ReferenceGenerator());
-			serviceList.add(service);
+		}
 				
 	}
 	

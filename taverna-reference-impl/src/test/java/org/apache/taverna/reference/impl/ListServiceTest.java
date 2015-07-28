@@ -34,6 +34,7 @@ import org.apache.taverna.reference.WorkflowRunIdEntity;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.context.ApplicationContext;
 
 public class ListServiceTest {
 	
@@ -46,22 +47,13 @@ public class ListServiceTest {
 		
 		ListServiceImpl service = null;
 		
-			service = new ListServiceImpl();
-			service.setListDao((ListDao)AppContextSetup.contextList.get(0).getBean("testListDao")); // hibernate
-			service.setT2ReferenceGenerator(new SimpleT2ReferenceGenerator());	
-			serviceList.add(service);
+		for (ApplicationContext context : AppContextSetup.contextList) {
 		
 			service = new ListServiceImpl();
-			service.setListDao((ListDao)AppContextSetup.contextList.get(1).getBean("testListDao")); // in memory
+			service.setListDao((ListDao)context.getBean("testListDao")); 
 			service.setT2ReferenceGenerator(new SimpleT2ReferenceGenerator());	
 			serviceList.add(service);
-
-		
-			service = new ListServiceImpl();
-			service.setListDao((ListDao)AppContextSetup.contextList.get(2).getBean("testListDao")); // transactional hibernate
-			service.setT2ReferenceGenerator(new SimpleT2ReferenceGenerator());	
-			serviceList.add(service);
-		
+		}
 	}
 	
 	@Test

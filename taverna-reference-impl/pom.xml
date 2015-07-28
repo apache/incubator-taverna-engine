@@ -34,9 +34,7 @@
 						<Import-Package>
 							org.aspectj.lang,
 							org.springframework.orm.*,
-							org.hibernate.*,
-							org.hibernate.cfg,
-							org.hibernate.proxy, *
+							*
 						</Import-Package>
 						<!-- <Import-Package> org.aspectj.lang;resolution:=optional, org.springframework.orm.*;resolution:=optional,
 							org.hibernate.*;resolution:=optional, org.hibernate.proxy;resolution:=optional,
@@ -79,30 +77,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>com.springsource.org.hibernate</artifactId>
-			<version>${hibernate.version}</version>
-			<!-- <optional>true</optional> -->
-			<exclusions>
-				<exclusion>
-					<groupId>javax.transaction</groupId>
-					<artifactId>jta</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>net.sf.ehcache</groupId>
-					<artifactId>ehcache</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>asm</groupId>
-					<artifactId>asm-attrs</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>antlr</groupId>
-					<artifactId>antlr</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
 			<groupId>javax.transaction</groupId>
 			<artifactId>com.springsource.javax.transaction</artifactId>
 			<version>${javax.transaction.version}</version>
@@ -112,6 +86,11 @@
 			<artifactId>log4j</artifactId>
 			<version>${log4j.version}</version>
 		</dependency>
+	<dependency>
+		<groupId>commons-logging</groupId>
+		<artifactId>commons-logging</artifactId>
+		<version>${commons.logging.version}</version>
+	</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

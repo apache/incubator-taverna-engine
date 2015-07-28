@@ -31,19 +31,12 @@ public class AppContextSetup {
 	public static void setup() throws Exception {
 		if (contextList == null){
 			
+			//Add the contexts for storing referenced data
 			contextList = new ArrayList<ApplicationContext>();
-			//Add all three contexts for storing referenced data
-			contextList = new ArrayList<ApplicationContext>();
-			ApplicationContext context = null;
-			context = new ClassPathXmlApplicationContext(
-					"vanillaHibernateAppContext.xml"); // hibernate context
-			contextList.add(context);
-			context = new ClassPathXmlApplicationContext(
+			ApplicationContext context = new ClassPathXmlApplicationContext(
 			"vanillaInMemoryAppContext.xml");
 			contextList.add(context); // in memory
-			context = new ClassPathXmlApplicationContext(
-			"vanillaHibernateTransactionalAppContext.xml");
-			contextList.add(context);	 // transactional hibernate context
+
 			
 		}
 	}
