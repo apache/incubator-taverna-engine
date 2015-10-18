@@ -17,7 +17,7 @@
 * under the License.
 */
 
-package org.apache.taverna.commons.services;
+package org.apache.taverna.services;
 
 /**
  * Thrown when a Configuration is not valid for a Configurable.

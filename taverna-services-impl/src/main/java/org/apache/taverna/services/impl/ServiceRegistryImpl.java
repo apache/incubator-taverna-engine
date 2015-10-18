@@ -17,7 +17,7 @@
 * under the License.
 */
 
-package org.apache.taverna.commons.services.impl;
+package org.apache.taverna.services.impl;
 
 import java.net.URI;
 import java.util.Set;

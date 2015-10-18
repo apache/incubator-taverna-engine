@@ -17,7 +17,7 @@
 * under the License.
 */
 
-package org.apache.taverna.commons.services;
+package org.apache.taverna.services;
 
 /**
  * Thrown when an activity type is not found.

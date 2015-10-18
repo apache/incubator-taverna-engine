@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
                            http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-	<bean id="serviceRegistry" class="org.apache.taverna.commons.services.impl.ServiceRegistryImpl">
+	<bean id="serviceRegistry" class="org.apache.taverna.services.impl.ServiceRegistryImpl">
 		<property name="activityService" ref="activityService" />
 	</bean>
 
