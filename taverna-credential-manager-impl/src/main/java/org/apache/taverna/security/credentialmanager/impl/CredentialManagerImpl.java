@@ -83,7 +83,7 @@ import org.apache.taverna.security.credentialmanager.UsernamePassword;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import uk.org.taverna.configuration.app.ApplicationConfiguration;
+import org.apache.taverna.configuration.app.ApplicationConfiguration;
 
 /**
  * Provides an implementation of {@link #CredentialManagerService}.

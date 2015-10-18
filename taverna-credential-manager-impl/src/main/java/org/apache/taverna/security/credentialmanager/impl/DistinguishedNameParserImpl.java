@@ -56,7 +56,7 @@ import org.apache.taverna.security.credentialmanager.DistinguishedNameParser;
 
 import org.apache.log4j.Logger;
 
-import uk.org.taverna.configuration.app.ApplicationConfiguration;
+import org.apache.taverna.configuration.app.ApplicationConfiguration;
 
 /**
  * Utility methods for Credential Manager and security-related stuff.

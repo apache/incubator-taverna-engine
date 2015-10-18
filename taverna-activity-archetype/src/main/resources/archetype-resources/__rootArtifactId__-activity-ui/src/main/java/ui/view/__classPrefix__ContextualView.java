@@ -12,7 +12,7 @@ import javax.swing.JPanel;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import uk.org.taverna.commons.services.ServiceRegistry;
+import org.apache.taverna.services.ServiceRegistry;
 
 import net.sf.taverna.t2.servicedescriptions.ServiceDescriptionRegistry;
 import net.sf.taverna.t2.workbench.activityicons.ActivityIconManager;

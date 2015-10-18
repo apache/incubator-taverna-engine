@@ -42,11 +42,11 @@ import org.springframework.osgi.test.AbstractConfigurableBundleCreatorTests;
 import org.springframework.osgi.test.platform.OsgiPlatform;
 import org.springframework.osgi.test.platform.Platforms;
 
-import uk.org.taverna.configuration.app.ApplicationConfiguration;
-import uk.org.taverna.configuration.database.DatabaseConfiguration;
-import uk.org.taverna.platform.data.api.Data;
-import uk.org.taverna.platform.report.State;
-import uk.org.taverna.platform.report.WorkflowReport;
+import org.apache.taverna.configuration.app.ApplicationConfiguration;
+import org.apache.taverna.configuration.database.DatabaseConfiguration;
+import org.apache.taverna.platform.data.api.Data;
+import org.apache.taverna.platform.report.State;
+import org.apache.taverna.platform.report.WorkflowReport;
 import org.apache.taverna.scufl2.api.container.WorkflowBundle;
 import org.apache.taverna.scufl2.api.io.WorkflowBundleReader;
 import org.apache.taverna.scufl2.translator.t2flow.T2FlowReader;

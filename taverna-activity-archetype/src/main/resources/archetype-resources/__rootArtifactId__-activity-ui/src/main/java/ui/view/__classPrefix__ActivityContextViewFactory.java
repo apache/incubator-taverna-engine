@@ -7,7 +7,7 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 
-import uk.org.taverna.commons.services.ServiceRegistry;
+import org.apache.taverna.services.ServiceRegistry;
 import org.apache.taverna.scufl2.api.activity.Activity;
 
 import net.sf.taverna.t2.servicedescriptions.ServiceDescriptionRegistry;

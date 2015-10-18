@@ -24,7 +24,7 @@ import static org.apache.taverna.security.credentialmanager.CredentialManager.US
 import java.io.File;
 
 import org.apache.taverna.security.credentialmanager.MasterPasswordProvider;
-import uk.org.taverna.configuration.app.ApplicationConfiguration;
+import org.apache.taverna.configuration.app.ApplicationConfiguration;
 
 //import org.apache.log4j.Logger;
 

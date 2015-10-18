@@ -35,8 +35,8 @@ import org.junit.Ignore;
 
 import org.apache.taverna.databundle.DataBundles;
 import org.apache.taverna.databundle.ErrorDocument;
-import uk.org.taverna.platform.report.State;
-import uk.org.taverna.platform.report.WorkflowReport;
+import org.apache.taverna.platform.report.State;
+import org.apache.taverna.platform.report.WorkflowReport;
 import org.apache.taverna.scufl2.api.container.WorkflowBundle;
 import org.apache.taverna.scufl2.api.io.WorkflowBundleIO;
 

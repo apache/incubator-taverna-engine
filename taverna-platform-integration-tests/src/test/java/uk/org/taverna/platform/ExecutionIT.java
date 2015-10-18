@@ -28,17 +28,17 @@ import java.util.Set;
 
 import org.osgi.framework.ServiceReference;
 
-import uk.org.taverna.platform.capability.activity.ActivityConfigurationException;
-import uk.org.taverna.platform.capability.activity.ActivityNotFoundException;
-import uk.org.taverna.platform.data.api.Data;
-import uk.org.taverna.platform.capability.dispatch.DispatchLayerConfigurationException;
-import uk.org.taverna.platform.capability.dispatch.DispatchLayerNotFoundException;
-import uk.org.taverna.platform.execution.api.AbstractExecutionEnvironment;
-import uk.org.taverna.platform.execution.api.AbstractExecutionService;
-import uk.org.taverna.platform.execution.api.Execution;
-import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
-import uk.org.taverna.platform.execution.api.ExecutionEnvironmentService;
-import uk.org.taverna.platform.execution.api.InvalidWorkflowException;
+import org.apache.taverna.platform.capability.activity.ActivityConfigurationException;
+import org.apache.taverna.platform.capability.activity.ActivityNotFoundException;
+import org.apache.taverna.platform.data.api.Data;
+import org.apache.taverna.platform.capability.dispatch.DispatchLayerConfigurationException;
+import org.apache.taverna.platform.capability.dispatch.DispatchLayerNotFoundException;
+import org.apache.taverna.platform.execution.api.AbstractExecutionEnvironment;
+import org.apache.taverna.platform.execution.api.AbstractExecutionService;
+import org.apache.taverna.platform.execution.api.Execution;
+import org.apache.taverna.platform.execution.api.ExecutionEnvironment;
+import org.apache.taverna.platform.execution.api.ExecutionEnvironmentService;
+import org.apache.taverna.platform.execution.api.InvalidWorkflowException;
 import org.apache.taverna.scufl2.api.configurations.ConfigurationDefinition;
 import org.apache.taverna.scufl2.api.container.WorkflowBundle;
 import org.apache.taverna.scufl2.api.core.Workflow;

@@ -7,7 +7,7 @@ import java.net.URI;
 
 import javax.swing.Action;
 
-import uk.org.taverna.commons.services.ServiceRegistry;
+import org.apache.taverna.services.ServiceRegistry;
 
 import net.sf.taverna.t2.servicedescriptions.ServiceDescriptionRegistry;
 import net.sf.taverna.t2.ui.menu.ContextualMenuComponent;

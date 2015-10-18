@@ -29,9 +29,9 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 
-import uk.org.taverna.osgi.starter.TavernaStarter;
-import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
-import uk.org.taverna.platform.run.api.RunService;
+import org.apache.taverna.osgi.starter.TavernaStarter;
+import org.apache.taverna.platform.execution.api.ExecutionEnvironment;
+import org.apache.taverna.platform.run.api.RunService;
 
 public class ActivityIT extends PlatformIT {
 

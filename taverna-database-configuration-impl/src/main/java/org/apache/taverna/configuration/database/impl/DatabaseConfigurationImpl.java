@@ -23,8 +23,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.taverna.configuration.database.DatabaseConfiguration;
-import uk.org.taverna.configuration.AbstractConfigurable;
-import uk.org.taverna.configuration.ConfigurationManager;
+import org.apache.taverna.configuration.AbstractConfigurable;
+import org.apache.taverna.configuration.ConfigurationManager;
 
 /**
  * Configuration for the reference service and provenance.

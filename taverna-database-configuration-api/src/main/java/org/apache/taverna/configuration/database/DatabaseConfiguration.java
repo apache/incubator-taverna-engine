@@ -21,7 +21,7 @@ package org.apache.taverna.configuration.database;
 
 import java.util.Map;
 
-import uk.org.taverna.configuration.Configurable;
+import org.apache.taverna.configuration.Configurable;
 
 /**
  *

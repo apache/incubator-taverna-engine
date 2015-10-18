@@ -22,9 +22,9 @@ package org.apache.taverna.commons.services.impl;
 import java.net.URI;
 import java.util.Set;
 
-import org.apache.taverna.commons.services.ActivityTypeNotFoundException;
-import org.apache.taverna.commons.services.InvalidConfigurationException;
-import org.apache.taverna.commons.services.ServiceRegistry;
+import org.apache.taverna.services.ActivityTypeNotFoundException;
+import org.apache.taverna.services.InvalidConfigurationException;
+import org.apache.taverna.services.ServiceRegistry;
 import org.apache.taverna.platform.capability.api.ActivityConfigurationException;
 import org.apache.taverna.platform.capability.api.ActivityNotFoundException;
 import org.apache.taverna.platform.capability.api.ActivityService;

@@ -26,12 +26,12 @@ import java.util.Set;
 
 import org.osgi.framework.ServiceReference;
 
-import uk.org.taverna.platform.data.api.Data;
-import uk.org.taverna.platform.execution.api.ExecutionEnvironment;
-import uk.org.taverna.platform.report.State;
-import uk.org.taverna.platform.report.WorkflowReport;
-import uk.org.taverna.platform.run.api.RunProfile;
-import uk.org.taverna.platform.run.api.RunService;
+import org.apache.taverna.platform.data.api.Data;
+import org.apache.taverna.platform.execution.api.ExecutionEnvironment;
+import org.apache.taverna.platform.report.State;
+import org.apache.taverna.platform.report.WorkflowReport;
+import org.apache.taverna.platform.run.api.RunProfile;
+import org.apache.taverna.platform.run.api.RunService;
 import org.apache.taverna.scufl2.api.container.WorkflowBundle;
 
 public class RunWorkflowsIT extends PlatformIT {

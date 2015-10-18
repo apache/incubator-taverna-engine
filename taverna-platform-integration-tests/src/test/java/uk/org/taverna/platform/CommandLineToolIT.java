@@ -24,8 +24,8 @@ import net.sf.taverna.t2.commandline.CommandLineTool;
 
 import org.osgi.framework.ServiceReference;
 
-import uk.org.taverna.commandline.args.CommandLineArguments;
-import uk.org.taverna.platform.run.api.RunService;
+import org.apache.taverna.commandline.args.CommandLineArguments;
+import org.apache.taverna.platform.run.api.RunService;
 import org.apache.taverna.scufl2.api.io.WorkflowBundleIO;
 import org.apache.taverna.scufl2.api.io.WorkflowBundleReader;
 

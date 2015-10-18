@@ -31,7 +31,7 @@ import org.apache.log4j.Logger;
 
 import org.apache.taverna.configuration.database.DatabaseConfiguration;
 import org.apache.taverna.configuration.database.DatabaseManager;
-import uk.org.taverna.configuration.app.ApplicationConfiguration;
+import org.apache.taverna.configuration.app.ApplicationConfiguration;
 
 /**
  * A set of utility methods related to basic data management.
