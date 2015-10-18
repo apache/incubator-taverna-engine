@@ -41,7 +41,7 @@ import org.apache.taverna.scufl2.api.profiles.Profile;
  * @author David Withers
  */
 public interface RunService {
-	String EVENT_TOPIC_ROOT = "uk/org/taverna/platform/run/RunService/";
+	String EVENT_TOPIC_ROOT = "org/apache/taverna/platform/run/RunService/";
 	String RUN_CREATED = EVENT_TOPIC_ROOT + "RUN_CREATED";
 	String RUN_DELETED = EVENT_TOPIC_ROOT + "RUN_DELETED";
 	String RUN_STARTED = EVENT_TOPIC_ROOT + "RUN_STARTED";
