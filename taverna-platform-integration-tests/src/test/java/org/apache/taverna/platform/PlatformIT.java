@@ -175,12 +175,12 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 				"net.sf.taverna.t2.security, credential-manager, 2.0-SNAPSHOT",
 				"net.sf.taverna.t2.security, credential-manager-impl, 2.0-SNAPSHOT",
 				"net.sourceforge.cglib, com.springsource.net.sf.cglib, 2.1.3",
-				"uk.org.taverna.configuration, taverna-app-configuration-api, 0.1.0-SNAPSHOT",
-				"uk.org.taverna.configuration, taverna-app-configuration-impl, 0.1.0-SNAPSHOT",
-				"uk.org.taverna.configuration, taverna-configuration-api, 0.1.0-SNAPSHOT",
-				"uk.org.taverna.configuration, taverna-configuration-impl, 0.1.0-SNAPSHOT",
-				"uk.org.taverna.configuration, taverna-database-configuration-api, 0.1.0-SNAPSHOT",
-				"uk.org.taverna.configuration, taverna-database-configuration-impl, 0.1.0-SNAPSHOT",
+				"org.apache.taverna.configuration, taverna-app-configuration-api, 0.1.0-SNAPSHOT",
+				"org.apache.taverna.configuration, taverna-app-configuration-impl, 0.1.0-SNAPSHOT",
+				"org.apache.taverna.configuration, taverna-configuration-api, 0.1.0-SNAPSHOT",
+				"org.apache.taverna.configuration, taverna-configuration-impl, 0.1.0-SNAPSHOT",
+				"org.apache.taverna.configuration, taverna-database-configuration-api, 0.1.0-SNAPSHOT",
+				"org.apache.taverna.configuration, taverna-database-configuration-impl, 0.1.0-SNAPSHOT",
 				"org.apache.taverna.platform, report, 0.1.2-SNAPSHOT",
 				"org.apache.taverna.platform, data, 0.1.2-SNAPSHOT",
 				"org.apache.taverna.platform, execution-local, 0.1.2-SNAPSHOT",
@@ -191,8 +191,8 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 				"org.apache.taverna.platform, taverna-execution-impl, 0.1.2-SNAPSHOT",
 				"org.apache.taverna.platform, taverna-run-api, 0.1.2-SNAPSHOT",
 				"org.apache.taverna.platform, taverna-run-impl, 0.1.2-SNAPSHOT",
-				"uk.org.taverna.osgi.services, xml-parser-service, 0.0.1-SNAPSHOT",
-				"uk.org.taverna.osgi.services, xml-transformer-service, 0.0.1-SNAPSHOT",
+				"org.apache.taverna.osgi.services, xml-parser-service, 0.0.1-SNAPSHOT",
+				"org.apache.taverna.osgi.services, xml-transformer-service, 0.0.1-SNAPSHOT",
 				// FIXME: Add the other scufl2 modules
 				"org.apache.taverna.scufl2, scufl2-api, 0.9.2",
 				"org.apache.taverna.scufl2, scufl2-rdfxml, 0.9.2",
@@ -249,7 +249,7 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 
 		if (databaseConfiguration == null) {
 			ServiceReference databaseConfigurationReference = bundleContext
-					.getServiceReference("uk.org.taverna.configuration.database.DatabaseConfiguration");
+					.getServiceReference("org.apache.taverna.configuration.database.DatabaseConfiguration");
 			databaseConfiguration = (DatabaseConfiguration) bundleContext
 					.getService(databaseConfigurationReference);
 			ServiceReference jndiContextManagerReference = bundleContext
@@ -257,7 +257,7 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 			jndiContextManager = (JNDIContextManager) bundleContext
 					.getService(jndiContextManagerReference);
 			ServiceReference applicationConfigurationReference = bundleContext
-					.getServiceReference("uk.org.taverna.configuration.app.ApplicationConfiguration");
+					.getServiceReference("org.apache.taverna.configuration.app.ApplicationConfiguration");
 			applicationConfiguration = (ApplicationConfiguration) bundleContext
 					.getService(applicationConfigurationReference);
 		}
