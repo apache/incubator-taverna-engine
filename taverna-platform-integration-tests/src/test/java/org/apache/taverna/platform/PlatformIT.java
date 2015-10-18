@@ -18,7 +18,7 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package uk.org.taverna.platform;
+package org.apache.taverna.platform;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -30,10 +30,6 @@ import java.net.URL;
 import java.util.Map;
 import java.util.Properties;
 
-import net.sf.taverna.t2.reference.ErrorDocument;
-import net.sf.taverna.t2.reference.StackTraceElementBean;
-import net.sf.taverna.t2.security.credentialmanager.CredentialManager;
-import net.sf.taverna.t2.security.credentialmanager.MasterPasswordProvider;
 
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.osgi.framework.ServiceReference;
@@ -44,12 +40,13 @@ import org.springframework.osgi.test.platform.Platforms;
 
 import org.apache.taverna.configuration.app.ApplicationConfiguration;
 import org.apache.taverna.configuration.database.DatabaseConfiguration;
-import org.apache.taverna.platform.data.api.Data;
 import org.apache.taverna.platform.report.State;
 import org.apache.taverna.platform.report.WorkflowReport;
 import org.apache.taverna.scufl2.api.container.WorkflowBundle;
 import org.apache.taverna.scufl2.api.io.WorkflowBundleReader;
 import org.apache.taverna.scufl2.translator.t2flow.T2FlowReader;
+import org.apache.taverna.security.credentialmanager.CredentialManager;
+import org.apache.taverna.security.credentialmanager.MasterPasswordProvider;
 
 public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 
@@ -184,16 +181,16 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 				"uk.org.taverna.configuration, taverna-configuration-impl, 0.1.0-SNAPSHOT",
 				"uk.org.taverna.configuration, taverna-database-configuration-api, 0.1.0-SNAPSHOT",
 				"uk.org.taverna.configuration, taverna-database-configuration-impl, 0.1.0-SNAPSHOT",
-				"uk.org.taverna.platform, report, 0.1.2-SNAPSHOT",
-				"uk.org.taverna.platform, data, 0.1.2-SNAPSHOT",
-				"uk.org.taverna.platform, execution-local, 0.1.2-SNAPSHOT",
-				"uk.org.taverna.platform, execution-remote, 0.1.2-SNAPSHOT",
-				"uk.org.taverna.platform, taverna-capability-api, 0.1.2-SNAPSHOT",
-				"uk.org.taverna.platform, taverna-capability-impl, 0.1.2-SNAPSHOT",
-				"uk.org.taverna.platform, taverna-execution-api, 0.1.2-SNAPSHOT",
-				"uk.org.taverna.platform, taverna-execution-impl, 0.1.2-SNAPSHOT",
-				"uk.org.taverna.platform, taverna-run-api, 0.1.2-SNAPSHOT",
-				"uk.org.taverna.platform, taverna-run-impl, 0.1.2-SNAPSHOT",
+				"org.apache.taverna.platform, report, 0.1.2-SNAPSHOT",
+				"org.apache.taverna.platform, data, 0.1.2-SNAPSHOT",
+				"org.apache.taverna.platform, execution-local, 0.1.2-SNAPSHOT",
+				"org.apache.taverna.platform, execution-remote, 0.1.2-SNAPSHOT",
+				"org.apache.taverna.platform, taverna-capability-api, 0.1.2-SNAPSHOT",
+				"org.apache.taverna.platform, taverna-capability-impl, 0.1.2-SNAPSHOT",
+				"org.apache.taverna.platform, taverna-execution-api, 0.1.2-SNAPSHOT",
+				"org.apache.taverna.platform, taverna-execution-impl, 0.1.2-SNAPSHOT",
+				"org.apache.taverna.platform, taverna-run-api, 0.1.2-SNAPSHOT",
+				"org.apache.taverna.platform, taverna-run-impl, 0.1.2-SNAPSHOT",
 				"uk.org.taverna.osgi.services, xml-parser-service, 0.0.1-SNAPSHOT",
 				"uk.org.taverna.osgi.services, xml-transformer-service, 0.0.1-SNAPSHOT",
 				// FIXME: Add the other scufl2 modules
@@ -299,48 +296,48 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 		return file;
 	}
 
-	public void printErrors(Data data) {
-			ErrorDocument error = (ErrorDocument) data.getValue();
-			String message = error.getMessage();
-			if (message != null) {
-				System.out.println(message);
-			}
-			String exceptionMessage = error.getExceptionMessage();
-			if (exceptionMessage != null) {
-				System.out.println(exceptionMessage);
-			}
-			for (StackTraceElementBean stackTraceElementBean : error.getStackTraceStrings()) {
-				System.out.println(stackTraceElementBean.getClassName());
-				System.out.println(stackTraceElementBean.getMethodName());
-				System.out.println(stackTraceElementBean.getLineNumber());
-			}
-//			Set<T2Reference> errorReferences = error.getErrorReferences();
-//			for (T2Reference t2Reference : errorReferences) {
-//				printErrors(referenceService, t2Reference);
+//	public void printErrors(Data data) {
+//			ErrorDocument error = (ErrorDocument) data.getValue();
+//			String message = error.getMessage();
+//			if (message != null) {
+//				System.out.println(message);
 //			}
-	}
-
-	public boolean checkResult(Data result, String expectedResult) {
-		if (result.isError()) {
-			printErrors(result);
-			return false;
-		} else {
-			Object resultObject = result.getValue();
-			String resultValue = null;
-			if (resultObject instanceof byte[]) {
-				resultValue = new String((byte[]) resultObject);
-			} else {
-				resultValue = (String) resultObject;
-			}
-
-			if (resultValue.startsWith(expectedResult)) {
-				return true;
-			} else {
-				System.out.println("Expected: " + expectedResult + ", Actual: " + resultValue);
-				return false;
-			}
-		}
-	}
+//			String exceptionMessage = error.getExceptionMessage();
+//			if (exceptionMessage != null) {
+//				System.out.println(exceptionMessage);
+//			}
+//			for (StackTraceElementBean stackTraceElementBean : error.getStackTraceStrings()) {
+//				System.out.println(stackTraceElementBean.getClassName());
+//				System.out.println(stackTraceElementBean.getMethodName());
+//				System.out.println(stackTraceElementBean.getLineNumber());
+//			}
+////			Set<T2Reference> errorReferences = error.getErrorReferences();
+////			for (T2Reference t2Reference : errorReferences) {
+////				printErrors(referenceService, t2Reference);
+////			}
+//	}
+//
+//	public boolean checkResult(Data result, String expectedResult) {
+//		if (result.isError()) {
+//			printErrors(result);
+//			return false;
+//		} else {
+//			Object resultObject = result.getValue();
+//			String resultValue = null;
+//			if (resultObject instanceof byte[]) {
+//				resultValue = new String((byte[]) resultObject);
+//			} else {
+//				resultValue = (String) resultObject;
+//			}
+//
+//			if (resultValue.startsWith(expectedResult)) {
+//				return true;
+//			} else {
+//				System.out.println("Expected: " + expectedResult + ", Actual: " + resultValue);
+//				return false;
+//			}
+//		}
+//	}
 
 	public boolean waitForState(WorkflowReport report, State state) throws InterruptedException {
 		return waitForState(report, state, true);
@@ -357,22 +354,22 @@ public class PlatformIT extends AbstractConfigurableBundleCreatorTests {
 		return report.getState().equals(state);
 	}
 
-	public void waitForResults(Map<String, Data> results, WorkflowReport report, String... ports)
-			throws InterruptedException {
-		int wait = 0;
-		while (!resultsReady(results, ports) && wait++ < 20) {
-			System.out.println(report);
-			Thread.sleep(500);
-		}
-	}
-
-	private boolean resultsReady(Map<String, Data> results, String... ports) {
-		for (String port : ports) {
-			if (!results.containsKey(port)) {
-				return false;
-			}
-		}
-		return true;
-	}
+//	public void waitForResults(Map<String, Data> results, WorkflowReport report, String... ports)
+//			throws InterruptedException {
+//		int wait = 0;
+//		while (!resultsReady(results, ports) && wait++ < 20) {
+//			System.out.println(report);
+//			Thread.sleep(500);
+//		}
+//	}
+//
+//	private boolean resultsReady(Map<String, Data> results, String... ports) {
+//		for (String port : ports) {
+//			if (!results.containsKey(port)) {
+//				return false;
+//			}
+//		}
+//		return true;
+//	}
 
 }

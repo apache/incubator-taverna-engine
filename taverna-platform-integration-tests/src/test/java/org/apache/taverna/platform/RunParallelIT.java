@@ -18,13 +18,11 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package uk.org.taverna.platform;
+package org.apache.taverna.platform;
 
 import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
-
-import net.sf.taverna.t2.security.credentialmanager.UsernamePassword;
 
 import org.osgi.framework.ServiceReference;
 
@@ -45,7 +43,7 @@ public class RunParallelIT extends PlatformIT {
 		super.setup();
 		if (runService == null) {
 			ServiceReference runServiceReference = bundleContext
-					.getServiceReference("uk.org.taverna.platform.run.api.RunService");
+					.getServiceReference("org.apache.taverna.platform.run.api.RunService");
 			runService = (RunService) bundleContext.getService(runServiceReference);
 		}
 		if (executionEnvironment == null) {

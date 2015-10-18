@@ -18,7 +18,7 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package uk.org.taverna.platform;
+package org.apache.taverna.platform;
 
 import java.io.File;
 import java.net.URI;
@@ -30,12 +30,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import net.sf.taverna.t2.security.credentialmanager.UsernamePassword;
-
 import org.osgi.framework.ServiceReference;
 
-import org.apache.taverna.platform.data.api.Data;
-import org.apache.taverna.platform.data.api.DataService;
 import org.apache.taverna.platform.execution.api.ExecutionEnvironment;
 import org.apache.taverna.platform.report.State;
 import org.apache.taverna.platform.report.WorkflowReport;
@@ -46,18 +42,17 @@ import org.apache.taverna.scufl2.api.container.WorkflowBundle;
 public class RunIT extends PlatformIT {
 
 	private RunService runService;
-	private DataService dataService;
 
 	protected void setup() throws Exception {
 		super.setup();
 		if (runService == null) {
 			ServiceReference runServiceReference = bundleContext
-					.getServiceReference("uk.org.taverna.platform.run.api.RunService");
+					.getServiceReference("org.apache.taverna.platform.run.api.RunService");
 			runService = (RunService) bundleContext.getService(runServiceReference);
 		}
 		if (dataService == null) {
 			ServiceReference dataServiceReference = bundleContext
-					.getServiceReference("uk.org.taverna.platform.data.DataService");
+					.getServiceReference("org.apache.taverna.platform.data.DataService");
 			dataService = (DataService) bundleContext.getService(dataServiceReference);
 		}
 		databaseConfiguration.setProvenanceEnabled(false);

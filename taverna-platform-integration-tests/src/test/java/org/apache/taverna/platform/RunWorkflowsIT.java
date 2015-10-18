@@ -18,7 +18,7 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package uk.org.taverna.platform;
+package org.apache.taverna.platform;
 
 import java.util.List;
 import java.util.Map;
@@ -26,7 +26,6 @@ import java.util.Set;
 
 import org.osgi.framework.ServiceReference;
 
-import org.apache.taverna.platform.data.api.Data;
 import org.apache.taverna.platform.execution.api.ExecutionEnvironment;
 import org.apache.taverna.platform.report.State;
 import org.apache.taverna.platform.report.WorkflowReport;
@@ -42,7 +41,7 @@ public class RunWorkflowsIT extends PlatformIT {
 		super.setup();
 		if (runService == null) {
 			ServiceReference runServiceReference = bundleContext
-					.getServiceReference("uk.org.taverna.platform.run.api.RunService");
+					.getServiceReference("org.apache.taverna.platform.run.api.RunService");
 			runService = (RunService) bundleContext.getService(runServiceReference);
 		}
 	}

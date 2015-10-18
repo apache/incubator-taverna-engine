@@ -18,7 +18,7 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package uk.org.taverna.platform;
+package org.apache.taverna.platform;
 
 import java.net.URI;
 import java.util.Collections;
@@ -28,18 +28,12 @@ import java.util.Set;
 
 import org.osgi.framework.ServiceReference;
 
-import org.apache.taverna.platform.capability.activity.ActivityConfigurationException;
-import org.apache.taverna.platform.capability.activity.ActivityNotFoundException;
-import org.apache.taverna.platform.data.api.Data;
-import org.apache.taverna.platform.capability.dispatch.DispatchLayerConfigurationException;
-import org.apache.taverna.platform.capability.dispatch.DispatchLayerNotFoundException;
 import org.apache.taverna.platform.execution.api.AbstractExecutionEnvironment;
 import org.apache.taverna.platform.execution.api.AbstractExecutionService;
 import org.apache.taverna.platform.execution.api.Execution;
 import org.apache.taverna.platform.execution.api.ExecutionEnvironment;
 import org.apache.taverna.platform.execution.api.ExecutionEnvironmentService;
 import org.apache.taverna.platform.execution.api.InvalidWorkflowException;
-import org.apache.taverna.scufl2.api.configurations.ConfigurationDefinition;
 import org.apache.taverna.scufl2.api.container.WorkflowBundle;
 import org.apache.taverna.scufl2.api.core.Workflow;
 import org.apache.taverna.scufl2.api.profiles.Profile;
@@ -51,7 +45,7 @@ public class ExecutionIT extends PlatformIT {
 	protected void setup() throws Exception {
 		super.setup();
 		ServiceReference[] executionServiceReferences = bundleContext.getServiceReferences(
-				"uk.org.taverna.platform.execution.api.ExecutionEnvironmentService", null);
+				"org.apache.taverna.platform.execution.api.ExecutionEnvironmentService", null);
 		assertEquals(1, executionServiceReferences.length);
 		executionEnvironmentService = (ExecutionEnvironmentService) bundleContext
 				.getService(executionServiceReferences[0]);
@@ -65,7 +59,7 @@ public class ExecutionIT extends PlatformIT {
 				.getExecutionEnvironments();
 		int size = executionEnvironments.size();
 
-		bundleContext.registerService("uk.org.taverna.platform.execution.api.ExecutionService",
+		bundleContext.registerService("org.apache.taverna.platform.execution.api.ExecutionService",
 				new AbstractExecutionService("test id", "test name", "test description") {
 					public Set<ExecutionEnvironment> getExecutionEnvivonments() {
 						return Collections

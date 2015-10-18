@@ -18,24 +18,20 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package uk.org.taverna.platform;
+package org.apache.taverna.platform;
 
 import java.net.URI;
 import java.util.List;
 
-import net.sf.taverna.t2.workflowmodel.processor.activity.Activity;
-
+import org.apache.taverna.platform.capability.api.ActivityConfigurationException;
+import org.apache.taverna.platform.capability.api.ActivityNotFoundException;
 import org.osgi.framework.ServiceReference;
 
-import org.apache.taverna.platform.capability.activity.ActivityConfigurationException;
-import org.apache.taverna.platform.capability.activity.ActivityNotFoundException;
-import org.apache.taverna.platform.capability.activity.ActivityService;
-import org.apache.taverna.scufl2.api.configurations.ConfigurationDefinition;
 
 public class ActivityIT extends PlatformIT {
 
 	public void testGetActivityURIs() {
-		ServiceReference activityServiceReference = bundleContext.getServiceReference("uk.org.taverna.platform.activity.ActivityService");
+		ServiceReference activityServiceReference = bundleContext.getServiceReference("org.apache.taverna.platform.capability.api.ActivityService");
 		ActivityService activityService = (ActivityService) bundleContext.getService(activityServiceReference);
 		List<URI> activityURIs = activityService.getActivityURIs();
 		System.out.println("================= Available Activities ===================");
@@ -47,7 +43,7 @@ public class ActivityIT extends PlatformIT {
 	}
 
 	public void testCreateActivity() throws ActivityNotFoundException, ActivityConfigurationException {
-		ServiceReference activityServiceReference = bundleContext.getServiceReference("uk.org.taverna.platform.activity.ActivityService");
+		ServiceReference activityServiceReference = bundleContext.getServiceReference("org.apache.taverna.platform.capability.api.ActivityService");
 		ActivityService activityService = (ActivityService) bundleContext.getService(activityServiceReference);
 		List<URI> activityURIs = activityService.getActivityURIs();
 		for (URI uri : activityURIs) {
@@ -57,7 +53,7 @@ public class ActivityIT extends PlatformIT {
 	}
 
 	public void testGetActivityConfigurationDefinition() throws Exception {
-		ServiceReference activityServiceReference = bundleContext.getServiceReference("uk.org.taverna.platform.activity.ActivityService");
+		ServiceReference activityServiceReference = bundleContext.getServiceReference("org.apache.taverna.platform.capability.api.ActivityService");
 		ActivityService activityService = (ActivityService) bundleContext.getService(activityServiceReference);
 
 		List<URI> activityURIs = activityService.getActivityURIs();

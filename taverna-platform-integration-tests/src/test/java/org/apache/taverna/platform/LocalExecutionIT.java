@@ -18,7 +18,7 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package uk.org.taverna.platform;
+package org.apache.taverna.platform;
 
 import java.util.Collections;
 import java.util.List;
@@ -27,8 +27,6 @@ import java.util.Set;
 
 import org.osgi.framework.ServiceReference;
 
-import org.apache.taverna.platform.data.api.Data;
-import org.apache.taverna.platform.data.api.DataService;
 import org.apache.taverna.platform.execution.api.ExecutionEnvironment;
 import org.apache.taverna.platform.execution.api.ExecutionService;
 import org.apache.taverna.platform.report.State;
@@ -40,14 +38,13 @@ import org.apache.taverna.scufl2.api.profiles.Profile;
 public class LocalExecutionIT extends PlatformIT {
 
 	private ExecutionService executionService;
-	private DataService dataService;
 	private Set<ExecutionEnvironment> executionEnvironments;
 
 	protected void setup() throws Exception {
 		super.setup();
 		if (executionService == null) {
 			ServiceReference[] executionServiceReferences = bundleContext.getServiceReferences(
-					"uk.org.taverna.platform.execution.api.ExecutionService",
+					"org.apache.taverna.platform.execution.api.ExecutionService",
 					"(org.springframework.osgi.bean.name=localExecution)");
 			assertEquals(1, executionServiceReferences.length);
 			executionService = (ExecutionService) bundleContext
@@ -57,7 +54,7 @@ public class LocalExecutionIT extends PlatformIT {
 		}
 		if (dataService == null) {
 			ServiceReference dataServiceReference = bundleContext
-					.getServiceReference("uk.org.taverna.platform.data.DataService");
+					.getServiceReference("org.apache.taverna.platform.data.DataService");
 			dataService = (DataService) bundleContext.getService(dataServiceReference);
 		}
 	}

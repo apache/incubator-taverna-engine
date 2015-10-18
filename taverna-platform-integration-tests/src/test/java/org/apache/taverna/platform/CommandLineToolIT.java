@@ -18,13 +18,10 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package uk.org.taverna.platform;
-
-import net.sf.taverna.t2.commandline.CommandLineTool;
+package org.apache.taverna.platform;
 
 import org.osgi.framework.ServiceReference;
 
-import org.apache.taverna.commandline.args.CommandLineArguments;
 import org.apache.taverna.platform.run.api.RunService;
 import org.apache.taverna.scufl2.api.io.WorkflowBundleIO;
 import org.apache.taverna.scufl2.api.io.WorkflowBundleReader;
@@ -39,7 +36,7 @@ public class CommandLineToolIT extends PlatformIT {
 		super.setup();
 		if (runService == null) {
 			ServiceReference runServiceReference = bundleContext
-					.getServiceReference("uk.org.taverna.platform.run.api.RunService");
+					.getServiceReference("org.apache.taverna.platform.run.api.RunService");
 			runService = (RunService) bundleContext.getService(runServiceReference);
 		}
 

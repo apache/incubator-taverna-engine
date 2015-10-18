@@ -18,12 +18,11 @@
  *  License along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  ******************************************************************************/
-package uk.org.taverna.platform;
+package org.apache.taverna.platform;
 
 import java.io.IOException;
 
 import org.osgi.framework.Bundle;
-import org.springframework.core.io.Resource;
 import org.springframework.osgi.util.OsgiStringUtils;
 
 public class OSGIFrameworkIT extends PlatformIT {
