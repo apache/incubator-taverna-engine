@@ -52,7 +52,7 @@ public class StatusReportTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.report.StatusReport#StatusReport()}.
+	 * Test method for {@link org.apache.taverna.platform.report.StatusReport#StatusReport()}.
 	 */
 	@Test
 	public void testStatusReport() {
@@ -72,7 +72,7 @@ public class StatusReportTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.report.StatusReport#getSubject()}.
+	 * Test method for {@link org.apache.taverna.platform.report.StatusReport#getSubject()}.
 	 */
 	@Test
 	public void testGetSubject() {
@@ -82,7 +82,7 @@ public class StatusReportTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.report.StatusReport#getState()}.
+	 * Test method for {@link org.apache.taverna.platform.report.StatusReport#getState()}.
 	 */
 	@Test
 	public void testGetState() {
@@ -91,7 +91,7 @@ public class StatusReportTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.report.StatusReport#getCreatedDate()}.
+	 * Test method for {@link org.apache.taverna.platform.report.StatusReport#getCreatedDate()}.
 	 */
 	@Test
 	public void testGetCreatedDate() {
@@ -101,7 +101,7 @@ public class StatusReportTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.report.StatusReport#setCreatedDate(java.util.Date)}.
+	 * Test method for {@link org.apache.taverna.platform.report.StatusReport#setCreatedDate(java.util.Date)}.
 	 */
 	@Test
 	public void testSetCreatedDate() {
@@ -112,7 +112,7 @@ public class StatusReportTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.report.StatusReport#getStartedDate()}.
+	 * Test method for {@link org.apache.taverna.platform.report.StatusReport#getStartedDate()}.
 	 */
 	@Test
 	public void testGetStartedDate() {
@@ -120,7 +120,7 @@ public class StatusReportTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.report.StatusReport#setStartedDate(java.util.Date)}.
+	 * Test method for {@link org.apache.taverna.platform.report.StatusReport#setStartedDate(java.util.Date)}.
 	 */
 	@Test
 	public void testSetStartedDate() {
@@ -131,7 +131,7 @@ public class StatusReportTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.report.StatusReport#getPausedDate()}.
+	 * Test method for {@link org.apache.taverna.platform.report.StatusReport#getPausedDate()}.
 	 */
 	@Test
 	public void testGetPausedDate() {
@@ -139,7 +139,7 @@ public class StatusReportTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.report.StatusReport#setPausedDate(java.util.Date)}.
+	 * Test method for {@link org.apache.taverna.platform.report.StatusReport#setPausedDate(java.util.Date)}.
 	 */
 	@Test
 	public void testSetPausedDate() {
@@ -150,7 +150,7 @@ public class StatusReportTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.report.StatusReport#getResumedDate()}.
+	 * Test method for {@link org.apache.taverna.platform.report.StatusReport#getResumedDate()}.
 	 */
 	@Test
 	public void testGetResumedDate() {
@@ -158,7 +158,7 @@ public class StatusReportTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.report.StatusReport#setResumedDate(java.util.Date)}.
+	 * Test method for {@link org.apache.taverna.platform.report.StatusReport#setResumedDate(java.util.Date)}.
 	 */
 	@Test
 	public void testSetResumedDate() {
@@ -169,7 +169,7 @@ public class StatusReportTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.report.StatusReport#getCancelledDate()}.
+	 * Test method for {@link org.apache.taverna.platform.report.StatusReport#getCancelledDate()}.
 	 */
 	@Test
 	public void testGetCancelledDate() {
@@ -177,7 +177,7 @@ public class StatusReportTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.report.StatusReport#setCancelledDate(java.util.Date)}.
+	 * Test method for {@link org.apache.taverna.platform.report.StatusReport#setCancelledDate(java.util.Date)}.
 	 */
 	@Test
 	public void testSetCancelledDate() {
@@ -188,7 +188,7 @@ public class StatusReportTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.report.StatusReport#getCompletedDate()}.
+	 * Test method for {@link org.apache.taverna.platform.report.StatusReport#getCompletedDate()}.
 	 */
 	@Test
 	public void testGetCompletedDate() {
@@ -196,7 +196,7 @@ public class StatusReportTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.report.StatusReport#setCompletedDate(java.util.Date)}.
+	 * Test method for {@link org.apache.taverna.platform.report.StatusReport#setCompletedDate(java.util.Date)}.
 	 */
 	@Test
 	public void testSetCompletedDate() {
@@ -207,7 +207,7 @@ public class StatusReportTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.report.StatusReport#getFailedDate()}.
+	 * Test method for {@link org.apache.taverna.platform.report.StatusReport#getFailedDate()}.
 	 */
 	@Test
 	public void testGetFailedDate() {
@@ -215,7 +215,7 @@ public class StatusReportTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.report.StatusReport#setFailedDate(java.util.Date)}.
+	 * Test method for {@link org.apache.taverna.platform.report.StatusReport#setFailedDate(java.util.Date)}.
 	 */
 	@Test
 	public void testSetFailedDate() {
@@ -226,7 +226,7 @@ public class StatusReportTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.report.StatusReport#getPausedDates()}.
+	 * Test method for {@link org.apache.taverna.platform.report.StatusReport#getPausedDates()}.
 	 */
 	@Test
 	public void testGetPausedDates() {
@@ -234,7 +234,7 @@ public class StatusReportTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.report.StatusReport#getResumedDates()}.
+	 * Test method for {@link org.apache.taverna.platform.report.StatusReport#getResumedDates()}.
 	 */
 	@Test
 	public void testGetResumedDates() {

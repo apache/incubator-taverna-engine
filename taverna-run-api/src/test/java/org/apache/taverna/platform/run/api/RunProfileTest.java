@@ -73,7 +73,7 @@ public class RunProfileTest {
 
 	/**
 	 * Test method for
-	 * {@link uk.org.taverna.platform.run.api.RunProfile#RunProfile(org.apache.taverna.scufl2.api.container.WorkflowBundle, java.util.Map, org.apache.taverna.reference.ReferenceService, org.apache.taverna.platform.execution.api.ExecutionService)}
+	 * {@link org.apache.taverna.platform.run.api.RunProfile#RunProfile(org.apache.taverna.scufl2.api.container.WorkflowBundle, java.util.Map, org.apache.taverna.reference.ReferenceService, org.apache.taverna.platform.execution.api.ExecutionService)}
 	 * .
 	 */
 	@Test
@@ -117,7 +117,7 @@ public class RunProfileTest {
 
 	/**
 	 * Test method for
-	 * {@link uk.org.taverna.platform.run.api.RunProfile#getWorkflow()}.
+	 * {@link org.apache.taverna.platform.run.api.RunProfile#getWorkflow()}.
 	 */
 	@Test
 	public void testGetWorkflow() {
@@ -131,7 +131,7 @@ public class RunProfileTest {
 
 	/**
 	 * Test method for
-	 * {@link uk.org.taverna.platform.run.api.RunProfile#setWorkflow(org.apache.taverna.scufl2.api.core.Workflow)}
+	 * {@link org.apache.taverna.platform.run.api.RunProfile#setWorkflow(org.apache.taverna.scufl2.api.core.Workflow)}
 	 * .
 	 */
 	@Test
@@ -150,7 +150,7 @@ public class RunProfileTest {
 
 	/**
 	 * Test method for
-	 * {@link uk.org.taverna.platform.run.api.RunProfile#getProfile()}.
+	 * {@link org.apache.taverna.platform.run.api.RunProfile#getProfile()}.
 	 */
 	@Test
 	public void testGetProfile() {
@@ -164,7 +164,7 @@ public class RunProfileTest {
 
 	/**
 	 * Test method for
-	 * {@link uk.org.taverna.platform.run.api.RunProfile#setProfile(org.apache.taverna.scufl2.api.profiles.Profile)}
+	 * {@link org.apache.taverna.platform.run.api.RunProfile#setProfile(org.apache.taverna.scufl2.api.profiles.Profile)}
 	 * .
 	 */
 	@Test
@@ -183,7 +183,7 @@ public class RunProfileTest {
 
 	/**
 	 * Test method for
-	 * {@link uk.org.taverna.platform.run.api.RunProfile#getDataBundle()}.
+	 * {@link org.apache.taverna.platform.run.api.RunProfile#getDataBundle()}.
 	 */
 	@Test
 	public void testGetDataBundle() {
@@ -194,7 +194,7 @@ public class RunProfileTest {
 
 	/**
 	 * Test method for
-	 * {@link uk.org.taverna.platform.run.api.RunProfile#setDataBundle(org.apache.taverna.robundle.Bundle)}
+	 * {@link org.apache.taverna.platform.run.api.RunProfile#setDataBundle(org.apache.taverna.robundle.Bundle)}
 	 * .
 	 */
 	@Test
@@ -207,7 +207,7 @@ public class RunProfileTest {
 
 	/**
 	 * Test method for
-	 * {@link uk.org.taverna.platform.run.api.RunProfile#getExecutionEnvironment()}.
+	 * {@link org.apache.taverna.platform.run.api.RunProfile#getExecutionEnvironment()}.
 	 */
 	@Test
 	public void testGetExecutionEnvironment() {
@@ -218,7 +218,7 @@ public class RunProfileTest {
 
 	/**
 	 * Test method for
-	 * {@link uk.org.taverna.platform.run.api.RunProfile#setExecutionEnvironment(uk.org.taverna.platform.execution.api.ExecutionEnvironment)}
+	 * {@link org.apache.taverna.platform.run.api.RunProfile#setExecutionEnvironment(org.apache.taverna.platform.execution.api.ExecutionEnvironment)}
 	 * .
 	 */
 	@Test

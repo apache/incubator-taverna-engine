@@ -33,7 +33,7 @@ import org.apache.taverna.platform.report.WorkflowReport;
 public class LocalExecutionTest {
 	
 	/**
-	 * Test method for {@link uk.org.taverna.platform.execution.impl.local.LocalExecution#start()}.
+	 * Test method for {@link org.apache.taverna.platform.execution.impl.local.LocalExecution#start()}.
 	 */
 	@Test
 	@Ignore
@@ -42,7 +42,7 @@ public class LocalExecutionTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.execution.impl.local.LocalExecution#pause()}.
+	 * Test method for {@link org.apache.taverna.platform.execution.impl.local.LocalExecution#pause()}.
 	 */
 	@Test
 	@Ignore
@@ -51,7 +51,7 @@ public class LocalExecutionTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.execution.impl.local.LocalExecution#resume()}.
+	 * Test method for {@link org.apache.taverna.platform.execution.impl.local.LocalExecution#resume()}.
 	 */
 	@Test
 	@Ignore
@@ -60,7 +60,7 @@ public class LocalExecutionTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.execution.impl.local.LocalExecution#cancel()}.
+	 * Test method for {@link org.apache.taverna.platform.execution.impl.local.LocalExecution#cancel()}.
 	 */
 	@Test
 	@Ignore
@@ -70,7 +70,7 @@ public class LocalExecutionTest {
 
 	/**
 	 * Test method for
-	 * {@link uk.org.taverna.platform.execution.impl.local.LocalExecution#DataflowExecution(org.apache.taverna.scufl2.api.core.Workflow, java.util.Map, net.sf.taverna.t2.reference.ReferenceService)}
+	 * {@link org.apache.taverna.platform.execution.impl.local.LocalExecution#DataflowExecution(org.apache.taverna.scufl2.api.core.Workflow, java.util.Map, net.sf.taverna.t2.reference.ReferenceService)}
 	 * .
 	 * 
 	 * @throws Exception
@@ -154,7 +154,7 @@ public class LocalExecutionTest {
 
 	/**
 	 * Test method for
-	 * {@link uk.org.taverna.platform.execution.impl.local.LocalExecution#resultTokenProduced(net.sf.taverna.t2.invocation.WorkflowDataToken, java.lang.String)}
+	 * {@link org.apache.taverna.platform.execution.impl.local.LocalExecution#resultTokenProduced(net.sf.taverna.t2.invocation.WorkflowDataToken, java.lang.String)}
 	 * .
 	 */
 	@Test

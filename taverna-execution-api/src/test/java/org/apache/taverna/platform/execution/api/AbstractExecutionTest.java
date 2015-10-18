@@ -85,7 +85,7 @@ public class AbstractExecutionTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.execution.api.AbstractExecution#getID()}.
+	 * Test method for {@link org.apache.taverna.platform.execution.api.AbstractExecution#getID()}.
 	 */
 	@Test
 	public void testGetID() {
@@ -94,7 +94,7 @@ public class AbstractExecutionTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.execution.api.AbstractExecution#getWorkflowBundle()}.
+	 * Test method for {@link org.apache.taverna.platform.execution.api.AbstractExecution#getWorkflowBundle()}.
 	 */
 	@Test
 	public void testGetWorkflowBundle() {
@@ -102,7 +102,7 @@ public class AbstractExecutionTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.execution.api.AbstractExecution#getWorkflow()}.
+	 * Test method for {@link org.apache.taverna.platform.execution.api.AbstractExecution#getWorkflow()}.
 	 */
 	@Test
 	public void testGetWorkflow() {
@@ -110,7 +110,7 @@ public class AbstractExecutionTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.execution.api.AbstractExecution#getInputs()}.
+	 * Test method for {@link org.apache.taverna.platform.execution.api.AbstractExecution#getInputs()}.
 	 */
 	@Test
 	public void testGetInputs() {
@@ -118,7 +118,7 @@ public class AbstractExecutionTest {
 	}
 
 	/**
-	 * Test method for {@link uk.org.taverna.platform.execution.api.AbstractExecution#getWorkflowReport()}.
+	 * Test method for {@link org.apache.taverna.platform.execution.api.AbstractExecution#getWorkflowReport()}.
 	 */
 	@Test
 	public void testGetWorkflowReport() {
