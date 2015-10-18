@@ -8,6 +8,6 @@
 
 	<service ref="serviceRegistry" interface="org.apache.taverna.services.ServiceRegistry" />
 
-    <reference id="activityService" interface="uk.org.taverna.platform.capability.api.ActivityService" />
+    <reference id="activityService" interface="org.apache.taverna.platform.capability.api.ActivityService" />
 
 </beans:beans>

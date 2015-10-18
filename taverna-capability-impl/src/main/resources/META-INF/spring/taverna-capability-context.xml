@@ -3,11 +3,11 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
                            http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-	<bean id="activityService" class="uk.org.taverna.platform.capability.activity.impl.ActivityServiceImpl">
+	<bean id="activityService" class="org.apache.taverna.platform.capability.activity.impl.ActivityServiceImpl">
 		<property name="activityFactories" ref="activityFactories" />
 	</bean>
 
-	<bean id="dispatchLayerService" class="uk.org.taverna.platform.capability.dispatch.impl.DispatchLayerServiceImpl">
+	<bean id="dispatchLayerService" class="org.apache.taverna.platform.capability.dispatch.impl.DispatchLayerServiceImpl">
 		<property name="dispatchLayerFactories" ref="dispatchLayerFactories" />
 	</bean>
 

@@ -17,7 +17,7 @@
 				<configuration>
 					<instructions>
 						<Import-Package>
-							uk.org.taverna.configuration.database;provide:=true,
+							org.apache.taverna.configuration.database;provide:=true,
 							org.apache.derby.jdbc, *
 						</Import-Package>
 					</instructions>

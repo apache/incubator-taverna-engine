@@ -9,8 +9,8 @@
 	<service ref="databaseConfiguration" interface="org.apache.taverna.configuration.database.DatabaseConfiguration" />
 	<service ref="databaseManager" interface="org.apache.taverna.configuration.database.DatabaseManager" />
 
-	<reference id="configurationManager" interface="uk.org.taverna.configuration.ConfigurationManager" />
-	<reference id="applicationConfiguration" interface="uk.org.taverna.configuration.app.ApplicationConfiguration" />
+	<reference id="configurationManager" interface="org.apache.taverna.configuration.ConfigurationManager" />
+	<reference id="applicationConfiguration" interface="org.apache.taverna.configuration.app.ApplicationConfiguration" />
 
 	<!-- <reference id="dataSourceFactory" interface="org.osgi.service.jdbc.DataSourceFactory"
 		filter="(osgi.jdbc.driver.class=org.apache.derby.jdbc.EmbeddedDriver)" /> -->

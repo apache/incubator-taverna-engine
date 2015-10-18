@@ -21,6 +21,6 @@
 	<reference id="activityIconManager" interface="org.apache.taverna.workbench.activityicons.ActivityIconManager" />
 	<reference id="colourManager" interface="org.apache.taverna.workbench.configuration.colour.ColourManager" />
 	<reference id="serviceDescriptionRegistry" interface="org.apache.taverna.servicedescriptions.ServiceDescriptionRegistry" />
-	<reference id="serviceRegistry" interface="org.apache.taverna.commons.services.ServiceRegistry" />
+	<reference id="serviceRegistry" interface="org.apache.taverna.services.ServiceRegistry" />
 
 </beans:beans>

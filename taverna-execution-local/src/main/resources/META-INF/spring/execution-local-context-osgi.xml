@@ -8,8 +8,8 @@
 
 	<service ref="localExecution">
 		<interfaces>
-			<beans:value>uk.org.taverna.platform.execution.api.ExecutionService</beans:value>
-			<beans:value>uk.org.taverna.platform.execution.api.WorkflowCompiler</beans:value>
+			<beans:value>org.apache.taverna.platform.execution.api.ExecutionService</beans:value>
+			<beans:value>org.apache.taverna.platform.execution.api.WorkflowCompiler</beans:value>
 		</interfaces>
 		<service-properties>
 			<beans:entry key="executor" value="TavernaEngine" />
