@@ -20,6 +20,8 @@
     <reference id="databaseManager" interface="org.apache.taverna.configuration.database.DatabaseManager"/>
 
 	<service ref="inMemoryReferenceService" interface="org.apache.taverna.reference.ReferenceService" />
+<!--
 	<service ref="hibernateReferenceService" interface="org.apache.taverna.reference.ReferenceService" />
+-->
 
 </beans:beans>
