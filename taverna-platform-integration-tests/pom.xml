@@ -222,10 +222,11 @@
 		</dependency>
 
 		<!-- Taverna OSGI Services -->
-		<!-- <dependency> <groupId>org.apache.taverna.osgi</groupId> <artifactId>xml-parser-service</artifactId>
-			<version>${taverna.osgi.version}</version> <exclusions> <exclusion> <groupId>org.apache.xerces</groupId>
-			<artifactId>com.springsource.org.apache.xerces</artifactId> </exclusion>
+		<!-- <dependency> <groupId>org.apache.taverna.osgi</groupId> <artifactId>xml-parser-service</artifactId> 
+			<version>${taverna.osgi.version}</version> <exclusions> <exclusion> <groupId>org.apache.xerces</groupId> 
+			<artifactId>com.springsource.org.apache.xerces</artifactId> </exclusion> 
 			</exclusions> </dependency> -->
+
 		<dependency>
 			<groupId>org.apache.taverna.osgi</groupId>
 			<artifactId>xml-transformer-service</artifactId>
@@ -274,13 +275,9 @@
 			<artifactId>taverna-observer</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>
-		<!-- is this needed here?  (Why?)
-		<dependency>
-			<groupId>${project.parent.groupId}</groupId>
-			<artifactId>ui</artifactId>
-			<version>${project.parent.version}</version>
-		</dependency>
-	-->
+		<!-- is this needed here? (Why?) -->
+		<!-- <dependency> <groupId>${project.parent.groupId}</groupId> <artifactId>ui</artifactId> 
+			<version>${project.parent.version}</version> </dependency> -->
 		<dependency>
 			<groupId>${project.parent.groupId}</groupId>
 			<artifactId>taverna-credential-manager</artifactId>
@@ -378,7 +375,7 @@
 			<version>2.0-SNAPSHOT</version>
 		</dependency>
 
-		<!-- Dependencies declared as provided by some poms - specified here to
+		<!-- Dependencies declared as provided by some poms - specified here to 
 			ensure that they are in the local repository for the testing framework -->
 		<dependency>
 			<groupId>commons-dbcp</groupId>
@@ -564,11 +561,21 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<!-- <dependency> <groupId>org.apache.ws</groupId> <artifactId>com.springsource.org.apache.ws.security</artifactId>
-			<version>1.5.8</version> <scope>test</scope> <exclusions> <exclusion> <groupId>org.apache.xalan</groupId>
-			<artifactId>com.springsource.org.apache.xalan</artifactId> </exclusion> </exclusions>
-			</dependency> -->
-			<!--
+
+
+		<!--
+		<dependency>
+			<groupId>org.apache.ws</groupId>
+			<artifactId>com.springsource.org.apache.ws.security</artifactId>
+			<version>1.5.8</version>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.xalan</groupId>
+					<artifactId>com.springsource.org.apache.xalan</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 		<dependency>
 			<groupId>org.beanshell</groupId>
 			<artifactId>com.springsource.bsh</artifactId>
@@ -579,7 +586,8 @@
 			<artifactId>martservice</artifactId>
 			<version>2.0-SNAPSHOT</version>
 		</dependency>
-	-->
+		-->
+
 		<dependency>
 			<groupId>org.dom4j</groupId>
 			<artifactId>com.springsource.org.dom4j</artifactId>
@@ -595,10 +603,19 @@
 			<artifactId>com.springsource.org.jdom</artifactId>
 			<version>1.1.0</version>
 		</dependency>
-		<!-- <dependency> <groupId>org.odftoolkit</groupId> <artifactId>odfdom-java.bundle</artifactId>
-			<version>0.7.0</version> <exclusions> <exclusion> <groupId>org.apache.xerces</groupId>
-			<artifactId>com.springsource.org.apache.xerces</artifactId> </exclusion>
-			</exclusions> </dependency> -->
+	<!-- 
+	<dependency>
+		<groupId>org.odftoolkit</groupId>
+		<artifactId>odfdom-java.bundle</artifactId>
+		<version>0.7.0</version>
+		<exclusions>
+			<exclusion>
+				<groupId>org.apache.xerces</groupId>
+				<artifactId>com.springsource.org.apache.xerces</artifactId>
+			</exclusion>
+		</exclusions>
+	</dependency> 
+	-->
 		<dependency>
 			<groupId>org.opensaml</groupId>
 			<artifactId>com.springsource.org.opensaml</artifactId>

@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
 		<groupId>org.apache.taverna.engine</groupId>
 		<artifactId>taverna-engine</artifactId>
 		<version>3.1.0-incubating-SNAPSHOT</version>
-    </parent>
-    <artifactId>taverna-provenanceconnector</artifactId>
-    <packaging>bundle</packaging>
-    <name>Apache Taverna Provenance Connector</name>
-    <description>Database storage and analysis of provenance info (LEGACY)</description>
+	</parent>
+	<artifactId>taverna-provenanceconnector</artifactId>
+	<packaging>bundle</packaging>
+	<name>Apache Taverna Provenance Connector</name>
+	<description>Database storage and analysis of provenance info (LEGACY)</description>
 	<build>
 		<plugins>
 			<plugin>
@@ -54,53 +55,48 @@
 		<dependency>
 			<groupId>org.jdom</groupId>
 			<artifactId>com.springsource.org.jdom</artifactId>
-                        <version>${jdom.version}</version>
+			<version>${jdom.version}</version>
 		</dependency>
-  		<dependency>
+		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
-                        <version>${log4j.version}</version>
+			<version>${log4j.version}</version>
 		</dependency>
 		<dependency>
-      <groupId>commons-dbcp</groupId>
-      <artifactId>commons-dbcp</artifactId>
-      <version>${commons.dbcp.version}</version>
+			<groupId>commons-dbcp</groupId>
+			<artifactId>commons-dbcp</artifactId>
+			<version>${commons.dbcp.version}</version>
 		</dependency>
-		<!--
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-                        <version>${commons.io.version}</version>
-		</dependency>
-		 -->
+		<!-- <dependency> <groupId>commons-io</groupId> <artifactId>commons-io</artifactId> 
+			<version>${commons.io.version}</version> </dependency> -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>com.springsource.org.apache.commons.lang</artifactId>
-                        <version>${commons.lang.version}</version>
+			<version>${commons.lang.version}</version>
 		</dependency>
-                <dependency>
-                        <groupId>org.tupeloproject</groupId>
-                        <artifactId>tupelo-cet</artifactId>
-                        <version>${tupelo.version}</version>
-                        <scope>provided</scope>
-                </dependency>
-                <dependency>
-                        <groupId>org.tupeloproject</groupId>
-                        <artifactId>tupelo-kernel</artifactId>
-                        <version>${tupelo.version}</version>
-                        <scope>provided</scope>
-                </dependency>
-                <dependency>
-                        <groupId>org.openprovenance</groupId>
-                        <artifactId>opm-core</artifactId>
-                        <version>${opm.version}</version>
-                        <scope>provided</scope>
-                </dependency>
+		<dependency>
+			<groupId>org.tupeloproject</groupId>
+			<artifactId>tupelo-cet</artifactId>
+			<version>${tupelo.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.tupeloproject</groupId>
+			<artifactId>tupelo-kernel</artifactId>
+			<version>${tupelo.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.openprovenance</groupId>
+			<artifactId>opm-core</artifactId>
+			<version>${opm.version}</version>
+			<scope>provided</scope>
+		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-                        <version>${junit.version}</version>
+			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
-    </dependencies>
+	</dependencies>
 </project>

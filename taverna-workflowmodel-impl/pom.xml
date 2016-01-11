@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-    <groupId>org.apache.taverna.engine</groupId>
-    <artifactId>taverna-engine</artifactId>
-    <version>3.1.0-incubating-SNAPSHOT</version>
+		<groupId>org.apache.taverna.engine</groupId>
+		<artifactId>taverna-engine</artifactId>
+		<version>3.1.0-incubating-SNAPSHOT</version>
 	</parent>
 	<artifactId>taverna-workflowmodel-impl</artifactId>
 	<packaging>bundle</packaging>
@@ -23,9 +24,9 @@
 				<configuration>
 					<instructions>
 						<Export-Package>
-						net.sf.taverna.t2.invocation.impl,
-						net.sf.taverna.t2.workflowmodel.impl,
-						net.sf.taverna.t2.workflowmodel.processor.iteration.impl,
+							net.sf.taverna.t2.invocation.impl,
+							net.sf.taverna.t2.workflowmodel.impl,
+							net.sf.taverna.t2.workflowmodel.processor.iteration.impl,
 						</Export-Package>
 					</instructions>
 				</configuration>
@@ -41,7 +42,7 @@
 		<dependency>
 			<groupId>org.jdom</groupId>
 			<artifactId>com.springsource.org.jdom</artifactId>
-      <version>${jdom.version}</version>
+			<version>${jdom.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.thoughtworks.xstream</groupId>
@@ -58,13 +59,13 @@
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
-      <version>${log4j.version}</version>
+			<version>${log4j.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-      <version>${junit.version}</version>
+			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
