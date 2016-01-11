@@ -7,7 +7,7 @@
                                  http://www.springframework.org/schema/osgi/spring-osgi.xsd" >
 
 	<service ref="inlineStringReferenceBuilder" interface="org.apache.taverna.reference.ExternalReferenceBuilderSPI" />
-	<service ref="inlineByteArrayReferenceBuilder" interface="org.apahce.taverna.reference.ExternalReferenceBuilderSPI" />
+	<service ref="inlineByteArrayReferenceBuilder" interface="org.apache.taverna.reference.ExternalReferenceBuilderSPI" />
 
 	<service ref="fileReference" interface="org.apache.taverna.reference.ExternalReferenceSPI" />
 	<service ref="httpReference" interface="org.apache.taverna.reference.ExternalReferenceSPI" />
