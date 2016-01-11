@@ -24,9 +24,9 @@
 				<configuration>
 					<instructions>
 						<Export-Package>
-							net.sf.taverna.t2.invocation.impl,
-							net.sf.taverna.t2.workflowmodel.impl,
-							net.sf.taverna.t2.workflowmodel.processor.iteration.impl,
+							org.apache.taverna.invocation.impl,
+							org.apache.taverna.workflowmodel.impl,
+							org.apache.taverna.workflowmodel.processor.iteration.impl,
 						</Export-Package>
 					</instructions>
 				</configuration>
