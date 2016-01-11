@@ -15,7 +15,7 @@
 	<name>Apache Taverna Engine and Platform</name>
 
 	<properties>
-		<taverna.language.version>0.15.0-incubating</taverna.language.version>
+		<taverna.language.version>0.15.1-incubating-SNAPSHOT</taverna.language.version>
 		<taverna.osgi.version>0.2.1-incubating-SNAPSHOT</taverna.osgi.version>
 	</properties>
 
