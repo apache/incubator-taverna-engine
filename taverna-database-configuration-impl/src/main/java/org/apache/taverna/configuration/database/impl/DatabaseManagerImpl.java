@@ -20,6 +20,7 @@
 package org.apache.taverna.configuration.database.impl;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -145,10 +146,10 @@ public class DatabaseManagerImpl implements DatabaseManager {
 
 	private void setDerbyPaths() {
 		if (databaseConfiguration.getConnectorType() == DatabaseConfiguration.CONNECTOR_DERBY) {
-			String homeDir = applicationConfiguration.getApplicationHomeDir().getAbsolutePath();
+			String homeDir = applicationConfiguration.getApplicationHomeDir().toAbsolutePath().toString();
 			System.setProperty("derby.system.home",homeDir);
-			File logFile = new File(applicationConfiguration.getLogDir(), "derby.log");
-			System.setProperty("derby.stream.error.file", logFile.getAbsolutePath());
+			Path logFile = applicationConfiguration.getLogDir().resolve("derby.log");
+			System.setProperty("derby.stream.error.file", logFile.toAbsolutePath().toString());
 		}
 
 	}

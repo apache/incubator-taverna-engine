@@ -77,7 +77,7 @@ public class DistinguishedNameParserImpl implements DistinguishedNameParser{
 	 */
 	public static File getTheCredentialManagerDefaultDirectory(
 			ApplicationConfiguration applicationConfiguration) {
-		File home = applicationConfiguration.getApplicationHomeDir();
+		File home = applicationConfiguration.getApplicationHomeDir().toFile();
 		File secConfigDirectory = new File(home, "security");
 		if (!secConfigDirectory.exists())
 			secConfigDirectory.mkdir();
