@@ -19,7 +19,6 @@
 
 package org.apache.taverna.platform.run.impl;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.ClosedFileSystemException;
 import java.nio.file.InvalidPathException;
@@ -35,10 +34,6 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventAdmin;
-import org.apache.taverna.robundle.Bundle;
-
 import org.apache.taverna.databundle.DataBundles;
 import org.apache.taverna.platform.execution.api.ExecutionEnvironment;
 import org.apache.taverna.platform.execution.api.ExecutionEnvironmentService;
@@ -52,16 +47,18 @@ import org.apache.taverna.platform.run.api.RunProfile;
 import org.apache.taverna.platform.run.api.RunProfileException;
 import org.apache.taverna.platform.run.api.RunService;
 import org.apache.taverna.platform.run.api.RunStateException;
+import org.apache.taverna.robundle.Bundle;
 import org.apache.taverna.scufl2.api.container.WorkflowBundle;
 import org.apache.taverna.scufl2.api.core.Workflow;
 import org.apache.taverna.scufl2.api.io.ReaderException;
 import org.apache.taverna.scufl2.api.io.WorkflowBundleIO;
 import org.apache.taverna.scufl2.api.profiles.Profile;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 
 /**
  * Implementation of the <code>RunService</code>.
  *
- * @author David Withers
  */
 public class RunServiceImpl implements RunService {
 	private static final Logger logger = Logger.getLogger(RunServiceImpl.class.getName());
@@ -105,14 +102,14 @@ public class RunServiceImpl implements RunService {
 	}
 
 	@Override
-	public String open(File runFile) throws IOException {
+	public String open(Path runFile) throws IOException {
 		try {
-			String runID = runFile.getName();
+			String runID = runFile.getFileName().toString();
 			int dot = runID.indexOf('.');
 			if (dot > 0)
 				runID = runID.substring(0, dot);
 			if (!runMap.containsKey(runID)) {
-				Bundle bundle = DataBundles.openBundle(runFile.toPath());
+				Bundle bundle = DataBundles.openBundle(runFile);
 				Run run = new Run(runID, bundle);
 				runMap.put(run.getID(), run);
 			}
@@ -137,11 +134,11 @@ public class RunServiceImpl implements RunService {
 	}
 
 	@Override
-	public void save(String runID, File runFile) throws InvalidRunIdException, IOException {
+	public void save(String runID, Path runFile) throws InvalidRunIdException, IOException {
 		Run run = getRun(runID);
 		Bundle dataBundle = run.getDataBundle();
 		try {
-			DataBundles.closeAndSaveBundle(dataBundle, runFile.toPath());
+			DataBundles.closeAndSaveBundle(dataBundle, runFile);
 		} catch (InvalidPathException e) {
 			throw new IOException(e);
 		}

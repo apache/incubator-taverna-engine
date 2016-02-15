@@ -19,8 +19,8 @@
 
 package org.apache.taverna.platform.run.api;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 
@@ -38,7 +38,6 @@ import org.apache.taverna.scufl2.api.profiles.Profile;
 /**
  * Service for managing runs of Taverna workflows.
  * 
- * @author David Withers
  */
 public interface RunService {
 	String EVENT_TOPIC_ROOT = "org/apache/taverna/platform/run/RunService/";
@@ -116,7 +115,7 @@ public interface RunService {
 	 * @throws InvalidWorkflowException
 	 * @throws RunProfileException
 	 */
-	String open(File runFile) throws IOException;
+	String open(Path runFile) throws IOException;
 
 	/**
 	 * Closes a run.
@@ -139,7 +138,7 @@ public interface RunService {
 	 *             if the run ID is not valid
 	 * @throws InvalidExecutionIdException
 	 */
-	void save(String runID, File runFile) throws InvalidRunIdException,
+	void save(String runID, Path runFile) throws InvalidRunIdException,
 			IOException;
 
 	/**

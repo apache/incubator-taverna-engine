@@ -28,7 +28,6 @@ import org.apache.taverna.scufl2.api.container.WorkflowBundle;
  * A <code>RunProfile</code> specifies the parameters required to run a
  * {@link org.apache.taverna.scufl2.api.core.Workflow}.
  * 
- * @author David Withers
  */
 public class RunProfile {
 	private ExecutionEnvironment executionEnvironment;
