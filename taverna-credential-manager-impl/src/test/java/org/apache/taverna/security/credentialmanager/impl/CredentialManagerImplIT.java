@@ -222,7 +222,7 @@ public class CredentialManagerImplIT {
 				"taverna-truststore.ubr");
 		FileUtils.copyFile(keystoreFile, keystoreDestFile);
 		FileUtils.copyFile(truststoreFile, truststoreDestFile);
-		credentialManager.setConfigurationDirectoryPath(credentialManagerDirectory);
+		credentialManager.setConfigurationDirectoryPath(credentialManagerDirectory.toPath());
 		
 		// Create the dummy master password provider
 		masterPasswordProvider = new DummyMasterPasswordProvider();
@@ -314,7 +314,7 @@ public class CredentialManagerImplIT {
 		System.out.println("Credential Manager's Keystore and Truststore will be saved to: "
 				+ credentialManagerDirectoryPath);
 		credentialManagerDirectory = new File(credentialManagerDirectoryPath);
-		credentialManager.setConfigurationDirectoryPath(credentialManagerDirectory);
+		credentialManager.setConfigurationDirectoryPath(credentialManagerDirectory.toPath());
 		
 		// Create the dummy master password provider
 		masterPasswordProvider = new DummyMasterPasswordProvider();

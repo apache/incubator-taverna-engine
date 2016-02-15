@@ -62,11 +62,9 @@ import org.mortbay.jetty.webapp.WebAppContext;
 
 /**
  * 
- * Based on org.apache.tavenra.security.credentialmanager.FixedPasswordProvider from the
+ * Based on org.apache.taverna.security.credentialmanager.FixedPasswordProvider from the
  * Taverna 2 codebase. 
  * 
- * @author Stian Soiland-Reyes
- * @author Alex Nenadic
  *
  */
 public class HTTPAuthenticatorIT {
@@ -131,7 +129,7 @@ public class HTTPAuthenticatorIT {
 		credentialManagerDirectory = new File(credentialManagerDirectoryPath);
 		try {
 			credentialManager
-					.setConfigurationDirectoryPath(credentialManagerDirectory);
+					.setConfigurationDirectoryPath(credentialManagerDirectory.toPath());
 		} catch (CMException e) {
 			System.out.println(e.getStackTrace());
 		}

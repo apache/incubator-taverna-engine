@@ -186,7 +186,7 @@ public class CredentialManagerImplTest {
 		credentialManagerDirectory = new File(credentialManagerDirectoryPath);
 		try {
 			credentialManager
-					.setConfigurationDirectoryPath(credentialManagerDirectory);
+					.setConfigurationDirectoryPath(credentialManagerDirectory.toPath());
 		} catch (CMException e) {
 			System.out.println(e.getStackTrace());
 		}
@@ -387,10 +387,10 @@ public class CredentialManagerImplTest {
 	public void testExportKeyPair() throws CMException, KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException {
 		String alias = credentialManager.addKeyPair(privateKey, privateKeyCertChain);
 		File fileToExportTo = new File(credentialManagerDirectory, "test-export-key.p12");
-		credentialManager.exportKeyPair(alias, fileToExportTo, privateKeyAndPKCS12KeystorePassword);
+		credentialManager.exportKeyPair(alias, fileToExportTo.toPath(), privateKeyAndPKCS12KeystorePassword);
 		assertTrue(fileToExportTo.exists());
 		// Load it back from the file we just saved
-		KeyStore ks = credentialManager.loadPKCS12Keystore(fileToExportTo, privateKeyAndPKCS12KeystorePassword);
+		KeyStore ks = credentialManager.loadPKCS12Keystore(fileToExportTo.toPath(), privateKeyAndPKCS12KeystorePassword);
 		Enumeration<String> aliases = ks.aliases();
 		Key newPrivateKey = null;
 		Certificate[] newPrivateKeyCerts = null;
@@ -610,7 +610,7 @@ public class CredentialManagerImplTest {
 	 */
 	@Test
 	public void testLoadPKCS12Keystore() throws CMException, KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException {
-		KeyStore pkcs12Keystore = credentialManager.loadPKCS12Keystore(new File(privateKeyFileURL.getPath()), privateKeyAndPKCS12KeystorePassword);
+		KeyStore pkcs12Keystore = credentialManager.loadPKCS12Keystore(new File(privateKeyFileURL.getPath()).toPath(), privateKeyAndPKCS12KeystorePassword);
 		
 		Key privateKey2 = null;
 		Certificate[] privateKeyCertChain2 = null;
@@ -704,7 +704,7 @@ public class CredentialManagerImplTest {
 		}
 		try {
 			credentialManagerNew
-					.setConfigurationDirectoryPath(credentialManagerDirectory);
+					.setConfigurationDirectoryPath(credentialManagerDirectory.toPath());
 		} catch (CMException e) {
 			System.out.println(e.getStackTrace());
 		}

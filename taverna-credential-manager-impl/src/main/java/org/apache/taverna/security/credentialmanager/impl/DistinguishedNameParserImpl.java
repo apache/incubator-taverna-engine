@@ -21,10 +21,12 @@
 package org.apache.taverna.security.credentialmanager.impl;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
@@ -46,24 +48,18 @@ import java.security.cert.Certificate;
 * specific language governing permissions and limitations
 * under the License.
 */
-
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
+import org.apache.log4j.Logger;
+import org.apache.taverna.configuration.app.ApplicationConfiguration;
 import org.apache.taverna.security.credentialmanager.CMException;
 import org.apache.taverna.security.credentialmanager.DistinguishedNameParser;
-
-import org.apache.log4j.Logger;
-
-import org.apache.taverna.configuration.app.ApplicationConfiguration;
 
 /**
  * Utility methods for Credential Manager and security-related stuff.
  * 
- * @author Alex Nenadic
- * @author Stian Soiland-Reyes
- * @author Christian Brenninkmeijer
  */
 public class DistinguishedNameParserImpl implements DistinguishedNameParser{
 	private static Logger logger = Logger.getLogger(DistinguishedNameParserImpl.class);
@@ -75,17 +71,20 @@ public class DistinguishedNameParserImpl implements DistinguishedNameParser{
 	 * Get the configuration directory where the security stuff will be/is saved
 	 * to.
 	 */
-	public static File getTheCredentialManagerDefaultDirectory(
+	public static Path getTheCredentialManagerDefaultDirectory(
 			ApplicationConfiguration applicationConfiguration) {
-		File home = applicationConfiguration.getApplicationHomeDir().toFile();
-		File secConfigDirectory = new File(home, "security");
-		if (!secConfigDirectory.exists())
-			secConfigDirectory.mkdir();
+		Path home = applicationConfiguration.getApplicationHomeDir();
+		Path secConfigDirectory = home.resolve("security");
+		try {
+			Files.createDirectories(secConfigDirectory);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 		return secConfigDirectory;
 	}
 
         @Override
-	public final File getCredentialManagerDefaultDirectory(
+	public final Path getCredentialManagerDefaultDirectory(
 			ApplicationConfiguration applicationConfiguration) {
 		return getTheCredentialManagerDefaultDirectory(applicationConfiguration);
 	}

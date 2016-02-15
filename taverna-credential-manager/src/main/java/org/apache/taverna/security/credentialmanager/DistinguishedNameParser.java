@@ -19,9 +19,9 @@
 
 package org.apache.taverna.security.credentialmanager;
 
-import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import org.apache.taverna.configuration.app.ApplicationConfiguration;
@@ -55,6 +55,6 @@ public interface DistinguishedNameParser {
      * Get the configuration directory where the security stuff will be/is saved
      * to.
      */
-    public File getCredentialManagerDefaultDirectory(ApplicationConfiguration applicationConfiguration);
+    public Path getCredentialManagerDefaultDirectory(ApplicationConfiguration applicationConfiguration);
 
  } 

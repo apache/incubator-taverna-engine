@@ -44,8 +44,6 @@ import org.junit.Test;
 
 /**
  * 
- * @author Stian Soiland-Reyes
- * @author Alex Nenadic
  *
  */
 public class PossibleURILookupsTest {
@@ -85,7 +83,7 @@ public class PossibleURILookupsTest {
 		credentialManagerDirectory = new File(credentialManagerDirectoryPath);
 		try {
 			credentialManager
-					.setConfigurationDirectoryPath(credentialManagerDirectory);
+					.setConfigurationDirectoryPath(credentialManagerDirectory.toPath());
 		} catch (CMException e) {
 			System.out.println(e.getStackTrace());
 		}

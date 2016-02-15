@@ -19,11 +19,16 @@
 
 package org.apache.taverna.security.credentialmanager.impl;
 
+import static javax.security.auth.x500.X500Principal.RFC2253;
+import static org.apache.taverna.security.credentialmanager.CredentialManager.KeystoreType.KEYSTORE;
+import static org.apache.taverna.security.credentialmanager.CredentialManager.KeystoreType.TRUSTSTORE;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
@@ -32,6 +37,8 @@ import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.Key;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
@@ -53,6 +60,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+
 import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManager;
@@ -64,14 +72,15 @@ import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509ExtendedKeyManager;
 import javax.net.ssl.X509KeyManager;
 import javax.net.ssl.X509TrustManager;
-import static javax.security.auth.x500.X500Principal.RFC2253;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
+import org.apache.taverna.configuration.app.ApplicationConfiguration;
 import org.apache.taverna.lang.observer.MultiCaster;
 import org.apache.taverna.lang.observer.Observable;
 import org.apache.taverna.lang.observer.Observer;
 import org.apache.taverna.security.credentialmanager.CMException;
 import org.apache.taverna.security.credentialmanager.CredentialManager;
-import static org.apache.taverna.security.credentialmanager.CredentialManager.KeystoreType.KEYSTORE;
-import static org.apache.taverna.security.credentialmanager.CredentialManager.KeystoreType.TRUSTSTORE;
 import org.apache.taverna.security.credentialmanager.DistinguishedNameParser;
 import org.apache.taverna.security.credentialmanager.JavaTruststorePasswordProvider;
 import org.apache.taverna.security.credentialmanager.KeystoreChangedEvent;
@@ -80,16 +89,11 @@ import org.apache.taverna.security.credentialmanager.ParsedDistinguishedName;
 import org.apache.taverna.security.credentialmanager.ServiceUsernameAndPasswordProvider;
 import org.apache.taverna.security.credentialmanager.TrustConfirmationProvider;
 import org.apache.taverna.security.credentialmanager.UsernamePassword;
-import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.apache.taverna.configuration.app.ApplicationConfiguration;
 
 /**
  * Provides an implementation of {@link #CredentialManagerService}.
  * 
- * @author Alex Nenadic
- * @author Stian Soiland-Reyes
  */
 
 public class CredentialManagerImpl implements CredentialManager,
@@ -1235,7 +1239,7 @@ public class CredentialManagerImpl implements CredentialManager,
 	 * chain from the Keystore to a PKCS #12 file.
 	 */
 	@Override
-	public void exportKeyPair(String alias, File exportFile,
+	public void exportKeyPair(String alias, Path exportFile,
 			String pkcs12Password) throws CMException {
 		// Need to make sure we are initialized before we do anything else
 		// as Credential Manager can be created but not initialized
@@ -1275,7 +1279,7 @@ public class CredentialManagerImpl implements CredentialManager,
 						certChain);
 
 				// Store the new PKCS #12 keystore on the disk
-				try (FileOutputStream fos = new FileOutputStream(exportFile)) {
+				try (OutputStream fos = Files.newOutputStream(exportFile)) {
 					newPkcs12.store(fos, pkcs12Password.toCharArray());
 				}
 			} catch (Exception ex) {
@@ -1715,10 +1719,10 @@ public class CredentialManagerImpl implements CredentialManager,
 	 * Load a PKCS12-type keystore from a file using the supplied password.
 	 */
 	@Override
-	public KeyStore loadPKCS12Keystore(File pkcs12File, String pkcs12Password)
+	public KeyStore loadPKCS12Keystore(Path pkcs12File, String pkcs12Password)
 			throws CMException {
 		// Load the PKCS #12 keystore from the file
-		try (InputStream input = new FileInputStream(pkcs12File)) {
+		try (InputStream input = Files.newInputStream(pkcs12File)) {
 			KeyStore pkcs12 = KeyStore.getInstance("PKCS12", "BC");
 			pkcs12.load(input, pkcs12Password.toCharArray());
 			return pkcs12;
@@ -2422,7 +2426,7 @@ public class CredentialManagerImpl implements CredentialManager,
 	private void loadDefaultSecurityFiles() {
 		if (credentialManagerDirectory == null)
 			credentialManagerDirectory = dnParser
-					.getCredentialManagerDefaultDirectory(applicationConfiguration);
+					.getCredentialManagerDefaultDirectory(applicationConfiguration).toFile();
 		if (keystoreFile == null)
 			keystoreFile = new File(credentialManagerDirectory,
 					KEYSTORE_FILE_NAME);
@@ -2446,8 +2450,9 @@ public class CredentialManagerImpl implements CredentialManager,
 	 * @throws CMException
 	 */
 	@Override
-	public void setConfigurationDirectoryPath(File credentialManagerDirectory)
+	public void setConfigurationDirectoryPath(Path credentialManagerPath)
 			throws CMException {
+		File credentialManagerDirectory = credentialManagerPath.toFile();
 		if (credentialManagerDirectory == null)
 			throw new CMException(
 					"Credential Manager's configuration directory cannot be null.");

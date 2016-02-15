@@ -19,9 +19,9 @@
 
 package org.apache.taverna.security.credentialmanager;
 
-import java.io.File;
 import java.net.Authenticator;
 import java.net.URI;
+import java.nio.file.Path;
 import java.security.Key;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
@@ -111,7 +111,7 @@ public interface CredentialManager {
 	 * @param credentialManagerDirectory
 	 * @throws CMException
 	 */
-	void setConfigurationDirectoryPath(File credentialManagerDirectory)
+	void setConfigurationDirectoryPath(Path credentialManagerDirectory)
 			throws CMException;
 
 	/**
@@ -244,7 +244,7 @@ public interface CredentialManager {
 	 * Export a key entry containing private key and public key certificate
 	 * chain from the Keystore to a PKCS #12 file.
 	 */
-	void exportKeyPair(String alias, File exportFile, String pkcs12Password)
+	void exportKeyPair(String alias, Path exportFile, String pkcs12Password)
 			throws CMException;
 
 	/**
@@ -343,7 +343,7 @@ public interface CredentialManager {
 	/**
 	 * Load a PKCS12-type keystore from a file using the supplied password.
 	 */
-	KeyStore loadPKCS12Keystore(File pkcs12File, String pkcs12Password)
+	KeyStore loadPKCS12Keystore(Path pkcs12File, String pkcs12Password)
 			throws CMException;
 
 	/**

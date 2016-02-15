@@ -21,10 +21,11 @@ package org.apache.taverna.security.credentialmanager.impl;
 
 import static org.apache.taverna.security.credentialmanager.CredentialManager.USER_SET_MASTER_PASSWORD_INDICATOR_FILE_NAME;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-import org.apache.taverna.security.credentialmanager.MasterPasswordProvider;
 import org.apache.taverna.configuration.app.ApplicationConfiguration;
+import org.apache.taverna.security.credentialmanager.MasterPasswordProvider;
 
 //import org.apache.log4j.Logger;
 
@@ -55,10 +56,9 @@ public class DefaultMasterPasswordProvider implements MasterPasswordProvider {
 
 	@Override
 	public String getMasterPassword(boolean firstTime) {
-		File cmDir = DistinguishedNameParserImpl.getTheCredentialManagerDefaultDirectory(appConfig);
-		File flagFile = new File(cmDir,
-				USER_SET_MASTER_PASSWORD_INDICATOR_FILE_NAME);
-		if (flagFile.exists())
+		Path cmDir = DistinguishedNameParserImpl.getTheCredentialManagerDefaultDirectory(appConfig);
+		Path flagFile = cmDir.resolve(USER_SET_MASTER_PASSWORD_INDICATOR_FILE_NAME);
+		if (Files.exists(flagFile))
 			return null;
 		return DEFAULT_MASTER_PASSWORD;
 	}

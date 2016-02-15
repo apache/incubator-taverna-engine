@@ -128,7 +128,7 @@ public class HTTPSConnectionAndTrustConfirmationIT {
 		credentialManagerDirectory = new File(credentialManagerDirectoryPath);
 		try {
 			credentialManager
-					.setConfigurationDirectoryPath(credentialManagerDirectory);
+					.setConfigurationDirectoryPath(credentialManagerDirectory.toPath());
 		} catch (CMException e) {
 			System.out.println(e.getStackTrace());
 		}
