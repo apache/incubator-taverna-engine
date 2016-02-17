@@ -50,12 +50,12 @@
  		<dependency>
  			<groupId>org.apache.derby</groupId>
 			<artifactId>com.springsource.org.apache.derby.client</artifactId>
- 			<version>${derbyclient.version}</version>
+ 			<version>${derby.version}</version>
  		</dependency>
  		<dependency>
  			<groupId>org.apache.derby</groupId>
 			<artifactId>com.springsource.org.apache.derby.drda</artifactId>
- 			<version>${derbynet.version}</version>
+ 			<version>${derby.version}</version>
  		</dependency>
     <dependency>
       <groupId>commons-dbcp</groupId>
