@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
 
     Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +17,6 @@
     limitations under the License.
 
 -->
-<?xml version="1.0" encoding="UTF-8"?>
 
 <!-- Dao implementations based on Spring's hibernate templates -->
 <beans xmlns="http://www.springframework.org/schema/beans"

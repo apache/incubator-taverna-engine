@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
 
     Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +17,6 @@
     limitations under the License.
 
 -->
-<?xml version="1.0" encoding="UTF-8"?>
 <archetype-descriptor
 	xsi:schemaLocation="http://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.0.0 http://maven.apache.org/xsd/archetype-descriptor-1.0.0.xsd"
 	name="myfancytool"
