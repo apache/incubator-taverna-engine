@@ -14,9 +14,9 @@ import org.apache.jena.riot.system.RiotLib;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.hp.hpl.jena.ontology.Individual;
-import com.hp.hpl.jena.ontology.OntModel;
-import com.hp.hpl.jena.sparql.util.Context;
+import org.apache.jena.ontology.Individual;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.sparql.util.Context;
 
 public class TestTavernaProvModel {
 

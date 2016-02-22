@@ -7,7 +7,7 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.hp.hpl.jena.ontology.Individual;
+import org.apache.jena.ontology.Individual;
 
 
 public class TestProvModel {

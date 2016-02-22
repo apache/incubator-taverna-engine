@@ -8,18 +8,18 @@ import org.apache.jena.riot.IO_Jena;
 import org.apache.jena.riot.system.IO_JenaWriters;
 import org.apache.log4j.Logger;
 
-import com.hp.hpl.jena.ontology.DatatypeProperty;
-import com.hp.hpl.jena.ontology.Individual;
-import com.hp.hpl.jena.ontology.ObjectProperty;
-import com.hp.hpl.jena.ontology.OntClass;
-import com.hp.hpl.jena.ontology.OntDocumentManager;
-import com.hp.hpl.jena.ontology.OntModel;
-import com.hp.hpl.jena.ontology.OntModelSpec;
-import com.hp.hpl.jena.rdf.model.Literal;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.util.FileManager;
-import com.hp.hpl.jena.util.LocationMapper;
+import org.apache.jena.ontology.DatatypeProperty;
+import org.apache.jena.ontology.Individual;
+import org.apache.jena.ontology.ObjectProperty;
+import org.apache.jena.ontology.OntClass;
+import org.apache.jena.ontology.OntDocumentManager;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.ontology.OntModelSpec;
+import org.apache.jena.rdf.model.Literal;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.util.FileManager;
+import org.apache.jena.util.LocationMapper;
 
 public class ProvModel {
     

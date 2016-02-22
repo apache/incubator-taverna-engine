@@ -2,11 +2,11 @@ package org.purl.wf4ever.provtaverna.owl;
 
 import java.net.URI;
 
-import com.hp.hpl.jena.ontology.DatatypeProperty;
-import com.hp.hpl.jena.ontology.Individual;
-import com.hp.hpl.jena.ontology.ObjectProperty;
-import com.hp.hpl.jena.ontology.OntClass;
-import com.hp.hpl.jena.ontology.OntModel;
+import org.apache.jena.ontology.DatatypeProperty;
+import org.apache.jena.ontology.Individual;
+import org.apache.jena.ontology.ObjectProperty;
+import org.apache.jena.ontology.OntClass;
+import org.apache.jena.ontology.OntModel;
 
 public class TavernaProvModel extends WfprovModel {
     protected static final String CNT = "http://www.w3.org/2011/content#";

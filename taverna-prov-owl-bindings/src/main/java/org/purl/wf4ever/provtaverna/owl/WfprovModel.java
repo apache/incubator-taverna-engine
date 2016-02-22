@@ -2,11 +2,11 @@ package org.purl.wf4ever.provtaverna.owl;
 
 import java.net.URI;
 
-import com.hp.hpl.jena.ontology.Individual;
-import com.hp.hpl.jena.ontology.ObjectProperty;
-import com.hp.hpl.jena.ontology.OntClass;
-import com.hp.hpl.jena.ontology.OntModel;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
+import org.apache.jena.ontology.Individual;
+import org.apache.jena.ontology.ObjectProperty;
+import org.apache.jena.ontology.OntClass;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.rdf.model.ModelFactory;
 
 public class WfprovModel extends ProvModel {
 
