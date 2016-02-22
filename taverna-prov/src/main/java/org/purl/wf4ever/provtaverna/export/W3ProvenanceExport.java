@@ -27,19 +27,19 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import net.sf.taverna.raven.appconfig.ApplicationConfig;
-import net.sf.taverna.t2.provenance.api.ProvenanceAccess;
-import net.sf.taverna.t2.provenance.lineageservice.URIGenerator;
-import net.sf.taverna.t2.provenance.lineageservice.utils.DataflowInvocation;
-import net.sf.taverna.t2.provenance.lineageservice.utils.Port;
-import net.sf.taverna.t2.provenance.lineageservice.utils.ProcessorEnactment;
-import net.sf.taverna.t2.provenance.lineageservice.utils.ProvenanceProcessor;
-import net.sf.taverna.t2.provenance.lineageservice.utils.WorkflowRun;
-import net.sf.taverna.t2.reference.ErrorDocument;
-import net.sf.taverna.t2.reference.IdentifiedList;
-import net.sf.taverna.t2.reference.StackTraceElementBean;
-import net.sf.taverna.t2.reference.T2Reference;
-import net.sf.taverna.t2.reference.T2ReferenceType;
-import net.sf.taverna.t2.spi.SPIRegistry;
+import org.apache.taverna.provenance.api.ProvenanceAccess;
+import org.apache.taverna.provenance.lineageservice.URIGenerator;
+import org.apache.taverna.provenance.lineageservice.utils.DataflowInvocation;
+import org.apache.taverna.provenance.lineageservice.utils.Port;
+import org.apache.taverna.provenance.lineageservice.utils.ProcessorEnactment;
+import org.apache.taverna.provenance.lineageservice.utils.ProvenanceProcessor;
+import org.apache.taverna.provenance.lineageservice.utils.WorkflowRun;
+import org.apache.taverna.reference.ErrorDocument;
+import org.apache.taverna.reference.IdentifiedList;
+import org.apache.taverna.reference.StackTraceElementBean;
+import org.apache.taverna.reference.T2Reference;
+import org.apache.taverna.reference.T2ReferenceType;
+import org.apache.taverna.spi.SPIRegistry;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.PropertyUtils;
@@ -64,14 +64,14 @@ import org.apache.taverna.scufl2.api.io.WorkflowBundleReader;
 import org.apache.taverna.scufl2.api.io.WorkflowBundleWriter;
 import org.apache.taverna.scufl2.translator.t2flow.T2FlowReader;
 
-import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
-import com.hp.hpl.jena.ontology.Individual;
-import com.hp.hpl.jena.ontology.OntModel;
-import com.hp.hpl.jena.rdf.model.Literal;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.sparql.util.Context;
-import com.hp.hpl.jena.sparql.vocabulary.FOAF;
+import org.apache.jena.datatypes.xsd.XSDDatatype;
+import org.apache.jena.ontology.Individual;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.rdf.model.Literal;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.sparql.util.Context;
+import org.apache.jena.sparql.vocabulary.FOAF;
 
 public class W3ProvenanceExport {
 

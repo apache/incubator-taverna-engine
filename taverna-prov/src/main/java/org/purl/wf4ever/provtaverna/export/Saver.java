@@ -21,16 +21,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.sf.taverna.t2.invocation.InvocationContext;
-import net.sf.taverna.t2.provenance.api.ProvenanceAccess;
-import net.sf.taverna.t2.reference.ExternalReferenceSPI;
-import net.sf.taverna.t2.reference.ReferenceService;
-import net.sf.taverna.t2.reference.ReferenceSet;
-import net.sf.taverna.t2.reference.ReferenceSetService;
-import net.sf.taverna.t2.reference.T2Reference;
-import net.sf.taverna.t2.reference.ValueCarryingExternalReference;
-import net.sf.taverna.t2.spi.SPIRegistry;
-import net.sf.taverna.t2.workbench.reference.config.DataManagementConfiguration;
+import org.apache.taverna.invocation.InvocationContext;
+import org.apache.taverna.provenance.api.ProvenanceAccess;
+import org.apache.taverna.reference.ExternalReferenceSPI;
+import org.apache.taverna.reference.ReferenceService;
+import org.apache.taverna.reference.ReferenceSet;
+import org.apache.taverna.reference.ReferenceSetService;
+import org.apache.taverna.reference.T2Reference;
+import org.apache.taverna.reference.ValueCarryingExternalReference;
+import org.apache.taverna.spi.SPIRegistry;
+import org.apache.taverna.reference.config.DataManagementConfiguration;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.codec.binary.Hex;
