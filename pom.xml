@@ -34,8 +34,8 @@
 	<name>Apache Taverna Engine and Platform</name>
 
 	<properties>
-		<taverna.language.version>0.15.1-incubating-SNAPSHOT</taverna.language.version>
-		<taverna.osgi.version>0.2.1-incubating-SNAPSHOT</taverna.osgi.version>
+		<taverna.language.version>0.15.1-incubating</taverna.language.version>
+		<taverna.osgi.version>0.2.1-incubating</taverna.osgi.version>
 		<derby.version>10.5.1000001.764942</derby.version>
 	</properties>
 
