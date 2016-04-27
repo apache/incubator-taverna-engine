@@ -40,9 +40,12 @@
 	</properties>
 
 	<modules>
-		<!-- Avoid spaghetti dependencies -->
+		<!-- TODO: see separate branch taverna-platform-integration-tests -->
 		<!-- <module>taverna-platform-integration-tests</module> --> 
+
+		<!-- TODO: see separate branch taverna-integration-tests -->
 		<!-- <module>taverna-integration-tests</module> --> 
+
 		<module>taverna-activity-archetype</module>
 		<module>taverna-activity-test-utils</module>
 		<module>taverna-capability-api</module>
