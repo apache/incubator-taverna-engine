@@ -1,4 +1,4 @@
-package org.purl.wf4ever.provtaverna.owl;
+package org.apache.taverna.prov.owl;
 
 import java.io.InputStream;
 import java.net.URI;
@@ -126,7 +126,7 @@ public class ProvModel {
             // (but no need to synchronize, the occassional extra should be ok)
             jenaFileManagerInitialized = true;
             // So that it can find our location-mapping.n3
-            // and the OWLs in classpath /org/purl/wf4ever/provtaverna/owl/
+            // and the OWLs in classpath /org.apache.taverna.prov.owl/
             FileManager.get().addLocatorClassLoader(getClass().getClassLoader());
             
             Model mapping = ModelFactory.createDefaultModel();

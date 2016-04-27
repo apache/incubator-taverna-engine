@@ -1,4 +1,4 @@
-package org.purl.wf4ever.provtaverna.owl;
+package org.apache.taverna.prov.owl;
 
 import java.net.URI;
 
