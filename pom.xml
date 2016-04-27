@@ -41,7 +41,7 @@
 
 	<modules>
 		<!-- Avoid spaghetti dependencies -->
-		<!-- <module>taverna-platform-integration-tests</module> --> 
+		<module>taverna-platform-integration-tests</module>
 		<!-- <module>taverna-integration-tests</module> --> 
 		<module>taverna-activity-archetype</module>
 		<module>taverna-activity-test-utils</module>
