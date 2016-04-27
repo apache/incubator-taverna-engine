@@ -24,8 +24,7 @@ Workflow engine for
 
 (c) 2007-2014 University of Manchester
 
-
-(c) 2014-2015 Apache Software Foundation
+(c) 2014-2016 Apache Software Foundation
 
 This product includes software developed at The [Apache Software
 Foundation](http://www.apache.org/).
@@ -36,7 +35,6 @@ Licensed under the
 
 The file [NOTICE](NOTICE) contain any additional attributions and
 details about embedded third-party libraries and source code.
-
 
 
 # Contribute
@@ -105,3 +103,34 @@ Apache Taverna project, you may not want to run the
 that enforces Apache headers in every source file - to disable it, try:
 
     mvn clean install -Drat.skip=true
+
+# Export restrictions
+
+This distribution includes cryptographic software.
+The country in which you currently reside may have restrictions
+on the import, possession, use, and/or re-export to another country,
+of encryption software. BEFORE using any encryption software,
+please check your country's laws, regulations and policies
+concerning the import, possession, or use, and re-export of
+encryption software, to see if this is permitted.
+See <http://www.wassenaar.org/> for more information.
+
+The U.S. Government Department of Commerce, Bureau of Industry and Security (BIS),
+has classified this software as Export Commodity Control Number (ECCN) 5D002.C.1,
+which includes information security software using or performing
+cryptographic functions with asymmetric algorithms.
+The form and manner of this Apache Software Foundation distribution makes
+it eligible for export under the License Exception
+ENC Technology Software Unrestricted (TSU) exception
+(see the BIS Export Administration Regulations, Section 740.13)
+for both object code and source code.
+
+The following provides more details on the included cryptographic software:
+
+* `taverna-credential-manager-impl` manages an encrypted keystore
+  for username/passwords and client/server SSL certificates. It
+  is designed to be used with Java Secure Socket Extension (JSSE),
+  Java Cryptography Extension (JCE) and the BouncyCastle encryption library.
+* This software may (via Apache Taverna Language,
+  Apache Taverna OSGi and Apache Jena) use Apache HttpComponents
+  for `https://` connections.

@@ -79,8 +79,8 @@
 		</dependency>
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcprov-jdk16</artifactId>
-			<version>${bcprov.jdk16.version}</version>
+			<artifactId>bcprov-jdk15on</artifactId>
+			<version>1.54</version>
 		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>
