@@ -97,6 +97,20 @@
 		</dependencies>
 	</dependencyManagement>
 
+	<build>
+		<plugins>
+		      <plugin>
+			<groupId>org.apache.rat</groupId>
+			<artifactId>apache-rat-plugin</artifactId>
+			<configuration>
+				<excludes combine.children="append">
+					<exclude>**/mimetype</exclude> <!-- really a binary file -->
+					<exclude>**/*.txt</exclude> <!-- workflow values -->
+				</excludes>
+			</configuration>
+			</plugin>
+		</plugins>
+	</build>
 	<scm>
 		<connection>scm:git:https://git-wip-us.apache.org/repos/asf/incubator-taverna-engine.git</connection>
 		<developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/incubator-taverna-engine.git</developerConnection>
@@ -114,5 +128,7 @@
 			</releases>
 		</repository>
 	</repositories>
+
+
 
 </project>
