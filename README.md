@@ -131,6 +131,6 @@ The following provides more details on the included cryptographic software:
   for username/passwords and client/server SSL certificates. It
   is designed to be used with Java Secure Socket Extension (JSSE),
   Java Cryptography Extension (JCE) and the BouncyCastle encryption library.
-* This software may (via Apache Taverna Language,
+* This software (via Apache Taverna Language,
   Apache Taverna OSGi and Apache Jena) use Apache HttpComponents
-  for `https://` connections.
+  if accessing `https://` connections.
