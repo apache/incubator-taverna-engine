@@ -61,21 +61,35 @@
 			<version>${taverna.osgi.version}</version>
 		</dependency>
 
-		<dependency>
- 			<groupId>org.apache.derby</groupId>
-			<artifactId>com.springsource.org.apache.derby</artifactId>
- 			<version>${derby.version}</version>
- 		</dependency>
- 		<dependency>
- 			<groupId>org.apache.derby</groupId>
-			<artifactId>com.springsource.org.apache.derby.client</artifactId>
- 			<version>${derby.version}</version>
- 		</dependency>
- 		<dependency>
- 			<groupId>org.apache.derby</groupId>
-			<artifactId>com.springsource.org.apache.derby.drda</artifactId>
- 			<version>${derby.version}</version>
- 		</dependency>
+
+<!--
+    <dependency>
+        <groupId>org.apache.derby</groupId>
+        <artifactId>derby</artifactId>
+        <version>${derby.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.derby</groupId>
+        <artifactId>derbyclient</artifactId>
+        <version>${derby.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.derby</groupId>
+        <artifactId>derbynet</artifactId>
+        <version>${derby.version}</version>
+    </dependency>
+
+NOTE: derbynet not yet available as an OSGi
+bundle, so we use instead:
+-->
+<dependency>
+	<groupId>org.apache.servicemix.bundles</groupId>
+	<artifactId>org.apache.servicemix.bundles.derby</artifactId>
+	<version>${servicemix.derby.version}</version>
+</dependency>
+
+
+
     <dependency>
       <groupId>commons-dbcp</groupId>
       <artifactId>commons-dbcp</artifactId>

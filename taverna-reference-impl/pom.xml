@@ -117,9 +117,9 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.derby</groupId>
-			<artifactId>com.springsource.org.apache.derby</artifactId>
-			<version>${derby.version}</version>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.derby</artifactId>
+			<version>${servicemix.derby.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
