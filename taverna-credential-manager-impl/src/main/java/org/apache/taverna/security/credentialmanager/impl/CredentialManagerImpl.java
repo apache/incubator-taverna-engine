@@ -214,9 +214,9 @@ public class CredentialManagerImpl implements CredentialManager,
 	private static List<URL> getSpecialTrustedCertificates() {
 		List<URL> urls = new ArrayList<>();
 		Class<?> c = CredentialManager.class;
-		urls.add(c.getResource("/trusted-certificates/TERENASSLCA.crt"));
-		urls.add(c.getResource("/trusted-certificates/UTNAddTrustServer_CA.crt"));
-		urls.add(c.getResource("/trusted-certificates/AddTrustExternalCARoot.crt"));
+		//urls.add(c.getResource("/trusted-certificates/TERENASSLCA.crt"));
+		//urls.add(c.getResource("/trusted-certificates/UTNAddTrustServer_CA.crt"));
+		//urls.add(c.getResource("/trusted-certificates/AddTrustExternalCARoot.crt"));
 		return urls;
 	}
 
@@ -241,9 +241,9 @@ public class CredentialManagerImpl implements CredentialManager,
 				
 				List<URL> certURLsToDelete = new ArrayList<>();
 				Class<?> c = CredentialManager.class;
-				certURLsToDelete.add(c.getResource("/trusted-certificates/www.biocatalogue.org-revoked.pem"));
-				certURLsToDelete.add(c.getResource("/trusted-certificates/www.biodiversitycatalogue.org-revoked.pem"));
-				certURLsToDelete.add(c.getResource("/trusted-certificates/heater.cs.man.ac.uk-not-needed.pem"));
+				//certURLsToDelete.add(c.getResource("/trusted-certificates/www.biocatalogue.org-revoked.pem"));
+				//certURLsToDelete.add(c.getResource("/trusted-certificates/www.biodiversitycatalogue.org-revoked.pem"));
+				//certURLsToDelete.add(c.getResource("/trusted-certificates/heater.cs.man.ac.uk-not-needed.pem"));
 
 				for (URL certURLToDelete : certURLsToDelete){
 					try (InputStream certStreamToDelete = certURLToDelete.openStream()) {					
