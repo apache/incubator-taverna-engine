@@ -108,6 +108,8 @@
 					<exclude>**/*.txt</exclude> <!-- workflow values -->
 					<exclude>**/src/main/resources/archetype-resources/</exclude> <!-- Don't want our archetype to generate ASF headers -->
 					<exclude>**/META-INF/spring.*</exclude> <!-- Miniscule spring marker files -->
+	
+					<exclude>**/org/pingel/util/CrossProduct.java</exclude> <!-- BSD 3-Clause (see NOTICE) -->
 				</excludes>
 			</configuration>
 			</plugin>
