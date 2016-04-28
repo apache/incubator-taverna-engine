@@ -63,8 +63,9 @@
 		<module>taverna-execution-remote</module>
 		<module>taverna-observer</module>
 
-		<!-- FIXME: Upgrade to T3 <module>taverna-prov</module> -->
+		<!-- FIXME: Upgrade to T3 <module>taverna-prov</module> 
 		<module>taverna-prov-owl-bindings</module>
+-->
 		<!-- <module>taverna-provenanceconnector</module> -->
 		<module>taverna-reference-api</module>
 		<module>taverna-reference-impl</module>
@@ -108,6 +109,7 @@
 					<exclude>**/*.txt</exclude> <!-- workflow values -->
 					<exclude>**/src/main/resources/archetype-resources/</exclude> <!-- Don't want our archetype to generate ASF headers -->
 					<exclude>**/META-INF/spring.*</exclude> <!-- Miniscule spring marker files -->
+					<exclude>**/workflowrun.json</exclude> <!-- example workflow run report -->
 	
 					<exclude>**/org/pingel/util/CrossProduct.java</exclude> <!-- BSD 3-Clause (see NOTICE) -->
 				</excludes>
