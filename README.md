@@ -144,3 +144,7 @@ The following provides more details on the included cryptographic software:
   initiate encrypted `https://` connections using
   [Java Secure Socket Extension](https://docs.oracle.com/javase/8/docs/technotes/guides/security/jsse/JSSERefGuide.html)
   (JSSE).
+* [taverna-database-configuration-impl](taverna-database-configuration-impl)  and
+  [taverna-reference-impl](taverna-reference-impl) depend on [Apache Derby](http://db.apache.org/derby/),
+  which use the Java Cryptography Extension (JCE) API.
+
