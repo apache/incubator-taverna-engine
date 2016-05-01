@@ -127,10 +127,20 @@ for both object code and source code.
 
 The following provides more details on the included cryptographic software:
 
-* `taverna-credential-manager-impl` manages an encrypted keystore
-  for username/passwords and client/server SSL certificates. It
-  is designed to be used with Java Secure Socket Extension (JSSE),
-  Java Cryptography Extension (JCE) and the BouncyCastle encryption library.
-* This software (via Apache Taverna Language,
-  Apache Taverna OSGi and Apache Jena) use Apache HttpComponents
-  if accessing `https://` connections.
+* [taverna-credential-manager-impl](taverna-credential-manager-impl)
+  manages an encrypted keystore for username/passwords and
+  client/server SSL certificates. It
+  is designed to be used with
+  [Java Secure Socket Extension](https://docs.oracle.com/javase/8/docs/technotes/guides/security/jsse/JSSERefGuide.html) (JSSE),
+  [Java Cryptography Extension (JCE)](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html) and depends on the
+  [BouncyCastle](https://www.bouncycastle.org/) bcprov encryption library.
+  The [JCE Unlimited Strength Jurisdiction Policy](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html)
+  must be installed separately to use keystore passwords with 7 or more characters.
+* Apache Taverna Engine depend on
+  [Apache Taverna Language](http://taverna.incubator.apache.org/download/language/),
+  [Apache Taverna OSGi](http://taverna.incubator.apache.org/download/osgi/) and
+  [Apache Jena](http://jena.apache.org/), which depend on
+  [Apache HttpComponents](https://hc.apache.org/) Client, which can
+  initiate encrypted `https://` connections using
+  [Java Secure Socket Extension](https://docs.oracle.com/javase/8/docs/technotes/guides/security/jsse/JSSERefGuide.html)
+  (JSSE).
