@@ -19,12 +19,24 @@
 Workflow engine for
 [Apache Taverna](http://taverna.incubator.apache.org/) (incubating).
 
+The engine executes a Taverna workflow, defined using
+[Apache Taverna Language](https://taverna.incubator.apache.org/download/language/).
+
+Note that the engine does not include the
+[activity implementations](https://github.com/apache/incubator-taverna-common-activities/)
+that actual perform work (e.g. calling a REST service). To
+use the engine, use the
+[Apache Taverna Command Line](https://github.com/apache/incubator-taverna-commandline/)
+or [Apache Taverna Server](https://github.com/apache/incubator-taverna-server/).
+
+All Taverna Engine modules are also valid [OSGi](http://www.osgi.org/) bundles,
+providing [OSGi services](#osgi-services).
+
 
 ## License
 
-(c) 2007-2014 University of Manchester
-
-(c) 2014-2016 Apache Software Foundation
+* (c) 2007-2014 University of Manchester
+* (c) 2014-2016 Apache Software Foundation
 
 This product includes software developed at The [Apache Software
 Foundation](http://www.apache.org/).
@@ -76,7 +88,7 @@ fully endorsed by the ASF.
 
 ## Prerequisites
 
-* Java 1.7 or newer (tested with OpenJDK 1.8)
+* Java 1.8 or newer (tested with OpenJDK 1.8)
 * [Apache Maven](https://maven.apache.org/download.html) 3.2.5 or newer (older
   versions probably also work)
 
@@ -103,6 +115,80 @@ Apache Taverna project, you may not want to run the
 that enforces Apache headers in every source file - to disable it, try:
 
     mvn clean install -Drat.skip=true
+
+# Modules
+
+The Taverna Engine modules are generally
+split into `-api` and `-impl`. `-api` contain
+Java interfaces and abstract classes and minimal dependencies, while `-impl`
+contain the corresponding implementation(s).
+
+Thus, the [taverna-common-activities](https://github.com/apache/incubator-taverna-common-activities/)
+should only need to depend on the `-api` modules, while the `-impl` are added by the
+packaging of the
+[taverna-commandline-product](https://github.com/apache/incubator-taverna-commandline/tree/master/taverna-commandline-product).
+
+* [taverna-activity-archetype](taverna-activity-archetype/) Apache Taverna Activity archetype
+* [taverna-activity-test-utils](taverna-activity-test-utils/) Apache Taverna Activity test utils
+* [taverna-capability-api](taverna-capability-api/) Apache Taverna Platform Capability API
+* [taverna-capability-impl](taverna-capability-impl/) Apache Taverna Platform Capability impl
+* [taverna-credential-manager](taverna-credential-manager/) Apache Taverna Credential manager
+* [taverna-credential-manager-impl](taverna-credential-manager-impl/) Apache Taverna Credential Manager impl
+* [taverna-database-configuration-api](taverna-database-configuration-api/) Apache Taverna Database Configuration API
+* [taverna-database-configuration-impl](taverna-database-configuration-impl/) Apache Taverna Database Configuration impl
+* [taverna-dataflow-activity](taverna-dataflow-activity/) Apache Taverna Dataflow Activity
+* [taverna-execution-api](taverna-execution-api/) Apache Taverna Platform Execution Service API
+* [taverna-execution-hadoop](taverna-execution-hadoop/) Apache Taverna Hadoop Workflow Execution Service
+* [taverna-execution-impl](taverna-execution-impl/) Apache Taverna Platform Execution Service impl
+* [taverna-execution-local](taverna-execution-local/) Apache Taverna Platform Local Execution Service
+* [taverna-execution-remote](taverna-execution-remote/) Apache Taverna Platform Remote Execution Service
+* [taverna-observer](taverna-observer/) Apache Taverna Observer pattern
+* [taverna-prov](taverna-prov/) Apache Taverna PROV support
+* [taverna-provenanceconnector](taverna-provenanceconnector/) Apache Taverna Provenance Connector
+* [taverna-prov-owl-bindings](taverna-prov-owl-bindings/) Apache Taverna PROV OWL bindings
+* [taverna-reference-api](taverna-reference-api/) Apache Taverna Reference Manager API
+* [taverna-reference-impl](taverna-reference-impl/) Apache Taverna Reference Manager impl
+* [taverna-reference-testhelpers](taverna-reference-testhelpers/) Apache Taverna Reference Test Helpers
+* [taverna-reference-types](taverna-reference-types/) Apache Taverna Engine Reference Types
+* [taverna-report-api](taverna-report-api/) Apache Taverna Platform Report Service
+* [taverna-run-api](taverna-run-api/) Apache Taverna Platform Run Service API
+* [taverna-run-impl](taverna-run-impl/) Apache Taverna Platform Run Service impl
+* [taverna-services-api](taverna-services-api/) Apache Taverna Services API
+* [taverna-services-impl](taverna-services-impl/) Apache Taverna Platform Services impl
+* [taverna-stringconstant-activity](taverna-stringconstant-activity/) Apache Taverna StringConstant Activity
+* [taverna-workflowmodel-api](taverna-workflowmodel-api/) Apache Taverna Workflow Model API
+* [taverna-workflowmodel-extensions](taverna-workflowmodel-extensions/) Apache Taverna Workflow Model Extension Points
+* [taverna-workflowmodel-impl](taverna-workflowmodel-impl/) Apache Taverna Workflow Model impl
+
+See the [taverna-engine javadoc](http://taverna.incubator.apache.org/javadoc/taverna-engine/)
+for details. In brief - assuming a workflow run by the
+[Apache Taverna Command Line](https://github.com/apache/incubator-taverna-commandline/):
+
+*
+
+## Spring services
+
+The OSGi services should be
+discoverable as [Spring](https://spring.io/) services,
+e.g. by adding to
+your `META-INF/spring/update-context-osgi.xml`:
+
+```xml
+
+    <beans:beans xmlns="http://www.springframework.org/schema/osgi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    	xmlns:beans="http://www.springframework.org/schema/beans"
+    	xsi:schemaLocation="http://www.springframework.org/schema/beans
+                                     http://www.springframework.org/schema/beans/spring-beans.xsd
+                                     http://www.springframework.org/schema/osgi
+                                     http://www.springframework.org/schema/osgi/spring-osgi.xsd">
+        <reference id="applicationConfiguration" interface="org.apache.taverna.configuration.app.ApplicationConfiguration" />
+        <reference id="proxyConfiguration" interface="org.apache.taverna.configuration.proxy.HttpProxyConfiguration" />
+        <reference id="configurationManager" interface="org.apache.taverna.configuration.ConfigurationManager" />
+        <reference id="downloadManager" interface="org.apache.taverna.download.DownloadManager" />
+        <reference id="pluginManager" interface="org.apache.taverna.plugin.PluginManager" />
+        <reference id="updateManager" interface="org.apache.taverna.update.UpdatenManager" />
+    </beans:beans>
+```
 
 # Export restrictions
 
@@ -147,4 +233,3 @@ The following provides more details on the included cryptographic software:
 * [taverna-database-configuration-impl](taverna-database-configuration-impl)  and
   [taverna-reference-impl](taverna-reference-impl) depend on [Apache Derby](http://db.apache.org/derby/),
   which use the Java Cryptography Extension (JCE) API.
-
