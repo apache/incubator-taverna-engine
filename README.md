@@ -132,7 +132,7 @@ packaging of the
 * [taverna-activity-test-utils](taverna-activity-test-utils/) Apache Taverna Activity test utils
 * [taverna-capability-api](taverna-capability-api/) Apache Taverna Platform Capability API
 * [taverna-capability-impl](taverna-capability-impl/) Apache Taverna Platform Capability impl
-* [taverna-credential-manager](taverna-credential-manager/) Apache Taverna Credential manager
+* [taverna-credential-manager-api](taverna-credential-manager-api/) Apache Taverna Credential Manager API
 * [taverna-credential-manager-impl](taverna-credential-manager-impl/) Apache Taverna Credential Manager impl
 * [taverna-database-configuration-api](taverna-database-configuration-api/) Apache Taverna Database Configuration API
 * [taverna-database-configuration-impl](taverna-database-configuration-impl/) Apache Taverna Database Configuration impl

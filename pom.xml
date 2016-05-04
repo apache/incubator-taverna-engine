@@ -50,7 +50,7 @@
 		<module>taverna-activity-test-utils</module>
 		<module>taverna-capability-api</module>
 		<module>taverna-capability-impl</module>
-		<module>taverna-credential-manager</module>
+		<module>taverna-credential-manager-api</module>
 		<module>taverna-credential-manager-impl</module>
 		<module>taverna-database-configuration-api</module>
 		<module>taverna-database-configuration-impl</module>

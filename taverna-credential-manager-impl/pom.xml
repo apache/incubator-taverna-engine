@@ -64,7 +64,7 @@
 	<dependencies>
 		<dependency>
       <groupId>${project.parent.groupId}</groupId>
-			<artifactId>taverna-credential-manager</artifactId>
+			<artifactId>taverna-credential-manager-api</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>
 		<dependency>
