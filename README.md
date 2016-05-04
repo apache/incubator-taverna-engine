@@ -203,7 +203,6 @@ There are two layers of Taverna Engine:
  [main workflow](https://taverna.incubator.apache.org/javadoc/taverna-language/org/apache/taverna/scufl2/api/container/WorkflowBundle.html#getMainWorkflow--))
  + (Optional) choose a [Profile](https://taverna.incubator.apache.org/javadoc/taverna-language/org/apache/taverna/scufl2/api/container/WorkflowBundle.html#getProfiles--) to bind
  workflow implementations (there's normally only one profile)
-
 * Create or load a [Bundle](https://taverna.incubator.apache.org/javadoc/taverna-language/org/apache/taverna/robundle/Bundle.html)
  with the expected [inputs](https://taverna.incubator.apache.org/javadoc/taverna-language/org/apache/taverna/scufl2/api/core/Workflow.html#getInputPorts--) of the
  [main workflow](https://taverna.incubator.apache.org/javadoc/taverna-language/org/apache/taverna/scufl2/api/container/WorkflowBundle.html#getMainWorkflow--) using
