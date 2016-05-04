@@ -183,9 +183,9 @@ for more details.
 
 ## Which module does what?
 
-In brief - assuming a workflow run by the
-[Apache Taverna Command Line](https://github.com/apache/incubator-taverna-commandline/),
-this is how a workflow is executed and which Taverna Engine modules are involved.
+This section shows how different Taverna Engine module are involved when running 
+a Taverna workflow, e.g. from the 
+[Apache Taverna Command Line](https://github.com/apache/incubator-taverna-commandline/).
 
 There are two layers of Taverna Engine:
 
@@ -236,7 +236,6 @@ from [Taverna Language](http://taverna.incubator.apache.org/download/language/)
    [Activity](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/workflowmodel/processor/activity/Activity.html) implementations from the installed plugins.
    + A [WorkflowInstanceFacade](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/facade/WorkflowInstanceFacade.html) is prepared - the engine's top-level representation of a workflow run
    + A [LocalExecutionManager](https://github.com/apache/incubator-taverna-engine/blob/master/taverna-execution-local/src/main/java/org/apache/taverna/platform/execution/impl/local/LocalExecutionMonitor.java) is added as a bridge between the Taverna Core engine and the Platform
-
 * Start the run using [runService.start()](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/platform/run/api/RunService.html#start-java.lang.String-)
   * Input values from the data [Bundle](https://taverna.incubator.apache.org/javadoc/taverna-language/org/apache/taverna/robundle/Bundle.html) is
   [converted](https://github.com/apache/incubator-taverna-engine/blob/master/taverna-execution-local/src/main/java/org/apache/taverna/platform/execution/impl/local/T2ReferenceConverter.java#L34) to be registered with a
@@ -244,9 +243,10 @@ from [Taverna Language](http://taverna.incubator.apache.org/download/language/)
   + Values are represented as either a [InlineStringReference](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/reference/impl/external/object/InlineStringReference.html) or [InlineByteArrayReference](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/reference/impl/external/object/InlineByteArrayReference.html), or could be external [HttpReference](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/reference/impl/external/http/HttpReference.html)s or [FileReference](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/reference/impl/external/file/FileReference.html)s ([taverna-reference-types](taverna-reference-types)). These types are recognized by the `Activity` implementations, allowing pass-by-reference
   where supported, with conversion to strings and bytes if needed.
   + Lists, values and references are stored  [in memory](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/reference/impl/InMemoryReferenceSetDao.html).
-  + This was previously backed by [Hibernate](https://github.com/apache/incubator-taverna-engine/blob/old/core-pre-incubator-20141219/reference-impl/src/main/java/net/sf/taverna/t2/reference/impl/HibernateReferenceSetDao.java) stored in [Apache Derby](http://db.apache.org/derby/)
-
-
+  + This was previously backed by [Hibernate](https://github.com/apache/incubator-taverna-engine/blob/old/core-pre-incubator-20141219/reference-impl/src/main/java/net/sf/taverna/t2/reference/impl/HibernateReferenceSetDao.java) stored in [Apache Derby](http://db.apache.org/derby/) - this code was removed due to license incompatibility.
+  + TODO: Add a different [ReferenceSetDao](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/reference/ReferenceSetDao.html) implementation
+    that is backed directly by the platform's [Bundle](https://taverna.incubator.apache.org/javadoc/taverna-language/org/apache/taverna/robundle/Bundle.html)
+    (effectively file-based).
 * Monitor the [state of the run](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/platform/run/api/RunService.html#getState-java.lang.String-) or
 [get](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/platform/run/api/RunService.html#getWorkflowReport-java.lang.String-) the [WorkflowReport](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/platform/report/WorkflowReport.html) for detailed progress ([taverna-report-api](taverna-report-api)), such as
 the [number of jobs completed](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/platform/report/ProcessorReport.html#getJobsCompleted--) for a given [Processor](https://taverna.incubator.apache.org/javadoc/taverna-language/org/apache/taverna/scufl2/api/core/Processor.html)
