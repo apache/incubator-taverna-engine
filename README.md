@@ -183,8 +183,8 @@ for more details.
 
 ## Which module does what?
 
-This section shows how different Taverna Engine module are involved when running 
-a Taverna workflow, e.g. from the 
+This section shows how different Taverna Engine module are involved when running
+a Taverna workflow, e.g. from the
 [Apache Taverna Command Line](https://github.com/apache/incubator-taverna-commandline/).
 
 There are two layers of Taverna Engine:
@@ -315,10 +315,10 @@ The following provides more details on the included cryptographic software:
   client/server SSL certificates. It
   is designed to be used with
   [Java Secure Socket Extension](https://docs.oracle.com/javase/8/docs/technotes/guides/security/jsse/JSSERefGuide.html) (JSSE),
-  [Java Cryptography Extension (JCE)](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html) and depends on the
+  [Java Cryptography Extension](http://docs.oracle.com/javase/8/docs/technotes/guides/security/crypto/CryptoSpec.html) (JCE) and depends on the
   [BouncyCastle](https://www.bouncycastle.org/) bcprov encryption library.
   The [JCE Unlimited Strength Jurisdiction Policy](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html)
-  must be installed separately to use keystore passwords with 7 or more characters.
+  may need to be installed separately to use keystore passwords with 7 or more characters.
 * Apache Taverna Engine depend on
   [Apache Taverna Language](http://taverna.incubator.apache.org/download/language/),
   [Apache Taverna OSGi](http://taverna.incubator.apache.org/download/osgi/) and
@@ -329,4 +329,6 @@ The following provides more details on the included cryptographic software:
   (JSSE).
 * [taverna-database-configuration-impl](taverna-database-configuration-impl)  and
   [taverna-reference-impl](taverna-reference-impl) depend on [Apache Derby](http://db.apache.org/derby/),
-  which use the Java Cryptography Extension (JCE) API.
+  which use the
+  [Java Cryptography Extension](http://docs.oracle.com/javase/8/docs/technotes/guides/security/crypto/CryptoSpec.html) (JCE)
+  API.
