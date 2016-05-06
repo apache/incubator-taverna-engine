@@ -30,7 +30,7 @@ use the engine, use the
 or [Apache Taverna Server](https://github.com/apache/incubator-taverna-server/).
 
 All Taverna Engine modules are also valid [OSGi](http://www.osgi.org/) bundles,
-providing [OSGi services](#osgi-services).
+providing OSGi services.
 
 
 ## License
@@ -53,10 +53,10 @@ details about embedded third-party libraries and source code.
 
 Please subscribe to and contact the
 [dev@taverna](http://taverna.incubator.apache.org/community/lists#dev mailing list)
-for any questions, suggestions and discussions about
+mailing list for any questions, suggestions and discussions about
 Apache Taverna.
 
-Bugs and feature plannings are tracked in the Jira
+Bugs and planned features are tracked in the Jira
 [Issue tracker](https://issues.apache.org/jira/browse/TAVERNA/component/12326810)
 under the `TAVERNA` component _Taverna Engine_. Feel free
 to add an issue!
@@ -77,7 +77,7 @@ sponsored by the [Apache Incubator PMC](http://incubator.apache.org/).
 
 [Incubation](http://incubator.apache.org/incubation/Process_Description.html)
 is required of all newly accepted projects until a further review
-indicates that the infrastructure, communications, and decision making process
+indicates that the infrastructure, communications, and decision-making process
 have stabilized in a manner consistent with other successful ASF projects.
 
 While incubation status is not necessarily a reflection of the completeness
@@ -119,9 +119,9 @@ that enforces Apache headers in every source file - to disable it, try:
 # Modules
 
 The Taverna Engine modules are generally
-split into `-api` and `-impl`. `-api` contain
-Java interfaces and abstract classes and minimal dependencies, while `-impl`
-contain the corresponding implementation(s).
+split into `-api` and `-impl`. The `-api` modules contain
+Java interfaces, abstract classes, and minimal dependencies while `-impl`
+modules contain the corresponding implementation(s).
 
 Thus, the [taverna-common-activities](https://github.com/apache/incubator-taverna-common-activities/)
 should only need to depend on the `-api` modules, while the `-impl` are added by the
@@ -190,7 +190,7 @@ a Taverna workflow, e.g. from the
 There are two layers of Taverna Engine:
 
 * Apache Taverna Platform provides an outer API for creating and managing workflow runs, potentially remotely.
-* Apache Taverna Core (aka `workflowmodel`, formerly `t2.core`) is the orchestrating part of the Taverna Engine. It's [Activity](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/workflowmodel/processor/activity/Activity.html) is implemented by multiple plugins depending on the activity type.
+* Apache Taverna Core (aka `workflowmodel`, formerly `t2.core`) is the orchestrating part of the Taverna Engine. Its [Activity](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/workflowmodel/processor/activity/Activity.html) is implemented by multiple plugins depending on the activity type.
 
 ### Preparations
 
@@ -319,7 +319,7 @@ The following provides more details on the included cryptographic software:
   [BouncyCastle](https://www.bouncycastle.org/) bcprov encryption library.
   The [JCE Unlimited Strength Jurisdiction Policy](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html)
   may need to be installed separately to use keystore passwords with 7 or more characters.
-* Apache Taverna Engine depend on
+* Apache Taverna Engine depends on
   [Apache Taverna Language](http://taverna.incubator.apache.org/download/language/),
   [Apache Taverna OSGi](http://taverna.incubator.apache.org/download/osgi/) and
   [Apache Jena](http://jena.apache.org/), which depend on
