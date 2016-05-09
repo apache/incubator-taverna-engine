@@ -30,7 +30,7 @@ use the engine, use the
 or [Apache Taverna Server](https://github.com/apache/incubator-taverna-server/).
 
 All Taverna Engine modules are also valid [OSGi](http://www.osgi.org/) bundles,
-providing OSGi services.
+providing OSGi [Spring services](#spring-services).
 
 
 ## License
