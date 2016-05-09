@@ -100,20 +100,29 @@
 
     <build>
         <plugins>
-              <plugin>
+            <plugin>
             <groupId>org.apache.rat</groupId>
             <artifactId>apache-rat-plugin</artifactId>
-            <configuration>
-                <excludes combine.children="append">
-                    <exclude>**/mimetype</exclude> <!-- really a binary file -->
-                    <exclude>**/*.txt</exclude> <!-- workflow values -->
-                    <exclude>**/src/main/resources/archetype-resources/</exclude> <!-- Don't want our archetype to generate ASF headers -->
-                    <exclude>**/META-INF/spring.*</exclude> <!-- Miniscule spring marker files -->
-                    <exclude>**/workflowrun.json</exclude> <!-- example workflow run report -->
-    
-                    <exclude>**/org/pingel/util/CrossProduct.java</exclude> <!-- BSD 3-Clause (see NOTICE) -->
-                </excludes>
-            </configuration>
+                <configuration>
+                    <excludes combine.children="append">
+                        <exclude>**/mimetype</exclude> <!-- really a binary file -->
+                        <exclude>**/*.txt</exclude> <!-- workflow values -->
+                        <exclude>**/src/main/resources/archetype-resources/</exclude> <!-- Don't want our archetype to generate ASF headers -->
+                        <exclude>**/META-INF/spring.*</exclude> <!-- Miniscule spring marker files -->
+                        <exclude>**/workflowrun.json</exclude> <!-- example workflow run report -->
+        
+                        <exclude>**/org/pingel/util/CrossProduct.java</exclude> <!-- BSD 3-Clause (see NOTICE) -->
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <links>
+                        <link>https://taverna.incubator.apache.org/javadoc/taverna-language/</link>
+                        <link>https://taverna.incubator.apache.org/javadoc/taverna-osgi/</link>
+                    </links>
+                </configuration>
             </plugin>
         </plugins>
     </build>
