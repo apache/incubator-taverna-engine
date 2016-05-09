@@ -43,7 +43,7 @@ provenance:
 
 The Taverna documentation has general information about [how to use the
 Taverna Command line
-tool](http://dev.mygrid.org.uk/wiki/display/taverna/Command+Line+Tool).
+tool](https://taverna.incubator.apache.org/documentation/command-line/).
 
 The Taverna-PROV command line does not support all the output options of
 the regular Taverna command line, output has to be saved using
@@ -336,7 +336,7 @@ Now we do a lookup of the
 behind the defined `?plan` - this is optional because not all processors have
 scripts (it might be a web service).
 This information is extracted from the
-[.ro/annotations/workflow.wfdesc.ttl](example/helloanyone.bundle/.ro/annotations/workflow.wfdesc.)
+[.ro/annotations/workflow.wfdesc.ttl](example/helloanyone.bundle/.ro/annotations/workflow.wfdesc.ttl)
 file which must also be parsed before querying.
 
 Lastly we look up the pararameters which describes `?input`, filtered by
