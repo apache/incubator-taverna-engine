@@ -18,122 +18,122 @@
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.apache.taverna</groupId>
-		<artifactId>apache-taverna-parent</artifactId>
-		<version>2-incubating</version>
-	</parent>
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.apache.taverna</groupId>
+        <artifactId>apache-taverna-parent</artifactId>
+        <version>2-incubating</version>
+    </parent>
 
-	<groupId>org.apache.taverna.engine</groupId>
-	<artifactId>apache-taverna-engine</artifactId>
-	<version>3.1.0-incubating-SNAPSHOT</version>
-	<packaging>pom</packaging>
-	<name>Apache Taverna Engine and Platform</name>
+    <groupId>org.apache.taverna.engine</groupId>
+    <artifactId>apache-taverna-engine</artifactId>
+    <version>3.1.0-incubating-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>Apache Taverna Engine and Platform</name>
 
-	<properties>
-		<taverna.language.version>0.15.1-incubating</taverna.language.version>
-		<taverna.osgi.version>0.2.1-incubating</taverna.osgi.version>
+    <properties>
+        <taverna.language.version>0.15.1-incubating</taverna.language.version>
+        <taverna.osgi.version>0.2.1-incubating</taverna.osgi.version>
                 <servicemix.derby.version>10.12.1.1_1</servicemix.derby.version> 
-	</properties>
+    </properties>
 
-	<modules>
-		<!-- TODO: see separate branch taverna-platform-integration-tests -->
-		<!-- <module>taverna-platform-integration-tests</module> --> 
+    <modules>
+        <!-- TODO: see separate branch taverna-platform-integration-tests -->
+        <!-- <module>taverna-platform-integration-tests</module> --> 
 
-		<!-- TODO: see separate branch taverna-integration-tests -->
-		<!-- <module>taverna-integration-tests</module> --> 
+        <!-- TODO: see separate branch taverna-integration-tests -->
+        <!-- <module>taverna-integration-tests</module> --> 
 
-		<module>taverna-activity-archetype</module>
-		<module>taverna-activity-test-utils</module>
-		<module>taverna-capability-api</module>
-		<module>taverna-capability-impl</module>
-		<module>taverna-credential-manager-api</module>
-		<module>taverna-credential-manager-impl</module>
-		<module>taverna-database-configuration-api</module>
-		<module>taverna-database-configuration-impl</module>
+        <module>taverna-activity-archetype</module>
+        <module>taverna-activity-test-utils</module>
+        <module>taverna-capability-api</module>
+        <module>taverna-capability-impl</module>
+        <module>taverna-credential-manager-api</module>
+        <module>taverna-credential-manager-impl</module>
+        <module>taverna-database-configuration-api</module>
+        <module>taverna-database-configuration-impl</module>
 
-		<module>taverna-dataflow-activity</module>
-		<module>taverna-execution-api</module>
-		<module>taverna-execution-hadoop</module>
-		<module>taverna-execution-impl</module>
-		<module>taverna-execution-local</module>
-		<module>taverna-execution-remote</module>
-		<module>taverna-observer</module>
+        <module>taverna-dataflow-activity</module>
+        <module>taverna-execution-api</module>
+        <module>taverna-execution-hadoop</module>
+        <module>taverna-execution-impl</module>
+        <module>taverna-execution-local</module>
+        <module>taverna-execution-remote</module>
+        <module>taverna-observer</module>
 
-		<!-- FIXME: Upgrade to T3 <module>taverna-prov</module> 
-		<module>taverna-prov-owl-bindings</module>
+        <!-- FIXME: Upgrade to T3 <module>taverna-prov</module> 
+        <module>taverna-prov-owl-bindings</module>
 -->
-		<!-- <module>taverna-provenanceconnector</module> -->
-		<module>taverna-reference-api</module>
-		<module>taverna-reference-impl</module>
-		<module>taverna-reference-testhelpers</module>
-		<module>taverna-reference-types</module>
-		<module>taverna-report-api</module>
-		<module>taverna-run-api</module>
-		<module>taverna-run-impl</module>
-		<module>taverna-services-api</module>
-		<module>taverna-services-impl</module>
-		<module>taverna-stringconstant-activity</module>
-		<module>taverna-workflowmodel-api</module>
-		<module>taverna-workflowmodel-extensions</module>
-		<module>taverna-workflowmodel-impl</module>
-	</modules>
+        <!-- <module>taverna-provenanceconnector</module> -->
+        <module>taverna-reference-api</module>
+        <module>taverna-reference-impl</module>
+        <module>taverna-reference-testhelpers</module>
+        <module>taverna-reference-types</module>
+        <module>taverna-report-api</module>
+        <module>taverna-run-api</module>
+        <module>taverna-run-impl</module>
+        <module>taverna-services-api</module>
+        <module>taverna-services-impl</module>
+        <module>taverna-stringconstant-activity</module>
+        <module>taverna-workflowmodel-api</module>
+        <module>taverna-workflowmodel-extensions</module>
+        <module>taverna-workflowmodel-impl</module>
+    </modules>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>log4j</groupId>
-				<artifactId>log4j</artifactId>
-				<version>${log4j.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>junit</groupId>
-				<artifactId>junit</artifactId>
-				<version>${junit.version}</version>
-				<scope>test</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>log4j</groupId>
+                <artifactId>log4j</artifactId>
+                <version>${log4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
-	<build>
-		<plugins>
-		      <plugin>
-			<groupId>org.apache.rat</groupId>
-			<artifactId>apache-rat-plugin</artifactId>
-			<configuration>
-				<excludes combine.children="append">
-					<exclude>**/mimetype</exclude> <!-- really a binary file -->
-					<exclude>**/*.txt</exclude> <!-- workflow values -->
-					<exclude>**/src/main/resources/archetype-resources/</exclude> <!-- Don't want our archetype to generate ASF headers -->
-					<exclude>**/META-INF/spring.*</exclude> <!-- Miniscule spring marker files -->
-					<exclude>**/workflowrun.json</exclude> <!-- example workflow run report -->
-	
-					<exclude>**/org/pingel/util/CrossProduct.java</exclude> <!-- BSD 3-Clause (see NOTICE) -->
-				</excludes>
-			</configuration>
-			</plugin>
-		</plugins>
-	</build>
-	<scm>
-		<connection>scm:git:https://git-wip-us.apache.org/repos/asf/incubator-taverna-engine.git</connection>
-		<developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/incubator-taverna-engine.git</developerConnection>
-		<url>https://github.com/apache/incubator-taverna-engine</url>
-		<tag>HEAD</tag>
-	</scm>
+    <build>
+        <plugins>
+              <plugin>
+            <groupId>org.apache.rat</groupId>
+            <artifactId>apache-rat-plugin</artifactId>
+            <configuration>
+                <excludes combine.children="append">
+                    <exclude>**/mimetype</exclude> <!-- really a binary file -->
+                    <exclude>**/*.txt</exclude> <!-- workflow values -->
+                    <exclude>**/src/main/resources/archetype-resources/</exclude> <!-- Don't want our archetype to generate ASF headers -->
+                    <exclude>**/META-INF/spring.*</exclude> <!-- Miniscule spring marker files -->
+                    <exclude>**/workflowrun.json</exclude> <!-- example workflow run report -->
+    
+                    <exclude>**/org/pingel/util/CrossProduct.java</exclude> <!-- BSD 3-Clause (see NOTICE) -->
+                </excludes>
+            </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <scm>
+        <connection>scm:git:https://git-wip-us.apache.org/repos/asf/incubator-taverna-engine.git</connection>
+        <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/incubator-taverna-engine.git</developerConnection>
+        <url>https://github.com/apache/incubator-taverna-engine</url>
+        <tag>HEAD</tag>
+    </scm>
 
-	<repositories>
-		<repository>
-			<id>apache.snapshots</id>
-			<name>Apache Snapshot Repository</name>
-			<url>http://repository.apache.org/snapshots</url>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-		</repository>
-	</repositories>
+    <repositories>
+        <repository>
+            <id>apache.snapshots</id>
+            <name>Apache Snapshot Repository</name>
+            <url>http://repository.apache.org/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+    </repositories>
 
 
 
