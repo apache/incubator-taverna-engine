@@ -24,7 +24,7 @@ The engine executes a Taverna workflow, defined using
 
 Note that the engine does not include the
 [activity implementations](https://github.com/apache/incubator-taverna-common-activities/)
-that actual perform work (e.g. calling a REST service). To
+that actually perform work (e.g. calling a REST service). To
 use the engine, use the
 [Apache Taverna Command Line](https://github.com/apache/incubator-taverna-commandline/)
 or [Apache Taverna Server](https://github.com/apache/incubator-taverna-server/).
@@ -42,10 +42,9 @@ This product includes software developed at The [Apache Software
 Foundation](http://www.apache.org/).
 
 Licensed under the
-[Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0), see the file
-[LICENSE](LICENSE) for details.
+[Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0), see the [LICENSE](LICENSE) file for details.
 
-The file [NOTICE](NOTICE) contain any additional attributions and
+The [NOTICE](NOTICE) file contains any additional attributions as well as
 details about embedded third-party libraries and source code.
 
 
@@ -197,17 +196,17 @@ There are two layers of Taverna Engine:
 * Load a SCUFL2 [WorkflowBundle](https://taverna.incubator.apache.org/javadoc/taverna-language/org/apache/taverna/scufl2/api/container/WorkflowBundle.html)
  from a `.wfbundle` or `.t2flow` file
  using [WorkflowBundleIO](https://taverna.incubator.apache.org/javadoc/taverna-language/org/apache/taverna/scufl2/api/io/WorkflowBundleIO.html)
- from [Taverna Language](http://taverna.incubator.apache.org/download/language/)
- + (Optional) choose a [Workflow](https://taverna.incubator.apache.org/javadoc/taverna-language/org/apache/taverna/scufl2/api/container/WorkflowBundle.html#getWorkflows--) to bind
+ from [Taverna Language](http://taverna.incubator.apache.org/download/language/).
+ + (Optional) Choose a [Workflow](https://taverna.incubator.apache.org/javadoc/taverna-language/org/apache/taverna/scufl2/api/container/WorkflowBundle.html#getWorkflows--) to bind
  workflows (usually the
- [main workflow](https://taverna.incubator.apache.org/javadoc/taverna-language/org/apache/taverna/scufl2/api/container/WorkflowBundle.html#getMainWorkflow--))
- + (Optional) choose a [Profile](https://taverna.incubator.apache.org/javadoc/taverna-language/org/apache/taverna/scufl2/api/container/WorkflowBundle.html#getProfiles--) to bind
- workflow implementations (there's normally only one profile)
+ [main workflow](https://taverna.incubator.apache.org/javadoc/taverna-language/org/apache/taverna/scufl2/api/container/WorkflowBundle.html#getMainWorkflow--)).
+ + (Optional) Choose a [Profile](https://taverna.incubator.apache.org/javadoc/taverna-language/org/apache/taverna/scufl2/api/container/WorkflowBundle.html#getProfiles--) to bind
+ workflow implementations. (There is normally only one profile.)
 * Create or load a [Bundle](https://taverna.incubator.apache.org/javadoc/taverna-language/org/apache/taverna/robundle/Bundle.html)
  with the expected [inputs](https://taverna.incubator.apache.org/javadoc/taverna-language/org/apache/taverna/scufl2/api/core/Workflow.html#getInputPorts--) of the
  [main workflow](https://taverna.incubator.apache.org/javadoc/taverna-language/org/apache/taverna/scufl2/api/container/WorkflowBundle.html#getMainWorkflow--) using
  [DataBundles](https://taverna.incubator.apache.org/javadoc/taverna-language/org/apache/taverna/databundle/DataBundles.html)
-from [Taverna Language](http://taverna.incubator.apache.org/download/language/)
+from [Taverna Language](http://taverna.incubator.apache.org/download/language/).
 
 ### Running a workflow
 
@@ -216,7 +215,7 @@ from [Taverna Language](http://taverna.incubator.apache.org/download/language/)
  [OsgiLauncher](https://taverna.incubator.apache.org/javadoc/taverna-osgi/org/apache/taverna/osgilauncher/OsgiLauncher.html) from [Apache Taverna OSGi](http://taverna.incubator.apache.org/download/osgi/).
  See the [TavernaStarter example](https://github.com/taverna-extras/taverna-starter/blob/master/src/main/java/org/apache/taverna/osgistarter/TavernaStarter.java)
  for details.
-* (Optional) populate service credentials (username/password)
+* (Optional) Populate service credentials (username/password)
  to be used by the workflow into the
  [CredentialManager](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/security/credentialmanager/CredentialManager.html) from
  [taverna-credential-manager-api](taverna-credential-manager-api/).
@@ -224,19 +223,19 @@ from [Taverna Language](http://taverna.incubator.apache.org/download/language/)
 * Use [runService.getExecutionEnvironments()](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/platform/run/api/RunService.html#getExecutionEnvironments-org.apache.taverna.scufl2.api.container.WorkflowBundle-) to find an executer for your workflow bundle or profile.
   + The RunService selects an appropriate
   [ExecutionService](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/platform/execution/api/ExecutionService.html)
-    service ([taverna-execution-api](taverna-execution-api)), checking the [Profile](https://taverna.incubator.apache.org/javadoc/taverna-language/org/apache/taverna/scufl2/api/container/WorkflowBundle.html#getProfiles--) against the installed [activity types](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/platform/execution/api/ExecutionEnvironment.html#getActivityTypes--) from [common-activities](https://github.com/apache/incubator-taverna-common-activities/) and plugins; discovered by the  [taverna-capability-api](taverna-capability-api)
-  + In the Taverna Command Line there is typically only one match, a  [LocalExecutionEnvironment](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/platform/execution/impl/local/LocalExecutionEnvironment.html), representing the  [LocalExecutionService](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/platform/execution/impl/local/LocalExecutionService.html) from [taverna-execution-local](taverna-execution-local)
-  + The experimental module [taverna-execution-remote](taverna-execution-remote) aims to execute a workflow on a remote [Taverna Server](http://github.com/apache/incubator-taverna-server/) - e.g. for running workflows remotely from Taverna Workbench
-  + The prototype module [taverna-execution-hadoop](taverna-execution-hadoop) is an attempt to execute compatible Taverna workflows as an [Apache Hadoop](http://hadoop.apache.org/) map-reduce workflow. (This code needs to be updated for newer Hadoop releases). For deteails, see the [SCAPE report on feasibility of parallelising preservation processes](http://scape-project.eu/wp-content/uploads/2013/04/SCAPE_D6.1_TUB_V1.2.pdf)
+    service ([taverna-execution-api](taverna-execution-api)), checking the [Profile](https://taverna.incubator.apache.org/javadoc/taverna-language/org/apache/taverna/scufl2/api/container/WorkflowBundle.html#getProfiles--) against the installed [activity types](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/platform/execution/api/ExecutionEnvironment.html#getActivityTypes--) from [common-activities](https://github.com/apache/incubator-taverna-common-activities/) and plugins; discovered by the  [taverna-capability-api](taverna-capability-api).
+  + In the Taverna Command Line there is typically only one match, a  [LocalExecutionEnvironment](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/platform/execution/impl/local/LocalExecutionEnvironment.html), representing the  [LocalExecutionService](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/platform/execution/impl/local/LocalExecutionService.html) from [taverna-execution-local](taverna-execution-local).
+  + The experimental module [taverna-execution-remote](taverna-execution-remote) aims to execute a workflow on a remote [Taverna Server](http://github.com/apache/incubator-taverna-server/) - e.g. for running workflows remotely from Taverna Workbench.
+  + The prototype module [taverna-execution-hadoop](taverna-execution-hadoop) is an attempt to execute compatible Taverna workflows as an [Apache Hadoop](http://hadoop.apache.org/) map-reduce workflow. (This code needs to be updated for newer Hadoop releases.) For details, see the [SCAPE report on feasibility of parallelising preservation processes](http://scape-project.eu/wp-content/uploads/2013/04/SCAPE_D6.1_TUB_V1.2.pdf).
 * [Create an execution job](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/platform/execution/api/ExecutionService.html#createExecution-org.apache.taverna.platform.execution.api.ExecutionEnvironment-org.apache.taverna.scufl2.api.container.WorkflowBundle-org.apache.taverna.scufl2.api.core.Workflow-org.apache.taverna.scufl2.api.profiles.Profile-org.apache.taverna.robundle.Bundle-), and provide the `ExecutionEnvironment`, the `WorkflowBundle`, its `Workflow`, `Profile` and data `Bundle` with inputs. A workflow run id `String` is returned for subsequent calls.
   + Typically this creates a [LocalExecution](taverna-execution-local/src/main/java/org/apache/taverna/platform/execution/impl/local/LocalExecution.java#L105) instance ([taverna-execution-local](taverna-execution-local)), which converts the
    abstract SCUFL2 [Workflow](https://taverna.incubator.apache.org/javadoc/taverna-language/org/apache/taverna/scufl2/api/core/Workflow.html) to an executable
    [Dataflow](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/workflowmodel/Dataflow.html) ([taverna-workflowmodel-api](taverna-workflowmodel-api)) which has corresponding [Processor](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/workflowmodel/Processor.html)s and
    [Activity](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/workflowmodel/processor/activity/Activity.html) implementations from the installed plugins.
-   + A [WorkflowInstanceFacade](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/facade/WorkflowInstanceFacade.html) is prepared - the engine's top-level representation of a workflow run
-   + A [LocalExecutionManager](https://github.com/apache/incubator-taverna-engine/blob/master/taverna-execution-local/src/main/java/org/apache/taverna/platform/execution/impl/local/LocalExecutionMonitor.java) is added as a bridge between the Taverna Core engine and the Platform
-* Start the run using [runService.start()](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/platform/run/api/RunService.html#start-java.lang.String-)
-  * Input values from the data [Bundle](https://taverna.incubator.apache.org/javadoc/taverna-language/org/apache/taverna/robundle/Bundle.html) is
+   + A [WorkflowInstanceFacade](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/facade/WorkflowInstanceFacade.html) is prepared - the engine's top-level representation of a workflow run.
+   + A [LocalExecutionManager](https://github.com/apache/incubator-taverna-engine/blob/master/taverna-execution-local/src/main/java/org/apache/taverna/platform/execution/impl/local/LocalExecutionMonitor.java) is added as a bridge between the Taverna Core engine and the Platform.
+* Start the run using [runService.start()](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/platform/run/api/RunService.html#start-java.lang.String-).
+  * Input values from the data [Bundle](https://taverna.incubator.apache.org/javadoc/taverna-language/org/apache/taverna/robundle/Bundle.html) are
   [converted](https://github.com/apache/incubator-taverna-engine/blob/master/taverna-execution-local/src/main/java/org/apache/taverna/platform/execution/impl/local/T2ReferenceConverter.java#L34) to be registered with a
 [ReferenceService](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/reference/ReferenceService.html) ([taverna-reference-api](taverna-reference-api)) - as Taverna workflows pass [T2Reference](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/reference/T2Reference.html)s.
   + Values are represented as either a [InlineStringReference](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/reference/impl/external/object/InlineStringReference.html) or [InlineByteArrayReference](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/reference/impl/external/object/InlineByteArrayReference.html), or could be external [HttpReference](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/reference/impl/external/http/HttpReference.html)s or [FileReference](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/reference/impl/external/file/FileReference.html)s ([taverna-reference-types](taverna-reference-types)). These types are recognized by the `Activity` implementations, allowing pass-by-reference
@@ -248,9 +247,9 @@ from [Taverna Language](http://taverna.incubator.apache.org/download/language/)
     (effectively file-based).
 * Monitor the [state of the run](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/platform/run/api/RunService.html#getState-java.lang.String-) or
 [get](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/platform/run/api/RunService.html#getWorkflowReport-java.lang.String-) the [WorkflowReport](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/platform/report/WorkflowReport.html) for detailed progress ([taverna-report-api](taverna-report-api)), such as
-the [number of jobs completed](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/platform/report/ProcessorReport.html#getJobsCompleted--) for a given [Processor](https://taverna.incubator.apache.org/javadoc/taverna-language/org/apache/taverna/scufl2/api/core/Processor.html)
-* Once the workflow is [COMPLETED](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/platform/report/State.html#COMPLETED)  (and even while it is [RUNNING](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/platform/report/State.html#RUNNING)) you can
-retrieve the  [bundle](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/platform/run/api/RunService.html#getDataBundle-java.lang.String-) that contains the output values and intermediate values.
+the [number of jobs completed](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/platform/report/ProcessorReport.html#getJobsCompleted--) for a given [Processor](https://taverna.incubator.apache.org/javadoc/taverna-language/org/apache/taverna/scufl2/api/core/Processor.html).
+* Once the workflow is [COMPLETED](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/platform/report/State.html#COMPLETED)  (and even while it is [RUNNING](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/platform/report/State.html#RUNNING)), you can
+retrieve the  [bundle](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/platform/run/api/RunService.html#getDataBundle-java.lang.String-) containing the output values and intermediate values.
   + To relate intermediate values, you will need to inspect either the
    [WorkflowReport](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/platform/report/WorkflowReport.html),
   [ProcessorReport](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/platform/report/ProcessorReport.html) or [ActivityReport](https://taverna.incubator.apache.org/javadoc/taverna-engine/org/apache/taverna/platform/report/ActivityReport.html)s
@@ -263,7 +262,7 @@ retrieve the  [bundle](https://taverna.incubator.apache.org/javadoc/taverna-engi
 
 The OSGi services should be
 discoverable as [Spring](https://spring.io/) services,
-e.g. by adding to
+e.g., by adding the following code to
 your `META-INF/spring/update-context-osgi.xml`:
 
 ```xml
@@ -315,7 +314,7 @@ The following provides more details on the included cryptographic software:
   client/server SSL certificates. It
   is designed to be used with
   [Java Secure Socket Extension](https://docs.oracle.com/javase/8/docs/technotes/guides/security/jsse/JSSERefGuide.html) (JSSE),
-  [Java Cryptography Extension](http://docs.oracle.com/javase/8/docs/technotes/guides/security/crypto/CryptoSpec.html) (JCE) and depends on the
+  [Java Cryptography Extension](http://docs.oracle.com/javase/8/docs/technotes/guides/security/crypto/CryptoSpec.html) (JCE), and depends on the
   [BouncyCastle](https://www.bouncycastle.org/) bcprov encryption library.
   The [JCE Unlimited Strength Jurisdiction Policy](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html)
   may need to be installed separately to use keystore passwords with 7 or more characters.
@@ -329,6 +328,6 @@ The following provides more details on the included cryptographic software:
   (JSSE).
 * [taverna-database-configuration-impl](taverna-database-configuration-impl)  and
   [taverna-reference-impl](taverna-reference-impl) depend on [Apache Derby](http://db.apache.org/derby/),
-  which use the
+  which uses the
   [Java Cryptography Extension](http://docs.oracle.com/javase/8/docs/technotes/guides/security/crypto/CryptoSpec.html) (JCE)
   API.
