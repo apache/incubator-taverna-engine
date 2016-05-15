@@ -26,10 +26,10 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import net.sf.taverna.t2.visit.VisitReport;
-import net.sf.taverna.t2.visit.VisitReport.Status;
-import net.sf.taverna.t2.workflowmodel.health.HealthCheck;
-import net.sf.taverna.t2.workflowmodel.health.HealthChecker;
+import org.apache.taverna.visit.VisitReport;
+import org.apache.taverna.visit.VisitReport.Status;
+import org.apache.taverna.workflowmodel.health.HealthCheck;
+import org.apache.taverna.workflowmodel.health.HealthChecker;
 
 /**
  * ${classPrefix} <code>HealthChecker</code>.

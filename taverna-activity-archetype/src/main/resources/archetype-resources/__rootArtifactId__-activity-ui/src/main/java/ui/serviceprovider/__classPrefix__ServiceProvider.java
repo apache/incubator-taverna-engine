@@ -26,8 +26,8 @@ import java.util.List;
 
 import javax.swing.Icon;
 
-import net.sf.taverna.t2.servicedescriptions.ServiceDescription;
-import net.sf.taverna.t2.servicedescriptions.ServiceDescriptionProvider;
+import org.apache.taverna.servicedescriptions.ServiceDescription;
+import org.apache.taverna.servicedescriptions.ServiceDescriptionProvider;
 
 public class ${classPrefix}ServiceProvider implements ServiceDescriptionProvider {
 

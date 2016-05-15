@@ -27,13 +27,13 @@ import java.util.Map;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import net.sf.taverna.t2.invocation.InvocationContext;
-import net.sf.taverna.t2.reference.ReferenceService;
-import net.sf.taverna.t2.reference.T2Reference;
-import net.sf.taverna.t2.workflowmodel.processor.activity.AbstractAsynchronousActivity;
-import net.sf.taverna.t2.workflowmodel.processor.activity.ActivityConfigurationException;
-import net.sf.taverna.t2.workflowmodel.processor.activity.AsynchronousActivity;
-import net.sf.taverna.t2.workflowmodel.processor.activity.AsynchronousActivityCallback;
+import org.apache.taverna.invocation.InvocationContext;
+import org.apache.taverna.reference.ReferenceService;
+import org.apache.taverna.reference.T2Reference;
+import org.apache.taverna.workflowmodel.processor.activity.AbstractAsynchronousActivity;
+import org.apache.taverna.workflowmodel.processor.activity.ActivityConfigurationException;
+import org.apache.taverna.workflowmodel.processor.activity.AsynchronousActivity;
+import org.apache.taverna.workflowmodel.processor.activity.AsynchronousActivityCallback;
 
 /**
  * ${classPrefix} <code>Activity<code>.

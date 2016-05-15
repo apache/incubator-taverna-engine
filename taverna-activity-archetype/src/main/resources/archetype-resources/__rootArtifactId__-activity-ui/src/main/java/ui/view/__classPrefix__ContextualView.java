@@ -31,11 +31,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import org.apache.taverna.services.ServiceRegistry;
 
-import net.sf.taverna.t2.servicedescriptions.ServiceDescriptionRegistry;
-import net.sf.taverna.t2.workbench.activityicons.ActivityIconManager;
-import net.sf.taverna.t2.workbench.edits.EditManager;
-import net.sf.taverna.t2.workbench.file.FileManager;
-import net.sf.taverna.t2.workbench.ui.actions.activity.ActivityContextualView;
+import org.apache.taverna.servicedescriptions.ServiceDescriptionRegistry;
+import org.apache.taverna.workbench.activityicons.ActivityIconManager;
+import org.apache.taverna.workbench.edits.EditManager;
+import org.apache.taverna.workbench.file.FileManager;
+import org.apache.taverna.workbench.ui.actions.activity.ActivityContextualView;
 
 import org.apache.taverna.scufl2.api.activity.Activity;
 

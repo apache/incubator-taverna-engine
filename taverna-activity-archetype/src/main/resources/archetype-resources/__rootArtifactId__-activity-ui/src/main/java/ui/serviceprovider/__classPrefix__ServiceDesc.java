@@ -30,7 +30,7 @@ import org.apache.taverna.scufl2.api.configurations.Configuration;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import net.sf.taverna.t2.servicedescriptions.ServiceDescription;
+import org.apache.taverna.servicedescriptions.ServiceDescription;
 
 public class ${classPrefix}ServiceDesc extends ServiceDescription {
 

@@ -25,7 +25,7 @@ import java.net.URI;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
-import net.sf.taverna.t2.workbench.activityicons.ActivityIconSPI;
+import org.apache.taverna.workbench.activityicons.ActivityIconSPI;
 
 public class ${classPrefix}ServiceIcon implements ActivityIconSPI {
 

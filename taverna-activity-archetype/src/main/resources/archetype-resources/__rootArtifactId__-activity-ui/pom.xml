@@ -35,24 +35,24 @@
 			<version>${version}</version>
 		</dependency>
 		<dependency>
-			<groupId>net.sf.taverna.t2.ui-api</groupId>
-			<artifactId>activity-palette-api</artifactId>
-			<version>${t2.ui.api.version}</version>
+			<groupId>org.apache.taverna.workbench</groupId>
+			<artifactId>taverna-activity-palette-api</artifactId>
+			<version>${taverna.workbench.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>net.sf.taverna.t2.ui-api</groupId>
-			<artifactId>menu-api</artifactId>
-			<version>${t2.ui.api.version}</version>
+			<groupId>org.apache.taverna.workbench</groupId>
+			<artifactId>taverna-menu-api</artifactId>
+			<version>${taverna.workbench.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>net.sf.taverna.t2.ui-api</groupId>
-			<artifactId>contextual-views-api</artifactId>
-			<version>${t2.ui.api.version}</version>
+			<groupId>org.apache.taverna.workbench</groupId>
+			<artifactId>taverna-contextual-views-api</artifactId>
+			<version>${taverna.workbench.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>net.sf.taverna.t2.ui-api</groupId>
-			<artifactId>activity-tools</artifactId>
-			<version>${t2.ui.api.version}</version>
+			<groupId>org.apache.taverna.workbench</groupId>
+			<artifactId>taverna-activity-tools</artifactId>
+			<version>${taverna.workbench.version}</version>
 		</dependency>
 
 		<dependency>

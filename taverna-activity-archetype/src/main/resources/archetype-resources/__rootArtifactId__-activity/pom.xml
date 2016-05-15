@@ -30,14 +30,14 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>net.sf.taverna.t2.core</groupId>
-			<artifactId>workflowmodel-api</artifactId>
-			<version>${t2.core.version}</version>
+			<groupId>org.apache.taverna.engine</groupId>
+			<artifactId>taverna-workflowmodel-api</artifactId>
+			<version>${taverna.engine.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>net.sf.taverna.t2.core</groupId>
-			<artifactId>reference-api</artifactId>
-			<version>${t2.core.version}</version>
+			<groupId>org.apache.taverna.engine</groupId>
+			<artifactId>taverna-reference-api</artifactId>
+			<version>${taverna.engine.version}</version>
 		</dependency>
 
 		<dependency>
@@ -53,15 +53,15 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>net.sf.taverna.t2.core</groupId>
-			<artifactId>workflowmodel-impl</artifactId>
-			<version>${t2.core.version}</version>
+			<groupId>org.apache.taverna.engine</groupId>
+			<artifactId>taverna-workflowmodel-impl</artifactId>
+			<version>${taverna.engine.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>net.sf.taverna.t2.activities</groupId>
-			<artifactId>activity-test-utils</artifactId>
-			<version>${t2.activities.version}</version>
+			<groupId>org.apache.taverna.engine</groupId>
+			<artifactId>taverna-activity-test-utils</artifactId>
+			<version>${taverna.engine.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

@@ -26,13 +26,13 @@ import javax.swing.Action;
 
 import org.apache.taverna.services.ServiceRegistry;
 
-import net.sf.taverna.t2.servicedescriptions.ServiceDescriptionRegistry;
-import net.sf.taverna.t2.ui.menu.ContextualMenuComponent;
-import net.sf.taverna.t2.ui.menu.MenuComponent;
-import net.sf.taverna.t2.workbench.activityicons.ActivityIconManager;
-import net.sf.taverna.t2.workbench.activitytools.AbstractConfigureActivityMenuAction;
-import net.sf.taverna.t2.workbench.edits.EditManager;
-import net.sf.taverna.t2.workbench.file.FileManager;
+import org.apache.taverna.servicedescriptions.ServiceDescriptionRegistry;
+import org.apache.taverna.ui.menu.ContextualMenuComponent;
+import org.apache.taverna.ui.menu.MenuComponent;
+import org.apache.taverna.workbench.activityicons.ActivityIconManager;
+import org.apache.taverna.workbench.activitytools.AbstractConfigureActivityMenuAction;
+import org.apache.taverna.workbench.edits.EditManager;
+import org.apache.taverna.workbench.file.FileManager;
 
 import ${package}.ui.config.${classPrefix}ConfigureAction;
 
