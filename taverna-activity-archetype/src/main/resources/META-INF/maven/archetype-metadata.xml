@@ -28,6 +28,8 @@
 		</requiredProperty>
 	</requiredProperties>
 	<modules>
+		<module id="${rootArtifactId}-plugin" dir="__rootArtifactId__-plugin"
+			name="${rootArtifactId}-plugin" />
 		<module id="${rootArtifactId}-activity" dir="__rootArtifactId__-activity"
 			name="${rootArtifactId}-activity">
 			<fileSets>
@@ -52,6 +54,7 @@
 				</fileSet>
 			</fileSets>
 		</module>
+		<!-- Disabled as -activity-ui is not yet updated for org.apache.taverna.*
 		<module id="${rootArtifactId}-activity-ui" dir="__rootArtifactId__-activity-ui"
 			name="${rootArtifactId}-activity-ui">
 			<fileSets>
@@ -70,7 +73,22 @@
 				</fileSet>
 			</fileSets>
 		</module>
-		<module id="${rootArtifactId}-plugin" dir="__rootArtifactId__-plugin"
-			name="${rootArtifactId}-plugin" />
+	-->
 	</modules>
+	<!-- But include *-ui. FIXME: Remove this section and re-enable -ui <module> above -->
+	<fileSets>
+		<fileSet filtered="true" packaged="true" encoding="UTF-8">
+			<directory>__rootArtifactId__-activity-ui/src/main/java</directory>
+			<includes>
+				<include>**/*.java</include>
+			</includes>
+		</fileSet>
+		<fileSet encoding="UTF-8" filtered="true">
+			<directory>__rootArtifactId__-activity-ui/src/main/resources</directory>
+			<includes>
+				<include>**/*.xml</include>
+				<include>**/*.png</include>
+			</includes>
+		</fileSet>
+	</fileSets>
 </archetype-descriptor>

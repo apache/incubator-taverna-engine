@@ -34,10 +34,12 @@
 			<artifactId>${rootArtifactId}-activity</artifactId>
 			<version>${version}</version>
 		</dependency>
+		<!-- Enable for Workbench integration
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>${rootArtifactId}-activity-ui</artifactId>
 			<version>${version}</version>
 		</dependency>
+		-->
 	</dependencies>
 </project>
