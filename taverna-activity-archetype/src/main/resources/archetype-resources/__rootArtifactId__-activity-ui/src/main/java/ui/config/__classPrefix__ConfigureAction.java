@@ -15,10 +15,7 @@
 ##
 ## Note: Above Velocity comment should NOT be included in generated
 ## code from the archetype
-#set( $symbol_pound = '#' )
-#set( $symbol_dollar = '$' )
-#set( $symbol_escape = '\' )
-package ${package}.ui.config;
+package \${package}.ui.config;
 
 import java.awt.event.ActionEvent;
 
@@ -33,13 +30,13 @@ import org.apache.taverna.workbench.ui.actions.activity.ActivityConfigurationAct
 import org.apache.taverna.workbench.ui.views.contextualviews.activity.ActivityConfigurationDialog;
 
 @SuppressWarnings("serial")
-public class ${classPrefix}ConfigureAction extends ActivityConfigurationAction {
+public class \${classPrefix}ConfigureAction extends ActivityConfigurationAction {
 
 	private final EditManager editManager;
 	private final FileManager fileManager;
 	private final ServiceRegistry serviceRegistry;
 
-	public ${classPrefix}ConfigureAction(Activity activity,
+	public \${classPrefix}ConfigureAction(Activity activity,
 			EditManager editManager, FileManager fileManager,
 			ActivityIconManager activityIconManager,
 			ServiceDescriptionRegistry serviceDescriptionRegistry,
@@ -57,7 +54,7 @@ public class ${classPrefix}ConfigureAction extends ActivityConfigurationAction {
 			return;
 		}
 
-		${classPrefix}ConfigurationPanel panel = new ${classPrefix}ConfigurationPanel(getActivity(), serviceRegistry);
+		\${classPrefix}ConfigurationPanel panel = new ${classPrefix}ConfigurationPanel(getActivity(), serviceRegistry);
 		ActivityConfigurationDialog dialog = new ActivityConfigurationDialog(getActivity(), panel, editManager);
 
 		setDialog(getActivity(), dialog, fileManager);

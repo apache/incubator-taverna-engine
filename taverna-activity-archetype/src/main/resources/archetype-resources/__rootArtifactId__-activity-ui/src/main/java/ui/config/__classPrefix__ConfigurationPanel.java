@@ -15,10 +15,7 @@
 ##
 ## Note: Above Velocity comment should NOT be included in generated
 ## code from the archetype
-#set( $symbol_pound = '#' )
-#set( $symbol_dollar = '$' )
-#set( $symbol_escape = '\' )
-package ${package}.ui.config;
+package \${package}.ui.config;
 
 import java.awt.GridLayout;
 import java.net.URI;
@@ -33,14 +30,14 @@ import org.apache.taverna.services.ServiceRegistry;
 import org.apache.taverna.scufl2.api.activity.Activity;
 
 @SuppressWarnings("serial")
-public class ${classPrefix}ConfigurationPanel extends ActivityConfigurationPanel {
+public class \${classPrefix}ConfigurationPanel extends ActivityConfigurationPanel {
 
 	private final ServiceRegistry serviceRegistry;
 
 	private JTextField fieldString;
 	private JTextField fieldURI;
 
-	public ${classPrefix}ConfigurationPanel(Activity activity, ServiceRegistry serviceRegistry) {
+	public \${classPrefix}ConfigurationPanel(Activity activity, ServiceRegistry serviceRegistry) {
 		super(activity);
 		this.serviceRegistry = serviceRegistry;
 		initialise();

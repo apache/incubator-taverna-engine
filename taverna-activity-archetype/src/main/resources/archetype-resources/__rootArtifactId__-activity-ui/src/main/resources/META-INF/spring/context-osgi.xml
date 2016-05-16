@@ -23,13 +23,13 @@
                       http://www.springframework.org/schema/osgi
                       http://www.springframework.org/schema/osgi/spring-osgi.xsd">
 
-	<service ref="${classPrefix}ServiceIcon" interface="org.apache.taverna.workbench.activityicons.ActivityIconSPI" />
+	<service ref="\${classPrefix}ServiceIcon" interface="org.apache.taverna.workbench.activityicons.ActivityIconSPI" />
 
-	<service ref="${classPrefix}ServiceProvider" interface="org.apache.taverna.servicedescriptions.ServiceDescriptionProvider" />
+	<service ref="\${classPrefix}ServiceProvider" interface="org.apache.taverna.servicedescriptions.ServiceDescriptionProvider" />
 
-	<service ref="${classPrefix}ConfigureMenuAction" auto-export="interfaces" />
+	<service ref="\${classPrefix}ConfigureMenuAction" auto-export="interfaces" />
 
-	<service ref="${classPrefix}ActivityContextViewFactory" interface="org.apache.taverna.workbench.ui.views.contextualviews.activity.ContextualViewFactory" />
+	<service ref="\${classPrefix}ActivityContextViewFactory" interface="org.apache.taverna.workbench.ui.views.contextualviews.activity.ContextualViewFactory" />
 
 	<reference id="editManager" interface="org.apache.taverna.workbench.edits.EditManager" />
 	<reference id="fileManager" interface="org.apache.taverna.workbench.file.FileManager" />

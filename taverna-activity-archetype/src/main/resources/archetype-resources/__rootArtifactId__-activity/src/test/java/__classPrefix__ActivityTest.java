@@ -15,10 +15,7 @@
 ##
 ## Note: Above Velocity comment should NOT be included in generated
 ## code from the archetype
-#set( $symbol_pound = '#' )
-#set( $symbol_dollar = '$' )
-#set( $symbol_escape = '\' )
-package ${package};
+package \${package};
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -42,11 +39,11 @@ import org.apache.taverna.workflowmodel.processor.activity.ActivityOutputPort;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ${classPrefix}ActivityTest {
+public class \${classPrefix}ActivityTest {
 
 	private ObjectNode configuration;
 
-	private ${classPrefix}Activity activity = new ${classPrefix}Activity();
+	private \${classPrefix}Activity activity = new ${classPrefix}Activity();
 
 	@Before
 	public void makeConfiguration() throws Exception {

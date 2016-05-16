@@ -15,10 +15,7 @@
 ##
 ## Note: Above Velocity comment should NOT be included in generated
 ## code from the archetype
-#set( $symbol_pound = '#' )
-#set( $symbol_dollar = '$' )
-#set( $symbol_escape = '\' )
-package ${package}.ui.view;
+package \${package}.ui.view;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -34,10 +31,10 @@ import org.apache.taverna.workbench.file.FileManager;
 import org.apache.taverna.workbench.ui.views.contextualviews.ContextualView;
 import org.apache.taverna.workbench.ui.views.contextualviews.activity.ContextualViewFactory;
 
-public class ${classPrefix}ActivityContextViewFactory implements ContextualViewFactory<Activity> {
+public class \${classPrefix}ActivityContextViewFactory implements ContextualViewFactory<Activity> {
 
 	private static final URI ACTIVITY_TYPE = URI
-			.create("http://example.com/2013/activity/${rootArtifactId}");
+			.create("http://example.com/2013/activity/\${rootArtifactId}");
 
 	private EditManager editManager;
 	private FileManager fileManager;
@@ -52,7 +49,7 @@ public class ${classPrefix}ActivityContextViewFactory implements ContextualViewF
 
 	@Override
 	public List<ContextualView> getViews(Activity selection) {
-		return Arrays.<ContextualView>asList(new ${classPrefix}ContextualView(selection, editManager,
+		return Arrays.<ContextualView>asList(new \${classPrefix}ContextualView(selection, editManager,
 				fileManager, activityIconManager, serviceDescriptionRegistry, serviceRegistry));
 	}
 

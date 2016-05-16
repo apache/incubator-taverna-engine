@@ -15,10 +15,7 @@
 ##
 ## Note: Above Velocity comment should NOT be included in generated
 ## code from the archetype
-#set( $symbol_pound = '#' )
-#set( $symbol_dollar = '$' )
-#set( $symbol_escape = '\' )
-package ${package}.ui.view;
+package \${package}.ui.view;
 
 import java.awt.Frame;
 
@@ -39,10 +36,10 @@ import org.apache.taverna.workbench.ui.actions.activity.ActivityContextualView;
 
 import org.apache.taverna.scufl2.api.activity.Activity;
 
-import ${package}.ui.config.${classPrefix}ConfigureAction;
+import \${package}.ui.config.${classPrefix}ConfigureAction;
 
 @SuppressWarnings("serial")
-public class ${classPrefix}ContextualView extends ActivityContextualView {
+public class \${classPrefix}ContextualView extends ActivityContextualView {
 
 	private final EditManager editManager;
 	private final FileManager fileManager;
@@ -52,7 +49,7 @@ public class ${classPrefix}ContextualView extends ActivityContextualView {
 
 	private JLabel description = new JLabel("ads");
 
-	public ${classPrefix}ContextualView(Activity activity, EditManager editManager,
+	public \${classPrefix}ContextualView(Activity activity, EditManager editManager,
 			FileManager fileManager, ActivityIconManager activityIconManager,
 			ServiceDescriptionRegistry serviceDescriptionRegistry, ServiceRegistry serviceRegistry) {
 		super(activity);
@@ -75,7 +72,7 @@ public class ${classPrefix}ContextualView extends ActivityContextualView {
 	@Override
 	public String getViewTitle() {
 		JsonNode configuration = getConfigBean().getJson();
-		return "${classPrefix} service " + configuration.get("exampleString").asText();
+		return "\${classPrefix} service " + configuration.get("exampleString").asText();
 	}
 
 	/**
@@ -84,7 +81,7 @@ public class ${classPrefix}ContextualView extends ActivityContextualView {
 	@Override
 	public void refreshView() {
 		JsonNode configuration = getConfigBean().getJson();
-		description.setText("${classPrefix} service " + configuration.get("exampleUri").asText()
+		description.setText("\${classPrefix} service " + configuration.get("exampleUri").asText()
 				+ " - " + configuration.get("exampleString").asText());
 		// TODO: Might also show extra service information looked
 		// up dynamically from endpoint/registry
@@ -101,7 +98,7 @@ public class ${classPrefix}ContextualView extends ActivityContextualView {
 
 	@Override
 	public Action getConfigureAction(final Frame owner) {
-		return new ${classPrefix}ConfigureAction(getActivity(), editManager, fileManager,
+		return new \${classPrefix}ConfigureAction(getActivity(), editManager, fileManager,
 				activityIconManager, serviceDescriptionRegistry, serviceRegistry);
 	}
 

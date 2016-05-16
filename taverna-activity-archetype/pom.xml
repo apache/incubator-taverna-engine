@@ -31,6 +31,15 @@
 	Includes engine and UI parts, and a test class to run the workbench with the new activity.
 	</description>
 	<build>
+	      <resources>
+		      <resource>
+						<!-- Filter BEFORE making the Velocity templates
+						in target/classes - so that ${taverna.osgi.version}
+						etc. can be taken from OUR parent -->
+						<directory>src/main/resources</directory>
+						<filtering>true</filtering>
+		      </resource>
+	      </resources>
 		<extensions>
 			<extension>
 				<groupId>org.apache.maven.archetype</groupId>
@@ -42,6 +51,13 @@
 			<plugin>
 				<artifactId>maven-archetype-plugin</artifactId>
 				<version>2.4</version>
+			</plugin>
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>2.7</version>
+				<configuration>
+				  <escapeString>\</escapeString>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

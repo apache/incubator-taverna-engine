@@ -15,10 +15,7 @@
 ##
 ## Note: Above Velocity comment should NOT be included in generated
 ## code from the archetype
-#set( $symbol_pound = '#' )
-#set( $symbol_dollar = '$' )
-#set( $symbol_escape = '\' )
-package ${package}.ui.serviceprovider;
+package \${package}.ui.serviceprovider;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -29,10 +26,10 @@ import javax.swing.Icon;
 import org.apache.taverna.servicedescriptions.ServiceDescription;
 import org.apache.taverna.servicedescriptions.ServiceDescriptionProvider;
 
-public class ${classPrefix}ServiceProvider implements ServiceDescriptionProvider {
+public class \${classPrefix}ServiceProvider implements ServiceDescriptionProvider {
 
 	private static final URI providerId = URI
-		.create("http://example.com/2011/service-provider/${rootArtifactId}");
+		.create("http://example.com/2011/service-provider/\${rootArtifactId}");
 
 	/**
 	 * Do the actual search for services. Return using the callBack parameter.
@@ -47,7 +44,7 @@ public class ${classPrefix}ServiceProvider implements ServiceDescriptionProvider
 		// FIXME: Implement the actual service search/lookup instead
 		// of dummy for-loop
 		for (int i = 1; i <= 5; i++) {
-			${classPrefix}ServiceDesc service = new ${classPrefix}ServiceDesc();
+			\${classPrefix}ServiceDesc service = new ${classPrefix}ServiceDesc();
 			// Populate the service description bean
 			service.setExampleString("Example " + i);
 			service.setExampleUri("http://localhost:8192/service");
@@ -69,7 +66,7 @@ public class ${classPrefix}ServiceProvider implements ServiceDescriptionProvider
 	 * Icon for service provider
 	 */
 	public Icon getIcon() {
-		return ${classPrefix}ServiceIcon.getIcon();
+		return \${classPrefix}ServiceIcon.getIcon();
 	}
 
 	/**

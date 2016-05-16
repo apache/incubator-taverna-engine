@@ -15,10 +15,7 @@
 ##
 ## Note: Above Velocity comment should NOT be included in generated
 ## code from the archetype
-#set( $symbol_pound = '#' )
-#set( $symbol_dollar = '$' )
-#set( $symbol_escape = '\' )
-package ${package};
+package \${package};
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,12 +33,12 @@ import org.apache.taverna.workflowmodel.processor.activity.AsynchronousActivity;
 import org.apache.taverna.workflowmodel.processor.activity.AsynchronousActivityCallback;
 
 /**
- * ${classPrefix} <code>Activity<code>.
+ * \${classPrefix} <code>Activity<code>.
  */
-public class ${classPrefix}Activity extends AbstractAsynchronousActivity<JsonNode>
+public class \${classPrefix}Activity extends AbstractAsynchronousActivity<JsonNode>
 		implements AsynchronousActivity<JsonNode> {
 
-	public static final String ACTIVITY_TYPE = "http://example.com/2013/activity/${rootArtifactId}";
+	public static final String ACTIVITY_TYPE = "http://example.com/2013/activity/\${rootArtifactId}";
 
 	/*
 	 * Best practice: Keep port names as constants to avoid misspelling. This
@@ -114,7 +111,7 @@ public class ${classPrefix}Activity extends AbstractAsynchronousActivity<JsonNod
 //				try {
 //					results = this.service.invoke(firstInput, special)
 //				} catch (ServiceException ex) {
-//					callback.fail("Could not invoke ${classPrefix} service " + configBean.getExampleUri(),
+//					callback.fail("Could not invoke \${classPrefix} service " + configBean.getExampleUri(),
 //							ex);
 //					// Make sure we don't call callback.receiveResult later
 //					return;

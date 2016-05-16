@@ -15,10 +15,7 @@
 ##
 ## Note: Above Velocity comment should NOT be included in generated
 ## code from the archetype
-#set( $symbol_pound = '#' )
-#set( $symbol_dollar = '$' )
-#set( $symbol_escape = '\' )
-package ${package}.ui.serviceprovider;
+package \${package}.ui.serviceprovider;
 
 import java.net.URI;
 
@@ -27,10 +24,10 @@ import javax.swing.ImageIcon;
 
 import org.apache.taverna.workbench.activityicons.ActivityIconSPI;
 
-public class ${classPrefix}ServiceIcon implements ActivityIconSPI {
+public class \${classPrefix}ServiceIcon implements ActivityIconSPI {
 
 	private static final URI ACTIVITY_TYPE = URI
-			.create("http://example.com/2013/activity/${rootArtifactId}");
+			.create("http://example.com/2013/activity/\${rootArtifactId}");
 
 	private static Icon icon;
 
@@ -49,7 +46,7 @@ public class ${classPrefix}ServiceIcon implements ActivityIconSPI {
 
 	public static Icon getIcon() {
 		if (icon == null) {
-			icon = new ImageIcon(${classPrefix}ServiceIcon.class.getResource("/exampleIcon.png"));
+			icon = new ImageIcon(\${classPrefix}ServiceIcon.class.getResource("/exampleIcon.png"));
 		}
 		return icon;
 	}

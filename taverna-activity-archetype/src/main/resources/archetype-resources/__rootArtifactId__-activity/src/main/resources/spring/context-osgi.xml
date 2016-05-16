@@ -14,16 +14,21 @@
 ##    limitations under the License.
 ##
 ## Note: Above Velocity comment should NOT be included in generated
-## xml from the archetype
+## code from the archetype
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<beans:beans xmlns="http://www.springframework.org/schema/osgi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:beans="http://www.springframework.org/schema/beans"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
-                           http://www.springframework.org/schema/beans/spring-beans.xsd">
+                                 http://www.springframework.org/schema/beans/spring-beans.xsd
+                                 http://www.springframework.org/schema/osgi
+                                 http://www.springframework.org/schema/osgi/spring-osgi.xsd">
 
-	<bean id="${classPrefix}ActivityHealthChecker" class="${package}.${classPrefix}ActivityHealthChecker" />
+	<!-- Services to be registered with the OSGi service register -->
+	<service ref="\${classPrefix}ActivityHealthChecker" interface="org.apache.taverna.workflowmodel.health.HealthChecker" />
 
-	<bean id="${classPrefix}ActivityFactory" class="${package}.${classPrefix}ActivityFactory">
-		<property name="edits" ref="edits" />
-	</bean>
+	<service ref="\${classPrefix}ActivityFactory" interface="org.apache.taverna.workflowmodel.processor.activity.ActivityFactory" />
 
-</beans>
+	<!-- References to services required from the OSGi service register -->
+	<reference id="edits" interface="org.apache.taverna.workflowmodel.Edits" />
+
+</beans:beans>

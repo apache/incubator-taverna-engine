@@ -15,10 +15,7 @@
 ##
 ## Note: Above Velocity comment should NOT be included in generated
 ## code from the archetype
-#set( $symbol_pound = '#' )
-#set( $symbol_dollar = '$' )
-#set( $symbol_escape = '\' )
-package ${package};
+package \${package};
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -40,11 +37,11 @@ import org.apache.taverna.workflowmodel.processor.activity.ActivityOutputPort;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ${classPrefix}ActivityFactoryTest {
+public class \${classPrefix}ActivityFactoryTest {
 
 	private ObjectNode configuration;
 
-	private ${classPrefix}ActivityFactory activityFactory;
+	private \${classPrefix}ActivityFactory activityFactory;
 
 	@Before
 	public void setUp() throws Exception {
@@ -52,20 +49,20 @@ public class ${classPrefix}ActivityFactoryTest {
 		configuration.put("exampleString", "something");
 		configuration.put("exampleUri", "http://localhost:8080/myEndPoint");
 
-		activityFactory = new ${classPrefix}ActivityFactory();
+		activityFactory = new \${classPrefix}ActivityFactory();
 		activityFactory.setEdits(new EditsImpl());
 	}
 
 	@Test
 	public void testCreateActivity() {
-		${classPrefix}Activity activity = activityFactory.createActivity();
+		\${classPrefix}Activity activity = activityFactory.createActivity();
 		assertNotNull(activity);
 		assertNotSame(activity, activityFactory.createActivity());
 	}
 
 	@Test
 	public void testGetActivityURI() {
-		assertEquals(URI.create(${classPrefix}Activity.ACTIVITY_TYPE), activityFactory.getActivityType());
+		assertEquals(URI.create(\${classPrefix}Activity.ACTIVITY_TYPE), activityFactory.getActivityType());
 	}
 
 	@Test

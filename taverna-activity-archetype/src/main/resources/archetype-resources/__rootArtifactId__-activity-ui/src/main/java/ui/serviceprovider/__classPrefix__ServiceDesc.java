@@ -15,10 +15,7 @@
 ##
 ## Note: Above Velocity comment should NOT be included in generated
 ## code from the archetype
-#set( $symbol_pound = '#' )
-#set( $symbol_dollar = '$' )
-#set( $symbol_escape = '\' )
-package ${package}.ui.serviceprovider;
+package \${package}.ui.serviceprovider;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -32,10 +29,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import org.apache.taverna.servicedescriptions.ServiceDescription;
 
-public class ${classPrefix}ServiceDesc extends ServiceDescription {
+public class \${classPrefix}ServiceDesc extends ServiceDescription {
 
 	private static final URI ACTIVITY_TYPE = URI
-			.create("http://example.com/2013/activity/${rootArtifactId}");
+			.create("http://example.com/2013/activity/\${rootArtifactId}");
 
 	// FIXME: Replace example fields and getters/setters with any required
 	// and optional fields. (All fields are searchable in the Service palette,
@@ -87,7 +84,7 @@ public class ${classPrefix}ServiceDesc extends ServiceDescription {
 	 */
 	@Override
 	public Icon getIcon() {
-		return ${classPrefix}ServiceIcon.getIcon();
+		return \${classPrefix}ServiceIcon.getIcon();
 	}
 
 	/**
@@ -106,7 +103,7 @@ public class ${classPrefix}ServiceDesc extends ServiceDescription {
 	@Override
 	public List<String> getPath() {
 		// For deeper paths you may return several strings
-		return Arrays.asList("${classPrefix}s " + exampleUri);
+		return Arrays.asList("\${classPrefix}s " + exampleUri);
 	}
 
 	/**

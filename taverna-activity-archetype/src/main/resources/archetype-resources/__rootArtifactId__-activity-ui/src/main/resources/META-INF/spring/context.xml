@@ -21,14 +21,14 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
                       http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-	<bean id="${classPrefix}ServiceIcon"
-		class="${package}.ui.serviceprovider.${classPrefix}ServiceIcon" />
+	<bean id="\${classPrefix}ServiceIcon"
+		class="\${package}.ui.serviceprovider.${classPrefix}ServiceIcon" />
 
-	<bean id="${classPrefix}ServiceProvider"
-		class="${package}.ui.serviceprovider.${classPrefix}ServiceProvider" />
+	<bean id="\${classPrefix}ServiceProvider"
+		class="\${package}.ui.serviceprovider.${classPrefix}ServiceProvider" />
 
-	<bean id="${classPrefix}ConfigureMenuAction"
-		class="${package}.ui.menu.${classPrefix}ConfigureMenuAction">
+	<bean id="\${classPrefix}ConfigureMenuAction"
+		class="\${package}.ui.menu.${classPrefix}ConfigureMenuAction">
 		<property name="editManager" ref="editManager" />
 		<property name="fileManager" ref="fileManager" />
 		<property name="activityIconManager" ref="activityIconManager" />
@@ -36,8 +36,8 @@
 		<property name="serviceRegistry" ref="serviceRegistry" />
 	</bean>
 
-	<bean id="${classPrefix}ActivityContextViewFactory"
-		class="${package}.ui.view.${classPrefix}ActivityContextViewFactory">
+	<bean id="\${classPrefix}ActivityContextViewFactory"
+		class="\${package}.ui.view.${classPrefix}ActivityContextViewFactory">
 		<property name="editManager" ref="editManager" />
 		<property name="fileManager" ref="fileManager" />
 		<property name="activityIconManager" ref="activityIconManager" />

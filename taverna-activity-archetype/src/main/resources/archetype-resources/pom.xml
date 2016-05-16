@@ -15,24 +15,24 @@
 ##
 ## Note: Above Velocity comment should NOT be included in generated
 ## pom.xml from the archetype
-#set( $symbol_pound = '#' )
-#set( $symbol_dollar = '$' )
-#set( $symbol_escape = '\' )
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>${groupId}</groupId>
-	<artifactId>${artifactId}</artifactId>
-	<version>${version}</version>
+	<groupId>\${groupId}</groupId>
+	<artifactId>\${artifactId}</artifactId>
+	<version>\${version}</version>
 	<packaging>pom</packaging>
-	<name>${classPrefix} Taverna project</name>
+	<name>\${classPrefix} Taverna project</name>
 
 	<properties>
-            <taverna.language.version>0.15.1-incubating</taverna.language.version>
-            <taverna.osgi.version>0.2.1-incubating</taverna.osgi.version>
-            <taverna.engine.version>3.1.0-incubating-SNAPSHOT</taverna.engine.version>
+	## The ${} below are expanded from taverna-engine pom.xml
+	## by resource filtering, rather than by Velocity
+	## http://maven.apache.org/plugins/maven-resources-plugin/examples/filter.html
+            <taverna.language.version>${taverna.language.version}</taverna.language.version>
+            <taverna.osgi.version>${taverna.osgi.version}</taverna.osgi.version>
+            <taverna.engine.version>${project.parent.version}</taverna.engine.version>
             <taverna.workbench.version>3.1.0-incubating-SNAPSHOT</taverna.workbench.version>
 	</properties>
 
@@ -85,7 +85,7 @@
 			<plugin>
 				<groupId>org.apache.taverna.osgi</groupId>
 				<artifactId>taverna-maven-plugin</artifactId>
-				<version>${taverna.osgi.version}</version>
+				<version>\${taverna.osgi.version}</version>
 				<extensions>true</extensions>
 			</plugin>
 		</plugins>
@@ -109,7 +109,7 @@
 									<pluginExecutionFilter>
 										<groupId>org.apache.taverna.orgi</groupId>
 										<artifactId>taverna-maven-plugin</artifactId>
-										<versionRange>[${taverna.osgi.version},)</versionRange>
+										<versionRange>[\${taverna.osgi.version},)</versionRange>
 										<goals>
 											<goal>plugin-generate</goal>
 										</goals>

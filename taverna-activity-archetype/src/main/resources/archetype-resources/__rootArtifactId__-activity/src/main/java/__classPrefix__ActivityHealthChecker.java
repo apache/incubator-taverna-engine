@@ -15,10 +15,7 @@
 ##
 ## Note: Above Velocity comment should NOT be included in generated
 ## code from the archetype
-#set( $symbol_pound = '#' )
-#set( $symbol_dollar = '$' )
-#set( $symbol_escape = '\' )
-package ${package};
+package \${package};
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -32,17 +29,17 @@ import org.apache.taverna.workflowmodel.health.HealthCheck;
 import org.apache.taverna.workflowmodel.health.HealthChecker;
 
 /**
- * ${classPrefix} <code>HealthChecker</code>.
+ * \${classPrefix} <code>HealthChecker</code>.
  */
-public class ${classPrefix}ActivityHealthChecker implements
-		HealthChecker<${classPrefix}Activity> {
+public class \${classPrefix}ActivityHealthChecker implements
+		HealthChecker<\${classPrefix}Activity> {
 
 	public boolean canVisit(Object o) {
 		// Return True if we can visit the object. We could do
 		// deeper (but not time consuming) checks here, for instance
-		// if the health checker only deals with ${classPrefix}Activity where
+		// if the health checker only deals with \${classPrefix}Activity where
 		// a certain configuration option is enabled.
-		return o instanceof ${classPrefix}Activity;
+		return o instanceof \${classPrefix}Activity;
 	}
 
 	public boolean isTimeConsuming() {
@@ -53,7 +50,7 @@ public class ${classPrefix}ActivityHealthChecker implements
 		return false;
 	}
 
-	public VisitReport visit(${classPrefix}Activity activity, List<Object> ancestry) {
+	public VisitReport visit(\${classPrefix}Activity activity, List<Object> ancestry) {
 		JsonNode config = activity.getConfiguration();
 
 		// We'll build a list of subreports
@@ -77,7 +74,7 @@ public class ${classPrefix}ActivityHealthChecker implements
 		// The default explanation here will be used if the subreports list is
 		// empty
 		return new VisitReport(HealthCheck.getInstance(), activity,
-				"${classPrefix} service OK", HealthCheck.NO_PROBLEM, subReports);
+				"\${classPrefix} service OK", HealthCheck.NO_PROBLEM, subReports);
 	}
 
 }

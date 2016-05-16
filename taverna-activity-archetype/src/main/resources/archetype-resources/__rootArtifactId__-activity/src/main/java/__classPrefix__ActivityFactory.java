@@ -15,12 +15,9 @@
 ##
 ## Note: Above Velocity comment should NOT be included in generated
 ## code from the archetype
-#set( $symbol_pound = '#' )
-#set( $symbol_dollar = '$' )
-#set( $symbol_escape = '\' )
-package ${package};
+package \${package};
 
-import static ${package}.${classPrefix}Activity.*;
+import static \${package}.${classPrefix}Activity.*;
 
 import java.io.IOException;
 import java.net.URI;
@@ -36,20 +33,20 @@ import org.apache.taverna.workflowmodel.processor.activity.ActivityInputPort;
 import org.apache.taverna.workflowmodel.processor.activity.ActivityOutputPort;
 
 /**
- * ${classPrefix} <code>ActivityFactory<code>.
+ * \${classPrefix} <code>ActivityFactory<code>.
  */
-public class ${classPrefix}ActivityFactory implements ActivityFactory {
+public class \${classPrefix}ActivityFactory implements ActivityFactory {
 
 	private Edits edits;
 
 	@Override
-	public ${classPrefix}Activity createActivity() {
-		return new ${classPrefix}Activity();
+	public \${classPrefix}Activity createActivity() {
+		return new \${classPrefix}Activity();
 	}
 
 	@Override
 	public URI getActivityType() {
-		return URI.create(${classPrefix}Activity.ACTIVITY_TYPE);
+		return URI.create(\${classPrefix}Activity.ACTIVITY_TYPE);
 	}
 
 	@Override

@@ -15,10 +15,7 @@
 ##
 ## Note: Above Velocity comment should NOT be included in generated
 ## code from the archetype
-#set( $symbol_pound = '#' )
-#set( $symbol_dollar = '$' )
-#set( $symbol_escape = '\' )
-package ${package}.ui.menu;
+package \${package}.ui.menu;
 
 import java.net.URI;
 
@@ -34,13 +31,13 @@ import org.apache.taverna.workbench.activitytools.AbstractConfigureActivityMenuA
 import org.apache.taverna.workbench.edits.EditManager;
 import org.apache.taverna.workbench.file.FileManager;
 
-import ${package}.ui.config.${classPrefix}ConfigureAction;
+import \${package}.ui.config.${classPrefix}ConfigureAction;
 
-public class ${classPrefix}ConfigureMenuAction extends AbstractConfigureActivityMenuAction implements
+public class \${classPrefix}ConfigureMenuAction extends AbstractConfigureActivityMenuAction implements
 		MenuComponent, ContextualMenuComponent {
 
 	private static final URI ACTIVITY_TYPE = URI
-			.create("http://example.com/2013/activity/${rootArtifactId}");
+			.create("http://example.com/2013/activity/\${rootArtifactId}");
 
 	private EditManager editManager;
 	private FileManager fileManager;
@@ -48,13 +45,13 @@ public class ${classPrefix}ConfigureMenuAction extends AbstractConfigureActivity
 	private ServiceDescriptionRegistry serviceDescriptionRegistry;
 	private ServiceRegistry serviceRegistry;
 
-	public ${classPrefix}ConfigureMenuAction() {
+	public \${classPrefix}ConfigureMenuAction() {
 		super(ACTIVITY_TYPE);
 	}
 
 	@Override
 	protected Action createAction() {
-		Action result = new ${classPrefix}ConfigureAction(findActivity(), editManager, fileManager,
+		Action result = new \${classPrefix}ConfigureAction(findActivity(), editManager, fileManager,
 				activityIconManager, serviceDescriptionRegistry, serviceRegistry);
 		result.putValue(Action.NAME, "Configure example service");
 		addMenuDots(result);
