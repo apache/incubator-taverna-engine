@@ -101,6 +101,16 @@ To build, use
 This will build each module and run their tests.
 
 
+## Building on Windows
+
+If you are building on Windows, ensure you unpack this source code
+to a folder with a [short path name](http://stackoverflow.com/questions/1880321/why-does-the-260-character-path-length-limit-exist-in-windows) 
+lenght, e.g. `C:\src` - as 
+Windows has a [limitation on the total path length](https://msdn.microsoft.com/en-us/library/aa365247%28VS.85%29.aspx#maxpath) 
+which might otherwise
+prevent this code from building successfully.
+
+
 ## Skipping tests
 
 To skip the tests (these can be time-consuming), use:
