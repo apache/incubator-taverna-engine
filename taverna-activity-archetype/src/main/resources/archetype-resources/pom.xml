@@ -27,6 +27,8 @@
 	<name>\${classPrefix} Taverna project</name>
 
 	<properties>
+            <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
 	## The ${} below are expanded from taverna-engine pom.xml
 	## by resource filtering, rather than by Velocity
 	## http://maven.apache.org/plugins/maven-resources-plugin/examples/filter.html
