@@ -30,6 +30,9 @@
     <description>Archetype to build a Taverna 3 service activity.
     Includes engine and UI parts, and a test class to run the workbench with the new activity.
     </description>
+    <properties>
+      <taverna.engine.version>${project.parent.version}</taverna.engine.version>
+    </properties>
     <build>
           <resources>
               <resource>
@@ -53,8 +56,8 @@
                 <version>2.4</version>
                    <dependencies>
                        <dependency>
-                    <!-- Workaround for ARCHETYPE-488 - should not be needed 
-                         for archetype-packaging 2.5 -->    
+                    <!-- Workaround for ARCHETYPE-488 - should not be needed
+                         for archetype-packaging 2.5 -->
                      <groupId>org.apache.maven.shared</groupId>
                      <artifactId>maven-invoker</artifactId>
                      <version>2.2</version>
@@ -70,25 +73,45 @@
             </plugin>
         </plugins>
     </build>
-    <profiles>
-      <profile>
-        <id>apache-release</id>
-        <build>
-            <plugins>
-                <plugin>
-                    <artifactId>maven-archetype-plugin</artifactId>
-                    <version>2.4</version>
-                    <configuration>
-                    <!-- disable archetype integratoin testing,
-		     can't access not-yet-released
-		     taverna-engine dependencies during 
-		     the release process -->
-                        <skip>true</skip>
-                    </configuration>
+    <dependencies>
 
-                </plugin>
-            </plugins>
-        </build>
-      </profile>
-    </profiles>
+      <!--
+        Dependencies on other Taverna Engine components needed
+        by the artifact integration test (TAVERNA-975)
+
+        We need to declare these so that the Maven reactor
+        for Taverna Engine can build them before running
+        our integration test (particularly during a release).
+
+        The section below MUST match the <dependencies> of
+        __rootArtifactId__-activity/pom.xml -
+        but should use <scope>test</scope> instead.
+      -->
+
+      <dependency>
+        <groupId>org.apache.taverna.engine</groupId>
+        <artifactId>taverna-workflowmodel-api</artifactId>
+        <version>${taverna.engine.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.taverna.engine</groupId>
+        <artifactId>taverna-reference-api</artifactId>
+        <version>${taverna.engine.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.taverna.engine</groupId>
+        <artifactId>taverna-workflowmodel-impl</artifactId>
+        <version>${taverna.engine.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.taverna.engine</groupId>
+        <artifactId>taverna-activity-test-utils</artifactId>
+        <version>${taverna.engine.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+    </dependencies>
 </project>

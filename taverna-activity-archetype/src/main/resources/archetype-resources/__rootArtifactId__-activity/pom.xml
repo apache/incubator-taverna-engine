@@ -29,6 +29,9 @@
 	<name>\${classPrefix} Taverna activity</name>
 
 	<dependencies>
+		## If adding a <dependency> from taverna-engine, make sure
+		## to also add it as a <scope>test</scope> dependency of
+		## the archetype itself (TAVERNA-975)
 		<dependency>
 			<groupId>org.apache.taverna.engine</groupId>
 			<artifactId>taverna-workflowmodel-api</artifactId>
