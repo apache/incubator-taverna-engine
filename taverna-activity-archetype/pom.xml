@@ -30,9 +30,6 @@
     <description>Archetype to build a Taverna 3 service activity.
     Includes engine and UI parts, and a test class to run the workbench with the new activity.
     </description>
-    <properties>
-      <taverna.engine.version>${project.parent.version}</taverna.engine.version>
-    </properties>
     <build>
           <resources>
               <resource>
@@ -91,25 +88,25 @@
       <dependency>
         <groupId>org.apache.taverna.engine</groupId>
         <artifactId>taverna-workflowmodel-api</artifactId>
-        <version>${taverna.engine.version}</version>
+        <version>${project.parent.version}</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.apache.taverna.engine</groupId>
         <artifactId>taverna-reference-api</artifactId>
-        <version>${taverna.engine.version}</version>
+        <version>${project.parent.version}</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.apache.taverna.engine</groupId>
         <artifactId>taverna-workflowmodel-impl</artifactId>
-        <version>${taverna.engine.version}</version>
+        <version>${project.parent.version}</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.apache.taverna.engine</groupId>
         <artifactId>taverna-activity-test-utils</artifactId>
-        <version>${taverna.engine.version}</version>
+        <version>${project.parent.version}</version>
         <scope>test</scope>
       </dependency>
 
