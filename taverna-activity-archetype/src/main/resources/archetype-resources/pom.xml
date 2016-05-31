@@ -34,7 +34,7 @@
 	## http://maven.apache.org/plugins/maven-resources-plugin/examples/filter.html
             <taverna.language.version>${taverna.language.version}</taverna.language.version>
             <taverna.osgi.version>${taverna.osgi.version}</taverna.osgi.version>
-            <taverna.engine.version>${project.parent.version}</taverna.engine.version>
+            <taverna.engine.version>${taverna.engine.version}</taverna.engine.version>
             <taverna.workbench.version>3.1.0-incubating-SNAPSHOT</taverna.workbench.version>
 	</properties>
 
