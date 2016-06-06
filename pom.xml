@@ -28,7 +28,7 @@
 
     <groupId>org.apache.taverna.engine</groupId>
     <artifactId>apache-taverna-engine</artifactId>
-    <version>3.1.0-incubating-SNAPSHOT</version>
+    <version>3.1.0-incubating</version>
     <packaging>pom</packaging>
     <name>Apache Taverna Engine and Platform</name>
 
@@ -129,7 +129,7 @@
         <connection>scm:git:https://git-wip-us.apache.org/repos/asf/incubator-taverna-engine.git</connection>
         <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/incubator-taverna-engine.git</developerConnection>
         <url>https://github.com/apache/incubator-taverna-engine</url>
-        <tag>HEAD</tag>
+        <tag>3.1.0-incubating-RC3</tag>
     </scm>
 
     <repositories>
