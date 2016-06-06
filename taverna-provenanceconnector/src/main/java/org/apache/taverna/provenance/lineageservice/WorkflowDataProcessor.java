@@ -1,8 +1,3 @@
-/**
- * 
- */
-package org.apache.taverna.provenance.lineageservice;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -11,9 +6,9 @@ package org.apache.taverna.provenance.lineageservice;
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,7 +16,7 @@ package org.apache.taverna.provenance.lineageservice;
  * specific language governing permissions and limitations
  * under the License.
  */
-
+package org.apache.taverna.provenance.lineageservice;
 
 import static org.apache.taverna.provenance.lineageservice.utils.ProvenanceUtils.iterationToString;
 import static org.apache.taverna.provenance.lineageservice.utils.ProvenanceUtils.parentProcess;
@@ -55,11 +50,11 @@ public class WorkflowDataProcessor {
 	private static Logger logger = Logger.getLogger(WorkflowDataProcessor.class);
 
 	// set of trees (impl as lists), one for each portName
-	// PM portName not enough must use the WFID as context as well, because the same output portName 
-	// may occur in multiple nested workflows 
-	Map<String, List<WorkflowDataNode>> workflowDataTrees = new HashMap<>();  
+	// PM portName not enough must use the WFID as context as well, because the same output portName
+	// may occur in multiple nested workflows
+	Map<String, List<WorkflowDataNode>> workflowDataTrees = new HashMap<>();
 
-	protected Map<String, Timestamp> workflowStarted = new ConcurrentHashMap<>(); 
+	protected Map<String, Timestamp> workflowStarted = new ConcurrentHashMap<>();
 
 	ProvenanceQuery pq=null;
 	ProvenanceWriter pw = null;
@@ -71,12 +66,12 @@ public class WorkflowDataProcessor {
 	 * to the portName found in the item. Repeated invocations of this method
 	 * incrementally reconstruct the tree structure for each of the workflow
 	 * outputs
-	 * 
+	 *
 	 * @param root
 	 */
 	public void addWorkflowDataItem(ProvenanceItem provenanceItem) {
 		WorkflowDataProvenanceItem workflowDataItem = (WorkflowDataProvenanceItem) provenanceItem;
-		
+
 		WorkflowDataNode wdn = new WorkflowDataNode();
 		wdn.setProcessId(provenanceItem.getProcessId());
 		wdn.setPortName(workflowDataItem.getPortName());
@@ -113,7 +108,7 @@ public class WorkflowDataProcessor {
 	/**
 	 * writes records to PortBinding or Collection by traversing the trees<br/>
 	 * expect this to be invoked after workflow completion
-	 * 
+	 *
 	 * @param workflowId
 	 *            the external name of the dataflow (not the UUID)
 	 * @param workflowRunId
@@ -126,7 +121,7 @@ public class WorkflowDataProcessor {
 
 		// i:inputPortName -> t2Ref
 		Map<String, String> workflowPortData = new HashMap<>();
-		
+
 		for (Map.Entry<String, List<WorkflowDataNode>> entry : workflowDataTrees
 				.entrySet()) {
 			String portName = entry.getKey();
@@ -148,7 +143,7 @@ public class WorkflowDataProcessor {
 						String portKey = (node.isInputPort() ? "/i:" : "/o:") + node.getPortName();
 						workflowPortData.put(portKey, node.getValue());
 					}
-					
+
 					if (node.isList) {
 						logger.debug("creating collection entry for "
 								+ node.value + " with index " + node.index);
@@ -189,7 +184,7 @@ public class WorkflowDataProcessor {
 							vb.setPositionInColl(node.getRelativePosition());
 						} else
 							vb.setPositionInColl(1); // default
-						
+
 						try {
 							getPw().addPortBinding(vb);
 						} catch (SQLException e) {
@@ -212,12 +207,12 @@ public class WorkflowDataProcessor {
 
 		List<Port> ports = getPq().getPortsForDataflow(workflowId);
 		String processId = completeEvent.getProcessId();
-		
+
 		DataflowInvocation invocation = new DataflowInvocation();
 		invocation.setDataflowInvocationId(UUID.randomUUID().toString());
 		invocation.setWorkflowId(workflowId);
 		invocation.setWorkflowRunId(workflowRunId);
-		
+
 		String parentProcessId = parentProcess(processId, 1);
 		if (parentProcessId != null) {
 			ProcessorEnactment procAct = invocationProcessToProcessEnactment
@@ -271,7 +266,7 @@ public class WorkflowDataProcessor {
 
 	/**
 	 * @param node
-	 * @return the last digit in the index 
+	 * @return the last digit in the index
 	 */
 	private int getPosition(WorkflowDataNode node) {
 		String[] vector = node.getIndex()
@@ -299,8 +294,8 @@ public class WorkflowDataProcessor {
 		if (index11.equals("") && tokens2.length == 1)
 			return true;
 
-		// [x1,x2, ...,xk] cannot be parent of [x1,x2,...xh] when k < h-1 
-		// because [x1,x2,...xh] is more than one level deeper than [x1,x2, ...,xk] 
+		// [x1,x2, ...,xk] cannot be parent of [x1,x2,...xh] when k < h-1
+		// because [x1,x2,...xh] is more than one level deeper than [x1,x2, ...,xk]
 		if (tokens1.length != tokens2.length - 1)
 			return false;
 

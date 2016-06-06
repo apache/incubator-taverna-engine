@@ -1,25 +1,3 @@
-/*******************************************************************************
- * Copyright (C) 2007 The University of Manchester
- *
- *  Modifications to the initial code base are copyright of their
- *  respective authors, or their employers as appropriate.
- *
- *  This program is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public License
- *  as published by the Free Software Foundation; either version 2.1 of
- *  the License, or (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful, but
- *  WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
- *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- ******************************************************************************/
-package org.apache.taverna.provenance.lineageservice;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -28,9 +6,9 @@ package org.apache.taverna.provenance.lineageservice;
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -38,7 +16,7 @@ package org.apache.taverna.provenance.lineageservice;
  * specific language governing permissions and limitations
  * under the License.
  */
-
+package org.apache.taverna.provenance.lineageservice;
 
 import static org.apache.taverna.provenance.connector.AbstractProvenanceConnector.DataflowInvocationTable.DataflowInvocation;
 
@@ -71,11 +49,11 @@ import org.apache.taverna.configuration.database.DatabaseManager;
  * Handles all the writing out of provenance items to the database layer. Uses
  * standard SQL so all specific instances of this class can extend this writer
  * to handle all of the db writes
- * 
+ *
  * @author Paolo Missier
  * @author Ian Dunlop
  * @author Stuart Owen
- * 
+ *
  */
 public class ProvenanceWriter {
 
@@ -99,7 +77,7 @@ public class ProvenanceWriter {
 	/**
 	 * add each Port as a row into the Port DB table <strong>note: no static
 	 * port type available as part of the dataflow...</strong>
-	 * 
+	 *
 	 * @param ports
 	 * @param wfId
 	 * @throws SQLException
@@ -162,7 +140,7 @@ public class ProvenanceWriter {
 
 	/**
 	 * inserts one row into the ARC DB table
-	 * 
+	 *
 	 * @param sourcePort
 	 * @param destinationPort
 	 * @param workflowId
@@ -244,7 +222,7 @@ public class ProvenanceWriter {
 
 	/**
 	 * insert new processor into the provenance DB
-	 * 
+	 *
 	 * @param name
 	 * @throws SQLException
 	 */
@@ -263,7 +241,7 @@ public class ProvenanceWriter {
 	/**
 	 * add a processor to the static portion of the DB with given name, type and
 	 * workflowId scope
-	 * 
+	 *
 	 * @param name
 	 * @param type
 	 * @param workflowId
@@ -425,7 +403,7 @@ public class ProvenanceWriter {
 
 	/**
 	 * persists var v back to DB
-	 * 
+	 *
 	 * @param v
 	 * @throws SQLException
 	 */
@@ -520,7 +498,7 @@ public class ProvenanceWriter {
 
 	/**
 	 * deletes DB contents for the static structures -- called prior to each run
-	 * 
+	 *
 	 * @throws SQLException
 	 */
 	public void clearDBStatic() throws SQLException {
@@ -539,7 +517,7 @@ public class ProvenanceWriter {
 
 	/**
 	 * deletes DB contents for the static structures -- called prior to each run
-	 * 
+	 *
 	 * @throws SQLException
 	 */
 	public void clearDBStatic(String wfID) throws SQLException {
@@ -594,7 +572,7 @@ public class ProvenanceWriter {
 	}
 	/**
 	 * deletes DB contents for all runs -- for testing purposes
-	 * 
+	 *
 	 * @throws SQLException
 	 */
 	public Set<String> clearDBDynamic(String runID) throws SQLException {
@@ -657,7 +635,7 @@ public class ProvenanceWriter {
 
 	/**
 	 * used to support the implementation of
-	 * 
+	 *
 	 * @param pname
 	 * @param vFrom
 	 * @param valFrom

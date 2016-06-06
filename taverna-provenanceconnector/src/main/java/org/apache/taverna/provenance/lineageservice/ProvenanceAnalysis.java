@@ -1,25 +1,3 @@
-/*******************************************************************************
- * Copyright (C) 2007 The University of Manchester   
- * 
- *  Modifications to the initial code base are copyright of their
- *  respective authors, or their employers as appropriate.
- * 
- *  This program is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public License
- *  as published by the Free Software Foundation; either version 2.1 of
- *  the License, or (at your option) any later version.
- *    
- *  This program is distributed in the hope that it will be useful, but
- *  WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
- *    
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- ******************************************************************************/
-package org.apache.taverna.provenance.lineageservice;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -28,9 +6,9 @@ package org.apache.taverna.provenance.lineageservice;
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -38,7 +16,7 @@ package org.apache.taverna.provenance.lineageservice;
  * specific language governing permissions and limitations
  * under the License.
  */
-
+package org.apache.taverna.provenance.lineageservice;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -150,7 +128,7 @@ public class ProvenanceAnalysis {
 
 
 	/**
-	 * asks the OPM manager to convert its current RDF OPMGraph to XML 
+	 * asks the OPM manager to convert its current RDF OPMGraph to XML
 	 * @return the filename of the OPM XML file
 	 * @throws OperatorException
 	 * @throws IOException
@@ -159,7 +137,7 @@ public class ProvenanceAnalysis {
 	//	public String OPMRdf2Xml() throws OperatorException, IOException, JAXBException {
 	//	if (isReady()) {
 	//	return aOPMManager.Rdf2Xml();
-	//	}  
+	//	}
 	//	return null;
 	//	}
 
@@ -167,15 +145,15 @@ public class ProvenanceAnalysis {
 	 * asks the OPM manager to create a dot file representing its current RDF OPMGraph<br/>
 	 * needs fixing
 	 * @return
-	 * @throws IOException 
-	 * @throws OperatorException 
+	 * @throws IOException
+	 * @throws OperatorException
 	 */
 	/*
 	public String OPMRdf2Dot() throws OperatorException, IOException {
 		if (aOPMManager != null && aOPMManager.isActive() && isReady()) {
 			return aOPMManager.Rdf2Dot();
-		}  
-		return null;		
+		}
+		return null;
 	}
 	 */
 
@@ -196,7 +174,7 @@ public class ProvenanceAnalysis {
 
 	/**
 	 * returns all available instances across all workflows
-	 * 
+	 *
 	 * @return
 	 * @throws SQLException
 	 */
@@ -206,7 +184,7 @@ public class ProvenanceAnalysis {
 
 	/**
 	 * returns all available instances for workflow workflowId
-	 * 
+	 *
 	 * @param workflowId
 	 * @return
 	 * @throws SQLException
@@ -256,7 +234,7 @@ public class ProvenanceAnalysis {
 		// launch a lineage query for each target variable
 		for (QueryPort qv : qvList) {
 
-			// full lineage query			
+			// full lineage query
 			logger.info(String.format(
 					"************\n lineage query: [instance, workflow, proc, port, path] = "
 							+ "[%s,%s,%s,%s,[%s]]\n***********", workflowRun,
@@ -302,7 +280,7 @@ public class ProvenanceAnalysis {
 	 * is specified, however, this just passes the request to
 	 * computeLineageSingleBinding. in this case the result map only contains
 	 * one entry
-	 * 
+	 *
 	 * @param workflowRun
 	 * @param var
 	 * @param proc
@@ -313,7 +291,7 @@ public class ProvenanceAnalysis {
 	 * @throws SQLException
 	 */
 	public Map<String, List<Dependencies>> computeLineageSingleVar(
-			String workflowRun,   // dynamic scope 
+			String workflowRun,   // dynamic scope
 			String workflowId,    // static scope
 			String var,   // target var
 			String proc,   // qualified with its processor name
@@ -364,7 +342,7 @@ public class ProvenanceAnalysis {
 	/**
 	 * main lineage query method. queries the provenance DB with a single
 	 * originating proc/var/path and a set of selected Processors
-	 * 
+	 *
 	 * @param workflowRunId
 	 * @param var
 	 * @param proc
@@ -477,7 +455,7 @@ public class ProvenanceAnalysis {
 	/**
 	 * accounts for an inverse transformation from one output to all inputs of a
 	 * processor
-	 * 
+	 *
 	 * @param workflowRunId
 	 * @param var
 	 *            the output var
@@ -517,7 +495,7 @@ public class ProvenanceAnalysis {
 
 		if (getPq().isDataflow(proc)) { // if we are looking at the output of an entire dataflow
 			// force the "input vars" for this step to be the output var itself
-			// this causes the following xfer step to trace back to the next processor _within_ proc 
+			// this causes the following xfer step to trace back to the next processor _within_ proc
 			inputVars = new ArrayList<>();
 			inputVars.add(outputVar);
 		} else if (proc.equals(OUTPUT_CONTAINER_PROCESSOR)) {  // same action as prev case, but may change in the future
@@ -558,13 +536,13 @@ public class ProvenanceAnalysis {
 				for (Port inputVar: inputVars)
 					var2Path.put(inputVar, null);
 			} else { // compute projected paths
-				String[] projectedPath; 
+				String[] projectedPath;
 
 				int start = 0;
 				for (Port inputVar: inputVars) {
 					// 24/7/08 get DNL (declared nesting level) and ANL (actual nesting level) from VAR
 					// TODO account for empty paths
-					int projectedPathLength = var2delta.get(inputVar);  // this is delta			
+					int projectedPathLength = var2delta.get(inputVar);  // this is delta
 
 					if (projectedPathLength == 0) {
 						// associate empty path to this var
@@ -589,7 +567,7 @@ public class ProvenanceAnalysis {
 			}
 		}
 
-		// accumulate this proc to current path 
+		// accumulate this proc to current path
 		currentPath.add(proc);
 
 		/*
@@ -617,7 +595,7 @@ public class ProvenanceAnalysis {
 
 		///////////
 		/// generate SQL if necessary -- for all input vars, based on the current path
-		/// the projected paths are required to determine the level in the collection at which 
+		/// the projected paths are required to determine the level in the collection at which
 		/// we look at the value assignment
 		///////////
 
@@ -686,7 +664,7 @@ public class ProvenanceAnalysis {
 							logger.debug("deref value for ref: " + ref + " "
 									+ data + " of class "
 									+ data.getClass().getName());
-							
+
 							try {
 								aOPMManager.addArtifact(vb.getValue(), data);
 							} catch (ProvenanceException e) {
@@ -707,7 +685,7 @@ public class ProvenanceAnalysis {
 					/*
 					 * assert proc as Process -- include iteration vector to
 					 * separate different activations of the same process
-					 */					
+					 */
 					try {
 						aOPMManager.addProcess(proc, vb.getIteration(),
 								workflowId, vb.getWorkflowRunId());
@@ -731,7 +709,7 @@ public class ProvenanceAnalysis {
 					}
 				}
 			}
-			// 
+			//
 			// create OPM process for this xform
 			//
 			for (LineageSQLQuery lq : newLqList) {
@@ -808,7 +786,7 @@ public class ProvenanceAnalysis {
 								logger.warn("Could not add artifact", e);
 							}
 
-							// true -> prevent duplicates CHECK	
+							// true -> prevent duplicates CHECK
 						}
 					}
 				}
@@ -820,7 +798,7 @@ public class ProvenanceAnalysis {
 				xferStep(workflowRunId, workflowId, inputVar,
 						var2Path.get(inputVar), selectedProcessors, lqList);
 		}
-		currentPath.remove(currentPath.size()-1);  // CHECK	
+		currentPath.remove(currentPath.size()-1);  // CHECK
 	}  // end xformStep
 
 	private void xferStep(String workflowRunId, String workflowId, Port port,
@@ -848,12 +826,12 @@ public class ProvenanceAnalysis {
 		// in this case set path to null
 
 		// retrieve full record for var:
-		// retrieve input vars for current processor 
+		// retrieve input vars for current processor
 		Map<String, String> varsQueryConstraints = new HashMap<>();
 
 //		varsQueryConstraints.put("W.workflowId", workflowRunId);
 		varsQueryConstraints.put("portId", a.getSourcePortId());
-//		varsQueryConstraints.put("processorNameRef", sourceProcName);  
+//		varsQueryConstraints.put("processorNameRef", sourceProcName);
 //		varsQueryConstraints.put("portName", sourcePortName);
 		List<Port> varList = getPq().getPorts(varsQueryConstraints);
 
@@ -876,9 +854,9 @@ public class ProvenanceAnalysis {
 		private boolean isXform = true;
 
 		private String iteration = "";  // this is the iteration projected on a single variable. Used for propagation upwards default is no iteration --
-		private String iterationVector = ""; // iteration vector accounts for cross-products. Used to be matched exactly in queries. 
-		private int iic = 0;  // index in collection -- default is 0 
-		private int collectionNesting = 0;  // n indicates granularity is n levels from leaf. 
+		private String iterationVector = ""; // iteration vector accounts for cross-products. Used to be matched exactly in queries.
+		private int iic = 0;  // index in collection -- default is 0
+		private int collectionNesting = 0;  // n indicates granularity is n levels from leaf.
 		// This quantifies loss of lineage precision when working with collections
 		private String collectionRef = null;
 		private String proc;

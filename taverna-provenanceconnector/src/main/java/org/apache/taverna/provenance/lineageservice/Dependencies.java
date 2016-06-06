@@ -1,25 +1,3 @@
-/*******************************************************************************
- * Copyright (C) 2007 The University of Manchester   
- * 
- *  Modifications to the initial code base are copyright of their
- *  respective authors, or their employers as appropriate.
- * 
- *  This program is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public License
- *  as published by the Free Software Foundation; either version 2.1 of
- *  the License, or (at your option) any later version.
- *    
- *  This program is distributed in the hope that it will be useful, but
- *  WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
- *    
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- ******************************************************************************/
-package org.apache.taverna.provenance.lineageservice;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -28,9 +6,9 @@ package org.apache.taverna.provenance.lineageservice;
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -38,7 +16,7 @@ package org.apache.taverna.provenance.lineageservice;
  * specific language governing permissions and limitations
  * under the License.
  */
-
+package org.apache.taverna.provenance.lineageservice;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,14 +27,14 @@ import java.util.ListIterator;
  * one record in the provenance DB at the finest possible level of granularity,
  * i.e., a single value possibly within a collection, bound to a processor port
  * and associated to a specific run of a specific workflow.
- * 
+ *
  * @author Paolo Missier
  * @see LineageQueryResultRecord
  */
 public class Dependencies {
 	final public static String COLL_TYPE = "referenceSetCollection";
 	final public static String ATOM_TYPE = "referenceSet";
-	
+
 	boolean printResolvedValue;
 
 	private List<LineageQueryResultRecord> records = new ArrayList<>();
@@ -67,7 +45,7 @@ public class Dependencies {
 
 	/**
 	 * adds a single record to the list of dependencies
-	 * 
+	 *
 	 * @param workflowId
 	 * @param pname
 	 * @param vname
@@ -125,13 +103,13 @@ public class Dependencies {
 		for (LineageQueryResultRecord record : getRecords()) {
 			record.setPrintResolvedValue(printResolvedValue);
 			sb.append("***  record: ****\n"+record.toString());
-		}		
+		}
 		return sb.toString();
 	}
 
 	/**
 	 * @return true is the records contain the actual values, in addition to the URI references to the values
-	 * <br/>NOT YET SUPPORTED. This switch is currently ignored and no values are returned in the current version 
+	 * <br/>NOT YET SUPPORTED. This switch is currently ignored and no values are returned in the current version
 	 */
 	public boolean isPrintResolvedValue() {
 		return printResolvedValue;
@@ -139,7 +117,7 @@ public class Dependencies {
 
 	/**
 	 * @param toggles insertion of values in addition to references to values in the records
-	 * <br/>NOT YET SUPPORTED. This switch is currently ignored and no values are returned in the current version 
+	 * <br/>NOT YET SUPPORTED. This switch is currently ignored and no values are returned in the current version
 	 */
 	public void setPrintResolvedValue(boolean printResolvedValue) {
 		this.printResolvedValue = printResolvedValue;

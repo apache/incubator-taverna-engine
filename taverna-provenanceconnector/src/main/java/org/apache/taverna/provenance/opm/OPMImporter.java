@@ -1,8 +1,3 @@
-/**
- * 
- */
-package org.apache.taverna.provenance.opm;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -11,9 +6,9 @@ package org.apache.taverna.provenance.opm;
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,7 +16,7 @@ package org.apache.taverna.provenance.opm;
  * specific language governing permissions and limitations
  * under the License.
  */
-
+package org.apache.taverna.provenance.opm;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -61,7 +56,7 @@ import org.openprovenance.model.WasTriggeredBy;
  * imports foreign XML-serialized OPM graphs into the native Taverna provenance
  * DB, so they can be queried using
  * {@link org.apache.taverna.provenance.lineageservice.ProvenanceAnalysis}
- * 
+ *
  * @author paolo
  */
 public class OPMImporter {
@@ -90,13 +85,13 @@ public class OPMImporter {
 
 	public OPMImporter(ProvenanceWriter pw) {
 		this.pw = pw;
-	}	
+	}
 
 	/**
 	 * orphan artifacts are those that are in the graph but are never used
 	 * neither generated. this indicates some problem with the graph structure.
 	 * this method is used for diagnostics after import has finished
-	 * 
+	 *
 	 * @return
 	 */
 	public List<String> getOrphanArtifacts() {
@@ -163,7 +158,7 @@ public class OPMImporter {
 		}
 
 		// what have we got?
-		// retrieve all OPM relations from the graph		
+		// retrieve all OPM relations from the graph
 		Dependencies dependencies = graph.getDependencies();
 
 		/*
@@ -206,7 +201,7 @@ public class OPMImporter {
 		for (WasDerivedFrom dep : wdfSet)
 			processWDF(dep);
 
-		// we actually ignore the others... 
+		// we actually ignore the others...
 
 		// *********
 		// complete the induced graph by building datalinks using the Artifact -> [Port] maps
@@ -217,7 +212,7 @@ public class OPMImporter {
 		accountNames.add(OPM_DEF_ACCOUNT);
 
 		/* Disabled as allAccounts is never assigned to
-		if (allAccounts != null)  
+		if (allAccounts != null)
 			for (Account acc:allAccounts) { accountNames.add(acc.getId()); }
 		*/
 
@@ -318,7 +313,7 @@ public class OPMImporter {
 
 	/**
 	 * generic processing of a process-artifact dependency
-	 * 
+	 *
 	 * @param procID
 	 * @param artId
 	 * @param role
@@ -347,7 +342,7 @@ public class OPMImporter {
 	 * used(A,R,P,acc): generates a process for P, a Port for (P,R) an
 	 * <em>input</em> PortBinding for (P,R,A) <br/>
 	 * this is very similar to {@link #processWGBy(WasGeneratedBy)}
-	 * 
+	 *
 	 * @param dep
 	 */
 	private void processUsed(Used dep) {
@@ -409,7 +404,7 @@ public class OPMImporter {
 	 * wgb(A,R,P,Acc): generates a Process for P, a Port for (P,R), an
 	 * <em>output</em> PortBinding for (P,R,A) This is all relative to the
 	 * workflow corresponding to account Acc.
-	 * 
+	 *
 	 * @param dep
 	 * @throws SQLException
 	 */
@@ -474,7 +469,7 @@ public class OPMImporter {
 	 * note that this analysis is conducted regardless of the accounts in which
 	 * the wgby and used properties appear, as one account could be used
 	 * deliberately to This will unclutter the DB.
-	 * 
+	 *
 	 * @param dep
 	 */
 	private void processWDF(WasDerivedFrom dep) {

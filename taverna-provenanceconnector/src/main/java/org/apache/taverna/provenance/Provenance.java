@@ -1,5 +1,3 @@
-package org.apache.taverna.provenance;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -8,9 +6,9 @@ package org.apache.taverna.provenance;
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -18,7 +16,7 @@ package org.apache.taverna.provenance;
  * specific language governing permissions and limitations
  * under the License.
  */
-
+package org.apache.taverna.provenance;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -58,7 +56,7 @@ import org.apache.taverna.reference.T2Reference;
  * <p/>
  * The XML schema for the XML query language is {@code pquery.xsd} in
  * {@link net.sf.taverna.t2.provenance.apic.client.resources}
- * 
+ *
  * @author Paolo Missier
  * @author Stuart Owen
  */
@@ -96,7 +94,7 @@ public interface Provenance {
 	 * This is used in the workbench to retrieve the "intermediate results" at
 	 * various points during workflow execution, as opposed to a set of
 	 * dependencies in response to a full-fledged provenance query.
-	 * 
+	 *
 	 * @param workflowRunId
 	 *            lineage scope -- a specific instance
 	 * @param processorName
@@ -139,7 +137,7 @@ public interface Provenance {
 	/**
 	 * Removes all records that pertain to a specific run (but not the static
 	 * specification of the workflow run)
-	 * 
+	 *
 	 * @param runID
 	 *            the internal ID of a run. This can be obtained using
 	 *            {@link #listRuns(String, Map)}
@@ -151,7 +149,7 @@ public interface Provenance {
 
 	/**
 	 * removes all records pertaining to the static structure of a workflow.
-	 * 
+	 *
 	 * @param workflowId
 	 *            the ID (not the external name) of the workflow whose static
 	 *            structure is to be deleted from the DB
@@ -162,7 +160,7 @@ public interface Provenance {
 	 * returns a set of workflowIDs for a given runID. The set is a singleton if
 	 * the workflow has no nesting, but in general the list contains one
 	 * workflowID for each nested workflow involved in the run
-	 * 
+	 *
 	 * @param runID
 	 *            the internal ID for a specific workflow run
 	 * @return a list of workflow IDs, one for each nested workflow involved in
@@ -203,7 +201,7 @@ public interface Provenance {
 
 	/**
 	 * lists all ports for a workflow
-	 * 
+	 *
 	 * @param workflowID
 	 * @return a list of {@link Port} beans, each representing an input or
 	 *         output port for the workflow
@@ -212,7 +210,7 @@ public interface Provenance {
 
 	/**
 	 * lists all ports for a workflow
-	 * 
+	 *
 	 * @param workflowID
 	 * @return a list of {@link Port} beans, each representing an input or
 	 *         output port for the workflow or a processor in the workflow
@@ -221,7 +219,7 @@ public interface Provenance {
 
 	/**
 	 * list all ports for a specific processor within a workflow
-	 * 
+	 *
 	 * @param workflowID
 	 * @param processorName
 	 * @return a list of {@link Port} beans, each representing an input or
@@ -257,7 +255,7 @@ public interface Provenance {
 	void toggleOPMGeneration(boolean active);
 
 	/**
-	 * 
+	 *
 	 * @return true if OPM is set to be generated in response to a query
 	 */
 	boolean isOPMGenerationActive();
@@ -266,7 +264,7 @@ public interface Provenance {
 	 * should actual artifact values be attached to OPM artifact nodes?<br>
 	 * default is FALSE<br/>
 	 * THIS IS CURRENTLY UNSUPPORTED -- DEFAULTS TO FALSE
-	 * 
+	 *
 	 * @param active
 	 */
 	void toggleAttachOPMArtifactValues(boolean active);

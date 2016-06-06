@@ -1,25 +1,3 @@
-/*******************************************************************************
- * Copyright (C) 2007 The University of Manchester   
- * 
- *  Modifications to the initial code base are copyright of their
- *  respective authors, or their employers as appropriate.
- * 
- *  This program is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public License
- *  as published by the Free Software Foundation; either version 2.1 of
- *  the License, or (at your option) any later version.
- *    
- *  This program is distributed in the hope that it will be useful, but
- *  WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
- *    
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- ******************************************************************************/
-package org.apache.taverna.provenance.lineageservice.types;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -28,9 +6,9 @@ package org.apache.taverna.provenance.lineageservice.types;
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -38,12 +16,12 @@ package org.apache.taverna.provenance.lineageservice.types;
  * specific language governing permissions and limitations
  * under the License.
  */
-
+package org.apache.taverna.provenance.lineageservice.types;
 
 /**
- * 
+ *
  * @author Paolo Missier
- * 
+ *
  */
 public class IterationType implements ProvenanceEventType {
 	private PortsSequenceType inputdata;
@@ -62,7 +40,7 @@ public class IterationType implements ProvenanceEventType {
 
 	/**
 	 * Gets the inputdata value for this IterationType.
-	 * 
+	 *
 	 * @return inputdata
 	 */
 	public PortsSequenceType getInputdata() {
@@ -71,7 +49,7 @@ public class IterationType implements ProvenanceEventType {
 
 	/**
 	 * Sets the inputdata value for this IterationType.
-	 * 
+	 *
 	 * @param inputdata
 	 */
 	public void setInputdata(PortsSequenceType inputdata) {
@@ -80,7 +58,7 @@ public class IterationType implements ProvenanceEventType {
 
 	/**
 	 * Gets the outputdata value for this IterationType.
-	 * 
+	 *
 	 * @return outputdata
 	 */
 	public PortsSequenceType getOutputdata() {
@@ -89,7 +67,7 @@ public class IterationType implements ProvenanceEventType {
 
 	/**
 	 * Sets the outputdata value for this IterationType.
-	 * 
+	 *
 	 * @param outputdata
 	 */
 	public void setOutputdata(PortsSequenceType outputdata) {
@@ -98,7 +76,7 @@ public class IterationType implements ProvenanceEventType {
 
 	/**
 	 * Gets the id value for this IterationType.
-	 * 
+	 *
 	 * @return id
 	 */
 	public String getId() {
@@ -107,7 +85,7 @@ public class IterationType implements ProvenanceEventType {
 
 	/**
 	 * Sets the id value for this IterationType.
-	 * 
+	 *
 	 * @param id
 	 */
 	public void setId(String id) {

@@ -1,8 +1,3 @@
-/**
- * 
- */
-package org.apache.taverna.provenance.api;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -11,9 +6,9 @@ package org.apache.taverna.provenance.api;
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,7 +16,7 @@ package org.apache.taverna.provenance.api;
  * specific language governing permissions and limitations
  * under the License.
  */
-
+package org.apache.taverna.provenance.api;
 
 import java.util.List;
 import java.util.Map;
@@ -34,7 +29,7 @@ import org.apache.taverna.provenance.lineageservice.LineageQueryResultRecord;
  * Java bean used to encapsulate the results of a provenance query. <br/>
  * This takes the form of a nested map, see {@link #getAnswer} for details on
  * its structure.
- * 
+ *
  * @author Paolo Missier
  */
 public class NativeAnswer {

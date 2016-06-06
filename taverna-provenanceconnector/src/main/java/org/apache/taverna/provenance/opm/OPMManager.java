@@ -1,8 +1,3 @@
-/**
- * 
- */
-package org.apache.taverna.provenance.opm;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -11,9 +6,9 @@ package org.apache.taverna.provenance.opm;
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,7 +16,7 @@ package org.apache.taverna.provenance.opm;
  * specific language governing permissions and limitations
  * under the License.
  */
-
+package org.apache.taverna.provenance.opm;
 
 import static org.tupeloproject.rdf.Resource.literal;
 import static org.tupeloproject.rdf.Resource.uriRef;
@@ -56,7 +51,7 @@ import org.tupeloproject.rdf.xml.RdfXmlWriter;
 
 /**
  * @author paolo
- * 
+ *
  */
 public class OPMManager {
 	private static Logger logger = Logger.getLogger(OPMManager.class);
@@ -89,7 +84,7 @@ public class OPMManager {
 	/**
 	 * default implementation of this method returns null -- has no idea how to
 	 * extract simple values from incoming artifact values
-	 * 
+	 *
 	 * @return
 	 */
 	public List<DataValueExtractor> getDataValueExtractor() {
@@ -99,7 +94,7 @@ public class OPMManager {
 	/**
 	 * create new account to hold the causality graph and give it a Resource
 	 * name
-	 * 
+	 *
 	 * @param accountName
 	 * @throws ProvenanceException
 	 */
@@ -162,7 +157,7 @@ public class OPMManager {
 
 	/**
 	 * no actual value is recorded
-	 * 
+	 *
 	 * @param aName
 	 * @return
 	 * @throws ProvenanceException
@@ -221,7 +216,7 @@ public class OPMManager {
 		} catch (URISyntaxException e1) {
 			processID = uriGenerator.makeProcessorURI(processorName, workflowId);
 		}
-		
+
 		uriGenerator.makeIteration(workflowRunId, workflowId, processorName,
 				iterationVector);
 
@@ -383,7 +378,7 @@ public class OPMManager {
 //	public String Rdf2Xml() throws OperatorException, IOException, JAXBException {
 //
 //		OPMRdf2Xml converter = new OPMRdf2Xml();
-//		converter.convert(OPM_RDF_GRAPH_FILE, OPM_XML_GRAPH_FILE);		
+//		converter.convert(OPM_RDF_GRAPH_FILE, OPM_XML_GRAPH_FILE);
 //		return OPM_XML_GRAPH_FILE;
 //	}
 
@@ -391,8 +386,8 @@ public class OPMManager {
 	 * creates a dot file from the current OPMGraph. <br/>
 	 * DOT NOT USE NEEDS FIXING
 	 * @return
-	 * @throws IOException 
-	 * @throws OperatorException 
+	 * @throws IOException
+	 * @throws OperatorException
 	 */
 	/*
 	public String Rdf2Dot() throws OperatorException, IOException {
@@ -400,14 +395,14 @@ public class OPMManager {
 		OPMRdf2Xml converter = new OPMRdf2Xml();
 		OPMGraph graph = converter.convert(OPM_RDF_GRAPH_FILE);
 
-		List<Process> processes = graph.getProcesses().getProcess();		
+		List<Process> processes = graph.getProcesses().getProcess();
 		for (Process p:processes) { p.setId("\""+p.getId()+"\""); }
 
-		List<Artifact> artifacts = graph.getArtifacts().getArtifact();		
+		List<Artifact> artifacts = graph.getArtifacts().getArtifact();
 		for (Artifact a:artifacts) { a.setId("\""+a.getId()+"\""); }
 
-//		OPMToDot aOPMToDot = new OPMToDot(DOT_CONFIG_FILE);  		
-		OPMToDot aOPMToDot = new OPMToDot();  		
+//		OPMToDot aOPMToDot = new OPMToDot(DOT_CONFIG_FILE);
+		OPMToDot aOPMToDot = new OPMToDot();
 
 		aOPMToDot.convert(graph, new File(OPM_DOT_FILE));
 		return OPM_DOT_FILE;

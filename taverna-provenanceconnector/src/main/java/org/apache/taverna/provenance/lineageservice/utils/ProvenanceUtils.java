@@ -1,5 +1,3 @@
-package org.apache.taverna.provenance.lineageservice.utils;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -8,9 +6,9 @@ package org.apache.taverna.provenance.lineageservice.utils;
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -18,7 +16,7 @@ package org.apache.taverna.provenance.lineageservice.utils;
  * specific language governing permissions and limitations
  * under the License.
  */
-
+package org.apache.taverna.provenance.lineageservice.utils;
 
 import static net.sf.taverna.t2.provenance.vocabulary.SharedVocabulary.INPUTDATA_EVENT_TYPE;
 
@@ -38,7 +36,7 @@ import org.tupeloproject.kernel.NotFoundException;
 
 public class ProvenanceUtils {
 	public static Pattern parentProcessPattern = Pattern.compile("^(.*):?[^:]+:[^:]+$");
-	
+
 	public static String iterationToString(int[] iteration) {
 		String result = "[";
 		for (int i = 0; i < iteration.length; i++) {
@@ -49,7 +47,7 @@ public class ProvenanceUtils {
 		result += "]";
 		return result;
 	}
-	
+
 	/**
 	 * Returns an Element representing the data item, identfied as either input
 	 * or output. References to data are currently resolved to their actual
@@ -81,11 +79,11 @@ public class ProvenanceUtils {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Given a {@link T2Reference} return all the other {@link T2Reference}s
 	 * which it contains as an XML Element.
-	 * 
+	 *
 	 * @param entityIdentifier
 	 * @return
 	 * @throws NotFoundException

@@ -1,5 +1,3 @@
-package org.apache.taverna.provenance.lineageservice;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -8,9 +6,9 @@ package org.apache.taverna.provenance.lineageservice;
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -18,7 +16,7 @@ package org.apache.taverna.provenance.lineageservice;
  * specific language governing permissions and limitations
  * under the License.
  */
-
+package org.apache.taverna.provenance.lineageservice;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -28,7 +26,7 @@ public class URIGenerator {
 	public String makeT2ReferenceURI(String collId) {
 		// collId is of the form t2:list//<UUID>
 		// map to a proper URI
-		
+
 		String[] tokens = collId.split("//");
 		String type = tokens[0].split(":")[1];
 		String namespace = tokens[1].split("/")[0].split("\\?")[0];
@@ -45,7 +43,7 @@ public class URIGenerator {
 	}
 
 	public String makePortURI(String wfId, String pName, String vName,
-			boolean inputPort) {		
+			boolean inputPort) {
 		return makeProcessorURI(pName, wfId) + (inputPort ? "in/" : "out/")
 				+ escape(vName);
 	}
@@ -58,7 +56,7 @@ public class URIGenerator {
 			throw new RuntimeException("Can't escape URI part " + part, e);
 		}
 	}
-	
+
 	public String makeProcessorURI(String pName, String wfId) {
 		return makeWorkflowURI(wfId) + "processor/" + escape(pName) + "/";
 	}

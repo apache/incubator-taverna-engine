@@ -1,26 +1,3 @@
-/*******************************************************************************
- * Copyright (C) 2009 The University of Manchester
- *
- *  Modifications to the initial code base are copyright of their
- *  respective authors, or their employers as appropriate.
- *
- *  This program is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public License
- *  as published by the Free Software Foundation; either version 2.1 of
- *  the License, or (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful, but
- *  WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
- *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- *
- ******************************************************************************/
-package org.apache.taverna.provenance.api;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -29,9 +6,9 @@ package org.apache.taverna.provenance.api;
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -40,6 +17,7 @@ package org.apache.taverna.provenance.api;
  * under the License.
  */
 
+package org.apache.taverna.provenance.api;
 
 import static java.sql.Connection.TRANSACTION_READ_UNCOMMITTED;
 import static javax.naming.Context.INITIAL_CONTEXT_FACTORY;
@@ -93,7 +71,7 @@ import org.apache.log4j.Logger;
  * <p/>
  * The XML schema for the XML query language is {@code pquery.xsd} in
  * {@link net.sf.taverna.t2.provenance.apic.client.resources}
- * 
+ *
  * @author Paolo Missier
  * @author Stuart Owen
  */
@@ -104,7 +82,7 @@ public class ProvenanceAccess implements Provenance {
 	private ProvenanceAnalysis analyser = null;
 	private ProvenanceQuery querier;
 	private ProvenanceWriter writer;
-	
+
 	private String connectorType;
 	private final List<ProvenanceConnectorFactory> provenanceConnectorFactories;
 
@@ -127,7 +105,7 @@ public class ProvenanceAccess implements Provenance {
 	 * name and jdbc url are required.<p/>
 	 * If the driver supports multiple connections, then a pool will be created
 	 * of 10 min idle, 50 max idle, and 50 max active connections.
-	 * 
+	 *
 	 * @param driverClassName
 	 * @param jdbcUrl
 	 */
@@ -138,7 +116,7 @@ public class ProvenanceAccess implements Provenance {
 	/**
 	 * Initialises a named JNDI DataSource if not already set up externally. The
 	 * DataSource is named jdbc/taverna
-	 * 
+	 *
 	 * @param driverClassName
 	 *            - the classname for the driver to be used.
 	 * @param jdbcUrl
@@ -268,7 +246,7 @@ public class ProvenanceAccess implements Provenance {
 	 * This is used in the workbench to retrieve the "intermediate results" at
 	 * various points during workflow execution, as opposed to a set of
 	 * dependencies in response to a full-fledged provenance query.
-	 * 
+	 *
 	 * @param workflowRunId
 	 *            lineage scope -- a specific instance
 	 * @param processorName
@@ -349,7 +327,7 @@ public class ProvenanceAccess implements Provenance {
 	/**
 	 * Removes all records that pertain to a specific run (but not the static
 	 * specification of the workflow run)
-	 * 
+	 *
 	 * @param runID
 	 *            the internal ID of a run. This can be obtained using
 	 *            {@link #listRuns(String, Map)}
@@ -376,7 +354,7 @@ public class ProvenanceAccess implements Provenance {
 
 	/**
 	 * removes all records pertaining to the static structure of a workflow.
-	 * 
+	 *
 	 * @param workflowId
 	 *            the ID (not the external name) of the workflow whose static
 	 *            structure is to be deleted from the DB
@@ -394,7 +372,7 @@ public class ProvenanceAccess implements Provenance {
 	 * returns a set of workflowIDs for a given runID. The set is a singleton if
 	 * the workflow has no nesting, but in general the list contains one
 	 * workflowID for each nested workflow involved in the run
-	 * 
+	 *
 	 * @param runID
 	 *            the internal ID for a specific workflow run
 	 * @return a list of workflow IDs, one for each nested workflow involved in
@@ -478,7 +456,7 @@ public class ProvenanceAccess implements Provenance {
 
 	/**
 	 * lists all ports for a workflow
-	 * 
+	 *
 	 * @param workflowID
 	 * @return a list of {@link Port} beans, each representing an input or
 	 *         output port for the workflow
@@ -490,7 +468,7 @@ public class ProvenanceAccess implements Provenance {
 
 	/**
 	 * lists all ports for a workflow
-	 * 
+	 *
 	 * @param workflowID
 	 * @return a list of {@link Port} beans, each representing an input or
 	 *         output port for the workflow or a processor in the workflow
@@ -502,7 +480,7 @@ public class ProvenanceAccess implements Provenance {
 
 	/**
 	 * list all ports for a specific processor within a workflow
-	 * 
+	 *
 	 * @param workflowID
 	 * @param processorName
 	 * @return a list of {@link Port} beans, each representing an input or
@@ -572,7 +550,7 @@ public class ProvenanceAccess implements Provenance {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return true if OPM is set to be generated in response to a query
 	 */
 	@Override
@@ -584,7 +562,7 @@ public class ProvenanceAccess implements Provenance {
 	 * should actual artifact values be attached to OPM artifact nodes?<br>
 	 * default is FALSE<br/>
 	 * THIS IS CURRENTLY UNSUPPORTED -- DEFAULTS TO FALSE
-	 * 
+	 *
 	 * @param active
 	 */
 	@Override
