@@ -91,6 +91,18 @@ fully endorsed by the ASF.
 * [Apache Maven](https://maven.apache.org/download.html) 3.2.5 or newer (older
   versions probably also work)
 
+This code relies on other
+[Apache Taverna modules](https://taverna.incubator.apache.org/download/code/),
+which Maven shuold automatically
+download from
+[Apache's Maven repository](https://taverna.incubator.apache.org/download/maven/);
+however you might want to compile these yourself in the below order:
+
+* [taverna-language](https://taverna.incubator.apache.org/download/language/)
+* [taverna-osgi](https://taverna.incubator.apache.org/download/osgi/)
+
+Please see the `<properties>` of this [pom.xml](pom.xml) to find the
+correct versions to build.
 
 # Building
 
@@ -104,9 +116,9 @@ This will build each module and run their tests.
 ## Building on Windows
 
 If you are building on Windows, ensure you unpack this source code
-to a folder with a [short path name](http://stackoverflow.com/questions/1880321/why-does-the-260-character-path-length-limit-exist-in-windows) 
-lenght, e.g. `C:\src` - as 
-Windows has a [limitation on the total path length](https://msdn.microsoft.com/en-us/library/aa365247%28VS.85%29.aspx#maxpath) 
+to a folder with a [short path name](http://stackoverflow.com/questions/1880321/why-does-the-260-character-path-length-limit-exist-in-windows)
+lenght, e.g. `C:\src` - as
+Windows has a [limitation on the total path length](https://msdn.microsoft.com/en-us/library/aa365247%28VS.85%29.aspx#maxpath)
 which might otherwise
 prevent this code from building successfully.
 
