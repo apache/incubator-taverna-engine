@@ -23,12 +23,12 @@
     <parent>
         <groupId>org.apache.taverna</groupId>
         <artifactId>apache-taverna-parent</artifactId>
-        <version>2-incubating</version>
+        <version>3-incubating-SNAPSHOT</version>
     </parent>
 
     <groupId>org.apache.taverna.engine</groupId>
     <artifactId>apache-taverna-engine</artifactId>
-    <version>3.1.0-incubating-SNAPSHOT</version>
+    <version>3.1.1-incubating-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Apache Taverna Engine and Platform</name>
 
