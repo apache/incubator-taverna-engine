@@ -97,7 +97,7 @@
 		<dependency>
 			<groupId>org.apache.taverna.language</groupId>
 			<artifactId>taverna-databundle</artifactId>
-			<version>${taverna.language.version}</version>
+			<version>${taverna.language.version}</version>			
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>

@@ -20,9 +20,9 @@
 package org.apache.taverna.platform.execution.impl.local;
 
 import static java.util.logging.Level.SEVERE;
-import static org.apache.taverna.platform.execution.impl.local.T2ReferenceConverter.convertPathToObject;
-
+i
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -49,6 +49,7 @@ import org.apache.taverna.workflowmodel.InvalidDataflowException;
 import org.apache.taverna.robundle.Bundle;
 
 import org.apache.taverna.databundle.DataBundles;
+import org.apache.taverna.databundle.DataBundles.ResolveOptions;
 import org.apache.taverna.platform.capability.api.ActivityService;
 import org.apache.taverna.platform.capability.api.DispatchLayerService;
 import org.apache.taverna.platform.execution.api.AbstractExecution;
@@ -145,10 +146,11 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 				for (Entry<String, DataflowInputPort> inputPort : inputPorts
 						.entrySet()) {
 					String portName = inputPort.getKey();
-					Path path = DataBundles.getPort(inputs, portName);
-					if (!DataBundles.isMissing(path)) {
+					Path port = DataBundles.getPort(inputs, portName);
+					if (!DataBundles.isMissing(port)) {
 						T2Reference identifier = referenceService.register(
-								convertPathToObject(path), inputPort.getValue()
+								DataBundles.resolve(port, ResolveOptions.BYTES), 
+								inputPort.getValue()
 										.getDepth(), true, null);
 						int[] index = new int[] {};
 						WorkflowDataToken token = new WorkflowDataToken("",
@@ -162,7 +164,7 @@ public class LocalExecution extends AbstractExecution implements ResultListener 
 					}
 				}
 			}
-		} catch (IOException e) {
+		} catch (IOException|UncheckedIOException e) {
 			logger.log(SEVERE, "Error getting input data", e);
 		}
 	}
