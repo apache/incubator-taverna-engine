@@ -20,7 +20,7 @@
 package org.apache.taverna.platform.execution.impl.local;
 
 import static java.util.logging.Level.SEVERE;
-i
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
