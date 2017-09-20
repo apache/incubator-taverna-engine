@@ -44,6 +44,7 @@
 							org.apache.taverna.invocation.impl,
 							org.apache.taverna.workflowmodel.impl,
 							org.apache.taverna.workflowmodel.processor.iteration.impl,
+							org.apache.taverna.workflowmodel.processor.dispatch.impl,
 						</Export-Package>
 					</instructions>
 				</configuration>

@@ -51,10 +51,9 @@
 					<instructions>
 						<Import-Package>
 							org.aspectj.lang,
-							org.springframework.orm.*,
 							*
 						</Import-Package>
-						<!-- <Import-Package> org.aspectj.lang;resolution:=optional, org.springframework.orm.*;resolution:=optional, 
+						<!-- <Import-Package> org.aspectj.lang;resolution:=optional, org.springframework.orm.*;resolution:=optional,
 							org.hibernate.*;resolution:=optional, org.hibernate.proxy;resolution:=optional, 
 							org.apache.derby.jdbc, * </Import-Package> -->
 					</instructions>
