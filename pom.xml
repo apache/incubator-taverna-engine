@@ -126,8 +126,8 @@
         </plugins>
     </build>
     <scm>
-        <connection>scm:git:https://git-wip-us.apache.org/repos/asf/incubator-taverna-engine.git</connection>
-        <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/incubator-taverna-engine.git</developerConnection>
+        <connection>scm:git:https://gitbox.apache.org/repos/asf/incubator-taverna-engine.git</connection>
+        <developerConnection>scm:git:git@github.com:apache/incubator-taverna-engine.git</developerConnection>
         <url>https://github.com/apache/incubator-taverna-engine</url>
         <tag>HEAD</tag>
     </scm>
