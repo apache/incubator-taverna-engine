@@ -35,7 +35,7 @@
     <properties>
         <taverna.language.version>0.16.0-incubating-SNAPSHOT</taverna.language.version>
         <taverna.osgi.version>0.2.1-incubating</taverna.osgi.version>
-                <servicemix.derby.version>10.12.1.1_1</servicemix.derby.version> 
+        <servicemix.derby.version>10.12.1.1_1</servicemix.derby.version> 
     </properties>
 
     <modules>
@@ -142,7 +142,5 @@
             </releases>
         </repository>
     </repositories>
-
-
 
 </project>
