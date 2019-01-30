@@ -57,8 +57,8 @@ import org.apache.taverna.provenance.lineageservice.utils.WorkflowTree;
 import org.apache.taverna.provenance.lineageservice.utils.WorkflowRun;
 
 import org.apache.log4j.Logger;
-import org.jdom.Document;
-import org.jdom.Element;
+import org.jdom2.Document;
+import org.jdom2.Element;
 
 import org.apache.taverna.configuration.database.DatabaseManager;
 
