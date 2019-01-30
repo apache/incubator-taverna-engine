@@ -43,8 +43,7 @@ import org.apache.taverna.workflowmodel.processor.iteration.IterationTypeMismatc
 import org.apache.taverna.workflowmodel.processor.iteration.NamedInputPortNode;
 import org.apache.taverna.workflowmodel.processor.iteration.PrefixDotProduct;
 import org.apache.taverna.workflowmodel.processor.iteration.TerminalNode;
-
-import org.jdom.Element;
+import org.jdom2.Element;
 
 /**
  * A single layer of iteration strategy, consuming individual named inputs and

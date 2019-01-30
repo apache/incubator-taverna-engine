@@ -58,15 +58,17 @@
 			<version>${project.parent.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.jdom</groupId>
-			<artifactId>com.springsource.org.jdom</artifactId>
-			<version>${jdom.version}</version>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.jdom</artifactId>
+			<version>${jdom2.version}</version>
 		</dependency>
+		<!-- 
 		<dependency>
-			<groupId>com.thoughtworks.xstream</groupId>
-			<artifactId>com.springsource.com.thoughtworks.xstream</artifactId>
-			<version>${xstream.version}</version>
+		    <groupId>com.thoughtworks.xstream</groupId>
+		    <artifactId>xstream</artifactId>
+		    <version>1.4.11.1</version>
 		</dependency>
+		 -->
 		<dependency>
 			<groupId>${project.parent.groupId}</groupId>
 			<artifactId>taverna-workflowmodel-extensions</artifactId>

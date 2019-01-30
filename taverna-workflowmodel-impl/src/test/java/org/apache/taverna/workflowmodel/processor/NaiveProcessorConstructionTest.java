@@ -28,7 +28,7 @@ import org.apache.taverna.workflowmodel.EditException;
 import org.apache.taverna.workflowmodel.impl.EditsImpl;
 import org.apache.taverna.workflowmodel.processor.activity.ActivityConfigurationException;
 
-import org.jdom.JDOMException;
+import org.jdom2.JDOMException;
 
 /**
  * Tests the processor factory along with activity serialisation logic
