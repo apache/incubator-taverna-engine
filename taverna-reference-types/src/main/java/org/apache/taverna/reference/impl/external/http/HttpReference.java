@@ -25,7 +25,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.Date;
 
 import org.apache.taverna.reference.AbstractExternalReference;
@@ -34,9 +36,7 @@ import org.apache.taverna.reference.ExternalReferenceSPI;
 import org.apache.taverna.reference.ExternalReferenceValidationException;
 import org.apache.taverna.reference.ReferenceContext;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.methods.HeadMethod;
+import org.apache.http.entity.ContentType;
 
 /**
  * Implementation of ExternalReference used to refer to data held in a locally
@@ -44,7 +44,6 @@ import org.apache.commons.httpclient.methods.HeadMethod;
  * {@link org.apache.taverna.reference.AbstractExternalReference
  * AbstractExternalReference} to enable hibernate based persistence.
  * 
- * @author Tom Oinn
  */
 public class HttpReference extends AbstractExternalReference implements
 		ExternalReferenceSPI {
@@ -80,27 +79,45 @@ public class HttpReference extends AbstractExternalReference implements
 	public String getCharset() throws DereferenceException {
 		if (charsetFetched)
 			return charsetName;
-		charsetFetched = true;
 		if (!httpUrl.getProtocol().equals("http")
 				&& !httpUrl.getProtocol().equals("https")) {
-			charsetName = null;
+			
+			// We don't know, probably system charset
 			return null;
 		}
-		HeadMethod method = new HeadMethod(httpUrl.toExternalForm());
-		HttpClient httpClient = new HttpClient();
+		// We already ruled out non-http/https above, so somewhat safe cast
+		HttpURLConnection c;
 		try {
-			httpClient.executeMethod(method);
-			charsetName = method.getResponseCharSet();
-			return charsetName;
-		} catch (HttpException e) {
-			// throw new DereferenceException(e);
+			c = (HttpURLConnection) httpUrl.openConnection();
 		} catch (IOException e) {
-			// throw new DereferenceException(e);
-		} finally {
-			method.releaseConnection();
+			// Does not matter, then we don't know charset. Assume this may fail later as well.
+			charsetFetched = true;
+			return null;
 		}
-		charsetName = null;
-		return null;
+		try {
+			c.setRequestMethod("HEAD");
+		} catch (ProtocolException e1) {
+			throw new RuntimeException("HttpURLConnection does not recognize HEAD method", e1);
+		}
+				
+		// We don't use the input stream, but do need to close it after
+		try (InputStream is = c.getInputStream()) {
+			//connection.connect();
+			String type = c.getHeaderField("Content-Type");
+			if (type != null) { 
+				ContentType ct = ContentType.parse(type);
+				Charset charset = ct.getCharset();
+				if (charset != null) {					
+					charsetName = charset.name();
+				}
+			}
+			charsetFetched = true;
+			return charsetName;
+		} catch (IOException e) {
+			// Does not matter, then we don't know charset. Assume this may fail later.
+			charsetFetched = true;
+			return null;
+		}				
 	}
 
 	/**
