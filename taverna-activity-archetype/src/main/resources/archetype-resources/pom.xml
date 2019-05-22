@@ -31,7 +31,7 @@
 
 	## The ${} below are expanded from taverna-engine pom.xml
 	## by resource filtering, rather than by Velocity
-	## http://maven.apache.org/plugins/maven-resources-plugin/examples/filter.html
+	## https://maven.apache.org/plugins/maven-resources-plugin/examples/filter.html
             <taverna.engine.version>${project.parent.version}</taverna.engine.version>
             <taverna.language.version>${taverna.language.version}</taverna.language.version>
             <taverna.osgi.version>${taverna.osgi.version}</taverna.osgi.version>
@@ -155,7 +155,7 @@
     <repository>
         <id>apache.snapshots</id>
         <name>Apache Snapshot Repository</name>
-        <url>http://repository.apache.org/snapshots</url>
+        <url>https://repository.apache.org/snapshots</url>
         <releases>
             <enabled>false</enabled>
         </releases>
@@ -165,7 +165,7 @@
 			<!-- The repository that your jars are deployed to -->
 			<id>my-repository</id>
 			<name>My Repository</name>
-			<url>http://www.example.com/maven/repository</url>
+			<url>https://www.example.com/maven/repository</url>
 		</repository>
 		<repository>
 			<!-- The repository that your snapshot jars are deployed to -->
